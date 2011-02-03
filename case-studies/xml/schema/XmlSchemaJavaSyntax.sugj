@@ -1,0 +1,43 @@
+package xml.schema;
+
+import org.sugarj.languages.Java;
+
+import xml.XmlSyntax;
+
+public sugar XmlSchemaJavaSyntax {
+  
+  context-free syntax
+    JavaId "." "write" "valid" "document" Document ";" -> ObjectStm {cons("ValWriteDoc")}
+  
+  sorts
+    XsdSugarDec XsdSugarDecHead XsdSugarBody
+  
+  context-free syntax
+    XsdSugarDecHead XsdSugarBody
+      -> XsdSugarDec {cons("XsdSugarDec")}
+    
+    XsdSugarDec -> SugarDec
+
+    AnnoOrSugarMod* "xmlschema" JavaId 
+      -> XsdSugarDecHead {cons("XsdSugarDecHead")}
+
+    "{" XsdDefinition  "}" -> XsdSugarBody {cons("XsdSugarBody")}
+    
+  lexical restrictions
+    "xmlschema" -/-  [a-zA-Z0-9\'\-\_]
+  
+  /* used for bootstrapping only */
+  sorts
+    XsdDefinition
+  
+  context-free syntax
+    Document -> XsdDefinition {cons("ValXMLSchemaDoc")}
+  
+  signature constructors
+    ValWriteDoc : JavaId * Document -> ObjectStm
+    ValXMLSchemaDoc : Document -> XsdDefinition
+  
+    XsdSugarDec : XsdSugarDecHead * XsdSugarBody -> XsdSugarDec
+    XsdSugarDecHead : list(AnnoOrSugarMod) * JavaId -> XsdSugarDecHead
+    XsdSugarBody : XsdDefinition -> XsdSugarBody
+}

@@ -1,0 +1,70 @@
+package javaclosure.concrete;
+
+import java.util.List;
+import java.util.ArrayList;
+
+import javaclosure.Syntax;
+
+import javaclosure.concrete.Transformation;
+
+public class Test<T>{
+	
+  public List<T> list;
+
+  public Test() {
+  	list = new ArrayList<T>();
+  }
+	
+  public String toString() {
+  	String s = "";
+  	
+  	for (int i = 0; i < list.size(); i++) {
+  		s += list.get(i);
+  		
+  		if (i < list.size() - 1)
+  		  s += ", ";
+  	}
+  	
+  	return s;
+  }
+  
+  public static Test<Integer> create() {
+		Test<Integer> t = new Test<Integer>();
+		t.list.add(1);
+		t.list.add(2);
+		t.list.add(3);
+		t.list.add(4);
+		t.list.add(5);
+		return t;
+	}
+	
+	
+  public <U> Test<U> map(#U(T) f) {
+		Test<U> test = new Test<U>();
+		
+    for (T t : list)
+      test.list.add(f.invoke(t));
+      
+    return test;
+  }
+  
+  
+  
+  public static <A,B,C> #C(A) compose(final #B(A) f, final #C(B) g) {
+  	return #C(A a) { return g.invoke(f.invoke(a)); };
+  }
+  
+  public static void main(String[] args) {
+  	Test<Integer> t = create();
+  	
+    System.out.println(t);
+    
+    #Integer(Integer) inc = #Integer(Integer i) { return i + 1; };
+    System.out.println(t.map(inc));
+    
+    #Double(Integer) toDouble = #Double(Integer i) { return i.doubleValue(); };
+    System.out.println(t.map(toDouble));
+    
+    System.out.println(t.map(compose(inc, toDouble)));
+  }
+}

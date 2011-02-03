@@ -1,0 +1,68 @@
+package xml.schema;
+
+import xml.schema.AsDesugaring;
+import xml.schema.XmlSchemaJavaSyntax;
+
+/*
+ * example schema based on
+ *   "An Introduction XML and Web Technologies"
+ *   by Anders Moeller and Michael Schwartzbach,
+ *   page 115,
+ *   Addison-Wesley
+ */
+public xmlschema TestSchema {
+  <{http://www.w3.org/2001/XMLSchema}schema
+    targetNamespace="http://www.informatik.uni-marburg.de/fb12/ps/students">
+   	
+   	<{http://www.w3.org/2001/XMLSchema}element name="students" type="StudentsType">
+   	</{http://www.w3.org/2001/XMLSchema}element>
+   	
+   	
+   	
+    <{http://www.w3.org/2001/XMLSchema}complexType name="StudentsType">
+      <{http://www.w3.org/2001/XMLSchema}sequence maxOccurs="unbounded">
+        <{http://www.w3.org/2001/XMLSchema}element name="student" type="StudentType">
+        </{http://www.w3.org/2001/XMLSchema}element>
+      </{http://www.w3.org/2001/XMLSchema}sequence>
+    </{http://www.w3.org/2001/XMLSchema}complexType>
+    
+    
+    
+    <{http://www.w3.org/2001/XMLSchema}complexType name="StudentType">
+      <{http://www.w3.org/2001/XMLSchema}sequence maxOccurs="unbounded">
+        <{http://www.w3.org/2001/XMLSchema}element name="scoring" type="ScoringType">
+        </{http://www.w3.org/2001/XMLSchema}element>
+      </{http://www.w3.org/2001/XMLSchema}sequence>
+      
+      <{http://www.w3.org/2001/XMLSchema}attribute name="name" type="StringType">
+      </{http://www.w3.org/2001/XMLSchema}attribute>
+    </{http://www.w3.org/2001/XMLSchema}complexType>
+    
+    
+    
+    <{http://www.w3.org/2001/XMLSchema}complexType name="ScoringType">
+      <{http://www.w3.org/2001/XMLSchema}sequence>
+      </{http://www.w3.org/2001/XMLSchema}sequence>
+      
+      <{http://www.w3.org/2001/XMLSchema}attribute name="course" type="StringType">
+      </{http://www.w3.org/2001/XMLSchema}attribute>
+      
+      <{http://www.w3.org/2001/XMLSchema}attribute name="score" type="ScoreType">
+      </{http://www.w3.org/2001/XMLSchema}attribute>
+    </{http://www.w3.org/2001/XMLSchema}complexType>
+    	
+    	
+    
+    <{http://www.w3.org/2001/XMLSchema}simpleType name="StringType">
+      <{http://www.w3.org/2001/XMLSchema}restriction base="string">
+      </{http://www.w3.org/2001/XMLSchema}restriction>
+    </{http://www.w3.org/2001/XMLSchema}simpleType>
+    
+    
+    
+    <{http://www.w3.org/2001/XMLSchema}simpleType name="ScoreType">
+      <{http://www.w3.org/2001/XMLSchema}restriction base="integer">
+      </{http://www.w3.org/2001/XMLSchema}restriction>
+    </{http://www.w3.org/2001/XMLSchema}simpleType>
+  </{http://www.w3.org/2001/XMLSchema}schema>
+}

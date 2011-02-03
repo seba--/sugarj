@@ -1,0 +1,29 @@
+module org/sugarj/init/initGrammar_atomicImports
+imports org/sugarj/languages/Java
+        org/sugarj/languages/SugarJ
+
+exports
+  sorts NextToplevelDeclaration ToplevelDeclaration Rest JavaImportDecs
+  
+  context-free start-symbols NextToplevelDeclaration
+  
+  context-free syntax %% ToplevelDeclaration
+    JavaPackageDec -> ToplevelDeclaration
+%%    JavaImportDecs -> ToplevelDeclaration
+    JavaTypeDec -> ToplevelDeclaration {cons("JavaTypeDec")}
+    SugarDec -> ToplevelDeclaration
+    
+  context-free syntax %% NextToplevelDeclaration
+    ToplevelDeclaration Rest -> NextToplevelDeclaration {cons("NextToplevelDeclaration")}
+    JavaImportDecs -> NextToplevelDeclaration {cons("ImportDeclarations")}
+  
+  context-free syntax %% JavaImportDecs
+  	JavaImportDec Rest -> JavaImportDecs {cons("SingleImport"), avoid}
+  	JavaImportDecs JavaImportDec -> JavaImportDecs {cons("ConsImports"), prefer}
+
+    
+  lexical syntax %% Rest
+    ~[]* -> Rest
+  
+  lexical restrictions
+    Rest -/- ~[]

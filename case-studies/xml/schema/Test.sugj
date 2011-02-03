@@ -1,0 +1,60 @@
+package xml.schema;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
+import xml.AsSax;
+import xml.XmlJavaSyntax;
+
+import xml.schema.TestSchema;
+
+public class Test extends xml.Test {
+	public static void main(String[] args) throws SAXException {
+    ContentHandler ch = new Test();
+    
+    ch.write valid document
+      <{http://www.informatik.uni-marburg.de/fb12/ps/students}students>
+      	
+      	
+      	
+        <{http://www.informatik.uni-marburg.de/fb12/ps/students}student name="Jane Doe">
+        	
+          <{http://www.informatik.uni-marburg.de/fb12/ps/students}scoring course="PLT" score="80">
+          </{http://www.informatik.uni-marburg.de/fb12/ps/students}scoring>
+          
+          <{http://www.informatik.uni-marburg.de/fb12/ps/students}scoring course="Computability" score="62">
+          </{http://www.informatik.uni-marburg.de/fb12/ps/students}scoring>
+          	
+        </{http://www.informatik.uni-marburg.de/fb12/ps/students}student>
+        	
+        	
+        	
+        <{http://www.informatik.uni-marburg.de/fb12/ps/students}student name="John Dee">
+        	
+          <{http://www.informatik.uni-marburg.de/fb12/ps/students}scoring course="Maths" score="80">
+          </{http://www.informatik.uni-marburg.de/fb12/ps/students}scoring>
+          
+          <{http://www.informatik.uni-marburg.de/fb12/ps/students}scoring course="Language processing II" score="12">
+          </{http://www.informatik.uni-marburg.de/fb12/ps/students}scoring>
+          	
+        </{http://www.informatik.uni-marburg.de/fb12/ps/students}student>
+        	
+        	
+        	
+        <{http://www.informatik.uni-marburg.de/fb12/ps/students}student name="April November">
+        	
+          <{http://www.informatik.uni-marburg.de/fb12/ps/students}scoring course="PLT" score="18">
+          </{http://www.informatik.uni-marburg.de/fb12/ps/students}scoring>
+          
+          <{http://www.informatik.uni-marburg.de/fb12/ps/students}scoring course="Advanced advancement" score="100">
+          </{http://www.informatik.uni-marburg.de/fb12/ps/students}scoring>
+          	
+        </{http://www.informatik.uni-marburg.de/fb12/ps/students}student>
+        	
+        	
+        	
+      </{http://www.informatik.uni-marburg.de/fb12/ps/students}students>;
+  }
+}

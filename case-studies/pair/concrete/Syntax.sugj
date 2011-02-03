@@ -1,0 +1,16 @@
+package pair.concrete;
+
+import org.sugarj.languages.Java;
+
+public sugar Syntax {
+  context-free syntax
+    "(" JavaExpr "," JavaExpr ")" -> 
+      JavaExpr {cons("Pair")}
+
+    "(" JavaType "," JavaType ")" -> 
+      JavaType {cons("PairType")}
+  
+  signature constructors
+    Pair     : JavaExpr * JavaExpr -> JavaExpr
+    PairType : JavaType * JavaType -> JavaType 
+}

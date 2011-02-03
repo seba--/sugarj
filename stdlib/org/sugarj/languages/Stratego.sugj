@@ -1,0 +1,3 @@
+package org.sugarj.languages;
+
+public native sugar Stratego = org/sugarj/languages/Stratego;

@@ -1,0 +1,24 @@
+module org/sugarj/init/initTrans
+imports libstrategolib
+        org/sugarj/languages/SugarJ
+
+signature constructors
+  NextToplevelDeclaration : ToplevelDeclaration * Rest -> NextToplevelDeclaration
+
+strategies
+  desugar = fail
+  changed-tree(s) = ?t; s; (equal(|t) < fail + id)
+  main = io-wrap(innermost(desugar))
+
+
+signature
+  constructors
+    Some : a -> Option(a)
+    None : Option(a)
+
+
+signature
+  constructors
+    Cons : a * List(a) -> List(a)
+    Nil  : List(a)
+    Conc : List(a) * List(a) -> List(a)

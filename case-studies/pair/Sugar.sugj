@@ -1,0 +1,43 @@
+package pair;
+
+import org.sugarj.languages.Java;
+
+public sugar Sugar {
+  context-free syntax
+    "(" JavaExpr "," JavaExpr ")" -> 
+      JavaExpr {cons("Pair")}
+
+    "(" JavaType "," JavaType ")" -> 
+      JavaType {cons("PairType")}
+  
+  signature constructors
+    Pair     : JavaExpr * JavaExpr -> JavaExpr
+    PairType : JavaType * JavaType -> JavaType
+  
+  desugarings
+    pair2expr
+    pair2type
+
+  rules
+    pair2expr : 
+      Pair(e1, e2) 
+      ->
+      NewInstance(
+        None(),
+        ClassOrInterfaceType(
+          TypeName(
+            PackageOrTypeName(Id("pair")),
+            Id("Pair")),
+          None()),
+        [e1, e2], 
+        None())
+
+    pair2type :
+      PairType(t1, t2)
+      ->
+      ClassOrInterfaceType(
+      	TypeName(
+          PackageOrTypeName(Id("pair")),
+          Id("Pair")),
+        Some(TypeArgs([t1, t2]))) 
+}

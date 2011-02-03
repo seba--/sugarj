@@ -1,0 +1,3 @@
+package org.sugarj.languages;
+
+public native sugar Java = org/sugarj/languages/Java;
