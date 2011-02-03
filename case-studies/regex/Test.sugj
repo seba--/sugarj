@@ -1,0 +1,11 @@
+package regex;
+
+import regex.Regex;
+import regex.RegexAsString;
+
+public class Test {
+  public static void main(String[] args) {
+    boolean b = args[0].matches(/a* \_[b-y]*\_ z*/);
+    System.out.println(b);
+  }
+}

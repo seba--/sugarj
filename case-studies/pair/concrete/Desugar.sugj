@@ -1,0 +1,22 @@
+package pair.concrete;
+
+import concretesyntax.ConcreteJava;
+
+import pair.concrete.Syntax;
+
+public sugar Desugar {
+  desugarings
+    pair2expr
+    pair2type
+
+  rules
+    pair2expr : 
+      java |[ (java_e1, java_e2) ]| 
+      ->
+      java |[ new pair.Pair(java_e1, java_e2) ]|
+
+    pair2type :
+      java |[ (java_t1, java_t2) ]|
+      ->
+      java |[ pair.Pair<java_t1, java_t2> ]| 
+}

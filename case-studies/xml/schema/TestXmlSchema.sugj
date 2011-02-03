@@ -1,0 +1,170 @@
+package xml.schema;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
+import xml.AsSax;
+import xml.XmlJavaSyntax;
+
+import xml.schema.XmlSchema;
+
+public class TestXmlSchema extends xml.Test {
+	public static void main(String[] args) throws SAXException {
+    ContentHandler ch = new TestXmlSchema();
+    
+    ch.write valid document
+        <{http://www.w3.org/2001/XMLSchema}schema
+		    targetNamespace="http://www.w3.org/2001/XMLSchema">
+		   	
+		   	
+		   	<{http://www.w3.org/2001/XMLSchema}element name="schema" type="SchemaType">
+		   	</{http://www.w3.org/2001/XMLSchema}element>
+		   	   	
+		   	
+		    <{http://www.w3.org/2001/XMLSchema}complexType name="SchemaType">
+		    	<{http://www.w3.org/2001/XMLSchema}choice maxOccurs="unbounded">
+		        
+		          <{http://www.w3.org/2001/XMLSchema}element name="element" type="ElementType">
+		          </{http://www.w3.org/2001/XMLSchema}element>
+		        
+		          <{http://www.w3.org/2001/XMLSchema}element name="complexType" type="ComplexType">
+		          </{http://www.w3.org/2001/XMLSchema}element>
+		        
+		          <{http://www.w3.org/2001/XMLSchema}element name="simpleType" type="SimpleType">
+		          </{http://www.w3.org/2001/XMLSchema}element>
+		      
+		      </{http://www.w3.org/2001/XMLSchema}choice>
+		      
+		      <{http://www.w3.org/2001/XMLSchema}attribute name="targetNamespace" type="StringType">
+		      </{http://www.w3.org/2001/XMLSchema}attribute>
+		    </{http://www.w3.org/2001/XMLSchema}complexType>
+		    
+		    
+		    
+		    <{http://www.w3.org/2001/XMLSchema}complexType name="ComplexType">
+		      <{http://www.w3.org/2001/XMLSchema}sequence>
+		        <{http://www.w3.org/2001/XMLSchema}choice>
+		      
+		          <{http://www.w3.org/2001/XMLSchema}element name="choice" type="ComplexTypeNested">
+		          </{http://www.w3.org/2001/XMLSchema}element>
+		          <{http://www.w3.org/2001/XMLSchema}element name="choice" type="ComplexTypeNestedMax">
+		          </{http://www.w3.org/2001/XMLSchema}element>
+		      
+		          <{http://www.w3.org/2001/XMLSchema}element name="sequence" type="ComplexTypeNested">
+		          </{http://www.w3.org/2001/XMLSchema}element>
+		          <{http://www.w3.org/2001/XMLSchema}element name="sequence" type="ComplexTypeNestedMax">
+		          </{http://www.w3.org/2001/XMLSchema}element>
+		      
+		        </{http://www.w3.org/2001/XMLSchema}choice>
+		        
+		        <{http://www.w3.org/2001/XMLSchema}sequence maxOccurs="unbounded">
+		          <{http://www.w3.org/2001/XMLSchema}element name="attribute" type="AttributeType">
+		          </{http://www.w3.org/2001/XMLSchema}element>
+		        </{http://www.w3.org/2001/XMLSchema}sequence>
+		      
+		      </{http://www.w3.org/2001/XMLSchema}sequence>
+		      
+		      <{http://www.w3.org/2001/XMLSchema}attribute name="name" type="StringType">
+		      </{http://www.w3.org/2001/XMLSchema}attribute>        
+		    </{http://www.w3.org/2001/XMLSchema}complexType>
+		    
+		    
+		    <{http://www.w3.org/2001/XMLSchema}complexType name="ComplexTypeNested">
+		      <{http://www.w3.org/2001/XMLSchema}choice maxOccurs="unbounded">
+			  
+		        <{http://www.w3.org/2001/XMLSchema}element name="choice" type="ComplexTypeNested">
+		        </{http://www.w3.org/2001/XMLSchema}element>
+		        <{http://www.w3.org/2001/XMLSchema}element name="choice" type="ComplexTypeNestedMax">
+		        </{http://www.w3.org/2001/XMLSchema}element>
+		  
+		        <{http://www.w3.org/2001/XMLSchema}element name="sequence" type="ComplexTypeNested">
+		        </{http://www.w3.org/2001/XMLSchema}element>
+		        <{http://www.w3.org/2001/XMLSchema}element name="sequence" type="ComplexTypeNestedMax">
+		        </{http://www.w3.org/2001/XMLSchema}element>
+		  
+		        <{http://www.w3.org/2001/XMLSchema}element name="element" type="ElementType">
+		        </{http://www.w3.org/2001/XMLSchema}element>
+		    
+		      </{http://www.w3.org/2001/XMLSchema}choice>
+		    </{http://www.w3.org/2001/XMLSchema}complexType>
+		    
+		    
+		    <{http://www.w3.org/2001/XMLSchema}complexType name="ComplexTypeNestedMax">
+		      <{http://www.w3.org/2001/XMLSchema}choice maxOccurs="unbounded">
+			  
+		        <{http://www.w3.org/2001/XMLSchema}element name="choice" type="ComplexTypeNested">
+		        </{http://www.w3.org/2001/XMLSchema}element>
+		        <{http://www.w3.org/2001/XMLSchema}element name="choice" type="ComplexTypeNestedMax">
+		        </{http://www.w3.org/2001/XMLSchema}element>
+		  
+		        <{http://www.w3.org/2001/XMLSchema}element name="sequence" type="ComplexTypeNested">
+		        </{http://www.w3.org/2001/XMLSchema}element>
+		        <{http://www.w3.org/2001/XMLSchema}element name="sequence" type="ComplexTypeNestedMax">
+		        </{http://www.w3.org/2001/XMLSchema}element>
+		  
+		        <{http://www.w3.org/2001/XMLSchema}element name="element" type="ElementType">
+		        </{http://www.w3.org/2001/XMLSchema}element>
+		    
+		      </{http://www.w3.org/2001/XMLSchema}choice>
+		      
+		      <{http://www.w3.org/2001/XMLSchema}attribute name="maxOccurs" type="StringType">
+		      </{http://www.w3.org/2001/XMLSchema}attribute>
+		    </{http://www.w3.org/2001/XMLSchema}complexType>
+		    
+		    
+		    <{http://www.w3.org/2001/XMLSchema}complexType name="ElementType">
+		      <{http://www.w3.org/2001/XMLSchema}sequence>
+		      </{http://www.w3.org/2001/XMLSchema}sequence>
+		      	
+		      <{http://www.w3.org/2001/XMLSchema}attribute name="name" type="StringType">
+		      </{http://www.w3.org/2001/XMLSchema}attribute>
+		    
+		      <{http://www.w3.org/2001/XMLSchema}attribute name="type" type="StringType">
+		      </{http://www.w3.org/2001/XMLSchema}attribute>
+		    </{http://www.w3.org/2001/XMLSchema}complexType>
+		    
+		    
+		    <{http://www.w3.org/2001/XMLSchema}complexType name="AttributeType">
+		      <{http://www.w3.org/2001/XMLSchema}sequence>
+		      </{http://www.w3.org/2001/XMLSchema}sequence>
+		      
+		 	  <{http://www.w3.org/2001/XMLSchema}attribute name="name" type="StringType">
+		      </{http://www.w3.org/2001/XMLSchema}attribute>
+		    
+		      <{http://www.w3.org/2001/XMLSchema}attribute name="type" type="StringType">
+		      </{http://www.w3.org/2001/XMLSchema}attribute>
+		    </{http://www.w3.org/2001/XMLSchema}complexType>
+		    
+		    
+		    <{http://www.w3.org/2001/XMLSchema}complexType name="SimpleType">
+		      <{http://www.w3.org/2001/XMLSchema}sequence>
+		        <{http://www.w3.org/2001/XMLSchema}element name="restriction" type="RestrictionType">
+		        </{http://www.w3.org/2001/XMLSchema}element>
+		      </{http://www.w3.org/2001/XMLSchema}sequence>
+		      
+		      <{http://www.w3.org/2001/XMLSchema}attribute name="name" type="StringType">
+		      </{http://www.w3.org/2001/XMLSchema}attribute>
+		    </{http://www.w3.org/2001/XMLSchema}complexType>
+		    
+		    	
+		    
+			<{http://www.w3.org/2001/XMLSchema}complexType name="RestrictionType">
+			  <{http://www.w3.org/2001/XMLSchema}sequence>
+		      </{http://www.w3.org/2001/XMLSchema}sequence>
+		      
+		      <{http://www.w3.org/2001/XMLSchema}attribute name="base" type="StringType">
+		      </{http://www.w3.org/2001/XMLSchema}attribute>
+		    </{http://www.w3.org/2001/XMLSchema}complexType>    
+		    
+		    
+		    
+		    <{http://www.w3.org/2001/XMLSchema}simpleType name="StringType">
+		    	<{http://www.w3.org/2001/XMLSchema}restriction base="string">
+		    	</{http://www.w3.org/2001/XMLSchema}restriction>
+		    </{http://www.w3.org/2001/XMLSchema}simpleType>
+		    
+		  </{http://www.w3.org/2001/XMLSchema}schema>;
+  }
+}

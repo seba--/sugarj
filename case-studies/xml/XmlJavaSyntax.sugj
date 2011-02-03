@@ -1,0 +1,73 @@
+package xml;
+
+import org.sugarj.languages.Java;
+
+import xml.XmlSyntax;
+
+/*
+ * https://svn.strategoxt.org/repos/StrategoXT/java-borg/trunk/syn/Java-XML.sdf
+ * https://svn.strategoxt.org/repos/StrategoXT/java-borg/trunk/sig/java-meta-markers.str
+ */
+public sugar XmlJavaSyntax {
+
+%% module Java-XML
+
+  sorts ObjectStm
+  context-free syntax
+    ObjectStm -> JavaStm {cons("ToMetaStm")}
+
+    JavaId "." "write" Content ";" -> ObjectStm {cons("WriteDoc")}
+    JavaId "." "write" Document ";" -> ObjectStm {cons("WriteDoc"), avoid}
+    JavaId "." "write" "document" Document ";" -> ObjectStm {cons("WriteDoc")}
+
+  signature constructors
+    WriteDoc : JavaId * Content -> ObjectStm
+    WriteDoc : JavaId * Document -> ObjectStm
+
+  context-free syntax
+    "<{" JavaStm  "}/>" -> Content {cons("FromMetaStm")}
+    
+  syntax
+    "{" <LAYOUT?-CF> <JavaExpr-CF> <LAYOUT?-CF> "}" -> FooDoubleQuotedText {cons("FromMetaExpr")}
+  
+
+  lexical syntax
+    [\ \t\12\13\n] -> LAYOUT {prefer}
+
+  signature
+	  constructors
+	    ToMetaExpr   : Expr -> Expr
+	    ToMetaStmListExpr  : Expr -> Expr
+	    ToMetaExprListExpr : Expr -> Expr
+	    ToMetaStm    : a -> Expr     
+	    WriteDoc     : Id * Content -> ContentStm
+	    FromMetaExpr : Expr -> a 
+	    FromMetaStmListExpr : Expr -> a 
+	
+	    TextFromMetaExpr : Expr -> a 
+	
+	    ToMetaListExpr : Expr -> Expr
+	
+	    meta-var     : String -> a
+	    meta-listvar : String -> a
+	
+	strategies
+	
+	  is-anti-quotation =
+	      ?FromMetaExpr(_)
+	    + ?TextFromMetaExpr(_)
+	    + ?meta-var(_)
+	    + ?meta-listvar(_)
+	
+	  is-quotation =
+	      ?ToMetaStm(_)
+	    + ?ToMetaExpr(_)
+	
+	strategies
+	
+	  all-quotation(s) =
+	      ToMetaStm(WriteDoc(id, s))
+	   <+ ToMetaStm(s)
+
+
+}

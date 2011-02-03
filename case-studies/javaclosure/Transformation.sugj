@@ -1,0 +1,44 @@
+package javaclosure;
+
+import javaclosure.Syntax;
+import javaclosure.ToRefType;
+
+import org.sugarj.languages.Java;
+
+/*
+ * see http://javac.info/closures-v06a.html
+ */
+public sugar Transformation {
+  desugarings
+    transFun
+    transLambda
+  
+  rules
+	transFun :
+      FunctionType(result, argument)
+      ->
+      ClassOrInterfaceType(
+      	TypeName(
+            PackageOrTypeName(Id("javaclosure")),
+            Id("Function")),
+        Some(TypeArgs([result', argument'])))
+    with result' := <toRefType> result;
+         argument' := <toRefType> argument
+  
+
+    transLambda :
+      BlockLambda(result, Param(mods, argument, Id(x)), body)
+      ->
+      NewInstance(
+        None(),
+        ClassOrInterfaceType(
+          TypeName(PackageOrTypeName(Id("javaclosure")), Id("Function")),
+          Some(TypeArgs([result', argument']))),
+        [],
+        Some(ClassBody(
+          [MethodDec(
+             MethodDecHead([Public()], None(), result', Id("invoke"), [Param(mods, argument', Id(x))], None()),
+             body)])))
+    with result' := <toRefType> result;
+         argument' := <toRefType> argument
+}

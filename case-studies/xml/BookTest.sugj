@@ -1,0 +1,20 @@
+package xml;
+
+import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
+
+import xml.AsSax;
+import xml.XmlJavaSyntax;
+
+public class BookTest extends xml.Test {
+  public static void main(String[] args) throws SAXException {
+    ContentHandler ch = new BookTest();
+    
+    String title = "Sweetness and Power: The Place of Sugar in Modern History";
+    
+    ch.write document
+      <book title="{title}" >
+        <author name="Sidney W. Mintz" />
+      </book>;
+  }
+}

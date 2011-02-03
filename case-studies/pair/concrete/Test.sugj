@@ -1,0 +1,9 @@
+package pair.concrete;
+
+import pair.concrete.Syntax;
+
+import pair.concrete.Desugar;
+
+public class Test {
+  private (String, Integer) p = ("12", 34);
+}

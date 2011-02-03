@@ -1,0 +1,89 @@
+module extraction
+imports
+  libstratego-lib
+  SugarJ
+  Sdf2Renamed
+  StrategoRenamed
+
+//Accept Rules
+rules 
+  AcceptSDF : grammar-elem(x) -> x
+  AcceptSTR : transformation-elem(x) -> x
+
+rules
+  // singleton :: a -> [a]
+  singleton : x -> [x]
+
+  children : x#(xs) -> xs
+
+  filter-children(s) : x#(xs) -> x#(<map(filter-tree(s));concat> xs)
+
+strategies
+  empty = ![]
+  
+  /*
+   * The argument strategy is tried on the nodes of the current AST in
+   * a top-down fashion. The result of `extract` is a list of results of
+   * applying `s`. The strategy only recurses when `s` fails.
+   */
+  // extract :: (a -> [b]) -> [b]
+  extract(s) =
+  	 s < id
+       + children ; map(extract(s)); concat
+  
+
+  filter-tree(s) =
+  	where(s) < filter-children(s); singleton
+             + ![]
+  
+// to SDF
+rules
+  CompDesugaringsToSDF :
+    Desugarings(ds) ->
+    context-free-syntax(<map(CompDesugaringToSDF); concat> ds)
+
+  CompDesugaringToSDF :
+    PureDesugaring(_) -> []
+    
+  CompDesugaringToSDF :
+    InjectDesugaring(name,from,to,attrs) ->
+    [prod([from],to,attrs)]
+  
+  fold-conc-grammars :
+    [] -> empty-grammar
+  
+  fold-conc-grammars :
+    [x] -> x
+  
+  fold-conc-grammars :
+    [x, y | z] ->
+      <fold-conc-grammars> [conc-grammars(x, y) | z]
+  
+strategies
+  mainSDF = io-wrap(toSDF; fold-conc-grammars)
+  toSDF = map(extract((AcceptSDF + (AcceptSTR; CompDesugaringsToSDF));
+                      singleton));
+              concat
+
+// to STR
+rules
+  CompDesugaringsToSTR :
+    Desugarings(as) ->
+    Strategies(<map(CompDesugaringToSTR)> as)
+
+  CompDesugaringToSTR :
+    PureDesugaring(term) ->
+    SDefNoArgs("desugar",Call(CallNoArgs(SVar("changed-tree")),[term]))
+
+  CompDesugaringToSTR :
+    InjectDesugaring(term,from,to,attrs) ->
+    SDefNoArgs("desugar",Call(CallNoArgs(SVar("changed-tree")),[term]))
+
+strategies
+  mainSTR = io-wrap(toSTR)
+	toSTR = map(extract(AcceptSTR;
+                      try(CompDesugaringsToSTR);
+                      singleton));
+              concat
+
+  

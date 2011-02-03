@@ -1,0 +1,641 @@
+package xml.schema;
+
+import xml.XmlSyntax;
+import xml.XmlTextTools;
+
+public sugar XmlSchemaCompiled {
+
+	strategies
+      report-error(|msg) = ![msg, ": ", <id>]; error; fail
+    	  
+	
+	strategies
+	  validate-XmlSchema-root =
+	    fail
+	
+	
+	strategies
+	  validate-XmlSchema-root =
+	    validate-XmlSchema-element-schema
+	
+	
+	rules
+	
+	  validate-XmlSchema-element-schema :
+	    Element(
+	      QName(
+	        Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	      , "schema"
+	      )
+	    , attributes
+	    , contents
+	    , QName(
+	        Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	      , "schema"
+	      )
+	    ) -> <validate-XmlSchema-type-SchemaType> Element(
+	                                                                       QName(
+	                                                                         Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                       , "schema"
+	                                                                       )
+	                                                                     , attributes
+	                                                                     , contents
+	                                                                     , QName(
+	                                                                         Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                       , "schema"
+	                                                                       )
+	                                                                     )
+	
+	
+	strategies
+	  validate-XmlSchema-type-SchemaType =
+	    where(?Element(ign1, ign2, <id>, ign4)
+	          ; repeat(
+	              \ [x|xs] -> <\ Element(
+	                               QName(
+	                                 Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                               , "element"
+	                               )
+	                             , attributes
+	                             , contents
+	                             , QName(
+	                                 Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                               , "element"
+	                               )
+	                             ) -> <validate-XmlSchema-type-ElementType> Element(
+	                                                                                                 QName(
+	                                                                                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                 , "element"
+	                                                                                                 )
+	                                                                                               , attributes
+	                                                                                               , contents
+	                                                                                               , QName(
+	                                                                                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                 , "element"
+	                                                                                                 )
+	                                                                                               ) \
+	                           ; !xs> x \
+	              + \ [x|xs] -> <\ Element(
+	                                 QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "complexType"
+	                                 )
+	                               , attributes
+	                               , contents
+	                               , QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "complexType"
+	                                 )
+	                               ) -> <validate-XmlSchema-type-ComplexType> Element(
+	                                                                                                   QName(
+	                                                                                                     Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                   , "complexType"
+	                                                                                                   )
+	                                                                                                 , attributes
+	                                                                                                 , contents
+	                                                                                                 , QName(
+	                                                                                                     Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                   , "complexType"
+	                                                                                                   )
+	                                                                                                 ) \
+	                             ; !xs> x \
+	              + \ [x|xs] -> <\ Element(
+	                                 QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "simpleType"
+	                                 )
+	                               , attributes
+	                               , contents
+	                               , QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "simpleType"
+	                                 )
+	                               ) -> <validate-XmlSchema-type-SimpleType> Element(
+	                                                                                                  QName(
+	                                                                                                    Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                  , "simpleType"
+	                                                                                                  )
+	                                                                                                , attributes
+	                                                                                                , contents
+	                                                                                                , QName(
+	                                                                                                    Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                  , "simpleType"
+	                                                                                                  )
+	                                                                                                ) \
+	                             ; !xs> x \
+	              + fail
+	            )
+	          ; (?[] <+ report-error(|"not all elements consumed")))
+	    ; where(?Element(ign1, <id>, ign3, ign4)
+	            ; (\ [x|xs] -> <\ Attribute(QName(None, "targetNamespace"), attval) -> <validate-attval-XmlSchema-type-StringType> attval \
+	                            ; !xs> x \
+	               ; id)
+	            ; (?[] <+ report-error(|"not all attributes consumed")))
+	    <+ report-error(|"mismatched complex type")
+	
+	
+	strategies
+	  validate-XmlSchema-type-ComplexType =
+	    where(?Element(ign1, ign2, <id>, ign4)
+	          ; ((\ [x|xs] -> <\ Element(
+	                               QName(
+	                                 Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                               , "choice"
+	                               )
+	                             , attributes
+	                             , contents
+	                             , QName(
+	                                 Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                               , "choice"
+	                               )
+	                             ) -> <validate-XmlSchema-type-ComplexTypeNested> Element(
+	                                                                                                       QName(
+	                                                                                                         Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                       , "choice"
+	                                                                                                       )
+	                                                                                                     , attributes
+	                                                                                                     , contents
+	                                                                                                     , QName(
+	                                                                                                         Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                       , "choice"
+	                                                                                                       )
+	                                                                                                     ) \
+	                           ; !xs> x \
+	              + \ [x|xs] -> <\ Element(
+	                                 QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "choice"
+	                                 )
+	                               , attributes
+	                               , contents
+	                               , QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "choice"
+	                                 )
+	                               ) -> <validate-XmlSchema-type-ComplexTypeNestedMax> Element(
+	                                                                                                            QName(
+	                                                                                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                            , "choice"
+	                                                                                                            )
+	                                                                                                          , attributes
+	                                                                                                          , contents
+	                                                                                                          , QName(
+	                                                                                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                            , "choice"
+	                                                                                                            )
+	                                                                                                          ) \
+	                             ; !xs> x \
+	              + \ [x|xs] -> <\ Element(
+	                                 QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "sequence"
+	                                 )
+	                               , attributes
+	                               , contents
+	                               , QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "sequence"
+	                                 )
+	                               ) -> <validate-XmlSchema-type-ComplexTypeNested> Element(
+	                                                                                                         QName(
+	                                                                                                           Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                         , "sequence"
+	                                                                                                         )
+	                                                                                                       , attributes
+	                                                                                                       , contents
+	                                                                                                       , QName(
+	                                                                                                           Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                         , "sequence"
+	                                                                                                         )
+	                                                                                                       ) \
+	                             ; !xs> x \
+	              + \ [x|xs] -> <\ Element(
+	                                 QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "sequence"
+	                                 )
+	                               , attributes
+	                               , contents
+	                               , QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "sequence"
+	                                 )
+	                               ) -> <validate-XmlSchema-type-ComplexTypeNestedMax> Element(
+	                                                                                                            QName(
+	                                                                                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                            , "sequence"
+	                                                                                                            )
+	                                                                                                          , attributes
+	                                                                                                          , contents
+	                                                                                                          , QName(
+	                                                                                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                            , "sequence"
+	                                                                                                            )
+	                                                                                                          ) \
+	                             ; !xs> x \
+	              + fail)
+	             ; repeat(
+	                 \ [x|xs] -> <\ Element(
+	                                  QName(
+	                                    Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                  , "attribute"
+	                                  )
+	                                , attributes
+	                                , contents
+	                                , QName(
+	                                    Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                  , "attribute"
+	                                  )
+	                                ) -> <validate-XmlSchema-type-AttributeType> Element(
+	                                                                                                      QName(
+	                                                                                                        Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                      , "attribute"
+	                                                                                                      )
+	                                                                                                    , attributes
+	                                                                                                    , contents
+	                                                                                                    , QName(
+	                                                                                                        Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                      , "attribute"
+	                                                                                                      )
+	                                                                                                    ) \
+	                              ; !xs> x \
+	                 ; id
+	               )
+	             ; id)
+	          ; (?[] <+ report-error(|"not all elements consumed")))
+	    ; where(?Element(ign1, <id>, ign3, ign4)
+	            ; (\ [x|xs] -> <\ Attribute(QName(None, "name"), attval) -> <validate-attval-XmlSchema-type-StringType> attval \
+	                            ; !xs> x \
+	               ; id)
+	            ; (?[] <+ report-error(|"not all attributes consumed")))
+	    <+ report-error(|"mismatched complex type")
+	
+	
+	strategies
+	  validate-XmlSchema-type-ComplexTypeNested =
+	    where(?Element(ign1, ign2, <id>, ign4)
+	          ; repeat(
+	              \ [x|xs] -> <\ Element(
+	                               QName(
+	                                 Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                               , "choice"
+	                               )
+	                             , attributes
+	                             , contents
+	                             , QName(
+	                                 Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                               , "choice"
+	                               )
+	                             ) -> <validate-XmlSchema-type-ComplexTypeNested> Element(
+	                                                                                                       QName(
+	                                                                                                         Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                       , "choice"
+	                                                                                                       )
+	                                                                                                     , attributes
+	                                                                                                     , contents
+	                                                                                                     , QName(
+	                                                                                                         Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                       , "choice"
+	                                                                                                       )
+	                                                                                                     ) \
+	                           ; !xs> x \
+	              + \ [x|xs] -> <\ Element(
+	                                 QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "choice"
+	                                 )
+	                               , attributes
+	                               , contents
+	                               , QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "choice"
+	                                 )
+	                               ) -> <validate-XmlSchema-type-ComplexTypeNestedMax> Element(
+	                                                                                                            QName(
+	                                                                                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                            , "choice"
+	                                                                                                            )
+	                                                                                                          , attributes
+	                                                                                                          , contents
+	                                                                                                          , QName(
+	                                                                                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                            , "choice"
+	                                                                                                            )
+	                                                                                                          ) \
+	                             ; !xs> x \
+	              + \ [x|xs] -> <\ Element(
+	                                 QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "sequence"
+	                                 )
+	                               , attributes
+	                               , contents
+	                               , QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "sequence"
+	                                 )
+	                               ) -> <validate-XmlSchema-type-ComplexTypeNested> Element(
+	                                                                                                         QName(
+	                                                                                                           Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                         , "sequence"
+	                                                                                                         )
+	                                                                                                       , attributes
+	                                                                                                       , contents
+	                                                                                                       , QName(
+	                                                                                                           Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                         , "sequence"
+	                                                                                                         )
+	                                                                                                       ) \
+	                             ; !xs> x \
+	              + \ [x|xs] -> <\ Element(
+	                                 QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "sequence"
+	                                 )
+	                               , attributes
+	                               , contents
+	                               , QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "sequence"
+	                                 )
+	                               ) -> <validate-XmlSchema-type-ComplexTypeNestedMax> Element(
+	                                                                                                            QName(
+	                                                                                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                            , "sequence"
+	                                                                                                            )
+	                                                                                                          , attributes
+	                                                                                                          , contents
+	                                                                                                          , QName(
+	                                                                                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                            , "sequence"
+	                                                                                                            )
+	                                                                                                          ) \
+	                             ; !xs> x \
+	              + \ [x|xs] -> <\ Element(
+	                                 QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "element"
+	                                 )
+	                               , attributes
+	                               , contents
+	                               , QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "element"
+	                                 )
+	                               ) -> <validate-XmlSchema-type-ElementType> Element(
+	                                                                                                   QName(
+	                                                                                                     Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                   , "element"
+	                                                                                                   )
+	                                                                                                 , attributes
+	                                                                                                 , contents
+	                                                                                                 , QName(
+	                                                                                                     Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                   , "element"
+	                                                                                                   )
+	                                                                                                 ) \
+	                             ; !xs> x \
+	              + fail
+	            )
+	          ; (?[] <+ report-error(|"not all elements consumed")))
+	    ; where(?Element(ign1, <id>, ign3, ign4)
+	            ; id
+	            ; (?[] <+ report-error(|"not all attributes consumed")))
+	    <+ report-error(|"mismatched complex type")
+	
+	
+	strategies
+	  validate-XmlSchema-type-ComplexTypeNestedMax =
+	    where(?Element(ign1, ign2, <id>, ign4)
+	          ; repeat(
+	              \ [x|xs] -> <\ Element(
+	                               QName(
+	                                 Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                               , "choice"
+	                               )
+	                             , attributes
+	                             , contents
+	                             , QName(
+	                                 Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                               , "choice"
+	                               )
+	                             ) -> <validate-XmlSchema-type-ComplexTypeNested> Element(
+	                                                                                                       QName(
+	                                                                                                         Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                       , "choice"
+	                                                                                                       )
+	                                                                                                     , attributes
+	                                                                                                     , contents
+	                                                                                                     , QName(
+	                                                                                                         Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                       , "choice"
+	                                                                                                       )
+	                                                                                                     ) \
+	                           ; !xs> x \
+	              + \ [x|xs] -> <\ Element(
+	                                 QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "choice"
+	                                 )
+	                               , attributes
+	                               , contents
+	                               , QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "choice"
+	                                 )
+	                               ) -> <validate-XmlSchema-type-ComplexTypeNestedMax> Element(
+	                                                                                                            QName(
+	                                                                                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                            , "choice"
+	                                                                                                            )
+	                                                                                                          , attributes
+	                                                                                                          , contents
+	                                                                                                          , QName(
+	                                                                                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                            , "choice"
+	                                                                                                            )
+	                                                                                                          ) \
+	                             ; !xs> x \
+	              + \ [x|xs] -> <\ Element(
+	                                 QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "sequence"
+	                                 )
+	                               , attributes
+	                               , contents
+	                               , QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "sequence"
+	                                 )
+	                               ) -> <validate-XmlSchema-type-ComplexTypeNested> Element(
+	                                                                                                         QName(
+	                                                                                                           Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                         , "sequence"
+	                                                                                                         )
+	                                                                                                       , attributes
+	                                                                                                       , contents
+	                                                                                                       , QName(
+	                                                                                                           Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                         , "sequence"
+	                                                                                                         )
+	                                                                                                       ) \
+	                             ; !xs> x \
+	              + \ [x|xs] -> <\ Element(
+	                                 QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "sequence"
+	                                 )
+	                               , attributes
+	                               , contents
+	                               , QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "sequence"
+	                                 )
+	                               ) -> <validate-XmlSchema-type-ComplexTypeNestedMax> Element(
+	                                                                                                            QName(
+	                                                                                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                            , "sequence"
+	                                                                                                            )
+	                                                                                                          , attributes
+	                                                                                                          , contents
+	                                                                                                          , QName(
+	                                                                                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                            , "sequence"
+	                                                                                                            )
+	                                                                                                          ) \
+	                             ; !xs> x \
+	              + \ [x|xs] -> <\ Element(
+	                                 QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "element"
+	                                 )
+	                               , attributes
+	                               , contents
+	                               , QName(
+	                                   Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                 , "element"
+	                                 )
+	                               ) -> <validate-XmlSchema-type-ElementType> Element(
+	                                                                                                   QName(
+	                                                                                                     Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                   , "element"
+	                                                                                                   )
+	                                                                                                 , attributes
+	                                                                                                 , contents
+	                                                                                                 , QName(
+	                                                                                                     Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                   , "element"
+	                                                                                                   )
+	                                                                                                 ) \
+	                             ; !xs> x \
+	              + fail
+	            )
+	          ; (?[] <+ report-error(|"not all elements consumed")))
+	    ; where(?Element(ign1, <id>, ign3, ign4)
+	            ; (\ [x|xs] -> <\ Attribute(QName(None, "maxOccurs"), attval) -> <validate-attval-XmlSchema-type-StringType> attval \
+	                            ; !xs> x \
+	               ; id)
+	            ; (?[] <+ report-error(|"not all attributes consumed")))
+	    <+ report-error(|"mismatched complex type")
+	
+	
+	strategies
+	  validate-XmlSchema-type-ElementType =
+	    where(?Element(ign1, ign2, <id>, ign4)
+	          ; id
+	          ; (?[] <+ report-error(|"not all elements consumed")))
+	    ; where(?Element(ign1, <id>, ign3, ign4)
+	            ; (\ [x|xs] -> <\ Attribute(QName(None, "name"), attval) -> <validate-attval-XmlSchema-type-StringType> attval \
+	                            ; !xs> x \
+	               ; \ [x|xs] -> <\ Attribute(QName(None, "type"), attval) -> <validate-attval-XmlSchema-type-StringType> attval \
+	                              ; !xs> x \
+	               ; id)
+	            ; (?[] <+ report-error(|"not all attributes consumed")))
+	    <+ report-error(|"mismatched complex type")
+	
+	
+	strategies
+	  validate-XmlSchema-type-AttributeType =
+	    where(?Element(ign1, ign2, <id>, ign4)
+	          ; id
+	          ; (?[] <+ report-error(|"not all elements consumed")))
+	    ; where(?Element(ign1, <id>, ign3, ign4)
+	            ; (\ [x|xs] -> <\ Attribute(QName(None, "name"), attval) -> <validate-attval-XmlSchema-type-StringType> attval \
+	                            ; !xs> x \
+	               ; \ [x|xs] -> <\ Attribute(QName(None, "type"), attval) -> <validate-attval-XmlSchema-type-StringType> attval \
+	                              ; !xs> x \
+	               ; id)
+	            ; (?[] <+ report-error(|"not all attributes consumed")))
+	    <+ report-error(|"mismatched complex type")
+	
+	
+	strategies
+	  validate-XmlSchema-type-SimpleType =
+	    where(?Element(ign1, ign2, <id>, ign4)
+	          ; (\ [x|xs] -> <\ Element(
+	                              QName(
+	                                Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                              , "restriction"
+	                              )
+	                            , attributes
+	                            , contents
+	                            , QName(
+	                                Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                              , "restriction"
+	                              )
+	                            ) -> <validate-XmlSchema-type-RestrictionType> Element(
+	                                                                                                    QName(
+	                                                                                                      Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                    , "restriction"
+	                                                                                                    )
+	                                                                                                  , attributes
+	                                                                                                  , contents
+	                                                                                                  , QName(
+	                                                                                                      Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+	                                                                                                    , "restriction"
+	                                                                                                    )
+	                                                                                                  ) \
+	                          ; !xs> x \
+	             ; id)
+	          ; (?[] <+ report-error(|"not all elements consumed")))
+	    ; where(?Element(ign1, <id>, ign3, ign4)
+	            ; (\ [x|xs] -> <\ Attribute(QName(None, "name"), attval) -> <validate-attval-XmlSchema-type-StringType> attval \
+	                            ; !xs> x \
+	               ; id)
+	            ; (?[] <+ report-error(|"not all attributes consumed")))
+	    <+ report-error(|"mismatched complex type")
+	
+	
+	strategies
+	  validate-XmlSchema-type-RestrictionType =
+	    where(?Element(ign1, ign2, <id>, ign4)
+	          ; id
+	          ; (?[] <+ report-error(|"not all elements consumed")))
+	    ; where(?Element(ign1, <id>, ign3, ign4)
+	            ; (\ [x|xs] -> <\ Attribute(QName(None, "base"), attval) -> <validate-attval-XmlSchema-type-StringType> attval \
+	                            ; !xs> x \
+	               ; id)
+	            ; (?[] <+ report-error(|"not all attributes consumed")))
+	    <+ report-error(|"mismatched complex type")
+	
+	
+	strategies
+	  validate-XmlSchema-type-StringType =
+	    where(?Element(ign1, ign2, [<id>], ign4)
+	          ; chardata2string
+	          ; validate-base-string
+	          ; id)
+	    <+ report-error(|"mismatched restriction")
+	
+	
+	strategies
+	  validate-attval-XmlSchema-type-StringType =
+	    where(xml-attr-value2string
+	          ; validate-base-string
+	          ; id)
+	    <+ report-error(|"mismatched restriction")
+
+	strategies
+      validate-base-string =
+        is-string <+ report-error(|"not a string")
+}
