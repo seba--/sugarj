@@ -1,0 +1,16 @@
+module SugarJ.main
+
+imports SugarJ-Builders SugarJ-Colorer SugarJ-Completions SugarJ-Folding SugarJ-Outliner SugarJ-References SugarJ-Syntax
+
+language General properties
+                  
+  name          : SugarJ
+  id            : org.sugarj.editor
+  extends       : Root
+                  
+  description   : "Spoofax/IMP-generated editor for the SugarJ language"
+  url           : http://strategoxt.org
+                  
+  extensions    : sugj
+  table         : include/SugarJ.tbl
+  start symbols : SugarCompilationUnit
