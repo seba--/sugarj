@@ -1,0 +1,110 @@
+module SugarJ-Folding.generated
+
+folding Default folding definitions
+  
+  // Folding rules indicate which syntactic constructs can be folded,
+  // and take one of the following forms:
+  //
+  //   <sort>.<constructor>
+  //
+  //   <sort>._
+  //
+  //   _.<constructor>
+  //
+  // To indicate that an element should always be folded, add
+  // a (folded) annotation:
+  //
+  //   _.Imports (folded)
+  //
+  // To disable a folding rule defined elsewhere, add a (disabled) annotation:
+  //
+  //   Definition._ (disabled)
+  
+  SugarCompilationUnit.CompilationUnit
+  JavaPackageDec.PackageDec
+  JavaExpr.Lit
+  JavaStringLiteral
+  JavaStringLiteral.String
+  JavaVarDecId.ArrayVarDecId
+  OptJavaTypeParams2
+  JavaTypeParams.TypeParams
+  JavaTypeParam.TypeParam
+  OptJavaTypeBound2
+  JavaTypeBound.TypeBound
+  OptJavaThrows2
+  JavaThrows.ThrowsDec
+  JavaClassType.ClassType
+  OptJavaInterfaces2
+  JavaInterfaces.ImplementsDec
+  JavaInterfaceType.InterfaceType
+  OptJavaExtendsInterfaces2
+  JavaExtendsInterfaces.ExtendsInterfaces
+  JavaMethodSpec.SuperMethod
+  JavaMethodSpec.QSuperMethod
+  JavaMethodSpec.GenericMethod
+  JavaPackageName.PackageName
+  JavaImportDec.TypeImportOnDemandDec
+  SugarDec.SugarDec
+  SugarDecHead.SugarDecHead
+  SugarBody.SugarBody
+  ListStarOfSugarDefElem2
+  SugarDefElem.grammar-elem
+  Grammar.sorts
+  Grammar.syntax
+  ListStarOfSdf2Production2
+  Sdf2Production.prod
+  Sdf2Attributes.attrs
+  Sdf2Attribute.term
+  Sdf2ATermAttribute.default
+  Sdf2ModuleName.parameterized
+  Sdf2Production.prefix-fun
+  Grammar.lexical-syntax
+  Grammar.context-free-syntax
+  Grammar.variables
+  Grammar.lexical-variables
+  Grammar.priorities
+  ListStarOfSdf2Priority2
+  Sdf2Priority.chain
+  Sdf2Group.with-arguments
+  Sdf2ArgumentIndicator.default
+  Sdf2Group.prods-group
+  Sdf2Group.assoc-group
+  Sdf2Priority.assoc
+  Grammar.lexical-priorities
+  Grammar.context-free-priorities
+  Grammar.restrictions
+  ListStarOfSdf2Restriction2
+  Sdf2Restriction.follow
+  Grammar.lexical-restrictions
+  Grammar.context-free-restrictions
+  Grammar.aliases
+  ListStarOfSdf2Alias2
+  Sdf2Alias.alias
+  SugarDefElem.transformation-elem
+  Transformation.Strategies
+  StrategoTypedid.VarDec
+  StrategoConstType
+  StrategoConstType.ConstType
+  StrategoConstType
+  StrategoStrategy.Scope
+  StrategoRuleDec.RDec
+  StrategoRuleDec.RDecT
+  ListStarOfStrategoId2
+  StrategoStrategyDef.ExtSDef
+  Transformation.Signature
+  StrategoSdecl.Sorts
+  StrategoSdecl.Constructors
+  StrategoOpdecl.OpDecl
+  StrategoOpdecl.OpDeclQ
+  StrategoOpdecl.OpDeclInj
+  StrategoOpdecl.ExtOpDecl
+  StrategoOpdecl.ExtOpDeclQ
+  StrategoOpdecl.ExtOpDeclInj
+  Transformation.Rules
+  Transformation.Overlays
+  StrategoOverlay.OverlayNoArgs
+  StrategoOverlay.Overlay
+  Transformation.Desugarings
+  Desugaring.PureDesugaring
+  Desugaring.InjectDesugaring
+  NativeSugarDecHead.NativeSugarDecHead
