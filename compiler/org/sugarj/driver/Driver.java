@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.ParseException;
@@ -63,7 +65,9 @@ public class Driver{
     return b.toString();
   }
 
-  private static List<String> currentlyProcessing = new ArrayList<String>();
+  private static List<URI> allInputFiles = new ArrayList<URI>();
+  private static List<URI> pendingInputFiles = new ArrayList<URI>();
+  private static List<URI> currentlyProcessing = new ArrayList<URI>();
 
   /**
    * denotes that the imported modules changed.
@@ -72,7 +76,7 @@ public class Driver{
 
   private static boolean genJava = false;
   
-  private String sourceFile;
+  private URI sourceFile;
   private String javaOutDir;
   private String javaOutFile;
   private String relPackageName;
@@ -101,10 +105,10 @@ public class Driver{
    * @param outdir
    *        the directory to write the output into.
    */
-  private void process(String source) {
+  private void process(URI source) {
     log.beginTask("processing", "BEGIN PROCESSING " + source);
     try {
-      sourceFile = new File(source).getCanonicalPath();
+      sourceFile = source;
 
       // TODO we need better circular dependency handling
       if (currentlyProcessing.contains(sourceFile))
@@ -116,7 +120,7 @@ public class Driver{
       javaOutFile = null; 
       // FileCommands.createFile(tmpOutdir, relModulePath + ".java");
 
-      mainModuleName = FileCommands.fileName(sourceFile);
+      mainModuleName = FileCommands.fileName(sourceFile.getPath());
 
       currentGrammarSDF = Environment.initGrammar;
       currentGrammarModule = Environment.initGrammarModule;
@@ -127,7 +131,7 @@ public class Driver{
       currentTransModule = Environment.initTransModule;
 
       remainingInput = FileCommands.newTempFile("sugj-rest");
-      FileCommands.copyFile(sourceFile, remainingInput);
+      FileCommands.copyFile(sourceFile.getPath(), remainingInput);
 
       // list of imports that contain SDF extensions
       availableSDFImports = new ArrayList<String>();
@@ -172,7 +176,8 @@ public class Driver{
       
       // COMPILE the generated java file
       compileGeneratedJavaFile();
-
+      currentlyProcessing.remove(sourceFile);
+      pendingInputFiles.remove(sourceFile);
     } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -187,7 +192,6 @@ public class Driver{
     try {
       JavaCommands.javac(javaOutFile, bin, javaOutDir, bin, Environment.stdLibDir);
     } finally {
-      currentlyProcessing.remove(sourceFile);
       log.endTask();
     }
   }
@@ -375,31 +379,26 @@ public class Driver{
       // TODO handle import declarations with asterisks, e.g. import foo.*;
       
       String importModuleRelativePath = getRelativeModulePath(importModule);
-      boolean isStdLibModule = importModuleRelativePath.startsWith("sugarj/"); 
+      boolean isStdLibModule = importModuleRelativePath.startsWith("org/sugarj/"); 
       
       // indicates whether a sugar is imported
       boolean newSyntax = false;
       
-      List<URL> files = searchClassFiles(importModuleRelativePath, isStdLibModule);
-      
-      if (files.isEmpty() && !isStdLibModule && !importModuleRelativePath.endsWith("*")) {
-        // if no class file for imported module exists
-        //    and the file is not from the standard library
-        URL importModuleSourceFile = null;
-        log.beginTask("Searching", "Search for source code of imported module");
-        try {
-          importModuleSourceFile = searchSugjFile(importModuleRelativePath, false);
-          if (importModuleSourceFile == null)
-            importModuleSourceFile = searchJavaFile(importModuleRelativePath, false);
-        } finally {
-          log.endTask();
-        }
-        
-        if (importModuleSourceFile != null) {
-          log.log("Found the source file of the imported module; processing it now.");
-          new Driver().process(importModuleSourceFile.getPath());
-          log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
-        }
+      List<URI> files = searchClassFiles(importModuleRelativePath, isStdLibModule);
+
+      URI importModuleSourceFile = null;
+      importModuleSourceFile = searchSugjFile(importModuleRelativePath, false);
+      if (importModuleSourceFile == null)
+        importModuleSourceFile = searchJavaFile(importModuleRelativePath, false);
+
+      if (// the imported module was given as input by the user
+          importModuleSourceFile != null && pendingInputFiles.contains(importModuleSourceFile) ||
+          // class file could not be found
+          files.isEmpty() && !isStdLibModule && !importModuleRelativePath.endsWith("*") && importModuleSourceFile != null) {
+
+        log.log("Need to compile the imported module first ; processing it now.");
+        new Driver().process(importModuleSourceFile);
+        log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
         
         // try again
         files = searchClassFiles(importModuleRelativePath, isStdLibModule);
@@ -413,8 +412,10 @@ public class Driver{
         log.log("Found imported module on the class path.");
       
       
-      for (URL importModuleClassFile : files)
+      for (URI importModuleClassFileURI : files)
       {
+        URL importModuleClassFile = importModuleClassFileURI.toURL();
+        
         String thisRelativePath = importModuleRelativePath;
         
         if (thisRelativePath.endsWith("*"))
@@ -513,7 +514,7 @@ public class Driver{
 	        }
 	      }
 	      
-	      if (importsChanged && newSyntax)
+	      if (importsChanged && newSyntax || importModuleSourceFile != null && allInputFiles.contains(importModuleSourceFile))
 	        skipCache = true;
       }
       
@@ -538,12 +539,14 @@ public class Driver{
   }
 
 
-  private URL searchFile(String what, String where, String extension, String relativePath, List<String> searchPath, boolean searchStdLib) throws MalformedURLException {
-    URL result = null;
+  private URI searchFile(String what, String where, String extension, String relativePath, List<String> searchPath, boolean searchStdLib) throws MalformedURLException {
+    URI result = null;
     log.beginTask("Searching", "Search for " + what);
     try {
       ClassLoader cl = createClassLoader(where, searchPath, searchStdLib);
-      result = cl.getResource(relativePath + extension);
+      result = cl.getResource(relativePath + extension).toURI();
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
     } finally {
       log.endTask(result != null);
     }
@@ -555,10 +558,10 @@ public class Driver{
 //    return searchFile("class file", "compiled files", ".class", relativePath, includePath, searchStdLib);
 //  }
   
-  private List<URL> searchClassFiles(String relativePath, boolean searchStdLib) throws MalformedURLException {
-    List<URL> res = new ArrayList<URL>();
+  private List<URI> searchClassFiles(String relativePath, boolean searchStdLib) throws MalformedURLException {
+    List<URI> res = new ArrayList<URI>();
     
-    URL classURL = searchFile("class file", "compiled files", ".class", relativePath, includePath, searchStdLib);
+    URI classURL = searchFile("class file", "compiled files", ".class", relativePath, includePath, searchStdLib);
     
     if (classURL != null)
     {
@@ -575,11 +578,11 @@ public class Driver{
     return res;
   }
 
-  private URL searchJavaFile(String relativePath, boolean searchStdLib) throws MalformedURLException {
+  private URI searchJavaFile(String relativePath, boolean searchStdLib) throws MalformedURLException {
     return searchFile("java file", "source files", ".java", relativePath, Environment.srcPath, searchStdLib);
   }
 
-  private URL searchSugjFile(String relativePath, boolean searchStdLib) throws MalformedURLException {
+  private URI searchSugjFile(String relativePath, boolean searchStdLib) throws MalformedURLException {
     return searchFile("extensible java file", "source files", ".sugj", relativePath, Environment.srcPath, searchStdLib);
   }
 
@@ -872,7 +875,17 @@ public class Driver{
       
       initializeCaches();
       
+      allInputFiles = new ArrayList<URI>();
+      pendingInputFiles = new ArrayList<URI>();
+      
       for (String source : sources)
+      {
+        URI uri = new File(source).toURI();
+        allInputFiles.add(uri);
+        pendingInputFiles.add(uri);
+      }
+      
+      for (URI source : allInputFiles)
         new Driver().process(source);
       
       storeCaches();
