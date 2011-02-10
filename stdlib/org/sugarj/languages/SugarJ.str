@@ -38,3 +38,4 @@ signature constructors
                                : List(SugarDefElem) -> SugarDef
     transformation-elem        : Transformation -> SugarDefElem
     grammar-elem               : Grammar -> SugarDefElem
+    CompileError               : String * Any -> CompileError
