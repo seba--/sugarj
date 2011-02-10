@@ -1,0 +1,32 @@
+package assertions;
+
+import org.sugarj.languages.Java;
+
+import assertions.AssertionSugar;
+
+public sugar TestAssertion {
+  assertions
+    null-assignments-only : VarDec(_, _) -> VarDec(_, Lit(Null()))
+
+//   desugarings
+//     null-assignments-only-gen
+// 
+//   rules
+//     null-assignments-only-gen : t -> t'
+//       where
+//         <\ VarDec(_, _) -> "" \> t;
+//         <\ VarDec(_, Lit(Null())) -> t \
+//          <+ report-error(|"assertion null-asignments-only failed")> t => t'
+// 
+//     report-error(|msg) : t -> CompileError(msg, t)
+
+}
+
+public class Test {
+  public static void main(String[] args) {
+  	String s = null;
+  	Integer i = null;
+  	
+  	Object o = "";
+  }
+}
