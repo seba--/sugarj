@@ -6,9 +6,13 @@ signature constructors
   NextToplevelDeclaration : ToplevelDeclaration * Rest -> NextToplevelDeclaration
 
 strategies
+  compile-error = ?CompileError(_,_)
+  compile-error(|msg) = !CompileError(msg,<id>)
+  
   desugar = fail
-  changed-tree(s) = ?t; s; (equal(|t) < fail + id)
-  main = io-wrap(innermost(desugar))
+  changed-tree(s) = ?t; s; not(equal(|t))
+  traverse(s) = compile-error <+ bottomup(try(s; traverse(s)))
+  main = io-wrap(traverse(desugar))
 
 
 signature
