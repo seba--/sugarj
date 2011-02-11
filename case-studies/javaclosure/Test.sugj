@@ -3,7 +3,9 @@ package javaclosure;
 import java.util.List;
 import java.util.ArrayList;
 
-import javaclosure.*;
+import javaclosure.Function;
+import javaclosure.Syntax;
+import javaclosure.Transformation;
 
 public class Test<T>{
 	

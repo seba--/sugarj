@@ -2,7 +2,8 @@ package org.sugarj.driver;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -31,10 +32,10 @@ public class ResourceList {
    *        the pattern to match
    * @return the resources in the order they are found
    */
-  public static List<URL> getResources(String pattern,
+  public static List<URI> getResources(String pattern,
                                                 List<String> paths,
                                                 String ext) {
-    ArrayList<URL> retval = new ArrayList<URL>();
+    ArrayList<URI> retval = new ArrayList<URI>();
 
     String patterns[] = pattern.split("/");
     
@@ -44,9 +45,9 @@ public class ResourceList {
     return retval;
   }
 
-  private static List<URL> getResources(String element,
+  private static List<URI> getResources(String element,
       String pattern, String[] patterns, int pos, String ext) {
-    ArrayList<URL> retval = new ArrayList<URL>();
+    ArrayList<URI> retval = new ArrayList<URI>();
     File file = new File(element);
     if (file.isDirectory()) {
       retval.addAll(getResourcesFromFile(file, patterns, pos, ext));
@@ -56,9 +57,9 @@ public class ResourceList {
     return retval;
   }
 
-  private static List<URL> getResourcesFromJarFile(File file,
+  private static List<URI> getResourcesFromJarFile(File file,
       String pattern, String ext) {
-    ArrayList<URL> retval = new ArrayList<URL>();
+    ArrayList<URI> retval = new ArrayList<URI>();
     ZipFile zf;
     try {
       zf = new ZipFile(file);
@@ -81,8 +82,10 @@ public class ResourceList {
       boolean accept = fileName.matches(pattern);
       if (accept) {
         try {
-          retval.add(new URL("jar:file", file.getCanonicalPath(), fileName));
+          retval.add(new URI("jar:file", file.getCanonicalPath(), fileName));
         } catch (IOException e1) {
+          e1.printStackTrace();
+        } catch (URISyntaxException e1) {
           e1.printStackTrace();
         }
       }
@@ -95,18 +98,14 @@ public class ResourceList {
     return retval;
   }
 
-  private static List<URL> getResourcesFromFile(File infile,
+  private static List<URI> getResourcesFromFile(File infile,
       String[] pattern, int pos, String ext) {
-    ArrayList<URL> retval = new ArrayList<URL>();
+    ArrayList<URI> retval = new ArrayList<URI>();
     
     if (pos >= pattern.length)
     {
       if (ext.equals("*") || (FileCommands.getExtension(infile) != null && FileCommands.getExtension(infile).equals(ext)))
-        try {
-          retval.add(infile.toURI().toURL());
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
+        retval.add(infile.toURI());
       
       return retval;
     }

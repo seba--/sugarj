@@ -7,9 +7,8 @@ import java.io.ObjectOutput;
 import java.util.Arrays;
 import java.util.List;
 
+import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.sugarj.driver.ATermCommands;
-
-import aterm.ATerm;
 
 /**
  * The key of some SDF module as needed for caching.
@@ -23,7 +22,7 @@ import aterm.ATerm;
  */
 public class ModuleKey implements Externalizable {
 
-  public ATerm module;
+  public IStrategoTerm module;
   public String main;
   public String[] paths;
   
@@ -32,13 +31,13 @@ public class ModuleKey implements Externalizable {
    */
   public ModuleKey() {}
   
-  public ModuleKey(ATerm module, String main, List<String> paths) {
+  public ModuleKey(IStrategoTerm module, String main, List<String> paths) {
     this.module = module;
     this.main = main;
     this.paths = paths.toArray(new String[]{});
   }
   
-  public ModuleKey(ATerm module, String main, String... paths) {
+  public ModuleKey(IStrategoTerm module, String main, String... paths) {
     this.module = module;
     this.main = main;
     this.paths = paths;

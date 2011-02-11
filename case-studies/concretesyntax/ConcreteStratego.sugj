@@ -17,7 +17,7 @@ public sugar ConcreteStratego {
 	  "stratego-term" "|[" StrategoTerm "]|" -> StrategoTerm {cons("ToMetaExpr")}
     "stratego"      "|[" StrategoTerm "]|" -> StrategoTerm {cons("ToMetaExpr")}
                     "|[" StrategoTerm "]|" -> StrategoTerm {cons("ToMetaExpr")}
-	
+
 	context-free syntax
 	  "~"     StrategoTerm  -> StrategoTerm  {cons("FromMetaExpr")}
     "term~" StrategoTerm  -> StrategoTerm  {cons("FromMetaExpr")}
@@ -25,4 +25,5 @@ public sugar ConcreteStratego {
 	  "id~"   StrategoTerm  -> StrategoId  {cons("FromMetaExpr")}
 	  "~"     StrategoTerm  -> StrategoStrategy  {cons("FromMetaExpr")}
     "strategy~" StrategoTerm  -> StrategoStrategy  {cons("FromMetaExpr")}
+    "string~" StrategoTerm  -> StrategoString  {cons("FromMetaExpr")}
 }

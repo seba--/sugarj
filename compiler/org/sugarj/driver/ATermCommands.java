@@ -1,40 +1,54 @@
 package org.sugarj.driver;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-import org.spoofax.jsglr.InvalidParseTableException;
+import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.interpreter.terms.IStrategoList;
+import org.spoofax.interpreter.terms.IStrategoString;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.jsglr.client.InvalidParseTableException;
+import org.spoofax.terms.StrategoListIterator;
+import org.spoofax.terms.TermFactory;
+import org.spoofax.terms.io.TAFTermReader;
 import org.strategoxt.lang.StrategoExit;
 import org.sugarj.driver.transformations.extractSdf;
 import org.sugarj.driver.transformations.extractStr;
 import org.sugarj.driver.transformations.sdf_desugar;
 
-import aterm.ATerm;
-import aterm.ATermFactory;
-import aterm.pure.PureFactory;
-
 public class ATermCommands {
   
   public static class MatchError extends Error {
-    private final ATerm scrutinee;
-    private final ATerm lowlevelPattern;
+    private static final long serialVersionUID = -3329736288449173760L;
+    private final IStrategoTerm scrutinee;
+    private final String kind;
     private final String highlevelPattern;
     
-    public MatchError(ATerm scrutinee, ATerm lowlevelPattern, String highlevelPattern) {
-      super("Error while matching against " + highlevelPattern);
+    public MatchError(IStrategoTerm scrutinee, String kind, String highlevelPattern) {
+      super("Error while matching " + kind + " of " + highlevelPattern);
       
       this.scrutinee = scrutinee;
-      this.lowlevelPattern = lowlevelPattern;
+      this.kind = kind;
       this.highlevelPattern = highlevelPattern;
     }
 
-    public ATerm getScrutinee() {
-      return scrutinee;
+    public MatchError(IStrategoTerm scrutinee, String kind) {
+      super("Error while matching " + kind);
+      
+      this.scrutinee = scrutinee;
+      this.kind = kind;
+      this.highlevelPattern = null;
     }
 
-    public ATerm getLowlevelPattern() {
-      return lowlevelPattern;
+    public IStrategoTerm getScrutinee() {
+      return scrutinee;
+    }
+    
+    public String getKind() {
+      return kind;
     }
 
     public String getHighlevelPattern() {
@@ -42,80 +56,59 @@ public class ATermCommands {
     }
   }
   
-  public static ATermFactory factory = new PureFactory();
+  public static TermFactory factory = new TermFactory();
 
-  public static ATerm atermFromFile(String filename) throws IOException {
-    return factory.readFromFile(filename);
+  public static IStrategoTerm atermFromFile(String filename) throws IOException {
+    return new TAFTermReader(factory).parseFromFile(filename);
   }
   
-  public static ATerm atermFromString(String s) throws IOException {
-    return factory.parse(s);
+  public static IStrategoTerm atermFromString(String s) throws IOException {
+    return factory.parseFromString(s);
   }
 
-  public static void atermToFile(ATerm aterm, String filename)
+  public static void atermToFile(IStrategoTerm aterm, String filename)
       throws IOException {
     FileOutputStream os = new FileOutputStream(filename);
     os.write(aterm.toString().getBytes());
   }
 
-  public static ATerm splitToplevel(ATerm aterm) {
-    return extractTerm(aterm, "NextToplevelDeclaration(?, _)");
-  }
-
-  public static String splitRest(ATerm aterm) {
-    return extractString(aterm, "NextToplevelDeclaration(_, ?)");
+  public static boolean isApplication(IStrategoTerm term, String cons) {
+    return term.getTermType() == IStrategoTerm.APPL &&
+           ((IStrategoAppl) term).getConstructor().getName().equals(cons);
   }
   
-  public static String extractString(ATerm term, String pattern) {
-    return (String) extract(term, pattern, "str");
-  }
-
-  public static ATerm extractTerm(ATerm term, String pattern) {
-    return (ATerm) extract(term, pattern, "term");
+  public static IStrategoTerm getApplicationSubterm(IStrategoTerm term, String cons, int index) {
+    if (isApplication(term, cons))
+      return term.getSubterm(index);
+    
+    throw new MatchError(term, "application", cons);
   }
   
-  public static String extractJava(ATerm term, String pattern) throws IOException {
-    return SDFCommands.prettyPrintJavaTerm(extractTerm(term, pattern));
+  public static String getString(IStrategoTerm term) {
+    if (term.getTermType() == IStrategoTerm.STRING)
+      return ((IStrategoString) term).stringValue();
+    
+    throw new MatchError(term, "string");
+  }
+
+  public static List<IStrategoTerm> getList(IStrategoTerm term) {
+    
+    if (term.getTermType() == IStrategoTerm.LIST)
+    {
+      List<IStrategoTerm> l = new ArrayList<IStrategoTerm>();
+      
+      for (Iterator<IStrategoTerm> it = new StrategoListIterator((IStrategoList) term);
+           it.hasNext(); )
+        l.add(it.next());
+      
+      return l;
+    }
+    
+    throw new MatchError(term, "list");
   }
   
-  public static boolean match(ATerm term, String pattern) {
-    ATermFactory factory = term.getFactory();
-	  String converted = convertPattern(pattern, "term");
-	  ATerm parsed = factory.parse(converted);
-	  
-	  return term.match(parsed) != null;
-  }
-
-  @SuppressWarnings("unchecked")
-  private static Object extract(ATerm term, String pattern, String type) {
-    ATermFactory factory = term.getFactory();
-    String converted = convertPattern(pattern, type);
-    ATerm parsed = factory.parse(converted);
-    int index = countUnderscores(pattern);
-
-    List l = term.match(parsed);
-    
-    if (l == null || index >= l.size())
-      throw new MatchError(term, parsed, pattern);
-    
-    return l.get(index);
-  }
-  
-  public static ATerm injectTerms(String pattern, ATerm... terms) {
-    List<ATerm> l = new ArrayList<ATerm>();
-    
-    for (ATerm t : terms)
-      l.add(t);
-    
-    return factory.make(convertPattern(pattern, "term"), l);
-  }
-
-  private static String convertPattern(String pattern, String type) {
-    return pattern.replace("_", "<term>").replace("?", "<" + type + ">");
-  }
-
-  private static int countUnderscores(String pattern) {
-    return pattern.substring(0, pattern.indexOf('?')).split("_").length - 1;
+  public static IStrategoTerm makeTuple(IStrategoTerm... ts) {
+    return factory.makeTuple(ts);
   }
   
   /**

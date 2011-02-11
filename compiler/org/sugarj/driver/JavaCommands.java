@@ -47,7 +47,9 @@ public class JavaCommands {
     StringBuilder classpath = new StringBuilder();
     classpath.append(FileCommands.toWindowsPath(dir));
     classpath.append(Environment.classpathsep);
-    classpath.append(FileCommands.toWindowsPath(Environment.strategoxt_jar));
+    
+    for (String path : Environment.includePath)
+      classpath.append(path).append(Environment.classpathsep);
     
     String[] cmd = new String[args.length + 5];
     cmd[0] = "java";

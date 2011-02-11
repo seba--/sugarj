@@ -1,0 +1,41 @@
+package assertions;
+
+import org.sugarj.languages.Stratego;
+
+import concretesyntax.ConcreteStratego;
+
+public sugar AssertionSugar {
+
+  lexical syntax
+    "assertions" -> StrategoKeyword
+
+  context-free syntax
+    "assertions" Assertion* -> Transformation {cons("Assertions")}  
+
+    StrategoId ":" StrategoTerm "->" StrategoTerm StrategoRuleCond*  -> Assertion {cons("Assertion")}
+  
+  signature constructors
+    Assertions : List(Assertion) -> Transformation
+    Assertion : StrategoId * StrategoTerm * StrategoTerm * List(StrategoRuleCond) -> Assertion
+  
+  lexical restrictions
+    "assertions" -/- [a-zA-Z0-9\'\-\_]
+
+  
+  rules
+    assertions-to-stratego :
+    	[transformation-elem(Assertions(as))|xs] -> <conc> (<map(assertion-to-stratego); concat> as, xs) 
+
+    assertion-to-stratego :
+    	Assertion(name, pre-assertion, assertion, conditions) -> [transformation-elem(desugaringz), transformation-elem(rulez)]
+    	where
+    	  !Desugarings([PureDesugaring(CallNoArgs(SVar(name)))]) => desugaringz;
+        !|[ <\ term~pre-assertion -> "" \> t;
+            <\ term~assertion -> t \
+                <+ compile-error(|<conc-strings> ("assertion ", string~name, " failed"))> t => t' ]| => assertion-cond;
+    	  !Rules([RDefNoArgs(name, Rule(Var("t"), Var("t'"), [WhereClause(assertion-cond) | conditions]))]) => rulez
+
+
+  desugarings
+    assertions-to-stratego
+}

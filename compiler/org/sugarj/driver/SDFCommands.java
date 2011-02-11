@@ -10,17 +10,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.spoofax.jsglr.InvalidParseTableException;
-import org.spoofax.jsglr.ParseTableManager;
-import org.spoofax.jsglr.SGLR;
-import org.spoofax.jsglr.SGLRException;
-import org.strategoxt.stratego_aterm.pp_aterm_box_0_0;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.jsglr.client.Asfix2TreeBuilder;
+import org.spoofax.jsglr.client.InvalidParseTableException;
+import org.spoofax.jsglr.io.ParseTableManager;
+import org.spoofax.jsglr.io.SGLR;
+import org.spoofax.jsglr.shared.SGLRException;
 import org.strategoxt.stratego_sglr.implode_asfix_0_0;
 import org.strategoxt.tools.main_pack_sdf_0_0;
 import org.sugarj.driver.caching.Cache;
 import org.sugarj.driver.caching.ModuleKey;
-
-import aterm.ATerm;
 
 /**
  * This class provides methods for various SDF commands. Each
@@ -230,11 +229,11 @@ public class SDFCommands {
       String f = FileCommands.newTempFile("aterm");
       parseImplode(Environment.sdfTbl, sdf, f, "Sdf2Module", false);
 
-      ATerm aterm = ATermCommands.atermFromFile(f);
+      IStrategoTerm aterm = ATermCommands.atermFromFile(f);
 
-      ATerm imports = ATermCommands.extractTerm(aterm, "module(_, ?, _)");
-      ATerm body = ATermCommands.extractTerm(aterm, "module(_, _, ?)");
-      ATerm importsBody = ATermCommands.injectTerms("(?,?)", imports, body);
+      IStrategoTerm imports = ATermCommands.getApplicationSubterm(aterm, "module", 1);
+      IStrategoTerm body = ATermCommands.getApplicationSubterm(aterm, "module", 2);
+      IStrategoTerm importsBody = ATermCommands.makeTuple(imports, body);
 
       return new ModuleKey(importsBody, "", Environment.bin);
     } finally {
@@ -264,15 +263,15 @@ public class SDFCommands {
     }
   }
   
-  private static ATerm jsglrParse(String tbl, String source, String start) throws IOException, InvalidParseTableException {
-    ParseTableManager ptm = new ParseTableManager();
-    SGLR sglr = new SGLR(ptm.getFactory(), ptm.loadFromFile(tbl));
+  private static IStrategoTerm jsglrParse(String tbl, String source, String start) throws IOException, InvalidParseTableException {
+    ParseTableManager ptm = new ParseTableManager(ATermCommands.factory);
+    SGLR sglr = new SGLR(new Asfix2TreeBuilder(ATermCommands.factory), ptm.loadFromFile(tbl));
     sglr.getDisambiguator().setFilterCycles(true);
     sglr.getDisambiguator().setFilterAny(true);
     sglr.getDisambiguator().setHeuristicFilters(false);
 
     try {
-      return sglr.parse(new BufferedInputStream(new FileInputStream(source)), start);
+      return (IStrategoTerm) sglr.parse(new BufferedInputStream(new FileInputStream(source)), start);
     }
     catch (SGLRException e) {
       e.printStackTrace();
@@ -297,7 +296,7 @@ public class SDFCommands {
   private static boolean jsglr(String tbl, String source, String target, String start) throws IOException, InvalidParseTableException {
     log.beginExecution("parsing", "parsing " + source + " using table " + tbl + " writing to " + target);
 
-    ATerm aterm = jsglrParse(tbl, source, start);
+    IStrategoTerm aterm = jsglrParse(tbl, source, start);
 
     if (aterm != null && !"-".equals(aterm)) {
       atermToFile(aterm, target);
@@ -437,15 +436,12 @@ public class SDFCommands {
     
     // CommandExecution.execute(cmd);
     
-    StrategyInvoker.invoke(pp_aterm_box_0_0.instance, 
-                           false, 
-                           CommandExecution.SILENT_EXECUTION || CommandExecution.SUB_SILENT_EXECUTION,
-                           "-i", 
-                           toCygwinPath(aterm));
-    
+    StringBuffer buf = new StringBuffer();
+    ATermCommands.atermFromFile(aterm).writeAsString(buf, -1);
+    log.log(buf.toString());
   }
   
-  public static String prettyPrintJavaTerm(ATerm aterm) throws IOException {
+  public static String prettyPrintJavaTerm(IStrategoTerm aterm) throws IOException {
     String in = FileCommands.newTempFile("aterm");
     String out = FileCommands.newTempFile("java-snippet");
     atermToFile(aterm, in);
@@ -478,7 +474,7 @@ public class SDFCommands {
     CommandExecution.execute(cmd);
   }
   
-  public static String prettyPrintSTR(ATerm aterm) throws IOException {
+  public static String prettyPrintSTR(IStrategoTerm aterm) throws IOException {
     String in = FileCommands.newTempFile("aterm");
     String out = FileCommands.newTempFile("str-snippet");
     atermToFile(aterm, in);
