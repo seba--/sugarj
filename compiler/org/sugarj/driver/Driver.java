@@ -1,13 +1,14 @@
 package org.sugarj.driver;
+
 import static org.sugarj.driver.ATermCommands.atermFromFile;
 import static org.sugarj.driver.ATermCommands.atermToFile;
-import static org.sugarj.driver.ATermCommands.extractJava;
 import static org.sugarj.driver.ATermCommands.extractSDF;
 import static org.sugarj.driver.ATermCommands.extractSTR;
-import static org.sugarj.driver.ATermCommands.extractString;
-import static org.sugarj.driver.ATermCommands.extractTerm;
 import static org.sugarj.driver.ATermCommands.fixSDF;
-import static org.sugarj.driver.ATermCommands.match;
+import static org.sugarj.driver.ATermCommands.isApplication;
+import static org.sugarj.driver.ATermCommands.getApplicationSubterm;
+import static org.sugarj.driver.ATermCommands.getList;
+import static org.sugarj.driver.ATermCommands.getString;
 import static org.sugarj.driver.Environment.bin;
 import static org.sugarj.driver.Environment.includePath;
 import static org.sugarj.driver.Environment.sep;
@@ -20,6 +21,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.ParseException;
@@ -32,11 +35,10 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
-import org.spoofax.jsglr.InvalidParseTableException;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.jsglr.client.InvalidParseTableException;
 import org.sugarj.driver.caching.Cache;
 import org.sugarj.driver.caching.ModuleKey;
-
-import aterm.ATerm;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -63,7 +65,9 @@ public class Driver{
     return b.toString();
   }
 
-  private static List<String> currentlyProcessing = new ArrayList<String>();
+  private static List<URI> allInputFiles = new ArrayList<URI>();
+  private static List<URI> pendingInputFiles = new ArrayList<URI>();
+  private static List<URI> currentlyProcessing = new ArrayList<URI>();
 
   /**
    * denotes that the imported modules changed.
@@ -72,7 +76,7 @@ public class Driver{
 
   private static boolean genJava = false;
   
-  private String sourceFile;
+  private URI sourceFile;
   private String javaOutDir;
   private String javaOutFile;
   private String relPackageName;
@@ -101,10 +105,10 @@ public class Driver{
    * @param outdir
    *        the directory to write the output into.
    */
-  private void process(String source) {
+  private void process(URI source) {
     log.beginTask("processing", "BEGIN PROCESSING " + source);
     try {
-      sourceFile = new File(source).getCanonicalPath();
+      sourceFile = source;
 
       // TODO we need better circular dependency handling
       if (currentlyProcessing.contains(sourceFile))
@@ -116,7 +120,7 @@ public class Driver{
       javaOutFile = null; 
       // FileCommands.createFile(tmpOutdir, relModulePath + ".java");
 
-      mainModuleName = FileCommands.fileName(sourceFile);
+      mainModuleName = FileCommands.fileName(sourceFile.getPath());
 
       currentGrammarSDF = Environment.initGrammar;
       currentGrammarModule = Environment.initGrammarModule;
@@ -127,7 +131,7 @@ public class Driver{
       currentTransModule = Environment.initTransModule;
 
       remainingInput = FileCommands.newTempFile("sugj-rest");
-      FileCommands.copyFile(sourceFile, remainingInput);
+      FileCommands.copyFile(sourceFile.getPath(), remainingInput);
 
       // list of imports that contain SDF extensions
       availableSDFImports = new ArrayList<String>();
@@ -144,11 +148,11 @@ public class Driver{
         // PARSE the next top-level declaration
         IncrementalParseResult parseResult =
             parseNextToplevelDeclaration(remainingInput);
-        ATerm parsed = parseResult.getToplevelDecl();
+        IStrategoTerm parsed = parseResult.getToplevelDecl();
         FileCommands.writeToFile(remainingInput, parseResult.getRest());
 
         // ASSIMILATE the parsed top-level declaration
-        ATerm desugared = currentDesugar(parsed);
+        IStrategoTerm desugared = currentDesugar(parsed);
         
         // reset cache skipping
         Environment.wocache = wocache;
@@ -172,7 +176,8 @@ public class Driver{
       
       // COMPILE the generated java file
       compileGeneratedJavaFile();
-
+      currentlyProcessing.remove(sourceFile);
+      pendingInputFiles.remove(sourceFile);
     } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -187,7 +192,6 @@ public class Driver{
     try {
       JavaCommands.javac(javaOutFile, bin, javaOutDir, bin, Environment.stdLibDir);
     } finally {
-      currentlyProcessing.remove(sourceFile);
       log.endTask();
     }
   }
@@ -196,14 +200,15 @@ public class Driver{
       throws IOException, ParseException, InvalidParseTableException {
     log.beginTask("parsing", "PARSE the next toplevel declaration.");
     try {
-      ATerm remainingInputTerm = currentParse(filename);
+      IStrategoTerm remainingInputTerm = currentParse(filename);
 
       if (remainingInputTerm == null)
         throw new ParseException("could not parse toplevel declaration in:\n"
             + filename, -1);
 
-      ATerm toplevelDecl = extractTerm(remainingInputTerm, "NextToplevelDeclaration(?, _)");
-      String rest = extractString(remainingInputTerm, "NextToplevelDeclaration(_, ?)");
+      IStrategoTerm toplevelDecl = getApplicationSubterm(remainingInputTerm, "NextToplevelDeclaration", 0);
+      String rest = getString(getApplicationSubterm(remainingInputTerm, "NextToplevelDeclaration", 1));
+
       
       if (toplevelDecl == null || rest == null)
         throw new ParseException(
@@ -217,24 +222,24 @@ public class Driver{
     }
   }
 
-  private void processToplevelDeclaration(ATerm toplevelDecl)
+  private void processToplevelDeclaration(IStrategoTerm toplevelDecl)
       throws IOException, ClassNotFoundException, InvalidParseTableException,
       ParseException {
-    if (match(toplevelDecl, "PackageDec(_, _)"))
+    if (isApplication(toplevelDecl, "PackageDec"))
       processPackageDec(toplevelDecl);
     else {
       if (javaOutFile == null)
         javaOutFile = javaOutDir + sep + relPackageNameSep() + mainModuleName + ".java";
       
-      if (match(toplevelDecl, "TypeImportDec(_)") || match(toplevelDecl, "TypeImportOnDemandDec(_)")) {
+      if (isApplication(toplevelDecl, "TypeImportDec") || isApplication(toplevelDecl, "TypeImportOnDemandDec")) {
         if (!Environment.atomicImportParsing)
           processImportDec(toplevelDecl);
         else 
           processImportDecs(toplevelDecl);
       }
-      else if (match(toplevelDecl, "JavaTypeDec(_)"))
+      else if (isApplication(toplevelDecl, "JavaTypeDec"))
         processJavaTypeDec(toplevelDecl);
-      else if (match(toplevelDecl, "SugarDec(_,_)"))
+      else if (isApplication(toplevelDecl, "SugarDec"))
         processSugarDec(toplevelDecl);
       else
         throw new ParseException("unexpected input at toplevel:\n"
@@ -242,7 +247,7 @@ public class Driver{
     }
   }
 
-  private ATerm currentParse(String remainingInput) throws IOException,
+  private IStrategoTerm currentParse(String remainingInput) throws IOException,
       InvalidParseTableException {
     // recompile the current grammar definition
     String currentGrammarTBL;
@@ -263,13 +268,13 @@ public class Driver{
         false))
       return null;
 
-    ATerm remainingInputTerm = atermFromFile(remainingInputParsed);
+    IStrategoTerm remainingInputTerm = atermFromFile(remainingInputParsed);
     FileCommands.delete(remainingInputParsed);
 
     return remainingInputTerm;
   }
 
-  private ATerm currentDesugar(ATerm term) throws IOException,
+  private IStrategoTerm currentDesugar(IStrategoTerm term) throws IOException,
       InvalidParseTableException {
     // assimilate toplevelDec using current transformation
     log.beginTask(
@@ -294,13 +299,12 @@ public class Driver{
     }
   }
 
-  private void processPackageDec(ATerm toplevelDecl) throws IOException {
+  private void processPackageDec(IStrategoTerm toplevelDecl) throws IOException {
     log.beginTask("processing", "PROCESS the desugared package declaration.");
     try {
       String packageName =
-          SDFCommands.prettyPrintJavaTerm(extractTerm(
-              toplevelDecl,
-              "PackageDec(_, ?)"));
+          SDFCommands.prettyPrintJavaTerm(
+          getApplicationSubterm(toplevelDecl, "PackageDec", 1));
 
       log.log("The Java package name is '" + packageName + "'.");
 
@@ -320,13 +324,13 @@ public class Driver{
     }
   }
   
-  private void processImportDecs(ATerm toplevelDecl) throws IOException, ClassNotFoundException, ParseException, InvalidParseTableException {
-    List<ATerm> pendingImports = new ArrayList<ATerm>();
+  private void processImportDecs(IStrategoTerm toplevelDecl) throws IOException, ClassNotFoundException, ParseException, InvalidParseTableException {
+    List<IStrategoTerm> pendingImports = new ArrayList<IStrategoTerm>();
     pendingImports.add(toplevelDecl);
     
     while (true) {
       IncrementalParseResult res = null;
-      ATerm term = null;
+      IStrategoTerm term = null;
       
       try {
         log.beginSilent();
@@ -340,8 +344,8 @@ public class Driver{
     
       if (res != null &&
           term != null &&
-          (match(term, "TypeImportDec(_)") ||
-           match(term, "TypeImportOnDemandDec(_)"))) {
+          (isApplication(term, "TypeImportDec") ||
+           isApplication(term, "TypeImportOnDemandDec"))) {
         FileCommands.writeToFile(remainingInput, res.getRest());
         pendingImports.add(term);
       }
@@ -349,11 +353,11 @@ public class Driver{
         break;
     }
     
-    for (ATerm pendingImport : pendingImports)
+    for (IStrategoTerm pendingImport : pendingImports)
       processImportDec(pendingImport);
   }
 
-  private void processImportDec(ATerm toplevelDecl) throws IOException,
+  private void processImportDec(IStrategoTerm toplevelDecl) throws IOException,
       ClassNotFoundException, ParseException, InvalidParseTableException {
     
     if (javaOutFile == null)
@@ -375,31 +379,26 @@ public class Driver{
       // TODO handle import declarations with asterisks, e.g. import foo.*;
       
       String importModuleRelativePath = getRelativeModulePath(importModule);
-      boolean isStdLibModule = importModuleRelativePath.startsWith("sugarj/"); 
+      boolean isStdLibModule = importModuleRelativePath.startsWith("org/sugarj/"); 
       
       // indicates whether a sugar is imported
       boolean newSyntax = false;
       
-      List<URL> files = searchClassFiles(importModuleRelativePath, isStdLibModule);
-      
-      if (files.isEmpty() && !isStdLibModule && !importModuleRelativePath.endsWith("*")) {
-        // if no class file for imported module exists
-        //    and the file is not from the standard library
-        URL importModuleSourceFile = null;
-        log.beginTask("Searching", "Search for source code of imported module");
-        try {
-          importModuleSourceFile = searchSugjFile(importModuleRelativePath, false);
-          if (importModuleSourceFile == null)
-            importModuleSourceFile = searchJavaFile(importModuleRelativePath, false);
-        } finally {
-          log.endTask();
-        }
-        
-        if (importModuleSourceFile != null) {
-          log.log("Found the source file of the imported module; processing it now.");
-          new Driver().process(importModuleSourceFile.getPath());
-          log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
-        }
+      List<URI> files = searchClassFiles(importModuleRelativePath, isStdLibModule);
+
+      URI importModuleSourceFile = null;
+      importModuleSourceFile = searchSugjFile(importModuleRelativePath, false);
+      if (importModuleSourceFile == null)
+        importModuleSourceFile = searchJavaFile(importModuleRelativePath, false);
+
+      if (// the imported module was given as input by the user
+          importModuleSourceFile != null && pendingInputFiles.contains(importModuleSourceFile) ||
+          // class file could not be found
+          files.isEmpty() && !isStdLibModule && !importModuleRelativePath.endsWith("*") && importModuleSourceFile != null) {
+
+        log.log("Need to compile the imported module first ; processing it now.");
+        new Driver().process(importModuleSourceFile);
+        log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
         
         // try again
         files = searchClassFiles(importModuleRelativePath, isStdLibModule);
@@ -413,8 +412,10 @@ public class Driver{
         log.log("Found imported module on the class path.");
       
       
-      for (URL importModuleClassFile : files)
+      for (URI importModuleClassFileURI : files)
       {
+        URL importModuleClassFile = importModuleClassFileURI.toURL();
+        
         String thisRelativePath = importModuleRelativePath;
         
         if (thisRelativePath.endsWith("*"))
@@ -425,20 +426,18 @@ public class Driver{
         
 	      URL importModuleSDFFile =
 	        new URL(importModuleClassFile.getProtocol() + ":" +
-	                importModuleClassFile.getFile().substring(0, importModuleClassFile.getPath().length() - 5) + "sdf"); 
+	                importModuleClassFile.getPath().substring(0, importModuleClassFile.getPath().length() - 5) + "sdf"); 
 	      //searchSdfFile(importModuleRelativePath, isStdLibModule);
 
 	      URL importModuleXTBLFile =
           new URL(importModuleClassFile.getProtocol() + ":" +
-                  importModuleClassFile.getFile().substring(0, importModuleClassFile.getPath().length() - 5) + "xtbl");
+                  importModuleClassFile.getPath().substring(0, importModuleClassFile.getPath().length() - 5) + "xtbl");
 	      
 	      URL importModuleSTRFile = 
 	        new URL(importModuleClassFile.getProtocol() + ":" +
-	                importModuleClassFile.getFile().substring(0, importModuleClassFile.getPath().length() - 5) + "str");
+	                importModuleClassFile.getPath().substring(0, importModuleClassFile.getPath().length() - 5) + "str");
 	      //searchStrFile(importModuleRelativePath, isStdLibModule);
 	
-	      
-	      
 	      if (new File(importModuleSDFFile.getPath()).exists()) {
 	        newSyntax = true;
 	        
@@ -513,7 +512,7 @@ public class Driver{
 	        }
 	      }
 	      
-	      if (importsChanged && newSyntax)
+	      if (importsChanged && newSyntax || importModuleSourceFile != null && allInputFiles.contains(importModuleSourceFile))
 	        skipCache = true;
       }
       
@@ -522,15 +521,15 @@ public class Driver{
     }
   }
 
-  private String extractImportedModuleName(ATerm toplevelDecl) throws IOException {
+  private String extractImportedModuleName(IStrategoTerm toplevelDecl) throws IOException {
     String name = null;
     log.beginTask("Extracting", "Extract name of imported module");
     try {
-      if (match(toplevelDecl, "TypeImportDec(_)"))
-        name = extractJava(toplevelDecl, "TypeImportDec(?)");
+      if (isApplication(toplevelDecl, "TypeImportDec"))
+        name = SDFCommands.prettyPrintJavaTerm(toplevelDecl.getSubterm(0));
       
-      if (match(toplevelDecl, "TypeImportOnDemandDec(_)"))
-        name = extractJava(toplevelDecl, "TypeImportOnDemandDec(?)") + ".*";
+      if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
+        name = SDFCommands.prettyPrintJavaTerm(toplevelDecl.getSubterm(0)) + ".*";
     } finally {
       log.endTask(name);
     }
@@ -538,12 +537,16 @@ public class Driver{
   }
 
 
-  private URL searchFile(String what, String where, String extension, String relativePath, List<String> searchPath, boolean searchStdLib) throws MalformedURLException {
-    URL result = null;
+  private URI searchFile(String what, String where, String extension, String relativePath, List<String> searchPath, boolean searchStdLib) throws MalformedURLException {
+    URI result = null;
     log.beginTask("Searching", "Search for " + what);
     try {
       ClassLoader cl = createClassLoader(where, searchPath, searchStdLib);
-      result = cl.getResource(relativePath + extension);
+      URL url = cl.getResource(relativePath + extension);
+      if (url != null)
+        result = url.toURI();
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
     } finally {
       log.endTask(result != null);
     }
@@ -555,10 +558,10 @@ public class Driver{
 //    return searchFile("class file", "compiled files", ".class", relativePath, includePath, searchStdLib);
 //  }
   
-  private List<URL> searchClassFiles(String relativePath, boolean searchStdLib) throws MalformedURLException {
-    List<URL> res = new ArrayList<URL>();
+  private List<URI> searchClassFiles(String relativePath, boolean searchStdLib) throws MalformedURLException {
+    List<URI> res = new ArrayList<URI>();
     
-    URL classURL = searchFile("class file", "compiled files", ".class", relativePath, includePath, searchStdLib);
+    URI classURL = searchFile("class file", "compiled files", ".class", relativePath, includePath, searchStdLib);
     
     if (classURL != null)
     {
@@ -575,12 +578,12 @@ public class Driver{
     return res;
   }
 
-  private URL searchJavaFile(String relativePath, boolean searchStdLib) throws MalformedURLException {
+  private URI searchJavaFile(String relativePath, boolean searchStdLib) throws MalformedURLException {
     return searchFile("java file", "source files", ".java", relativePath, Environment.srcPath, searchStdLib);
   }
 
-  private URL searchSugjFile(String relativePath, boolean searchStdLib) throws MalformedURLException {
-    return searchFile("extensible java file", "source files", ".sugj", relativePath, Environment.srcPath, searchStdLib);
+  private URI searchSugjFile(String relativePath, boolean searchStdLib) throws MalformedURLException {
+    return searchFile("SugarJ file", "source files", ".sugj", relativePath, Environment.srcPath, searchStdLib);
   }
 
 //  private URL searchSdfFile(String relativePath, boolean searchStdLib) throws MalformedURLException {
@@ -612,7 +615,7 @@ public class Driver{
     }
   }
   
-  private void processJavaTypeDec(ATerm toplevelDecl) throws IOException {
+  private void processJavaTypeDec(IStrategoTerm toplevelDecl) throws IOException {
     log.beginTask(
         "processing",
         "PROCESS the desugared Java type declaration.");
@@ -621,10 +624,9 @@ public class Driver{
       try {
         FileCommands.appendToFile(
             javaOutFile,
-            SDFCommands.prettyPrintJavaTerm(extractTerm(
-                toplevelDecl,
-                "JavaTypeDec(?)"))
-                + "\n");
+            SDFCommands.prettyPrintJavaTerm(
+            getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0))
+            + "\n");
       } finally {
         log.endTask();
       }
@@ -633,7 +635,7 @@ public class Driver{
     }
   }
 
-  private void processSugarDec(ATerm toplevelDecl) throws IOException,
+  private void processSugarDec(IStrategoTerm toplevelDecl) throws IOException,
       InvalidParseTableException {
     log.beginTask(
         "processing",
@@ -644,31 +646,40 @@ public class Driver{
       String fullExtName = null;
       boolean isPublic = false;
 
+      IStrategoTerm head = getApplicationSubterm(toplevelDecl, "SugarDec", 0);
+      IStrategoTerm body= getApplicationSubterm(toplevelDecl, "SugarDec", 1);
+      
       log.beginTask("Extracting name and accessibility of the sugar.");
       try {
-        isNative = !match(toplevelDecl, "SugarDec(SugarDecHead(_,_), _)");
+        isNative = isApplication(head, "NativeSugarDecHead");
         
         if (isNative) {
           extName =
-            SDFCommands.prettyPrintJavaTerm(extractTerm(
-                toplevelDecl,
-                "SugarDec(NativeSugarDecHead(_, _, ?), _)"));
+            SDFCommands.prettyPrintJavaTerm(
+            getApplicationSubterm(head, "NativeSugarDecHead", 2));
           
-          isPublic =
-            match(
-                toplevelDecl,
-                "SugarDec(NativeSugarDecHead([Public], _, _) ,_)");
+          IStrategoTerm mods = getApplicationSubterm(head, "NativeSugarDecHead", 0);
+          
+          for (IStrategoTerm t : getList(mods))
+            if (isApplication(t, "Public"))
+            {
+              isPublic = true;
+              break;
+            }
         }
         else {
           extName =
-            SDFCommands.prettyPrintJavaTerm(extractTerm(
-                toplevelDecl,
-                "SugarDec(SugarDecHead(_, ?), _)"));
+            SDFCommands.prettyPrintJavaTerm(
+            getApplicationSubterm(head, "SugarDecHead", 1));    
           
-          isPublic =
-            match(
-                toplevelDecl,
-                "SugarDec(SugarDecHead([Public], _) ,_)");
+          IStrategoTerm mods = getApplicationSubterm(head, "SugarDecHead", 0);
+          
+          for (IStrategoTerm t : getList(mods))
+            if (isApplication(t, "Public"))
+            {
+              isPublic = true;
+              break;
+            }
         }
         
         
@@ -722,7 +733,7 @@ public class Driver{
         sdfImports = "";
       
       if (isNative) {
-        String nativeModule = extractTerm(toplevelDecl, "SugarDec(_,NativeSugarBody(?))").toString();
+        String nativeModule = getString(getApplicationSubterm(body, "NativeSugarBody", 0)); 
         
         if (nativeModule.length() > 1)
             // remove quotes
@@ -745,10 +756,9 @@ public class Driver{
       }
       else {
         // this is a list of SDF and Stratego statements
-        ATerm body =
-            extractTerm(toplevelDecl, "SugarDec(_,SugarBody(?))");
+        IStrategoTerm sugarBody = getApplicationSubterm(body, "SugarBody", 0);
         String bodyFile = FileCommands.newTempFile("aterm");
-        atermToFile(body, bodyFile);
+        atermToFile(sugarBody, bodyFile);
   
         String sdfExtractTmp = FileCommands.newTempFile("sdf");
         String sdfExtract = FileCommands.newTempFile("sdf");
@@ -830,7 +840,7 @@ public class Driver{
     }
   }
 
-  private void checkCurrentGrammar() throws IOException, InvalidParseTableException{
+  private void checkCurrentGrammar() throws IOException, InvalidParseTableException {
     if (Environment.xtblCompilation)
       // we already checked this when separately compiling the parse table
       return;
@@ -872,7 +882,17 @@ public class Driver{
       
       initializeCaches();
       
+      allInputFiles = new ArrayList<URI>();
+      pendingInputFiles = new ArrayList<URI>();
+      
       for (String source : sources)
+      {
+        URI uri = new File(source).toURI();
+        allInputFiles.add(uri);
+        pendingInputFiles.add(uri);
+      }
+      
+      for (URI source : allInputFiles)
         new Driver().process(source);
       
       storeCaches();

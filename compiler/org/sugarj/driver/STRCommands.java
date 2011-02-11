@@ -7,13 +7,12 @@ import static org.sugarj.driver.Log.log;
 import java.io.File;
 import java.io.IOException;
 
-import org.spoofax.jsglr.InvalidParseTableException;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.jsglr.client.InvalidParseTableException;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.strj.Main;
 import org.sugarj.driver.caching.Cache;
 import org.sugarj.driver.caching.ModuleKey;
-
-import aterm.ATerm;
 
 /**
  * This class provides methods for various SDF commands. Each
@@ -89,7 +88,7 @@ public class STRCommands {
       String javaFilename = FileCommands.fileName(str).replace("-", "_");
       String java = dir + sep + javaFilename + ".java";
       strj(str, java, main);
-      JavaCommands.javac(java, dir, Environment.strategoxt_jar);
+      JavaCommands.javac(java, dir, Environment.includePath);
       FileCommands.delete(java);
 
       return dir + sep + javaFilename;
@@ -149,10 +148,10 @@ public class STRCommands {
           "StrategoModule",
           false);
 
-      ATerm aterm = ATermCommands.atermFromFile(f);
+      IStrategoTerm aterm = ATermCommands.atermFromFile(f);
       FileCommands.delete(f);
 
-      aterm = ATermCommands.extractTerm(aterm, "Module(_, ?)");
+      aterm = ATermCommands.getApplicationSubterm(aterm, "Module", 1);
 
       return new ModuleKey(aterm, main, Environment.bin);
     } finally {

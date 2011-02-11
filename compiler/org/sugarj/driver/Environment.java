@@ -66,8 +66,6 @@ public class Environment {
   public static String initTrans = null;
   public static String initTransModule = null;
 
-  public static String strategoxt_jar = null;
-
 
   public static void init() throws IOException {
     srcPath.add(src);
@@ -127,12 +125,6 @@ public class Environment {
       initTransModule = "org/sugarj/init/initTrans";
     }
     else notFound("initial SugarJ desugaring org/sugarj/init/initTrans.str");
-    
-    URL url;
-    if ((url = cl.getResource("strategoxt.jar")) != null) {
-      strategoxt_jar = url.getPath(); 
-    }
-    else notFound("Stratego binaries strategoxt.jar");
     
     if (sdfDef != null)
       synDir = new File(sdfDef).getParent();
