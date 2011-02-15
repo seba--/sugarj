@@ -6,6 +6,9 @@ import static org.sugarj.driver.Log.log;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.InvalidParseTableException;
@@ -37,19 +40,23 @@ public class STRCommands {
      */
     
     
-    String[] cmd = new String[] {
+    List<String> cmd = new ArrayList<String>(Arrays.asList(new String[] {
 //        "java",
 //        "-Xss4M",
 //        "-jar", toWindowsPath(Environment.strategoxt_jar),
         "-i", toWindowsPath(str),
         "-o", toWindowsPath(java),
         "-m", main,
-        "-I", toCygwinPath(Environment.stdLibDir),
-        "-I", toWindowsPath(Environment.bin)
-    };
+        "-I", toCygwinPath(Environment.stdLibDir)
+    }));
+    
+    for (String path : Environment.includePath) {
+      cmd.add("-I");
+      cmd.add(path);
+    }
     
     try {
-    Main.mainNoExit(cmd);
+    Main.mainNoExit(cmd.toArray(new String[cmd.size()]));
     }
     catch (StrategoExit e) {
       if (e.getValue() != 0)
@@ -153,7 +160,7 @@ public class STRCommands {
 
       aterm = ATermCommands.getApplicationSubterm(aterm, "Module", 1);
 
-      return new ModuleKey(aterm, main, Environment.bin);
+      return new ModuleKey(aterm, main);
     } finally {
       log.endTask();
     }

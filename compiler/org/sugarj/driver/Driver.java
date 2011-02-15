@@ -16,6 +16,7 @@ import static org.sugarj.driver.Log.log;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -190,7 +191,11 @@ public class Driver{
   private void compileGeneratedJavaFile() throws IOException {
     log.beginTask("compilation", "COMPILE the generated java file");
     try {
-      JavaCommands.javac(javaOutFile, bin, javaOutDir, bin, Environment.stdLibDir);
+      List<String> path = new ArrayList<String>(Environment.includePath);
+      path.add(Environment.stdLibDir);
+      path.add(javaOutDir);
+      
+      JavaCommands.javac(javaOutFile, bin, path);
     } finally {
       log.endTask();
     }
@@ -383,7 +388,7 @@ public class Driver{
       
       // indicates whether a sugar is imported
       boolean newSyntax = false;
-      
+
       List<URI> files = searchClassFiles(importModuleRelativePath, isStdLibModule);
 
       URI importModuleSourceFile = null;
@@ -402,14 +407,13 @@ public class Driver{
         
         // try again
         files = searchClassFiles(importModuleRelativePath, isStdLibModule);
-  
-        if (files.isEmpty())
-          throw new ClassNotFoundException("could not find imported module "
-              + importModule);
       }
       
       if (!files.isEmpty())
         log.log("Found imported module on the class path.");
+      else
+        throw new ClassNotFoundException("could not find imported module "
+            + importModule);
       
       
       for (URI importModuleClassFileURI : files)
@@ -595,7 +599,7 @@ public class Driver{
 //  }
   
   private ClassLoader createClassLoader(String what, List<String> path, boolean searchStdLib) throws MalformedURLException {
-    log.beginTask("Creating", "Create a class loader for " + what);
+    // log.beginTask("Creating", "Create a class loader for " + what);
     try {
       URL[] urls = new URL[path.size() + 1];
       
@@ -611,7 +615,7 @@ public class Driver{
        */
       return new URLClassLoader(urls, null);
     } finally {
-      log.endTask();
+      // log.endTask();
     }
   }
   
@@ -884,10 +888,23 @@ public class Driver{
       
       allInputFiles = new ArrayList<URI>();
       pendingInputFiles = new ArrayList<URI>();
+
+      URL[] urls = new URL[Environment.srcPath.size()];
+      int i = 0;
+      for (String path : Environment.srcPath)
+        urls[i++] = new File(path).toURI().toURL();
+
+      ClassLoader loader = new URLClassLoader(urls);
       
       for (String source : sources)
       {
-        URI uri = new File(source).toURI();
+        URL url = loader.getResource(source);
+        
+        if (url == null)
+          throw new FileNotFoundException(source);
+        
+        URI uri = url.toURI();
+        
         allInputFiles.add(uri);
         pendingInputFiles.add(uri);
       }
