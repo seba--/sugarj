@@ -60,6 +60,8 @@ public sugar ConcreteJava {
   context-free syntax
     "~"       StrategoTerm  -> JavaExpr  {cons("FromMetaExpr")}
     "~expr:"  StrategoTerm  -> JavaExpr  {cons("FromMetaExpr")}
+    "~"       StrategoTerm       -> JavaArrayInit  {cons("FromMetaExpr")}
+    "~arrayinit:"  StrategoTerm  -> JavaArrayInit  {cons("FromMetaExpr")}
 
 
 %%%
@@ -217,6 +219,8 @@ context-free syntax
   context-free syntax
     "~"          StrategoTerm -> JavaType {cons("FromMetaExpr")}
     "~type:"     StrategoTerm -> JavaType {cons("FromMetaExpr")}
+    "~"          StrategoTerm -> JavaArrayBaseType {cons("FromMetaExpr")}
+    "~arraybasetype:"     StrategoTerm -> JavaArrayBaseType {cons("FromMetaExpr")}
     "~reftype:"  StrategoTerm -> JavaRefType {cons("FromMetaExpr")}
 
 %%%
