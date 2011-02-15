@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.spoofax.jsglr.InvalidParseTableException;
@@ -51,7 +52,7 @@ public class SDFCommands {
      * We can include as many paths as we want here, checking the
      * adequacy of the occurring imports is done elsewhere.
      */
-    String[] cmd = new String[]{
+    List<String> cmd = new ArrayList<String>(Arrays.asList(new String[] {
 //      PACK_SDF,
       "-i", toCygwinPath(sdf),
       "-o", toCygwinPath(def),
@@ -59,13 +60,17 @@ public class SDFCommands {
       "-Idef", toCygwinPath(Environment.sdfDef),
       "-Idef", toCygwinPath(Environment.strategoDef),
       "-I", toCygwinPath(Environment.stdLibDir),
-      "-I", toCygwinPath(Environment.bin)
-    };
+    }));
+    
+    for (String path : Environment.includePath) {
+      cmd.add("-I");
+      cmd.add(path);
+    }
     
     StrategyInvoker.invoke(main_pack_sdf_0_0.instance, 
                            false, 
                            CommandExecution.SILENT_EXECUTION || CommandExecution.SUB_SILENT_EXECUTION, 
-                           cmd);
+                           cmd.toArray(new String[cmd.size()]));
     
     // CommandExecution.execute(cmd);
     
@@ -236,7 +241,7 @@ public class SDFCommands {
       ATerm body = ATermCommands.extractTerm(aterm, "module(_, _, ?)");
       ATerm importsBody = ATermCommands.injectTerms("(?,?)", imports, body);
 
-      return new ModuleKey(importsBody, "", Environment.bin);
+      return new ModuleKey(importsBody, "");
     } finally {
       log.endTask();
     }
