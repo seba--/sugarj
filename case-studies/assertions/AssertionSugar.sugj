@@ -8,34 +8,42 @@ public sugar AssertionSugar {
 
   lexical syntax
     "assertions" -> StrategoKeyword
+    "assertion" -> StrategoKeyword
 
   context-free syntax
-    "assertions" Assertion* -> Transformation {cons("Assertions")}  
+    "assertions" StrategoStrategy* -> Transformation {cons("Assertions")}  
+
+    "assertion" "rules" Assertion* -> Transformation {cons("AssertionRules")}  
 
     StrategoId ":" StrategoTerm "->" StrategoTerm StrategoRuleCond*  -> Assertion {cons("Assertion")}
   
   signature constructors
-    Assertions : List(Assertion) -> Transformation
+    Assertions : List(Strategy) -> Transformation
+    AssertionRules : List(Assertion) -> Transformation
     Assertion : StrategoId * StrategoTerm * StrategoTerm * List(StrategoRuleCond) -> Assertion
   
   lexical restrictions
     "assertions" -/- [a-zA-Z0-9\'\-\_]
+    "assertion" -/- [a-zA-Z0-9\'\-\_]
 
   
   rules
-    assertions-to-stratego :
-    	[transformation-elem(Assertions(as))|xs] -> <conc> (<map(assertion-to-stratego); concat> as, xs) 
+    assertions-to-desugarings :
+      Assertions(as) -> Desugarings(<map(!PureDesugaring(<id>))> as)
+
+    assertionrules-to-stratego :
+    	AssertionRules(as) -> Rules(<map(assertion-to-stratego)> as) 
 
     assertion-to-stratego :
-    	Assertion(name, pre-assertion, assertion, conditions) -> [transformation-elem(desugaringz), transformation-elem(rulez)]
+    	Assertion(name, pre-assertion, assertion, conditions) -> rule
     	where
-    	  !Desugarings([PureDesugaring(CallNoArgs(SVar(name)))]) => desugaringz;
         !|[ <\ term~pre-assertion -> "" \> t;
             <\ term~assertion -> t \
                 <+ compile-error(|<conc-strings> ("assertion ", string~name, " failed"))> t => t' ]| => assertion-cond;
-    	  !Rules([RDefNoArgs(name, Rule(Var("t"), Var("t'"), [WhereClause(assertion-cond) | conditions]))]) => rulez
+    	  !RDefNoArgs(name, Rule(Var("t"), Var("t'"), [WhereClause(assertion-cond) | conditions])) => rule
 
 
   desugarings
-    assertions-to-stratego
+    assertions-to-desugarings
+    assertionrules-to-stratego
 }
