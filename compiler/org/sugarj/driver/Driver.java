@@ -5,10 +5,10 @@ import static org.sugarj.driver.ATermCommands.atermToFile;
 import static org.sugarj.driver.ATermCommands.extractSDF;
 import static org.sugarj.driver.ATermCommands.extractSTR;
 import static org.sugarj.driver.ATermCommands.fixSDF;
-import static org.sugarj.driver.ATermCommands.isApplication;
 import static org.sugarj.driver.ATermCommands.getApplicationSubterm;
 import static org.sugarj.driver.ATermCommands.getList;
 import static org.sugarj.driver.ATermCommands.getString;
+import static org.sugarj.driver.ATermCommands.isApplication;
 import static org.sugarj.driver.Environment.bin;
 import static org.sugarj.driver.Environment.includePath;
 import static org.sugarj.driver.Environment.sep;
@@ -28,7 +28,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
@@ -38,37 +38,25 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.InvalidParseTableException;
+import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+import org.spoofax.jsglr.client.imploder.Token;
+import org.spoofax.jsglr.shared.BadTokenException;
+import org.spoofax.jsglr.shared.SGLRException;
+import org.spoofax.jsglr.shared.TokenExpectedException;
+import org.strategoxt.HybridInterpreter;
 import org.sugarj.driver.caching.Cache;
 import org.sugarj.driver.caching.ModuleKey;
+import org.sugarj.driver.caching.ModuleKeyCache;
+import org.sugarj.stdlib.StdLib;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
 public class Driver{
 
-  // TODO change when going binary
-  private static final String SDF_OUTPUT_EXTENSION = ".sdf";
-  private static final String STR_OUTPUT_EXTENSION = ".str";
-
-  private static String getRelativeModulePath(String module) {
-    return module.replace(".", sep);
-  }
-
-  public static String printListSeparated(List<String> l, String sep) {
-    StringBuilder b = new StringBuilder();
-
-    for (Iterator<String> it = l.iterator(); it.hasNext();) {
-      b.append(it.next());
-      if (it.hasNext())
-        b.append(sep);
-    }
-
-    return b.toString();
-  }
-
-  private static List<URI> allInputFiles = new ArrayList<URI>();
-  private static List<URI> pendingInputFiles = new ArrayList<URI>();
-  private static List<URI> currentlyProcessing = new ArrayList<URI>();
+  private static List<URI> allInputFiles;
+  private static List<URI> pendingInputFiles;
+  private static List<URI> currentlyProcessing;
 
   /**
    * denotes that the imported modules changed.
@@ -89,9 +77,20 @@ public class Driver{
   private String currentTransSTR;
   private String currentTransModule;
   private String remainingInput;
+  
+  private Collection<String> dependentFiles;
 
   private List<String> availableSDFImports;
   private List<String> availableSTRImports;
+  
+  private IStrategoTerm sugaredPackageDecl;
+  private List<IStrategoTerm> sugaredImportDecls = new ArrayList<IStrategoTerm>();
+  private List<IStrategoTerm> sugaredTypeOrSugarDecls = new ArrayList<IStrategoTerm>();
+  
+  private IStrategoTerm lastSugaredToplevelDecl;
+  
+  private RetractableTreeBuilder treeBuilder;
+  private HybridInterpreter interp;
   
   /**
    * the next parsing and desugaring uses no cache lookup if skipCache.
@@ -105,8 +104,14 @@ public class Driver{
    *        the file to process.
    * @param outdir
    *        the directory to write the output into.
+   * @throws IOException 
+   * @throws SGLRException 
+   * @throws InvalidParseTableException 
+   * @throws ParseException 
+   * @throws BadTokenException 
+   * @throws TokenExpectedException 
    */
-  private void process(URI source) {
+  public void process(URI source) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
     log.beginTask("processing", "BEGIN PROCESSING " + source);
     try {
       sourceFile = source;
@@ -123,13 +128,13 @@ public class Driver{
 
       mainModuleName = FileCommands.fileName(sourceFile.getPath());
 
-      currentGrammarSDF = Environment.initGrammar;
-      currentGrammarModule = Environment.initGrammarModule;
+      currentGrammarSDF = StdLib.initGrammar.getPath();
+      currentGrammarModule = StdLib.initGrammarModule;
       if (Environment.xtblCompilation)
-        currentGrammarXTBL = Environment.initGrammarXTBL;
+        currentGrammarXTBL = StdLib.initGrammarXTBL.getPath();
 
-      currentTransSTR = Environment.initTrans;
-      currentTransModule = Environment.initTransModule;
+      currentTransSTR = StdLib.initTrans.getPath();
+      currentTransModule = StdLib.initTransModule;
 
       remainingInput = FileCommands.newTempFile("sugj-rest");
       FileCommands.copyFile(sourceFile.getPath(), remainingInput);
@@ -140,7 +145,11 @@ public class Driver{
       // list of imports that contain Stratego extensions
       availableSTRImports = new ArrayList<String>();
 
-
+      dependentFiles = new ArrayList<String>();
+      
+      treeBuilder = new RetractableTreeBuilder();
+      interp = new HybridInterpreter();
+      
       boolean done = false;
       while (!done) {
         boolean wocache = Environment.wocache;
@@ -149,11 +158,12 @@ public class Driver{
         // PARSE the next top-level declaration
         IncrementalParseResult parseResult =
             parseNextToplevelDeclaration(remainingInput);
-        IStrategoTerm parsed = parseResult.getToplevelDecl();
+        lastSugaredToplevelDecl = parseResult.getToplevelDecl();
+        remainingInput = FileCommands.newTempFile("sugj-rest");
         FileCommands.writeToFile(remainingInput, parseResult.getRest());
-
-        // ASSIMILATE the parsed top-level declaration
-        IStrategoTerm desugared = currentDesugar(parsed);
+        
+        // DESUGAR the parsed top-level declaration
+        IStrategoTerm desugared = currentDesugar(lastSugaredToplevelDecl);
         
         // reset cache skipping
         Environment.wocache = wocache;
@@ -171,19 +181,21 @@ public class Driver{
       }
       
       // check final grammar and transformation for errors
-      Environment.wocache = true;
-      checkCurrentGrammar();
-      checkCurrentTransformation();
+      if (!Environment.noChecking) {
+        checkCurrentGrammar();
+        checkCurrentTransformation();
+      }
       
       // COMPILE the generated java file
       compileGeneratedJavaFile();
       currentlyProcessing.remove(sourceFile);
       pendingInputFiles.remove(sourceFile);
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
+    }
+    catch (CommandExecution.ExecutionError e) {
+      // TODO do something more sensible
       e.printStackTrace();
-    } finally {
-      
+    }
+    finally {
       log.endTask();
     }
   }
@@ -192,7 +204,7 @@ public class Driver{
     log.beginTask("compilation", "COMPILE the generated java file");
     try {
       List<String> path = new ArrayList<String>(Environment.includePath);
-      path.add(Environment.stdLibDir);
+      path.add(StdLib.stdLibDir.getPath());
       path.add(javaOutDir);
       
       JavaCommands.javac(javaOutFile, bin, path);
@@ -202,7 +214,7 @@ public class Driver{
   }
 
   private IncrementalParseResult parseNextToplevelDeclaration(String filename)
-      throws IOException, ParseException, InvalidParseTableException {
+      throws IOException, ParseException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     log.beginTask("parsing", "PARSE the next toplevel declaration.");
     try {
       IStrategoTerm remainingInputTerm = currentParse(filename);
@@ -212,8 +224,15 @@ public class Driver{
             + filename, -1);
 
       IStrategoTerm toplevelDecl = getApplicationSubterm(remainingInputTerm, "NextToplevelDeclaration", 0);
-      String rest = getString(getApplicationSubterm(remainingInputTerm, "NextToplevelDeclaration", 1));
+      IStrategoTerm restTerm = getApplicationSubterm(remainingInputTerm, "NextToplevelDeclaration", 1);
+      String rest = getString(restTerm);
 
+      try {
+        if (!rest.isEmpty())
+          treeBuilder.retract(restTerm);
+      } catch (Throwable t) {
+        t.printStackTrace();
+      }
       
       if (toplevelDecl == null || rest == null)
         throw new ParseException(
@@ -228,8 +247,7 @@ public class Driver{
   }
 
   private void processToplevelDeclaration(IStrategoTerm toplevelDecl)
-      throws IOException, ClassNotFoundException, InvalidParseTableException,
-      ParseException {
+      throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
     if (isApplication(toplevelDecl, "PackageDec"))
       processPackageDec(toplevelDecl);
     else {
@@ -253,12 +271,12 @@ public class Driver{
   }
 
   private IStrategoTerm currentParse(String remainingInput) throws IOException,
-      InvalidParseTableException {
+      InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     // recompile the current grammar definition
     String currentGrammarTBL;
     
     if (!Environment.xtblCompilation)
-      currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule);
+      currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, dependentFiles);
     else
       currentGrammarTBL = SDFCommands.finalizeXtbl(currentGrammarXTBL);
 
@@ -270,7 +288,8 @@ public class Driver{
         remainingInput,
         remainingInputParsed,
         "NextToplevelDeclaration",
-        false))
+        false,
+        treeBuilder))
       return null;
 
     IStrategoTerm remainingInputTerm = atermFromFile(remainingInputParsed);
@@ -280,7 +299,7 @@ public class Driver{
   }
 
   private IStrategoTerm currentDesugar(IStrategoTerm term) throws IOException,
-      InvalidParseTableException {
+      InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     // assimilate toplevelDec using current transformation
     log.beginTask(
         "desugaring",
@@ -289,10 +308,10 @@ public class Driver{
       String toplevelIn = FileCommands.newTempFile("aterm");
       String toplevelOut = FileCommands.newTempFile("aterm");
 
-      String currentTransProg = STRCommands.compile(currentTransSTR, "main");
+      String currentTransProg = STRCommands.compile(currentTransSTR, "main", dependentFiles);
 
       atermToFile(term, toplevelIn);
-      STRCommands.assimilate(currentTransProg, toplevelIn, toplevelOut);
+      STRCommands.assimilate(currentTransProg, toplevelIn, toplevelOut, interp);
       term = atermFromFile(toplevelOut);
 
       FileCommands.delete(toplevelIn);
@@ -307,13 +326,15 @@ public class Driver{
   private void processPackageDec(IStrategoTerm toplevelDecl) throws IOException {
     log.beginTask("processing", "PROCESS the desugared package declaration.");
     try {
+      sugaredPackageDecl = lastSugaredToplevelDecl;
+      
       String packageName =
           SDFCommands.prettyPrintJavaTerm(
-          getApplicationSubterm(toplevelDecl, "PackageDec", 1));
+          getApplicationSubterm(toplevelDecl, "PackageDec", 1), interp);
 
       log.log("The Java package name is '" + packageName + "'.");
 
-      relPackageName = getRelativeModulePath(packageName);
+      relPackageName = FileCommands.getRelativeModulePath(packageName);
 
       log.log("The SDF / Stratego package name is '" + relPackageName + "'.");
 
@@ -323,13 +344,13 @@ public class Driver{
 
       FileCommands.appendToFile(
           javaOutFile,
-          SDFCommands.prettyPrintJavaTerm(toplevelDecl) + "\n");
+          SDFCommands.prettyPrintJavaTerm(toplevelDecl, interp) + "\n");
     } finally {
       log.endTask();
     }
   }
   
-  private void processImportDecs(IStrategoTerm toplevelDecl) throws IOException, ClassNotFoundException, ParseException, InvalidParseTableException {
+  private void processImportDecs(IStrategoTerm toplevelDecl) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
     List<IStrategoTerm> pendingImports = new ArrayList<IStrategoTerm>();
     pendingImports.add(toplevelDecl);
     
@@ -362,8 +383,9 @@ public class Driver{
       processImportDec(pendingImport);
   }
 
-  private void processImportDec(IStrategoTerm toplevelDecl) throws IOException,
-      ClassNotFoundException, ParseException, InvalidParseTableException {
+  private void processImportDec(IStrategoTerm toplevelDecl) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
+    
+    sugaredImportDecls.add(lastSugaredToplevelDecl);
     
     if (javaOutFile == null)
       javaOutFile = javaOutDir + sep + mainModuleName + ".java";
@@ -376,14 +398,14 @@ public class Driver{
       try {
         FileCommands.appendToFile(
             javaOutFile,
-            SDFCommands.prettyPrintJavaTerm(toplevelDecl) + "\n");
+            SDFCommands.prettyPrintJavaTerm(toplevelDecl, interp) + "\n");
       } finally {
         log.endTask();
       }
 
       // TODO handle import declarations with asterisks, e.g. import foo.*;
       
-      String importModuleRelativePath = getRelativeModulePath(importModule);
+      String importModuleRelativePath = FileCommands.getRelativeModulePath(importModule);
       boolean isStdLibModule = importModuleRelativePath.startsWith("org/sugarj/"); 
       
       // indicates whether a sugar is imported
@@ -411,14 +433,18 @@ public class Driver{
       
       if (!files.isEmpty())
         log.log("Found imported module on the class path.");
-      else
-        throw new ClassNotFoundException("could not find imported module "
-            + importModule);
+      else {
+        String msg = "module not found " + importModule;
+        for (int i = ImploderAttachment.getLeftToken(toplevelDecl).getIndex(),  
+               max = ImploderAttachment.getRightToken(toplevelDecl).getIndex(); i <= max; i++)
+          ((Token) treeBuilder.getTokenizer().getTokenAt(i)).setError(msg);
+      }
       
       
       for (URI importModuleClassFileURI : files)
       {
         URL importModuleClassFile = importModuleClassFileURI.toURL();
+        dependentFiles.add(importModuleClassFile.getPath());
         
         String thisRelativePath = importModuleRelativePath;
         
@@ -444,6 +470,7 @@ public class Driver{
 	
 	      if (new File(importModuleSDFFile.getPath()).exists()) {
 	        newSyntax = true;
+	        dependentFiles.add(importModuleSDFFile.getPath());
 	        
 	        log.beginTask("Incorporation", "Incorporate the imported grammar " + thisRelativePath);
 	        try {
@@ -472,6 +499,7 @@ public class Driver{
 	          new File(importModuleXTBLFile.getPath()).exists() &&
 	          !isStdLibModule) {
           newSyntax = true;
+          dependentFiles.add(importModuleXTBLFile.getPath());
           
           log.beginTask("Incorporation", "Incorporate the imported pre-compiled grammar " + thisRelativePath);
           try {
@@ -487,6 +515,7 @@ public class Driver{
 	
 	      if (new File(importModuleSTRFile.getPath()).exists()) {
 	        newSyntax = true;
+	        dependentFiles.add(importModuleSTRFile.getPath());
 	        
 	        log.beginTask(
 	            "Incorporation",
@@ -530,10 +559,10 @@ public class Driver{
     log.beginTask("Extracting", "Extract name of imported module");
     try {
       if (isApplication(toplevelDecl, "TypeImportDec"))
-        name = SDFCommands.prettyPrintJavaTerm(toplevelDecl.getSubterm(0));
+        name = SDFCommands.prettyPrintJavaTerm(toplevelDecl.getSubterm(0), interp);
       
       if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
-        name = SDFCommands.prettyPrintJavaTerm(toplevelDecl.getSubterm(0)) + ".*";
+        name = SDFCommands.prettyPrintJavaTerm(toplevelDecl.getSubterm(0), interp) + ".*";
     } finally {
       log.endTask(name);
     }
@@ -574,7 +603,7 @@ public class Driver{
     }
     
     List<String> path = new ArrayList<String>(includePath);
-    path.add(Environment.stdLibDir);
+    path.add(StdLib.stdLibDir.getPath());
     
     if (relativePath.endsWith("/*"))
       return ResourceList.getResources(relativePath, path, "class");
@@ -607,7 +636,7 @@ public class Driver{
       for (String include : path)
         urls[i++] = new File(include).toURI().toURL();
 
-      urls[urls.length - 1] = new File(Environment.stdLibDir).toURI().toURL();
+      urls[urls.length - 1] = new File(StdLib.stdLibDir.getPath()).toURI().toURL();
       
       /*
        * we use 'null' as the parent class loader purposely, so
@@ -624,12 +653,15 @@ public class Driver{
         "processing",
         "PROCESS the desugared Java type declaration.");
     try {
+      
+      sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      
       log.beginTask("Generate Java code.");
       try {
         FileCommands.appendToFile(
             javaOutFile,
             SDFCommands.prettyPrintJavaTerm(
-            getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0))
+            getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0), interp)
             + "\n");
       } finally {
         log.endTask();
@@ -645,6 +677,8 @@ public class Driver{
         "processing",
         "PROCESS the desugared sugar declaration.");
     try {
+      sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      
       boolean isNative;
       String extName = null;
       String fullExtName = null;
@@ -660,7 +694,7 @@ public class Driver{
         if (isNative) {
           extName =
             SDFCommands.prettyPrintJavaTerm(
-            getApplicationSubterm(head, "NativeSugarDecHead", 2));
+            getApplicationSubterm(head, "NativeSugarDecHead", 2), interp);
           
           IStrategoTerm mods = getApplicationSubterm(head, "NativeSugarDecHead", 0);
           
@@ -674,7 +708,7 @@ public class Driver{
         else {
           extName =
             SDFCommands.prettyPrintJavaTerm(
-            getApplicationSubterm(head, "SugarDecHead", 1));    
+            getApplicationSubterm(head, "SugarDecHead", 1), interp);    
           
           IStrategoTerm mods = getApplicationSubterm(head, "SugarDecHead", 0);
           
@@ -730,8 +764,8 @@ public class Driver{
   
       FileCommands.createFile(strExtension);
 
-      String sdfImports = "imports " + printListSeparated(availableSDFImports, " ") + "\n";
-      String strImports = "imports " + printListSeparated(availableSTRImports, " ") + "\n";
+      String sdfImports = "imports " + StringCommands.printListSeparated(availableSDFImports, " ") + "\n";
+      String strImports = "imports " + StringCommands.printListSeparated(availableSTRImports, " ") + "\n";
       
       if (Environment.xtblCompilation)
         sdfImports = "";
@@ -801,8 +835,8 @@ public class Driver{
 
 
       if (CommandExecution.FULL_COMMAND_LINE) {
-        System.out.println("  Wrote SDF file to '" + sdfExtension + "'.");
-        System.out.println("  Wrote Stratego file to '" + strExtension + "'.");
+        System.out.println("  Wrote SDF file to '" + new File(sdfExtension).getAbsolutePath() + "'.");
+        System.out.println("  Wrote Stratego file to '" + new File(strExtension).getAbsolutePath() + "'.");
       }
       
       String currentGrammarName =
@@ -852,42 +886,60 @@ public class Driver{
     log.beginTask("checking grammar", "CHECK current grammar");
     
     try {
+      boolean wocache = Environment.wocache;
+      Environment.wocache = true;
       SDFCommands.check(currentGrammarSDF, currentGrammarModule);
+      Environment.wocache = wocache;
     } finally {
       log.endTask();
     }
   }
   
-  private void checkCurrentTransformation() throws IOException, InvalidParseTableException{
+  private void checkCurrentTransformation() throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException{
     log.beginTask("checking transformation", "CHECK current transformation");
     
     try {
-      STRCommands.compile(currentTransSTR, "main");
+      boolean wocache = Environment.wocache;
+      Environment.wocache = true;
+      STRCommands.compile(currentTransSTR, "main", dependentFiles);
+      Environment.wocache = wocache;
     } finally {
       log.endTask();
     }
+  }
+  
+  public static void initialize() throws IOException {
+    Environment.init();
+    
+    if (Environment.cacheDir != null)
+      FileCommands.createDir(Environment.cacheDir);
+    
+    FileCommands.createDir(Environment.bin);
+    
+    try {
+      initializeCaches();
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+      SDFCommands.sdfCache = new ModuleKeyCache<String>();
+      STRCommands.strCache = new ModuleKeyCache<String>();
+    }
+    
+    allInputFiles = new ArrayList<URI>();
+    pendingInputFiles = new ArrayList<URI>();
+    currentlyProcessing = new ArrayList<URI>();
   }
   
   /**
    * @param args
-   * @throws ClassNotFoundException
    * @throws IOException
    */
   public static void main(String[] args) {
     // log.log("This is the extensible java compiler.");
     try {
+      initialize();
+      
       String[] sources = handleOptions(args);
-      Environment.init();
-      
-      if (Environment.cacheDir != null)
-        FileCommands.createDir(Environment.cacheDir);
-      
-      FileCommands.createDir(Environment.bin);
-      
-      initializeCaches();
-      
-      allInputFiles = new ArrayList<URI>();
-      pendingInputFiles = new ArrayList<URI>();
 
       URL[] urls = new URL[Environment.srcPath.size()];
       int i = 0;
@@ -1029,15 +1081,15 @@ public class Driver{
     if (line.hasOption("gen-java"))
       genJava = true;
     
-    if (line.hasOption("stdlibdir"))
-      Environment.stdLibDir = line.getOptionValue("stdlibdir");
-    
     if (line.hasOption("xtbl"))
       Environment.xtblCompilation = true;
     
     if (line.hasOption("atomic-imports"))
       Environment.atomicImportParsing = true;
-    
+
+    if (line.hasOption("no-checking"))
+      Environment.noChecking = true;
+
     String[] sources = line.getArgs();
     if (sources.length < 1)
       throw new CLIError("No source files specified.", options);
@@ -1136,12 +1188,6 @@ public class Driver{
         "gen-java",
         false,
         "Generate the resulting Java file in the source folder.");
-    
-    options.addOption(
-        null,
-        "stdlibdir",
-        true,
-        "Specifiy the directory containing the standard library.");
 
     options.addOption(
         null,
@@ -1154,12 +1200,18 @@ public class Driver{
         "atomic-imports",
         false,
         "Parse all import statements simultaneously.");
+
+    options.addOption(
+        null,
+        "no-checing",
+        false,
+        "Do not check resulting SDF and Stratego files.");
     
     return options;
   }
 
   @SuppressWarnings("unchecked")
-  public static void initializeCaches() throws IOException, ClassNotFoundException {
+  private static void initializeCaches() throws IOException {
     if (Environment.cacheDir == null)
       return;
     
@@ -1167,16 +1219,25 @@ public class Driver{
     String strCache = FileCommands.findFile("strCache", Environment.cacheDir);
 
     if (sdfCache != null)
-      SDFCommands.sdfCache =
-          (Cache<ModuleKey, String>) new ObjectInputStream(new FileInputStream(
-              sdfCache)).readObject();
+      try {
+        log.log("load sdf cache from " + sdfCache);
+        SDFCommands.sdfCache =
+            (Cache<ModuleKey, String>) new ObjectInputStream(new FileInputStream(
+                sdfCache)).readObject();
+      } catch (ClassNotFoundException e) {
+        throw new IOException("could not load sdf cache", e);
+      }
     else
       SDFCommands.sdfCache = new Cache<ModuleKey, String>();
     
     if (strCache != null)
-      STRCommands.strCache =
-          (Cache<ModuleKey, String>) new ObjectInputStream(new FileInputStream(
-              strCache)).readObject();
+      try {
+        log.log("load str cache from " + strCache);
+        STRCommands.strCache =
+            (Cache<ModuleKey, String>) new ObjectInputStream(new FileInputStream(
+                strCache)).readObject();
+      } catch (ClassNotFoundException e) {
+        throw new IOException("could not load stratego cache", e);      }
     else
       STRCommands.strCache = new Cache<ModuleKey, String>();
   }
@@ -1198,12 +1259,19 @@ public class Driver{
       strCache = Environment.cacheDir + sep + "strCache";
       FileCommands.createFile(strCache);
     }
-
-    if (SDFCommands.sdfCache != null)
-      new ObjectOutputStream(new FileOutputStream(sdfCache)).writeObject(SDFCommands.sdfCache);
     
-    if (STRCommands.strCache != null)
+    
+    if (SDFCommands.sdfCache != null) {
+      log.log("store sdf cache in " + sdfCache);
+      log.log("sdf cache size: " + SDFCommands.sdfCache.size());
+      new ObjectOutputStream(new FileOutputStream(sdfCache)).writeObject(SDFCommands.sdfCache);
+    }
+    
+    if (STRCommands.strCache != null) {
+      log.log("store str cache in " + strCache);
+      log.log("str cache size: " + STRCommands.strCache.size());
       new ObjectOutputStream(new FileOutputStream(strCache)).writeObject(STRCommands.strCache);
+    }
   }
 
   private String relPackageNameSep() {
@@ -1213,4 +1281,28 @@ public class Driver{
     return relPackageName + sep;
   }
   
+  /**
+   * @return the non-desugared syntax tree of the complete file.
+   */
+  public IStrategoTerm getSugaredSyntaxTree() {
+    
+    // XXX empty lists => no tokens
+    IStrategoTerm packageDecl = ATermCommands.makeSome(sugaredPackageDecl, treeBuilder.getTokenizer().getTokenAt(0));
+    IStrategoTerm imports = 
+      ATermCommands.makeList("JavaImportDec*", ImploderAttachment.getRightToken(packageDecl), sugaredImportDecls);
+    IStrategoTerm body =
+      ATermCommands.makeList("TypeOrSugarDec*", ImploderAttachment.getRightToken(imports), sugaredTypeOrSugarDecls);
+    
+    IStrategoTerm term =
+      ATermCommands.makeAppl("SugarCompilationUnit", "SugarCompilationUnit", 3,
+        packageDecl,
+        imports,
+        body);
+    
+    ImploderAttachment.getTokenizer(term).setAst(term);
+    ImploderAttachment.getTokenizer(term).initAstNodeBinding();
+    
+    return term;
+  }
+    
 }

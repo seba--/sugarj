@@ -29,6 +29,8 @@ public class JavaCommands {
         cpBuilder.append(Environment.classpathsep);
     }
     
+    // TODO change to ejc
+    
     String[] cmd = new String[] {
         JAVAC,
         "-cp", cpBuilder.toString(),
@@ -62,6 +64,19 @@ public class JavaCommands {
       cmd[i + 5] = args[i];
     
     CommandExecution.executeWithPrefix(main, cmd);
+  }
+  
+  
+  public static void jar(String dir, String output) {
+    String[] cmd = {
+        "jar",
+        "cf",
+        output,
+        "-C", dir,
+        "."
+        };
+    
+    CommandExecution.execute(cmd);
   }
   
 }

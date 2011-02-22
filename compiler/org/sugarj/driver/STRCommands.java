@@ -8,14 +8,21 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.InvalidParseTableException;
+import org.spoofax.jsglr.client.imploder.TreeBuilder;
+import org.spoofax.jsglr.shared.BadTokenException;
+import org.spoofax.jsglr.shared.SGLRException;
+import org.spoofax.jsglr.shared.TokenExpectedException;
+import org.strategoxt.HybridInterpreter;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.strj.Main;
 import org.sugarj.driver.caching.Cache;
 import org.sugarj.driver.caching.ModuleKey;
+import org.sugarj.stdlib.StdLib;
 
 /**
  * This class provides methods for various SDF commands. Each
@@ -47,13 +54,14 @@ public class STRCommands {
         "-i", toWindowsPath(str),
         "-o", toWindowsPath(java),
         "-m", main,
-        "-I", toCygwinPath(Environment.stdLibDir)
+        "-I", toCygwinPath(StdLib.stdLibDir.getPath())
     }));
     
-    for (String path : Environment.includePath) {
-      cmd.add("-I");
-      cmd.add(path);
-    }
+    for (String path : Environment.includePath)
+      if (new File(path).isDirectory()){
+        cmd.add("-I");
+        cmd.add(path);
+      }
     
     try {
     Main.mainNoExit(cmd.toArray(new String[cmd.size()]));
@@ -69,8 +77,8 @@ public class STRCommands {
   }
   
   
-  public static String compile(String str, String main) throws IOException, InvalidParseTableException {
-    ModuleKey key = getModuleKeyForAssimilation(str, main);
+  public static String compile(String str, String main, Collection<String> dependentFiles) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+    ModuleKey key = getModuleKeyForAssimilation(str, main, dependentFiles);
     String prog = lookupAssimilationInCache(key);
     
     if (prog == null) {
@@ -144,23 +152,24 @@ public class STRCommands {
   }
 
 
-  private static ModuleKey getModuleKeyForAssimilation(String str, String main) throws IOException, InvalidParseTableException {
+  private static ModuleKey getModuleKeyForAssimilation(String str, String main, Collection<String> dependentFiles) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     log.beginTask("Generating", "Generate module key for current assimilation");
     try {
       String f = FileCommands.newTempFile("aterm");
       SDFCommands.parseImplode(
-          Environment.strategoTbl,
+          StdLib.strategoTbl.getPath(),
           str,
           f,
           "StrategoModule",
-          false);
+          false,
+          new TreeBuilder());
 
       IStrategoTerm aterm = ATermCommands.atermFromFile(f);
       FileCommands.delete(f);
 
       aterm = ATermCommands.getApplicationSubterm(aterm, "Module", 1);
 
-      return new ModuleKey(aterm, main);
+      return new ModuleKey(dependentFiles, aterm);
     } finally {
       log.endTask();
     }
@@ -168,11 +177,34 @@ public class STRCommands {
   }
 
 
-  public static void assimilate(String prog, String in, String out) throws IOException {
+  public static void assimilate(String prog, String in, String out, HybridInterpreter interp) throws IOException {
     File f = new File(prog);
-    String main = f.getName();
     String dir = f.getParent();
     
-    JavaCommands.java(dir, main, "-i", in, "-o", out);
+    String jarfile = FileCommands.newTempFile("jar");
+    
+    JavaCommands.jar(dir, jarfile);
+
+    log.beginTask("desugaring " + in + " to " + out);
+    try {
+      HybridInterpreter newInterp = new HybridInterpreter(interp);
+      interp.loadJars(new File(jarfile).toURI().toURL());
+      interp.setCurrent(ATermCommands.atermFromFile(in));
+      
+      if (interp.invoke("internal-main")) {
+        IStrategoTerm term = interp.current();
+        ATermCommands.atermToFile(term, out);
+      }
+      else
+        throw new RuntimeException("hybrid interpreter failed");
+    }
+    catch (Exception e) {
+      throw new RuntimeException("desugaring failed", e);
+    }
+    finally {
+      log.endTask();
+    }
+    
+      
   }
 }

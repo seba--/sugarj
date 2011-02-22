@@ -15,7 +15,7 @@ public class Cache<K,V> implements Serializable {
   private static final long serialVersionUID = -2259409096012167237L;
 
   // TODO replace HasMap by proper cache implementation
-  public HashMap<K,V> cache;
+  private HashMap<K,V> cache;
   
   public Cache() {
     cache = new HashMap<K,V>();
@@ -36,5 +36,9 @@ public class Cache<K,V> implements Serializable {
   public void remove(K k) {
     if (!Environment.rocache)
       cache.remove(k);
+  }
+  
+  public int size() {
+    return cache.size();
   }
 }
