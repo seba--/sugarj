@@ -1,22 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: SugarJ Plug-in
-Bundle-SymbolicName: sugarj_editor;singleton:=true
-Bundle-Version: 1.0.0
+Bundle-Name: org.sugarj.editor
+Bundle-SymbolicName: org.sugarj.editor;singleton:=true
+Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.sugarj.editor.Activator
+Export-Package: org.sugarj.editor; uses:="org.eclipse.imp.preferences,  org.eclipse.imp.parser,  org.eclipse.imp.runtime,  org.strategoxt.imp.runtime.services,  org.spoofax.interpreter.terms,  org.strategoxt.imp.runtime.parser,  org.osgi.framework,  org.strategoxt.imp.runtime.dynamicloading"
+Require-Bundle: org.eclipse.core.runtime,org.eclipse.core.resources,org.eclipse.imp.runtime,org.eclipse.ui,lpg.runtime,org.eclipse.jface.text,org.eclipse.ui.editors,org.eclipse.ui.workbench.texteditor,org.strategoxt.imp.runtime,org.spoofax.jsglr,org.strategoxt.strj,org.sugarj.compiler,org.sugarj.stdlib
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.osgi.framework;version="1.3.0"
-Require-Bundle: org.eclipse.core.runtime,
-  org.eclipse.core.resources,
-  org.eclipse.imp.runtime,
-  org.eclipse.ui,
-  lpg.runtime,
-  org.eclipse.jface.text,
-  org.eclipse.ui.editors,
-  org.eclipse.ui.workbench.texteditor,
-  org.strategoxt.imp.runtime,
-  org.spoofax.aterm,
-  org.spoofax.jsglr,
-  org.strategoxt.strj
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
-Export-Package: org.sugarj.editor

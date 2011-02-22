@@ -18,7 +18,10 @@
         <property name="dist" location="bin/dist"/>
         
         <!-- Imports -->
-        <property name="build.sdf.imports" value="-Idef ${lib}/Java-15.def -Idef ${lib}/Sdf2.def -Idef ${lib}/Stratego.def"/>
+        <property name="build.sdf.imports" value="
+        	              -Idef ${lib}/Java-15.def
+        	              -Idef ${lib}/Sdf2.def
+        	              -Idef ${lib}/Stratego.def"/>
         <property name="build.stratego.args" value="
                         --library
                         -I &quot;${trans}&quot;
