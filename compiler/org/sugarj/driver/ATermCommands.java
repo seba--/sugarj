@@ -1,8 +1,10 @@
 package org.sugarj.driver;
 
-import java.io.FileOutputStream;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -10,15 +12,23 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.jsglr.client.InvalidParseTableException;
+import org.spoofax.jsglr.client.imploder.IToken;
+import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.spoofax.terms.StrategoListIterator;
-import org.spoofax.terms.TermFactory;
+import org.spoofax.terms.attachments.ParentAttachment;
+import org.spoofax.terms.attachments.ParentTermFactory;
 import org.spoofax.terms.io.TAFTermReader;
+import org.strategoxt.imp.runtime.Environment;
 import org.strategoxt.lang.StrategoExit;
 import org.sugarj.driver.transformations.extractSdf;
 import org.sugarj.driver.transformations.extractStr;
 import org.sugarj.driver.transformations.sdf_desugar;
 
+/**
+ * @author Sebastian Erdweg <seba at informatik uni-marburg de>
+ */
 public class ATermCommands {
   
   public static class MatchError extends Error {
@@ -56,9 +66,14 @@ public class ATermCommands {
     }
   }
   
-  public static TermFactory factory = new TermFactory();
+  public static ITermFactory factory = new ParentTermFactory(Environment.getTermFactory());
 
   public static IStrategoTerm atermFromFile(String filename) throws IOException {
+    IStrategoTerm term = org.sugarj.driver.Environment.terms.get(filename);
+    
+    if (term != null)
+      return term;
+    
     return new TAFTermReader(factory).parseFromFile(filename);
   }
   
@@ -68,8 +83,11 @@ public class ATermCommands {
 
   public static void atermToFile(IStrategoTerm aterm, String filename)
       throws IOException {
-    FileOutputStream os = new FileOutputStream(filename);
-    os.write(aterm.toString().getBytes());
+    org.sugarj.driver.Environment.terms.put(filename, aterm);
+
+    FileWriter writer = new FileWriter(new File(filename));
+    aterm.writeAsString(writer, Integer.MAX_VALUE);
+    writer.close();
   }
 
   public static boolean isApplication(IStrategoTerm term, String cons) {
@@ -109,6 +127,67 @@ public class ATermCommands {
   
   public static IStrategoTerm makeTuple(IStrategoTerm... ts) {
     return factory.makeTuple(ts);
+  }
+  
+  public static IStrategoTerm makeSome(IStrategoTerm term, IToken noneToken) {
+    if (term != null)
+      return makeAppl("Some", "Some", 1, noneToken, term);
+    
+    return makeAppl("None", "Some", 0, noneToken);
+  }
+  
+  public static IStrategoList makeList(String sort, IToken emptyListToken, IStrategoTerm... ts) {
+    IStrategoList term = factory.makeList(ts);
+    
+    setAttachment(term, sort, emptyListToken, ts);
+    return term;
+  }
+
+  public static IStrategoList makeList(String sort, IToken emptyListToken, Collection<IStrategoTerm> ts) {
+    return makeList(sort, emptyListToken, ts.toArray(new IStrategoTerm[ts.size()]));
+  }
+
+  public static IStrategoTerm makeAppl(String cons, String sort, int arity, IStrategoTerm... args) {
+    assert args.length > 0;
+    return makeAppl(cons, sort, arity, null, args);
+  }
+  
+  public static IStrategoTerm makeAppl(String cons, String sort, int arity, IToken emptyArgsToken, IStrategoTerm... args) {
+    assert emptyArgsToken != null || args.length > 0;
+    
+    IStrategoTerm appl =
+      factory.makeAppl(
+             factory.makeConstructor(cons, arity),
+             args);
+    
+    setAttachment(appl, sort, emptyArgsToken, args);
+    
+    return appl;
+  }
+  
+  private static void setAttachment(IStrategoTerm term, String sort, IToken emptyToken, IStrategoTerm... children) {
+    IToken left;
+    IToken right;
+    
+    if (children.length == 0) {
+      left = emptyToken;
+      right = emptyToken;
+    }
+    else {
+      left = ImploderAttachment.getLeftToken(children[0]);
+      right = ImploderAttachment.getRightToken(children[children.length - 1]);
+    }
+    
+    ImploderAttachment.putImploderAttachment(
+        term,
+        false,
+        sort, 
+        left,
+        right);
+    
+    
+    for (IStrategoTerm arg : children)
+      ParentAttachment.putParent(arg, term, null);
   }
   
   /**
@@ -160,5 +239,35 @@ public class ATermCommands {
         throw new RuntimeException("Sdf desugaring failed", e);
     }
     // STRCommands.assimilate(STRCommands.getSDFDesugarProg(), term, fixed);
+  }
+  
+  
+  public static Collection<String> extractModuleNames(IStrategoTerm term) {
+    if (term.getTermType() != IStrategoTerm.LIST)
+      return null;
+    
+    Collection<String> names = new ArrayList<String>();
+    IStrategoList list = (IStrategoList) term;
+    
+    while (!list.isEmpty())
+    {
+      IStrategoTerm listEntry = list.head();
+      if (listEntry.getTermType() != IStrategoTerm.LIST)
+        throw new IllegalStateException("unexpected term type in imports " + list);
+
+      list = list.tail();
+      IStrategoList imports = (IStrategoList) listEntry;
+      
+      while (!imports.isEmpty()) {
+        IStrategoTerm module = imports.head();
+        imports = imports.tail();
+        
+        IStrategoTerm unparameterized = getApplicationSubterm(module, "module", 0);
+        IStrategoTerm moduleName = getApplicationSubterm(unparameterized, "unparameterized", 0);
+        names.add(getString(moduleName));
+      }
+    }
+    
+    return names;
   }
 }

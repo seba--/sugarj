@@ -12,7 +12,8 @@ strategies
   desugar = fail
   changed-tree(s) = ?t; s; not(equal(|t))
   traverse(s) = compile-error <+ bottomup(try(s; traverse(s)))
-  main = io-wrap(traverse(desugar))
+  internal-main = traverse(desugar)
+  main = io-wrap(internal-main)
 
 
 signature

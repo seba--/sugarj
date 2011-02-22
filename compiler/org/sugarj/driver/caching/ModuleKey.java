@@ -1,11 +1,14 @@
 package org.sugarj.driver.caching;
 
 import java.io.Externalizable;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.sugarj.driver.ATermCommands;
@@ -22,25 +25,21 @@ import org.sugarj.driver.ATermCommands;
  */
 public class ModuleKey implements Externalizable {
 
-  public IStrategoTerm module;
-  public String main;
-  public String[] paths;
+  private boolean checkGet;
+  public Map<String, Long> imports;
+  public IStrategoTerm body;
   
   /**
    * For deserialization only.
    */
   public ModuleKey() {}
   
-  public ModuleKey(IStrategoTerm module, String main, List<String> paths) {
-    this.module = module;
-    this.main = main;
-    this.paths = paths.toArray(new String[]{});
-  }
-  
-  public ModuleKey(IStrategoTerm module, String main, String... paths) {
-    this.module = module;
-    this.main = main;
-    this.paths = paths;
+  public ModuleKey(Collection<String> dependentFiles, IStrategoTerm module) {
+    this.imports = new HashMap<String, Long>();
+    this.body = module;
+    
+    for (String file : dependentFiles)
+      imports.put(file, new File(file).lastModified());
   }
   
   public boolean equals(Object o) {
@@ -48,33 +47,42 @@ public class ModuleKey implements Externalizable {
       return false;
     
     ModuleKey k = (ModuleKey) o;
-    return module.equals(k.module) && main.equals(k.main) && Arrays.equals(paths, k.paths);
+    return body.equals(k.body) && 
+      (checkGet ? imports.equals(k.imports) : imports.keySet().equals(k.imports.keySet()));
   }
   
   public int hashCode() {
-    return module.hashCode() + main.hashCode() + Arrays.hashCode(paths);
+    return imports.keySet().hashCode() + body.hashCode();
   }
 
   @Override
   public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-    module = ATermCommands.atermFromString((String) in.readObject());
-    main = (String) in.readObject();
-      
-    int len = in.readInt();
-    paths = new String[len];
+    imports = new HashMap<String, Long>();
+    int entries = in.readInt();
+    for (int i = 0; i < entries; i++) {
+      imports.put((String) in.readObject(), in.readLong());
+    }
     
-    for (int i = 0; i < len; i++)
-      paths[i] = (String) in.readObject();
+    body = ATermCommands.atermFromString((String) in.readObject());
   }
 
   @Override
   public void writeExternal(ObjectOutput out) throws IOException {
-    out.writeObject(module.toString());
-    out.writeObject(main);
+    out.writeInt(imports.size());
+    for (Entry<String, Long> entry : imports.entrySet()) {
+      out.writeObject(entry.getKey());
+      out.writeLong(entry.getValue());
+    }
     
-    out.writeInt(paths.length);
-    for (String p : paths)
-      out.writeObject(p);
+    out.writeObject(body.toString());
+  }
+
+  void doGet() {
+    this.checkGet = true;
+  }
+
+  void doPut() {
+    this.checkGet = false;
   }
   
 }

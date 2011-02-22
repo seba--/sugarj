@@ -10,8 +10,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -306,5 +309,33 @@ public class FileCommands {
       s = s.substring(1, s.length() - 1);
       writeToFile(file, s);
     }
+  }
+
+  public static String getRelativeModulePath(String module) {
+    return module.replace(".", sep);
+  }
+
+  private static String locateModule(String module, String fileExtension) {
+    
+    for (String path : Environment.includePath) {
+      File f = new File(path + Environment.sep + module + "." + fileExtension);
+      if (f.exists())
+        return f.getAbsolutePath();
+    }
+    
+    return null;
+  }
+  
+  public static Map<String, Long> locateModules(Collection<String> modules, String fileExtension) {
+    Map<String, Long> map = new HashMap<String, Long>();
+    
+    for (String module : modules) {
+      String path = locateModule(module, fileExtension);
+      
+      if (path != null)
+        map.put(path, new File(path).lastModified());
+    }
+      
+    return map;
   }
 }
