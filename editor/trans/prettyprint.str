@@ -1,0 +1,28 @@
+module prettyprint
+
+imports
+  include/SugarJ
+
+strategies //custom strategy for code formatting
+  
+prettyprint:
+  Module(x, y) ->
+  $[module [x]
+  	
+    [<map(prettyprint); separate-by(|"\n\n"); concat-strings> y]]
+    
+prettyprint:
+  Entity(x, y) ->
+  $[entity [x]{
+      [<map(prettyprint); separate-by(|"\n"); concat-strings> y]
+    }]
+    
+prettyprint:
+  Property(x, y) -> $[[x] : [<prettyprint> y]]
+  
+prettyprint:
+  Type(t) -> $[[t]]
+	
+prettyprint=
+  where(is-string <+ is-num)
+

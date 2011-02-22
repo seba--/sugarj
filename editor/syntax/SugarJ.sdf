@@ -33,7 +33,7 @@ exports
 
 
   context-free syntax
-  	JavaPackageDec? JavaImportDec* TypeOrSugarDec*  -> SugarCompilationUnit {prefer,cons("CompilationUnit")}
+  	JavaPackageDec? JavaImportDec* TypeOrSugarDec*  -> SugarCompilationUnit {prefer,cons("SugarCompilationUnit")}
   	
   	JavaTypeDec -> TypeOrSugarDec {cons("JavaTypeDec")}
   	SugarDec -> TypeOrSugarDec

@@ -3,8 +3,8 @@
 <project name="build.generated">
 
         <target name="spoofaximp.default" depends="spoofaximp.default.ctree"/>
-        <target name="spoofaximp.default.ctree" depends="check-classpath,init,sdf2table,meta-sdf2table,ppgen,pppack,stratego.aster,stratego.ctree,java.jar,sdf2imp,refresh"/>
-        <target name="spoofaximp.default.jar" depends="check-classpath,init,sdf2table,meta-sdf2table,ppgen,pppack,stratego.aster,stratego.jar,  java.jar,sdf2imp,refresh"/>
+        <target name="spoofaximp.default.ctree" depends="check-classpath,init,sdf2table,meta-sdf2table,ppgen,pppack,stratego.aster,java.jar,stratego.ctree,sdf2imp,refresh"/>
+        <target name="spoofaximp.default.jar" depends="check-classpath,init,sdf2table,meta-sdf2table,ppgen,pppack,stratego.aster,java.jar,stratego.jar,  sdf2imp,refresh"/>
     
         <!-- Initialization -->
         <available file="${build}/org/sugarj/editor/strategies/Main.class" property="java.jar.enabled"/>
@@ -262,9 +262,10 @@
                 <arg value="org.strategoxt.tools.main-ppgen"/>
                 <arg value="-i"/>
                 <arg value="${include}/${sdfmodule}.def"/>
+                <arg value="-t"/>
+                <arg value="-b"/>
                 <arg value="-o"/>
                 <arg value="${include}/${sdfmodule}.generated.pp.af"/>
-                <arg value="-t"/>
             </java>
             <java classname="run" failonerror="false">
                 <arg value="org.strategoxt.tools.main-pp-pp-table"/>
@@ -442,6 +443,7 @@
         
         <target name="clean" description="clean up">
             <delete dir="${build}"/>
-            <delete file="${src-gen}/trans/Main.java"/>
+            <delete file="${include}/${sdfmodule}.def"/>
+            <delete dir="${src-gen}/trans"/>
         </target>
     </project>

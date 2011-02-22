@@ -8,6 +8,8 @@ imports
   lib/editor-common.generated
   check
   generate
+  prettyprint
+  refactorings
 
 rules // Main editor interface (defined by editor/SugarJ-Builders and -References.esv)
   
