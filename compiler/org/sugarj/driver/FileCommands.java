@@ -10,6 +10,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -69,6 +71,7 @@ public class FileCommands {
    */
   public static void writeToFile(String file, String content)
       throws IOException {
+    FileCommands.createFile(file);
     new FileOutputStream(file).write(content.getBytes());
   }
 
@@ -93,6 +96,16 @@ public class FileCommands {
     return fileData.toString();
   }
 
+  
+  public static String fileName(URL url) {
+    return fileName(url.getPath());
+  }
+  
+  
+  public static String fileName(URI uri) {
+    return fileName(uri.getPath());
+  }
+  
   public static String fileName(String file_doof) {
     String file = toCygwinPath(file_doof);
     int index = file.lastIndexOf(sep);

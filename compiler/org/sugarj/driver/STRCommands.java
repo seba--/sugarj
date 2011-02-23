@@ -174,15 +174,19 @@ public class STRCommands {
 
 
   public static void assimilate(String jarfile, String in, String out, HybridInterpreter interp) throws IOException {
-    log.beginTask("desugaring " + in + " to " + out);
+    IStrategoTerm result = assimilate(jarfile, ATermCommands.atermFromFile(in), interp);
+    ATermCommands.atermToFile(result, out);
+  }
+  
+  public static IStrategoTerm assimilate(String jarfile, IStrategoTerm in, HybridInterpreter interp) throws IOException {
     try {
       HybridInterpreter newInterp = new HybridInterpreter(interp);
       newInterp.loadJars(new File(jarfile).toURI().toURL());
-      newInterp.setCurrent(ATermCommands.atermFromFile(in));
+      newInterp.setCurrent(in);
       
       if (newInterp.invoke("internal-main")) {
         IStrategoTerm term = newInterp.current();
-        ATermCommands.atermToFile(term, out);
+        return term;
       }
       else
         throw new RuntimeException("hybrid interpreter failed");
@@ -190,10 +194,5 @@ public class STRCommands {
     catch (Exception e) {
       throw new RuntimeException("desugaring failed", e);
     }
-    finally {
-      log.endTask();
-    }
-    
-      
   }
 }

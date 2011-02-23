@@ -245,7 +245,7 @@ public class SDFCommands {
 
     IStrategoTerm aterm = null;
     
-    aterm = parser.parse(new BufferedInputStream(new FileInputStream(source)), source);
+    aterm = parser.parse(source, source);
 
 
     if (aterm != null) {
@@ -257,30 +257,30 @@ public class SDFCommands {
     return false;
   }
   
-  /**
-   * Parses the given source using the given table and implodes the resulting parse tree.
-   * 
-   * @param tbl
-   * @param source
-   * @param target
-   * @param start
-   * @return
-   * @throws IOException
-   * @throws InvalidParseTableException
-   * @throws SGLRException 
-   * @throws BadTokenException 
-   * @throws TokenExpectedException 
-   */
-  public static boolean parseImplode(String tbl, String source, String target, String start, boolean binary, ITreeBuilder treeBuilder, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
-    return parseImplode(org.strategoxt.imp.runtime.Environment.loadParseTable(tbl), tbl, source, target, start, binary, treeBuilder, parser);
-  }
+//  /**
+//   * Parses the given source using the given table and implodes the resulting parse tree.
+//   * 
+//   * @param tbl
+//   * @param source
+//   * @param target
+//   * @param start
+//   * @return
+//   * @throws IOException
+//   * @throws InvalidParseTableException
+//   * @throws SGLRException 
+//   * @throws BadTokenException 
+//   * @throws TokenExpectedException 
+//   */
+//  public static boolean parseImplode(String tbl, String source, String target, String start, boolean binary, ITreeBuilder treeBuilder, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+//    return parseImplode(org.strategoxt.imp.runtime.Environment.loadParseTable(tbl), tbl, source, target, start, binary, treeBuilder, parser);
+//  }
   
   public static boolean parseImplode(ParseTable table, String source, String target, String start, boolean binary, ITreeBuilder treeBuilder, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     return parseImplode(table, "unknown", source, target, start, binary, treeBuilder, parser);
   }
   
   private static boolean parseImplode(ParseTable table, String tbl, String source, String target, String start, boolean binary, ITreeBuilder treeBuilder, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
-    log.beginExecution("parsing", "parsing " + source + " using table " + tbl + " writing to " + target);
+    log.beginExecution("parsing", "parsing source using table " + tbl + " writing to " + target);
 
     boolean result = false;
     try {

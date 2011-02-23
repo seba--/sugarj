@@ -3,7 +3,6 @@ package org.sugarj.editor;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -30,7 +29,7 @@ import org.sugarj.driver.FileCommands;
 public class SugarJParser extends JSGLRI {
 
   private String projectPath;
-  private Driver driver;
+  private Driver.Result result;
 
   public SugarJParser(JSGLRI parser) {
     super(parser.getParseTable(), parser.getStartSymbol(), parser.getController());
@@ -80,25 +79,14 @@ public class SugarJParser extends JSGLRI {
     URI uri = new File(dir + Environment.sep + FileCommands.fileName(filename)).toURI();
     FileCommands.writeToFile(dir + Environment.sep + FileCommands.fileName(filename), input);
 
-    Driver.initialize();
-    driver = new Driver();
-    
     try {
-      driver.process(uri);
+      result = Driver.compile(uri);
     } catch (Throwable e) {
       org.strategoxt.imp.runtime.Environment.logException(e);
       return super.doParse(input, filename);
     }
     
-    try {
-      Driver.storeCaches();
-    }
-    catch (Exception e) {
-      // XXX ignore errors in cache storing
-      e.printStackTrace();
-    }
-    
-    IStrategoTerm term = driver.getSugaredSyntaxTree();
+    IStrategoTerm term = result.getSugaredSyntaxTree();
     
     return term;
   }
@@ -119,13 +107,13 @@ public class SugarJParser extends JSGLRI {
   
   @Override
   public Set<BadTokenException> getCollectedErrors() {
-    return driver.getCollectedErrors();
+    return result.getCollectedErrors();
   }
 
 
   public List<IStrategoTerm> getEditorServices() {
     final List<IStrategoTerm> empty = Collections.emptyList();
-    return driver == null ? empty : driver.getEditorServices();
+    return result == null ? empty : result.getEditorServices();
   }
   
 }

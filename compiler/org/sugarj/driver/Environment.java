@@ -1,5 +1,7 @@
 package org.sugarj.driver;
 
+import static org.sugarj.driver.Log.log;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -58,4 +60,18 @@ public class Environment {
     includePath.add(bin);
   }
 
+  private static Long tick;
+  
+  public static void tick() {
+    tick = System.currentTimeMillis();
+  }
+  
+  public static void tack() {
+    tack("");
+  }
+  
+  public static void tack(String s) {
+    log.log(s + " " + (System.currentTimeMillis() - tick) + "ms");
+    tick();
+  }
 }
