@@ -551,6 +551,8 @@ public class Driver{
         URL importModuleClassFile = importModuleClassFileURI.toURL();
         dependentFiles.add(importModuleClassFile.getPath());
         
+        log.log(importModuleClassFile.toString());
+        
         String thisRelativePath = importModuleRelativePath;
         
         if (thisRelativePath.endsWith("*"))
