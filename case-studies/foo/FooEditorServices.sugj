@@ -5,14 +5,17 @@ import foo.FooSugar;
 
 public editor services FooEditorServices {
   colorer C1
-    keyword : 13 168 55 bold      
+    keyword : 255 168 55 bold      
   
   colorer C2
-    _.TypeName : green
+    _.TypeName : red
+    _.MyId     : blue
     _.Foo      : green
-  
+
 }
 
 class Test2 {
-    String x = nil;
+  TYPE v = nil;
+  String x = nil;
+  String y = null;
 }
