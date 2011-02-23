@@ -19,6 +19,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
   
   @Override
   public IParseController getWrapped() {
+    initDescriptor();
     IParseController result = super.getWrapped();
     if (result instanceof SGLRParseController) {
       JSGLRI parser = ((SGLRParseController) result).getParser();
@@ -34,10 +35,14 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
     return result;
   }
   
-  public static synchronized Descriptor getDescriptor() {
+  public static synchronized Descriptor initDescriptor() {
     try {
-      if (descriptor == null)
+      if (descriptor == null) {
         descriptor = new SugarJDescriptor(SugarJParseControllerGenerated.getDescriptor());
+        setDescriptor(descriptor);
+        // TODO: Optimize - generated parse controller also registers and reinitializes the descriptor...
+        Environment.registerDescriptor(descriptor.getLanguage(), descriptor);
+      }
       return descriptor;
     } catch (BadDescriptorException e) {
       Environment.logException("Bad descriptor for " + LANGUAGE + " plugin", e);

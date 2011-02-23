@@ -3,6 +3,8 @@ package org.sugarj.editor;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -122,7 +124,8 @@ public class SugarJParser extends JSGLRI {
 
 
   public List<IStrategoTerm> getEditorServices() {
-    return driver.getEditorServices();
+    final List<IStrategoTerm> empty = Collections.emptyList();
+    return driver == null ? empty : driver.getEditorServices();
   }
   
 }

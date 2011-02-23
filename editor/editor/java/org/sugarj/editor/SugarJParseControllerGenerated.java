@@ -32,6 +32,10 @@ public class SugarJParseControllerGenerated extends DynamicParseController
       createDescriptor();
     return descriptor;
   }
+  
+  protected static synchronized void setDescriptor(Descriptor descriptor) {
+    SugarJParseControllerGenerated.descriptor = descriptor;
+  }
 
   private static void createDescriptor()
   { 

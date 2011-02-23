@@ -12,3 +12,7 @@ public editor services FooEditorServices {
     _.Foo      : green
   
 }
+
+class Test2 {
+    String x = nil;
+}
