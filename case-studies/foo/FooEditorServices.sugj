@@ -1,0 +1,11 @@
+package foo;
+
+import org.sugarj.languages.EditorServices; 
+import foo.FooSugar;
+
+public editor services FooEditorServices {
+  colorer C1
+    keyword : 13 168 55 bold      
+  
+  colorer C2
+}
