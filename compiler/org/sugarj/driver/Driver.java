@@ -14,6 +14,8 @@ import static org.sugarj.driver.Environment.includePath;
 import static org.sugarj.driver.Environment.sep;
 import static org.sugarj.driver.Log.log;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -320,9 +322,24 @@ public class Driver{
         
         if (services.getTermType() != IStrategoTerm.LIST)
           throw new IllegalStateException("editor services are not a list: " + services);
+
+  
+        String editorServicesFile = bin + sep + relPackageNameSep() + extName + ".serv";
+        FileCommands.createFile(editorServicesFile);
+  
+        log.log("writing editor services to " + editorServicesFile);
         
-        for (IStrategoTerm service : StrategoListIterator.iterable((IStrategoList) services))
+        ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(editorServicesFile)));
+        oos.writeInt(((IStrategoList) services).size());
+        
+        for (IStrategoTerm service : StrategoListIterator.iterable((IStrategoList) services)) {
           editorServices.add(service);
+          oos.writeObject(service.toString());
+        }
+        
+        oos.close();
+        
+  
         
       } finally {
         log.endTask();
@@ -568,6 +585,10 @@ public class Driver{
 	        new URL(importModuleClassFile.getProtocol() + ":" +
 	                importModuleClassFile.getPath().substring(0, importModuleClassFile.getPath().length() - 5) + "str");
 	      //searchStrFile(importModuleRelativePath, isStdLibModule);
+	      
+	      URL importModuleSERVFile = 
+          new URL(importModuleClassFile.getProtocol() + ":" +
+                  importModuleClassFile.getPath().substring(0, importModuleClassFile.getPath().length() - 5) + "serv");
 	
 	      if (new File(importModuleSDFFile.getPath()).exists()) {
 	        newSyntax = true;
@@ -629,6 +650,28 @@ public class Driver{
 	          log.endTask();
 	        }
 	      }
+	      
+	      if (new File(importModuleSERVFile.getPath()).exists()) {
+          newSyntax = true;
+          dependentFiles.add(importModuleSERVFile.getPath());
+          
+          log.beginTask("Incorporation", "Incorporate the imported editor services " + thisRelativePath);
+          try {
+            ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(importModuleSERVFile.getPath())));
+            
+            int services = ois.readInt();
+            for (int i = 0; i < services; i++)
+              try {
+                editorServices.add(ATermCommands.atermFromString((String) ois.readObject()));
+              } catch (ClassNotFoundException e) {
+                throw new RuntimeException("ill-formed editor service in " + importModuleSERVFile, e);
+              }
+            
+            ois.close();
+          } finally {
+            log.endTask();
+          }
+        }
 	      
 	      if (importsChanged && newSyntax || importModuleSourceFile != null && allInputFiles.contains(importModuleSourceFile))
 	        skipCache = true;
