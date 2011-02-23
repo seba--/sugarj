@@ -39,12 +39,12 @@ public class SugarJParser extends JSGLRI {
     Driver.initialize();
     driver = new Driver();
     
-    Environment.includePath.add("/Users/lk/opt/eclipse/plugins/org.spoofax.jsglr_0.3.0.201102221950.jar");
-    Environment.includePath.add("/Users/lk/opt/Eclipse/plugins/org.strategoxt.strj_0.17.92.201102221950");
-    Environment.includePath.add("/Users/lk/opt/Eclipse/plugins/org.strategoxt.strj_0.17.92.201102221950/java/strategoxt.jar");
-    Environment.includePath.add("/Users/lk/opt/Eclipse/plugins/org.spoofax.interpreter.core_0.4.0.201102221950.jar");
-    Environment.includePath.add("/Users/lk/opt/Eclipse/plugins/org.spoofax.interpreter.library.jsglr_0.3.9.201102221950.jar");
-    Environment.includePath.add("/Users/lk/opt/Eclipse/plugins/org.spoofax.terms_1.0.0.201102221950.jar");
+    Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.spoofax.jsglr_0.3.0.201102091215.jar");
+    Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.strategoxt.strj_0.17.92.201102091215");
+    Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.strategoxt.strj_0.17.92.201102091215/java/strategoxt.jar");
+    Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.spoofax.interpreter.core_0.4.0.201102091215.jar");
+    Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.spoofax.interpreter.library.jsglr_0.3.9.201102091215.jar");
+    Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.spoofax.terms_1.0.0.201102091215.jar");
 
     assert projectPath != null;
     Environment.srcPath.add(projectPath);
