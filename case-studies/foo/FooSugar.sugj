@@ -10,10 +10,18 @@ import org.sugarj.languages.Java;
 public sugar FooSugar {
   context-free syntax
     "nil" -> JavaLiteral {cons("Foo"), prefer}
+    FooTypeId -> JavaTypeName {cons("TypeName"), prefer}
+    FooTypeName -> FooTypeId {cons("MyId")}
+    
+  lexical syntax
+    "TYPE" -> FooTypeName
+    "TYPE" -> JavaId {reject}
   
   signature constructors
     Foo : Literal
+    MyId : String -> FooTypeId
   
   desugarings
     \ Foo -> Null \
+    \ MyId(s) -> Id("String") \
 }
