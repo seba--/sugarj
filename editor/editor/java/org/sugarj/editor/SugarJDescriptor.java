@@ -23,6 +23,8 @@ import org.strategoxt.imp.runtime.parser.SGLRParseController;
 public class SugarJDescriptor extends Descriptor {
 
   private final IStrategoAppl baseDocument;
+  
+  private List<IStrategoTerm> lastServices;
 
   public SugarJDescriptor(Descriptor baseDescriptor) throws BadDescriptorException {
     super(baseDescriptor.getDocument());
@@ -34,10 +36,13 @@ public class SugarJDescriptor extends Descriptor {
       Class<T> type, SGLRParseController controller)
       throws BadDescriptorException {
     
-    if (controller.getParser() instanceof SugarJParser) {
+    if (controller != null && controller.getParser() instanceof SugarJParser) {
       List<IStrategoTerm> services = ((SugarJParser) controller.getParser()).getEditorServices();
-      setDocument(composeDefinitions(baseDocument, services));
-      simpleClearCache(controller); // TODO: only clear when necessary
+      if (!services.equals(lastServices)) {
+        simpleClearCache(controller);
+        setDocument(composeDefinitions(baseDocument, services));
+        lastServices = services;
+      }
     }
     
     return super.createService(type, controller);
@@ -45,12 +50,12 @@ public class SugarJDescriptor extends Descriptor {
   
   private static IStrategoAppl composeDefinitions(IStrategoAppl base, List<IStrategoTerm> extensions) {
     IStrategoConstructor cons = base.getConstructor();
-    if (cons.getName().equals("Module") && cons.getSubtermCount() == 3) {
+    if (cons.getName().equals("Module") && cons.getArity() == 3) {
       ITermFactory factory = Environment.getTermFactory();
       List<IStrategoTerm> allDefinitions = new ArrayList<IStrategoTerm>();
       addAll(allDefinitions, (IStrategoList) termAt(base, 2));
       allDefinitions.addAll(extensions);
-      return factory.makeAppl(cons, termAt(base, 0), factory.makeList(allDefinitions));
+      return factory.makeAppl(cons, termAt(base, 0), termAt(base, 1), factory.makeList(allDefinitions));
     } else {
       throw new IllegalStateException("Unsupported editor descriptor format:" + cons);
     }
