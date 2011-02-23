@@ -10,7 +10,7 @@ import org.sugarj.driver.Environment;
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  *
  */
-public class Cache<K,V> implements Serializable {
+public class Cache<K extends Serializable,V extends Serializable> implements Serializable {
 
   private static final long serialVersionUID = -2259409096012167237L;
 

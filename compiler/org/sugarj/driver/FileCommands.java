@@ -41,8 +41,9 @@ public class FileCommands {
   }
 
   public static void delete(String file) throws IOException {
-    if (DO_DELETE && !keepFiles.contains(file))
-      new File(file).delete();
+    if (DO_DELETE)
+      if (!keepFiles.contains(file))
+        new File(file).delete();
   }
 
   public static void copyFile(String from, String to) throws IOException {

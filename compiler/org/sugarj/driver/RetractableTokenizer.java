@@ -18,10 +18,11 @@ public class RetractableTokenizer extends Tokenizer {
     super(input, filename, keywords);
   }
   
-  public void unbindAstNode(ISimpleTerm node) {
+  public void retract(ISimpleTerm node) {
     assert getTokenizer(node) == this;
     
-    getTokens().remove(getTokens().size() - 1);
+    if (currentToken().getKind() == IToken.TK_EOF)
+      getTokens().remove(getTokens().size() - 1);
     
     IToken tok = getLeftToken(node);
     

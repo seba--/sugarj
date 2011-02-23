@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.sugarj.driver.ATermCommands;
 
 /**
  * The key of some SDF module as needed for caching.
@@ -27,16 +26,19 @@ public class ModuleKey implements Externalizable {
 
   private boolean checkGet;
   public Map<String, Long> imports;
-  public IStrategoTerm body;
+  public String body;
   
   /**
    * For deserialization only.
    */
   public ModuleKey() {}
   
-  public ModuleKey(Collection<String> dependentFiles, IStrategoTerm module) {
+  public ModuleKey(Collection<String> dependentFiles, IStrategoTerm module) throws IOException {
     this.imports = new HashMap<String, Long>();
-    this.body = module;
+    
+    StringBuffer buf = new StringBuffer();
+    module.writeAsString(buf, Integer.MAX_VALUE);
+    this.body = buf.toString();
     
     for (String file : dependentFiles)
       imports.put(file, new File(file).lastModified());
@@ -63,7 +65,7 @@ public class ModuleKey implements Externalizable {
       imports.put((String) in.readObject(), in.readLong());
     }
     
-    body = ATermCommands.atermFromString((String) in.readObject());
+    body = (String) in.readObject();
   }
 
   @Override
@@ -74,7 +76,7 @@ public class ModuleKey implements Externalizable {
       out.writeLong(entry.getValue());
     }
     
-    out.writeObject(body.toString());
+    out.writeObject(body);
   }
 
   void doGet() {
