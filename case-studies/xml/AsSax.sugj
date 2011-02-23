@@ -37,10 +37,10 @@ public sugar AsSax {
 	    Document(_,c,_) -> 
 	      java_bstm* |[
 	         java_x.startDocument();
-	         ~*bstm*
+	         java_bstm*;
 	         java_x.endDocument();
 	      ]|
-	      where <content-to-stms(|java_x)> c => bstm*
+	      where <content-to-stms(|java_x)> c => java_bstm*
 	
 	  /**
 	   * @todo  Support namespaces
@@ -49,25 +49,25 @@ public sugar AsSax {
 	    Element(QName(pref, n), atts, children, QName(pref, n)) ->
 	      java_bstm* |[
 	         org.xml.sax.helpers.AttributesImpl java_y = new org.xml.sax.helpers.AttributesImpl();
-	         ~*bstm1*
+	         java_bstm1*;
 	         java_x.startElement(~<java-string-prefix> pref, ~<java-string-expr> n, ~<java-string-qname> (pref,n), java_y);
-	         ~*bstm2*
+	         java_bstm2*;
 	         java_x.endElement(~<java-string-prefix> pref, ~<java-string-expr> n, ~<java-string-qname> (pref,n));
 	      ]|
-	      where <map(content-to-stms(|java_x))> children => bstm2*
+	      where <map(content-to-stms(|java_x))> children => java_bstm2*
 	          ; new => java_y
-	          ; <map(attribute-to-stm(|java_y))> atts => bstm1*
+	          ; <map(attribute-to-stm(|java_y))> atts => java_bstm1*
 	
 	   content-to-stm(|java_x) :
       EmptyElement(QName(pref, n), atts) ->
         java_bstm* |[
            org.xml.sax.helpers.AttributesImpl java_y = new org.xml.sax.helpers.AttributesImpl();
-           ~*bstm1*
+           java_bstm1*;
            java_x.startElement(~<java-string-prefix> pref, ~<java-string-expr> n, ~<java-string-qname> (pref, n), java_y);
            java_x.endElement(~<java-string-prefix> pref, ~<java-string-expr> n, ~<java-string-qname> (pref, n));
         ]|
         where new => java_y
-            ; <map(attribute-to-stm(|java_y))> atts => bstm1*
+            ; <map(attribute-to-stm(|java_y))> atts => java_bstm1*
 	
 	  content-to-stm(|java_x) :
 	    TextFromMetaExpr(java_e) ->
