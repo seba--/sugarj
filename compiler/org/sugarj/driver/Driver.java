@@ -69,8 +69,6 @@ public class Driver{
    */
   private static boolean importsChanged = false;
 
-  private static boolean genJava = false;
-  
   private URI sourceFile;
   private String javaOutDir;
   private String javaOutFile;
@@ -193,8 +191,8 @@ public class Driver{
         done = parseResult.parsingFinished();
       }
       
-      if (genJava) {
-        String f = new File(sourceFile).getParent() + sep + mainModuleName + ".java";
+      if (Environment.generateJavaFile) {
+        String f = Environment.bin + sep + relPackageNameSep() + mainModuleName + ".java";
         FileCommands.copyFile(javaOutFile, f);
         log.log("Wrote generated Java file to " + f);
       }
@@ -304,7 +302,7 @@ public class Driver{
           FileCommands.appendToFile(
               javaOutFile,
               "/* auto-generated dummy class as replacement\n" + 
-              " * for extracted sugar.\n" +
+              " * for extracted editor services.\n" +
               " */\n" +
               (isPublic ? "public " : "") + "class " + mainModuleName + "{}\n");
 
@@ -1153,7 +1151,7 @@ public class Driver{
       importsChanged = true;
     
     if (line.hasOption("gen-java"))
-      genJava = true;
+      Environment.generateJavaFile = true;
     
     if (line.hasOption("atomic-imports"))
       Environment.atomicImportParsing = true;
