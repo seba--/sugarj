@@ -42,7 +42,8 @@ public class Environment {
    * don't check resulting sdf and stratego files after splitting
    */
   public static boolean noChecking = false;
-  
+
+  public static boolean generateJavaFile = false;
   
   public static String trans = "sugarj" + sep + "driver" + sep + "transformations";
   public static String tmpDir = System.getProperty("java.io.tmpdir");
@@ -56,4 +57,5 @@ public class Environment {
     srcPath.add(src);
     includePath.add(bin);
   }
+
 }
