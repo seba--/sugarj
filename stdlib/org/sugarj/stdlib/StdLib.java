@@ -3,7 +3,6 @@ package org.sugarj.stdlib;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -17,6 +16,7 @@ public class StdLib {
   public static URI sdfTbl = new File(stdLibDir.getPath() + "/" + "org/sugarj/languages/Sdf2.tbl").toURI();
   public static URI strategoDef = new File(stdLibDir.getPath() + "/" + "org/sugarj/languages/Stratego.def").toURI();
   public static URI strategoTbl = new File(stdLibDir.getPath() + "/" + "org/sugarj/languages/Stratego.tbl").toURI();
+  public static URI editorServiceDef = new File(stdLibDir.getPath() + "/" + "org/sugarj/languages/EditorServices.def").toURI();
 
   public static URI initGrammar = new File(stdLibDir.getPath() + "/" + "org/sugarj/init/initGrammar.sdf").toURI();
   public static String initGrammarModule = "org/sugarj/init/initGrammar";

@@ -2,9 +2,9 @@ package org.sugarj.driver;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -48,9 +48,9 @@ public class Environment {
   public static String tmpDir = System.getProperty("java.io.tmpdir");
   
   
-  public static List<String> srcPath = new ArrayList<String>();
+  public static Set<String> srcPath = new HashSet<String>();
   
-  public static List<String> includePath = new ArrayList<String>();
+  public static Set<String> includePath = new HashSet<String>();
   
   public static void init() throws IOException {
     srcPath.add(src);

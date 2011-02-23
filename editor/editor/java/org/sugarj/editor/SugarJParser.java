@@ -19,7 +19,8 @@ import org.sugarj.driver.FileCommands;
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
 public class SugarJParser extends JSGLRI {
-  
+
+  private String projectPath;
   private Driver driver;
 
   public SugarJParser(JSGLRI parser) {
@@ -45,8 +46,14 @@ public class SugarJParser extends JSGLRI {
     Environment.includePath.add("/Users/lk/opt/Eclipse/plugins/org.spoofax.interpreter.library.jsglr_0.3.9.201102221950.jar");
     Environment.includePath.add("/Users/lk/opt/Eclipse/plugins/org.spoofax.terms_1.0.0.201102221950.jar");
 
-    // TODO why does this not work for pair.concrete.Desugar???
+    assert projectPath != null;
+    Environment.srcPath.add(projectPath);
+    Environment.bin = projectPath;
+    
     Environment.atomicImportParsing = true;
+
+    // use this to temporarily deactivate caching
+    // Environment.wocache = true;
     
 //    String result = org.strategoxt.stratego_lib.Main.class.getProtectionDomain().getCodeSource().getLocation().getFile();
 //            if (Platform.getOS().equals(Platform.OS_WIN32)) {
@@ -84,6 +91,11 @@ public class SugarJParser extends JSGLRI {
     IStrategoTerm term = driver.getSugaredSyntaxTree();
     
     return term;
+  }
+
+
+  public void setProjectPath(String projectPath) {
+    this.projectPath = projectPath;
   }
   
   @Override

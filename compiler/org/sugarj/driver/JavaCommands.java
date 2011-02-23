@@ -2,7 +2,7 @@ package org.sugarj.driver;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
+import java.util.Collection;
 
 import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
 
@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
  */
 public class JavaCommands {
 
-  public static void javac(String java, String dir, List<String> cp) throws IOException {
+  public static void javac(String java, String dir, Collection<String> cp) throws IOException {
     javac(java, dir, cp.toArray(new String[] {}));
   }
 

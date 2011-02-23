@@ -574,7 +574,7 @@ public class Driver{
   }
 
 
-  private URI searchFile(String what, String where, String extension, String relativePath, List<String> searchPath, boolean searchStdLib) throws MalformedURLException {
+  private URI searchFile(String what, String where, String extension, String relativePath, Set<String> searchPath, boolean searchStdLib) throws MalformedURLException {
     URI result = null;
     log.beginTask("Searching", "Search for " + what);
     try {
@@ -631,7 +631,7 @@ public class Driver{
 //    return searchFile("compiled desugaring", "compiled files", STR_OUTPUT_EXTENSION, relativePath, includePath, searchStdLib);
 //  }
   
-  private ClassLoader createClassLoader(String what, List<String> path, boolean searchStdLib) throws MalformedURLException {
+  private ClassLoader createClassLoader(String what, Collection<String> path, boolean searchStdLib) throws MalformedURLException {
     // log.beginTask("Creating", "Create a class loader for " + what);
     try {
       URL[] urls = new URL[path.size() + 1];

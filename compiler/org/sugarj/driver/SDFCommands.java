@@ -58,6 +58,7 @@ public class SDFCommands {
       "-Idef", toCygwinPath(StdLib.javaDef.getPath()),
       "-Idef", toCygwinPath(StdLib.sdfDef.getPath()),
       "-Idef", toCygwinPath(StdLib.strategoDef.getPath()),
+      "-Idef", toCygwinPath(StdLib.editorServiceDef.getPath()),
       "-I", toCygwinPath(StdLib.stdLibDir.getPath()),
     }));
     
