@@ -41,7 +41,6 @@ public class SugarJParser extends JSGLRI {
     driver = new Driver();
     
     Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.spoofax.jsglr_0.3.0.201102091215.jar");
-    Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.strategoxt.strj_0.17.92.201102091215");
     Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.strategoxt.strj_0.17.92.201102091215/java/strategoxt.jar");
     Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.spoofax.interpreter.core_0.4.0.201102091215.jar");
     Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.spoofax.interpreter.library.jsglr_0.3.9.201102091215.jar");
