@@ -4,6 +4,7 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
 import xml.AsSax;
+import xml.Test;
 import xml.XmlJavaSyntax;
 
 public class BookTest extends xml.Test {
