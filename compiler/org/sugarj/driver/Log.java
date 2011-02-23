@@ -78,6 +78,10 @@ public class Log {
       endTask(bad);
   }
   
+  public void log(Object o) {
+    log(o.toString());
+  }
+  
   public synchronized void log(String text) {
     if (silent >= 0)
       return;

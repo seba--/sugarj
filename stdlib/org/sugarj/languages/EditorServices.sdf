@@ -3,12 +3,12 @@ imports org/sugarj/languages/SugarJ
         EditorServicesRenamed
 exports
   sorts
-    EditorServiceDecHead EditorServiceBody
+    EditorServicesDecHead EditorServicesBody
     
   context-free syntax
-    EditorServiceDecHead EditorServiceBody
-      -> SugarDec {cons("EditorServiceDec")}
+    EditorServicesDecHead EditorServicesBody
+      -> SugarDec {cons("EditorServicesDec")}
     
-    AnnoOrSugarMod* "editor" "services" JavaId -> EditorServiceDecHead {cons("EditorServiceDecHead")}
-    "{" EditorServiceSection*  "}" -> EditorServiceBody {cons("EditorServiceBody")}
+    AnnoOrSugarMod* "editor" "services" JavaId -> EditorServicesDecHead {cons("EditorServicesDecHead")}
+    "{" EditorServiceSection*  "}" -> EditorServicesBody {cons("EditorServicesBody")}
     

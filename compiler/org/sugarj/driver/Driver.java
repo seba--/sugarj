@@ -38,6 +38,7 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
+import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.InvalidParseTableException;
 import org.spoofax.jsglr.client.ParseTable;
@@ -46,6 +47,7 @@ import org.spoofax.jsglr.client.imploder.Token;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
+import org.spoofax.terms.StrategoListIterator;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.lang.Context;
@@ -98,6 +100,8 @@ public class Driver{
   private HybridInterpreter interp;
   private JSGLRI parser;
   private Context makePermissiveContext;
+  
+  private List<IStrategoTerm> editorServices;
   
   /**
    * the next parsing and desugaring uses no cache lookup if skipCache.
@@ -260,6 +264,76 @@ public class Driver{
     }
   }
 
+  
+  private void processEditorServicesDec(IStrategoTerm toplevelDecl) throws IOException {
+    log.beginTask(
+        "processing",
+        "PROCESS the desugared editor services declaration.");
+    try {
+      sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      
+      String extName = null;
+      String fullExtName = null;
+      boolean isPublic = false;
+
+      IStrategoTerm head = getApplicationSubterm(toplevelDecl, "EditorServicesDec", 0);
+      IStrategoTerm body= getApplicationSubterm(toplevelDecl, "EditorServicesDec", 1);
+      
+      log.beginTask("Extracting name and accessibility of the editor services.");
+      try {
+        extName =
+          SDFCommands.prettyPrintJava(
+          getApplicationSubterm(head, "EditorServicesDecHead", 1), interp);    
+        
+        IStrategoTerm mods = getApplicationSubterm(head, "EditorServicesDecHead", 0);
+        
+        for (IStrategoTerm t : getList(mods))
+          if (isApplication(t, "Public"))
+          {
+            isPublic = true;
+            break;
+          }
+        
+        fullExtName = relPackageNameSep() + extName;
+
+        log.log("The name of the editor services is '" + extName + "'.");
+        log.log("The full name of the editor services is '" + fullExtName + "'.");
+
+        if (extName.equals(mainModuleName))
+          FileCommands.appendToFile(
+              javaOutFile,
+              "/* auto-generated dummy class as replacement\n" + 
+              " * for extracted sugar.\n" +
+              " */\n" +
+              (isPublic ? "public " : "") + "class " + mainModuleName + "{}\n");
+
+        
+
+        if (isPublic)
+          log.log("The editor services is public.");
+        else
+          log.log("The editor services is not public.");
+      
+        log.log("The body of the editor services is:");
+        log.log(body.toString());
+        
+        IStrategoTerm services = ATermCommands.getApplicationSubterm(body, "EditorServicesBody", 0);
+        
+        if (services.getTermType() != IStrategoTerm.LIST)
+          throw new IllegalStateException("editor services are not a list: " + services);
+        
+        for (IStrategoTerm service : StrategoListIterator.iterable((IStrategoList) services))
+          editorServices.add(service);
+        
+      } finally {
+        log.endTask();
+      }
+    } finally {
+      log.endTask();
+    }
+  }
+  
+  
   private void processToplevelDeclaration(IStrategoTerm toplevelDecl)
       throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
     if (isApplication(toplevelDecl, "PackageDec"))
@@ -278,6 +352,8 @@ public class Driver{
         processJavaTypeDec(toplevelDecl);
       else if (isApplication(toplevelDecl, "SugarDec"))
         processSugarDec(toplevelDecl);
+      else if (isApplication(toplevelDecl, "EditorServicesDec")) 
+        processEditorServicesDec(toplevelDecl);
       else
         throw new ParseException("unexpected input at toplevel:\n"
             + "toplevel declaration: " + toplevelDecl, -1);
@@ -455,13 +531,17 @@ public class Driver{
         files = searchClassFiles(importModuleRelativePath, isStdLibModule);
       }
       
-      if (!files.isEmpty())
+      if (!files.isEmpty()) {
         log.log("Found imported module on the class path.");
+        log.log(files.get(0).toString());
+      }
       else {
         String msg = "module not found " + importModule;
         for (int i = ImploderAttachment.getLeftToken(toplevelDecl).getIndex(),  
                max = ImploderAttachment.getRightToken(toplevelDecl).getIndex(); i <= max; i++)
           ((Token) inputTreeBuilder.getTokenizer().getTokenAt(i)).setError(msg);
+        
+        log.log("no module found");
       }
       
       
@@ -1298,6 +1378,10 @@ public class Driver{
     ImploderAttachment.getTokenizer(term).initAstNodeBinding();
     
     return term;
+  }
+  
+  public List<IStrategoTerm> getEditorServices() {
+    return editorServices;
   }
     
 }
