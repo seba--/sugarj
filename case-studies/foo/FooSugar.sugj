@@ -1,0 +1,14 @@
+package foo;
+
+import org.sugarj.languages.Java;
+
+public sugar FooSugar {
+  context-free syntax
+    "fooNULL" -> Literal {cons("Foo")}
+  
+  signature constructors
+    Foo : Literal
+  
+  desugarings
+    \ Foo -> Null \
+}

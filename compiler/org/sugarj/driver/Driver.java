@@ -161,6 +161,7 @@ public class Driver{
       inputTreeBuilder = new RetractableTreeBuilder();
       interp = new HybridInterpreter();
       makePermissiveContext = make_permissive.init();
+      editorServices = new ArrayList<IStrategoTerm>();
       
       // XXX need to load ANY parse table, preferable an empty one.
       parser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.sdfTbl.getPath()), "Sdf2Module");
