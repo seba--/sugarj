@@ -43,9 +43,6 @@ public class SugarJParser extends JSGLRI {
     if (Environment.cacheDir == null)
       Environment.cacheDir = System.getProperty("user.home") + "/.sugarj/cache";
     
-    Driver.initialize();
-    driver = new Driver();
-    
     Environment.includePath.add(getJarPath(SGLR.class));
     Environment.includePath.add(getJarPath(strj.class));
     Environment.includePath.add(getJarPath(Interpreter.class));
@@ -55,8 +52,10 @@ public class SugarJParser extends JSGLRI {
     assert projectPath != null;
     Environment.srcPath.add(projectPath);
     Environment.bin = projectPath;
+    Environment.src = projectPath;
     
     Environment.atomicImportParsing = true;
+    Environment.generateJavaFile = true;
 
     // use this to temporarily deactivate caching
     // Environment.wocache = true;
@@ -79,6 +78,9 @@ public class SugarJParser extends JSGLRI {
     URI uri = new File(dir + Environment.sep + FileCommands.fileName(filename)).toURI();
     FileCommands.writeToFile(dir + Environment.sep + FileCommands.fileName(filename), input);
 
+    Driver.initialize();
+    driver = new Driver();
+    
     try {
       driver.process(uri);
     } catch (Throwable e) {
