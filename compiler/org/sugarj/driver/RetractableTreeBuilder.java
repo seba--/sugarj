@@ -29,8 +29,7 @@ public class RetractableTreeBuilder extends TreeBuilder {
     if (getInput() == null)
       setInput(input);
     
-    setTokenizer(new RetractableTokenizer(input, filename, getTable().getKeywordRecognizer()));
-    setStringIterator(new PushbackStringIterator(input));
+    setTokenizer(new RetractableTokenizer(input, filename, getParseTable().getKeywordRecognizer()));
     isInitialized = true;
   }
   
