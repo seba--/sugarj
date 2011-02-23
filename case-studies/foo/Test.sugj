@@ -1,0 +1,8 @@
+package foo;
+
+import foo.FooSugar;
+import foo.FooEditorServices;
+
+public class Test {
+    String s = nil;
+}

@@ -8,4 +8,7 @@ public editor services FooEditorServices {
     keyword : 13 168 55 bold      
   
   colorer C2
+    _.TypeName : green
+    _.Foo      : green
+  
 }

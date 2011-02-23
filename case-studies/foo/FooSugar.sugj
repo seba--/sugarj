@@ -2,9 +2,14 @@ package foo;
 
 import org.sugarj.languages.Java;
 
+/**
+ * SugarJ extension that saves one character
+ * by introducing a new 'nil' keyword in place
+ * of the old four-letter 'null' keyword.
+ */
 public sugar FooSugar {
   context-free syntax
-    "fooNULL" -> Literal {cons("Foo")}
+    "nil" -> JavaLiteral {cons("Foo"), prefer}
   
   signature constructors
     Foo : Literal
