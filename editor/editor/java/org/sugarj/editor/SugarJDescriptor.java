@@ -38,7 +38,7 @@ public class SugarJDescriptor extends Descriptor {
     
     if (controller != null && controller.getParser() instanceof SugarJParser) {
       List<IStrategoTerm> services = ((SugarJParser) controller.getParser()).getEditorServices();
-      if (!services.equals(lastServices)) {
+      if (services != null && !services.equals(lastServices)) {
         simpleClearCache(controller);
         setDocument(composeDefinitions(baseDocument, services));
         lastServices = services;
