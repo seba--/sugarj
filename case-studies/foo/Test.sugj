@@ -3,6 +3,9 @@ package foo;
 import foo.FooSugar;
 import foo.FooEditorServices;
 
+
 public class Test {
-    String s = nil;
+  TYPE v = nil;
+  String x = nil;
+  String y = null;
 }
