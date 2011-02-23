@@ -39,6 +39,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
     try {
       if (descriptor == null) {
         descriptor = new SugarJDescriptor(SugarJParseControllerGenerated.getDescriptor());
+        descriptor.setAttachmentProvider(SugarJParseControllerGenerated.class);
         setDescriptor(descriptor);
         // TODO: Optimize - generated parse controller also registers and reinitializes the descriptor...
         Environment.registerDescriptor(descriptor.getLanguage(), descriptor);
