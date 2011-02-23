@@ -22,7 +22,7 @@ public class RetractableTokenizer extends Tokenizer {
     assert getTokenizer(node) == this;
     
     if (currentToken().getKind() == IToken.TK_EOF)
-      getTokens().remove(getTokens().size() - 1);
+      removeTokenAt(getTokenCount() - 1);
     
     IToken tok = getLeftToken(node);
     
@@ -32,12 +32,15 @@ public class RetractableTokenizer extends Tokenizer {
     int lastIndex = getTokenCount() - 1;
     assert end == lastIndex;
     
-    setLine(tok.getLine());
-    setStartOffsetSilently(tok.getStartOffset());
-    setOffsetAtLineStart(tok.getStartOffset() - tok.getColumn());
+    setPositions(tok.getLine(), tok.getStartOffset(), tok.getStartOffset() - tok.getColumn());
     
     for (int i = end; i >= start; i--)
-      getTokens().remove(i);
+      removeTokenAt(i);
     
+  }
+  
+  @Override
+  public void setKeywordRecognizer(KeywordRecognizer keywords) {
+    super.setKeywordRecognizer(keywords);
   }
 }

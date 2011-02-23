@@ -238,7 +238,7 @@ public class SDFCommands {
     parser.setStartSymbol(start);
     
     if (treeBuilder instanceof RetractableTreeBuilder && ((RetractableTreeBuilder) treeBuilder).isInitialized())
-      treeBuilder.getTokenizer().setKeywordsRecognizer(parser.getParseTable().getKeywordRecognizer());
+      ((RetractableTokenizer) treeBuilder.getTokenizer()).setKeywordRecognizer(parser.getParseTable().getKeywordRecognizer());
     
     parser.getParser().setTreeBuilder(treeBuilder);
 
