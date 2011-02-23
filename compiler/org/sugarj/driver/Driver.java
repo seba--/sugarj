@@ -29,7 +29,9 @@ import java.net.URLClassLoader;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -101,6 +103,8 @@ public class Driver{
    * the next parsing and desugaring uses no cache lookup if skipCache.
    */
   private boolean skipCache = false;
+  
+  private Set<BadTokenException> collectedErrors = new HashSet<BadTokenException>();
   
   /**
    * Process the given Extensible Java file.
@@ -292,15 +296,22 @@ public class Driver{
     parser.setUseRecovery(recovery);
     
     // read next toplevel decl and stop if that fails
-    if (!SDFCommands.parseImplode(
-        currentGrammarTBL,
-        remainingInput,
-        remainingInputParsed,
-        "NextToplevelDeclaration",
-        false,
-        inputTreeBuilder,
-        parser))
-      return null;
+    boolean success = false;
+    try {
+      success = SDFCommands.parseImplode(
+          currentGrammarTBL,
+          remainingInput,
+          remainingInputParsed,
+          "NextToplevelDeclaration",
+          false,
+          inputTreeBuilder,
+          parser);
+    } finally {
+      if (recovery)
+        collectedErrors.addAll(parser.getCollectedErrors());
+    }
+    
+    if (!success) return null;
 
     IStrategoTerm remainingInputTerm = atermFromFile(remainingInputParsed);
     FileCommands.delete(remainingInputParsed);
@@ -1005,6 +1016,10 @@ public class Driver{
         "java -java sugarj.jar [options] source-files",
         options,
         false);
+  }
+  
+  public Set<BadTokenException> getCollectedErrors() {
+    return collectedErrors;
   }
 
   private static String[] processOptions(Options options, CommandLine line) throws org.apache.commons.cli.ParseException {

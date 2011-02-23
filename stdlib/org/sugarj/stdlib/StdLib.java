@@ -10,7 +10,7 @@ import java.net.URL;
  */
 public class StdLib {
 
-  public static URI stdLibDir = new File("/Users/seba/svn-strategoxt/sugarj/branches/SugarJ-editor-services/stdlib").toURI();
+  public static URI stdLibDir = new File("/Users/lk/projects/StrategoXT/sugarj/branches/SugarJ-editor-services/stdlib").toURI();
 
   public static URI javaDef = new File(stdLibDir.getPath() + "/" + "org/sugarj/languages/Java-15.def").toURI();
   public static URI sdfDef = new File(stdLibDir.getPath() + "/" + "org/sugarj/languages/Sdf2.def").toURI();

@@ -1,7 +1,6 @@
 package org.sugarj.driver;
 
 import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getLeftToken;
-import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getRightToken;
 import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getTokenizer;
 
 import org.spoofax.interpreter.terms.ISimpleTerm;
@@ -21,22 +20,16 @@ public class RetractableTokenizer extends Tokenizer {
   public void retract(ISimpleTerm node) {
     assert getTokenizer(node) == this;
     
-    if (currentToken().getKind() == IToken.TK_EOF)
-      removeTokenAt(getTokenCount() - 1);
-    
     IToken tok = getLeftToken(node);
     
     int start = tok.getIndex();
-    int end = getRightToken(node).getIndex();
-
-    int lastIndex = getTokenCount() - 1;
-    assert end == lastIndex;
     
-    setPositions(tok.getLine(), tok.getStartOffset(), tok.getStartOffset() - tok.getColumn());
-    
-    for (int i = end; i >= start; i--)
+    for (int i = getTokenCount() - 1; i >= start; i--)
       removeTokenAt(i);
     
+    assert getTokenCount() == start;
+    
+    setPositions(tok.getLine(), tok.getStartOffset(), tok.getStartOffset() - tok.getColumn());
   }
   
   @Override

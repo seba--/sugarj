@@ -3,6 +3,7 @@ package org.sugarj.editor;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.shared.BadTokenException;
@@ -13,12 +14,14 @@ import org.sugarj.driver.CommandExecution;
 import org.sugarj.driver.Driver;
 import org.sugarj.driver.Environment;
 import org.sugarj.driver.FileCommands;
-import org.sugarj.driver.Log;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
 public class SugarJParser extends JSGLRI {
+  
+  private Driver driver;
+
   public SugarJParser(JSGLRI parser) {
     super(parser.getParseTable(), parser.getStartSymbol(), parser.getController());
   }
@@ -33,14 +36,14 @@ public class SugarJParser extends JSGLRI {
       Environment.cacheDir = System.getProperty("user.home") + "/.sugarj/cache";
     
     Driver.initialize();
-    Driver driver = new Driver();
+    driver = new Driver();
     
-    Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.spoofax.jsglr_0.3.0.201102091215.jar");
-    Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.strategoxt.strj_0.17.92.201102091215");
-    Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.strategoxt.strj_0.17.92.201102091215/java/strategoxt.jar");
-    Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.spoofax.interpreter.core_0.4.0.201102091215.jar");
-    Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.spoofax.interpreter.library.jsglr_0.3.9.201102091215.jar");
-    Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.spoofax.terms_1.0.0.201102091215.jar");
+    Environment.includePath.add("/Users/lk/opt/eclipse/plugins/org.spoofax.jsglr_0.3.0.201102221950.jar");
+    Environment.includePath.add("/Users/lk/opt/Eclipse/plugins/org.strategoxt.strj_0.17.92.201102221950");
+    Environment.includePath.add("/Users/lk/opt/Eclipse/plugins/org.strategoxt.strj_0.17.92.201102221950/java/strategoxt.jar");
+    Environment.includePath.add("/Users/lk/opt/Eclipse/plugins/org.spoofax.interpreter.core_0.4.0.201102221950.jar");
+    Environment.includePath.add("/Users/lk/opt/Eclipse/plugins/org.spoofax.interpreter.library.jsglr_0.3.9.201102221950.jar");
+    Environment.includePath.add("/Users/lk/opt/Eclipse/plugins/org.spoofax.terms_1.0.0.201102221950.jar");
 
     // TODO why does this not work for pair.concrete.Desugar???
     Environment.atomicImportParsing = true;
@@ -81,6 +84,11 @@ public class SugarJParser extends JSGLRI {
     IStrategoTerm term = driver.getSugaredSyntaxTree();
     
     return term;
+  }
+  
+  @Override
+  public Set<BadTokenException> getCollectedErrors() {
+    return driver.getCollectedErrors();
   }
   
 }
