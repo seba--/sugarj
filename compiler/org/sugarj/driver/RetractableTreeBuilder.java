@@ -36,7 +36,7 @@ public class RetractableTreeBuilder extends TreeBuilder {
   
   public void retract(ISimpleTerm term) {
     assert getTokenizer() instanceof RetractableTokenizer;
-    ((RetractableTokenizer) getTokenizer()).unbindAstNode(term);
+    ((RetractableTokenizer) getTokenizer()).retract(term);
     setOffset(getTokenizer().getStartOffset());
   }
   

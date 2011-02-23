@@ -81,6 +81,7 @@ public class CommandExecution {
   }
 
   public static class ExecutionError extends Error {
+    private static final long serialVersionUID = -4924660269220590175L;
     private final String[] cmds;
 
     public ExecutionError(String message, String[] cmds) {
@@ -139,9 +140,9 @@ public class CommandExecution {
     try {
       Runtime rt = Runtime.getRuntime();
 
-      if (!SILENT_EXECUTION) {
-        log.beginExecution(prefix, cmds);
-      }
+//      if (!SILENT_EXECUTION) {
+//        log.beginExecution(prefix, cmds);
+//      }
 
       Process p = rt.exec(cmds);
 
@@ -158,7 +159,7 @@ public class CommandExecution {
       // Wait for the process to finish
       exitValue = p.waitFor();
 
-      log.endExecution(exitValue, errStreamLogger.getUnloggedMsg());
+//      log.endExecution(exitValue, errStreamLogger.getUnloggedMsg());
     } catch (Throwable t) {
       throw new ExecutionError("problems while executing " + prefix + ": "
           + t.getMessage(), cmds, t);

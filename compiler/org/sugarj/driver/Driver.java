@@ -38,14 +38,16 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.InvalidParseTableException;
+import org.spoofax.jsglr.client.ParseTable;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.spoofax.jsglr.client.imploder.Token;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.strategoxt.HybridInterpreter;
-import org.sugarj.driver.caching.Cache;
-import org.sugarj.driver.caching.ModuleKey;
+import org.strategoxt.imp.runtime.parser.JSGLRI;
+import org.strategoxt.lang.Context;
+import org.strategoxt.permissivegrammars.make_permissive;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.stdlib.StdLib;
 
@@ -72,7 +74,6 @@ public class Driver{
   private String mainModuleName;
 
   private String currentGrammarSDF;
-  private String currentGrammarXTBL;
   private String currentGrammarModule;
   private String currentTransSTR;
   private String currentTransModule;
@@ -89,8 +90,12 @@ public class Driver{
   
   private IStrategoTerm lastSugaredToplevelDecl;
   
-  private RetractableTreeBuilder treeBuilder;
+  private RetractableTreeBuilder inputTreeBuilder;
+  private JSGLRI sdfParser;
+  private JSGLRI strParser;
   private HybridInterpreter interp;
+  private JSGLRI parser;
+  private Context makePermissiveContext;
   
   /**
    * the next parsing and desugaring uses no cache lookup if skipCache.
@@ -130,8 +135,6 @@ public class Driver{
 
       currentGrammarSDF = StdLib.initGrammar.getPath();
       currentGrammarModule = StdLib.initGrammarModule;
-      if (Environment.xtblCompilation)
-        currentGrammarXTBL = StdLib.initGrammarXTBL.getPath();
 
       currentTransSTR = StdLib.initTrans.getPath();
       currentTransModule = StdLib.initTransModule;
@@ -147,8 +150,15 @@ public class Driver{
 
       dependentFiles = new ArrayList<String>();
       
-      treeBuilder = new RetractableTreeBuilder();
+      inputTreeBuilder = new RetractableTreeBuilder();
       interp = new HybridInterpreter();
+      makePermissiveContext = make_permissive.init();
+      
+      // XXX need to load ANY parse table, preferable an empty one.
+      parser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.sdfTbl.getPath()), "Sdf2Module");
+      
+      sdfParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.sdfTbl.getPath()), "Sdf2Module");
+      strParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.strategoTbl.getPath()), "StrategoModule");
       
       boolean done = false;
       while (!done) {
@@ -157,7 +167,7 @@ public class Driver{
         
         // PARSE the next top-level declaration
         IncrementalParseResult parseResult =
-            parseNextToplevelDeclaration(remainingInput);
+            parseNextToplevelDeclaration(remainingInput, true);
         lastSugaredToplevelDecl = parseResult.getToplevelDecl();
         remainingInput = FileCommands.newTempFile("sugj-rest");
         FileCommands.writeToFile(remainingInput, parseResult.getRest());
@@ -213,11 +223,11 @@ public class Driver{
     }
   }
 
-  private IncrementalParseResult parseNextToplevelDeclaration(String filename)
+  private IncrementalParseResult parseNextToplevelDeclaration(String filename, boolean recovery)
       throws IOException, ParseException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     log.beginTask("parsing", "PARSE the next toplevel declaration.");
     try {
-      IStrategoTerm remainingInputTerm = currentParse(filename);
+      IStrategoTerm remainingInputTerm = currentParse(filename, recovery);
 
       if (remainingInputTerm == null)
         throw new ParseException("could not parse toplevel declaration in:\n"
@@ -229,7 +239,7 @@ public class Driver{
 
       try {
         if (!rest.isEmpty())
-          treeBuilder.retract(restTerm);
+          inputTreeBuilder.retract(restTerm);
       } catch (Throwable t) {
         t.printStackTrace();
       }
@@ -270,18 +280,17 @@ public class Driver{
     }
   }
 
-  private IStrategoTerm currentParse(String remainingInput) throws IOException,
+  private IStrategoTerm currentParse(String remainingInput, boolean recovery) throws IOException,
       InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     // recompile the current grammar definition
-    String currentGrammarTBL;
+    ParseTable currentGrammarTBL;
     
-    if (!Environment.xtblCompilation)
-      currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, dependentFiles);
-    else
-      currentGrammarTBL = SDFCommands.finalizeXtbl(currentGrammarXTBL);
+    currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, dependentFiles, sdfParser, makePermissiveContext);
 
     String remainingInputParsed = FileCommands.newTempFile("aterm");
 
+    parser.setUseRecovery(recovery);
+    
     // read next toplevel decl and stop if that fails
     if (!SDFCommands.parseImplode(
         currentGrammarTBL,
@@ -289,7 +298,8 @@ public class Driver{
         remainingInputParsed,
         "NextToplevelDeclaration",
         false,
-        treeBuilder))
+        inputTreeBuilder,
+        parser))
       return null;
 
     IStrategoTerm remainingInputTerm = atermFromFile(remainingInputParsed);
@@ -308,7 +318,7 @@ public class Driver{
       String toplevelIn = FileCommands.newTempFile("aterm");
       String toplevelOut = FileCommands.newTempFile("aterm");
 
-      String currentTransProg = STRCommands.compile(currentTransSTR, "main", dependentFiles);
+      String currentTransProg = STRCommands.compile(currentTransSTR, "main", dependentFiles, strParser);
 
       atermToFile(term, toplevelIn);
       STRCommands.assimilate(currentTransProg, toplevelIn, toplevelOut, interp);
@@ -329,7 +339,7 @@ public class Driver{
       sugaredPackageDecl = lastSugaredToplevelDecl;
       
       String packageName =
-          SDFCommands.prettyPrintJavaTerm(
+          SDFCommands.prettyPrintJava(
           getApplicationSubterm(toplevelDecl, "PackageDec", 1), interp);
 
       log.log("The Java package name is '" + packageName + "'.");
@@ -344,7 +354,7 @@ public class Driver{
 
       FileCommands.appendToFile(
           javaOutFile,
-          SDFCommands.prettyPrintJavaTerm(toplevelDecl, interp) + "\n");
+          SDFCommands.prettyPrintJava(toplevelDecl, interp) + "\n");
     } finally {
       log.endTask();
     }
@@ -360,7 +370,7 @@ public class Driver{
       
       try {
         log.beginSilent();
-        res = parseNextToplevelDeclaration(remainingInput);
+        res = parseNextToplevelDeclaration(remainingInput, false);
         term = res.getToplevelDecl();
       }
       catch (Throwable t) { }
@@ -375,8 +385,11 @@ public class Driver{
         FileCommands.writeToFile(remainingInput, res.getRest());
         pendingImports.add(term);
       }
-      else
+      else {
+        if (term != null)
+          inputTreeBuilder.retract(term);
         break;
+      }
     }
     
     for (IStrategoTerm pendingImport : pendingImports)
@@ -398,7 +411,7 @@ public class Driver{
       try {
         FileCommands.appendToFile(
             javaOutFile,
-            SDFCommands.prettyPrintJavaTerm(toplevelDecl, interp) + "\n");
+            SDFCommands.prettyPrintJava(toplevelDecl, interp) + "\n");
       } finally {
         log.endTask();
       }
@@ -437,7 +450,7 @@ public class Driver{
         String msg = "module not found " + importModule;
         for (int i = ImploderAttachment.getLeftToken(toplevelDecl).getIndex(),  
                max = ImploderAttachment.getRightToken(toplevelDecl).getIndex(); i <= max; i++)
-          ((Token) treeBuilder.getTokenizer().getTokenAt(i)).setError(msg);
+          ((Token) inputTreeBuilder.getTokenizer().getTokenAt(i)).setError(msg);
       }
       
       
@@ -459,10 +472,6 @@ public class Driver{
 	                importModuleClassFile.getPath().substring(0, importModuleClassFile.getPath().length() - 5) + "sdf"); 
 	      //searchSdfFile(importModuleRelativePath, isStdLibModule);
 
-	      URL importModuleXTBLFile =
-          new URL(importModuleClassFile.getProtocol() + ":" +
-                  importModuleClassFile.getPath().substring(0, importModuleClassFile.getPath().length() - 5) + "xtbl");
-	      
 	      URL importModuleSTRFile = 
 	        new URL(importModuleClassFile.getProtocol() + ":" +
 	                importModuleClassFile.getPath().substring(0, importModuleClassFile.getPath().length() - 5) + "str");
@@ -495,23 +504,7 @@ public class Driver{
 	        }
 	      }
 	      
-	      if (Environment.xtblCompilation && 
-	          new File(importModuleXTBLFile.getPath()).exists() &&
-	          !isStdLibModule) {
-          newSyntax = true;
-          dependentFiles.add(importModuleXTBLFile.getPath());
-          
-          log.beginTask("Incorporation", "Incorporate the imported pre-compiled grammar " + thisRelativePath);
-          try {
-            String newXtbl = FileCommands.newTempFile("xtbl");
-            SDFCommands.composeXtbl(currentGrammarXTBL, importModuleXTBLFile.getPath(), newXtbl);
-            currentGrammarXTBL = newXtbl;
-          } finally {
-            log.endTask();
-          }
-        }
-	      
-	      
+
 	
 	      if (new File(importModuleSTRFile.getPath()).exists()) {
 	        newSyntax = true;
@@ -559,10 +552,10 @@ public class Driver{
     log.beginTask("Extracting", "Extract name of imported module");
     try {
       if (isApplication(toplevelDecl, "TypeImportDec"))
-        name = SDFCommands.prettyPrintJavaTerm(toplevelDecl.getSubterm(0), interp);
+        name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp);
       
       if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
-        name = SDFCommands.prettyPrintJavaTerm(toplevelDecl.getSubterm(0), interp) + ".*";
+        name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp) + ".*";
     } finally {
       log.endTask(name);
     }
@@ -660,7 +653,7 @@ public class Driver{
       try {
         FileCommands.appendToFile(
             javaOutFile,
-            SDFCommands.prettyPrintJavaTerm(
+            SDFCommands.prettyPrintJava(
             getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0), interp)
             + "\n");
       } finally {
@@ -693,7 +686,7 @@ public class Driver{
         
         if (isNative) {
           extName =
-            SDFCommands.prettyPrintJavaTerm(
+            SDFCommands.prettyPrintJava(
             getApplicationSubterm(head, "NativeSugarDecHead", 2), interp);
           
           IStrategoTerm mods = getApplicationSubterm(head, "NativeSugarDecHead", 0);
@@ -707,7 +700,7 @@ public class Driver{
         }
         else {
           extName =
-            SDFCommands.prettyPrintJavaTerm(
+            SDFCommands.prettyPrintJava(
             getApplicationSubterm(head, "SugarDecHead", 1), interp);    
           
           IStrategoTerm mods = getApplicationSubterm(head, "SugarDecHead", 0);
@@ -767,9 +760,6 @@ public class Driver{
       String sdfImports = "imports " + StringCommands.printListSeparated(availableSDFImports, " ") + "\n";
       String strImports = "imports " + StringCommands.printListSeparated(availableSTRImports, " ") + "\n";
       
-      if (Environment.xtblCompilation)
-        sdfImports = "";
-      
       if (isNative) {
         String nativeModule = getString(getApplicationSubterm(body, "NativeSugarBody", 0)); 
         
@@ -809,25 +799,33 @@ public class Driver{
         FileCommands.delete(bodyFile);
         FileCommands.delete(sdfExtractTmp);
         
-        SDFCommands.prettyPrintSDF(sdfExtract, sdfExtension);
-
         String sdfExtensionHead =
           "module " + fullExtName + "\n" + sdfImports
                 + (isPublic ? "exports " : "hiddens ") + "\n";
 
-        String sdfExtensionContent = FileCommands.readFileAsString(sdfExtension);
-        
-        FileCommands.writeToFile(sdfExtension, sdfExtensionHead
-            + sdfExtensionContent);
+        String sdfExtensionContent = SDFCommands.prettyPrintSDF(sdfExtract, interp);
+
+        FileCommands.writeToFile(sdfExtension,
+            sdfExtensionHead + sdfExtensionContent);
 
         String strExtensionTerm = FileCommands.newTempFile("aterm");
 
         FileCommands.writeToFile(strExtensionTerm, "Module(\"" + fullExtName
             + "\"" + ", " + atermFromFile(strExtract) + ")" + "\n");
 
-        SDFCommands.prettyPrintSTR(strExtensionTerm, strExtension);
-
-        FileCommands.insert(strImports, strExtension, 2);
+        String strExtensionContent = SDFCommands.prettyPrintSTR(strExtensionTerm, interp);
+        
+        int index = strExtensionContent.indexOf('\n');
+        if (index >= 0)
+          strExtensionContent =
+            strExtensionContent.substring(0, index + 1)
+            + strImports + "\n"
+            + strExtensionContent.substring(index + 1);
+        else
+          strExtensionContent += strImports;
+          
+        
+        FileCommands.writeToFile(strExtension, strExtensionContent);
         
         availableSDFImports.add(fullExtName);
         availableSTRImports.add(fullExtName);
@@ -850,17 +848,6 @@ public class Driver{
           + "\n" + "        " + fullExtName);
       currentGrammarModule = currentGrammarName;
 
-      if (Environment.xtblCompilation) {
-        String xtblExtension =
-          bin + sep + relPackageNameSep()
-              + extName + ".xtbl";
-        
-        SDFCommands.compileXtbl(sdfExtension, xtblExtension, fullExtName);
-        
-        String newXtbl = FileCommands.newTempFile("xtbl");
-        SDFCommands.composeXtbl(currentGrammarXTBL, xtblExtension, newXtbl);
-        currentGrammarXTBL = newXtbl;
-      }
 
       String currentTransName =
         FileCommands.hashFileName("sugarj", currentTransModule + fullExtName);
@@ -879,10 +866,6 @@ public class Driver{
   }
 
   private void checkCurrentGrammar() throws IOException, InvalidParseTableException {
-    if (Environment.xtblCompilation)
-      // we already checked this when separately compiling the parse table
-      return;
-    
     log.beginTask("checking grammar", "CHECK current grammar");
     
     try {
@@ -901,7 +884,7 @@ public class Driver{
     try {
       boolean wocache = Environment.wocache;
       Environment.wocache = true;
-      STRCommands.compile(currentTransSTR, "main", dependentFiles);
+      STRCommands.compile(currentTransSTR, "main", dependentFiles, strParser);
       Environment.wocache = wocache;
     } finally {
       log.endTask();
@@ -916,14 +899,7 @@ public class Driver{
     
     FileCommands.createDir(Environment.bin);
     
-    try {
-      initializeCaches();
-    }
-    catch (IOException e) {
-      e.printStackTrace();
-      SDFCommands.sdfCache = new ModuleKeyCache<String>();
-      STRCommands.strCache = new ModuleKeyCache<String>();
-    }
+    initializeCaches();
     
     allInputFiles = new ArrayList<URI>();
     pendingInputFiles = new ArrayList<URI>();
@@ -1081,9 +1057,6 @@ public class Driver{
     if (line.hasOption("gen-java"))
       genJava = true;
     
-    if (line.hasOption("xtbl"))
-      Environment.xtblCompilation = true;
-    
     if (line.hasOption("atomic-imports"))
       Environment.atomicImportParsing = true;
 
@@ -1191,12 +1164,6 @@ public class Driver{
 
     options.addOption(
         null,
-        "xtbl",
-        false,
-        "Separately compile parse tables.");
-
-    options.addOption(
-        null,
         "atomic-imports",
         false,
         "Parse all import statements simultaneously.");
@@ -1218,28 +1185,41 @@ public class Driver{
     String sdfCache = FileCommands.findFile("sdfCache", Environment.cacheDir);
     String strCache = FileCommands.findFile("strCache", Environment.cacheDir);
 
-    if (sdfCache != null)
+    if (SDFCommands.sdfCache == null && sdfCache != null)
       try {
         log.log("load sdf cache from " + sdfCache);
-        SDFCommands.sdfCache =
-            (Cache<ModuleKey, String>) new ObjectInputStream(new FileInputStream(
-                sdfCache)).readObject();
-      } catch (ClassNotFoundException e) {
-        throw new IOException("could not load sdf cache", e);
+          SDFCommands.sdfCache =
+              (ModuleKeyCache<String>) new ObjectInputStream(new FileInputStream(
+                  sdfCache)).readObject();
+      } 
+      catch (ClassNotFoundException e) {
+        SDFCommands.sdfCache = new ModuleKeyCache<String>();
+        e.printStackTrace();
       }
-    else
-      SDFCommands.sdfCache = new Cache<ModuleKey, String>();
+      catch (IOException e) {
+        SDFCommands.sdfCache = new ModuleKeyCache<String>();
+        e.printStackTrace();
+      }
+    else if (SDFCommands.sdfCache == null)
+      SDFCommands.sdfCache = new ModuleKeyCache<String>();
     
-    if (strCache != null)
+    if (STRCommands.strCache == null && strCache != null)
       try {
         log.log("load str cache from " + strCache);
         STRCommands.strCache =
-            (Cache<ModuleKey, String>) new ObjectInputStream(new FileInputStream(
+            (ModuleKeyCache<String>) new ObjectInputStream(new FileInputStream(
                 strCache)).readObject();
-      } catch (ClassNotFoundException e) {
-        throw new IOException("could not load stratego cache", e);      }
-    else
-      STRCommands.strCache = new Cache<ModuleKey, String>();
+      } 
+      catch (ClassNotFoundException e) {
+        STRCommands.strCache = new ModuleKeyCache<String>();
+        e.printStackTrace();     
+      }
+      catch (IOException e) {
+        STRCommands.strCache = new ModuleKeyCache<String>();
+        e.printStackTrace();
+      }
+    else if (STRCommands.strCache == null)
+      STRCommands.strCache = new ModuleKeyCache<String>();
   }
 
   
@@ -1287,7 +1267,7 @@ public class Driver{
   public IStrategoTerm getSugaredSyntaxTree() {
     
     // XXX empty lists => no tokens
-    IStrategoTerm packageDecl = ATermCommands.makeSome(sugaredPackageDecl, treeBuilder.getTokenizer().getTokenAt(0));
+    IStrategoTerm packageDecl = ATermCommands.makeSome(sugaredPackageDecl, inputTreeBuilder.getTokenizer().getTokenAt(0));
     IStrategoTerm imports = 
       ATermCommands.makeList("JavaImportDec*", ImploderAttachment.getRightToken(packageDecl), sugaredImportDecls);
     IStrategoTerm body =

@@ -1,7 +1,10 @@
 package org.sugarj.driver;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
+
+import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
 
 /**
  * 
@@ -13,8 +16,6 @@ import java.util.List;
  */
 public class JavaCommands {
 
-  private final static String JAVAC = "javac";
-  
   public static void javac(String java, String dir, List<String> cp) throws IOException {
     javac(java, dir, cp.toArray(new String[] {}));
   }
@@ -32,13 +33,19 @@ public class JavaCommands {
     // TODO change to ejc
     
     String[] cmd = new String[] {
-        JAVAC,
         "-cp", cpBuilder.toString(),
         "-d", FileCommands.toWindowsPath(dir),
+        "-source", "1.5",
+        "-nowarn",
         FileCommands.toWindowsPath(java)
     };
     
-    CommandExecution.execute(cmd);
+    // this is ECJ
+    BatchCompiler.compile(
+        cmd,
+        new PrintWriter(System.out),
+        new PrintWriter(System.err),
+        null);
   }
 
   /**

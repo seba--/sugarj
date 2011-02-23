@@ -3,7 +3,6 @@ package org.sugarj.driver;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -33,10 +32,6 @@ public class Environment {
   public static boolean rocache = false;
   public static boolean wocache = false;
   
-  /*
-   * separate parse table compilation
-   */
-  public static boolean xtblCompilation = false;
   
   /* 
    * parse all imports simultaneously, i.e., not one after the other

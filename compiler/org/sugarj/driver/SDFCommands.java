@@ -12,25 +12,24 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import javax.management.RuntimeErrorException;
-
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.ITreeBuilder;
 import org.spoofax.jsglr.client.InvalidParseTableException;
 import org.spoofax.jsglr.client.ParseTable;
-import org.spoofax.jsglr.client.imploder.TreeBuilder;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
-import org.strategoxt.java_front.java_front;
 import org.strategoxt.java_front.pp_java_string_0_0;
-import org.strategoxt.stratego_sglr.implode_asfix_0_0;
+import org.strategoxt.lang.Context;
+import org.strategoxt.lang.StrategoExit;
+import org.strategoxt.stratego_sdf.pp_sdf_string_0_0;
+import org.strategoxt.strc.pp_stratego_string_0_0;
 import org.strategoxt.tools.main_pack_sdf_0_0;
-import org.sugarj.driver.caching.Cache;
 import org.sugarj.driver.caching.ModuleKey;
+import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.stdlib.StdLib;
 
 /**
@@ -42,19 +41,9 @@ import org.sugarj.stdlib.StdLib;
  */
 public class SDFCommands {
   
-  private final static String PACK_SDF = StdLib.binDir.getPath() + "pack-sdf";
-  private final static String SGLRI = StdLib.binDir.getPath() + "sglri";
   private final static String SDF_2_TABLE = StdLib.binDir.getPath() + "sdf2table";
-  private final static String SDF_XTBL = StdLib.binDir.getPath() + "sdf-xtbl";
-  private final static String XTBL_COMPOSE = StdLib.binDir.getPath() + "xtbl-compose";
-  private final static String XTBL_FINALIZE = StdLib.binDir.getPath() + "xtbl-finalize";
-  private final static String PP_ATERM = StdLib.binDir.getPath() + "pp-aterm";
-  private final static String PP_SDF = StdLib.binDir.getPath() + "pp-sdf";
-  private final static String PP_STRATEGO = StdLib.binDir.getPath() + "pp-stratego";
-  private final static String PP_JAVA = StdLib.binDir.getPath() + "pp-java";
-  private final static String IMPLODE_ASFIX = StdLib.binDir.getPath() + "implode-asfix";
   
-  public static Cache<ModuleKey, String> sdfCache = null;
+  public static ModuleKeyCache<String> sdfCache = null;
   
   private static void packSdf(String sdf, String def) throws IOException {
     
@@ -103,23 +92,7 @@ public class SDFCommands {
     if (!new File(tbl).exists())
       throw new RuntimeException("execution of sdf2table failed");
   }
-  
-  private static void sdfXtbl(String def, String xtbl, String module) throws IOException {
-    String[] cmd = new String[] {
-        SDF_XTBL,
-        "-i", toCygwinPath(def),
-        "-o", toCygwinPath(xtbl),
-        "-m", module,
-        "-q", module,
-        "--internal-layout"
-    };
-    
-    CommandExecution.executeWithPrefix("sdf-xtbl", cmd);
-    
-    if (!new File(xtbl).exists())
-      throw new RuntimeException("execution of sdf-xtbl failed");
-  }
-  
+
   private static void normalizeTable(String def, String module) throws IOException {
     String[] cmd = new String[] {
         "bash",
@@ -147,63 +120,19 @@ public class SDFCommands {
    * @throws BadTokenException 
    * @throws TokenExpectedException 
    */
-  public static String compile(String sdf, String module, Collection<String> dependentFiles) throws IOException,
+  public static ParseTable compile(String sdf, String module, Collection<String> dependentFiles, JSGLRI sdfParser, Context context) throws IOException,
       InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
-    ModuleKey key = getModuleKeyForGrammar(sdf, module, dependentFiles);
+    ModuleKey key = getModuleKeyForGrammar(sdf, module, dependentFiles, sdfParser);
     String tbl = lookupGrammarInCache(key);
     if (tbl == null) {
-      tbl = generateParseTable(key, sdf, module);
+      tbl = generateParseTable(key, sdf, module, context);
       cacheParseTable(key, tbl);
     }
-    return tbl;
+    
+    return org.strategoxt.imp.runtime.Environment.loadParseTable(tbl);
   }
   
-  public static void compileXtbl(String sdf,
-                                 String xtbl,
-                                 String module) throws IOException {
-    log.beginTask("Generating", "Compile the parse table separately");
-    try {
-      String def = FileCommands.newTempFile("def");
-      packSdf(sdf, def);
-      sdfXtbl(def, xtbl, module);
-    } finally {
-      log.endTask();
-    }
-  }
-
-  public static void composeXtbl(String xtbl1,
-                                 String xtbl2,
-                                 String xtblOut) {
-    String[] cmd = new String[] {
-        XTBL_COMPOSE,
-        "-o", toCygwinPath(xtblOut),
-        toCygwinPath(xtbl1),
-        toCygwinPath(xtbl2)
-    };
-    
-    CommandExecution.executeWithPrefix("xtbl-compose", cmd);
-    
-    if (!new File(xtblOut).exists())
-      throw new RuntimeException("execution of xtbl-compose failed");
-  }
-
-  public static String finalizeXtbl(String xtbl) throws IOException {
-    String tbl = FileCommands.newTempFile("tbl");
-    
-    String[] cmd = new String[] {
-        XTBL_FINALIZE,
-        "-i", toCygwinPath(xtbl),
-        "-o", toCygwinPath(tbl)
-    };
-    
-    CommandExecution.executeWithPrefix("xtbl-finalize", cmd);
-    
-    if (!new File(tbl).exists())
-      throw new RuntimeException("execution of xtbl-finalize failed");
-    
-    return tbl;
-  }
-
+  
   private static void cacheParseTable(ModuleKey key, String tbl) {
     if (sdfCache == null)
       return;
@@ -211,10 +140,6 @@ public class SDFCommands {
     log.beginTask("Caching", "Cache parse table");
     try {
       sdfCache.put(key, tbl);
-      FileCommands.keepFiles.add(tbl);
-
-      if (CommandExecution.CACHE_INFO)
-        log.log("Cache Location: " + tbl);
     } finally {
       log.endTask();
     }
@@ -229,13 +154,6 @@ public class SDFCommands {
     log.beginTask("Searching", "Search parse table in cache");
     try {
       result = sdfCache.get(key);
-      
-      // Ignore non-existing files
-      if (result != null && !FileCommands.exists(result))
-        result = null;
-      
-      if (result != null && CommandExecution.CACHE_INFO)
-        log.log("Cache location: " + result);
     } finally {
       log.endTask(result != null);
     }
@@ -243,13 +161,10 @@ public class SDFCommands {
     return result;
   }
   
-  private static ModuleKey getModuleKeyForGrammar(String sdf, String module, Collection<String> dependentFiles) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  private static ModuleKey getModuleKeyForGrammar(String sdf, String module, Collection<String> dependentFiles, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     log.beginTask("Generating", "Generate module key for current grammar");
     try {
-      String f = FileCommands.newTempFile("aterm");
-      parseImplode(StdLib.sdfTbl.getPath(), sdf, f, "Sdf2Module", false, new TreeBuilder());
-
-      IStrategoTerm aterm = ATermCommands.atermFromFile(f);
+      IStrategoTerm aterm = parser.parse(new FileInputStream(sdf), sdf);
 
       IStrategoTerm imports = ATermCommands.getApplicationSubterm(aterm, "module", 1);
       IStrategoTerm body = ATermCommands.getApplicationSubterm(aterm, "module", 2);
@@ -263,92 +178,46 @@ public class SDFCommands {
 
   private static String generateParseTable(ModuleKey key,
                                            String sdf,
-                                           String module)
-      throws IOException {
+                                           String module,
+                                           Context context)
+      throws IOException, InvalidParseTableException {
     log.beginTask("Generating", "Generate the parse table");
     try {
-      String tbl = null;
+      String tblFile = null;
       
       if (Environment.cacheDir != null)
-        tbl = FileCommands.createFile(Environment.cacheDir, key.hashCode());
+        tblFile = FileCommands.createFile(Environment.cacheDir, key.hashCode());
       else
-        tbl = FileCommands.newTempFile("tbl");
+        tblFile = FileCommands.newTempFile("tbl");
 
       String def = FileCommands.newTempFile("def");
+      String permissiveDef = FileCommands.newTempFile("def-permissive");
       packSdf(sdf, def);
-      sdf2Table(def, tbl, module);
-      return tbl;
+      makePermissive(def, permissiveDef, context);
+      sdf2Table(permissiveDef, tblFile, module);
+      return tblFile;
     } finally {
       log.endTask();
     }
   }
-    
-
-  /**
-   * 
-   * Parses the given source file using the given parse table
-   * and start symbol. Should the parsing succeed, the resulting
-   * aterm is written into the target file.
-   * 
-   * @param tbl
-   * @param source
-   * @param target
-   * @param start
-   * @return true iff parsing succeeded.
-   * @throws IOException
-   * @throws InvalidParseTableException
-   */
-  private static boolean sglri(String tbl, String source, String target, String start) throws IOException, InvalidParseTableException {
-    log.beginExecution("parsing", "parsing " + source + " using table " + tbl + " writing to " + target);
-
+  
+  private static void makePermissive(String def, String permissveDef, Context context) throws IOException {
+    log.beginExecution("make permissive", "-i", def, "-o", permissveDef);
     try {
-      String[] cmd;
+      // FIXME how to run 'make_permissive' properly???
+      // make_permissive.mainNoExit(context, "-i", def, "-o", permissveDef);
       
-      if (Environment.xtblCompilation)
-        cmd = new String[] {
-          SGLRI,
-          "-p", tbl,
-          "-i", source,
-          "-o", target
-        };
-      else 
-        cmd = new String[] {
-          SGLRI,
-          "-p", tbl,
-          "-i", source,
-          "-o", target,
-          "-s", start
-        };
-      
-      CommandExecution.execute(cmd);
-      return true;
-    } finally {
+      FileCommands.copyFile(def, permissveDef);
+    }
+    catch (StrategoExit e) {
+      if (e.getValue() != 0)
+        throw new RuntimeException("make permissive failed", e);
+    }
+    finally {
       log.endTask();
     }
   }
-  
-  
-  private static void implodeAsfix(String aterm, String outTerm, boolean binaryOutput) throws IOException {
-    List<String> args = new ArrayList<String>();
-    
-    // args.add(IMPLODE_ASFIX);
-    args.add("-i"); args.add(toCygwinPath(aterm));
-    args.add("-o"); args.add(toCygwinPath(outTerm));
-    
-    if (binaryOutput)
-      args.add("-b");
-
-    StrategyInvoker.invoke(implode_asfix_0_0.instance, 
-                           true, 
-                           CommandExecution.SILENT_EXECUTION || CommandExecution.SUB_SILENT_EXECUTION,
-                           args.toArray(new String[]{}));
-    
-    // CommandExecution.execute(args);
-    
-    if (!new File(outTerm).exists())
-      throw new RuntimeException("execution of implode-asfix failed");
-  }
-
+ 
   /**
    * Parses the given source using the given table and implodes the resulting parse tree.
    * 
@@ -363,12 +232,10 @@ public class SDFCommands {
    * @throws BadTokenException 
    * @throws TokenExpectedException 
    */
-  private static boolean jsglri(String tbl, String source, String target, String start, ITreeBuilder treeBuilder) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
-    log.beginExecution("parsing", "parsing " + source + " using table " + tbl + " writing to " + target);
+  private static boolean jsglri(ParseTable table, String source, String target, String start, ITreeBuilder treeBuilder, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
 
-    ParseTable table = org.strategoxt.imp.runtime.Environment.loadParseTable(tbl);
-    JSGLRI parser = new JSGLRI(table, start);
-    parser.setUseRecovery(true);
+    parser.setParseTable(table);
+    parser.setStartSymbol(start);
     
     if (treeBuilder instanceof RetractableTreeBuilder && ((RetractableTreeBuilder) treeBuilder).isInitialized())
       treeBuilder.getTokenizer().setKeywordsRecognizer(parser.getParseTable().getKeywordRecognizer());
@@ -382,14 +249,9 @@ public class SDFCommands {
 
     if (aterm != null) {
       atermToFile(aterm, target);
-
-      log.endTask();
-      
       return true;
     }
 
-    log.endTask("failed: " + 
-                log.commandLineAsString(new String[] {"jsglri", "-p", tbl, "-i", source, "-o", target, "-s", start}));
 
     return false;
   }
@@ -408,8 +270,30 @@ public class SDFCommands {
    * @throws BadTokenException 
    * @throws TokenExpectedException 
    */
-  public static boolean parseImplode(String tbl, String source, String target, String start, boolean binary, ITreeBuilder treeBuilder) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
-    return jsglri(tbl, source, target, start, treeBuilder);
+  public static boolean parseImplode(String tbl, String source, String target, String start, boolean binary, ITreeBuilder treeBuilder, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+    return parseImplode(org.strategoxt.imp.runtime.Environment.loadParseTable(tbl), tbl, source, target, start, binary, treeBuilder, parser);
+  }
+  
+  public static boolean parseImplode(ParseTable table, String source, String target, String start, boolean binary, ITreeBuilder treeBuilder, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+    return parseImplode(table, "unknown", source, target, start, binary, treeBuilder, parser);
+  }
+  
+  private static boolean parseImplode(ParseTable table, String tbl, String source, String target, String start, boolean binary, ITreeBuilder treeBuilder, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+    log.beginExecution("parsing", "parsing " + source + " using table " + tbl + " writing to " + target);
+
+    boolean result = false;
+    try {
+      result = jsglri(table, source, target, start, treeBuilder, parser);
+    }
+    finally {
+      if (result)
+        log.endTask();
+      else
+        log.endTask("failed: " + 
+            log.commandLineAsString(new String[] {"jsglri", "-p", tbl, "-i", source, "-o", target, "-s", start}));
+    }
+    
+    return result;
   }
   
   
@@ -427,18 +311,24 @@ public class SDFCommands {
     log.log(buf.toString());
   }
   
-  public static String prettyPrintJavaTerm(IStrategoTerm aterm, HybridInterpreter interp) throws IOException {
-    String in = FileCommands.newTempFile("aterm");
-    String out = FileCommands.newTempFile("java-snippet");
-    atermToFile(aterm, in);
-    prettyPrintJava(in, out, interp);
+
+  /**
+   * Pretty prints the content of a Java AST in some file.
+   * 
+   * @param aterm the name of a file which contains an aterm which encodes a Java AST
+   * @throws IOException 
+   */
+  public static String prettyPrintJava(String aterm, HybridInterpreter interp) throws IOException {
+    IStrategoTerm term = ATermCommands.atermFromFile(aterm);
+    return prettyPrintJava(term, interp);
+  }  
+  
+  public static String prettyPrintJava(IStrategoTerm term, HybridInterpreter interp) throws IOException {
+    IStrategoTerm string = pp_java_string_0_0.instance.invoke(interp.getCompiledContext(), term);
+    if (string != null)
+      return Term.asJavaString(string);
     
-    String res = FileCommands.readFileAsString(out).trim();
-    
-    FileCommands.delete(in);
-    FileCommands.delete(out);
-    
-    return res;
+    throw new RuntimeException("pretty printing java AST failed: " + term);
   }
 
   /**
@@ -448,85 +338,37 @@ public class SDFCommands {
    * @return
    * @throws IOException 
    */
-  public static void prettyPrintSDF(String aterm, String txt) throws IOException {
-    String[] cmd = new String[] {
-        PP_SDF,
-        "-i", toCygwinPath(aterm),
-        "-o", toCygwinPath(txt)
-    };
-    
-    // StrategyInvoker.invoke(pp_sdf_string_0_0.instance, cmd);
-    
-    CommandExecution.execute(cmd);
+  public static String prettyPrintSDF(String aterm, HybridInterpreter interp) throws IOException {
+    IStrategoTerm term = ATermCommands.atermFromFile(aterm);
+    return prettyPrintSDF(term, interp);
   }
   
-  public static String prettyPrintSTR(IStrategoTerm aterm) throws IOException {
-    String in = FileCommands.newTempFile("aterm");
-    String out = FileCommands.newTempFile("str-snippet");
-    atermToFile(aterm, in);
-    prettyPrintSTR(in, out);
+  public static String prettyPrintSDF(IStrategoTerm term, HybridInterpreter interp) {
+    IStrategoTerm string = pp_sdf_string_0_0.instance.invoke(interp.getCompiledContext(), term);
+    if (string != null)
+      return Term.asJavaString(string);
     
-    String res = FileCommands.readFileAsString(out).trim();
-    
-    FileCommands.delete(in);
-    FileCommands.delete(out);
-    
-    return res;
+    throw new RuntimeException("pretty printing SDF AST failed: " + term);
   }
-  
   
   /**
-   * Pretty prints the content of the given STR file.
+   * Pretty prints the content of the given Stratego file. 
    * 
-   * @param str
+   * @param aterm
    * @return
    * @throws IOException 
    */
-  public static void prettyPrintSTR(String aterm, String txt) throws IOException {
-    String[] cmd = new String[] {
-        PP_STRATEGO,
-        "-i", toCygwinPath(aterm),
-        "-o", toCygwinPath(txt),
-        "-a"
-    };
-    
-//    org.strategoxt.strc.Main.init();
-//    org.strategoxt.stratego_lib.Main.init();
-//    org.strategoxt.stratego_xtc.Main.init();
-//    StrategyInvoker.invoke(pp_stratego.pp_stratego_io_0_0.instance, cmd);
-//    
-//    FileCommands.trimQuotes(toCygwinPath(txt));
-
-    CommandExecution.execute(cmd);
+  public static String prettyPrintSTR(String aterm, HybridInterpreter interp) throws IOException {
+    IStrategoTerm term = ATermCommands.atermFromFile(aterm);
+    return prettyPrintSTR(term, interp);
   }
   
-  /**
-   * Pretty prints the content of a Java AST in some file.
-   * 
-   * @param aterm the name of a file which contains an aterm which encodes a Java AST
-   * @throws IOException 
-   */
-  public static void prettyPrintJava(String aterm, String txt, HybridInterpreter interp) throws IOException {
-    IStrategoTerm term = ATermCommands.atermFromFile(aterm);
-    IStrategoTerm string = pp_java_string_0_0.instance.invoke(interp.getCompiledContext(), term);
+  public static String prettyPrintSTR(IStrategoTerm term, HybridInterpreter interp) {
+    IStrategoTerm string = pp_stratego_string_0_0.instance.invoke(interp.getCompiledContext(), term);
     if (string != null)
-      FileCommands.writeToFile(txt, Term.asJavaString(string));
-    else throw new RuntimeException("pretty printing java AST failed: " + term);
+      return Term.asJavaString(string);
     
-////    String[] cmd = new String[] {
-////        PP_JAVA,
-////        "-i", toCygwinPath(aterm),
-////        "-o", toCygwinPath(txt)
-//    };
-   
-// TODO would have to call StringExplode or something
-//    StrategyInvoker.invoke(pp_java5_to_string_0_0.instance, 
-//                           true, 
-//                           CommandExecution.SILENT_EXECUTION || CommandExecution.SUB_SILENT_EXECUTION,
-//                           cmd);
-//    
-//    FileCommands.trimQuotes(toCygwinPath(txt));
-
-//    CommandExecution.execute(cmd);
-  }  
+    throw new RuntimeException("pretty printing SDF AST failed: " + term);
+  }
+  
 }
