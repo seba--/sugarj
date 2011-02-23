@@ -6,11 +6,17 @@ import java.net.URI;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Platform;
+import org.spoofax.interpreter.core.Interpreter;
+import org.spoofax.interpreter.library.jsglr.JSGLRLibrary;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.jsglr.client.SGLR;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
+import org.spoofax.terms.Term;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
+import org.strategoxt.strj.strj;
 import org.sugarj.driver.CommandExecution;
 import org.sugarj.driver.Driver;
 import org.sugarj.driver.Environment;
@@ -40,11 +46,11 @@ public class SugarJParser extends JSGLRI {
     Driver.initialize();
     driver = new Driver();
     
-    Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.spoofax.jsglr_0.3.0.201102091215.jar");
-    Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.strategoxt.strj_0.17.92.201102091215/java/strategoxt.jar");
-    Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.spoofax.interpreter.core_0.4.0.201102091215.jar");
-    Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.spoofax.interpreter.library.jsglr_0.3.9.201102091215.jar");
-    Environment.includePath.add("/Users/seba/Library/Eclipse/plugins/org.spoofax.terms_1.0.0.201102091215.jar");
+    Environment.includePath.add(getJarPath(SGLR.class));
+    Environment.includePath.add(getJarPath(strj.class));
+    Environment.includePath.add(getJarPath(Interpreter.class));
+    Environment.includePath.add(getJarPath(JSGLRLibrary.class));
+    Environment.includePath.add(getJarPath(Term.class));
 
     assert projectPath != null;
     Environment.srcPath.add(projectPath);
@@ -91,6 +97,15 @@ public class SugarJParser extends JSGLRI {
     IStrategoTerm term = driver.getSugaredSyntaxTree();
     
     return term;
+  }
+  
+  private String getJarPath(Class<?> aClass) {
+    String result = aClass.getProtectionDomain().getCodeSource().getLocation().getFile();
+    if (Platform.getOS().equals(Platform.OS_WIN32)) {
+        // FIXME: proper paths on Windows
+        result = result.substring(1);
+    }
+    return result;
   }
 
 
