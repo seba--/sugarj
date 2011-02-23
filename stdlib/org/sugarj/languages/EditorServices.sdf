@@ -1,0 +1,14 @@
+module org/sugarj/languages/EditorServices
+imports org/sugarj/languages/SugarJ
+        EditorServicesRenamed
+exports
+  sorts
+    EditorServiceDecHead EditorServiceBody
+    
+  context-free syntax
+    EditorServiceDecHead EditorServiceBody
+      -> SugarDec {cons("EditorServiceDec")}
+    
+    AnnoOrSugarMod* "editor" "services" JavaId -> EditorServiceDecHead {cons("EditorServiceDecHead")}
+    "{" EditorServiceSection*  "}" -> EditorServiceBody {cons("EditorServiceBody")}
+    
