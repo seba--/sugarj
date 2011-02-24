@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.ITreeBuilder;
@@ -42,6 +44,8 @@ import org.sugarj.stdlib.StdLib;
 public class SDFCommands {
   
   private final static String SDF_2_TABLE = StdLib.binDir.getPath() + "sdf2table";
+  
+  private final static Pattern SDF_FILE_PATTERN = Pattern.compile(".*\\.sdf");
   
   public static ModuleKeyCache<String> sdfCache = null;
   
@@ -174,7 +178,12 @@ public class SDFCommands {
       IStrategoTerm body = ATermCommands.getApplicationSubterm(aterm, "module", 2);
       IStrategoTerm term = ATermCommands.makeTuple(imports, body);
 
-      return new ModuleKey(dependentFiles, term);
+      LinkedList<String> depList = new LinkedList<String>();
+      for (String file : dependentFiles)
+        if (SDF_FILE_PATTERN.matcher(file).matches())
+          depList.add(file);
+      
+      return new ModuleKey(depList, term);
     } finally {
       log.endTask();
     }

@@ -11,7 +11,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.InvalidParseTableException;
@@ -38,6 +40,8 @@ public class STRCommands {
   
   public static ModuleKeyCache<String> strCache = null;
   
+  private final static Pattern STR_FILE_PATTERN = Pattern.compile(".*\\.str");
+
   /**
    *  Compiles a {@code *.str} file to a single {@code *.java} file. 
    */
@@ -164,7 +168,12 @@ public class STRCommands {
 
       aterm = ATermCommands.getApplicationSubterm(aterm, "Module", 1);
 
-      return new ModuleKey(dependentFiles, aterm);
+      LinkedList<String> depList = new LinkedList<String>();
+      for (String file : dependentFiles)
+        if (STR_FILE_PATTERN.matcher(file).matches())
+          depList.add(file);
+      
+      return new ModuleKey(depList, aterm);
     } finally {
       log.endTask();
     }

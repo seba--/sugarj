@@ -104,7 +104,7 @@ public class Driver{
         return false;
 
       for (Entry<String, Integer> entry : fileDependencyHashes.entrySet())
-        if (FileCommands.fileHash(entry.getKey()) > entry.getValue())
+        if (FileCommands.fileHash(entry.getKey()) != entry.getValue())
           return false;
       
       for (Entry<String, Integer> entry : generatedFileHashes.entrySet())
@@ -145,7 +145,6 @@ public class Driver{
             "Builders(\"desugaring provider\", " +
               "[SemanticProvider(\"" + 
                   jarfile.replace("\\", "\\\\").replace("\"", "\\\"") + "\")])");
-      System.out.println(builder);
       editorServices.add(builder);
     }
   }
@@ -175,11 +174,6 @@ public class Driver{
   private static List<URI> allInputFiles;
   private static List<String> pendingInputFiles;
   private static List<String> currentlyProcessing;
-
-  /**
-   * denotes that the imported modules changed.
-   */
-  private static boolean importsChanged = false;
 
   private Result driverResult = new Result();
   
@@ -643,9 +637,6 @@ public class Driver{
       String importModuleRelativePath = FileCommands.getRelativeModulePath(importModule);
       boolean isStdLibModule = importModuleRelativePath.startsWith("org/sugarj/"); 
       
-      // indicates whether a sugar is imported
-      boolean newSyntax = false;
-
       List<URI> files = searchClassFiles(importModuleRelativePath, isStdLibModule);
 
       URI importModuleSourceFile = null;
@@ -715,7 +706,6 @@ public class Driver{
                   importModuleClassFile.getPath().substring(0, importModuleClassFile.getPath().length() - 5) + "serv");
 	
 	      if (new File(importModuleSDFFile.getPath()).exists()) {
-	        newSyntax = true;
 	        driverResult.addFileDependency(importModuleSDFFile.getPath());
 	        
 	        log.beginTask("Incorporation", "Incorporate the imported grammar " + thisRelativePath);
@@ -747,7 +737,6 @@ public class Driver{
 
 	
 	      if (new File(importModuleSTRFile.getPath()).exists()) {
-	        newSyntax = true;
 	        driverResult.addFileDependency(importModuleSTRFile.getPath());
 	        
 	        log.beginTask(
@@ -795,9 +784,6 @@ public class Driver{
             log.endTask();
           }
         }
-	      
-	      if (importsChanged && newSyntax || importModuleSourceFile != null && allInputFiles.contains(FileCommands.fileName(importModuleSourceFile)))
-	        skipCache = true;
       }
       
     } finally {
@@ -1307,9 +1293,6 @@ public class Driver{
     
     if (line.hasOption("write-only-cache"))
       Environment.wocache = true;
-    
-    if (line.hasOption("imports-changed"))
-      importsChanged = true;
     
     if (line.hasOption("gen-java"))
       Environment.generateJavaFile = true;
