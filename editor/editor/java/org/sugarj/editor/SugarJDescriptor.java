@@ -13,13 +13,17 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.StrategoListIterator;
 import org.strategoxt.imp.runtime.Environment;
+import org.strategoxt.imp.runtime.dynamicloading.AbstractService;
 import org.strategoxt.imp.runtime.dynamicloading.BadDescriptorException;
 import org.strategoxt.imp.runtime.dynamicloading.Descriptor;
 import org.strategoxt.imp.runtime.dynamicloading.DynamicParseController;
 import org.strategoxt.imp.runtime.dynamicloading.IDynamicLanguageService;
+import org.strategoxt.imp.runtime.dynamicloading.IOnSaveService;
 import org.strategoxt.imp.runtime.parser.SGLRParseController;
 
 /**
+ * A descriptor that creates file-specific editor services.
+ * 
  * @author Lennart Kats <lennart add lclnet.nl>
  */
 public class SugarJDescriptor extends Descriptor {
@@ -36,6 +40,7 @@ public class SugarJDescriptor extends Descriptor {
   }
   
   @Override
+  @SuppressWarnings("unchecked")
   public synchronized <T extends ILanguageService> T createService(
       Class<T> type, SGLRParseController controller)
       throws BadDescriptorException {
@@ -43,24 +48,39 @@ public class SugarJDescriptor extends Descriptor {
     if (controller != null && controller.getParser() instanceof SugarJParser) {
       List<IStrategoTerm> services = ((SugarJParser) controller.getParser()).getEditorServices();
       if (services != null && !services.equals(lastServices)) {
-        releadEditors(controller);
+        reloadEditors(controller);
         setDocument(composeDefinitions(baseDocument, services));
         lastServices = services;
       }
     }
     
-    return super.createService(type, controller);
+    T result = super.createService(type, controller);
+    if (IOnSaveService.class == type)
+      result = (T) new SugarJOnSaveService(this, (IOnSaveService) result);
+    return result;
   }
   
-  private void releadEditors(SGLRParseController controller) {
+  private void reloadEditors(SGLRParseController controller) {
     simpleClearCache(controller);
-
     for (IDynamicLanguageService service : getActiveServices(controller)) {
       try {
-        service.reinitialize(this);
+        if (!(service instanceof DynamicParseController))
+            service.reinitialize(this);
+      } catch (BadDescriptorException e) {
+        Environment.logWarning("Unable to reinitialize service", e);
+      }
+    }
+  }
+
+  public void reloadAllEditors() {
+    for (IDynamicLanguageService service : getActiveServices()) {
+      try {
         if (service instanceof DynamicParseController) {
-          SGLRParseController wrapped = (SGLRParseController) ((DynamicParseController) service).getWrapped();
-          wrapped.scheduleParserUpdate(REPARSE_OTHER_EDITOR_DELAY, false);
+          SGLRParseController controller = (SGLRParseController) ((DynamicParseController) service).getWrapped();
+          simpleClearCache(controller);
+          controller.scheduleParserUpdate(REPARSE_OTHER_EDITOR_DELAY, false);
+        } else {
+          service.reinitialize(this);
         }
       } catch (BadDescriptorException e) {
         Environment.logWarning("Unable to reinitialize service", e);

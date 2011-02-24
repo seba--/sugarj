@@ -57,12 +57,6 @@ public class SugarJParser extends JSGLRI {
     // use this to temporarily deactivate caching
     // Environment.wocache = true;
     
-//    String result = org.strategoxt.stratego_lib.Main.class.getProtectionDomain().getCodeSource().getLocation().getFile();
-//            if (Platform.getOS().equals(Platform.OS_WIN32)) {
-//                // FIXME: proper paths on Windows
-//                result = result.substring(1);
-//            }
-    
     Environment.noChecking = true;
     
     CommandExecution.SILENT_EXECUTION = false;
@@ -85,15 +79,6 @@ public class SugarJParser extends JSGLRI {
     IStrategoTerm term = result.getSugaredSyntaxTree();
     
     return term;
-  }
-  
-  private String getJarPath(Class<?> aClass) {
-    String result = aClass.getProtectionDomain().getCodeSource().getLocation().getFile();
-    if (Platform.getOS().equals(Platform.OS_WIN32)) {
-        // FIXME: proper paths on Windows
-        result = result.substring(1);
-    }
-    return result;
   }
 
 
