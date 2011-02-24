@@ -1,3 +1,4 @@
+definition
 module org/sugarj/languages/SugarJ
 imports org/sugarj/languages/Java
         org/sugarj/languages/Sdf2
@@ -141,3 +142,15 @@ sorts Grammar Transformation Desugaring SugarDef SugarDefElem
 
   lexical restrictions
     "desugarings" -/- [a-zA-Z0-9\'\-\_]
+
+
+  sorts
+    EditorServicesDecHead EditorServicesBody
+    
+  context-free syntax
+    EditorServicesDecHead EditorServicesBody
+      -> SugarDec {cons("EditorServicesDec")}
+    
+    AnnoOrSugarMod* "editor" "services" JavaId -> EditorServicesDecHead {cons("EditorServicesDecHead")}
+    "{" EditorServiceSection*  "}" -> EditorServicesBody {cons("EditorServicesBody")}
+    

@@ -26,8 +26,8 @@ import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.java_front.pp_java_string_0_0;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
+import org.strategoxt.permissivegrammars.make_permissive;
 import org.strategoxt.stratego_sdf.pp_sdf_string_0_0;
-import org.strategoxt.stratego_sdf.stratego_sdf;
 import org.strategoxt.strc.pp_stratego_string_0_0;
 import org.strategoxt.tools.main_pack_sdf_0_0;
 import org.sugarj.driver.caching.ModuleKey;
@@ -59,6 +59,7 @@ public class SDFCommands {
 //      PACK_SDF,
       "-i", toCygwinPath(sdf),
       "-o", toCygwinPath(def),
+      "-Idef", toCygwinPath(StdLib.sugarjDef.getPath()),
       "-Idef", toCygwinPath(StdLib.javaDef.getPath()),
       "-Idef", toCygwinPath(StdLib.sdfDef.getPath()),
       "-Idef", toCygwinPath(StdLib.strategoDef.getPath()),
@@ -200,23 +201,29 @@ public class SDFCommands {
       tblFile = FileCommands.newTempFile("tbl");
 
       String def = FileCommands.newTempFile("def");
-      String permissiveDef = FileCommands.newTempFile("def-permissive");
       packSdf(sdf, def, sdfContext);
-      makePermissive(def, permissiveDef, makePermissiveContext);
-      sdf2Table(permissiveDef, tblFile, module);
+      sdf2Table(def, tblFile, module);
       return tblFile;
     } finally {
       log.endTask();
     }
   }
   
-  private static void makePermissive(String def, String permissveDef, Context context) throws IOException {
-    log.beginExecution("make permissive", "-i", def, "-o", permissveDef);
+  public static void makePermissiveSdf(String sdf, String permissveSdf, Context context) throws IOException {
+    String def = FileCommands.newTempFile("def");
+    String permissiveDef = FileCommands.newTempFile("def-permissive");
+    
+    FileCommands.writeToFile(def, "definition\n" + FileCommands.readFileAsString(sdf));
+    makePermissive(def, permissiveDef, context);
+    
+    String result = FileCommands.readFileAsString(permissiveDef);
+    FileCommands.writeToFile(permissveSdf, result.substring(11)); // "definition\n"
+  }
+  
+  private static void makePermissive(String def, String permissiveDef, Context context) throws IOException {
+    log.beginExecution("make permissive", "-i", def, "-o", permissiveDef);
     try {
-      // FIXME how to run 'make_permissive' properly???
-      // make_permissive.mainNoExit(context, "-i", def, "-o", permissveDef);
-      
-      FileCommands.copyFile(def, permissveDef);
+      make_permissive.mainNoExit(context, "-i", def, "-o", permissiveDef);
     }
     catch (StrategoExit e) {
       if (e.getValue() != 0)

@@ -39,3 +39,8 @@ signature constructors
     transformation-elem        : Transformation -> SugarDefElem
     grammar-elem               : Grammar -> SugarDefElem
     CompileError               : String * Any -> CompileError
+    
+    EditorServicesDec          : EditorServicesDecHead * EditorServicesDecBody -> SugarDec
+    EditorServicesDecHead      : List(Annos) * JavaId -> EditorServicesDecHead
+    EditorServicesBody         : List(EditorServicesSection) -> EditorServiceBody
+    

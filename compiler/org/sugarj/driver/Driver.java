@@ -1052,8 +1052,11 @@ public class Driver{
 
         String sdfExtensionContent = SDFCommands.prettyPrintSDF(sdfExtract, interp);
 
+        SDFCommands.makePermissiveSdf(sdfExtension, sdfExtension, makePermissiveContext);
         driverResult.generateFile(sdfExtension, sdfExtensionHead + sdfExtensionContent);
 
+        
+        
         String strExtensionTerm = FileCommands.newTempFile("aterm");
 
         driverResult.generateFile(strExtensionTerm, 
