@@ -22,6 +22,7 @@ public class Test extends DefaultHandler {
     
     
     ch.write document
+    
       <xsd:schema
 		    targetNamespace="http://www.w3.org/2001/XMLSchema"
 		    blockDefault="#all"
@@ -29,6 +30,7 @@ public class Test extends DefaultHandler {
 		    version="1.0">
 		    <{http://www.w3.org/2001/XMLSchema}simpleType name="derivationSet">
 		      <annotation>
+		      
 		        <documentation>
 		          A utility type, not for public use
 		        </documentation> 

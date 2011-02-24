@@ -193,7 +193,7 @@ public sugar XmlSyntax {
     
 
   context-free syntax
-    EmptyElementLeft ElemName Attribute* EmptyElementRight -> Element {cons("EmptyElement")}
+    "<" ElemName Attribute* "/>" -> Element {cons("EmptyElement")}
 
     ElementStartLeft ElemName Attribute* ElementStartRight
       Content* 
