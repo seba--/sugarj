@@ -3,7 +3,6 @@ package org.sugarj.editor;
 import org.eclipse.jface.text.DocumentEvent;
 import org.strategoxt.imp.runtime.EditorState;
 import org.strategoxt.imp.runtime.dynamicloading.IOnSaveService;
-import org.strategoxt.imp.runtime.parser.SGLRParseController;
 
 /**
  * @author Lennart Kats <lennart add lclnet.nl>
@@ -32,6 +31,6 @@ public class SugarJOnSaveService implements IOnSaveService {
   @Override
   public void documentChanged(DocumentEvent event) {
     baseService.documentChanged(event);
-    descriptor.reloadAllEditors();
+    descriptor.reloadAllEditors(0);
   }
 }
