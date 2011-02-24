@@ -13,7 +13,6 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.StrategoListIterator;
 import org.strategoxt.imp.runtime.Environment;
-import org.strategoxt.imp.runtime.dynamicloading.AbstractService;
 import org.strategoxt.imp.runtime.dynamicloading.BadDescriptorException;
 import org.strategoxt.imp.runtime.dynamicloading.Descriptor;
 import org.strategoxt.imp.runtime.dynamicloading.DynamicParseController;
@@ -75,13 +74,13 @@ public class SugarJDescriptor extends Descriptor {
     }
   }
 
-  public void reloadAllEditors() {
+  public void reloadAllEditors(int delay) {
     for (IDynamicLanguageService service : getActiveServices()) {
       try {
         if (service instanceof DynamicParseController) {
           SGLRParseController controller = (SGLRParseController) ((DynamicParseController) service).getWrapped();
           simpleClearCache(controller);
-          controller.scheduleParserUpdate(REPARSE_OTHER_EDITOR_DELAY, false);
+          controller.scheduleParserUpdate(delay, false);
         } else {
           service.reinitialize(this);
         }
