@@ -3,7 +3,6 @@ import static org.sugarj.driver.ATermCommands.atermToFile;
 import static org.sugarj.driver.FileCommands.toCygwinPath;
 import static org.sugarj.driver.Log.log;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -291,7 +290,7 @@ public class SDFCommands {
         log.endTask();
       else
         log.endTask("failed: " + 
-            log.commandLineAsString(new String[] {"jsglri", "-p", tbl, "-i", source, "-o", target, "-s", start}));
+            log.commandLineAsString(new String[] {"jsglri", "-p", tbl, "-i source -o", target, "-s", start}));
     }
     
     return result;
