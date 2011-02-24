@@ -1,0 +1,24 @@
+package xml;
+
+import org.sugarj.languages.EditorServices;
+
+import xml.XmlSyntax;
+
+public editor services XmlEditor {
+  colorer XmlHighlighting
+    CommentLeft : xmlParenthesis
+    CommentRight : xmlParenthesis
+    EmptyElementLeft : xmlParenthesis
+    ElementStartLeft : xmlParenthesis
+    ElementEndLeft : xmlParenthesis
+    EmptyElementRight : xmlParenthesis
+    ElementStartRight : xmlParenthesis
+    ElementEndRight : xmlParenthesis
+    
+    environment _.ElemName : 0 0 255
+    environment AttrName : 0 150 40
+    // environment DoubleQuoted : blue
+    // Qualifier : 0 255 102
+    
+    xmlParenthesis = 0 0 200 bold
+}

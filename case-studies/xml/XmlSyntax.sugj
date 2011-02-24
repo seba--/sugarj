@@ -5,10 +5,14 @@ package xml;
  */
 public sugar XmlSyntax {
 
+
+
+
 %% module xml-attribute
   context-free syntax
 
-    QName "=" AttValue -> Attribute {cons("Attribute")}
+    AttrName "=" AttValue -> Attribute {cons("Attribute")}
+    QName -> AttrName {cons("AttrName")}
 
   syntax
 
@@ -166,8 +170,6 @@ public sugar XmlSyntax {
 
     Prologue Element Epilogue -> Document {cons("Document")}
 
-    "<" QName Attribute* "/>" -> Element {cons("EmptyElement")}
-
     Element -> Content
     Comment -> Content {cons("Comment")}
     PI      -> Content
@@ -176,12 +178,30 @@ public sugar XmlSyntax {
     CharData      -> <Content-CF>
     CDataSection  -> <Content-CF>
 
-  context-free syntax
-    "<" QName Attribute* ">"
-      Content* 
-    "</" QName ">"
-    -> Element {cons("Element")}
 
+  lexical syntax
+    "<!--" -> CommentLeft
+    "-->"  -> CommentRight
+    
+    "<"  -> EmptyElementLeft
+    "<"  -> ElementStartLeft
+    "</" -> ElementEndLeft
+ 
+    "/>" -> EmptyElementRight
+    ">" -> ElementStartRight
+    ">" -> ElementEndRight
+    
+
+  context-free syntax
+    EmptyElementLeft ElemName Attribute* EmptyElementRight -> Element {cons("EmptyElement")}
+
+    ElementStartLeft ElemName Attribute* ElementStartRight
+      Content* 
+    ElementEndLeft ElemName ElementEndRight
+    -> Element {cons("Element")}
+    
+    QName -> ElemName {cons("ElemName")}
+  
 
 %% module xml-names
 
@@ -201,7 +221,7 @@ public sugar XmlSyntax {
 %% module xml-comments
 
   lexical syntax
-    "<!--" (~[\-] | Dash)* "-->" -> Comment
+    CommentLeft (~[\-] | Dash)* CommentRight -> Comment
     "-" -> Dash
 
   lexical restrictions
@@ -218,15 +238,26 @@ public sugar XmlSyntax {
 
 
 
+  desugarings
+    \ Element(_, name1, attrs, _, content, _, name2, _) -> Element(name1, attrs, content, name2) \
+    \ EmptyElement(_, name, attrs, _) -> EmptyElement(name, attrs) \
+    \ Comment(_, com, _) -> Comment(com) \
+    \ ElemName(name) -> name \
+    \ AttrName(name) -> name \
 
 	signature
 	  constructors
+	    ElemName         : QName -> ElemName
+      AttrName         : QName -> AttrName
 	                     : CharData -> Content
 	                     : PI -> Content
 	    Comment          : Comment -> Content
+	    Comment          : String * Comment * String -> Content
 	                     : Element -> Content
-	    Element          : QName * List(Attribute) * List(Content) * QName -> Element
+      Element          : QName * List(Attribute) * List(Content) * QName -> Element
+	    Element          : String * QName * List(Attribute) * String * List(Content) * String * QName * String -> Element
 	    EmptyElement     : QName * List(Attribute) -> Element
+      EmptyElement     : String * QName * List(Attribute) * String -> Element
 	    Document         : Prologue * Element * Epilogue -> Document
 	                     : String -> FooSingleQuotedText
 	                     : String -> FooDoubleQuotedText
