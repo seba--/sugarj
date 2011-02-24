@@ -49,7 +49,7 @@ public class SDFCommands {
   
   public static ModuleKeyCache<String> sdfCache = null;
   
-  private static void packSdf(String sdf, String def) throws IOException {
+  private static void packSdf(String sdf, String def, Context sdfContext) throws IOException {
     
     /*
      * We can include as many paths as we want here, checking the
@@ -72,10 +72,8 @@ public class SDFCommands {
         cmd.add(path);
       }
     
-    Context c = stratego_sdf.init();
-    
     try {
-      c.invokeStrategyCLI(main_pack_sdf_0_0.instance, "pack-sdf", cmd.toArray(new String[cmd.size()]));
+      sdfContext.invokeStrategyCLI(main_pack_sdf_0_0.instance, "pack-sdf", cmd.toArray(new String[cmd.size()]));
     } catch(StrategoExit e) {
       if (e.getValue() != 0) {
         throw new RuntimeException(e);
@@ -113,9 +111,9 @@ public class SDFCommands {
     CommandExecution.executeWithPrefix("sdf2table", cmd);
   }
   
-  public static void check(String sdf, String module) throws IOException {
+  public static void check(String sdf, String module, Context sdfContext) throws IOException {
     String def = FileCommands.newTempFile("def");
-    packSdf(sdf, def);
+    packSdf(sdf, def, sdfContext);
     normalizeTable(def, module);
   }
   
@@ -128,12 +126,12 @@ public class SDFCommands {
    * @throws BadTokenException 
    * @throws TokenExpectedException 
    */
-  public static ParseTable compile(String sdf, String module, Collection<String> dependentFiles, JSGLRI sdfParser, Context context) throws IOException,
+  public static ParseTable compile(String sdf, String module, Collection<String> dependentFiles, JSGLRI sdfParser, Context sdfContext, Context makePermissiveContext) throws IOException,
       InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     ModuleKey key = getModuleKeyForGrammar(sdf, module, dependentFiles, sdfParser);
     String tbl = lookupGrammarInCache(key);
     if (tbl == null) {
-      tbl = generateParseTable(key, sdf, module, context);
+      tbl = generateParseTable(key, sdf, module, sdfContext, makePermissiveContext);
       cacheParseTable(key, tbl);
     }
     
@@ -192,21 +190,19 @@ public class SDFCommands {
   private static String generateParseTable(ModuleKey key,
                                            String sdf,
                                            String module,
-                                           Context context)
+                                           Context sdfContext,
+                                           Context makePermissiveContext)
       throws IOException, InvalidParseTableException {
     log.beginTask("Generating", "Generate the parse table");
     try {
       String tblFile = null;
       
-      if (Environment.cacheDir != null)
-        tblFile = FileCommands.createFile(Environment.cacheDir, key.hashCode());
-      else
-        tblFile = FileCommands.newTempFile("tbl");
+      tblFile = FileCommands.newTempFile("tbl");
 
       String def = FileCommands.newTempFile("def");
       String permissiveDef = FileCommands.newTempFile("def-permissive");
-      packSdf(sdf, def);
-      makePermissive(def, permissiveDef, context);
+      packSdf(sdf, def, sdfContext);
+      makePermissive(def, permissiveDef, makePermissiveContext);
       sdf2Table(permissiveDef, tblFile, module);
       return tblFile;
     } finally {
