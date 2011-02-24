@@ -15,12 +15,16 @@ import org.spoofax.terms.StrategoListIterator;
 import org.strategoxt.imp.runtime.Environment;
 import org.strategoxt.imp.runtime.dynamicloading.BadDescriptorException;
 import org.strategoxt.imp.runtime.dynamicloading.Descriptor;
+import org.strategoxt.imp.runtime.dynamicloading.DynamicParseController;
+import org.strategoxt.imp.runtime.dynamicloading.IDynamicLanguageService;
 import org.strategoxt.imp.runtime.parser.SGLRParseController;
 
 /**
  * @author Lennart Kats <lennart add lclnet.nl>
  */
 public class SugarJDescriptor extends Descriptor {
+  
+  private static final int REPARSE_OTHER_EDITOR_DELAY = 1000;
 
   private final IStrategoAppl baseDocument;
   
@@ -39,7 +43,7 @@ public class SugarJDescriptor extends Descriptor {
     if (controller != null && controller.getParser() instanceof SugarJParser) {
       List<IStrategoTerm> services = ((SugarJParser) controller.getParser()).getEditorServices();
       if (services != null && !services.equals(lastServices)) {
-        simpleClearCache(controller);
+        releadEditors(controller);
         setDocument(composeDefinitions(baseDocument, services));
         lastServices = services;
       }
@@ -48,13 +52,29 @@ public class SugarJDescriptor extends Descriptor {
     return super.createService(type, controller);
   }
   
+  private void releadEditors(SGLRParseController controller) {
+    simpleClearCache(controller);
+
+    for (IDynamicLanguageService service : getActiveServices(controller)) {
+      try {
+        service.reinitialize(this);
+        if (service instanceof DynamicParseController) {
+          SGLRParseController wrapped = (SGLRParseController) ((DynamicParseController) service).getWrapped();
+          wrapped.scheduleParserUpdate(REPARSE_OTHER_EDITOR_DELAY, false);
+        }
+      } catch (BadDescriptorException e) {
+        Environment.logWarning("Unable to reinitialize service", e);
+      }
+    }
+  }
+
   private static IStrategoAppl composeDefinitions(IStrategoAppl base, List<IStrategoTerm> extensions) {
     IStrategoConstructor cons = base.getConstructor();
     if (cons.getName().equals("Module") && cons.getArity() == 3) {
       ITermFactory factory = Environment.getTermFactory();
       List<IStrategoTerm> allDefinitions = new ArrayList<IStrategoTerm>();
-      addAll(allDefinitions, (IStrategoList) termAt(base, 2));
       allDefinitions.addAll(extensions);
+      addAll(allDefinitions, (IStrategoList) termAt(base, 2));
       return factory.makeAppl(cons, termAt(base, 0), termAt(base, 1), factory.makeList(allDefinitions));
     } else {
       throw new IllegalStateException("Unsupported editor descriptor format:" + cons);
