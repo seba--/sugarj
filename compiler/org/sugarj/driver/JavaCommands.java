@@ -16,11 +16,11 @@ import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
  */
 public class JavaCommands {
 
-  public static void javac(String java, String dir, Collection<String> cp) throws IOException {
-    javac(java, dir, cp.toArray(new String[] {}));
+  public static boolean javac(String java, String dir, Collection<String> cp) throws IOException {
+    return javac(java, dir, cp.toArray(new String[] {}));
   }
 
-  public static void javac(String java, String dir, String... cp) throws IOException {
+  public static boolean javac(String java, String dir, String... cp) throws IOException {
     StringBuilder cpBuilder = new StringBuilder();
     
     for (int i = 0; i < cp.length; i++) {
@@ -29,6 +29,11 @@ public class JavaCommands {
       if (i < cp.length - 1)
         cpBuilder.append(Environment.classpathsep);
     }
+    
+    if(cp.length > 0)
+      cpBuilder.append(Environment.classpathsep);
+    
+    cpBuilder.append(dir);
     
     // TODO change to ejc
     
@@ -41,7 +46,7 @@ public class JavaCommands {
     };
     
     // this is ECJ
-    BatchCompiler.compile(
+    return BatchCompiler.compile(
         cmd,
         new PrintWriter(System.out),
         new PrintWriter(System.err),

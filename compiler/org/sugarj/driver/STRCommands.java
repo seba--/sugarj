@@ -56,7 +56,8 @@ public class STRCommands {
         "-i", toWindowsPath(str),
         "-o", toWindowsPath(java),
         "-m", main,
-        "-I", toCygwinPath(StdLib.stdLibDir.getPath())
+        "-I", toCygwinPath(StdLib.stdLibDir.getPath()),
+        "-p", "sugarj"
     }));
     
     for (String path : Environment.includePath)
@@ -96,10 +97,14 @@ public class STRCommands {
     log.beginTask("Generating", "Generate the assimilator");
     try {
       String dir = FileCommands.newTempDir();
+      FileCommands.createDir(dir + sep + "sugarj");
       String javaFilename = FileCommands.fileName(str).replace("-", "_");
-      String java = dir + sep + javaFilename + ".java";
+      String java = dir + sep + "sugarj" + sep + javaFilename + ".java";
       strj(str, java, main);
-      JavaCommands.javac(java, dir, Environment.includePath);
+      
+      if (!JavaCommands.javac(java, dir, Environment.includePath))
+        throw new RuntimeException("java compilation failed");
+        
 
       String jarfile = FileCommands.newTempFile("jar");
       JavaCommands.jar(dir, jarfile);

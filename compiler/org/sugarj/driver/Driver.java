@@ -138,6 +138,16 @@ public class Driver{
       
       JavaCommands.javac(javaOutFile, bin, path);
     }
+    
+    private void registerEditorDesugarings(String jarfile) throws IOException {
+      IStrategoTerm builder =
+        ATermCommands.atermFromString(
+            "Builders(\"desugaring provider\", " +
+              "[SemanticProvider(\"" + 
+                  jarfile.replace("\\", "\\\\").replace("\"", "\\\"") + "\")])");
+      System.out.println(builder);
+      editorServices.add(builder);
+    }
   }
   
   private static class Key {
@@ -202,6 +212,7 @@ public class Driver{
   private HybridInterpreter interp;
   private JSGLRI parser;
   private Context makePermissiveContext;
+  private String currentTransProg;
   
   /**
    * the next parsing and desugaring uses no cache lookup if skipCache.
@@ -331,6 +342,8 @@ public class Driver{
       pendingInputFiles.remove(moduleName);
       
       driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
+      if (currentTransProg != null)
+        driverResult.registerEditorDesugarings(currentTransProg);
     }
     catch (CommandExecution.ExecutionError e) {
       // TODO do something more sensible
@@ -539,7 +552,7 @@ public class Driver{
         "desugaring",
         "DESUGAR the current toplevel declaration.");
     try {
-      String currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(), strParser);
+      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(), strParser);
 
       return STRCommands.assimilate(currentTransProg, term, interp);
     } finally {
@@ -769,7 +782,6 @@ public class Driver{
 	      }
 	      
 	      if (new File(importModuleSERVFile.getPath()).exists()) {
-          newSyntax = true;
           driverResult.addFileDependency(importModuleSERVFile.getPath());
           
           log.beginTask("Incorporation", "Incorporate the imported editor services " + thisRelativePath);
@@ -1423,7 +1435,7 @@ public class Driver{
   }
 
   @SuppressWarnings("unchecked")
-  private static void initializeCaches() throws IOException {
+  private static synchronized void initializeCaches() throws IOException {
     if (Environment.cacheDir == null)
       return;
     
@@ -1460,7 +1472,7 @@ public class Driver{
   }
 
   
-  private static void storeCaches() throws IOException {
+  private static synchronized void storeCaches() throws IOException {
     if (Environment.cacheDir == null || Environment.rocache)
       return;
     
