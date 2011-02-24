@@ -1,8 +1,7 @@
 package org.sugarj.editor;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -64,12 +63,8 @@ public class SugarJParser extends JSGLRI {
     
     // TODO compile files into the project folder
 
-    String dir = FileCommands.newTempDir();
-    URI uri = new File(dir + Environment.sep + FileCommands.fileName(filename)).toURI();
-    FileCommands.writeToFile(dir + Environment.sep + FileCommands.fileName(filename), input);
-
     try {
-      result = Driver.compile(uri);
+      result = Driver.compile(input, FileCommands.fileName(filename));
     } catch (Throwable e) {
       org.strategoxt.imp.runtime.Environment.logException(e);
       return super.doParse(input, filename);
@@ -93,7 +88,7 @@ public class SugarJParser extends JSGLRI {
 
   public List<IStrategoTerm> getEditorServices() {
     final List<IStrategoTerm> empty = Collections.emptyList();
-    return result == null ? empty : result.getEditorServices();
+    return result == null ? empty : new ArrayList<IStrategoTerm>(result.getEditorServices());
   }
   
 }

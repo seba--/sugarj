@@ -57,6 +57,7 @@ import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.lang.Context;
 import org.strategoxt.permissivegrammars.make_permissive;
+import org.strategoxt.stratego_sdf.stratego_sdf;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.stdlib.StdLib;
 
@@ -68,7 +69,7 @@ public class Driver{
   public static class Result {
     private Map<String, Integer> fileDependencyHashes = new HashMap<String, Integer>();
     private Map<String, Integer> generatedFileHashes = new HashMap<String, Integer>();
-    private List<IStrategoTerm> editorServices = new ArrayList<IStrategoTerm>();
+    private Set<IStrategoTerm> editorServices = new HashSet<IStrategoTerm>();
     private Set<BadTokenException> collectedErrors = new HashSet<BadTokenException>();
     private IStrategoTerm sugaredSyntaxTree = null;
     private String generatedClassFile;
@@ -95,7 +96,7 @@ public class Driver{
       editorServices.add(service);
     }
     
-    public List<IStrategoTerm> getEditorServices() {
+    public Set<IStrategoTerm> getEditorServices() {
       return editorServices;
     }
     
@@ -205,6 +206,7 @@ public class Driver{
   private JSGLRI strParser;
   private HybridInterpreter interp;
   private JSGLRI parser;
+  private Context sdfContext;
   private Context makePermissiveContext;
   private String currentTransProg;
   
@@ -287,6 +289,7 @@ public class Driver{
 
       inputTreeBuilder = new RetractableTreeBuilder();
       interp = new HybridInterpreter();
+      sdfContext = stratego_sdf.init();
       makePermissiveContext = make_permissive.init();
       
       // XXX need to load ANY parse table, preferable an empty one.
@@ -460,9 +463,12 @@ public class Driver{
         
         StringBuffer buf = new StringBuffer();
         
+        for (IStrategoTerm service : driverResult.getEditorServices())
+          buf.append(service).append('\n');
+        
         for (IStrategoTerm service : StrategoListIterator.iterable((IStrategoList) services)) {
           driverResult.addEditorService(service);
-          buf.append(service.toString()).append('\n');
+          buf.append(service).append('\n');
         }
         
         driverResult.generateFile(editorServicesFile, buf.toString());
@@ -509,7 +515,7 @@ public class Driver{
     // recompile the current grammar definition
     ParseTable currentGrammarTBL;
     
-    currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, makePermissiveContext);
+    currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfContext, makePermissiveContext);
 
     String remainingInputParsed = FileCommands.newTempFile("aterm");
 
@@ -1114,7 +1120,7 @@ public class Driver{
     try {
       boolean wocache = Environment.wocache;
       Environment.wocache = true;
-      SDFCommands.check(currentGrammarSDF, currentGrammarModule);
+      SDFCommands.check(currentGrammarSDF, currentGrammarModule, sdfContext);
       Environment.wocache = wocache;
     } finally {
       log.endTask();
