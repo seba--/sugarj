@@ -20,6 +20,7 @@ import org.strategoxt.imp.runtime.dynamicloading.DynamicParseController;
 import org.strategoxt.imp.runtime.dynamicloading.IDynamicLanguageService;
 import org.strategoxt.imp.runtime.dynamicloading.IOnSaveService;
 import org.strategoxt.imp.runtime.parser.SGLRParseController;
+import org.strategoxt.imp.runtime.services.StrategoObserver;
 
 /**
  * A descriptor that creates file-specific editor services.
@@ -55,8 +56,10 @@ public class SugarJDescriptor extends Descriptor {
     }
     
     T result = super.createService(type, controller);
-    if (IOnSaveService.class == type)
+    if (result instanceof IOnSaveService)
       result = (T) new SugarJOnSaveService(this, (IOnSaveService) result);
+    if (result instanceof StrategoObserver)
+      ((StrategoObserver) result).setPrototypeAllowed(false);
     return result;
   }
   
@@ -65,7 +68,7 @@ public class SugarJDescriptor extends Descriptor {
     for (IDynamicLanguageService service : getActiveServices(controller)) {
       try {
         if (!(service instanceof DynamicParseController))
-            service.reinitialize(this);
+          service.reinitialize(this);
       } catch (BadDescriptorException e) {
         Environment.logWarning("Unable to reinitialize service", e);
       }
