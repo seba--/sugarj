@@ -66,24 +66,24 @@ import org.sugarj.stdlib.StdLib;
 public class Driver{
   
   public static class Result {
-    private Map<String, Long> fileDependencyTimestamps = new HashMap<String, Long>();
+    private Map<String, Integer> fileDependencyHashes = new HashMap<String, Integer>();
     private Map<String, Integer> generatedFileHashes = new HashMap<String, Integer>();
     private List<IStrategoTerm> editorServices = new ArrayList<IStrategoTerm>();
     private Set<BadTokenException> collectedErrors = new HashSet<BadTokenException>();
     private IStrategoTerm sugaredSyntaxTree = null;
     private String generatedClassFile;
 
-    private void addFileDependency(String file) {
-      fileDependencyTimestamps.put(file, new File(file).lastModified());
+    private void addFileDependency(String file) throws IOException {
+      fileDependencyHashes.put(file, FileCommands.fileHash(file));
     }
     
     public Collection<String> getFileDependencies() {
-      return fileDependencyTimestamps.keySet();
+      return fileDependencyHashes.keySet();
     }
     
     private void generateFile(String file, String content) throws IOException {
       FileCommands.writeToFile(file, content);
-      generatedFileHashes.put(file, content.hashCode());
+      generatedFileHashes.put(file, FileCommands.fileHash(file));
     }
     
     private void appendToFile(String file, String content) throws IOException {
@@ -103,8 +103,8 @@ public class Driver{
       if (!new File(generatedClassFile).exists())
         return false;
 
-      for (Entry<String, Long> entry : fileDependencyTimestamps.entrySet())
-        if (new File(entry.getKey()).lastModified() > entry.getValue())
+      for (Entry<String, Integer> entry : fileDependencyHashes.entrySet())
+        if (FileCommands.fileHash(entry.getKey()) > entry.getValue())
           return false;
       
       for (Entry<String, Integer> entry : generatedFileHashes.entrySet())
