@@ -8,15 +8,18 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import xml.AsSax;
+import xml.XmlSyntax;
 import xml.XmlJavaSyntax;
+
+import xml.XmlEditor;
 
 /*
  * code for printing based on http://www.informit.com/articles/article.aspx?p=26351&seqNum=5
  */
 public class Test extends DefaultHandler {
-
   public static void main(String[] args) throws SAXException {
     ContentHandler ch = new Test();
+    
     
     ch.write document
       <xsd:schema
@@ -28,7 +31,7 @@ public class Test extends DefaultHandler {
 		      <annotation>
 		        <documentation>
 		          A utility type, not for public use
-		        </documentation>
+		        </documentation> 
 		        <documentation>
 		          #all or (possibly empty) subset of {extension, restriction}
 		        </documentation>
