@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.runtime.Platform;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.SGLRException;
@@ -41,7 +40,7 @@ public class SugarJParser extends JSGLRI {
       Environment.cacheDir = System.getProperty("user.home") + "/.sugarj/cache";
     
     //Environment.includePath.add(getJarPath(SGLR.class));
-    Environment.includePath.add(StrategoJarAntPropertyProvider.getStrategoJarPath());
+    Environment.includePath.add(new StrategoJarAntPropertyProvider().getAntPropertyValue(""));
     //Environment.includePath.add(getJarPath(Interpreter.class));
     //Environment.includePath.add(getJarPath(JSGLRLibrary.class));
     //Environment.includePath.add(getJarPath(Term.class));
