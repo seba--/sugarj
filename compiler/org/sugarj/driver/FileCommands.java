@@ -352,4 +352,8 @@ public class FileCommands {
       
     return map;
   }
+
+  public static int fileHash(String file) throws IOException {
+    return readFileAsString(file).hashCode();
+  }
 }
