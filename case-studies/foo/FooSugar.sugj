@@ -16,6 +16,7 @@ public sugar FooSugar {
   lexical syntax
     "TYPE" -> FooTypeName
     "TYPE" -> JavaId {reject}
+    
   
   signature constructors
     Foo : Literal
@@ -24,4 +25,26 @@ public sugar FooSugar {
   desugarings
     \ Foo -> Null \
     \ MyId(s) -> Id("String") \
+    
+  rules
+    sugarj-analyze:
+    (ast, path, project-path) -> (ast, errors, warnings, notes)
+    with
+      editor-init;
+      // analyze;
+      errors   := <collect-all(constraint-error, conc)> ast;
+      warnings := <collect-all(constraint-warning, conc)> ast;
+      notes    := <collect-all(constraint-note, conc)> ast
+
+  editor-init =
+    // Ensure all dynamic rules are properly scoped
+    try(dr-scope-all-end);
+    dr-scope-all-start
+
+    constraint-error = foo-check
+    constraint-warning = fail
+    constraint-note = fail
+  
+    foo-check :
+      Foo -> "don't use nil, stupid"
 }

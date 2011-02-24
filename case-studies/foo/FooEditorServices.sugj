@@ -5,13 +5,15 @@ import foo.FooSugar;
 
 public editor services FooEditorServices {
   colorer C1
-    keyword : 255 168 55 bold      
+    keyword : 255 168 55 italic      
   
   colorer C2
     _.TypeName : red
     _.MyId     : blue
     _.Foo      : green
-
+  
+  builders
+    observer : sugarj-analyze
 }
 
 class Test2 {

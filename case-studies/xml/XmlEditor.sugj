@@ -14,11 +14,18 @@ public editor services XmlEditor {
     EmptyElementRight : xmlParenthesis
     ElementStartRight : xmlParenthesis
     ElementEndRight : xmlParenthesis
+    Element.EmptyElement : xmlParenthesis
     
-    environment _.ElemName : 0 0 255
+    environment _.ElemName : 10 0 255
     environment AttrName : 0 150 40
     // environment DoubleQuoted : blue
     // Qualifier : 0 255 102
     
     xmlParenthesis = 0 0 200 bold
+    
+  folding XmlFolding
+    Element.Element
+    
+  outliner XmlOutliner
+    ElemName._
 }
