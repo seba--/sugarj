@@ -95,13 +95,7 @@ public class STRCommands {
                                             String main) throws IOException {
     log.beginTask("Generating", "Generate the assimilator");
     try {
-      String dir = null;
-      
-      if (Environment.cacheDir != null)
-        dir = FileCommands.createDir(Environment.cacheDir, key.hashCode());
-      else
-        dir = FileCommands.newTempDir();
-      
+      String dir = FileCommands.newTempDir();
       String javaFilename = FileCommands.fileName(str).replace("-", "_");
       String java = dir + sep + javaFilename + ".java";
       strj(str, java, main);
