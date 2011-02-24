@@ -25,6 +25,7 @@ import org.strategoxt.java_front.pp_java_string_0_0;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.stratego_sdf.pp_sdf_string_0_0;
+import org.strategoxt.stratego_sdf.stratego_sdf;
 import org.strategoxt.strc.pp_stratego_string_0_0;
 import org.strategoxt.tools.main_pack_sdf_0_0;
 import org.sugarj.driver.caching.ModuleKey;
@@ -67,12 +68,15 @@ public class SDFCommands {
         cmd.add(path);
       }
     
-    StrategyInvoker.invoke(main_pack_sdf_0_0.instance, 
-                           false, 
-                           CommandExecution.SILENT_EXECUTION || CommandExecution.SUB_SILENT_EXECUTION, 
-                           cmd.toArray(new String[cmd.size()]));
+    Context c = stratego_sdf.init();
     
-    // CommandExecution.execute(cmd);
+    try {
+      c.invokeStrategyCLI(main_pack_sdf_0_0.instance, "pack-sdf", cmd.toArray(new String[cmd.size()]));
+    } catch(StrategoExit e) {
+      if (e.getValue() != 0) {
+        throw new RuntimeException(e);
+      }
+    }
     
     if (!new File(def).exists())
       throw new RuntimeException("execution of pack-sdf failed");
@@ -288,9 +292,12 @@ public class SDFCommands {
     finally {
       if (result)
         log.endTask();
-      else
+      else {
+        String sourceFile = FileCommands.newTempFile("");
+        FileCommands.writeToFile(sourceFile, source);
         log.endTask("failed: " + 
-            log.commandLineAsString(new String[] {"jsglri", "-p", tbl, "-i source -o", target, "-s", start}));
+            log.commandLineAsString(new String[] {"jsglri", "-p", tbl, "-i " + sourceFile + " -o", target, "-s", start}));
+      }
     }
     
     return result;

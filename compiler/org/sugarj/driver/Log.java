@@ -46,6 +46,10 @@ public class Log {
       return;
     
     long endTime = System.currentTimeMillis();
+    
+    if (tasks.isEmpty())
+      return;
+    
     String shortText = tasks.pop();
     Long startTime = timings.pop();
     long duration = endTime - startTime;
