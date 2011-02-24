@@ -36,14 +36,14 @@ public sugar FooSugar {
       warnings := <collect-all(constraint-warning, conc)> ast;
       notes    := <collect-all(constraint-note, conc)> ast
 
-  editor-init =
-    // Ensure all dynamic rules are properly scoped
-    try(dr-scope-all-end);
-    dr-scope-all-start
-
-    constraint-error = foo-check
-    constraint-warning = fail
-    constraint-note = fail
+	  editor-init =
+	    // Ensure all dynamic rules are properly scoped
+	    try(dr-scope-all-end);
+	    dr-scope-all-start
+	
+	    constraint-error = foo-check
+	    constraint-warning = fail
+	    constraint-note = fail
   
     foo-check :
       Foo -> "don't use nil, stupid"

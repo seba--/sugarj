@@ -1,19 +1,20 @@
 package foo;
 
-import org.sugarj.languages.EditorServices; 
+import foo.EditorServiceHelper;
+
 import foo.FooSugar;
 
 public editor services FooEditorServices {
   colorer C1
-    keyword : 255 168 55 italic      
+    keyword : 255 168 55 bold      
   
   colorer C2
     _.TypeName : red
-    _.MyId     : blue
+    _.MyId     : BLUE
     _.Foo      : green
   
   builders
-    observer : sugarj-analyze
+//    observer : sugarj-analyze
 }
 
 class Test2 {
