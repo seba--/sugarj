@@ -1437,11 +1437,7 @@ public class Driver{
               (ModuleKeyCache<String>) new ObjectInputStream(new FileInputStream(
                   sdfCache)).readObject();
       } 
-      catch (ClassNotFoundException e) {
-        SDFCommands.sdfCache = new ModuleKeyCache<String>();
-        e.printStackTrace();
-      }
-      catch (IOException e) {
+      catch (Exception e) {
         SDFCommands.sdfCache = new ModuleKeyCache<String>();
         e.printStackTrace();
       }
@@ -1455,11 +1451,7 @@ public class Driver{
             (ModuleKeyCache<String>) new ObjectInputStream(new FileInputStream(
                 strCache)).readObject();
       } 
-      catch (ClassNotFoundException e) {
-        STRCommands.strCache = new ModuleKeyCache<String>();
-        e.printStackTrace();     
-      }
-      catch (IOException e) {
+      catch (Exception e) {
         STRCommands.strCache = new ModuleKeyCache<String>();
         e.printStackTrace();
       }
