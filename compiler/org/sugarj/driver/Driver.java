@@ -67,14 +67,11 @@ public class Driver{
   
   public static class Result {
     private Map<String, Long> fileDependencyTimestamps = new HashMap<String, Long>();
-    private Map<String, String> generatedFiles = new HashMap<String, String>();
+    private Map<String, Integer> generatedFileHashes = new HashMap<String, Integer>();
     private List<IStrategoTerm> editorServices = new ArrayList<IStrategoTerm>();
     private Set<BadTokenException> collectedErrors = new HashSet<BadTokenException>();
     private IStrategoTerm sugaredSyntaxTree = null;
-    private String javaOutFile;
-    private String bin;
-    private List<String> path;
-    private String relPackageName;
+    private String generatedClassFile;
 
     private void addFileDependency(String file) {
       fileDependencyTimestamps.put(file, new File(file).lastModified());
@@ -85,19 +82,13 @@ public class Driver{
     }
     
     private void generateFile(String file, String content) throws IOException {
-      generatedFiles.put(file, content);
       FileCommands.writeToFile(file, content);
+      generatedFileHashes.put(file, content.hashCode());
     }
     
     private void appendToFile(String file, String content) throws IOException {
-      String oldContent = generatedFiles.get(file);
-      
-      if (oldContent == null)
-        oldContent = "";
-      
-      generatedFiles.put(file, oldContent + content);
-      
       FileCommands.appendToFile(file, content);
+      generatedFileHashes.put(file, FileCommands.fileHash(file));
     }
     
     private void addEditorService(IStrategoTerm service) {
@@ -108,22 +99,16 @@ public class Driver{
       return editorServices;
     }
     
-    private void regenerateFiles() throws IOException {
-      for (Map.Entry<String, String> entry : generatedFiles.entrySet())
-        if (!FileCommands.readFileAsString(entry.getKey()).equals(entry.getValue()))
-          FileCommands.writeToFile(entry.getKey(), entry.getValue());
-      
-      String classFile = 
-        bin + sep 
-        + (relPackageName == null || relPackageName.isEmpty() ? "" : (relPackageName + sep))
-        + FileCommands.fileName(javaOutFile) + ".class";
-      if (javaOutFile != null && !new File(classFile).exists())
-        JavaCommands.javac(javaOutFile, bin, path);
-    }
-    
-    private boolean isUpToDate() {
+    private boolean isUpToDate() throws IOException {
+      if (!new File(generatedClassFile).exists())
+        return false;
+
       for (Entry<String, Long> entry : fileDependencyTimestamps.entrySet())
         if (new File(entry.getKey()).lastModified() > entry.getValue())
+          return false;
+      
+      for (Entry<String, Integer> entry : generatedFileHashes.entrySet())
+        if (FileCommands.fileHash(entry.getKey()) != entry.getValue())
           return false;
       
       return true;
@@ -146,10 +131,11 @@ public class Driver{
     }
 
     private void compileJava(String javaOutFile, String bin, List<String> path, String relPackageName) throws IOException {
-      this.javaOutFile = javaOutFile;
-      this.bin = bin;
-      this.path = path;
-      this.relPackageName = relPackageName;
+      generatedClassFile = 
+        bin + sep 
+        + (relPackageName == null || relPackageName.isEmpty() ? "" : (relPackageName + sep))
+        + FileCommands.fileName(javaOutFile) + ".class";
+      
       JavaCommands.javac(javaOutFile, bin, path);
     }
   }
@@ -238,11 +224,8 @@ public class Driver{
   
   public static Result compile(String source, String moduleName) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
     Result result = getResult(source, moduleName);
-    if (result != null && result.isUpToDate()) {
-      result.regenerateFiles();
+    if (result != null && result.isUpToDate())
       return result;
-    }
-      
     
     initialize();
     Driver driver = new Driver();
