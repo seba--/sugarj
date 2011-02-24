@@ -292,8 +292,8 @@ public class FileCommands {
     writeToFile(file, b.toString());
   }
 
-  public static boolean exists(String tbl) {
-    return new File(tbl).exists();
+  public static boolean exists(String file) {
+    return new File(file).exists();
   }
 
   public static String hashFileName(String prefix, int hash) {
@@ -354,6 +354,9 @@ public class FileCommands {
   }
 
   public static int fileHash(String file) throws IOException {
-    return readFileAsString(file).hashCode();
+    if (exists(file))
+      return readFileAsString(file).hashCode();
+    
+    return 0;
   }
 }
