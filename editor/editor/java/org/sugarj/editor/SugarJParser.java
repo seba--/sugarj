@@ -8,16 +8,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Platform;
-import org.spoofax.interpreter.core.Interpreter;
-import org.spoofax.interpreter.library.jsglr.JSGLRLibrary;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.jsglr.client.SGLR;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
-import org.spoofax.terms.Term;
+import org.strategoxt.eclipse.ant.StrategoJarAntPropertyProvider;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
-import org.strategoxt.strj.strj;
 import org.sugarj.driver.CommandExecution;
 import org.sugarj.driver.Driver;
 import org.sugarj.driver.Environment;
@@ -44,11 +40,11 @@ public class SugarJParser extends JSGLRI {
     if (Environment.cacheDir == null)
       Environment.cacheDir = System.getProperty("user.home") + "/.sugarj/cache";
     
-    Environment.includePath.add(getJarPath(SGLR.class));
-    Environment.includePath.add(getJarPath(strj.class));
-    Environment.includePath.add(getJarPath(Interpreter.class));
-    Environment.includePath.add(getJarPath(JSGLRLibrary.class));
-    Environment.includePath.add(getJarPath(Term.class));
+    //Environment.includePath.add(getJarPath(SGLR.class));
+    Environment.includePath.add(StrategoJarAntPropertyProvider.getStrategoJarPath());
+    //Environment.includePath.add(getJarPath(Interpreter.class));
+    //Environment.includePath.add(getJarPath(JSGLRLibrary.class));
+    //Environment.includePath.add(getJarPath(Term.class));
 
     assert projectPath != null;
     Environment.srcPath.add(projectPath);
