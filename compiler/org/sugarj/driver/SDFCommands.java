@@ -226,8 +226,10 @@ public class SDFCommands {
       make_permissive.mainNoExit(context, "-i", def, "-o", permissiveDef);
     }
     catch (StrategoExit e) {
-      if (e.getValue() != 0)
-        throw new RuntimeException("make permissive failed", e);
+      if (e.getValue() != 0) {
+        org.strategoxt.imp.runtime.Environment.logWarning("make permissive failed", e);
+        FileCommands.copyFile(def, permissiveDef);
+      }
     }
     finally {
       log.endTask();
