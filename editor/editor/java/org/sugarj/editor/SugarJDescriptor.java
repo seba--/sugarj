@@ -27,8 +27,6 @@ import org.strategoxt.imp.runtime.services.StrategoObserver;
  * @author Lennart Kats <lennart add lclnet.nl>
  */
 public class SugarJDescriptor extends Descriptor {
-  
-  private static final int REPARSE_OTHER_EDITOR_DELAY = 1000;
 
   private final IStrategoAppl baseDocument;
   
@@ -37,6 +35,7 @@ public class SugarJDescriptor extends Descriptor {
   public SugarJDescriptor(Descriptor baseDescriptor) throws BadDescriptorException {
     super(baseDescriptor.getDocument());
     baseDocument = baseDescriptor.getDocument();
+    setDynamicallyLoaded(true);
   }
   
   @Override
@@ -55,11 +54,25 @@ public class SugarJDescriptor extends Descriptor {
     }
     
     T result = super.createService(type, controller);
+    
     if (result instanceof IOnSaveService)
       result = (T) new SugarJOnSaveService(this, (IOnSaveService) result);
-    if (result instanceof StrategoObserver)
-      ((StrategoObserver) result).setPrototypeAllowed(false);
+    
+    if (result instanceof StrategoObserver) {
+      initObserver((StrategoObserver) result);
+    }
+    
     return result;
+  }
+
+  private void initObserver(StrategoObserver observer) {
+    observer.getLock().lock();
+    try {
+      observer.setPrototypeAllowed(false);
+      ((StrategoObserver) observer).getRuntime(); // eagerly initilize w/ current document
+    } finally {
+      observer.getLock().unlock();
+    }
   }
   
   private void reloadEditors(SGLRParseController controller) {
@@ -95,8 +108,8 @@ public class SugarJDescriptor extends Descriptor {
     if (cons.getName().equals("Module") && cons.getArity() == 3) {
       ITermFactory factory = Environment.getTermFactory();
       List<IStrategoTerm> allDefinitions = new ArrayList<IStrategoTerm>();
-      allDefinitions.addAll(extensions);
       addAll(allDefinitions, (IStrategoList) termAt(base, 2));
+      allDefinitions.addAll(extensions);
       return factory.makeAppl(cons, termAt(base, 0), termAt(base, 1), factory.makeList(allDefinitions));
     } else {
       throw new IllegalStateException("Unsupported editor descriptor format:" + cons);

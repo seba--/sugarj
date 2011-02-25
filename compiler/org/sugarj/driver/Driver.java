@@ -145,7 +145,9 @@ public class Driver{
         ATermCommands.atermFromString(
             "Builders(\"desugaring provider\", " +
               "[SemanticProvider(\"" + 
-                  jarfile.replace("\\", "\\\\").replace("\"", "\\\"") + "\")])");
+                  jarfile.replace("\\", "\\\\").replace("\"", "\\\"") + "\")" +
+              ",SemanticObserver(Strategy(\"sugarj-analyze\"))" +
+              "])");
       editorServices.add(builder);
     }
   }
