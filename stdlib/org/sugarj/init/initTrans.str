@@ -15,6 +15,16 @@ strategies
   internal-main = traverse(desugar)
   main = io-wrap(internal-main)
 
+  sugarj-analyze = fail // TODO: do something here?
+  
+  editor-init =
+    // Ensure all dynamic rules are properly scoped
+    try(dr-scope-all-end);
+    dr-scope-all-start
+
+  constraint-error = fail
+  constraint-warning = fail
+  constraint-note = fail
 
 signature
   constructors
