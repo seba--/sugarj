@@ -6,15 +6,7 @@ import xml.XmlSyntax;
 
 public editor services XmlEditor {
   colorer XmlHighlighting
-    CommentLeft : xmlParenthesis
-    CommentRight : xmlParenthesis
-    EmptyElementLeft : xmlParenthesis
-    ElementStartLeft : xmlParenthesis
-    ElementEndLeft : xmlParenthesis
-    EmptyElementRight : xmlParenthesis
-    ElementStartRight : xmlParenthesis
-    ElementEndRight : xmlParenthesis
-    Element.EmptyElement : xmlParenthesis
+    Element : xmlParenthesis
     
     environment _.ElemName : 10 0 255
     environment AttrName : 0 150 40

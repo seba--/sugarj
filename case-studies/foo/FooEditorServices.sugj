@@ -14,7 +14,7 @@ public editor services FooEditorServices {
     _.Foo      : green
   
   builders
-//    observer : sugarj-analyze
+    observer : sugarj-analyze
 }
 
 class Test2 {

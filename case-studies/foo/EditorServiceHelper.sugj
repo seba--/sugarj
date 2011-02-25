@@ -4,5 +4,5 @@ public editor services EditorServiceHelper {
   colorer
     RED   = 255 0 0 bold
     GREEN = 0 255 0 bold
-    BLUE  = 0 0 255 bold
+    BLUE  = 0 0 255 italic
 }
