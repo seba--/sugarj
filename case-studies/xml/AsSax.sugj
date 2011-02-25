@@ -46,13 +46,13 @@ public sugar AsSax {
 	   * @todo  Support namespaces
 	   */
 	  content-to-stm(|java_x) :
-	    Element(QName(pref, n), atts, children, QName(pref, n)) ->
+	    Element(QName(pref, n), atts, children, QName(pref', n')) ->
 	      java_bstm* |[
 	         org.xml.sax.helpers.AttributesImpl java_y = new org.xml.sax.helpers.AttributesImpl();
 	         java_bstm1*;
 	         java_x.startElement(~<java-string-prefix> pref, ~<java-string-expr> n, ~<java-string-qname> (pref,n), java_y);
 	         java_bstm2*;
-	         java_x.endElement(~<java-string-prefix> pref, ~<java-string-expr> n, ~<java-string-qname> (pref,n));
+	         java_x.endElement(~<java-string-prefix> pref', ~<java-string-expr> n', ~<java-string-qname> (pref,n));
 	      ]|
 	      where <map(content-to-stms(|java_x))> children => java_bstm2*
 	          ; new => java_y
