@@ -61,7 +61,9 @@ public class STRCommands {
         "-o", toWindowsPath(java),
         "-m", main,
         "-I", toCygwinPath(StdLib.stdLibDir.getPath()),
-        "-p", "sugarj"
+        "-p", "sugarj",
+        "--library",
+        "-O", "0"
     }));
     
     for (String path : Environment.includePath)
