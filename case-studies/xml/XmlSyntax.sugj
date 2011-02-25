@@ -6,6 +6,12 @@ package xml;
 public sugar XmlSyntax {
 
 
+  rules
+    constraint-error :
+      Element(lname, attrs, content, rname) -> 
+      (<id>, "element start and end tag need to coincide")
+      where <not(equal)> (lname, rname) 
+
 
 
 %% module xml-attribute
@@ -179,25 +185,12 @@ public sugar XmlSyntax {
     CDataSection  -> <Content-CF>
 
 
-  lexical syntax
-    "<!--" -> CommentLeft
-    "-->"  -> CommentRight
-    
-    "<"  -> EmptyElementLeft
-    "<"  -> ElementStartLeft
-    "</" -> ElementEndLeft
- 
-    "/>" -> EmptyElementRight
-    ">" -> ElementStartRight
-    ">" -> ElementEndRight
-    
-
   context-free syntax
     "<" ElemName Attribute* "/>" -> Element {cons("EmptyElement")}
 
-    ElementStartLeft ElemName Attribute* ElementStartRight
+    "<" ElemName Attribute* ">"
       Content* 
-    ElementEndLeft ElemName ElementEndRight
+    "</" ElemName ">"
     -> Element {cons("Element")}
     
     QName -> ElemName {cons("ElemName")}
@@ -239,8 +232,6 @@ public sugar XmlSyntax {
 
 
   desugarings
-    \ Element(_, name1, attrs, _, content, _, name2, _) -> Element(name1, attrs, content, name2) \
-    \ EmptyElement(_, name, attrs, _) -> EmptyElement(name, attrs) \
     \ Comment(_, com, _) -> Comment(com) \
     \ ElemName(name) -> name \
     \ AttrName(name) -> name \
@@ -255,9 +246,7 @@ public sugar XmlSyntax {
 	    Comment          : String * Comment * String -> Content
 	                     : Element -> Content
       Element          : QName * List(Attribute) * List(Content) * QName -> Element
-	    Element          : String * QName * List(Attribute) * String * List(Content) * String * QName * String -> Element
 	    EmptyElement     : QName * List(Attribute) -> Element
-      EmptyElement     : String * QName * List(Attribute) * String -> Element
 	    Document         : Prologue * Element * Epilogue -> Document
 	                     : String -> FooSingleQuotedText
 	                     : String -> FooDoubleQuotedText
