@@ -58,6 +58,7 @@ import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.lang.Context;
 import org.strategoxt.permissivegrammars.make_permissive;
 import org.strategoxt.stratego_sdf.stratego_sdf;
+import org.strategoxt.tools.tools;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.stdlib.StdLib;
 
@@ -291,7 +292,7 @@ public class Driver{
 
       inputTreeBuilder = new RetractableTreeBuilder();
       interp = new HybridInterpreter();
-      sdfContext = stratego_sdf.init();
+      sdfContext = tools.init();
       makePermissiveContext = make_permissive.init();
       
       // XXX need to load ANY parse table, preferable an empty one.
@@ -380,6 +381,9 @@ public class Driver{
       IStrategoTerm restTerm = getApplicationSubterm(remainingInputTerm, "NextToplevelDeclaration", 1);
       String rest = getString(restTerm);
 
+      if (input.equals(rest))
+        throw new RuntimeException("empty toplevel declaration parse rule");
+      
       try {
         if (!rest.isEmpty())
           inputTreeBuilder.retract(restTerm);
