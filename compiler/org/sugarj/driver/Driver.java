@@ -1010,8 +1010,8 @@ public class Driver{
   
       FileCommands.createFile(strExtension);
 
-      String sdfImports = "imports " + StringCommands.printListSeparated(availableSDFImports, " ") + "\n";
-      String strImports = "imports " + StringCommands.printListSeparated(availableSTRImports, " ") + "\n";
+      String sdfImports = " imports " + StringCommands.printListSeparated(availableSDFImports, " ") + "\n";
+      String strImports = " imports " + StringCommands.printListSeparated(availableSTRImports, " ") + "\n";
       
       if (isNative) {
         String nativeModule = getString(getApplicationSubterm(body, "NativeSugarBody", 0)); 
