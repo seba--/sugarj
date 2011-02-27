@@ -22,7 +22,6 @@ public class Test extends DefaultHandler {
     
     
     ch.write document
-    
       <xsd:schema
 		    targetNamespace="http://www.w3.org/2001/XMLSchema"
 		    blockDefault="#all"

@@ -9,10 +9,11 @@ public sugar XmlSyntax {
   rules
     constraint-error :
       Element(lname, attrs, content, rname) -> 
-      (<id>, "element start and end tag need to coincide")
+      [(lname, "element start and end tag need to coincide"),
+       (rname, "element start and end tag need to coincide")]
       where <not(equal)> (lname, rname) 
 
-
+ 
 
 %% module xml-attribute
   context-free syntax

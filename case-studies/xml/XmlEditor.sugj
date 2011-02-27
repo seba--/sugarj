@@ -5,11 +5,12 @@ import org.sugarj.languages.EditorServices;
 import xml.XmlSyntax;
 
 public editor services XmlEditor {
-  colorer XmlHighlighting
+  colorer XmlHighlighting    
     Element : xmlParenthesis
+     
+    environment ElemName : blue
+    environment AttValue : darkgreen
     
-    environment _.ElemName : 10 0 255
-    environment AttrName : 0 150 40
     
     xmlParenthesis = 0 0 200 bold
     
