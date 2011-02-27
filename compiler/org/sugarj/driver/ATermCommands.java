@@ -20,11 +20,13 @@ import org.spoofax.terms.StrategoListIterator;
 import org.spoofax.terms.attachments.ParentAttachment;
 import org.spoofax.terms.attachments.ParentTermFactory;
 import org.spoofax.terms.io.TAFTermReader;
+import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.runtime.Environment;
+import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
-import org.sugarj.driver.transformations.extractSdf;
-import org.sugarj.driver.transformations.extractStr;
-import org.sugarj.driver.transformations.sdf_desugar;
+import org.strategoxt.tools.sdf_desugar_0_0;
+import org.sugarj.driver.transformations.extraction.extract_sdf_0_0;
+import org.sugarj.driver.transformations.extraction.extract_str_0_0;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -78,7 +80,7 @@ public class ATermCommands {
   }
   
   public static IStrategoTerm atermFromString(String s) throws IOException {
-    return factory.parseFromString(s);
+    return new TAFTermReader(factory).parseFromString(s);
   }
 
   public static void atermToFile(IStrategoTerm aterm, String filename)
@@ -199,15 +201,16 @@ public class ATermCommands {
    * @param sdf result file
    * @throws InvalidParseTableException 
    */
-  public static void extractSDF(String term, String sdf) throws IOException, InvalidParseTableException {
+  public static IStrategoTerm extractSDF(IStrategoTerm term, Context context) throws IOException, InvalidParseTableException {
+    IStrategoTerm result = null;
     try {
-      extractSdf.mainNoExit("-i", term, "-o", sdf);
+      result = extract_sdf_0_0.instance.invoke(context, term);
     }
     catch (StrategoExit e) {
-      if (e.getValue() != 0)
-        throw new RuntimeException("Sdf extraction failed", e);
+      if (e.getValue() != 0 || result == null)
+        throw new RuntimeException("Stratego extraction failed", e);
     }
-    // STRCommands.assimilate(STRCommands.getExtractSDFProg(), term, sdf);
+    return result;
   }
   
   /**
@@ -219,55 +222,29 @@ public class ATermCommands {
    * @param str result file
    * @throws InvalidParseTableException 
    */
-  public static void extractSTR(String term, String str) throws IOException, InvalidParseTableException {
+  public static IStrategoTerm extractSTR(IStrategoTerm term, Context context) throws IOException, InvalidParseTableException {
+    IStrategoTerm result = null;
     try {
-      extractStr.mainNoExit("-i", term, "-o", str);
+      result = extract_str_0_0.instance.invoke(context, term);
     }
     catch (StrategoExit e) {
-      if (e.getValue() != 0)
+      if (e.getValue() != 0 || result == null)
         throw new RuntimeException("Stratego extraction failed", e);
     }
-    // STRCommands.assimilate(STRCommands.getExtractSTRProg(), term, str);
+    return result;
   }
   
-  public static void fixSDF(String term, String fixed) throws IOException, InvalidParseTableException {
+  public static IStrategoTerm fixSDF(IStrategoTerm term, HybridInterpreter interp) throws IOException, InvalidParseTableException {
+    IStrategoTerm result = null;
     try {
-      sdf_desugar.mainNoExit("-i", term, "-o", fixed);
+      result = sdf_desugar_0_0.instance.invoke(interp.getCompiledContext(), term);
     }
     catch (StrategoExit e) {
-      if (e.getValue() != 0)
+      if (e.getValue() != 0 || result == null)
         throw new RuntimeException("Sdf desugaring failed", e);
     }
-    // STRCommands.assimilate(STRCommands.getSDFDesugarProg(), term, fixed);
+    
+    return result;
   }
   
-  
-  public static Collection<String> extractModuleNames(IStrategoTerm term) {
-    if (term.getTermType() != IStrategoTerm.LIST)
-      return null;
-    
-    Collection<String> names = new ArrayList<String>();
-    IStrategoList list = (IStrategoList) term;
-    
-    while (!list.isEmpty())
-    {
-      IStrategoTerm listEntry = list.head();
-      if (listEntry.getTermType() != IStrategoTerm.LIST)
-        throw new IllegalStateException("unexpected term type in imports " + list);
-
-      list = list.tail();
-      IStrategoList imports = (IStrategoList) listEntry;
-      
-      while (!imports.isEmpty()) {
-        IStrategoTerm module = imports.head();
-        imports = imports.tail();
-        
-        IStrategoTerm unparameterized = getApplicationSubterm(module, "module", 0);
-        IStrategoTerm moduleName = getApplicationSubterm(unparameterized, "unparameterized", 0);
-        names.add(getString(moduleName));
-      }
-    }
-    
-    return names;
-  }
 }

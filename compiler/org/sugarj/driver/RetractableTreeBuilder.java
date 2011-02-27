@@ -1,6 +1,5 @@
 package org.sugarj.driver;
 
-import org.spoofax.PushbackStringIterator;
 import org.spoofax.interpreter.terms.ISimpleTerm;
 import org.spoofax.jsglr.client.imploder.TermTreeFactory;
 import org.spoofax.jsglr.client.imploder.TreeBuilder;

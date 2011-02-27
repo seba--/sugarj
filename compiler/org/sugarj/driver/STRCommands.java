@@ -182,12 +182,6 @@ public class STRCommands {
     
   }
 
-
-  public static void assimilate(String jarfile, String in, String out, HybridInterpreter interp) throws IOException {
-    IStrategoTerm result = assimilate(jarfile, ATermCommands.atermFromFile(in), interp);
-    ATermCommands.atermToFile(result, out);
-  }
-  
   public static IStrategoTerm assimilate(String jarfile, IStrategoTerm in, HybridInterpreter interp) throws IOException {
     try {
       HybridInterpreter newInterp = new HybridInterpreter(interp);

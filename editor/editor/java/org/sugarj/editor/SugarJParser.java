@@ -16,6 +16,7 @@ import org.sugarj.driver.CommandExecution;
 import org.sugarj.driver.Driver;
 import org.sugarj.driver.Environment;
 import org.sugarj.driver.FileCommands;
+import org.sugarj.driver.Result;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -23,7 +24,7 @@ import org.sugarj.driver.FileCommands;
 public class SugarJParser extends JSGLRI {
 
   private String projectPath;
-  private Driver.Result result;
+  private Result result;
 
   public SugarJParser(JSGLRI parser) {
     super(parser.getParseTable(), parser.getStartSymbol(), parser.getController());
@@ -64,15 +65,15 @@ public class SugarJParser extends JSGLRI {
     // TODO compile files into the project folder
 
     try {
-      result = Driver.compile(input, FileCommands.fileName(filename));
+      result = Driver.compile(input, FileCommands.fileName(filename), filename);
     } catch (Throwable e) {
       org.strategoxt.imp.runtime.Environment.logException(e);
       return super.doParse(input, filename);
     }
     
-    IStrategoTerm term = result.getSugaredSyntaxTree();
+    // TODO how to handle pending results?
     
-    return term;
+    return result.getSugaredSyntaxTree();
   }
 
 

@@ -1,7 +1,5 @@
 package org.sugarj.driver;
 
-import static org.sugarj.driver.ATermCommands.atermFromFile;
-import static org.sugarj.driver.ATermCommands.atermToFile;
 import static org.sugarj.driver.ATermCommands.extractSDF;
 import static org.sugarj.driver.ATermCommands.extractSTR;
 import static org.sugarj.driver.ATermCommands.fixSDF;
@@ -32,11 +30,9 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -57,101 +53,15 @@ import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.lang.Context;
 import org.strategoxt.permissivegrammars.make_permissive;
-import org.strategoxt.stratego_sdf.stratego_sdf;
 import org.strategoxt.tools.tools;
 import org.sugarj.driver.caching.ModuleKeyCache;
+import org.sugarj.driver.transformations.extraction.extraction;
 import org.sugarj.stdlib.StdLib;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
 public class Driver{
-  
-  public static class Result {
-    private Map<String, Integer> fileDependencyHashes = new HashMap<String, Integer>();
-    private Map<String, Integer> generatedFileHashes = new HashMap<String, Integer>();
-    private Set<IStrategoTerm> editorServices = new HashSet<IStrategoTerm>();
-    private Set<BadTokenException> collectedErrors = new HashSet<BadTokenException>();
-    private IStrategoTerm sugaredSyntaxTree = null;
-    private String generatedClassFile;
-
-    private void addFileDependency(String file) throws IOException {
-      fileDependencyHashes.put(file, FileCommands.fileHash(file));
-    }
-    
-    public Collection<String> getFileDependencies() {
-      return fileDependencyHashes.keySet();
-    }
-    
-    private void generateFile(String file, String content) throws IOException {
-      FileCommands.writeToFile(file, content);
-      generatedFileHashes.put(file, FileCommands.fileHash(file));
-    }
-    
-    private void appendToFile(String file, String content) throws IOException {
-      FileCommands.appendToFile(file, content);
-      generatedFileHashes.put(file, FileCommands.fileHash(file));
-    }
-    
-    private void addEditorService(IStrategoTerm service) {
-      editorServices.add(service);
-    }
-    
-    public Set<IStrategoTerm> getEditorServices() {
-      return editorServices;
-    }
-    
-    private boolean isUpToDate() throws IOException {
-      if (!new File(generatedClassFile).exists())
-        return false;
-
-      for (Entry<String, Integer> entry : fileDependencyHashes.entrySet())
-        if (FileCommands.fileHash(entry.getKey()) != entry.getValue())
-          return false;
-      
-      for (Entry<String, Integer> entry : generatedFileHashes.entrySet())
-        if (FileCommands.fileHash(entry.getKey()) != entry.getValue())
-          return false;
-      
-      return true;
-    }
-    
-    private void addBadTokenExceptions(Collection<? extends BadTokenException> exceptions) {
-      collectedErrors.addAll(exceptions);
-    }
-    
-    public Set<BadTokenException> getCollectedErrors() {
-      return collectedErrors;
-    }
-    
-    private void setSugaredSyntaxTree(IStrategoTerm sugaredSyntaxTree) {
-      this.sugaredSyntaxTree = sugaredSyntaxTree;
-    }
-    
-    public IStrategoTerm getSugaredSyntaxTree() {
-      return sugaredSyntaxTree;
-    }
-
-    private void compileJava(String javaOutFile, String bin, List<String> path, String relPackageName) throws IOException {
-      generatedClassFile = 
-        bin + sep 
-        + (relPackageName == null || relPackageName.isEmpty() ? "" : (relPackageName + sep))
-        + FileCommands.fileName(javaOutFile) + ".class";
-      
-      JavaCommands.javac(javaOutFile, bin, path);
-    }
-    
-    private void registerEditorDesugarings(String jarfile) throws IOException {
-      IStrategoTerm builder =
-        ATermCommands.atermFromString(
-            "Builders(\"desugaring provider\", " +
-              "[SemanticProvider(\"" + 
-                  jarfile.replace("\\", "\\\\").replace("\"", "\\\"") + "\")" +
-              ",SemanticObserver(Strategy(\"sugarj-analyze\"))" +
-              "])");
-      editorServices.add(builder);
-    }
-  }
   
   private static class Key {
     private String source;
@@ -172,7 +82,7 @@ public class Driver{
           && ((Key) o).moduleName.equals(moduleName);
     }
   }
-  
+
   private static Map<Key, Result> resultCache = new HashMap<Key, Result>();
 
   private static List<URI> allInputFiles;
@@ -211,6 +121,7 @@ public class Driver{
   private JSGLRI parser;
   private Context sdfContext;
   private Context makePermissiveContext;
+  private Context extractionContext;
   private String currentTransProg;
   
   /**
@@ -229,14 +140,19 @@ public class Driver{
   public static Result compile(URI sourceFile) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
     String source = FileCommands.readFileAsString(sourceFile.getPath());
     String moduleName = FileCommands.fileName(sourceFile);
-    return compile(source, moduleName);
+    return compile(source, moduleName, sourceFile.getPath());
   }
   
-  public static Result compile(String source, String moduleName) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
-    Result result = getResult(source, moduleName);
-    if (result != null && result.isUpToDate())
-      return result;
-    
+  public static Result compile(String source, String moduleName, String file) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
+    synchronized (Driver.class) {
+      Result result = getResult(source, moduleName);
+      if (result != null && result.isUpToDate())
+        return result;
+      
+      // mark this module as pending 
+      putResult(source, moduleName, PendingResult.instance);
+    }
+
     initialize();
     Driver driver = new Driver();
     driver.process(source, moduleName);
@@ -262,45 +178,16 @@ public class Driver{
   private void process(String source, String moduleName) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
     log.beginTask("processing", "BEGIN PROCESSING " + moduleName);
     try {
-      this.moduleName = moduleName;
+      init(moduleName);
 
+      remainingInput = source;
+      
       // TODO we need better circular dependency handling
       if (currentlyProcessing.contains(moduleName))
         throw new IllegalStateException("circular processing");
 
       currentlyProcessing.add(moduleName);
 
-      javaOutDir = FileCommands.newTempDir();
-      javaOutFile = null; 
-      // FileCommands.createFile(tmpOutdir, relModulePath + ".java");
-
-      mainModuleName = moduleName;
-
-      currentGrammarSDF = StdLib.initGrammar.getPath();
-      currentGrammarModule = StdLib.initGrammarModule;
-
-      currentTransSTR = StdLib.initTrans.getPath();
-      currentTransModule = StdLib.initTransModule;
-
-      remainingInput = source;
-
-      // list of imports that contain SDF extensions
-      availableSDFImports = new ArrayList<String>();
-
-      // list of imports that contain Stratego extensions
-      availableSTRImports = new ArrayList<String>();
-
-      inputTreeBuilder = new RetractableTreeBuilder();
-      interp = new HybridInterpreter();
-      sdfContext = tools.init();
-      makePermissiveContext = make_permissive.init();
-      
-      // XXX need to load ANY parse table, preferable an empty one.
-      parser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.sdfTbl.getPath()), "Sdf2Module");
-      
-      sdfParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.sdfTbl.getPath()), "Sdf2Module");
-      strParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.strategoTbl.getPath()), "StrategoModule");
-      
       boolean done = false;
       while (!done) {
         boolean wocache = Environment.wocache;
@@ -523,17 +410,15 @@ public class Driver{
     
     currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfContext, makePermissiveContext);
 
-    String remainingInputParsed = FileCommands.newTempFile("aterm");
+    IStrategoTerm parseResult = null;
 
     parser.setUseRecovery(recovery);
     
     // read next toplevel decl and stop if that fails
-    boolean success = false;
     try {
-      success = SDFCommands.parseImplode(
+      parseResult = SDFCommands.parseImplode(
           currentGrammarTBL,
           remainingInput,
-          remainingInputParsed,
           "NextToplevelDeclaration",
           false,
           inputTreeBuilder,
@@ -543,12 +428,7 @@ public class Driver{
         driverResult.addBadTokenExceptions(parser.getCollectedErrors());
     }
     
-    if (!success) return null;
-
-    IStrategoTerm remainingInputTerm = atermFromFile(remainingInputParsed);
-    FileCommands.delete(remainingInputParsed);
-
-    return remainingInputTerm;
+    return parseResult;
   }
 
   private IStrategoTerm currentDesugar(IStrategoTerm term) throws IOException,
@@ -1038,38 +918,25 @@ public class Driver{
       else {
         // this is a list of SDF and Stratego statements
         IStrategoTerm sugarBody = getApplicationSubterm(body, "SugarBody", 0);
-        String bodyFile = FileCommands.newTempFile("aterm");
-        atermToFile(sugarBody, bodyFile);
   
-        String sdfExtractTmp = FileCommands.newTempFile("sdf");
-        String sdfExtract = FileCommands.newTempFile("sdf");
-        String strExtract = FileCommands.newTempFile("str");
+        IStrategoTerm sdfExtract = fixSDF(extractSDF(sugarBody, extractionContext), interp);
+        IStrategoTerm strExtract = extractSTR(sugarBody, extractionContext);
   
-        extractSDF(bodyFile, sdfExtractTmp);
-        fixSDF(sdfExtractTmp, sdfExtract);
-        extractSTR(bodyFile, strExtract);
-  
-        FileCommands.delete(bodyFile);
-        FileCommands.delete(sdfExtractTmp);
-        
         String sdfExtensionHead =
           "module " + fullExtName + "\n" + sdfImports
                 + (isPublic ? "exports " : "hiddens ") + "\n";
 
         String sdfExtensionContent = SDFCommands.prettyPrintSDF(sdfExtract, interp);
 
-        SDFCommands.makePermissiveSdf(sdfExtension, sdfExtension, makePermissiveContext);
-        driverResult.generateFile(sdfExtension, sdfExtensionHead + sdfExtensionContent);
+        String sdfSource = SDFCommands.makePermissiveSdf(sdfExtensionHead + sdfExtensionContent, makePermissiveContext);
+        driverResult.generateFile(sdfExtension, sdfSource);
 
         
-        
-        String strExtensionTerm = FileCommands.newTempFile("aterm");
-
-        driverResult.generateFile(strExtensionTerm, 
+        String strExtensionTerm = 
             "Module(" + "\"" + fullExtName+ "\"" + ", " 
-                      + atermFromFile(strExtract) + ")" + "\n");
+                      + strExtract + ")" + "\n";
 
-        String strExtensionContent = SDFCommands.prettyPrintSTR(strExtensionTerm, interp);
+        String strExtensionContent = SDFCommands.prettyPrintSTR(ATermCommands.atermFromString(strExtensionTerm), interp);
         
         int index = strExtensionContent.indexOf('\n');
         if (index >= 0)
@@ -1162,6 +1029,40 @@ public class Driver{
     allInputFiles = new ArrayList<URI>();
     pendingInputFiles = new ArrayList<String>();
     currentlyProcessing = new ArrayList<String>();
+  }
+  
+  private void init(String moduleName) throws FileNotFoundException, IOException, InvalidParseTableException {
+    this.moduleName = moduleName;
+
+    javaOutDir = FileCommands.newTempDir();
+    javaOutFile = null; 
+    // FileCommands.createFile(tmpOutdir, relModulePath + ".java");
+
+    mainModuleName = moduleName;
+
+    currentGrammarSDF = StdLib.initGrammar.getPath();
+    currentGrammarModule = StdLib.initGrammarModule;
+
+    currentTransSTR = StdLib.initTrans.getPath();
+    currentTransModule = StdLib.initTransModule;
+
+    // list of imports that contain SDF extensions
+    availableSDFImports = new ArrayList<String>();
+
+    // list of imports that contain Stratego extensions
+    availableSTRImports = new ArrayList<String>();
+
+    inputTreeBuilder = new RetractableTreeBuilder();
+    interp = new HybridInterpreter();
+    sdfContext = tools.init();
+    makePermissiveContext = make_permissive.init();
+    extractionContext = extraction.init();
+    
+    // XXX need to load ANY parse table, preferable an empty one.
+    parser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.sdfTbl.getPath()), "Sdf2Module");
+    
+    sdfParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.sdfTbl.getPath()), "Sdf2Module");
+    strParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.strategoTbl.getPath()), "StrategoModule");
   }
   
   /**
