@@ -3,13 +3,17 @@ package org.sugarj.stdlib;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
 public class StdLib {
 
-  public static URI stdLibDir = new File("/Users/seba/svn-strategoxt/sugarj/branches/SugarJ-editor-services/stdlib").toURI();
+  public static URL stdLibDir;
+  static {
+    stdLibDir = StdLib.class.getProtectionDomain().getCodeSource().getLocation();
+  }
 
   public static URI sugarjDef = new File(stdLibDir.getPath() + "/" + "org/sugarj/languages/SugarJ.def").toURI();
   public static URI javaDef = new File(stdLibDir.getPath() + "/" + "org/sugarj/languages/Java-15.def").toURI();
@@ -39,7 +43,7 @@ public class StdLib {
     exists(initGrammarAtomicImports);
     exists(initGrammarXTBL);
     exists(initTrans);
-    exists(stdLibDir);
+    exists(stdLibDir.toURI());
     exists(binDir);
   }
   
