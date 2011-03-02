@@ -17,7 +17,6 @@ public sugar XmlSyntax {
 
 %% module xml-attribute
   context-free syntax
-
     AttrName "=" AttValue -> Attribute {cons("Attribute")}
     QName -> AttrName {cons("AttrName")}
 
@@ -26,8 +25,8 @@ public sugar XmlSyntax {
     "\"" DoubleQuotedPart* "\"" -> <AttValue-CF> {cons("DoubleQuoted")}
     "'"  SingleQuotedPart* "'" -> <AttValue-CF> {cons("SingleQuoted")}
 
-    FooDoubleQuotedText -> DoubleQuotedPart {cons("Literal")}
-    FooSingleQuotedText -> SingleQuotedPart {cons("Literal")}
+    FooDoubleQuotedText -> DoubleQuotedPart {cons("CharDataPart")}
+    FooSingleQuotedText -> SingleQuotedPart {cons("CharDataPart")}
 
     <DoubleQuotedText-LEX> -> FooDoubleQuotedText
     <SingleQuotedText-LEX> -> FooSingleQuotedText
@@ -53,7 +52,7 @@ public sugar XmlSyntax {
 
     CharDataPart+ -> CharData {cons("Text")}
 
-    FooCharDataText -> CharDataPart {cons("Literal")}
+    FooCharDataText -> CharDataPart {cons("CharDataPart")}
     <Ref-CF> -> CharDataPart
     "<![CDATA[" <CData-LEX> "]]>" -> CharDataPart {cons("CDATASection")}
 
@@ -174,14 +173,13 @@ public sugar XmlSyntax {
 
   sorts Document Element Content
   context-free syntax
-
     Prologue Element Epilogue -> Document {cons("Document")}
 
     Element -> Content
     Comment -> Content {cons("Comment")}
     PI      -> Content
-  syntax
 
+  syntax
     CharData      -> <Content-CF>
     CDataSection  -> <Content-CF>
 
@@ -252,9 +250,9 @@ public sugar XmlSyntax {
 	                     : String -> FooSingleQuotedText
 	                     : String -> FooDoubleQuotedText
 	                     : Ref -> SingleQuotedPart
-	    Literal          : FooSingleQuotedText -> SingleQuotedPart
+	    CharDataPart          : FooSingleQuotedText -> SingleQuotedPart
 	                     : Ref -> DoubleQuotedPart
-	    Literal          : FooDoubleQuotedText -> DoubleQuotedPart
+	    CharDataPart          : FooDoubleQuotedText -> DoubleQuotedPart
 	    SingleQuoted     : List(SingleQuotedPart) -> AttValue
 	    DoubleQuoted     : List(DoubleQuotedPart) -> AttValue
 	    Attribute        : QName * AttValue -> Attribute
@@ -268,7 +266,7 @@ public sugar XmlSyntax {
 	                     : String -> FooCharDataText
 	    CDATASection     : String -> CharDataPart
 	                     : Ref -> CharDataPart
-	    Literal          : FooCharDataText -> CharDataPart
+	    CharDataPart          : FooCharDataText -> CharDataPart
 	    Text             : List(CharDataPart) -> CharData
 	    DocTypeDecl      : QName * ExternalID -> DocTypeDecl
 	    DocTypePrologue  : DocTypeDecl * List(Misc) -> DocTypePrologue

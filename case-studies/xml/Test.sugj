@@ -6,7 +6,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
-
+   
 import xml.AsSax;
 import xml.XmlSyntax;
 import xml.XmlJavaSyntax;
@@ -20,13 +20,12 @@ public class Test extends DefaultHandler {
   public static void main(String[] args) throws SAXException {
     ContentHandler ch = new Test();
     
-    
     ch.write document
       <xsd:schema
 		    targetNamespace="http://www.w3.org/2001/XMLSchema"
 		    blockDefault="#all"
 		    elementFormDefault="qualified"
-		    version="1.0">
+		    version="1.0">   
 		    <{http://www.w3.org/2001/XMLSchema}simpleType name="derivationSet">
 		      <annotation>
 		      

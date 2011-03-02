@@ -1,19 +1,20 @@
 package xml;
 
-import org.sugarj.languages.EditorServices;
-
+import editor.Colors;
 import xml.XmlSyntax;
 
 public editor services XmlEditor {
-  colorer XmlHighlighting    
+  colorer XmlHighlighting
     Element : xmlParenthesis
      
     environment ElemName : blue
-    environment AttValue : darkgreen
-    
+    environment AttrName : darkorange
+    environment AttValue : darkred
+    environment CharData : default
+    environment CharDataSection : default
     
     xmlParenthesis = 0 0 200 bold
-    
+
   folding XmlFolding
     Element.Element
     
