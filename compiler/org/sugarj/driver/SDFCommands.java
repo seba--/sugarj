@@ -21,12 +21,14 @@ import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
+import org.strategoxt.imp.nativebundle.SDFBundleCommand;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.java_front.pp_java_string_0_0;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.permissivegrammars.make_permissive;
 import org.strategoxt.stratego_sdf.pp_sdf_string_0_0;
+import org.strategoxt.stratego_xtc.stratego_xtc;
 import org.strategoxt.strc.pp_stratego_string_0_0;
 import org.strategoxt.tools.main_pack_sdf_0_0;
 import org.sugarj.driver.caching.ModuleKey;
@@ -93,7 +95,12 @@ public class SDFCommands {
         "-m", module
     };
     
-    CommandExecution.executeWithPrefix("sdf2table", cmd);
+    IStrategoTerm termArgs[] = new IStrategoTerm[cmd.length - 2];
+    for (int i = 0; i < termArgs.length; i++)
+      termArgs[i] = ATermCommands.makeString(cmd[i+2], null);
+    
+    Context context = stratego_xtc.init();
+    SDFBundleCommand.getInstance().invoke(context, "sdf2table", termArgs);
     
     if (!new File(tbl).exists())
       throw new RuntimeException("execution of sdf2table failed");

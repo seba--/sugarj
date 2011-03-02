@@ -39,11 +39,7 @@ public class SugarJParser extends JSGLRI {
     if (Environment.cacheDir == null)
       Environment.cacheDir = System.getProperty("user.home") + "/.sugarj/cache";
     
-    //Environment.includePath.add(getJarPath(SGLR.class));
     Environment.includePath.add(new StrategoJarAntPropertyProvider().getAntPropertyValue(""));
-    //Environment.includePath.add(getJarPath(Interpreter.class));
-    //Environment.includePath.add(getJarPath(JSGLRLibrary.class));
-    //Environment.includePath.add(getJarPath(Term.class));
 
     assert projectPath != null;
     Environment.srcPath.add(projectPath);
@@ -70,8 +66,6 @@ public class SugarJParser extends JSGLRI {
       org.strategoxt.imp.runtime.Environment.logException(e);
       return super.doParse(input, filename);
     }
-    
-    // TODO how to handle pending results?
     
     return result.getSugaredSyntaxTree();
   }

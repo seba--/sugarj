@@ -50,7 +50,7 @@ public class Result {
   }
   
   boolean isUpToDate() throws IOException {
-    if (!new File(generatedClassFile).exists())
+    if (generatedClassFile != null && !new File(generatedClassFile).exists())
       return false;
 
     for (Entry<String, Integer> entry : fileDependencyHashes.entrySet())
@@ -90,13 +90,6 @@ public class Result {
   }
   
   void registerEditorDesugarings(String jarfile) throws IOException {
-    IStrategoTerm builder =
-      ATermCommands.atermFromString(
-          "Builders(\"desugaring provider\", " +
-            "[SemanticProvider(\"" + 
-                jarfile.replace("\\", "\\\\").replace("\"", "\\\"") + "\")" +
-            ",SemanticObserver(Strategy(\"sugarj-analyze\"))" +
-            "])");
-    editorServices.add(builder);
+    editorServices = new HashSet<IStrategoTerm>(ATermCommands.registerSemanticProvider(editorServices, jarfile));
   }
 }

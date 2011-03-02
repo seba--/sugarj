@@ -39,7 +39,6 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
-import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.InvalidParseTableException;
 import org.spoofax.jsglr.client.ParseTable;
@@ -48,7 +47,6 @@ import org.spoofax.jsglr.client.imploder.Token;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
-import org.spoofax.terms.StrategoListIterator;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.lang.Context;
@@ -82,6 +80,8 @@ public class Driver{
           && ((Key) o).moduleName.equals(moduleName);
     }
   }
+
+  private final static int PENDING_TIMEOUT = 120000;
 
   private static Map<Key, Result> resultCache = new HashMap<Key, Result>();
 
@@ -133,6 +133,31 @@ public class Driver{
     return resultCache.get(new Key(source, moduleName));
   }
   
+  private static Result getNonPendingResult(String source, String moduleName) {
+    Key key = new Key(source, moduleName);
+    Result r;
+    int count = 0;
+    synchronized (key) {
+      while (true) {
+        synchronized (resultCache) {
+          r = resultCache.get(key);
+        }
+        
+        if (r != null && !(r instanceof PendingResult))
+          return r;
+        
+        if (count > PENDING_TIMEOUT)
+          throw new IllegalStateException("pending result timed out for module " + moduleName);
+        
+        count += 100;
+        try {
+          key.wait(100);
+        } catch (InterruptedException e) {
+        }
+      }
+    }
+  }
+
   private static synchronized void putResult(String source, String moduleName, Result result) {
     resultCache.put(new Key(source, moduleName), result);
   }
@@ -144,20 +169,31 @@ public class Driver{
   }
   
   public static Result compile(String source, String moduleName, String file) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
+    boolean isPending = false;
     synchronized (Driver.class) {
       Result result = getResult(source, moduleName);
-      if (result != null && result.isUpToDate())
+      if (result != null && result instanceof PendingResult)
+        isPending = true;
+      else if (result != null && result.isUpToDate())
         return result;
       
       // mark this module as pending 
       putResult(source, moduleName, PendingResult.instance);
     }
-
-    initialize();
-    Driver driver = new Driver();
-    driver.process(source, moduleName);
-    storeCaches();
-    putResult(source, moduleName, driver.driverResult);
+    
+    if (isPending && getNonPendingResult(source, moduleName) != null) 
+      return compile(source, moduleName, file);
+    
+    Driver driver = null;
+    try {
+      initialize();
+      driver = new Driver();
+      driver.process(source, moduleName);
+      storeCaches();
+    } finally {
+      putResult(source, moduleName, driver == null ? null : driver.driverResult);
+    }
+    
     return driver.driverResult;
   }
   
@@ -187,6 +223,10 @@ public class Driver{
         throw new IllegalStateException("circular processing");
 
       currentlyProcessing.add(moduleName);
+      
+      driverResult.addEditorService(
+        ATermCommands.atermFromString(
+          "Builders(\"sugarj checking\", [SemanticObserver(Strategy(\"sugarj-analyze\"))])"));
 
       boolean done = false;
       while (!done) {
@@ -345,9 +385,12 @@ public class Driver{
         
         IStrategoTerm services = ATermCommands.getApplicationSubterm(body, "EditorServicesBody", 0);
         
-        if (services.getTermType() != IStrategoTerm.LIST)
+        if (!ATermCommands.isList(services))
           throw new IllegalStateException("editor services are not a list: " + services);
-
+        
+        List<IStrategoTerm> editorServices = ATermCommands.getList(services);
+        if (currentTransProg != null)
+          editorServices = ATermCommands.registerSemanticProvider(editorServices, currentTransProg);
   
         String editorServicesFile = bin + sep + relPackageNameSep() + extName + ".serv";
         FileCommands.createFile(editorServicesFile);
@@ -359,7 +402,7 @@ public class Driver{
         for (IStrategoTerm service : driverResult.getEditorServices())
           buf.append(service).append('\n');
         
-        for (IStrategoTerm service : StrategoListIterator.iterable((IStrategoList) services)) {
+        for (IStrategoTerm service : editorServices) {
           driverResult.addEditorService(service);
           buf.append(service).append('\n');
         }
@@ -502,8 +545,10 @@ public class Driver{
       }
     }
     
-    for (IStrategoTerm pendingImport : pendingImports)
+    for (IStrategoTerm pendingImport : pendingImports) {
+      lastSugaredToplevelDecl = pendingImport;
       processImportDec(pendingImport);
+    }
   }
 
   private void processImportDec(IStrategoTerm toplevelDecl) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
@@ -923,8 +968,10 @@ public class Driver{
         IStrategoTerm strExtract = extractSTR(sugarBody, extractionContext);
   
         String sdfExtensionHead =
-          "module " + fullExtName + "\n" + sdfImports
-                + (isPublic ? "exports " : "hiddens ") + "\n";
+          "module " + fullExtName + "\n" 
+          + sdfImports
+          + (isPublic ? "exports " : "hiddens ") + "\n"
+          + "  (/)" + "\n";
 
         String sdfExtensionContent = SDFCommands.prettyPrintSDF(sdfExtract, interp);
 
