@@ -111,6 +111,10 @@ public class ATermCommands {
     throw new MatchError(term, "string");
   }
 
+  public static boolean isList(IStrategoTerm term) {
+    return term.getTermType() == IStrategoTerm.LIST;
+  }
+  
   public static List<IStrategoTerm> getList(IStrategoTerm term) {
     
     if (term.getTermType() == IStrategoTerm.LIST)
@@ -138,6 +142,17 @@ public class ATermCommands {
     return makeAppl("None", "Some", 0, noneToken);
   }
   
+  public static IStrategoTerm makeString(String s, IToken token) {
+    IStrategoTerm t = factory.makeString(s);
+    setAttachment(t, "String", token);
+    return t;
+  }
+  
+  public static IStrategoList makeList(String sort, IStrategoTerm... ts) {
+    assert ts.length > 0;
+    return makeList(sort, null, ts);
+  }
+  
   public static IStrategoList makeList(String sort, IToken emptyListToken, IStrategoTerm... ts) {
     IStrategoList term = factory.makeList(ts);
     
@@ -145,10 +160,14 @@ public class ATermCommands {
     return term;
   }
 
+  public static IStrategoList makeList(String sort, Collection<IStrategoTerm> ts) {
+    return makeList(sort, ts.toArray(new IStrategoTerm[ts.size()]));
+  }
+  
   public static IStrategoList makeList(String sort, IToken emptyListToken, Collection<IStrategoTerm> ts) {
     return makeList(sort, emptyListToken, ts.toArray(new IStrategoTerm[ts.size()]));
   }
-
+  
   public static IStrategoTerm makeAppl(String cons, String sort, int arity, IStrategoTerm... args) {
     assert args.length > 0;
     return makeAppl(cons, sort, arity, null, args);
@@ -172,6 +191,9 @@ public class ATermCommands {
     IToken right;
     
     if (children.length == 0) {
+      if (emptyToken == null)
+        return;
+      
       left = emptyToken;
       right = emptyToken;
     }
@@ -180,12 +202,13 @@ public class ATermCommands {
       right = ImploderAttachment.getRightToken(children[children.length - 1]);
     }
     
-    ImploderAttachment.putImploderAttachment(
-        term,
-        false,
-        sort, 
-        left,
-        right);
+    if (left != null && right != null)
+      ImploderAttachment.putImploderAttachment(
+          term,
+          false,
+          sort, 
+          left,
+          right);
     
     
     for (IStrategoTerm arg : children)
@@ -245,6 +268,33 @@ public class ATermCommands {
     }
     
     return result;
+  }
+  
+  public static List<IStrategoTerm> registerSemanticProvider(Collection<IStrategoTerm> editorServices, String jarfile) throws IOException {
+    String jarfilePath = jarfile.replace("\\", "\\\\").replace("\"", "\\\"");
+    IStrategoTerm semanticProvider = atermFromString("SemanticProvider(\"" + jarfilePath + "\")");
+    
+    List<IStrategoTerm> newServices = new ArrayList<IStrategoTerm>();
+    
+    for (IStrategoTerm service : editorServices)
+    {
+      if (ATermCommands.isApplication(service, "Builders")) {
+        IStrategoTerm name = ATermCommands.getApplicationSubterm(service, "Builders", 0);
+        IStrategoTerm builders = ATermCommands.getApplicationSubterm(service, "Builders", 1);
+        if (ATermCommands.isList(builders)) {
+          List<IStrategoTerm> builderList = new ArrayList<IStrategoTerm>();
+          builderList.add(semanticProvider);
+          builderList.addAll(getList(builders));
+          builders = ATermCommands.makeList("SemanticRule*", builderList);
+        }
+        
+        service = ATermCommands.makeAppl("Builders", "Section", 2, name, builders);
+      }
+      
+      newServices.add(service);
+    }
+    
+    return newServices;
   }
   
 }
