@@ -16,7 +16,7 @@ import java.lang.ref.WeakReference;
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("DynRuleUnion_3_0");
-    Fail71:
+    Fail72:
     { 
       IStrategoTerm i_113 = null;
       IStrategoTerm e_113 = null;
@@ -25,7 +25,7 @@ import java.lang.ref.WeakReference;
       IStrategoTerm j_113 = null;
       IStrategoTerm k_113 = null;
       if(term.getTermType() != IStrategoTerm.APPL || extraction._consDynRuleUnion_3 != ((IStrategoAppl)term).getConstructor())
-        break Fail71;
+        break Fail72;
       e_113 = term.getSubterm(0);
       f_113 = term.getSubterm(1);
       g_113 = term.getSubterm(2);
@@ -33,15 +33,15 @@ import java.lang.ref.WeakReference;
       i_113 = annos48;
       term = t_19.invoke(context, e_113);
       if(term == null)
-        break Fail71;
+        break Fail72;
       j_113 = term;
       term = u_19.invoke(context, f_113);
       if(term == null)
-        break Fail71;
+        break Fail72;
       k_113 = term;
       term = v_19.invoke(context, g_113);
       if(term == null)
-        break Fail71;
+        break Fail72;
       term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consDynRuleUnion_3, new IStrategoTerm[]{j_113, k_113, term}), checkListAnnos(termFactory, i_113));
       context.popOnSuccess();
       if(true)

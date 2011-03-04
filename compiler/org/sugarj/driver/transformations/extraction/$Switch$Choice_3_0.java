@@ -16,7 +16,7 @@ import java.lang.ref.WeakReference;
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("SwitchChoice_3_0");
-    Fail80:
+    Fail81:
     { 
       IStrategoTerm l_115 = null;
       IStrategoTerm i_115 = null;
@@ -25,7 +25,7 @@ import java.lang.ref.WeakReference;
       IStrategoTerm m_115 = null;
       IStrategoTerm n_115 = null;
       if(term.getTermType() != IStrategoTerm.APPL || extraction._consSwitchChoice_3 != ((IStrategoAppl)term).getConstructor())
-        break Fail80;
+        break Fail81;
       i_115 = term.getSubterm(0);
       j_115 = term.getSubterm(1);
       k_115 = term.getSubterm(2);
@@ -33,15 +33,15 @@ import java.lang.ref.WeakReference;
       l_115 = annos57;
       term = n_20.invoke(context, i_115);
       if(term == null)
-        break Fail80;
+        break Fail81;
       m_115 = term;
       term = o_20.invoke(context, j_115);
       if(term == null)
-        break Fail80;
+        break Fail81;
       n_115 = term;
       term = p_20.invoke(context, k_115);
       if(term == null)
-        break Fail80;
+        break Fail81;
       term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consSwitchChoice_3, new IStrategoTerm[]{m_115, n_115, term}), checkListAnnos(termFactory, l_115));
       context.popOnSuccess();
       if(true)

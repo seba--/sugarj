@@ -16,7 +16,7 @@ import java.lang.ref.WeakReference;
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("DynRuleIntersectUnionFix_3_0");
-    Fail73:
+    Fail74:
     { 
       IStrategoTerm x_113 = null;
       IStrategoTerm u_113 = null;
@@ -25,7 +25,7 @@ import java.lang.ref.WeakReference;
       IStrategoTerm y_113 = null;
       IStrategoTerm z_113 = null;
       if(term.getTermType() != IStrategoTerm.APPL || extraction._consDynRuleIntersectUnionFix_3 != ((IStrategoAppl)term).getConstructor())
-        break Fail73;
+        break Fail74;
       u_113 = term.getSubterm(0);
       v_113 = term.getSubterm(1);
       w_113 = term.getSubterm(2);
@@ -33,15 +33,15 @@ import java.lang.ref.WeakReference;
       x_113 = annos50;
       term = z_19.invoke(context, u_113);
       if(term == null)
-        break Fail73;
+        break Fail74;
       y_113 = term;
       term = a_20.invoke(context, v_113);
       if(term == null)
-        break Fail73;
+        break Fail74;
       z_113 = term;
       term = b_20.invoke(context, w_113);
       if(term == null)
-        break Fail73;
+        break Fail74;
       term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consDynRuleIntersectUnionFix_3, new IStrategoTerm[]{y_113, z_113, term}), checkListAnnos(termFactory, x_113));
       context.popOnSuccess();
       if(true)

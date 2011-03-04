@@ -15,21 +15,21 @@ import java.lang.ref.WeakReference;
   @Override public IStrategoTerm invoke(Context context, IStrategoTerm term)
   { 
     ITermFactory termFactory = context.getFactory();
-    Fail11:
+    Fail12:
     { 
-      IStrategoTerm term2 = term;
+      IStrategoTerm term3 = term;
       IStrategoConstructor cons3 = term.getTermType() == IStrategoTerm.APPL ? ((IStrategoAppl)term).getConstructor() : null;
-      Success2:
+      Success3:
       { 
         if(cons3 == extraction._consPureDesugaring_1)
         { 
-          Fail12:
+          Fail13:
           { 
             term = extraction.constNil0;
             if(true)
-              break Success2;
+              break Success3;
           }
-          term = term2;
+          term = term3;
         }
         if(cons3 == extraction._consInjectDesugaring_4)
         { 
@@ -43,7 +43,7 @@ import java.lang.ref.WeakReference;
         }
         else
         { 
-          break Fail11;
+          break Fail12;
         }
       }
       if(true)

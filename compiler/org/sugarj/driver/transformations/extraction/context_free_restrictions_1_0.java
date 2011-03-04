@@ -16,18 +16,18 @@ import java.lang.ref.WeakReference;
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("context_free_restrictions_1_0");
-    Fail241:
+    Fail242:
     { 
       IStrategoTerm a_145 = null;
       IStrategoTerm z_144 = null;
       if(term.getTermType() != IStrategoTerm.APPL || extraction._conscontext_free_restrictions_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail241;
+        break Fail242;
       z_144 = term.getSubterm(0);
       IStrategoList annos197 = term.getAnnotations();
       a_145 = annos197;
       term = t_28.invoke(context, z_144);
       if(term == null)
-        break Fail241;
+        break Fail242;
       term = termFactory.annotateTerm(termFactory.makeAppl(extraction._conscontext_free_restrictions_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, a_145));
       context.popOnSuccess();
       if(true)

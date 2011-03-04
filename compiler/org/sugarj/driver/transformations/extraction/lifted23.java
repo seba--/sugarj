@@ -15,15 +15,15 @@ import java.lang.ref.WeakReference;
   @Override public IStrategoTerm invoke(Context context, IStrategoTerm term)
   { 
     ITermFactory termFactory = context.getFactory();
-    Fail288:
+    Fail289:
     { 
       IStrategoTerm d_155 = null;
       if(term.getTermType() != IStrategoTerm.APPL || extraction._constransformation_elem_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail288;
+        break Fail289;
       d_155 = term.getSubterm(0);
       term = try_1_0.instance.invoke(context, d_155, comp_desugarings_to_str_0_0.instance);
       if(term == null)
-        break Fail288;
+        break Fail289;
       term = (IStrategoTerm)termFactory.makeListCons(term, (IStrategoList)extraction.constNil0);
       if(true)
         return term;

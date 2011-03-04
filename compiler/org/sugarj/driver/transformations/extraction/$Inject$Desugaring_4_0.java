@@ -16,7 +16,7 @@ import java.lang.ref.WeakReference;
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("InjectDesugaring_4_0");
-    Fail278:
+    Fail279:
     { 
       IStrategoTerm n_151 = null;
       IStrategoTerm i_151 = null;
@@ -27,7 +27,7 @@ import java.lang.ref.WeakReference;
       IStrategoTerm r_151 = null;
       IStrategoTerm s_151 = null;
       if(term.getTermType() != IStrategoTerm.APPL || extraction._consInjectDesugaring_4 != ((IStrategoAppl)term).getConstructor())
-        break Fail278;
+        break Fail279;
       i_151 = term.getSubterm(0);
       k_151 = term.getSubterm(1);
       l_151 = term.getSubterm(2);
@@ -36,19 +36,19 @@ import java.lang.ref.WeakReference;
       n_151 = annos233;
       term = o_30.invoke(context, i_151);
       if(term == null)
-        break Fail278;
+        break Fail279;
       o_151 = term;
       term = p_30.invoke(context, k_151);
       if(term == null)
-        break Fail278;
+        break Fail279;
       r_151 = term;
       term = q_30.invoke(context, l_151);
       if(term == null)
-        break Fail278;
+        break Fail279;
       s_151 = term;
       term = r_30.invoke(context, m_151);
       if(term == null)
-        break Fail278;
+        break Fail279;
       term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consInjectDesugaring_4, new IStrategoTerm[]{o_151, r_151, s_151, term}), checkListAnnos(termFactory, n_151));
       context.popOnSuccess();
       if(true)

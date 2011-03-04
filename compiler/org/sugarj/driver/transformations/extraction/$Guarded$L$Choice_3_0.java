@@ -16,7 +16,7 @@ import java.lang.ref.WeakReference;
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("GuardedLChoice_3_0");
-    Fail115:
+    Fail116:
     { 
       IStrategoTerm j_121 = null;
       IStrategoTerm g_121 = null;
@@ -25,7 +25,7 @@ import java.lang.ref.WeakReference;
       IStrategoTerm m_121 = null;
       IStrategoTerm n_121 = null;
       if(term.getTermType() != IStrategoTerm.APPL || extraction._consGuardedLChoice_3 != ((IStrategoAppl)term).getConstructor())
-        break Fail115;
+        break Fail116;
       g_121 = term.getSubterm(0);
       h_121 = term.getSubterm(1);
       i_121 = term.getSubterm(2);
@@ -33,15 +33,15 @@ import java.lang.ref.WeakReference;
       j_121 = annos91;
       term = p_22.invoke(context, g_121);
       if(term == null)
-        break Fail115;
+        break Fail116;
       m_121 = term;
       term = q_22.invoke(context, h_121);
       if(term == null)
-        break Fail115;
+        break Fail116;
       n_121 = term;
       term = r_22.invoke(context, i_121);
       if(term == null)
-        break Fail115;
+        break Fail116;
       term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consGuardedLChoice_3, new IStrategoTerm[]{m_121, n_121, term}), checkListAnnos(termFactory, j_121));
       context.popOnSuccess();
       if(true)
