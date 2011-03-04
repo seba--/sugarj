@@ -4,14 +4,12 @@ import xml.schema.AsDesugaring;
 import xml.schema.XmlSchemaJavaSyntax;
 
 public xmlschema XmlSchema {
-  <{http://www.w3.org/2001/XMLSchema}schema
+  <{http://www.w3.org/2001/XMLSchema}schema 
     targetNamespace="http://www.w3.org/2001/XMLSchema">
-   	
    	
    	<{http://www.w3.org/2001/XMLSchema}element name="schema" type="SchemaType">
    	</{http://www.w3.org/2001/XMLSchema}element>
    	   	
-   	
     <{http://www.w3.org/2001/XMLSchema}complexType name="SchemaType">
     	<{http://www.w3.org/2001/XMLSchema}choice maxOccurs="unbounded">
         
@@ -29,8 +27,6 @@ public xmlschema XmlSchema {
       <{http://www.w3.org/2001/XMLSchema}attribute name="targetNamespace" type="StringType">
       </{http://www.w3.org/2001/XMLSchema}attribute>
     </{http://www.w3.org/2001/XMLSchema}complexType>
-    
-    
     
     <{http://www.w3.org/2001/XMLSchema}complexType name="ComplexType">
       <{http://www.w3.org/2001/XMLSchema}sequence>
@@ -153,6 +149,5 @@ public xmlschema XmlSchema {
     	<{http://www.w3.org/2001/XMLSchema}restriction base="string">
     	</{http://www.w3.org/2001/XMLSchema}restriction>
     </{http://www.w3.org/2001/XMLSchema}simpleType>
-    
   </{http://www.w3.org/2001/XMLSchema}schema>
 }

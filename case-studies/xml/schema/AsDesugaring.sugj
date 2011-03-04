@@ -5,290 +5,245 @@ import concretesyntax.ConcreteStratego;
 import xml.ConcreteXml;
 import xml.XmlJavaSyntax;
 import xml.XmlTextTools;
+import xml.XmlEditor;
 
-import xml.schema.XmlSchemaCompiled;
+import xml.schema.SharedStrategies;
 import xml.schema.XmlSchemaJavaSyntax;
 
-public sugar AsDesugaring {
-  
-  desugarings
-    // for bootsstrapping
-     \ ValXMLSchemaDoc(doc) -> doc \
-    // after bootsstrapping
-    // \ ValXMLSchemaDoc(Document(pre, root, post))
-    //   ->
-    //   Document(pre, <validate-XmlSchema-root + report-error(|"***********INVALID XML SCHEMA*********\n")> root, post) \
-                       
 
+public sugar AsDesugaring {
+
+  // validating XML schemas
+  rules
+    constraint-error :
+      XMLSchemaDoc(Document(pre, root, post)) -> err
+      where
+        <xml-validate> root => err;
+        <not(?[])> err
+    
+
+  // comment out for bootstrapping
+    constraint-error :
+      XMLSchemaDoc(Document(pre, root, post)) -> (root, "document does not match any xml schema in scope")
+      where
+        <not(xml-validate)> root
+    
+  // validating a document against a schema 
+    constraint-error :
+      ValWriteDoc(ch,Document(pre, root, post)) -> err
+      where
+        <xml-validate> root => err;
+        <not(?[])> err
+
+    constraint-error :
+      ValWriteDoc(ch,Document(pre, root, post)) -> (root, "no schema for this namespace found")
+      where
+        <not(xml-validate)> root
+    
   desugarings
     xsdDec
     valWriteDocToStrategyCall
   
-  /*  
-  desugarings
-    \ EmptyElement(QName(Some("http://www.w3.org/2001/XMLSchema"), el), attributes)
-      ->
-      Element(QName(Some("http://www.w3.org/2001/XMLSchema"), el), attributes, [], QName(Some("http://www.w3.org/2001/XMLSchema"), el)) \
-  */
-  
-  strategies
-    valWriteDocToStrategyCall = fail
-    
-  strategies
-    report-error(|msg) = ![msg, ": ", <id>]; error; fail
-    
   rules
-    val-name : name -> "validate-root" // <concat-strings> ["validate-", name, "-root"]
-    val-name-element : (name, elname) -> "validate-element" // <concat-strings> ["validate-", name, "-element-", elname]
-    val-name-type : (name, type) -> <concat-strings> ["validate-type-", type] // <concat-strings> ["validate-", name, "-type-", type]
-    val-name-type-attval : (name, type) -> <concat-strings> ["validate-attval-type-", type] // <concat-strings> ["validate-attval-", name, "-type-", type]
-    val-base : name -> <concat-strings> ["validate-base-", name]
-    val-restriction : name -> <concat-strings> ["validate-restriction-", name]
-  
+    xml-validate = fail
+    valWriteDocToStrategyCall = fail
+    report-error(|t) = !t;debug
+    
   rules
     xsdDec : 
-      XsdSugarDec(XsdSugarDecHead(mods, Id(name)), body) 
+      XsdSugarDec(XsdSugarDecHead(mods, name), doc) 
       ->
-      SugarDec(SugarDecHead(mods, Id(name)), <xsdBody(|name)> body)
+      SugarDec(SugarDecHead(mods, name), <xsdBody> doc)
       
-    xsdBody(|name) :
-      XsdSugarBody(xsd)
+    xsdBody :
+      XsdSugarBody(XMLSchemaDoc(xsd))
       -> 
-      SugarBody(
-        [transformation-elem(
-          |[ strategies
-               ~(<val-name> name) = fail ]|),
-         transformation-elem(
-          |[ rules
-               valWriteDocToStrategyCall : 
-                 ValWriteDoc(ch, 
-                             Document(pre, root, post))
-                 ->
-                 WriteDoc(ch,
-                          Document(pre, <debug(!"start val: ");id~(<val-name> name)> root, post)) 
-          ]|)
-        | <xsd2stratego(|name); map(!transformation-elem(<id>))> xsd])
+      SugarBody(<xsd2stratego; map(!transformation-elem(<id>))> xsd)
+
+  rules
+    val-type : type -> <concat-strings> ["validate-type-", type]
+    val-type-attval : type -> <concat-strings> ["validate-attval-type-", type]
+    val-base : name -> <concat-strings> ["validate-base-", name]
+  
         
   
   rules
     // documents
-    xsd2stratego(|name) : 
+    xsd2stratego : 
       Document(pre, el, post)
       ->
-      <debug(!"document: "); element2stratego(|name, "")> el
-  
-  
-  strategies
-    element2stratego(|name, namespace) = xsdElement2stratego(|name, namespace) <+ otherElement2stratego(|name)
-    otherElement2stratego(|name) = debug(!"other: "); ![]
+      <xsdElement2stratego(|"")> el
   
   
   // rules for elements of XSD (all having the XSD prefix)
   rules
     // schema root
-    xsdElement2stratego(|name, ign) :
-      xml |[
-        <{http://www.w3.org/2001/XMLSchema}schema targetNamespace=attval>
-          <>contents
-        </{http://www.w3.org/2001/XMLSchema}schema>
-      ]|
-      ->
-      result
+    xsdElement2stratego(|ignore) :
+      Element(
+        ElemName(QName(Some(URIPrefix("http://www.w3.org/2001/XMLSchema")), "schema")),
+        [Attribute(AttrName(QName(None(), "targetNamespace")), attval)],
+        contents,
+        _)
+      -> result
       where
-        <xml-attr-value2string> attval => namespace ;
-        <debug(!"schema: "); mapconcat(element2stratego(|name, namespace))> contents => result
-
-  
-  
-    // element
-    xsdElement2stratego(|name, namespaceuri) :
+        <xml-attr-value2string> attval => namespace; 
+        <mapconcat(xsdElement2stratego(|namespace);ensure-list <+ !["failed to translate:",<id>])> contents => result
+   
+    // root element 
+    xsdElement2stratego(|namespace) :
       xml |[
         <{http://www.w3.org/2001/XMLSchema}element name=attval1 type=attval2>
         </{http://www.w3.org/2001/XMLSchema}element>
       ]|
-      ->
-      // nested concrete syntax !!!
-      //   => ambiguities in the deeper-nested syntax are
-      //      parsed and compiled
-      //   => double anti-quotation needed
-      [ |[
-        strategies
-          ~(<val-name> name) = id~(<val-name-element> (name, ncname))
-        ]|,
-        |[
-        rules
-          id~(<val-name-element> (name, ncname)) :
-          	xml |[
-          	  <{<>term~namespacestring}<>term~ncnamestring attributes>
-          	    <>contents
-          	  </{<>term~namespacestring}<>term~ncnamestring>
-          	]|
-          	->
-          	<debug(!"val type: ");id~(<val-name-type> (name, typename))>
-            xml |[
-              <{<>term~namespacestring}<>term~ncnamestring attributes>
-          	    <>contents
-          	  </{<>term~namespacestring}<>term~ncnamestring>
-            ]|
-        ]| ]
+      -> 
+      |[ rules 
+           xml-validate = strategy~namespace-match; ~elem-match ]|
       where
 	     <xml-attr-value2string> attval1 => ncname ;
-	     <asstring> ncname => ncnamestring ;  
 	     <xml-attr-value2string> attval2 => typename;
-	     <asstring> namespaceuri => namespacestring
-  
+	     <match-namespace> namespace => namespace-match;
+	     <match-element> (namespace, ncname, typename) => elem-match
     
     // complex types
-    xsdElement2stratego(|name, namespace) :
-      xml |[ 
-        <{http://www.w3.org/2001/XMLSchema}complexType name=attval>
-          <>contents
-        </{http://www.w3.org/2001/XMLSchema}complexType>
-      ]|
+    xsdElement2stratego(|namespace) :
+        Element(
+        ElemName(QName(Some(URIPrefix("http://www.w3.org/2001/XMLSchema")), "complexType")),
+        [Attribute(AttrName(QName(None(), "name")), attval)],
+        contents,
+        ElemName(QName(Some(URIPrefix("http://www.w3.org/2001/XMLSchema")), "complexType")))
       ->
       [ |[
-        strategies
-          ~(<val-name-type> (name, typename)) =
-            (where (
-               ?Element(ign1, ign2, <id>, ign4);
-               debug(!"val complex type: ");
-               strategy~strat;
-               (?[] <+ report-error(|"not all elements consumed")));
-             where (
-               ?Element(ign1, <id>, ign3, ign4);
-               debug(!"val complex type attributes: ");
-               strategy~attcheck;
-               (?[] <+ report-error(|"not all attributes consumed")))
-             )
-            <+ report-error(|"mismatched complex type")
+        rules
+          ~(<val-type> typename) :
+            Element(name1,attrs,cs,name2) -> <conc> (err1, err2)
+            where <strategy~attcheck> attrs => err1;
+                  <strategy~contentcheck-all> cs => err2
       ]| ]
       where
         <xml-attr-value2string> attval => typename ;
-        <debug(!"complexType: ");
-         mapconcat(complexType2stratego(|name, typename, namespace) < ![<id>] + ![]);
-         debug(!"complex strats: ")> contents => strats;
-        <(?[<id>] + (?[]; !Id)) 
-         <+ report-error(|"more then one element in complex type")> strats => strat;
-        <debug(!"attributes complexType: ");
-         mapconcat(attDecl2stratego(|name, typename, namespace) < ![<id>] + ![]);
-         debug(!"complex attchecks: ")> contents => attchecks;
-        <foldr(!Id, \ (a,b) -> Seq(a,b) \)> attchecks => attcheck
+        <head; complexType2stratego(|typename, namespace)> contents => contentcheck;
+        <sequentialize-strategies> [contentcheck, <empty-check> "unexpected element"] => contentcheck-all;
+
+        
+        <tail; map(attDecl2stratego(|typename, namespace))> contents => attchecks;
+        <conc> (attchecks, [<empty-check> "unexpected attribute"]) => attchecks-all;
+        <sequentialize-strategies> attchecks-all => attcheck 
         
   
     // simple types
-    xsdElement2stratego(|name, namespace) :
-      xml |[ 
-        <{http://www.w3.org/2001/XMLSchema}simpleType name=attval>
-          <>[content]
-        </{http://www.w3.org/2001/XMLSchema}simpleType>
-      ]|
+    xsdElement2stratego(|namespace) :
+      Element(
+        ElemName(QName(Some(URIPrefix("http://www.w3.org/2001/XMLSchema")), "simpleType")),
+        [Attribute(AttrName(QName(None(), "name")), attval)],
+        [content],
+        ElemName(QName(Some(URIPrefix("http://www.w3.org/2001/XMLSchema")), "simpleType")))
       ->
-      <debug(!"simpleType: "); simpleType2stratego(|name, typename)> content
-      where <xml-attr-value2string> attval => typename
+      [ |[
+        rules
+          ~(<val-type> typename) :
+            Element(name1,attrs,[c],name2) -> err
+            where
+              <chardata2string> c => cstring;
+              <strategy~simplecheck> (c,cstring) => err
+          
+          ~(<val-type> typename) :
+            Element(name1,attrs,cs,name2) -> [(c, <concat-strings>["type mismatch: expected character data, found ", <write-to-string> cs])]
+            where
+              <not(?[c]) + (?[c]; not(chardata2string))> cs
+
+          ~(<val-type-attval> typename) :
+            attr -> err
+            where
+              <xml-attr-value2string> attr => attrstring ;
+              <strategy~simplecheck> (attr,attrstring) => err
+      ]| ]
+      where <xml-attr-value2string> attval => typename;
+            <simpleType2stratego(|typename)> content => simplecheck
+            
    
    
+   
+    
    
   // complex types to stratego
   rules
     // choice
-    complexType2stratego(|name, typename, namespace) :
-      xml |[
-        <{http://www.w3.org/2001/XMLSchema}choice>
-          <>contents
-        </{http://www.w3.org/2001/XMLSchema}choice>
-      ]|
+    complexType2stratego(|typename, namespace) :
+      Element(
+        ElemName(QName(Some(URIPrefix("http://www.w3.org/2001/XMLSchema")), "choice")),
+        [],
+        contents,
+        ElemName(QName(Some(URIPrefix("http://www.w3.org/2001/XMLSchema")), "choice")))
       -> 
       strat
       where
-        <map(complexType2stratego(|name, typename, namespace))> contents => strats;
-        <foldr(!Fail, \ (a,b) -> Choice(a,b) \)> strats => strat
+        <map(complexType2stratego(|typename, namespace))> contents => strats;
+        <any-error-free-strategy> strats => strat
   
     // choice max
-    complexType2stratego(|name, typename, namespace) :
-      xml |[
-        <{http://www.w3.org/2001/XMLSchema}choice maxOccurs="unbounded">
-          <>contents
-        </{http://www.w3.org/2001/XMLSchema}choice>
-      ]|
+    complexType2stratego(|typename, namespace) :
+      Element(
+        ElemName(QName(Some(URIPrefix("http://www.w3.org/2001/XMLSchema")), "choice")),
+        [Attribute(AttrName(QName(None(), "maxOccurs")), DoubleQuoted([CharDataPart("unbounded")]))],
+        contents,
+        ElemName(QName(Some(URIPrefix("http://www.w3.org/2001/XMLSchema")), "choice")))
       -> 
-      |[ repeat(strategy~strat) ]|
+      |[ repeat-strategy(strategy~strat) ]|
       where
-        <map(complexType2stratego(|name, typename, namespace))> contents => strats;
-        <foldr(!Fail, \ (a,b) -> Choice(a,b) \)> strats => strat
+        <map(complexType2stratego(|typename, namespace))> contents => strats;
+        <any-error-free-strategy> strats => strat
   
     // sequence
-    complexType2stratego(|name, typename, namespace) :
-      xml |[
-        <{http://www.w3.org/2001/XMLSchema}sequence>
-          <>contents
-        </{http://www.w3.org/2001/XMLSchema}sequence>
-      ]|
+    complexType2stratego(|typename, namespace) :
+      Element(
+        ElemName(QName(Some(URIPrefix("http://www.w3.org/2001/XMLSchema")), "sequence")),
+        [],
+        contents,
+        ElemName(QName(Some(URIPrefix("http://www.w3.org/2001/XMLSchema")), "sequence")))
       -> 
       strat
       where
-        <map(complexType2stratego(|name, typename, namespace))> contents => strats;
-        <foldr(!Id, \ (a,b) -> Seq(a,b) \)> strats => strat
+        <map(complexType2stratego(|typename, namespace))> contents => strats;
+        <sequentialize-strategies> strats => strat
   	
   	
   	// sequence max
-    complexType2stratego(|name, typename, namespace) :
-      xml |[
-        <{http://www.w3.org/2001/XMLSchema}sequence maxOccurs="unbounded">
-          <>contents
-        </{http://www.w3.org/2001/XMLSchema}sequence>
-      ]|
+    complexType2stratego(|typename, namespace) :
+      Element(
+        ElemName(QName(Some(URIPrefix("http://www.w3.org/2001/XMLSchema")), "sequence")),
+        [Attribute(AttrName(QName(None(), "maxOccurs")), DoubleQuoted([CharDataPart("unbounded")]))],
+        contents,
+        ElemName(QName(Some(URIPrefix("http://www.w3.org/2001/XMLSchema")), "sequence")))
       -> 
-      |[ repeat(strategy~strat) ]|
+      |[ repeat-strategy(strategy~strat) ]|
       where
-        <map(complexType2stratego(|name, typename, namespace))> contents => strats;
-        <?[] < !Fail + foldr(!Id, \ (a,b) -> Seq(a,b) \)> strats => strat
+        <map(complexType2stratego(|typename, namespace))> contents => strats;
+        <sequentialize-strategies> strats => strat
   	
   	
   	// element
-    complexType2stratego(|name, typename, namespaceuri) :
+    complexType2stratego(|typename, namespace) :
       xml |[
         <{http://www.w3.org/2001/XMLSchema}element name=attval1 type=attval2>
         </{http://www.w3.org/2001/XMLSchema}element>
       ]|
       ->
       |[ 
-      	\ [x | xs] -> 
-	      < \ xml |[
-	      	    <{<>term~namespacestring}<>term~ncname attributes>
-	      	      <>contents
-	      	    </{<>term~namespacestring}<>term~ncname>
-	          ]|
-	          ->
-	          <debug(!"val type: ");id~(<val-name-type> (name, eltypename))>
-	          xml |[
-	          	<{<>term~namespacestring}<>term~ncname attributes>
-	          	  <>contents
-	          	</{<>term~namespacestring}<>term~ncname>
-	          ]|
-	     \ ; !xs > 
-	     x \
-	  ]|
+      	\ [x | xs] ->
+      	  <strategy~(<match-element> (namespace, ncname, eltypename));
+      	   (is-error <+ !xs)>
+      	  x
+      	\
+      ]|
       where
-	     <xml-attr-value2string; asstring> attval1 => ncname ; 
-	     <xml-attr-value2string> attval2 => eltypename;
-	     <asstring> namespaceuri => namespacestring
+	     <xml-attr-value2string> attval1 => ncname ; 
+	     <xml-attr-value2string> attval2 => eltypename
   
 
   
-    // element ref
-    complexType2stratego(|name, typename, namespace) :
-      xml |[
-        <{http://www.w3.org/2001/XMLSchema}element ref=attval>
-        </{http://www.w3.org/2001/XMLSchema}element>
-      ]|
-      -> 
-      stratego-strategy |[ \ [x | xs] -> <id~(<val-name-element> (name, elname)); !xs > x \ ]|
-      where <xml-attr-value2string> attval => elname
-   
-  
   // attribute decls
   rules
-    attDecl2stratego(|name, typename, namespace) :
+    attDecl2stratego(|typename, namespace) :
       xml |[
         <{http://www.w3.org/2001/XMLSchema}attribute name=attval1 type=attval2>
         </{http://www.w3.org/2001/XMLSchema}attribute>
@@ -296,98 +251,111 @@ public sugar AsDesugaring {
       ->
       |[
       	\ [x | xs] -> 
-	      < \ Attribute(QName(None, term~ncname), attval)
-	          ->
-	          <debug(!"att type: "); id~(<val-name-type-attval> (name, atttypename))>
-	          attval
-	     \ ; !xs > 
-	     x \
+	        <strategy~(<match-attribute> (ncname, atttypename));
+	         (is-error <+ !xs)> 
+	        x
+	      \
 	  ]|
       where
-	     <xml-attr-value2string; asstring> attval1 => ncname ; 
+	     <xml-attr-value2string> attval1 => ncname ; 
 	     <xml-attr-value2string> attval2 => atttypename
    
    
   // simple types to stratego
   rules
     // restriction
-    simpleType2stratego(|name, typename) :
-      xml |[
-        <{http://www.w3.org/2001/XMLSchema}restriction base=attval>
-     		  <>contents
-        </{http://www.w3.org/2001/XMLSchema}restriction>
-      ]|
+    simpleType2stratego(|typename) :
+      Element(
+        ElemName(QName(Some(URIPrefix("http://www.w3.org/2001/XMLSchema")), "restriction")),
+        [Attribute(AttrName(QName(None(), "base")), attval)],
+        contents,
+        ElemName(QName(Some(URIPrefix("http://www.w3.org/2001/XMLSchema")), "restriction")))
       ->
-      [ |[
-        strategies
-          ~(<val-name-type> (name, typename)) =
-            where (
-              ?Element(ign1,ign2,[<id>],ign4) ;
-              debug(!"val simple type: ");
-              chardata2string ;
-              id~(<debug(!"base: "); val-base> basename) ;
-              strategy~(<debug(!"restriction: "); gen-restriction-check(|name, typename)> contents))
-            <+ report-error(|"mismatched restriction")
-      ]|,
-      |[
-        strategies
-      	  ~(<val-name-type-attval> (name, typename)) =
-            where (
-              xml-attr-value2string ;
-              debug(!"val simple att type: ");
-              id~(<debug(!"base: "); val-base> basename) ;
-              strategy~(<debug(!"restriction: "); gen-restriction-check(|name, typename)> contents))
-            <+ report-error(|"mismatched restriction")
-      ]| ]
+      |[ id~(<val-base> basename)
+         <+ ?(t,val);
+            !(t, <concat-strings>["no base type definition ", string~basename, " for value ", val, " found"])
+      ]|
       where <xml-attr-value2string> attval => basename
      
-    gen-restriction-check(|name, typename) :
-      [] -> stratego |[ id ]|
+     
     
-    gen-restriction-check(|name, typename) :
-      [el | rest]
-      ->
-      |[ strategy~check; strategy~restcheck ]| 
-      where
-        <gen-restriction-check-el(|name, typename)> el => check ;
-        <gen-restriction-check(|name, typename)> rest => restcheck
-  
-    // minInclusive
-    gen-restriction-check-el(|name, typename) :
-      xml |[
-        <{http://www.w3.org/2001/XMLSchema}minInclusive value=attval>
-        </{http://www.w3.org/2001/XMLSchema}minInclusive>
-      ]|
-      ->
-      stratego-strategy |[ id~(<val-restriction> "minInclusive") (|~minimum) ]|
-      with <xml-attr-value2string> attval => minimum
-    
-    // maxInclusive
-    gen-restriction-check-el(|name, typename) :
-      xml |[
-        <{http://www.w3.org/2001/XMLSchema}maxInclusive value=attval>
-        </{http://www.w3.org/2001/XMLSchema}maxInclusive>
-      ]|
-      ->
-      stratego-strategy |[ id~(<val-restriction> "maxInclusive") (|~maximum) ]|
-      with <xml-attr-value2string> attval => maximum
-    
-    
-  strategies
-    validate-base-string =
-      is-string <+ report-error(|"not a string")
-    
-    validate-base-integer =
-      validate-base-string;
-      where(string-to-int) <+ report-error(|"not an integer")
-  
-    validate-restriction-minInclusive(|min) =
-      where (\ a -> (<string-to-int> a, min)\; (equal + gt)) <+ report-error(|"too small")
-    
-    validate-restriction-maxInclusive(|max) =
-      where (\a -> (<string-to-int> a, max)\; (equal + lt)) <+ report-error(|"too large")
-  
   
   rules
-    asstring : s -> NoAnnoList(Str(s))
+    any-error-free-strategy : [] -> Fail
+    any-error-free-strategy :
+       [s|ss] -> 
+       stratego |[
+         {x, serr :
+          ?x;
+          strategy~s; ?serr;
+          if is-error
+            then !x; strategy~(<any-error-free-strategy> ss) <+ !serr
+            else id
+          end
+         }
+       ]|
+    
+    sequentialize-strategies : [] -> stratego |[ id ]|
+    sequentialize-strategies :
+       [s|ss] -> 
+       stratego |[
+          strategy~s; 
+          if is-error
+	          then id
+	          else strategy~(<sequentialize-strategies> ss)
+	        end
+       ]|
+    
+
+  rules
+    match-namespace :
+      namespace -> 
+      stratego |[
+        ?Element(
+          ElemName(QName(Some(URIPrefix(string~namespace)), name1)),
+          attributes,
+          contents,
+          ElemName(QName(Some(URIPrefix(string~namespace)), name2)))
+        ]|
+
+    match-element :
+      (namespace,ncname,typename) -> 
+      stratego |[
+        {err :
+         \  doc @
+              Element(
+				        ElemName(QName(Some(URIPrefix(string~namespace)), string~ncname)),
+				        attributes,
+				        contents,
+				        ElemName(QName(Some(URIPrefix(string~namespace)), string~ncname)))
+            -> err
+            where
+              <id~(<val-type> typename) <+ ![(doc, <concat-strings>["no type definition ", string~typename, " for element ", string~ncname, " found"])]> doc => err
+         \
+         }
+         <+ ![(<id>, <concat-strings> ["expected element: ", string~ncname, " of namespace: ", string~namespace])]  
+        ]|
+    
+    match-attribute :
+      (ncname, atttypename) ->
+      stratego |[
+        {err :
+        \ att@Attribute(AttrName(QName(None, string~ncname)), attval)
+          ->
+          err
+          where
+            <id~(<val-type-attval> atttypename) <+ ![(att, <concat-strings> ["no type definition for ", string~atttypename, " of attribute ", string~ncname, " found"])]> attval => err
+        \
+        }
+        <+ ![(<id>, <concat-strings> ["expected attribute: ", string~ncname])]
+      ]|
+  
+    empty-check :
+      msg -> 
+      stratego |[
+        if ?[]
+          then ![]
+          else is-list < (map(!(<id>,string~msg))) + ![(<id>,string~msg)]
+        end
+      ]|
 }
