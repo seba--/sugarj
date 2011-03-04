@@ -13,6 +13,8 @@ import xml.XmlJavaSyntax;
 
 import xml.XmlEditor;
 
+import editor.ASTBuilder;
+
 /*
  * code for printing based on http://www.informit.com/articles/article.aspx?p=26351&seqNum=5
  */

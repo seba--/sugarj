@@ -26,7 +26,7 @@ public sugar AsSax {
 	  meta-explode-sax =
 	    alltd(explode-write; meta-explode-sax)
 	
-	  explode-write :
+	  explode-write : 
 	    ToMetaStm(WriteDoc(Id(x), c)) -> java_bstm |[ { java_bstm* } ]|
 	      where < content-to-stm(|x)
 	            ; concat-content
@@ -46,7 +46,7 @@ public sugar AsSax {
 	   * @todo  Support namespaces
 	   */
 	  content-to-stm(|java_x) :
-	    Element(QName(pref, n), atts, children, QName(pref', n')) ->
+	    Element(ElemName(QName(pref, n)), atts, children, ElemName(QName(pref', n'))) ->
 	      java_bstm* |[
 	         org.xml.sax.helpers.AttributesImpl java_y = new org.xml.sax.helpers.AttributesImpl();
 	         java_bstm1*;
@@ -59,7 +59,7 @@ public sugar AsSax {
 	          ; <map(attribute-to-stm(|java_y))> atts => java_bstm1*
 	
 	   content-to-stm(|java_x) :
-      EmptyElement(QName(pref, n), atts) ->
+      EmptyElement(ElemName(QName(pref, n)), atts) ->
         java_bstm* |[
            org.xml.sax.helpers.AttributesImpl java_y = new org.xml.sax.helpers.AttributesImpl();
            java_bstm1*;
@@ -83,7 +83,7 @@ public sugar AsSax {
 	   * @todo  Support namespaces
 	   */
 	  attribute-to-stm(|java_y) :
-	    Attribute(QName(pref, n), v) -> java_bstm |[ java_y.addAttribute(~<java-string-prefix> pref, ~<java-string-expr> n, ~<java-string-qname> (pref, n), "CDATA", java_e); ]|
+	    Attribute(AttrName(QName(pref, n)), v) -> java_bstm |[ java_y.addAttribute(~<java-string-prefix> pref, ~<java-string-expr> n, ~<java-string-qname> (pref, n), "CDATA", java_e); ]|
 	      where <attribute-value-to-expr> v => java_e
 	
 	  attribute-value-to-expr :

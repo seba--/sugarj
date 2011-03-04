@@ -232,8 +232,6 @@ public sugar XmlSyntax {
 
   desugarings
     \ Comment(_, com, _) -> Comment(com) \
-    \ ElemName(name) -> name \
-    \ AttrName(name) -> name \
 
 	signature
 	  constructors
