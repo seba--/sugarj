@@ -43,7 +43,6 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.InvalidParseTableException;
 import org.spoofax.jsglr.client.ParseTable;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
-import org.spoofax.jsglr.client.imploder.Token;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
@@ -323,6 +322,10 @@ public class Driver{
             "could not parse next toplevel declaration in:\n"
                 + remainingInputTerm.toString(),
             -1);
+      
+      String tmpFile = FileCommands.newTempFile("aterm");
+      FileCommands.writeToFile(tmpFile, toplevelDecl.toString());
+      log.log("next toplevel declaration parsed: " + tmpFile);
 
       return new IncrementalParseResult(toplevelDecl, rest);
     } finally {
@@ -428,21 +431,25 @@ public class Driver{
       if (javaOutFile == null)
         javaOutFile = javaOutDir + sep + relPackageNameSep() + mainModuleName + ".java";
       
-      if (isApplication(toplevelDecl, "TypeImportDec") || isApplication(toplevelDecl, "TypeImportOnDemandDec")) {
-        if (!Environment.atomicImportParsing)
-          processImportDec(toplevelDecl);
-        else 
-          processImportDecs(toplevelDecl);
+      try {
+        if (isApplication(toplevelDecl, "TypeImportDec") || isApplication(toplevelDecl, "TypeImportOnDemandDec")) {
+          if (!Environment.atomicImportParsing)
+            processImportDec(toplevelDecl);
+          else 
+            processImportDecs(toplevelDecl);
+        }
+        else if (isApplication(toplevelDecl, "JavaTypeDec"))
+          processJavaTypeDec(toplevelDecl);
+        else if (isApplication(toplevelDecl, "SugarDec"))
+          processSugarDec(toplevelDecl);
+        else if (isApplication(toplevelDecl, "EditorServicesDec")) 
+          processEditorServicesDec(toplevelDecl);
+        else
+          throw new IllegalArgumentException("unexpected toplevel declaration, desugaring probably failed");
+      } catch (Exception e) {
+        ATermCommands.setErrorMessage(toplevelDecl, e.getLocalizedMessage());
+        sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
       }
-      else if (isApplication(toplevelDecl, "JavaTypeDec"))
-        processJavaTypeDec(toplevelDecl);
-      else if (isApplication(toplevelDecl, "SugarDec"))
-        processSugarDec(toplevelDecl);
-      else if (isApplication(toplevelDecl, "EditorServicesDec")) 
-        processEditorServicesDec(toplevelDecl);
-      else
-        throw new ParseException("unexpected input at toplevel:\n"
-            + "toplevel declaration: " + toplevelDecl, -1);
     }
   }
 
@@ -600,15 +607,8 @@ public class Driver{
         log.log("Found imported module on the class path.");
         log.log(files.get(0).toString());
       }
-      else {
-        String msg = "module not found " + importModule;
-        for (int i = ImploderAttachment.getLeftToken(toplevelDecl).getIndex(),  
-               max = ImploderAttachment.getRightToken(toplevelDecl).getIndex(); i <= max; i++)
-          ((Token) inputTreeBuilder.getTokenizer().getTokenAt(i)).setError(msg);
-        
-        log.log("no module found");
-      }
-      
+      else
+        ATermCommands.setErrorMessage(toplevelDecl, "module not found " + importModule);
       
       for (URI importModuleClassFileURI : files)
       {

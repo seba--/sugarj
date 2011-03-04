@@ -176,6 +176,8 @@ public class STRCommands {
           depList.add(file);
       
       return new ModuleKey(depList, aterm);
+    } catch (Exception e) {
+      throw new SGLRException(strParser.getParser(), "could not parse STR file " + str, e);
     } finally {
       log.endTask();
     }
