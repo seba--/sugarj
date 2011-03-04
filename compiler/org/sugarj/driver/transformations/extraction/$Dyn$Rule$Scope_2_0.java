@@ -16,25 +16,25 @@ import java.lang.ref.WeakReference;
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("DynRuleScope_2_0");
-    Fail77:
+    Fail78:
     { 
       IStrategoTerm s_114 = null;
       IStrategoTerm o_114 = null;
       IStrategoTerm p_114 = null;
       IStrategoTerm t_114 = null;
       if(term.getTermType() != IStrategoTerm.APPL || extraction._consDynRuleScope_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail77;
+        break Fail78;
       o_114 = term.getSubterm(0);
       p_114 = term.getSubterm(1);
       IStrategoList annos54 = term.getAnnotations();
       s_114 = annos54;
       term = h_20.invoke(context, o_114);
       if(term == null)
-        break Fail77;
+        break Fail78;
       t_114 = term;
       term = i_20.invoke(context, p_114);
       if(term == null)
-        break Fail77;
+        break Fail78;
       term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consDynRuleScope_2, new IStrategoTerm[]{t_114, term}), checkListAnnos(termFactory, s_114));
       context.popOnSuccess();
       if(true)

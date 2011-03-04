@@ -40,7 +40,10 @@ strategies
 rules
   comp-desugarings-to-sdf :
     Desugarings(ds) ->
-    context-free-syntax(<map(comp-desugaring-to-sdf); concat> ds)
+    context-free-syntax(syns)
+    where
+      <map(comp-desugaring-to-sdf); concat> ds => syns;
+      <not(?[])> syns
 
   comp-desugaring-to-sdf :
     PureDesugaring(_) -> []

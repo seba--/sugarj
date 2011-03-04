@@ -16,18 +16,18 @@ import java.lang.ref.WeakReference;
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("non_transitive_1_0");
-    Fail192:
+    Fail193:
     { 
       IStrategoTerm n_136 = null;
       IStrategoTerm m_136 = null;
       if(term.getTermType() != IStrategoTerm.APPL || extraction._consnon_transitive_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail192;
+        break Fail193;
       m_136 = term.getSubterm(0);
       IStrategoList annos160 = term.getAnnotations();
       n_136 = annos160;
       term = p_26.invoke(context, m_136);
       if(term == null)
-        break Fail192;
+        break Fail193;
       term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consnon_transitive_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, n_136));
       context.popOnSuccess();
       if(true)

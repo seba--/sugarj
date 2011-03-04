@@ -16,7 +16,7 @@ import java.lang.ref.WeakReference;
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("ExtSDefInl_4_0");
-    Fail68:
+    Fail69:
     { 
       IStrategoTerm h_112 = null;
       IStrategoTerm c_112 = null;
@@ -27,7 +27,7 @@ import java.lang.ref.WeakReference;
       IStrategoTerm j_112 = null;
       IStrategoTerm k_112 = null;
       if(term.getTermType() != IStrategoTerm.APPL || extraction._consExtSDefInl_4 != ((IStrategoAppl)term).getConstructor())
-        break Fail68;
+        break Fail69;
       c_112 = term.getSubterm(0);
       d_112 = term.getSubterm(1);
       f_112 = term.getSubterm(2);
@@ -36,19 +36,19 @@ import java.lang.ref.WeakReference;
       h_112 = annos45;
       term = h_19.invoke(context, c_112);
       if(term == null)
-        break Fail68;
+        break Fail69;
       i_112 = term;
       term = i_19.invoke(context, d_112);
       if(term == null)
-        break Fail68;
+        break Fail69;
       j_112 = term;
       term = j_19.invoke(context, f_112);
       if(term == null)
-        break Fail68;
+        break Fail69;
       k_112 = term;
       term = k_19.invoke(context, g_112);
       if(term == null)
-        break Fail68;
+        break Fail69;
       term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consExtSDefInl_4, new IStrategoTerm[]{i_112, j_112, k_112, term}), checkListAnnos(termFactory, h_112));
       context.popOnSuccess();
       if(true)

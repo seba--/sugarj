@@ -19,6 +19,7 @@ import java.lang.ref.WeakReference;
     Fail10:
     { 
       IStrategoTerm m_15 = null;
+      IStrategoTerm n_15 = null;
       if(term.getTermType() != IStrategoTerm.APPL || extraction._consDesugarings_1 != ((IStrategoAppl)term).getConstructor())
         break Fail10;
       m_15 = term.getSubterm(0);
@@ -28,7 +29,24 @@ import java.lang.ref.WeakReference;
       term = concat_0_0.instance.invoke(context, term);
       if(term == null)
         break Fail10;
-      term = termFactory.makeAppl(extraction._conscontext_free_syntax_1, new IStrategoTerm[]{term});
+      n_15 = term;
+      IStrategoTerm term2 = term;
+      Success2:
+      { 
+        Fail11:
+        { 
+          if(term.getTermType() != IStrategoTerm.LIST || !((IStrategoList)term).isEmpty())
+            break Fail11;
+          { 
+            if(true)
+              break Fail10;
+            if(true)
+              break Success2;
+          }
+        }
+        term = term2;
+      }
+      term = termFactory.makeAppl(extraction._conscontext_free_syntax_1, new IStrategoTerm[]{n_15});
       context.popOnSuccess();
       if(true)
         return term;
