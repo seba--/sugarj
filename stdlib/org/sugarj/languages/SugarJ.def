@@ -154,4 +154,9 @@ exports
     AnnoOrSugarMod* "editor" "services" JavaId -> EditorServicesDecHead {cons("EditorServicesDecHead")}
     "{" EditorServiceSection* "}"              -> EditorServicesBody    {cons("EditorServicesBody")}
 
+
+
+  lexical syntax
+         -> "}" {recover, reject}
+
   )

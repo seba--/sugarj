@@ -143,3 +143,8 @@ sorts Grammar Transformation Desugaring SugarDef SugarDefElem
 
   lexical restrictions
     "desugarings" -/- [a-zA-Z0-9\'\-\_]
+
+
+
+  lexical syntax
+         -> "}" {recover, reject}
