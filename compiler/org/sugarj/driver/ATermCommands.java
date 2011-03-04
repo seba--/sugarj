@@ -1,5 +1,7 @@
 package org.sugarj.driver;
 
+import static org.sugarj.driver.Log.log;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -16,6 +18,7 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.jsglr.client.InvalidParseTableException;
 import org.spoofax.jsglr.client.imploder.IToken;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+import org.spoofax.jsglr.client.imploder.Token;
 import org.spoofax.terms.StrategoListIterator;
 import org.spoofax.terms.attachments.ParentAttachment;
 import org.spoofax.terms.attachments.ParentTermFactory;
@@ -295,6 +298,20 @@ public class ATermCommands {
     }
     
     return newServices;
+  }
+
+  public static void setErrorMessage(IStrategoTerm toplevelDecl, String msg) {
+    IToken left = ImploderAttachment.getLeftToken(toplevelDecl);
+    IToken right = ImploderAttachment.getRightToken(toplevelDecl);
+    for (int i = left.getIndex(), max = right.getIndex(); i <= max; i++) {
+      Token tok = ((Token) left.getTokenizer().getTokenAt(i));
+      tok.setError(msg);
+      
+      if (tok.getTokenizer().getInput().charAt(tok.getStartOffset()) == '\n')
+        break;
+    }
+    
+    log.log(msg + ": " + toplevelDecl);
   }
   
 }

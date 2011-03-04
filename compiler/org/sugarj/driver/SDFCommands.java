@@ -189,6 +189,8 @@ public class SDFCommands {
           depList.add(file);
       
       return new ModuleKey(depList, term);
+    } catch (Exception e) {
+      throw new SGLRException(parser.getParser(), "could not parse SDF file " + sdf, e);
     } finally {
       log.endTask();
     }
@@ -264,7 +266,7 @@ public class SDFCommands {
     
     parser.getParser().setTreeBuilder(treeBuilder);
 
-    return parser.parse(source, source);
+    return parser.parse(source, "in-file declaration");
   }
   
 //  /**
@@ -351,7 +353,7 @@ public class SDFCommands {
     if (string != null)
       return Term.asJavaString(string);
     
-    throw new RuntimeException("pretty printing SDF AST failed: " + term);
+    throw new RuntimeException("pretty printing STR AST failed: " + term);
   }
   
 }
