@@ -303,6 +303,10 @@ public class ATermCommands {
   public static void setErrorMessage(IStrategoTerm toplevelDecl, String msg) {
     IToken left = ImploderAttachment.getLeftToken(toplevelDecl);
     IToken right = ImploderAttachment.getRightToken(toplevelDecl);
+    
+    if (left == null || right == null)
+      throw new IllegalStateException(msg + ": " + toplevelDecl);
+    
     for (int i = left.getIndex(), max = right.getIndex(); i <= max; i++) {
       Token tok = ((Token) left.getTokenizer().getTokenAt(i));
       tok.setError(msg);
