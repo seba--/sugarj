@@ -411,9 +411,6 @@ public class Driver{
         }
         
         driverResult.generateFile(editorServicesFile, buf.toString());
-        
-  
-        
       } finally {
         log.endTask();
       }
@@ -444,10 +441,17 @@ public class Driver{
           processSugarDec(toplevelDecl);
         else if (isApplication(toplevelDecl, "EditorServicesDec")) 
           processEditorServicesDec(toplevelDecl);
+        else if (ATermCommands.isList(toplevelDecl))
+          /* 
+           * Desugarings may generate lists of toplevel declarations. These declarations,
+           * however, may not depend on one another.
+           */
+          for (IStrategoTerm term : ATermCommands.getList(toplevelDecl))
+            processToplevelDeclaration(term);
         else
           throw new IllegalArgumentException("unexpected toplevel declaration, desugaring probably failed");
       } catch (Exception e) {
-        ATermCommands.setErrorMessage(toplevelDecl, e.getLocalizedMessage());
+        ATermCommands.setErrorMessage(toplevelDecl, e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString());
         sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
       }
     }
