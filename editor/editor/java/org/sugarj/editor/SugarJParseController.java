@@ -1,9 +1,14 @@
 package org.sugarj.editor;
 
+import java.io.File;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.imp.model.ISourceProject;
 import org.eclipse.imp.parser.IMessageHandler;
 import org.eclipse.imp.parser.IParseController;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.strategoxt.imp.runtime.Environment;
 import org.strategoxt.imp.runtime.dynamicloading.BadDescriptorException;
 import org.strategoxt.imp.runtime.dynamicloading.Descriptor;
@@ -16,6 +21,8 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
 
   private SugarJParser sugarjParser;
   private String projectPath;
+
+  private String outputPath;
   
   @Override
   public IParseController getWrapped() {
@@ -27,6 +34,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
         sugarjParser = new SugarJParser(parser);
 
         sugarjParser.setProjectPath(projectPath);
+        sugarjParser.setOutputPath(outputPath);
         
         ((SGLRParseController) result).setParser(sugarjParser);
       }
@@ -56,10 +64,23 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
       IMessageHandler handler) {
     super.initialize(filePath, project, handler);
     
-    if (project != null)
-      projectPath = project.getRawProject().getLocation().toString();
+    if (project != null) {
+      projectPath = project.getRawProject().getLocation().makeAbsolute().toString();
+      IJavaProject javaProject = JavaCore.create(project.getRawProject());
+      if (javaProject != null)
+        try { 
+          
+          outputPath = projectPath + File.separator + javaProject.getOutputLocation().makeRelativeTo(project.getRawProject().getFullPath()).toString();
+        } catch (JavaModelException e) { 
+          outputPath = null; 
+        }
+      else
+        outputPath = null;
+    }
     
-    if (sugarjParser != null)
+    if (sugarjParser != null) {
       sugarjParser.setProjectPath(projectPath);
+      sugarjParser.setOutputPath(outputPath);
+    }
   }
 }

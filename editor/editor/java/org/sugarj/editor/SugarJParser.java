@@ -24,6 +24,7 @@ import org.sugarj.driver.Result;
 public class SugarJParser extends JSGLRI {
 
   private String projectPath;
+  private String outputPath;
   private Result result;
 
   public SugarJParser(JSGLRI parser) {
@@ -43,8 +44,9 @@ public class SugarJParser extends JSGLRI {
 
     assert projectPath != null;
     Environment.srcPath.add(projectPath);
-    Environment.bin = projectPath;
     Environment.src = projectPath;
+    Environment.bin = outputPath != null ? outputPath : projectPath;
+
     
     Environment.atomicImportParsing = true;
     Environment.generateJavaFile = true;
@@ -74,7 +76,11 @@ public class SugarJParser extends JSGLRI {
   public void setProjectPath(String projectPath) {
     this.projectPath = projectPath;
   }
-  
+
+  public void setOutputPath(String outputPath) {
+    this.outputPath = outputPath;
+  }
+
   @Override
   public Set<BadTokenException> getCollectedErrors() {
     return result.getCollectedErrors();
