@@ -8,31 +8,24 @@ import static org.sugarj.driver.ATermCommands.getList;
 import static org.sugarj.driver.ATermCommands.getString;
 import static org.sugarj.driver.ATermCommands.isApplication;
 import static org.sugarj.driver.Environment.bin;
-import static org.sugarj.driver.Environment.includePath;
 import static org.sugarj.driver.Environment.sep;
 import static org.sugarj.driver.Log.log;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -85,8 +78,8 @@ public class Driver{
   private static Map<Key, Result> resultCache = new HashMap<Key, Result>();
 
   private static List<URI> allInputFiles;
-  private static List<String> pendingInputFiles;
-  private static List<String> currentlyProcessing;
+  private static List<URI> pendingInputFiles;
+  private static List<URI> currentlyProcessing;
 
   private Result driverResult = new Result();
   
@@ -162,9 +155,24 @@ public class Driver{
   }
   
   public static Result compile(URI sourceFile) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
+    synchronized (currentlyProcessing) {
+      // TODO we need better circular dependency handling
+      if (currentlyProcessing.contains(sourceFile))
+        throw new IllegalStateException("circular processing");
+      currentlyProcessing.add(sourceFile);
+    }
+
     String source = FileCommands.readFileAsString(sourceFile.getPath());
     String moduleName = FileCommands.fileName(sourceFile);
-    return compile(source, moduleName, sourceFile.getPath());
+    
+    Result res = compile(source, moduleName, sourceFile.getPath());
+
+    synchronized (currentlyProcessing) {
+      currentlyProcessing.remove(sourceFile);
+    }
+    pendingInputFiles.remove(sourceFile);
+
+    return res;
   }
   
   public static Result compile(String source, String moduleName, String file) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
@@ -217,12 +225,6 @@ public class Driver{
 
       remainingInput = source;
       
-      // TODO we need better circular dependency handling
-      if (currentlyProcessing.contains(moduleName))
-        throw new IllegalStateException("circular processing");
-
-      currentlyProcessing.add(moduleName);
-      
       driverResult.addEditorService(
         ATermCommands.atermFromString(
           "Builders(\"sugarj checking\", [SemanticObserver(Strategy(\"sugarj-analyze\"))])"));
@@ -264,8 +266,6 @@ public class Driver{
       
       // COMPILE the generated java file
       compileGeneratedJavaFile();
-      currentlyProcessing.remove(moduleName);
-      pendingInputFiles.remove(moduleName);
       
       driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
       if (currentTransProg != null)
@@ -571,261 +571,79 @@ public class Driver{
     
     log.beginTask("processing", "PROCESS the desugared import declaration.");
     try {
-      String importModule = extractImportedModuleName(toplevelDecl);
-
-      log.beginTask("Generate Java code");
-      try {
-        driverResult.appendToFile(javaOutFile, SDFCommands.prettyPrintJava(toplevelDecl, interp) + "\n");
-      } finally {
-        log.endTask();
-      }
+      String importModule = ModuleSystemCommands.extractImportedModuleName(toplevelDecl, interp);
 
       // TODO handle import declarations with asterisks, e.g. import foo.*;
       
-      String importModuleRelativePath = FileCommands.getRelativeModulePath(importModule);
-      boolean isStdLibModule = importModuleRelativePath.startsWith("org/sugarj/"); 
+      String modulePath = FileCommands.getRelativeModulePath(importModule);
+  
+      boolean success = processImport(modulePath, toplevelDecl);
       
-      List<URI> files = searchClassFiles(importModuleRelativePath, isStdLibModule);
-
-      URI importModuleSourceFile = null;
-      importModuleSourceFile = searchSugjFile(importModuleRelativePath, false);
-      if (importModuleSourceFile == null)
-        importModuleSourceFile = searchJavaFile(importModuleRelativePath, false);
-
-      if (// the imported module was given as input by the user
-          importModuleSourceFile != null && pendingInputFiles.contains(FileCommands.fileName(importModuleSourceFile)) ||
-          // class file could not be found
-          files.isEmpty() && !isStdLibModule && !importModuleRelativePath.endsWith("*") && importModuleSourceFile != null ||
-          // source file is newer then the class file
-          importModuleSourceFile != null && !files.isEmpty() && new File(importModuleSourceFile).lastModified() > new File(files.get(0)).lastModified()) {
-
-        log.log("Need to compile the imported module first ; processing it now.");
-        compile(importModuleSourceFile);
-        log.log("CONTINUE PROCESSING'" + moduleName + "'.");
-        
-        // try again
-        files = searchClassFiles(importModuleRelativePath, isStdLibModule);
-      }
+      URI sourceFile = ModuleSystemCommands.locateSourceFile(modulePath);
       
-      if (!files.isEmpty()) {
-        log.log("Found imported module on the class path.");
-        log.log(files.get(0).toString());
-      }
-      else
-        ATermCommands.setErrorMessage(toplevelDecl, "module not found " + importModule);
-      
-      for (URI importModuleClassFileURI : files)
-      {
-        URL importModuleClassFile = importModuleClassFileURI.toURL();
-        driverResult.addFileDependency(importModuleClassFile.getPath());
+      if (sourceFile != null &&
+          !modulePath.startsWith("org/sugarj") &&
+          !modulePath.endsWith("*")) {
         
-        if (importModuleSourceFile != null)
-          driverResult.addFileDependency(importModuleSourceFile.getPath());
-        
-        log.log(importModuleClassFile.toString());
-        
-        String thisRelativePath = importModuleRelativePath;
-        
-        if (thisRelativePath.endsWith("*"))
-        {
-          thisRelativePath = thisRelativePath.substring(0, thisRelativePath.length() - 1);
-          thisRelativePath += FileCommands.fileName(importModuleClassFile);
-        }
-        
-	      URL importModuleSDFFile =
-	        new URL(importModuleClassFile.getProtocol() + ":" +
-	                importModuleClassFile.getPath().substring(0, importModuleClassFile.getPath().length() - 5) + "sdf"); 
-	      //searchSdfFile(importModuleRelativePath, isStdLibModule);
+        URI classUri = ModuleSystemCommands.searchFile(modulePath, ".class");
+        if (!success ||
+            pendingInputFiles.contains(sourceFile) ||
+            new File(sourceFile).lastModified() > new File(classUri).lastModified()) {
 
-	      URL importModuleSTRFile = 
-	        new URL(importModuleClassFile.getProtocol() + ":" +
-	                importModuleClassFile.getPath().substring(0, importModuleClassFile.getPath().length() - 5) + "str");
-	      //searchStrFile(importModuleRelativePath, isStdLibModule);
-	      
-	      URL importModuleSERVFile = 
-          new URL(importModuleClassFile.getProtocol() + ":" +
-                  importModuleClassFile.getPath().substring(0, importModuleClassFile.getPath().length() - 5) + "serv");
-	
-	      if (new File(importModuleSDFFile.getPath()).exists()) {
-	        driverResult.addFileDependency(importModuleSDFFile.getPath());
-	        
-	        log.beginTask("Incorporation", "Incorporate the imported grammar " + thisRelativePath);
-	        try {
-	          // build extension of current grammar
-	          String newGrammarName = 
-	            FileCommands.hashFileName("sugarj", currentGrammarModule + thisRelativePath);
-	            
-	
-	          String newGrammar =
-	              Environment.tmpDir + sep + newGrammarName + ".sdf";
-	
-	          String grammar = 
-	            "module " + newGrammarName + "\n"
-            + "imports " + currentGrammarModule + "\n"
-            + "        " + thisRelativePath;
-	          
-	          driverResult.generateFile(newGrammar, grammar);
-	
-	          currentGrammarModule = newGrammarName;
-	          currentGrammarSDF = newGrammar;
-	
-	          availableSDFImports.add(thisRelativePath);
-	        } finally {
-	          log.endTask();
-	        }
-	      }
-	      
-
-	
-	      if (new File(importModuleSTRFile.getPath()).exists()) {
-	        driverResult.addFileDependency(importModuleSTRFile.getPath());
-	        
-	        log.beginTask(
-	            "Incorporation",
-	            "Incorporate the imported desugaring rules " + thisRelativePath);
-	        try {
-	          // build extension of current transformation
-	          String newTransName =
-	            FileCommands.hashFileName("sugarj", currentTransModule + thisRelativePath);
-	
-	          String newTrans = Environment.tmpDir + sep + newTransName + ".str";
-	
-	          String trans =
-	            "module " + newTransName + "\n"
-              + "imports " + currentTransModule + "\n"
-              + "        " + thisRelativePath;
-	          
-	          driverResult.generateFile(newTrans, trans);
-	
-	          currentTransModule = newTransName;
-	          currentTransSTR = newTrans;
-	
-	          availableSTRImports.add(thisRelativePath);
-	
-	          /*
-	           * do not delete any files here, since they are still
-	           * imported into the new grammar
-	           */
-	        } finally {
-	          log.endTask();
-	        }
-	      }
-	      
-	      if (new File(importModuleSERVFile.getPath()).exists()) {
-          driverResult.addFileDependency(importModuleSERVFile.getPath());
+          log.log("Need to compile the imported module first ; processing it now.");
+          compile(sourceFile);
+          log.log("CONTINUE PROCESSING'" + moduleName + "'.");
           
-          log.beginTask("Incorporation", "Incorporate the imported editor services " + thisRelativePath);
-          try {
-            BufferedReader reader = new BufferedReader(new FileReader(importModuleSERVFile.getPath()));
-            String line;
-            
-            while ((line = reader.readLine()) != null)
-              driverResult.addEditorService(ATermCommands.atermFromString(line));
-          } finally {
-            log.endTask();
-          }
+          // try again
+          success = processImport(modulePath, toplevelDecl);
         }
       }
+      
+      if (!success)
+        ATermCommands.setErrorMessage(toplevelDecl, "module not found " + importModule);
       
     } finally {
       log.endTask();
     }
   }
+  
+  private boolean processImport(String modulePath, IStrategoTerm importTerm) throws IOException {
+    boolean success = false;
+    
+    success |= ModuleSystemCommands.importClass(
+        modulePath, 
+        importTerm, 
+        javaOutFile,
+        interp, 
+        driverResult);
 
-  private String extractImportedModuleName(IStrategoTerm toplevelDecl) throws IOException {
-    String name = null;
-    log.beginTask("Extracting", "Extract name of imported module");
-    try {
-      if (isApplication(toplevelDecl, "TypeImportDec"))
-        name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp);
-      
-      if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
-        name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp) + ".*";
-    } finally {
-      log.endTask(name);
-    }
-    return name;
-  }
-
-
-  private URI searchFile(String what, String where, String extension, String relativePath, Set<String> searchPath, boolean searchStdLib) throws MalformedURLException {
-    URI result = null;
-    log.beginTask("Searching", "Search for " + what);
-    try {
-      ClassLoader cl = createClassLoader(where, searchPath, searchStdLib);
-      URL url = cl.getResource(relativePath + extension);
-      if (url != null)
-        result = url.toURI();
-    } catch (URISyntaxException e) {
-      e.printStackTrace();
-    } finally {
-      log.endTask(result != null);
+    String grammarModule = ModuleSystemCommands.importSdf(
+        modulePath, 
+        currentGrammarModule, 
+        availableSDFImports, 
+        driverResult);
+    if (grammarModule != null) {
+      success = true;
+      currentGrammarSDF = grammarModule;
+      currentGrammarModule = FileCommands.fileName(grammarModule);
     }
     
-    return result;
-  }
-  
-//  private URL searchClassFile(String relativePath, boolean searchStdLib) throws MalformedURLException {
-//    return searchFile("class file", "compiled files", ".class", relativePath, includePath, searchStdLib);
-//  }
-  
-  private List<URI> searchClassFiles(String relativePath, boolean searchStdLib) throws MalformedURLException {
-    List<URI> res = new ArrayList<URI>();
-    
-    URI classURL = searchFile("class file", "compiled files", ".class", relativePath, includePath, searchStdLib);
-    
-    if (classURL != null)
-    {
-      res.add(classURL);
-      return res;
+    String transModule = ModuleSystemCommands.importStratego(
+        modulePath, 
+        currentTransModule, 
+        availableSTRImports, 
+        driverResult);
+    if (transModule != null) {
+      success = true;
+      currentTransSTR = transModule;
+      currentTransModule = FileCommands.fileName(transModule);
     }
     
-    List<String> path = new ArrayList<String>(includePath);
-    path.add(StdLib.stdLibDir.getPath());
+    success |= ModuleSystemCommands.importEditorServices(modulePath, driverResult);
     
-    if (relativePath.endsWith("/*"))
-      return ResourceList.getResources(relativePath, path, "class");
-    
-    return res;
+    return success;
   }
 
-  private URI searchJavaFile(String relativePath, boolean searchStdLib) throws MalformedURLException {
-    return searchFile("java file", "source files", ".java", relativePath, Environment.srcPath, searchStdLib);
-  }
-
-  private URI searchSugjFile(String relativePath, boolean searchStdLib) throws MalformedURLException {
-    return searchFile("SugarJ file", "source files", ".sugj", relativePath, Environment.srcPath, searchStdLib);
-  }
-
-//  private URL searchSdfFile(String relativePath, boolean searchStdLib) throws MalformedURLException {
-//    return searchFile("compiled grammar", "compiled files", SDF_OUTPUT_EXTENSION, relativePath, includePath, searchStdLib);
-//  }
-
-//  private URL searchStrFile(String relativePath, boolean searchStdLib) throws MalformedURLException {
-//    return searchFile("compiled desugaring", "compiled files", STR_OUTPUT_EXTENSION, relativePath, includePath, searchStdLib);
-//  }
-  
-  private ClassLoader createClassLoader(String what, Collection<String> path, boolean searchStdLib) throws MalformedURLException {
-    // log.beginTask("Creating", "Create a class loader for " + what);
-    try {
-      URL[] urls = new URL[path.size() + 1];
-      
-      int i = 0;
-      for (String include : path)
-        urls[i++] = new File(include).toURI().toURL();
-
-      urls[urls.length - 1] = new File(StdLib.stdLibDir.getPath()).toURI().toURL();
-      
-      /*
-       * we use 'null' as the parent class loader purposely, so
-       * that only the given urls are searched.
-       */
-      return new URLClassLoader(urls, null);
-    } finally {
-      // log.endTask();
-    }
-  }
-  
   private void processJavaTypeDec(IStrategoTerm toplevelDecl) throws IOException {
     log.beginTask(
         "processing",
@@ -909,7 +727,6 @@ public class Driver{
               " * for extracted sugar.\n" +
               " */\n" +
               (isPublic ? "public " : "") + "class " + mainModuleName + "{}\n");
-
         
 
         if (isPublic)
@@ -1078,8 +895,8 @@ public class Driver{
     initializeCaches();
     
     allInputFiles = new ArrayList<URI>();
-    pendingInputFiles = new ArrayList<String>();
-    currentlyProcessing = new ArrayList<String>();
+    pendingInputFiles = new ArrayList<URI>();
+    currentlyProcessing = new ArrayList<URI>();
   }
   
   private void init(String moduleName) throws FileNotFoundException, IOException, InvalidParseTableException {
@@ -1144,7 +961,7 @@ public class Driver{
         URI uri = url.toURI();
         
         allInputFiles.add(uri);
-        pendingInputFiles.add(FileCommands.fileName(uri));
+        pendingInputFiles.add(uri);
       }
       
       for (URI source : allInputFiles)
