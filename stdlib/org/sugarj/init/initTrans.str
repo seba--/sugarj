@@ -2,6 +2,8 @@ module org/sugarj/init/initTrans
 imports libstrategolib
         org/sugarj/languages/SugarJ
 
+imports org/sugarj/transformations/GenerateSignatures
+
 signature constructors
   NextToplevelDeclaration : ToplevelDeclaration * Rest -> NextToplevelDeclaration
 
@@ -11,8 +13,12 @@ strategies
   
   desugar = fail
   changed-tree(s) = ?t; s; not(equal(|t))
-  traverse(s) = compile-error <+ bottomup(try(s; traverse(s)))
-  internal-main = traverse(desugar)
+  
+  unlocked-bottomup(s) = ?Locked(t) < id + all(unlocked-bottomup(s)); s
+  traverse(s) = compile-error <+ unlocked-bottomup(try(s; traverse(s)))
+  unlock = bottomup(try(?Locked(<id>)))
+  
+  internal-main = traverse(desugar); unlock
   main = io-wrap(internal-main)
 
   sugarj-analyze:
@@ -33,6 +39,10 @@ strategies
     constraint-error = fail
     constraint-warning = fail
     constraint-note = fail
+
+signature
+  constructors
+    Locked : a -> a
 
 signature
   constructors
