@@ -920,7 +920,7 @@ public class Driver{
     sdfContext = tools.init(interp.getCompiledContext());
     makePermissiveContext = make_permissive.init(interp.getCompiledContext());
     extractionContext = extraction.init(interp.getCompiledContext());
-    strjContext = strj.init(interp.getCompiledContext());
+    strjContext = org.strategoxt.strj.Main.init(interp.getCompiledContext());
     
     // XXX need to load ANY parse table, preferably an empty one.
     parser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.sdfTbl.getPath()), "Sdf2Module");

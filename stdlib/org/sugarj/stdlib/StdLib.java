@@ -1,6 +1,9 @@
 package org.sugarj.stdlib;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -11,28 +14,65 @@ import java.net.URL;
 public class StdLib {
 
   public static URL stdLibDir;
+  private static String stdLibTmpDir;
   static {
     stdLibDir = StdLib.class.getProtectionDomain().getCodeSource().getLocation();
+
+    try {
+      File f = File.createTempFile("org.sugarj.stdlib", "");
+      f.delete();
+      f.mkdir();
+      stdLibTmpDir = f.getPath();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
-  public static URI sugarjDef = new File(stdLibDir.getPath() + "/" + "org/sugarj/languages/SugarJ.def").toURI();
-  public static URI javaDef = new File(stdLibDir.getPath() + "/" + "org/sugarj/languages/Java-15.def").toURI();
-  public static URI sdfDef = new File(stdLibDir.getPath() + "/" + "org/sugarj/languages/Sdf2.def").toURI();
-  public static URI sdfTbl = new File(stdLibDir.getPath() + "/" + "org/sugarj/languages/Sdf2.tbl").toURI();
-  public static URI strategoDef = new File(stdLibDir.getPath() + "/" + "org/sugarj/languages/Stratego.def").toURI();
-  public static URI strategoTbl = new File(stdLibDir.getPath() + "/" + "org/sugarj/languages/Stratego.tbl").toURI();
-  public static URI editorServiceDef = new File(stdLibDir.getPath() + "/" + "org/sugarj/languages/EditorServices.def").toURI();
+  private static URI ensureFile(String ressource) {
+    try {
+      URI uri = StdLib.class.getClassLoader().getResource(ressource).toURI();
+      if (uri != null && uri.getPath() != null && new File(uri.getPath()).exists())
+        return uri;
+    } catch (URISyntaxException e) {
+    }
+      
+    
+    File f = new File(stdLibTmpDir + "/" + ressource);
+    f.getParentFile().mkdirs();
+    
+    try {
+      InputStream in = StdLib.class.getClassLoader().getResourceAsStream(ressource);
+      FileOutputStream fos = new FileOutputStream(f);
+      byte[] bs = new byte[256];
+      while (in.read(bs) >= 0)
+        fos.write(bs);
+      fos.close();
+      in.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    
+    return f.toURI();
+  }
+  
 
-  public static URI initGrammar = new File(stdLibDir.getPath() + "/" + "org/sugarj/init/initGrammar.sdf").toURI();
+  
+  public static URI sugarjDef = ensureFile("org/sugarj/languages/SugarJ.def");
+  public static URI javaDef = ensureFile("org/sugarj/languages/Java-15.def");
+  public static URI sdfDef = ensureFile("org/sugarj/languages/Sdf2.def");
+  public static URI sdfTbl = ensureFile("org/sugarj/languages/Sdf2.tbl");
+  public static URI strategoDef = ensureFile("org/sugarj/languages/Stratego.def");
+  public static URI strategoTbl = ensureFile("org/sugarj/languages/Stratego.tbl");
+  public static URI editorServiceDef = ensureFile("org/sugarj/languages/EditorServices.def");
+
+  public static URI initGrammar = ensureFile("org/sugarj/init/initGrammar.sdf");
   public static String initGrammarModule = "org/sugarj/init/initGrammar";
-  public static URI initGrammarAtomicImports = new File(stdLibDir.getPath() + "/" + "org/sugarj/init/initGrammar_atomicImports.sdf").toURI();
+  public static URI initGrammarAtomicImports = ensureFile("org/sugarj/init/initGrammar_atomicImports.sdf");
   public static String initGrammarAtomicImportsModule = "org/sugarj/init/initGrammar_atomicImports";
-  public static URI initGrammarXTBL = new File(stdLibDir.getPath() + "/" + "org/sugarj/init/initGrammar.xtbl").toURI();
-  public static URI initTrans = new File(stdLibDir.getPath() + "/" + "org/sugarj/init/initTrans.str").toURI();
+  public static URI initGrammarXTBL = ensureFile("org/sugarj/init/initGrammar.xtbl");
+  public static URI initTrans = ensureFile("org/sugarj/init/initTrans.str");
   public static String initTransModule = "org/sugarj/init/initTrans";
 
-  public static URI binDir = new File(System.getProperty("user.home") + "/.nix-profile/bin").toURI();
-  
   public static void main(String args[]) throws URISyntaxException {
     exists(javaDef);
     exists(sdfDef);
@@ -44,7 +84,6 @@ public class StdLib {
     exists(initGrammarXTBL);
     exists(initTrans);
     exists(stdLibDir.toURI());
-    exists(binDir);
   }
   
   private static void exists(URI uri) {
