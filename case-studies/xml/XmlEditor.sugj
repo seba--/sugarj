@@ -20,4 +20,8 @@ public editor services XmlEditor {
     
   outliner XmlOutliner
     ElemName._
+  
+  completions
+    completion template : ElemName = "author"
+    completion template : "<{lib}author title=\"<AttVal>\">\n</{lib}author>"
 }

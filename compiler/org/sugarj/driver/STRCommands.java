@@ -17,11 +17,14 @@ import java.util.regex.Pattern;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.InvalidParseTableException;
+import org.spoofax.jsglr.client.imploder.IToken;
+import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
+import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.strj.Main;
 import org.sugarj.driver.caching.ModuleKey;
@@ -45,7 +48,7 @@ public class STRCommands {
   /**
    *  Compiles a {@code *.str} file to a single {@code *.java} file. 
    */
-  private static void strj(String str, String java, String main) throws IOException {
+  private static void strj(String str, String java, String main, Context strjContext) throws IOException {
     
     /*
      * We can include as many paths as we want here, checking the
@@ -73,7 +76,7 @@ public class STRCommands {
       }
     
     try {
-    Main.mainNoExit(cmd.toArray(new String[cmd.size()]));
+    Main.mainNoExit(strjContext, cmd.toArray(new String[cmd.size()]));
     }
     catch (StrategoExit e) {
       if (e.getValue() != 0)
@@ -86,12 +89,12 @@ public class STRCommands {
   }
   
   
-  public static String compile(String str, String main, Collection<String> dependentFiles, JSGLRI strParser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  public static String compile(String str, String main, Collection<String> dependentFiles, JSGLRI strParser, Context strjContext) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     ModuleKey key = getModuleKeyForAssimilation(str, main, dependentFiles, strParser);
     String prog = lookupAssimilationInCache(key);
     
     if (prog == null) {
-      prog = generateAssimilator(key, str, main);
+      prog = generateAssimilator(key, str, main, strjContext);
       cacheAssimilator(key, prog);
     }
     return prog;
@@ -99,14 +102,15 @@ public class STRCommands {
     
   private static String generateAssimilator(ModuleKey key,
                                             String str,
-                                            String main) throws IOException {
+                                            String main,
+                                            Context strjContext) throws IOException {
     log.beginTask("Generating", "Generate the assimilator");
     try {
       String dir = FileCommands.newTempDir();
       FileCommands.createDir(dir + sep + "sugarj");
       String javaFilename = FileCommands.fileName(str).replace("-", "_");
       String java = dir + sep + "sugarj" + sep + javaFilename + ".java";
-      strj(str, java, main);
+      strj(str, java, main, strjContext);
       
       if (!JavaCommands.javac(java, dir, Environment.includePath))
         throw new RuntimeException("java compilation failed");
@@ -130,7 +134,6 @@ public class STRCommands {
     log.beginTask("Caching", "Cache assimilator");
     try {
       strCache.put(key, prog);
-      FileCommands.keepFiles.add(new File(prog).getParent());
 
       if (CommandExecution.CACHE_INFO)
         log.log("Cache Location: " + prog);
@@ -158,6 +161,9 @@ public class STRCommands {
     } finally {
       log.endTask(result != null);
     }
+    
+    if (result != null && !new File(result).exists())
+      return null;
     
     return result;
   }
@@ -192,6 +198,16 @@ public class STRCommands {
       
       if (newInterp.invoke("internal-main")) {
         IStrategoTerm term = newInterp.current();
+        
+        IToken left = ImploderAttachment.getLeftToken(in);
+        IToken right = ImploderAttachment.getRightToken(in);
+        String sort = ImploderAttachment.getSort(in);
+        
+        try {
+          ImploderAttachment.putImploderAttachment(term, false, sort, left, right);
+        } catch (Exception e) {
+          log.log("origin annotation failed");
+        }
         return term;
       }
       else

@@ -1,7 +1,7 @@
 package foo;
 
 import org.sugarj.languages.Java;
-
+   
 /**
  * SugarJ extension that saves one character
  * by introducing a new 'nil' keyword in place
@@ -29,4 +29,26 @@ public sugar FooSugar {
   rules
     constraint-error : 
       Foo -> (<id>, "don't use nil, stupid")
+  
+  
+  // foo declarations
+  context-free syntax
+    AnnoOrSugarMod* "foo" JavaId "{" "}" -> SugarDec {cons("FooDec")}
+  
+  signature constructors
+    FooDec : List(AnnoOrSugarMod) * JavaId -> SugarDec
+  
+  desugarings
+    desugar-foodec-alt
+  
+  rules
+    desugar-foodec :
+      FooDec(mods, name) -> SugarDec(SugarDecHead(mods, name), SugarBody([]))
+    
+    desugar-foodec2 :
+      FooDec(mods, name) -> EditorServicesDec(EditorServicesDecHead(mods, name), EditorServicesBody([]))
+    
+    desugar-foodec-alt :
+      foo@FooDec(mods, name) -> [<desugar-foodec> foo, <desugar-foodec2> foo]
 }
+   

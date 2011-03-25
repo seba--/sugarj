@@ -7,6 +7,7 @@ import xml.XmlJavaSyntax;
 import xml.XmlTextTools;
 import xml.XmlEditor;
 
+import xml.schema.AsEditorService;
 import xml.schema.SharedStrategies;
 import xml.schema.XmlSchemaJavaSyntax;
 
@@ -53,12 +54,13 @@ public sugar AsDesugaring {
     xsdDec : 
       XsdSugarDec(XsdSugarDecHead(mods, name), doc) 
       ->
-      SugarDec(SugarDecHead(mods, name), <xsdBody> doc)
+      [SugarDec(SugarDecHead(mods, name), SugarBody(<xsdBody> doc)),
+       EditorServicesDec(EditorServicesDecHead(mods, name), EditorServicesBody(<schema-editor> doc))]
       
     xsdBody :
       XsdSugarBody(XMLSchemaDoc(xsd))
       -> 
-      SugarBody(<xsd2stratego; map(!transformation-elem(<id>))> xsd)
+      <xsd2stratego; map(!transformation-elem(<id>))> xsd
 
   rules
     val-type : type -> <concat-strings> ["validate-type-", type]
@@ -87,7 +89,7 @@ public sugar AsDesugaring {
       -> result
       where
         <xml-attr-value2string> attval => namespace; 
-        <mapconcat(xsdElement2stratego(|namespace);ensure-list <+ !["failed to translate:",<id>])> contents => result
+        <mapconcat(xsdElement2stratego(|namespace);ensure-list <+ ![("translation failed", <id>)])> contents => result
    
     // root element 
     xsdElement2stratego(|namespace) :

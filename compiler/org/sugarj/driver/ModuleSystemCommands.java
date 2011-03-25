@@ -15,6 +15,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -165,10 +166,10 @@ public class ModuleSystemCommands {
     if (modulePath.startsWith("org/sugarj"))
       return null;
     
-    URI result = searchFile(modulePath, ".sugj");
+    URI result = searchFile(modulePath, ".sugj", Collections.singleton(Environment.src));
     
     if (result == null)
-      result = searchFile(modulePath, ".java");
+      result = searchFile(modulePath, ".java", Collections.singleton(Environment.src));
     
     return result;
   }

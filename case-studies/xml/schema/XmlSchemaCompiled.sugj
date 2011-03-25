@@ -8,9 +8,7 @@ import xml.schema.SharedStrategies;
 
 public sugar XmlSchemaCompiled {
 
-
 rules
-
   xml-validate =
     ?Element(
        ElemName(
@@ -100,124 +98,130 @@ rules
                 ; if is-error then id else id end
               end)> attrs => err1
           ; <(repeat-strategy(
-                ?x
-                ; \ [x|xs] -> <({err:
-                                  \ doc@Element(
-                                          ElemName(
-                                            QName(
-                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                            , "element"
-                                            )
-                                          )
-                                        , attributes
-                                        , contents
-                                        , ElemName(
-                                            QName(
-                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                            , "element"
-                                            )
-                                          )
-                                        ) -> err
-                                    where <(validate-type-ElementType
-                                            <+ ![ ( doc
-                                                  , <concat-strings> [ "no type definition "
-                                                                     , "ElementType"
-                                                                     , " for element "
-                                                                     , "element"
-                                                                     , " found"
-                                                                     ]
-                                                  )
-                                                ])> doc => err \
-                                }
-                                <+ ![ ( <id>
-                                      , <concat-strings> ["expected element: ", "element", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
-                                      )
-                                    ])
-                               ; (is-error <+ !xs)> x \
-                ; ?serr
-                ; if is-error then
-                    !x
-                    ; ?x
-                    ; \ [x|xs] -> <({err:
-                                      \ doc@Element(
-                                              ElemName(
-                                                QName(
-                                                  Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                , "complexType"
-                                                )
+                {x, serr:
+                  ?x
+                  ; \ [x|xs] -> <({err:
+                                    \ doc@Element(
+                                            ElemName(
+                                              QName(
+                                                Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                              , "element"
                                               )
-                                            , attributes
-                                            , contents
-                                            , ElemName(
-                                                QName(
-                                                  Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                , "complexType"
-                                                )
+                                            )
+                                          , attributes
+                                          , contents
+                                          , ElemName(
+                                              QName(
+                                                Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                              , "element"
                                               )
-                                            ) -> err
-                                        where <(validate-type-ComplexType
-                                                <+ ![ ( doc
-                                                      , <concat-strings> [ "no type definition "
-                                                                         , "ComplexType"
-                                                                         , " for element "
-                                                                         , "complexType"
-                                                                         , " found"
-                                                                         ]
+                                            )
+                                          ) -> err
+                                      where <(validate-type-ElementType
+                                              <+ ![ ( doc
+                                                    , <concat-strings> [ "no type definition "
+                                                                       , "ElementType"
+                                                                       , " for element "
+                                                                       , "element"
+                                                                       , " found"
+                                                                       ]
+                                                    )
+                                                  ])> doc => err \
+                                  }
+                                  <+ ![ ( <id>
+                                        , <concat-strings> ["expected element: ", "element", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
+                                        )
+                                      ])
+                                 ; (is-error <+ !xs)> x \
+                  ; ?serr
+                  ; if is-error then
+                      !x
+                      ; {x, serr:
+                          ?x
+                          ; \ [x|xs] -> <({err:
+                                            \ doc@Element(
+                                                    ElemName(
+                                                      QName(
+                                                        Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                      , "complexType"
                                                       )
-                                                    ])> doc => err \
-                                    }
-                                    <+ ![ ( <id>
-                                          , <concat-strings> ["expected element: ", "complexType", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
-                                          )
-                                        ])
-                                   ; (is-error <+ !xs)> x \
-                    ; ?serr
-                    ; if is-error then
-                        !x
-                        ; ?x
-                        ; \ [x|xs] -> <({err:
-                                          \ doc@Element(
-                                                  ElemName(
-                                                    QName(
-                                                      Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                    , "simpleType"
                                                     )
-                                                  )
-                                                , attributes
-                                                , contents
-                                                , ElemName(
-                                                    QName(
-                                                      Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                    , "simpleType"
+                                                  , attributes
+                                                  , contents
+                                                  , ElemName(
+                                                      QName(
+                                                        Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                      , "complexType"
+                                                      )
                                                     )
-                                                  )
-                                                ) -> err
-                                            where <(validate-type-SimpleType
-                                                    <+ ![ ( doc
-                                                          , <concat-strings> [ "no type definition "
-                                                                             , "SimpleType"
-                                                                             , " for element "
-                                                                             , "simpleType"
-                                                                             , " found"
-                                                                             ]
-                                                          )
-                                                        ])> doc => err \
-                                        }
-                                        <+ ![ ( <id>
-                                              , <concat-strings> ["expected element: ", "simpleType", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
-                                              )
-                                            ])
-                                       ; (is-error <+ !xs)> x \
-                        ; ?serr
-                        ; if is-error then !x ; fail <+ !serr else id end
-                        <+ !serr
-                      else
-                        id
-                      end
-                    <+ !serr
-                  else
-                    id
-                  end
+                                                  ) -> err
+                                              where <(validate-type-ComplexType
+                                                      <+ ![ ( doc
+                                                            , <concat-strings> [ "no type definition "
+                                                                               , "ComplexType"
+                                                                               , " for element "
+                                                                               , "complexType"
+                                                                               , " found"
+                                                                               ]
+                                                            )
+                                                          ])> doc => err \
+                                          }
+                                          <+ ![ ( <id>
+                                                , <concat-strings> ["expected element: ", "complexType", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
+                                                )
+                                              ])
+                                         ; (is-error <+ !xs)> x \
+                          ; ?serr
+                          ; if is-error then
+                              !x
+                              ; {x, serr:
+                                  ?x
+                                  ; \ [x|xs] -> <({err:
+                                                    \ doc@Element(
+                                                            ElemName(
+                                                              QName(
+                                                                Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                              , "simpleType"
+                                                              )
+                                                            )
+                                                          , attributes
+                                                          , contents
+                                                          , ElemName(
+                                                              QName(
+                                                                Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                              , "simpleType"
+                                                              )
+                                                            )
+                                                          ) -> err
+                                                      where <(validate-type-SimpleType
+                                                              <+ ![ ( doc
+                                                                    , <concat-strings> [ "no type definition "
+                                                                                       , "SimpleType"
+                                                                                       , " for element "
+                                                                                       , "simpleType"
+                                                                                       , " found"
+                                                                                       ]
+                                                                    )
+                                                                  ])> doc => err \
+                                                  }
+                                                  <+ ![ ( <id>
+                                                        , <concat-strings> ["expected element: ", "simpleType", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
+                                                        )
+                                                      ])
+                                                 ; (is-error <+ !xs)> x \
+                                  ; ?serr
+                                  ; if is-error then !x ; fail <+ !serr else id end
+                                }
+                              <+ !serr
+                            else
+                              id
+                            end
+                        }
+                      <+ !serr
+                    else
+                      id
+                    end
+                }
               )
               ; if is-error then
                   id
@@ -270,165 +274,173 @@ rules
                 end
                 ; if is-error then id else id end
               end)> attrs => err1
-          ; <(((?x
-                ; \ [x|xs] -> <({err:
-                                  \ doc@Element(
-                                          ElemName(
-                                            QName(
-                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                            , "choice"
-                                            )
-                                          )
-                                        , attributes
-                                        , contents
-                                        , ElemName(
-                                            QName(
-                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                            , "choice"
-                                            )
-                                          )
-                                        ) -> err
-                                    where <(validate-type-ComplexTypeNested
-                                            <+ ![ ( doc
-                                                  , <concat-strings> [ "no type definition "
-                                                                     , "ComplexTypeNested"
-                                                                     , " for element "
-                                                                     , "choice"
-                                                                     , " found"
-                                                                     ]
-                                                  )
-                                                ])> doc => err \
-                                }
-                                <+ ![ ( <id>
-                                      , <concat-strings> ["expected element: ", "choice", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
-                                      )
-                                    ])
-                               ; (is-error <+ !xs)> x \
-                ; ?serr
-                ; if is-error then
-                    !x
-                    ; ?x
-                    ; \ [x|xs] -> <({err:
-                                      \ doc@Element(
-                                              ElemName(
-                                                QName(
-                                                  Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                , "choice"
-                                                )
-                                              )
-                                            , attributes
-                                            , contents
-                                            , ElemName(
-                                                QName(
-                                                  Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                , "choice"
-                                                )
-                                              )
-                                            ) -> err
-                                        where <(validate-type-ComplexTypeNestedMax
-                                                <+ ![ ( doc
-                                                      , <concat-strings> [ "no type definition "
-                                                                         , "ComplexTypeNestedMax"
-                                                                         , " for element "
-                                                                         , "choice"
-                                                                         , " found"
-                                                                         ]
-                                                      )
-                                                    ])> doc => err \
-                                    }
-                                    <+ ![ ( <id>
-                                          , <concat-strings> ["expected element: ", "choice", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
-                                          )
-                                        ])
-                                   ; (is-error <+ !xs)> x \
-                    ; ?serr
-                    ; if is-error then
-                        !x
-                        ; ?x
-                        ; \ [x|xs] -> <({err:
-                                          \ doc@Element(
-                                                  ElemName(
-                                                    QName(
-                                                      Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                    , "sequence"
-                                                    )
-                                                  )
-                                                , attributes
-                                                , contents
-                                                , ElemName(
-                                                    QName(
-                                                      Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                    , "sequence"
-                                                    )
-                                                  )
-                                                ) -> err
-                                            where <(validate-type-ComplexTypeNested
-                                                    <+ ![ ( doc
-                                                          , <concat-strings> [ "no type definition "
-                                                                             , "ComplexTypeNested"
-                                                                             , " for element "
-                                                                             , "sequence"
-                                                                             , " found"
-                                                                             ]
-                                                          )
-                                                        ])> doc => err \
-                                        }
-                                        <+ ![ ( <id>
-                                              , <concat-strings> ["expected element: ", "sequence", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
-                                              )
-                                            ])
-                                       ; (is-error <+ !xs)> x \
-                        ; ?serr
-                        ; if is-error then
-                            !x
-                            ; ?x
-                            ; \ [x|xs] -> <({err:
-                                              \ doc@Element(
-                                                      ElemName(
-                                                        QName(
-                                                          Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                        , "sequence"
-                                                        )
-                                                      )
-                                                    , attributes
-                                                    , contents
-                                                    , ElemName(
-                                                        QName(
-                                                          Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                        , "sequence"
-                                                        )
-                                                      )
-                                                    ) -> err
-                                                where <(validate-type-ComplexTypeNestedMax
-                                                        <+ ![ ( doc
-                                                              , <concat-strings> [ "no type definition "
-                                                                                 , "ComplexTypeNestedMax"
-                                                                                 , " for element "
-                                                                                 , "sequence"
-                                                                                 , " found"
-                                                                                 ]
-                                                              )
-                                                            ])> doc => err \
-                                            }
-                                            <+ ![ ( <id>
-                                                  , <concat-strings> ["expected element: ", "sequence", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
-                                                  )
-                                                ])
-                                           ; (is-error <+ !xs)> x \
-                            ; ?serr
-                            ; if is-error then !x ; fail <+ !serr else id end
-                            <+ !serr
-                          else
-                            id
-                          end
-                        <+ !serr
-                      else
-                        id
-                      end
-                    <+ !serr
-                  else
-                    id
-                  end)
+          ; <(({x, serr:
+                 ?x
+                 ; \ [x|xs] -> <({err:
+                                   \ doc@Element(
+                                           ElemName(
+                                             QName(
+                                               Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                             , "choice"
+                                             )
+                                           )
+                                         , attributes
+                                         , contents
+                                         , ElemName(
+                                             QName(
+                                               Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                             , "choice"
+                                             )
+                                           )
+                                         ) -> err
+                                     where <(validate-type-ComplexTypeNested
+                                             <+ ![ ( doc
+                                                   , <concat-strings> [ "no type definition "
+                                                                      , "ComplexTypeNested"
+                                                                      , " for element "
+                                                                      , "choice"
+                                                                      , " found"
+                                                                      ]
+                                                   )
+                                                 ])> doc => err \
+                                 }
+                                 <+ ![ ( <id>
+                                       , <concat-strings> ["expected element: ", "choice", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
+                                       )
+                                     ])
+                                ; (is-error <+ !xs)> x \
+                 ; ?serr
+                 ; if is-error then
+                     !x
+                     ; {x, serr:
+                         ?x
+                         ; \ [x|xs] -> <({err:
+                                           \ doc@Element(
+                                                   ElemName(
+                                                     QName(
+                                                       Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                     , "choice"
+                                                     )
+                                                   )
+                                                 , attributes
+                                                 , contents
+                                                 , ElemName(
+                                                     QName(
+                                                       Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                     , "choice"
+                                                     )
+                                                   )
+                                                 ) -> err
+                                             where <(validate-type-ComplexTypeNestedMax
+                                                     <+ ![ ( doc
+                                                           , <concat-strings> [ "no type definition "
+                                                                              , "ComplexTypeNestedMax"
+                                                                              , " for element "
+                                                                              , "choice"
+                                                                              , " found"
+                                                                              ]
+                                                           )
+                                                         ])> doc => err \
+                                         }
+                                         <+ ![ ( <id>
+                                               , <concat-strings> ["expected element: ", "choice", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
+                                               )
+                                             ])
+                                        ; (is-error <+ !xs)> x \
+                         ; ?serr
+                         ; if is-error then
+                             !x
+                             ; {x, serr:
+                                 ?x
+                                 ; \ [x|xs] -> <({err:
+                                                   \ doc@Element(
+                                                           ElemName(
+                                                             QName(
+                                                               Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                             , "sequence"
+                                                             )
+                                                           )
+                                                         , attributes
+                                                         , contents
+                                                         , ElemName(
+                                                             QName(
+                                                               Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                             , "sequence"
+                                                             )
+                                                           )
+                                                         ) -> err
+                                                     where <(validate-type-ComplexTypeNested
+                                                             <+ ![ ( doc
+                                                                   , <concat-strings> [ "no type definition "
+                                                                                      , "ComplexTypeNested"
+                                                                                      , " for element "
+                                                                                      , "sequence"
+                                                                                      , " found"
+                                                                                      ]
+                                                                   )
+                                                                 ])> doc => err \
+                                                 }
+                                                 <+ ![ ( <id>
+                                                       , <concat-strings> ["expected element: ", "sequence", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
+                                                       )
+                                                     ])
+                                                ; (is-error <+ !xs)> x \
+                                 ; ?serr
+                                 ; if is-error then
+                                     !x
+                                     ; {x, serr:
+                                         ?x
+                                         ; \ [x|xs] -> <({err:
+                                                           \ doc@Element(
+                                                                   ElemName(
+                                                                     QName(
+                                                                       Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                                     , "sequence"
+                                                                     )
+                                                                   )
+                                                                 , attributes
+                                                                 , contents
+                                                                 , ElemName(
+                                                                     QName(
+                                                                       Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                                     , "sequence"
+                                                                     )
+                                                                   )
+                                                                 ) -> err
+                                                             where <(validate-type-ComplexTypeNestedMax
+                                                                     <+ ![ ( doc
+                                                                           , <concat-strings> [ "no type definition "
+                                                                                              , "ComplexTypeNestedMax"
+                                                                                              , " for element "
+                                                                                              , "sequence"
+                                                                                              , " found"
+                                                                                              ]
+                                                                           )
+                                                                         ])> doc => err \
+                                                         }
+                                                         <+ ![ ( <id>
+                                                               , <concat-strings> ["expected element: ", "sequence", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
+                                                               )
+                                                             ])
+                                                        ; (is-error <+ !xs)> x \
+                                         ; ?serr
+                                         ; if is-error then !x ; fail <+ !serr else id end
+                                       }
+                                     <+ !serr
+                                   else
+                                     id
+                                   end
+                               }
+                             <+ !serr
+                           else
+                             id
+                           end
+                       }
+                     <+ !serr
+                   else
+                     id
+                   end
+               }
                ; if is-error then
                    id
                  else
@@ -497,206 +509,216 @@ rules
             end
             ; if is-error then id else id end)> attrs => err1
           ; <(repeat-strategy(
-                ?x
-                ; \ [x|xs] -> <({err:
-                                  \ doc@Element(
-                                          ElemName(
-                                            QName(
-                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                            , "choice"
+                {x, serr:
+                  ?x
+                  ; \ [x|xs] -> <({err:
+                                    \ doc@Element(
+                                            ElemName(
+                                              QName(
+                                                Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                              , "choice"
+                                              )
                                             )
-                                          )
-                                        , attributes
-                                        , contents
-                                        , ElemName(
-                                            QName(
-                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                            , "choice"
+                                          , attributes
+                                          , contents
+                                          , ElemName(
+                                              QName(
+                                                Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                              , "choice"
+                                              )
                                             )
-                                          )
-                                        ) -> err
-                                    where <(validate-type-ComplexTypeNested
-                                            <+ ![ ( doc
-                                                  , <concat-strings> [ "no type definition "
-                                                                     , "ComplexTypeNested"
-                                                                     , " for element "
-                                                                     , "choice"
-                                                                     , " found"
-                                                                     ]
-                                                  )
-                                                ])> doc => err \
-                                }
-                                <+ ![ ( <id>
-                                      , <concat-strings> ["expected element: ", "choice", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
-                                      )
-                                    ])
-                               ; (is-error <+ !xs)> x \
-                ; ?serr
-                ; if is-error then
-                    !x
-                    ; ?x
-                    ; \ [x|xs] -> <({err:
-                                      \ doc@Element(
-                                              ElemName(
-                                                QName(
-                                                  Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                , "choice"
-                                                )
-                                              )
-                                            , attributes
-                                            , contents
-                                            , ElemName(
-                                                QName(
-                                                  Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                , "choice"
-                                                )
-                                              )
-                                            ) -> err
-                                        where <(validate-type-ComplexTypeNestedMax
-                                                <+ ![ ( doc
-                                                      , <concat-strings> [ "no type definition "
-                                                                         , "ComplexTypeNestedMax"
-                                                                         , " for element "
-                                                                         , "choice"
-                                                                         , " found"
-                                                                         ]
-                                                      )
-                                                    ])> doc => err \
-                                    }
-                                    <+ ![ ( <id>
-                                          , <concat-strings> ["expected element: ", "choice", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
-                                          )
-                                        ])
-                                   ; (is-error <+ !xs)> x \
-                    ; ?serr
-                    ; if is-error then
-                        !x
-                        ; ?x
-                        ; \ [x|xs] -> <({err:
-                                          \ doc@Element(
-                                                  ElemName(
-                                                    QName(
-                                                      Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                    , "sequence"
+                                          ) -> err
+                                      where <(validate-type-ComplexTypeNested
+                                              <+ ![ ( doc
+                                                    , <concat-strings> [ "no type definition "
+                                                                       , "ComplexTypeNested"
+                                                                       , " for element "
+                                                                       , "choice"
+                                                                       , " found"
+                                                                       ]
                                                     )
-                                                  )
-                                                , attributes
-                                                , contents
-                                                , ElemName(
-                                                    QName(
-                                                      Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                    , "sequence"
+                                                  ])> doc => err \
+                                  }
+                                  <+ ![ ( <id>
+                                        , <concat-strings> ["expected element: ", "choice", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
+                                        )
+                                      ])
+                                 ; (is-error <+ !xs)> x \
+                  ; ?serr
+                  ; if is-error then
+                      !x
+                      ; {x, serr:
+                          ?x
+                          ; \ [x|xs] -> <({err:
+                                            \ doc@Element(
+                                                    ElemName(
+                                                      QName(
+                                                        Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                      , "choice"
+                                                      )
                                                     )
-                                                  )
-                                                ) -> err
-                                            where <(validate-type-ComplexTypeNested
-                                                    <+ ![ ( doc
-                                                          , <concat-strings> [ "no type definition "
-                                                                             , "ComplexTypeNested"
-                                                                             , " for element "
-                                                                             , "sequence"
-                                                                             , " found"
-                                                                             ]
-                                                          )
-                                                        ])> doc => err \
-                                        }
-                                        <+ ![ ( <id>
-                                              , <concat-strings> ["expected element: ", "sequence", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
-                                              )
-                                            ])
-                                       ; (is-error <+ !xs)> x \
-                        ; ?serr
-                        ; if is-error then
-                            !x
-                            ; ?x
-                            ; \ [x|xs] -> <({err:
-                                              \ doc@Element(
-                                                      ElemName(
-                                                        QName(
-                                                          Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                        , "sequence"
-                                                        )
+                                                  , attributes
+                                                  , contents
+                                                  , ElemName(
+                                                      QName(
+                                                        Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                      , "choice"
                                                       )
-                                                    , attributes
-                                                    , contents
-                                                    , ElemName(
-                                                        QName(
-                                                          Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                        , "sequence"
-                                                        )
-                                                      )
-                                                    ) -> err
-                                                where <(validate-type-ComplexTypeNestedMax
-                                                        <+ ![ ( doc
-                                                              , <concat-strings> [ "no type definition "
-                                                                                 , "ComplexTypeNestedMax"
-                                                                                 , " for element "
-                                                                                 , "sequence"
-                                                                                 , " found"
-                                                                                 ]
+                                                    )
+                                                  ) -> err
+                                              where <(validate-type-ComplexTypeNestedMax
+                                                      <+ ![ ( doc
+                                                            , <concat-strings> [ "no type definition "
+                                                                               , "ComplexTypeNestedMax"
+                                                                               , " for element "
+                                                                               , "choice"
+                                                                               , " found"
+                                                                               ]
+                                                            )
+                                                          ])> doc => err \
+                                          }
+                                          <+ ![ ( <id>
+                                                , <concat-strings> ["expected element: ", "choice", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
+                                                )
+                                              ])
+                                         ; (is-error <+ !xs)> x \
+                          ; ?serr
+                          ; if is-error then
+                              !x
+                              ; {x, serr:
+                                  ?x
+                                  ; \ [x|xs] -> <({err:
+                                                    \ doc@Element(
+                                                            ElemName(
+                                                              QName(
+                                                                Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                              , "sequence"
                                                               )
-                                                            ])> doc => err \
-                                            }
-                                            <+ ![ ( <id>
-                                                  , <concat-strings> ["expected element: ", "sequence", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
-                                                  )
-                                                ])
-                                           ; (is-error <+ !xs)> x \
-                            ; ?serr
-                            ; if is-error then
-                                !x
-                                ; ?x
-                                ; \ [x|xs] -> <({err:
-                                                  \ doc@Element(
-                                                          ElemName(
-                                                            QName(
-                                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                            , "element"
                                                             )
-                                                          )
-                                                        , attributes
-                                                        , contents
-                                                        , ElemName(
-                                                            QName(
-                                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                            , "element"
+                                                          , attributes
+                                                          , contents
+                                                          , ElemName(
+                                                              QName(
+                                                                Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                              , "sequence"
+                                                              )
                                                             )
-                                                          )
-                                                        ) -> err
-                                                    where <(validate-type-ElementType
-                                                            <+ ![ ( doc
-                                                                  , <concat-strings> [ "no type definition "
-                                                                                     , "ElementType"
-                                                                                     , " for element "
-                                                                                     , "element"
-                                                                                     , " found"
-                                                                                     ]
-                                                                  )
-                                                                ])> doc => err \
+                                                          ) -> err
+                                                      where <(validate-type-ComplexTypeNested
+                                                              <+ ![ ( doc
+                                                                    , <concat-strings> [ "no type definition "
+                                                                                       , "ComplexTypeNested"
+                                                                                       , " for element "
+                                                                                       , "sequence"
+                                                                                       , " found"
+                                                                                       ]
+                                                                    )
+                                                                  ])> doc => err \
+                                                  }
+                                                  <+ ![ ( <id>
+                                                        , <concat-strings> ["expected element: ", "sequence", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
+                                                        )
+                                                      ])
+                                                 ; (is-error <+ !xs)> x \
+                                  ; ?serr
+                                  ; if is-error then
+                                      !x
+                                      ; {x, serr:
+                                          ?x
+                                          ; \ [x|xs] -> <({err:
+                                                            \ doc@Element(
+                                                                    ElemName(
+                                                                      QName(
+                                                                        Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                                      , "sequence"
+                                                                      )
+                                                                    )
+                                                                  , attributes
+                                                                  , contents
+                                                                  , ElemName(
+                                                                      QName(
+                                                                        Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                                      , "sequence"
+                                                                      )
+                                                                    )
+                                                                  ) -> err
+                                                              where <(validate-type-ComplexTypeNestedMax
+                                                                      <+ ![ ( doc
+                                                                            , <concat-strings> [ "no type definition "
+                                                                                               , "ComplexTypeNestedMax"
+                                                                                               , " for element "
+                                                                                               , "sequence"
+                                                                                               , " found"
+                                                                                               ]
+                                                                            )
+                                                                          ])> doc => err \
+                                                          }
+                                                          <+ ![ ( <id>
+                                                                , <concat-strings> ["expected element: ", "sequence", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
+                                                                )
+                                                              ])
+                                                         ; (is-error <+ !xs)> x \
+                                          ; ?serr
+                                          ; if is-error then
+                                              !x
+                                              ; {x, serr:
+                                                  ?x
+                                                  ; \ [x|xs] -> <({err:
+                                                                    \ doc@Element(
+                                                                            ElemName(
+                                                                              QName(
+                                                                                Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                                              , "element"
+                                                                              )
+                                                                            )
+                                                                          , attributes
+                                                                          , contents
+                                                                          , ElemName(
+                                                                              QName(
+                                                                                Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                                              , "element"
+                                                                              )
+                                                                            )
+                                                                          ) -> err
+                                                                      where <(validate-type-ElementType
+                                                                              <+ ![ ( doc
+                                                                                    , <concat-strings> [ "no type definition "
+                                                                                                       , "ElementType"
+                                                                                                       , " for element "
+                                                                                                       , "element"
+                                                                                                       , " found"
+                                                                                                       ]
+                                                                                    )
+                                                                                  ])> doc => err \
+                                                                  }
+                                                                  <+ ![ ( <id>
+                                                                        , <concat-strings> ["expected element: ", "element", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
+                                                                        )
+                                                                      ])
+                                                                 ; (is-error <+ !xs)> x \
+                                                  ; ?serr
+                                                  ; if is-error then !x ; fail <+ !serr else id end
                                                 }
-                                                <+ ![ ( <id>
-                                                      , <concat-strings> ["expected element: ", "element", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
-                                                      )
-                                                    ])
-                                               ; (is-error <+ !xs)> x \
-                                ; ?serr
-                                ; if is-error then !x ; fail <+ !serr else id end
-                                <+ !serr
-                              else
-                                id
-                              end
-                            <+ !serr
-                          else
-                            id
-                          end
-                        <+ !serr
-                      else
-                        id
-                      end
-                    <+ !serr
-                  else
-                    id
-                  end
+                                              <+ !serr
+                                            else
+                                              id
+                                            end
+                                        }
+                                      <+ !serr
+                                    else
+                                      id
+                                    end
+                                }
+                              <+ !serr
+                            else
+                              id
+                            end
+                        }
+                      <+ !serr
+                    else
+                      id
+                    end
+                }
               )
               ; if is-error then
                   id
@@ -750,206 +772,216 @@ rules
                 ; if is-error then id else id end
               end)> attrs => err1
           ; <(repeat-strategy(
-                ?x
-                ; \ [x|xs] -> <({err:
-                                  \ doc@Element(
-                                          ElemName(
-                                            QName(
-                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                            , "choice"
+                {x, serr:
+                  ?x
+                  ; \ [x|xs] -> <({err:
+                                    \ doc@Element(
+                                            ElemName(
+                                              QName(
+                                                Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                              , "choice"
+                                              )
                                             )
-                                          )
-                                        , attributes
-                                        , contents
-                                        , ElemName(
-                                            QName(
-                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                            , "choice"
+                                          , attributes
+                                          , contents
+                                          , ElemName(
+                                              QName(
+                                                Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                              , "choice"
+                                              )
                                             )
-                                          )
-                                        ) -> err
-                                    where <(validate-type-ComplexTypeNested
-                                            <+ ![ ( doc
-                                                  , <concat-strings> [ "no type definition "
-                                                                     , "ComplexTypeNested"
-                                                                     , " for element "
-                                                                     , "choice"
-                                                                     , " found"
-                                                                     ]
-                                                  )
-                                                ])> doc => err \
-                                }
-                                <+ ![ ( <id>
-                                      , <concat-strings> ["expected element: ", "choice", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
-                                      )
-                                    ])
-                               ; (is-error <+ !xs)> x \
-                ; ?serr
-                ; if is-error then
-                    !x
-                    ; ?x
-                    ; \ [x|xs] -> <({err:
-                                      \ doc@Element(
-                                              ElemName(
-                                                QName(
-                                                  Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                , "choice"
-                                                )
-                                              )
-                                            , attributes
-                                            , contents
-                                            , ElemName(
-                                                QName(
-                                                  Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                , "choice"
-                                                )
-                                              )
-                                            ) -> err
-                                        where <(validate-type-ComplexTypeNestedMax
-                                                <+ ![ ( doc
-                                                      , <concat-strings> [ "no type definition "
-                                                                         , "ComplexTypeNestedMax"
-                                                                         , " for element "
-                                                                         , "choice"
-                                                                         , " found"
-                                                                         ]
-                                                      )
-                                                    ])> doc => err \
-                                    }
-                                    <+ ![ ( <id>
-                                          , <concat-strings> ["expected element: ", "choice", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
-                                          )
-                                        ])
-                                   ; (is-error <+ !xs)> x \
-                    ; ?serr
-                    ; if is-error then
-                        !x
-                        ; ?x
-                        ; \ [x|xs] -> <({err:
-                                          \ doc@Element(
-                                                  ElemName(
-                                                    QName(
-                                                      Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                    , "sequence"
+                                          ) -> err
+                                      where <(validate-type-ComplexTypeNested
+                                              <+ ![ ( doc
+                                                    , <concat-strings> [ "no type definition "
+                                                                       , "ComplexTypeNested"
+                                                                       , " for element "
+                                                                       , "choice"
+                                                                       , " found"
+                                                                       ]
                                                     )
-                                                  )
-                                                , attributes
-                                                , contents
-                                                , ElemName(
-                                                    QName(
-                                                      Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                    , "sequence"
+                                                  ])> doc => err \
+                                  }
+                                  <+ ![ ( <id>
+                                        , <concat-strings> ["expected element: ", "choice", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
+                                        )
+                                      ])
+                                 ; (is-error <+ !xs)> x \
+                  ; ?serr
+                  ; if is-error then
+                      !x
+                      ; {x, serr:
+                          ?x
+                          ; \ [x|xs] -> <({err:
+                                            \ doc@Element(
+                                                    ElemName(
+                                                      QName(
+                                                        Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                      , "choice"
+                                                      )
                                                     )
-                                                  )
-                                                ) -> err
-                                            where <(validate-type-ComplexTypeNested
-                                                    <+ ![ ( doc
-                                                          , <concat-strings> [ "no type definition "
-                                                                             , "ComplexTypeNested"
-                                                                             , " for element "
-                                                                             , "sequence"
-                                                                             , " found"
-                                                                             ]
-                                                          )
-                                                        ])> doc => err \
-                                        }
-                                        <+ ![ ( <id>
-                                              , <concat-strings> ["expected element: ", "sequence", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
-                                              )
-                                            ])
-                                       ; (is-error <+ !xs)> x \
-                        ; ?serr
-                        ; if is-error then
-                            !x
-                            ; ?x
-                            ; \ [x|xs] -> <({err:
-                                              \ doc@Element(
-                                                      ElemName(
-                                                        QName(
-                                                          Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                        , "sequence"
-                                                        )
+                                                  , attributes
+                                                  , contents
+                                                  , ElemName(
+                                                      QName(
+                                                        Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                      , "choice"
                                                       )
-                                                    , attributes
-                                                    , contents
-                                                    , ElemName(
-                                                        QName(
-                                                          Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                        , "sequence"
-                                                        )
-                                                      )
-                                                    ) -> err
-                                                where <(validate-type-ComplexTypeNestedMax
-                                                        <+ ![ ( doc
-                                                              , <concat-strings> [ "no type definition "
-                                                                                 , "ComplexTypeNestedMax"
-                                                                                 , " for element "
-                                                                                 , "sequence"
-                                                                                 , " found"
-                                                                                 ]
+                                                    )
+                                                  ) -> err
+                                              where <(validate-type-ComplexTypeNestedMax
+                                                      <+ ![ ( doc
+                                                            , <concat-strings> [ "no type definition "
+                                                                               , "ComplexTypeNestedMax"
+                                                                               , " for element "
+                                                                               , "choice"
+                                                                               , " found"
+                                                                               ]
+                                                            )
+                                                          ])> doc => err \
+                                          }
+                                          <+ ![ ( <id>
+                                                , <concat-strings> ["expected element: ", "choice", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
+                                                )
+                                              ])
+                                         ; (is-error <+ !xs)> x \
+                          ; ?serr
+                          ; if is-error then
+                              !x
+                              ; {x, serr:
+                                  ?x
+                                  ; \ [x|xs] -> <({err:
+                                                    \ doc@Element(
+                                                            ElemName(
+                                                              QName(
+                                                                Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                              , "sequence"
                                                               )
-                                                            ])> doc => err \
-                                            }
-                                            <+ ![ ( <id>
-                                                  , <concat-strings> ["expected element: ", "sequence", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
-                                                  )
-                                                ])
-                                           ; (is-error <+ !xs)> x \
-                            ; ?serr
-                            ; if is-error then
-                                !x
-                                ; ?x
-                                ; \ [x|xs] -> <({err:
-                                                  \ doc@Element(
-                                                          ElemName(
-                                                            QName(
-                                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                            , "element"
                                                             )
-                                                          )
-                                                        , attributes
-                                                        , contents
-                                                        , ElemName(
-                                                            QName(
-                                                              Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
-                                                            , "element"
+                                                          , attributes
+                                                          , contents
+                                                          , ElemName(
+                                                              QName(
+                                                                Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                              , "sequence"
+                                                              )
                                                             )
-                                                          )
-                                                        ) -> err
-                                                    where <(validate-type-ElementType
-                                                            <+ ![ ( doc
-                                                                  , <concat-strings> [ "no type definition "
-                                                                                     , "ElementType"
-                                                                                     , " for element "
-                                                                                     , "element"
-                                                                                     , " found"
-                                                                                     ]
-                                                                  )
-                                                                ])> doc => err \
+                                                          ) -> err
+                                                      where <(validate-type-ComplexTypeNested
+                                                              <+ ![ ( doc
+                                                                    , <concat-strings> [ "no type definition "
+                                                                                       , "ComplexTypeNested"
+                                                                                       , " for element "
+                                                                                       , "sequence"
+                                                                                       , " found"
+                                                                                       ]
+                                                                    )
+                                                                  ])> doc => err \
+                                                  }
+                                                  <+ ![ ( <id>
+                                                        , <concat-strings> ["expected element: ", "sequence", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
+                                                        )
+                                                      ])
+                                                 ; (is-error <+ !xs)> x \
+                                  ; ?serr
+                                  ; if is-error then
+                                      !x
+                                      ; {x, serr:
+                                          ?x
+                                          ; \ [x|xs] -> <({err:
+                                                            \ doc@Element(
+                                                                    ElemName(
+                                                                      QName(
+                                                                        Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                                      , "sequence"
+                                                                      )
+                                                                    )
+                                                                  , attributes
+                                                                  , contents
+                                                                  , ElemName(
+                                                                      QName(
+                                                                        Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                                      , "sequence"
+                                                                      )
+                                                                    )
+                                                                  ) -> err
+                                                              where <(validate-type-ComplexTypeNestedMax
+                                                                      <+ ![ ( doc
+                                                                            , <concat-strings> [ "no type definition "
+                                                                                               , "ComplexTypeNestedMax"
+                                                                                               , " for element "
+                                                                                               , "sequence"
+                                                                                               , " found"
+                                                                                               ]
+                                                                            )
+                                                                          ])> doc => err \
+                                                          }
+                                                          <+ ![ ( <id>
+                                                                , <concat-strings> ["expected element: ", "sequence", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
+                                                                )
+                                                              ])
+                                                         ; (is-error <+ !xs)> x \
+                                          ; ?serr
+                                          ; if is-error then
+                                              !x
+                                              ; {x, serr:
+                                                  ?x
+                                                  ; \ [x|xs] -> <({err:
+                                                                    \ doc@Element(
+                                                                            ElemName(
+                                                                              QName(
+                                                                                Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                                              , "element"
+                                                                              )
+                                                                            )
+                                                                          , attributes
+                                                                          , contents
+                                                                          , ElemName(
+                                                                              QName(
+                                                                                Some(URIPrefix("http://www.w3.org/2001/XMLSchema"))
+                                                                              , "element"
+                                                                              )
+                                                                            )
+                                                                          ) -> err
+                                                                      where <(validate-type-ElementType
+                                                                              <+ ![ ( doc
+                                                                                    , <concat-strings> [ "no type definition "
+                                                                                                       , "ElementType"
+                                                                                                       , " for element "
+                                                                                                       , "element"
+                                                                                                       , " found"
+                                                                                                       ]
+                                                                                    )
+                                                                                  ])> doc => err \
+                                                                  }
+                                                                  <+ ![ ( <id>
+                                                                        , <concat-strings> ["expected element: ", "element", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
+                                                                        )
+                                                                      ])
+                                                                 ; (is-error <+ !xs)> x \
+                                                  ; ?serr
+                                                  ; if is-error then !x ; fail <+ !serr else id end
                                                 }
-                                                <+ ![ ( <id>
-                                                      , <concat-strings> ["expected element: ", "element", " of namespace: ", "http://www.w3.org/2001/XMLSchema"]
-                                                      )
-                                                    ])
-                                               ; (is-error <+ !xs)> x \
-                                ; ?serr
-                                ; if is-error then !x ; fail <+ !serr else id end
-                                <+ !serr
-                              else
-                                id
-                              end
-                            <+ !serr
-                          else
-                            id
-                          end
-                        <+ !serr
-                      else
-                        id
-                      end
-                    <+ !serr
-                  else
-                    id
-                  end
+                                              <+ !serr
+                                            else
+                                              id
+                                            end
+                                        }
+                                      <+ !serr
+                                    else
+                                      id
+                                    end
+                                }
+                              <+ !serr
+                            else
+                              id
+                            end
+                        }
+                      <+ !serr
+                    else
+                      id
+                    end
+                }
               )
               ; if is-error then
                   id
