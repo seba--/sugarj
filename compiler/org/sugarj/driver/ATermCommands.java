@@ -2,8 +2,6 @@ package org.sugarj.driver;
 
 import static org.sugarj.driver.Log.log;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,11 +18,12 @@ import org.spoofax.jsglr.client.imploder.IToken;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.spoofax.jsglr.client.imploder.Token;
 import org.spoofax.terms.StrategoListIterator;
+import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.attachments.ParentAttachment;
 import org.spoofax.terms.attachments.ParentTermFactory;
+import org.spoofax.terms.io.InlinePrinter;
 import org.spoofax.terms.io.TAFTermReader;
 import org.strategoxt.HybridInterpreter;
-import org.strategoxt.imp.runtime.Environment;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.tools.sdf_desugar_0_0;
@@ -71,10 +70,10 @@ public class ATermCommands {
     }
   }
   
-  public static ITermFactory factory = new ParentTermFactory(Environment.getTermFactory());
+  public static ITermFactory factory = new ParentTermFactory(new TermFactory());
 
   public static IStrategoTerm atermFromFile(String filename) throws IOException {
-    IStrategoTerm term = org.sugarj.driver.Environment.terms.get(filename);
+    IStrategoTerm term = Environment.terms.get(filename);
     
     if (term != null)
       return term;
@@ -86,13 +85,18 @@ public class ATermCommands {
     return new TAFTermReader(factory).parseFromString(s);
   }
 
+  public static String atermToFile(IStrategoTerm aterm) throws IOException {
+    String file = FileCommands.newTempFile("ast");
+    atermToFile(aterm, file);
+    return file;
+  }
+  
   public static void atermToFile(IStrategoTerm aterm, String filename)
       throws IOException {
-    org.sugarj.driver.Environment.terms.put(filename, aterm);
-
-    FileWriter writer = new FileWriter(new File(filename));
-    aterm.writeAsString(writer, Integer.MAX_VALUE);
-    writer.close();
+    Environment.terms.put(filename, aterm);
+    InlinePrinter printer = new InlinePrinter();
+    aterm.prettyPrint(printer);
+    FileCommands.writeToFile(filename, printer.getString());
   }
 
   public static boolean isApplication(IStrategoTerm term, String cons) {
@@ -304,8 +308,15 @@ public class ATermCommands {
     IToken left = ImploderAttachment.getLeftToken(toplevelDecl);
     IToken right = ImploderAttachment.getRightToken(toplevelDecl);
     
+    String file = "no file";
+    try {
+      file = atermToFile(toplevelDecl);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    
     if (left == null || right == null)
-      throw new IllegalStateException(msg + ": " + toplevelDecl);
+      throw new IllegalStateException(msg + ": " + file);
     
     for (int i = left.getIndex(), max = right.getIndex(); i <= max; i++) {
       Token tok = ((Token) left.getTokenizer().getTokenAt(i));
@@ -315,7 +326,7 @@ public class ATermCommands {
         break;
     }
     
-    log.log(msg + ": " + toplevelDecl);
+    log.log(msg + ": " + file);
   }
   
 }

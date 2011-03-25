@@ -1,9 +1,9 @@
 package xml.schema;
   
 import xml.schema.XmlSchema;
-import xml.schema.AsDesugaring;
- 
-public xmlschema BookSchema {   
+import xml.schema.AsEditorService;
+
+public xmlschema BookSchema {
   <{http://www.w3.org/2001/XMLSchema}schema targetNamespace="lib">
     
     <{http://www.w3.org/2001/XMLSchema}element name="book" type="BookType">

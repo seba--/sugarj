@@ -171,6 +171,9 @@ public class SDFCommands {
       log.endTask(result != null);
     }
     
+    if (result != null && !new File(result).exists())
+      return null;
+    
     return result;
   }
   
@@ -221,10 +224,10 @@ public class SDFCommands {
     String def = FileCommands.newTempFile("def");
     String permissiveDef = FileCommands.newTempFile("def-permissive");
     
-    FileCommands.writeToFile(def, "definition\n" + source);
+    FileCommands.writeToFile(def, sdfToDef(source));
     makePermissive(def, permissiveDef, context);
     
-    return FileCommands.readFileAsString(permissiveDef).substring(11); // drop "definition\n"
+    return defToSdf(FileCommands.readFileAsString(permissiveDef)); // drop "definition\n"
   }
   
   private static void makePermissive(String def, String permissiveDef, Context context) throws IOException {
@@ -333,12 +336,12 @@ public class SDFCommands {
    * @return
    * @throws IOException 
    */
-  public static String prettyPrintSDF(IStrategoTerm term, HybridInterpreter interp) {
+  public static String prettyPrintSDF(IStrategoTerm term, HybridInterpreter interp) throws IOException {
     IStrategoTerm string = pp_sdf_string_0_0.instance.invoke(interp.getCompiledContext(), term);
     if (string != null)
       return Term.asJavaString(string);
     
-    throw new RuntimeException("pretty printing SDF AST failed: " + term);
+    throw new RuntimeException("pretty printing SDF AST failed: " + ATermCommands.atermToFile(term));
   }
   
   /**
@@ -348,12 +351,19 @@ public class SDFCommands {
    * @return
    * @throws IOException 
    */
-  public static String prettyPrintSTR(IStrategoTerm term, HybridInterpreter interp) {
+  public static String prettyPrintSTR(IStrategoTerm term, HybridInterpreter interp) throws IOException {
     IStrategoTerm string = pp_stratego_string_0_0.instance.invoke(interp.getCompiledContext(), term);
     if (string != null)
       return Term.asJavaString(string);
     
-    throw new RuntimeException("pretty printing STR AST failed: " + term);
+    throw new RuntimeException("pretty printing STR AST failed: " + ATermCommands.atermToFile(term));
   }
   
+  private static String sdfToDef(String sdf) {
+    return "definition\n" + sdf;
+  }
+  
+  private static String defToSdf(String def) {
+    return def.substring(11);
+  }
 }

@@ -30,7 +30,7 @@ public class Test<T>{
   
   public static Test<Integer> create() {
 		Test<Integer> t = new Test<Integer>();
-		t.list.add(1);
+		t.list.add(1); 
 		t.list.add(2);
 		t.list.add(3);
 		t.list.add(4);

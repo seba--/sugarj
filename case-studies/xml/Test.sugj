@@ -13,6 +13,7 @@ import xml.XmlJavaSyntax;
 
 import xml.XmlEditor;
 
+import editor.util.Strategies;
 import editor.ASTBuilder;
 
 /*

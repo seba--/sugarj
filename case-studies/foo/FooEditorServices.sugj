@@ -5,20 +5,19 @@ import foo.EditorServiceHelper;
 import foo.FooSugar;
 
 public editor services FooEditorServices {
-  colorer C1
-    keyword : 255 168 55 bold      
-  
-  colorer C2
-    _.TypeName : red
+  colorer
     _.MyId     : BLUE
     _.Foo      : green
-  
-  builders
-    observer : sugarj-analyze
+ 
+  completions
+    completion keyword : "nil"
+    completion template : "TYPE " <JavaId> " = nil;"
+    completion template : JavaId = "SugarJ" 
 }
 
 class Test2 {
   TYPE v = nil;
   String x = nil;
   String y = null;
+  String z = "abc";
 }

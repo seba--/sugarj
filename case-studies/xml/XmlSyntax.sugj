@@ -230,9 +230,7 @@ public sugar XmlSyntax {
 
 
 
-  desugarings
-    \ Comment(_, com, _) -> Comment(com) \
-
+/*
 	signature
 	  constructors
 	    ElemName         : QName -> ElemName
@@ -297,5 +295,5 @@ public sugar XmlSyntax {
 	    QName            : Option(Qualifier) * NCName -> QName
 	                     : String -> NCName
 	                     : String -> Comment
-
+*/
 }

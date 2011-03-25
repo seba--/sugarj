@@ -10,29 +10,29 @@ import org.sugarj.languages.Java;
  */
 public sugar Transformation {
   desugarings
-    transFun
-    transLambda
+    desugar-closure-type
+    desugar-closure
   
   rules
-	transFun :
-      FunctionType(result, argument)
+	desugar-closure-type :
+      ClosureType(result, argument)
       ->
       ClassOrInterfaceType(
       	TypeName(
             PackageOrTypeName(Id("javaclosure")),
-            Id("Function")),
+            Id("Closure")),
         Some(TypeArgs([result', argument'])))
     with result' := <toRefType> result;
          argument' := <toRefType> argument
   
 
-    transLambda :
-      BlockLambda(result, Param(mods, argument, Id(x)), body)
+    desugar-closure :
+      Closure(result, Param(mods, argument, Id(x)), body)
       ->
       NewInstance(
         None(),
         ClassOrInterfaceType(
-          TypeName(PackageOrTypeName(Id("javaclosure")), Id("Function")),
+          TypeName(PackageOrTypeName(Id("javaclosure")), Id("Closure")),
           Some(TypeArgs([result', argument']))),
         [],
         Some(ClassBody(

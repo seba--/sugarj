@@ -28,8 +28,6 @@ public class FileCommands {
 
   private final static boolean DO_DELETE = false;
 
-  public static Set<String> keepFiles = new HashSet<String>();
-
   public static String newTempFile(String suffix) throws IOException {
     File f =
         File.createTempFile(
@@ -43,13 +41,15 @@ public class FileCommands {
   }
 
   public static void delete(String file) throws IOException {
-    if (DO_DELETE)
-      if (!keepFiles.contains(file))
-        new File(file).delete();
+    new File(file).delete();
   }
 
   public static void copyFile(String from, String to) throws IOException {
-    copyFile(new FileInputStream(from), new FileOutputStream(to));
+    FileInputStream fis = new FileInputStream(from);
+    FileOutputStream fos = new FileOutputStream(to);
+    copyFile(fis, fos);
+    fis.close();
+    fos.close();
   }
   
   public static void copyFile(InputStream in, OutputStream out) throws IOException {
@@ -72,12 +72,16 @@ public class FileCommands {
   public static void writeToFile(String file, String content)
       throws IOException {
     FileCommands.createFile(file);
-    new FileOutputStream(file).write(content.getBytes());
+    FileOutputStream fos = new FileOutputStream(file);
+    fos.write(content.getBytes());
+    fos.close();
   }
 
   public static void appendToFile(String file, String content)
       throws IOException {
-    new FileOutputStream(file, true).write(content.getBytes());
+    FileOutputStream fos = new FileOutputStream(file, true);
+    fos.write(content.getBytes());
+    fos.close();
   }
 
   // from http://snippets.dzone.com/posts/show/1335
@@ -180,6 +184,8 @@ public class FileCommands {
     while ((len = in.read(b)) > 0)
       out.write(b, 0, len);
 
+    in.close();
+    out.close();
     delete(tmp.getAbsolutePath());
   }
 
@@ -293,6 +299,10 @@ public class FileCommands {
   }
 
   public static boolean exists(String file) {
+    return new File(file).exists();
+  }
+  
+  public static boolean exists(URI file) {
     return new File(file).exists();
   }
 

@@ -7,6 +7,6 @@ public sugar Strategies {
       (filename, result)
       with
         filename := <guarantee-extension(|"ast")> path;
-        result   := <id> selected
+        result   := selected
 
 }

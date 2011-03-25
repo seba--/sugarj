@@ -12,25 +12,25 @@ import org.sugarj.languages.Java;
  */
 public sugar Transformation {
   desugarings
-    transFun
-    transLambda
+    desugar-closure-type
+    desugar-closure
   
   
   rules
-    transFun :
-         java |[ #~result(~argument) ]|
-      -> java |[ javaclosure.Function<? extends ~reftype:result', ? super ~reftype:argument'> ]|
+    desugar-closure-type :
+         |[ #~result(~argument) ]|
+      -> |[ javaclosure.Closure<? extends ~result', ? super ~argument'> ]|
     with
       result'   := <toRefType> result;
       argument' := <toRefType> argument
 
-    transLambda :
-         java |[ #~result(~argument ~id:x) ~block:body ]|
-      -> java |[ new javaclosure.Function<~result', ~argument'>() {
-        	         public ~result' invoke(~argument' ~id:x)
-        	           ~block:body
-                 } ]|
+    desugar-closure :
+         |[ #~result(~argument ~id:x) ~block:body ]|
+      -> |[ new javaclosure.Closure<~result', ~argument'>() {
+        	    public ~result' invoke(~argument' ~id:x)
+        	      ~block:body
+            } ]|
       with
         result' := <toRefType> result;
         argument' := <toRefType> argument
-}
+}  
