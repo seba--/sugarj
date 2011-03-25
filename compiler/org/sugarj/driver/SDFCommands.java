@@ -44,8 +44,6 @@ import org.sugarj.stdlib.StdLib;
  */
 public class SDFCommands {
   
-  private final static String SDF_2_TABLE = StdLib.binDir.getPath() + "sdf2table";
-  
   private final static Pattern SDF_FILE_PATTERN = Pattern.compile(".*\\.sdf");
   
   public static ModuleKeyCache<String> sdfCache = null;
@@ -87,19 +85,32 @@ public class SDFCommands {
   }
   
   private static void sdf2Table(String def, String tbl, String module) throws IOException {
-    String[] cmd = new String[] {
-        "bash",
-        SDF_2_TABLE,
+    sdf2Table(def, tbl, module, false);
+  }
+  
+  private static void sdf2Table(String def, String tbl, String module, boolean normalize) throws IOException {
+    String[] cmd; 
+    
+    if (!normalize)
+      cmd = new String[] {
         "-i", toCygwinPath(def),
         "-o", toCygwinPath(tbl),
         "-m", module
-    };
+      };
+    else
+      cmd = new String[] {
+        "-i", toCygwinPath(def),
+        "-o", toCygwinPath(tbl),
+        "-m", module,
+        "-n"
+      };
     
-    IStrategoTerm termArgs[] = new IStrategoTerm[cmd.length - 2];
+    IStrategoTerm termArgs[] = new IStrategoTerm[cmd.length];
     for (int i = 0; i < termArgs.length; i++)
-      termArgs[i] = ATermCommands.makeString(cmd[i+2], null);
+      termArgs[i] = ATermCommands.makeString(cmd[i], null);
     
     Context context = stratego_xtc.init();
+    SDFBundleCommand.getInstance().init();
     SDFBundleCommand.getInstance().invoke(context, "sdf2table", termArgs);
     
     if (!new File(tbl).exists())
@@ -107,15 +118,7 @@ public class SDFCommands {
   }
 
   private static void normalizeTable(String def, String module) throws IOException {
-    String[] cmd = new String[] {
-        "bash",
-        SDF_2_TABLE,
-        "-i", toCygwinPath(def),
-        "-m", module,
-        "-n"
-    };
-    
-    CommandExecution.executeWithPrefix("sdf2table", cmd);
+    sdf2Table(def, FileCommands.newTempFile("tbl"), module, true);
   }
   
   public static void check(String sdf, String module, Context sdfContext) throws IOException {

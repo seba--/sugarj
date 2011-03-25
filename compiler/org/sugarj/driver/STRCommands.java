@@ -115,7 +115,6 @@ public class STRCommands {
       if (!JavaCommands.javac(java, dir, Environment.includePath))
         throw new RuntimeException("java compilation failed");
         
-
       String jarfile = FileCommands.newTempFile("jar");
       JavaCommands.jar(dir, jarfile);
 
