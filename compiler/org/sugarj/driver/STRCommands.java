@@ -27,6 +27,8 @@ import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.strj.Main;
+import org.strategoxt.strj.main_strj_0_0;
+import org.strategoxt.strj.strj_0_0;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.stdlib.StdLib;
@@ -76,7 +78,9 @@ public class STRCommands {
       }
     
     try {
-    Main.mainNoExit(strjContext, cmd.toArray(new String[cmd.size()]));
+      // XXX strj does not create Java file with non-fresh context
+      Context c = org.strategoxt.strj.strj.init();
+      c.invokeStrategyCLI(main_strj_0_0.instance, "strj", cmd.toArray(new String[cmd.size()]));
     }
     catch (StrategoExit e) {
       if (e.getValue() != 0)
