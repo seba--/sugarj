@@ -51,12 +51,9 @@ public class Environment {
   public static String tmpDir = System.getProperty("java.io.tmpdir");
   
   
-  public static Set<String> srcPath = new HashSet<String>();
-  
   public static Set<String> includePath = new HashSet<String>();
   
   public static void init() throws IOException {
-    srcPath.add(src);
     includePath.add(bin);
   }
 

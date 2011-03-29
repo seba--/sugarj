@@ -94,9 +94,13 @@ public class ATermCommands {
   public static void atermToFile(IStrategoTerm aterm, String filename)
       throws IOException {
     Environment.terms.put(filename, aterm);
+    FileCommands.writeToFile(filename, atermToString(aterm));
+  }
+  
+  public static String atermToString(IStrategoTerm aterm) {
     InlinePrinter printer = new InlinePrinter();
     aterm.prettyPrint(printer);
-    FileCommands.writeToFile(filename, printer.getString());
+    return printer.getString();
   }
 
   public static boolean isApplication(IStrategoTerm term, String cons) {
@@ -139,7 +143,13 @@ public class ATermCommands {
   }
   
   public static IStrategoTerm makeTuple(IStrategoTerm... ts) {
-    return factory.makeTuple(ts);
+    return makeTuple(null, ts);
+  }
+  
+  public static IStrategoTerm makeTuple(IToken tok, IStrategoTerm... ts) {
+    IStrategoTerm t = factory.makeTuple(ts);
+    setAttachment(t, "Tuple", tok, ts);
+    return t;
   }
   
   public static IStrategoTerm makeSome(IStrategoTerm term, IToken noneToken) {

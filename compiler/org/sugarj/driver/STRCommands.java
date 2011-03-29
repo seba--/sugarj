@@ -26,9 +26,7 @@ import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
-import org.strategoxt.strj.Main;
 import org.strategoxt.strj.main_strj_0_0;
-import org.strategoxt.strj.strj_0_0;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.stdlib.StdLib;
@@ -194,12 +192,16 @@ public class STRCommands {
   }
 
   public static IStrategoTerm assimilate(String jarfile, IStrategoTerm in, HybridInterpreter interp) throws IOException {
+    return assimilate("internal-main", jarfile, in, interp);
+  }
+  
+  public static IStrategoTerm assimilate(String strategy, String jarfile, IStrategoTerm in, HybridInterpreter interp) throws IOException {
     try {
       HybridInterpreter newInterp = new HybridInterpreter(interp);
       newInterp.loadJars(new File(jarfile).toURI().toURL());
       newInterp.setCurrent(in);
       
-      if (newInterp.invoke("internal-main")) {
+      if (newInterp.invoke(strategy)) {
         IStrategoTerm term = newInterp.current();
         
         IToken left = ImploderAttachment.getLeftToken(in);
