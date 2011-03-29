@@ -958,7 +958,8 @@ public class Driver{
       
       for (URI source : allInputFiles) {
         Result res = compile(source);
-        DriverCLI.processResultCLI(res, source.getPath(), new File(".").getAbsolutePath());
+        if (!DriverCLI.processResultCLI(res, source.getPath(), new File(".").getAbsolutePath()))
+          throw new RuntimeException("compilation of " + source.getPath() + " failed");
       }
       
     } catch (Exception e) {

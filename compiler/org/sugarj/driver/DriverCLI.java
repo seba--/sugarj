@@ -30,6 +30,7 @@ import org.strategoxt.imp.runtime.Environment;
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  *
+ * large chunk copied and adapted from org.strategoxt.imp.runtime.parser.ParseErrorHandler
  */
 public class DriverCLI {
   
@@ -61,11 +62,14 @@ public class DriverCLI {
     }
   }
   
-  static void processResultCLI(Result res, String file, String project) throws IOException {
+  static boolean processResultCLI(Result res, String file, String project) throws IOException {
     log.log("");
+    
+    boolean success = res.getCollectedErrors().isEmpty();
     
     for (BadTokenException e : res.getCollectedErrors())
       log.log("syntax error: line " + e.getLineNumber() + " column " + e.getColumnNumber() + ": " + e.getMessage());
+    
     
     IToken tok = ImploderAttachment.getRightToken(res.getSugaredSyntaxTree());
     
@@ -76,9 +80,11 @@ public class DriverCLI {
         ATermCommands.makeString(project, tok));
     
     List<Error> errors = gatherNonFatalErrors(res.getSugaredSyntaxTree());
+    success &= errors.isEmpty();
     
     for (Error error : errors)
       log.log("error: line " + error.lineStart + " column " + error.columnStart + " to line " + error.lineEnd + " column " + error.columEnd + ":\n  " + error.msg);
+
     
     IStrategoTerm errorTree = STRCommands.assimilate("sugarj-analyze", res.getDesugaringsFile(), tuple, new HybridInterpreter());
     
@@ -89,6 +95,7 @@ public class DriverCLI {
     IStrategoList warnings = Tools.termAt(errorTree, 2);
     IStrategoList notes = Tools.termAt(errorTree, 3);
     
+    success &= semErrors.isEmpty() && warnings.isEmpty() && notes.isEmpty();
     
     for (IStrategoTerm error : semErrors.getAllSubterms())
       if (error.getTermType() == IStrategoTerm.LIST)
@@ -109,7 +116,9 @@ public class DriverCLI {
       else
         reportCLI(note, "note");
     
-    System.out.println(ATermCommands.atermToFile(errorTree));
+    // System.out.println(ATermCommands.atermToFile(errorTree));
+    
+    return success;
   }
   
   private static void reportCLI(IStrategoTerm pairOrList, String kind) throws IOException {
