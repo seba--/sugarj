@@ -941,12 +941,7 @@ public class Driver{
       
       String[] sources = handleOptions(args);
 
-      URL[] urls = new URL[Environment.srcPath.size()];
-      int i = 0;
-      for (String path : Environment.srcPath)
-        urls[i++] = new File(path).toURI().toURL();
-
-      ClassLoader loader = new URLClassLoader(urls);
+      ClassLoader loader = new URLClassLoader(new URL[] {new File(Environment.src).toURI().toURL()});
       
       for (String source : sources)
       {
@@ -961,10 +956,10 @@ public class Driver{
         pendingInputFiles.add(uri);
       }
       
-      for (URI source : allInputFiles)
-        compile(source);
-      
-      storeCaches();
+      for (URI source : allInputFiles) {
+        Result res = compile(source);
+        DriverCLI.processResultCLI(res, source.getPath(), new File(".").getAbsolutePath());
+      }
       
     } catch (Exception e) {
       e.printStackTrace();
@@ -1061,7 +1056,7 @@ public class Driver{
 
     if (line.hasOption("sourcepath"))
       for (String path : line.getOptionValue("sourcepath").split(Environment.classpathsep))
-        Environment.srcPath.add(path);
+        Environment.src = path;
  
     if (line.hasOption("d"))
       Environment.bin = line.getOptionValue("d");

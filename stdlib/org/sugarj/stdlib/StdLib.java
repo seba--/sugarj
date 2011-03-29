@@ -29,15 +29,11 @@ public class StdLib {
   }
 
   private static URI ensureFile(String ressource) {
-    try {
-      URI uri = StdLib.class.getClassLoader().getResource(ressource).toURI();
-      if (uri != null && uri.getPath() != null && new File(uri.getPath()).exists())
-        return uri;
-    } catch (URISyntaxException e) {
-    }
-      
+    File f = new File(stdLibDir.getPath() + File.separator + ressource);
+    if (f.exists())
+      return f.toURI();
     
-    File f = new File(stdLibTmpDir + "/" + ressource);
+    f = new File(stdLibTmpDir + "/" + ressource);
     f.getParentFile().mkdirs();
     
     try {

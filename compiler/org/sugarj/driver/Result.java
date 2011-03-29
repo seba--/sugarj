@@ -22,6 +22,7 @@ public class Result {
   private Set<BadTokenException> collectedErrors = new HashSet<BadTokenException>();
   private IStrategoTerm sugaredSyntaxTree = null;
   private String generatedClassFile;
+  private String desugaringsFile;
 
   void addFileDependency(String file) throws IOException {
     fileDependencyHashes.put(file, FileCommands.fileHash(file));
@@ -90,6 +91,11 @@ public class Result {
   }
   
   void registerEditorDesugarings(String jarfile) throws IOException {
+    desugaringsFile = jarfile;
     editorServices = new HashSet<IStrategoTerm>(ATermCommands.registerSemanticProvider(editorServices, jarfile));
+  }
+  
+  String getDesugaringsFile() {
+    return desugaringsFile;
   }
 }
