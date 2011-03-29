@@ -1,7 +1,6 @@
 package xml.schema;
   
 import xml.schema.XmlSchema;
-import xml.schema.AsEditorService;
 
 public xmlschema BookSchema {
   <{http://www.w3.org/2001/XMLSchema}schema targetNamespace="lib">

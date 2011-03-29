@@ -2,7 +2,7 @@ package xml.schema;
 
 import org.sugarj.languages.Java;
 
-import xml.XmlSyntax;
+import xml.XmlJavaSyntax;
  
 public sugar XmlSchemaJavaSyntax {
   
