@@ -291,7 +291,8 @@ public sugar AsDesugaring {
           ?x;
           strategy~s; ?serr;
           if is-error
-            then !x; strategy~(<any-error-free-strategy> ss) <+ !serr
+            then 
+              !x; strategy~(<any-error-free-strategy> ss) <+ !serr
             else id
           end
          }

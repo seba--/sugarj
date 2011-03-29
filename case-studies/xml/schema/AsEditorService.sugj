@@ -1,0 +1,16 @@
+package xml.schema;
+
+import xml.XmlSyntax;
+import xml.schema.XmlSchemaJavaSyntax;
+
+public sugar AsEditorService {
+  rules
+    schema-editor :
+      XsdSugarBody(XMLSchemaDoc(xsd)) -> <schema-editor> xsd
+    
+    schema-editor :
+      Document(pre, el, post) -> <schema-editor-element> el
+
+    schema-editor-element :
+      el -> []    
+}
