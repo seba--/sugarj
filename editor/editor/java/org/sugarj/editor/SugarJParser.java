@@ -43,7 +43,6 @@ public class SugarJParser extends JSGLRI {
     Environment.includePath.add(new StrategoJarAntPropertyProvider().getAntPropertyValue(""));
 
     assert projectPath != null;
-    Environment.srcPath.add(projectPath);
     Environment.src = projectPath;
     Environment.bin = outputPath != null ? outputPath : projectPath;
 
@@ -60,8 +59,6 @@ public class SugarJParser extends JSGLRI {
     CommandExecution.SUB_SILENT_EXECUTION = false;
     CommandExecution.FULL_COMMAND_LINE = true;
     
-    // TODO compile files into the project folder
-
     try {
       result = Driver.compile(input, FileCommands.fileName(filename), filename);
     } catch (Throwable e) {
