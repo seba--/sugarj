@@ -808,19 +808,6 @@ public class Driver{
         if (CommandExecution.FULL_COMMAND_LINE)
           log.log("Wrote SDF file to '" + new File(sdfExtension).getAbsolutePath() + "'.");
         
-        String currentGrammarName =
-          FileCommands.hashFileName("sugarj", currentGrammarModule + fullExtName);
-
-        currentGrammarSDF =
-            Environment.tmpDir + sep + currentGrammarName + ".sdf";
-
-        driverResult.generateFile(currentGrammarSDF, 
-            "module " + currentGrammarName + "\n"
-            + "imports " + currentGrammarModule + "\n" 
-            + "        " + fullExtName);
-        currentGrammarModule = currentGrammarName;
-
-
         String strExtensionTerm = 
             "Module(" + "\"" + fullExtName+ "\"" + ", " 
                       + strExtract + ")" + "\n";
@@ -842,18 +829,33 @@ public class Driver{
         
         if (CommandExecution.FULL_COMMAND_LINE)
           log.log("Wrote Stratego file to '" + new File(strExtension).getAbsolutePath() + "'.");
-        
+      }
+
+      if (FileCommands.exists(sdfExtension)) {
+        String currentGrammarName =
+          FileCommands.hashFileName("sugarj", currentGrammarModule + fullExtName);
+        currentGrammarSDF =
+          Environment.tmpDir + sep + currentGrammarName + ".sdf";
+        driverResult.generateFile(currentGrammarSDF, 
+            "module " + currentGrammarName + "\n"
+            + "imports " + currentGrammarModule + "\n" 
+            + "        " + fullExtName);
+        currentGrammarModule = currentGrammarName;
+        driverResult.addFileDependency(sdfExtension);
+      }
+
+      if (FileCommands.exists(strExtension)) {
         String currentTransName =
           FileCommands.hashFileName("sugarj", currentTransModule + fullExtName);
-
         currentTransSTR = Environment.tmpDir + sep + currentTransName + ".str";
-
         driverResult.generateFile(currentTransSTR,
             "module " + currentTransName + "\n" 
             + "imports " + currentTransModule + "\n"
             + "        " + fullExtName);
         currentTransModule = currentTransName;
+        driverResult.addFileDependency(strExtension);
       }
+
     } finally {
       log.endTask();
     }
