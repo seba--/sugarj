@@ -3,7 +3,6 @@ package javaclosure;
 import java.util.List;
 import java.util.ArrayList;
 
-import javaclosure.Closure;
 import javaclosure.Syntax;
 import javaclosure.Transformation;
 

@@ -3,8 +3,7 @@ package javaclosure.concrete;
 import java.util.List;
 import java.util.ArrayList;
 
-import javaclosure.Syntax;
-
+import javaclosure.concrete.Syntax;
 import javaclosure.concrete.Transformation;
 
 public class Test<T>{
