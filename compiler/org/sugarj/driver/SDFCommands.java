@@ -56,14 +56,14 @@ public class SDFCommands {
      */
     List<String> cmd = new ArrayList<String>(Arrays.asList(new String[] {
 //      PACK_SDF,
-      "-i", toCygwinPath(sdf),
-      "-o", toCygwinPath(def),
-      "-Idef", toCygwinPath(StdLib.sugarjDef.getPath()),
-      "-Idef", toCygwinPath(StdLib.javaDef.getPath()),
-      "-Idef", toCygwinPath(StdLib.sdfDef.getPath()),
-      "-Idef", toCygwinPath(StdLib.strategoDef.getPath()),
-      "-Idef", toCygwinPath(StdLib.editorServiceDef.getPath()),
-      "-I", toCygwinPath(StdLib.stdLibDir.getPath()),
+      "-i", sdf,
+      "-o", def,
+      "-Idef", StdLib.sugarjDef.getPath(),
+      "-Idef", StdLib.javaDef.getPath(),
+      "-Idef", StdLib.sdfDef.getPath(),
+      "-Idef", StdLib.strategoDef.getPath(),
+      "-Idef", StdLib.editorServiceDef.getPath(),
+      "-I", StdLib.stdLibDir.getPath(),
     }));
     
     for (String path : Environment.includePath) 

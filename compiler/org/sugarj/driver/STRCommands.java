@@ -63,7 +63,7 @@ public class STRCommands {
         "-i", toWindowsPath(str),
         "-o", toWindowsPath(java),
         "-m", main,
-        "-I", toCygwinPath(StdLib.stdLibDir.getPath()),
+        "-I", StdLib.stdLibDir.getPath(),
         "-p", "sugarj",
         "--library",
         "-O", "0"
