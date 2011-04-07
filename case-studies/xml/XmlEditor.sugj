@@ -10,8 +10,8 @@ public editor services XmlEditor {
     environment ElemName : blue
     environment AttrName : darkorange
     environment AttValue : darkred
-    environment CharData : default
-    environment CharDataSection : default
+    environment CharData : black
+    environment CharDataSection : black
     
     xmlParenthesis = 0 0 200 bold
 
