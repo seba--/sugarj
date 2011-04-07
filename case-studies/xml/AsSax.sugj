@@ -72,9 +72,11 @@ public sugar AsSax {
 	  content-to-stm(|java_x) :
 	    TextFromMetaExpr(java_e) ->
 	    java_bstm |[
-	      java_x.characters({|
-	        String java_y = java_e; | java_y.toCharArray()
-	      |}, 0, java_y.length());
+	      {|
+          String java_y = java_e;
+         |
+	        java_x.characters( java_y.toCharArray(), 0, java_y.length())
+	      |};
 	    ]|
 	      where new => java_y
 	

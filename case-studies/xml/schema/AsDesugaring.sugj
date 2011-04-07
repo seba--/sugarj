@@ -19,8 +19,7 @@ public sugar AsDesugaring {
     constraint-error :
       XMLSchemaDoc(Document(pre, root, post)) -> err
       where
-        <xml-validate> root => err;
-        <not(?[])> err
+        <xml-validate> root => err
     
 
   // comment out for bootstrapping
@@ -33,8 +32,7 @@ public sugar AsDesugaring {
     constraint-error :
       ValWriteDoc(ch,Document(pre, root, post)) -> err
       where
-        <xml-validate> root => err;
-        <not(?[])> err
+        <xml-validate> root => err
 
     constraint-error :
       ValWriteDoc(ch,Document(pre, root, post)) -> (root, "no schema for this namespace found")

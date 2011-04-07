@@ -16,10 +16,10 @@ public class BookSchemaTest extends Test {
   public static void main(String[] args) throws SAXException {
     ContentHandler ch = new BookSchemaTest();
     
-    ch.write valid document
-      <{lib}book title="Sweetness and Power: The Place of Sugar in Modern History">
-        <{lib}author name="Sidney W. Mintz">
-        </{lib}author>
-      </{lib}book>;
+    @Validate
+    ch.<{lib}book title="Sweetness and Power: The Place of Sugar in Modern History">
+         <{lib}author name="Sidney W. Mintz">
+         </{lib}author>
+       </{lib}book>;
   }
 } 

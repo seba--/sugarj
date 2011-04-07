@@ -7,7 +7,7 @@ import xml.XmlJavaSyntax;
 public sugar XmlSchemaJavaSyntax {
   
   context-free syntax
-    JavaId "." "write" "valid" "document" Document ";" -> ObjectStm {cons("ValWriteDoc")}
+    "@Validate" JavaId "."  Document ";" -> ObjectStm {cons("ValWriteDoc")}
   
   desugarings
     \ ValWriteDoc(ch,doc) -> WriteDoc(ch,doc) \
