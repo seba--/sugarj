@@ -1,17 +1,17 @@
 package org.sugarj.driver;
 
-import aterm.ATerm;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
 public class IncrementalParseResult {
-  private final ATerm toplevelDecl;
+  private final IStrategoTerm toplevelDecl;
   private final String rest;
   
-  public IncrementalParseResult(ATerm toplevelDecl, String rest) {
+  public IncrementalParseResult(IStrategoTerm toplevelDecl, String rest) {
     this.toplevelDecl = toplevelDecl;
     this.rest = rest;
   }
   
-  public ATerm getToplevelDecl() {
+  public IStrategoTerm getToplevelDecl() {
     return toplevelDecl;
   }
   

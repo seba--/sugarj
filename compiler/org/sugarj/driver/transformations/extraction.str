@@ -1,14 +1,14 @@
 module extraction
 imports
   libstratego-lib
-  SugarJ
-  Sdf2Renamed
-  StrategoRenamed
+  org/sugarj/languages/SugarJ
+  org/sugarj/languages/Sdf2
+  org/sugarj/languages/Stratego
 
 //Accept Rules
 rules 
-  AcceptSDF : grammar-elem(x) -> x
-  AcceptSTR : transformation-elem(x) -> x
+  accept-sdf : grammar-elem(x) -> x
+  accept-str : transformation-elem(x) -> x
 
 rules
   // singleton :: a -> [a]
@@ -38,14 +38,17 @@ strategies
   
 // to SDF
 rules
-  CompDesugaringsToSDF :
+  comp-desugarings-to-sdf :
     Desugarings(ds) ->
-    context-free-syntax(<map(CompDesugaringToSDF); concat> ds)
+    context-free-syntax(syns)
+    where
+      <map(comp-desugaring-to-sdf); concat> ds => syns;
+      <not(?[])> syns
 
-  CompDesugaringToSDF :
+  comp-desugaring-to-sdf :
     PureDesugaring(_) -> []
     
-  CompDesugaringToSDF :
+  comp-desugaring-to-sdf :
     InjectDesugaring(name,from,to,attrs) ->
     [prod([from],to,attrs)]
   
@@ -60,30 +63,30 @@ rules
       <fold-conc-grammars> [conc-grammars(x, y) | z]
   
 strategies
-  mainSDF = io-wrap(toSDF; fold-conc-grammars)
-  toSDF = map(extract((AcceptSDF + (AcceptSTR; CompDesugaringsToSDF));
-                      singleton));
-              concat
+  main-sdf = io-wrap(extract-sdf; fold-conc-grammars)
+  extract-sdf = map(extract((accept-sdf + (accept-str; comp-desugarings-to-sdf));
+                            singleton));
+                    concat
 
 // to STR
 rules
-  CompDesugaringsToSTR :
+  comp-desugarings-to-str :
     Desugarings(as) ->
-    Strategies(<map(CompDesugaringToSTR)> as)
+    Strategies(<map(comp-desugaring-to-str)> as)
 
-  CompDesugaringToSTR :
+  comp-desugaring-to-str :
     PureDesugaring(term) ->
     SDefNoArgs("desugar",Call(CallNoArgs(SVar("changed-tree")),[term]))
 
-  CompDesugaringToSTR :
+  comp-desugaring-to-str :
     InjectDesugaring(term,from,to,attrs) ->
     SDefNoArgs("desugar",Call(CallNoArgs(SVar("changed-tree")),[term]))
 
 strategies
-  mainSTR = io-wrap(toSTR)
-	toSTR = map(extract(AcceptSTR;
-                      try(CompDesugaringsToSTR);
-                      singleton));
-              concat
+  mainSTR = io-wrap(extract-str)
+	extract-str = map(extract(accept-str;
+                            try(comp-desugarings-to-str);
+                            singleton));
+                    concat
 
   

@@ -3,8 +3,7 @@ package javaclosure.concrete;
 import java.util.List;
 import java.util.ArrayList;
 
-import javaclosure.Syntax;
-
+import javaclosure.concrete.Syntax;
 import javaclosure.concrete.Transformation;
 
 public class Test<T>{
@@ -30,7 +29,7 @@ public class Test<T>{
   
   public static Test<Integer> create() {
 		Test<Integer> t = new Test<Integer>();
-		t.list.add(1);
+		t.list.add(1); 
 		t.list.add(2);
 		t.list.add(3);
 		t.list.add(4);

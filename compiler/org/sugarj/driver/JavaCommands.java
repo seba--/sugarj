@@ -1,7 +1,10 @@
 package org.sugarj.driver;
 
 import java.io.IOException;
-import java.util.List;
+import java.io.PrintWriter;
+import java.util.Collection;
+
+import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
 
 /**
  * 
@@ -13,13 +16,11 @@ import java.util.List;
  */
 public class JavaCommands {
 
-  private final static String JAVAC = "javac";
-  
-  public static void javac(String java, String dir, List<String> cp) throws IOException {
-    javac(java, dir, cp.toArray(new String[] {}));
+  public static boolean javac(String java, String dir, Collection<String> cp) throws IOException {
+    return javac(java, dir, cp.toArray(new String[] {}));
   }
 
-  public static void javac(String java, String dir, String... cp) throws IOException {
+  public static boolean javac(String java, String dir, String... cp) throws IOException {
     StringBuilder cpBuilder = new StringBuilder();
     
     for (int i = 0; i < cp.length; i++) {
@@ -29,14 +30,27 @@ public class JavaCommands {
         cpBuilder.append(Environment.classpathsep);
     }
     
+    if(cp.length > 0)
+      cpBuilder.append(Environment.classpathsep);
+    
+    cpBuilder.append(dir);
+    
+    // TODO change to ejc
+    
     String[] cmd = new String[] {
-        JAVAC,
         "-cp", cpBuilder.toString(),
         "-d", FileCommands.toWindowsPath(dir),
+        "-source", "1.5",
+        "-nowarn",
         FileCommands.toWindowsPath(java)
     };
     
-    CommandExecution.execute(cmd);
+    // this is ECJ
+    return BatchCompiler.compile(
+        cmd,
+        new PrintWriter(System.out),
+        new PrintWriter(System.err),
+        null);
   }
 
   /**
@@ -47,7 +61,9 @@ public class JavaCommands {
     StringBuilder classpath = new StringBuilder();
     classpath.append(FileCommands.toWindowsPath(dir));
     classpath.append(Environment.classpathsep);
-    classpath.append(FileCommands.toWindowsPath(Environment.strategoxt_jar));
+    
+    for (String path : Environment.includePath)
+      classpath.append(path).append(Environment.classpathsep);
     
     String[] cmd = new String[args.length + 5];
     cmd[0] = "java";
@@ -60,6 +76,19 @@ public class JavaCommands {
       cmd[i + 5] = args[i];
     
     CommandExecution.executeWithPrefix(main, cmd);
+  }
+  
+  
+  public static void jar(String dir, String output) {
+    String[] cmd = {
+        "jar",
+        "cf",
+        output,
+        "-C", dir,
+        "."
+        };
+    
+    CommandExecution.execute(cmd);
   }
   
 }

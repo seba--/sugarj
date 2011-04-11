@@ -11,7 +11,7 @@ public sugar XmlTextTools {
 	strategies
 	
 	  /**
-	   * @type  String -> String
+	   * @type  String -> String  
 	   */
 	  string2xml-attr-value =
 	    string-as-chars(xml-escape-chars)
@@ -89,7 +89,7 @@ public sugar XmlTextTools {
 	  xml-unescape =
 	    Text(
 	      map(
-	        ?Literal(_)
+	        ?CharDataPart(_)
 	     <+ unescape-amp
 	      + unescape-lt
 	      + unescape-gt
@@ -103,17 +103,17 @@ public sugar XmlTextTools {
 	  /**
 	   * @type  CharDataPart -> CharDataPart
 	   */
-	  unescape-amp  : EntityRef("amp")  -> Literal("&")
-	  unescape-lt   : EntityRef("lt")   -> Literal("<")
-	  unescape-gt   : EntityRef("gt")   -> Literal(">")
-	  unescape-apos : EntityRef("apos") -> Literal("'")
-	  unescape-quot : EntityRef("quot") -> Literal("\"")
+	  unescape-amp  : EntityRef("amp")  -> CharDataPart("&")
+	  unescape-lt   : EntityRef("lt")   -> CharDataPart("<")
+	  unescape-gt   : EntityRef("gt")   -> CharDataPart(">")
+	  unescape-apos : EntityRef("apos") -> CharDataPart("'")
+	  unescape-quot : EntityRef("quot") -> CharDataPart("\"")
 	
 	  unescape-dec-charref :
-	    DecCharRef(s) -> Literal(<dec-char-to-string> s)
+	    DecCharRef(s) -> CharDataPart(<dec-char-to-string> s)
 	
 	  unescape-hex-charref :
-	    HexCharRef(s) -> Literal(<hex-char-to-string> s)
+	    HexCharRef(s) -> CharDataPart(<hex-char-to-string> s)
 	
 	  /*
 	  unescape-dec-charref : ['&', '#', x, ';' | cs] -> []
@@ -175,7 +175,7 @@ public sugar XmlTextTools {
 	  chardata2strings =
 	      xml-unescape
 	    ; ?Text(<id>)
-	    ; map(?Literal(<id>) + ?CDATASection(<id>))
+	    ; map(?CharDataPart(<id>) + ?CDATASection(<id>))
 	
 	  chardata2string =
 	      chardata2strings

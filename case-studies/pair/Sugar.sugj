@@ -1,43 +1,21 @@
 package pair;
 
 import org.sugarj.languages.Java;
+import concretesyntax.ConcreteJava;
 
 public sugar Sugar {
   context-free syntax
-    "(" JavaExpr "," JavaExpr ")" -> 
-      JavaExpr {cons("Pair")}
-
-    "(" JavaType "," JavaType ")" -> 
-      JavaType {cons("PairType")}
-  
-  signature constructors
-    Pair     : JavaExpr * JavaExpr -> JavaExpr
-    PairType : JavaType * JavaType -> JavaType
+    "(" JavaType "," JavaType ")" -> JavaType {cons("PType")}
+    "(" JavaExpr "," JavaExpr ")" -> JavaExpr {cons("PExpr")}
   
   desugarings
-    pair2expr
-    pair2type
+    desugar-pair-type
+    desugar-pair-expr
 
   rules
-    pair2expr : 
-      Pair(e1, e2) 
-      ->
-      NewInstance(
-        None(),
-        ClassOrInterfaceType(
-          TypeName(
-            PackageOrTypeName(Id("pair")),
-            Id("Pair")),
-          None()),
-        [e1, e2], 
-        None())
+    desugar-pair-type :
+      PType(t1, t2) -> |[ pair.Pair<~t1, ~t2> ]| 
 
-    pair2type :
-      PairType(t1, t2)
-      ->
-      ClassOrInterfaceType(
-      	TypeName(
-          PackageOrTypeName(Id("pair")),
-          Id("Pair")),
-        Some(TypeArgs([t1, t2]))) 
+    desugar-pair-expr : 
+      PExpr(e1, e2) -> |[ new pair.Pair.create(~e1, ~e2) ]|
 }

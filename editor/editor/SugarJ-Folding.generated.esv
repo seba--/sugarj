@@ -20,24 +20,24 @@ folding Default folding definitions
   //
   //   Definition._ (disabled)
   
-  SugarCompilationUnit.CompilationUnit
+  SugarCompilationUnit.SugarCompilationUnit
   JavaPackageDec.PackageDec
   JavaExpr.Lit
   JavaStringLiteral
   JavaStringLiteral.String
   JavaVarDecId.ArrayVarDecId
-  OptJavaTypeParams2
+  OptJavaTypeParams0
   JavaTypeParams.TypeParams
   JavaTypeParam.TypeParam
-  OptJavaTypeBound2
+  OptJavaTypeBound0
   JavaTypeBound.TypeBound
-  OptJavaThrows2
+  OptJavaThrows0
   JavaThrows.ThrowsDec
   JavaClassType.ClassType
-  OptJavaInterfaces2
+  OptJavaInterfaces0
   JavaInterfaces.ImplementsDec
   JavaInterfaceType.InterfaceType
-  OptJavaExtendsInterfaces2
+  OptJavaExtendsInterfaces0
   JavaExtendsInterfaces.ExtendsInterfaces
   JavaMethodSpec.SuperMethod
   JavaMethodSpec.QSuperMethod
@@ -47,11 +47,11 @@ folding Default folding definitions
   SugarDec.SugarDec
   SugarDecHead.SugarDecHead
   SugarBody.SugarBody
-  ListStarOfSugarDefElem2
+  ListStarOfSugarDefElem0
   SugarDefElem.grammar-elem
   Grammar.sorts
   Grammar.syntax
-  ListStarOfSdf2Production2
+  ListStarOfSdf2Production0
   Sdf2Production.prod
   Sdf2Attributes.attrs
   Sdf2Attribute.term
@@ -63,7 +63,7 @@ folding Default folding definitions
   Grammar.variables
   Grammar.lexical-variables
   Grammar.priorities
-  ListStarOfSdf2Priority2
+  ListStarOfSdf2Priority0
   Sdf2Priority.chain
   Sdf2Group.with-arguments
   Sdf2ArgumentIndicator.default
@@ -73,12 +73,12 @@ folding Default folding definitions
   Grammar.lexical-priorities
   Grammar.context-free-priorities
   Grammar.restrictions
-  ListStarOfSdf2Restriction2
+  ListStarOfSdf2Restriction0
   Sdf2Restriction.follow
   Grammar.lexical-restrictions
   Grammar.context-free-restrictions
   Grammar.aliases
-  ListStarOfSdf2Alias2
+  ListStarOfSdf2Alias0
   Sdf2Alias.alias
   SugarDefElem.transformation-elem
   Transformation.Strategies
@@ -89,7 +89,7 @@ folding Default folding definitions
   StrategoStrategy.Scope
   StrategoRuleDec.RDec
   StrategoRuleDec.RDecT
-  ListStarOfStrategoId2
+  ListStarOfStrategoId0
   StrategoStrategyDef.ExtSDef
   Transformation.Signature
   StrategoSdecl.Sorts

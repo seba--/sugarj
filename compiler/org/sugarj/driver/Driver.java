@@ -1,15 +1,13 @@
 package org.sugarj.driver;
-import static org.sugarj.driver.ATermCommands.atermFromFile;
-import static org.sugarj.driver.ATermCommands.atermToFile;
-import static org.sugarj.driver.ATermCommands.extractJava;
+
 import static org.sugarj.driver.ATermCommands.extractSDF;
 import static org.sugarj.driver.ATermCommands.extractSTR;
-import static org.sugarj.driver.ATermCommands.extractString;
-import static org.sugarj.driver.ATermCommands.extractTerm;
 import static org.sugarj.driver.ATermCommands.fixSDF;
-import static org.sugarj.driver.ATermCommands.match;
+import static org.sugarj.driver.ATermCommands.getApplicationSubterm;
+import static org.sugarj.driver.ATermCommands.getList;
+import static org.sugarj.driver.ATermCommands.getString;
+import static org.sugarj.driver.ATermCommands.isApplication;
 import static org.sugarj.driver.Environment.bin;
-import static org.sugarj.driver.Environment.includePath;
 import static org.sugarj.driver.Environment.sep;
 import static org.sugarj.driver.Log.log;
 
@@ -20,83 +18,195 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
-import org.spoofax.jsglr.InvalidParseTableException;
-import org.sugarj.driver.caching.Cache;
-import org.sugarj.driver.caching.ModuleKey;
-
-import aterm.ATerm;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.jsglr.client.InvalidParseTableException;
+import org.spoofax.jsglr.client.ParseTable;
+import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+import org.spoofax.jsglr.shared.BadTokenException;
+import org.spoofax.jsglr.shared.SGLRException;
+import org.spoofax.jsglr.shared.TokenExpectedException;
+import org.strategoxt.HybridInterpreter;
+import org.strategoxt.imp.runtime.parser.JSGLRI;
+import org.strategoxt.lang.Context;
+import org.strategoxt.permissivegrammars.make_permissive;
+import org.strategoxt.tools.tools;
+import org.sugarj.driver.caching.ModuleKeyCache;
+import org.sugarj.driver.transformations.extraction.extraction;
+import org.sugarj.stdlib.StdLib;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
 public class Driver{
-
-  // TODO change when going binary
-  private static final String SDF_OUTPUT_EXTENSION = ".sdf";
-  private static final String STR_OUTPUT_EXTENSION = ".str";
-
-  private static String getRelativeModulePath(String module) {
-    return module.replace(".", sep);
-  }
-
-  public static String printListSeparated(List<String> l, String sep) {
-    StringBuilder b = new StringBuilder();
-
-    for (Iterator<String> it = l.iterator(); it.hasNext();) {
-      b.append(it.next());
-      if (it.hasNext())
-        b.append(sep);
-    }
-
-    return b.toString();
-  }
-
-  private static List<URI> allInputFiles = new ArrayList<URI>();
-  private static List<URI> pendingInputFiles = new ArrayList<URI>();
-  private static List<URI> currentlyProcessing = new ArrayList<URI>();
-
-  /**
-   * denotes that the imported modules changed.
-   */
-  private static boolean importsChanged = false;
-
-  private static boolean genJava = false;
   
-  private URI sourceFile;
+  public final static String VERSION = "editor-services-0.1";
+  
+  private static class Key {
+    private String source;
+    private String moduleName;
+    
+    private Key(String source, String moduleName) {
+      this.source = source;
+      this.moduleName = moduleName;
+    }
+    
+    public int hashCode() {
+      return source.hashCode() + moduleName.hashCode();
+    }
+    
+    public boolean equals(Object o) {
+      return o instanceof Key 
+          && ((Key) o).source.equals(source)
+          && ((Key) o).moduleName.equals(moduleName);
+    }
+  }
+
+  private final static int PENDING_TIMEOUT = 120000;
+
+  private static Map<Key, Result> resultCache = new HashMap<Key, Result>();
+
+  private static List<URI> allInputFiles;
+  private static List<URI> pendingInputFiles;
+  private static List<URI> currentlyProcessing;
+
+  private Result driverResult = new Result();
+  
+  private String moduleName;
   private String javaOutDir;
   private String javaOutFile;
   private String relPackageName;
   private String mainModuleName;
 
   private String currentGrammarSDF;
-  private String currentGrammarXTBL;
   private String currentGrammarModule;
   private String currentTransSTR;
   private String currentTransModule;
   private String remainingInput;
+  
+  // private Collection<String> dependentFiles;
 
   private List<String> availableSDFImports;
   private List<String> availableSTRImports;
+  
+  private IStrategoTerm sugaredPackageDecl;
+  private List<IStrategoTerm> sugaredImportDecls = new ArrayList<IStrategoTerm>();
+  private List<IStrategoTerm> sugaredTypeOrSugarDecls = new ArrayList<IStrategoTerm>();
+  
+  private IStrategoTerm lastSugaredToplevelDecl;
+  
+  private RetractableTreeBuilder inputTreeBuilder;
+  private JSGLRI sdfParser;
+  private JSGLRI strParser;
+  private HybridInterpreter interp;
+  private JSGLRI parser;
+  private Context sdfContext;
+  private Context makePermissiveContext;
+  private Context extractionContext;
+  private Context strjContext;
+  
+  private String currentTransProg;
   
   /**
    * the next parsing and desugaring uses no cache lookup if skipCache.
    */
   private boolean skipCache = false;
+  
+  private static synchronized Result getResult(String source, String moduleName) {
+    return resultCache.get(new Key(source, moduleName));
+  }
+  
+  private static Result getNonPendingResult(String source, String moduleName) {
+    Key key = new Key(source, moduleName);
+    Result r;
+    int count = 0;
+    synchronized (key) {
+      while (true) {
+        synchronized (resultCache) {
+          r = resultCache.get(key);
+        }
+        
+        if (r != null && !(r instanceof PendingResult))
+          return r;
+        
+        if (count > PENDING_TIMEOUT)
+          throw new IllegalStateException("pending result timed out for module " + moduleName);
+        
+        count += 100;
+        try {
+          key.wait(100);
+        } catch (InterruptedException e) {
+        }
+      }
+    }
+  }
+
+  private static synchronized void putResult(String source, String moduleName, Result result) {
+    resultCache.put(new Key(source, moduleName), result);
+  }
+  
+  public static Result compile(URI sourceFile) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
+    synchronized (currentlyProcessing) {
+      // TODO we need better circular dependency handling
+      if (currentlyProcessing.contains(sourceFile))
+        throw new IllegalStateException("circular processing");
+      currentlyProcessing.add(sourceFile);
+    }
+
+    String source = FileCommands.readFileAsString(sourceFile.getPath());
+    String moduleName = FileCommands.fileName(sourceFile);
+    
+    Result res = compile(source, moduleName, sourceFile.getPath());
+
+    synchronized (currentlyProcessing) {
+      currentlyProcessing.remove(sourceFile);
+    }
+    pendingInputFiles.remove(sourceFile);
+
+    return res;
+  }
+  
+  public static Result compile(String source, String moduleName, String file) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
+    boolean isPending = false;
+    synchronized (Driver.class) {
+      Result result = getResult(source, moduleName);
+      if (result != null && result instanceof PendingResult)
+        isPending = true;
+      else if (result != null && result.isUpToDate())
+        return result;
+      
+      // mark this module as pending 
+      putResult(source, moduleName, PendingResult.instance);
+    }
+    
+    if (isPending && getNonPendingResult(source, moduleName) != null) 
+      return compile(source, moduleName, file);
+    
+    Driver driver = null;
+    try {
+      initialize();
+      driver = new Driver();
+      driver.process(source, moduleName);
+      storeCaches();
+    } finally {
+      putResult(source, moduleName, driver == null ? null : driver.driverResult);
+    }
+    
+    return driver.driverResult;
+  }
   
   /**
    * Process the given Extensible Java file.
@@ -105,41 +215,24 @@ public class Driver{
    *        the file to process.
    * @param outdir
    *        the directory to write the output into.
+   * @throws IOException 
+   * @throws SGLRException 
+   * @throws InvalidParseTableException 
+   * @throws ParseException 
+   * @throws BadTokenException 
+   * @throws TokenExpectedException 
    */
-  private void process(URI source) {
-    log.beginTask("processing", "BEGIN PROCESSING " + source);
+  private void process(String source, String moduleName) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
+    log.beginTask("processing", "BEGIN PROCESSING " + moduleName);
+    boolean success = false;
     try {
-      sourceFile = source;
+      init(moduleName);
 
-      // TODO we need better circular dependency handling
-      if (currentlyProcessing.contains(sourceFile))
-        throw new IllegalStateException("circular processing");
-
-      currentlyProcessing.add(sourceFile);
-
-      javaOutDir = FileCommands.newTempDir();
-      javaOutFile = null; 
-      // FileCommands.createFile(tmpOutdir, relModulePath + ".java");
-
-      mainModuleName = FileCommands.fileName(sourceFile.getPath());
-
-      currentGrammarSDF = Environment.initGrammar;
-      currentGrammarModule = Environment.initGrammarModule;
-      if (Environment.xtblCompilation)
-        currentGrammarXTBL = Environment.initGrammarXTBL;
-
-      currentTransSTR = Environment.initTrans;
-      currentTransModule = Environment.initTransModule;
-
-      remainingInput = FileCommands.newTempFile("sugj-rest");
-      FileCommands.copyFile(sourceFile.getPath(), remainingInput);
-
-      // list of imports that contain SDF extensions
-      availableSDFImports = new ArrayList<String>();
-
-      // list of imports that contain Stratego extensions
-      availableSTRImports = new ArrayList<String>();
-
+      remainingInput = source;
+      
+      driverResult.addEditorService(
+        ATermCommands.atermFromString(
+          "Builders(\"sugarj checking\", [SemanticObserver(Strategy(\"sugarj-analyze\"))])"));
 
       boolean done = false;
       while (!done) {
@@ -148,12 +241,12 @@ public class Driver{
         
         // PARSE the next top-level declaration
         IncrementalParseResult parseResult =
-            parseNextToplevelDeclaration(remainingInput);
-        ATerm parsed = parseResult.getToplevelDecl();
-        FileCommands.writeToFile(remainingInput, parseResult.getRest());
-
-        // ASSIMILATE the parsed top-level declaration
-        ATerm desugared = currentDesugar(parsed);
+            parseNextToplevelDeclaration(remainingInput, true);
+        lastSugaredToplevelDecl = parseResult.getToplevelDecl();
+        remainingInput = parseResult.getRest();
+        
+        // DESUGAR the parsed top-level declaration
+        IStrategoTerm desugared = currentDesugar(lastSugaredToplevelDecl);
         
         // reset cache skipping
         Environment.wocache = wocache;
@@ -164,27 +257,34 @@ public class Driver{
         done = parseResult.parsingFinished();
       }
       
-      if (genJava) {
-        String f = new File(sourceFile).getParent() + sep + mainModuleName + ".java";
-        FileCommands.copyFile(javaOutFile, f);
+      if (Environment.generateJavaFile) {
+        String f = Environment.bin + sep + relPackageNameSep() + mainModuleName + ".java";
+        driverResult.generateFile(f, FileCommands.readFileAsString(javaOutFile));
         log.log("Wrote generated Java file to " + f);
       }
       
       // check final grammar and transformation for errors
-      Environment.wocache = true;
-      checkCurrentGrammar();
-      checkCurrentTransformation();
+      if (!Environment.noChecking) {
+        checkCurrentGrammar();
+        checkCurrentTransformation();
+      }
       
       // COMPILE the generated java file
       compileGeneratedJavaFile();
-      currentlyProcessing.remove(sourceFile);
-      pendingInputFiles.remove(sourceFile);
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } finally {
       
-      log.endTask();
+      driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
+      if (currentTransProg != null)
+        driverResult.registerEditorDesugarings(currentTransProg);
+      
+      success = true;
+    }
+    catch (CommandExecution.ExecutionError e) {
+      // TODO do something more sensible
+      e.printStackTrace();
+      success = false;
+    }
+    finally {
+      log.endTask(success, "done processing " + moduleName, "failed processing " + moduleName);
     }
   }
 
@@ -192,33 +292,48 @@ public class Driver{
     log.beginTask("compilation", "COMPILE the generated java file");
     try {
       List<String> path = new ArrayList<String>(Environment.includePath);
-      path.add(Environment.stdLibDir);
+      path.add(StdLib.stdLibDir.getPath());
       path.add(javaOutDir);
       
-      JavaCommands.javac(javaOutFile, bin, path);
+      driverResult.compileJava(javaOutFile, bin, path, relPackageName);
     } finally {
       log.endTask();
     }
   }
 
-  private IncrementalParseResult parseNextToplevelDeclaration(String filename)
-      throws IOException, ParseException, InvalidParseTableException {
+  private IncrementalParseResult parseNextToplevelDeclaration(String input, boolean recovery)
+      throws IOException, ParseException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     log.beginTask("parsing", "PARSE the next toplevel declaration.");
     try {
-      ATerm remainingInputTerm = currentParse(filename);
+      IStrategoTerm remainingInputTerm = currentParse(input, recovery);
 
       if (remainingInputTerm == null)
         throw new ParseException("could not parse toplevel declaration in:\n"
-            + filename, -1);
+            + input, -1);
 
-      ATerm toplevelDecl = extractTerm(remainingInputTerm, "NextToplevelDeclaration(?, _)");
-      String rest = extractString(remainingInputTerm, "NextToplevelDeclaration(_, ?)");
+      IStrategoTerm toplevelDecl = getApplicationSubterm(remainingInputTerm, "NextToplevelDeclaration", 0);
+      IStrategoTerm restTerm = getApplicationSubterm(remainingInputTerm, "NextToplevelDeclaration", 1);
+      String rest = getString(restTerm);
+
+      if (input.equals(rest))
+        throw new RuntimeException("empty toplevel declaration parse rule");
+      
+      try {
+        if (!rest.isEmpty())
+          inputTreeBuilder.retract(restTerm);
+      } catch (Throwable t) {
+        t.printStackTrace();
+      }
       
       if (toplevelDecl == null || rest == null)
         throw new ParseException(
             "could not parse next toplevel declaration in:\n"
                 + remainingInputTerm.toString(),
             -1);
+      
+      String tmpFile = FileCommands.newTempFile("aterm");
+      FileCommands.writeToFile(tmpFile, toplevelDecl.toString());
+      log.log("next toplevel declaration parsed: " + tmpFile);
 
       return new IncrementalParseResult(toplevelDecl, rest);
     } finally {
@@ -226,120 +341,209 @@ public class Driver{
     }
   }
 
-  private void processToplevelDeclaration(ATerm toplevelDecl)
-      throws IOException, ClassNotFoundException, InvalidParseTableException,
-      ParseException {
-    if (match(toplevelDecl, "PackageDec(_, _)"))
-      processPackageDec(toplevelDecl);
-    else {
-      if (javaOutFile == null)
-        javaOutFile = javaOutDir + sep + relPackageNameSep() + mainModuleName + ".java";
-      
-      if (match(toplevelDecl, "TypeImportDec(_)") || match(toplevelDecl, "TypeImportOnDemandDec(_)")) {
-        if (!Environment.atomicImportParsing)
-          processImportDec(toplevelDecl);
-        else 
-          processImportDecs(toplevelDecl);
-      }
-      else if (match(toplevelDecl, "JavaTypeDec(_)"))
-        processJavaTypeDec(toplevelDecl);
-      else if (match(toplevelDecl, "SugarDec(_,_)"))
-        processSugarDec(toplevelDecl);
-      else
-        throw new ParseException("unexpected input at toplevel:\n"
-            + "toplevel declaration: " + toplevelDecl, -1);
-    }
-  }
-
-  private ATerm currentParse(String remainingInput) throws IOException,
-      InvalidParseTableException {
-    // recompile the current grammar definition
-    String currentGrammarTBL;
-    
-    if (!Environment.xtblCompilation)
-      currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule);
-    else
-      currentGrammarTBL = SDFCommands.finalizeXtbl(currentGrammarXTBL);
-
-    String remainingInputParsed = FileCommands.newTempFile("aterm");
-
-    // read next toplevel decl and stop if that fails
-    if (!SDFCommands.parseImplode(
-        currentGrammarTBL,
-        remainingInput,
-        remainingInputParsed,
-        "NextToplevelDeclaration",
-        false))
-      return null;
-
-    ATerm remainingInputTerm = atermFromFile(remainingInputParsed);
-    FileCommands.delete(remainingInputParsed);
-
-    return remainingInputTerm;
-  }
-
-  private ATerm currentDesugar(ATerm term) throws IOException,
-      InvalidParseTableException {
-    // assimilate toplevelDec using current transformation
+  
+  private void processEditorServicesDec(IStrategoTerm toplevelDecl) throws IOException {
     log.beginTask(
-        "desugaring",
-        "DESUGAR the current toplevel declaration.");
+        "processing",
+        "PROCESS the desugared editor services declaration.");
     try {
-      String toplevelIn = FileCommands.newTempFile("aterm");
-      String toplevelOut = FileCommands.newTempFile("aterm");
+      sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      
+      String extName = null;
+      String fullExtName = null;
+      boolean isPublic = false;
 
-      String currentTransProg = STRCommands.compile(currentTransSTR, "main");
+      IStrategoTerm head = getApplicationSubterm(toplevelDecl, "EditorServicesDec", 0);
+      IStrategoTerm body= getApplicationSubterm(toplevelDecl, "EditorServicesDec", 1);
+      
+      log.beginTask("Extracting name and accessibility of the editor services.");
+      try {
+        extName =
+          SDFCommands.prettyPrintJava(
+          getApplicationSubterm(head, "EditorServicesDecHead", 1), interp);    
+        
+        IStrategoTerm mods = getApplicationSubterm(head, "EditorServicesDecHead", 0);
+        
+        for (IStrategoTerm t : getList(mods))
+          if (isApplication(t, "Public"))
+          {
+            isPublic = true;
+            break;
+          }
+        
+        fullExtName = relPackageNameSep() + extName;
 
-      atermToFile(term, toplevelIn);
-      STRCommands.assimilate(currentTransProg, toplevelIn, toplevelOut);
-      term = atermFromFile(toplevelOut);
+        log.log("The name of the editor services is '" + extName + "'.");
+        log.log("The full name of the editor services is '" + fullExtName + "'.");
 
-      FileCommands.delete(toplevelIn);
-      FileCommands.delete(toplevelOut);
+        if (extName.equals(mainModuleName))
+          driverResult.appendToFile(
+              javaOutFile,
+              "/* auto-generated dummy class as replacement\n" + 
+              " * for extracted editor services.\n" +
+              " */\n" +
+              (isPublic ? "public " : "") + "class " + mainModuleName + "{}\n");
 
-      return term;
-    } finally {
-      log.endTask();
-    }
-  }
+        
 
-  private void processPackageDec(ATerm toplevelDecl) throws IOException {
-    log.beginTask("processing", "PROCESS the desugared package declaration.");
-    try {
-      String packageName =
-          SDFCommands.prettyPrintJavaTerm(extractTerm(
-              toplevelDecl,
-              "PackageDec(_, ?)"));
-
-      log.log("The Java package name is '" + packageName + "'.");
-
-      relPackageName = getRelativeModulePath(packageName);
-
-      log.log("The SDF / Stratego package name is '" + relPackageName + "'.");
-
-      javaOutFile =
-          javaOutDir + sep + relPackageNameSep() + mainModuleName + ".java";
-      FileCommands.createFile(javaOutFile);
-
-      FileCommands.appendToFile(
-          javaOutFile,
-          SDFCommands.prettyPrintJavaTerm(toplevelDecl) + "\n");
+        if (isPublic)
+          log.log("The editor services is public.");
+        else
+          log.log("The editor services is not public.");
+      
+        log.log("The body of the editor services is:");
+        log.log(body.toString());
+        
+        IStrategoTerm services = ATermCommands.getApplicationSubterm(body, "EditorServicesBody", 0);
+        
+        if (!ATermCommands.isList(services))
+          throw new IllegalStateException("editor services are not a list: " + services);
+        
+        List<IStrategoTerm> editorServices = ATermCommands.getList(services);
+        if (currentTransProg != null)
+          editorServices = ATermCommands.registerSemanticProvider(editorServices, currentTransProg);
+  
+        String editorServicesFile = bin + sep + relPackageNameSep() + extName + ".serv";
+        FileCommands.createFile(editorServicesFile);
+  
+        log.log("writing editor services to " + editorServicesFile);
+        
+        StringBuffer buf = new StringBuffer();
+        
+        for (IStrategoTerm service : driverResult.getEditorServices())
+          buf.append(service).append('\n');
+        
+        for (IStrategoTerm service : editorServices) {
+          driverResult.addEditorService(service);
+          buf.append(service).append('\n');
+        }
+        
+        driverResult.generateFile(editorServicesFile, buf.toString());
+      } finally {
+        log.endTask();
+      }
     } finally {
       log.endTask();
     }
   }
   
-  private void processImportDecs(ATerm toplevelDecl) throws IOException, ClassNotFoundException, ParseException, InvalidParseTableException {
-    List<ATerm> pendingImports = new ArrayList<ATerm>();
+  
+  private void processToplevelDeclaration(IStrategoTerm toplevelDecl)
+      throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
+    if (isApplication(toplevelDecl, "PackageDec"))
+      processPackageDec(toplevelDecl);
+    else {
+      if (javaOutFile == null)
+        javaOutFile = javaOutDir + sep + relPackageNameSep() + mainModuleName + ".java";
+      
+      try {
+        if (isApplication(toplevelDecl, "TypeImportDec") || isApplication(toplevelDecl, "TypeImportOnDemandDec")) {
+          if (!Environment.atomicImportParsing)
+            processImportDec(toplevelDecl);
+          else 
+            processImportDecs(toplevelDecl);
+        }
+        else if (isApplication(toplevelDecl, "JavaTypeDec"))
+          processJavaTypeDec(toplevelDecl);
+        else if (isApplication(toplevelDecl, "SugarDec"))
+          processSugarDec(toplevelDecl);
+        else if (isApplication(toplevelDecl, "EditorServicesDec")) 
+          processEditorServicesDec(toplevelDecl);
+        else if (ATermCommands.isList(toplevelDecl))
+          /* 
+           * Desugarings may generate lists of toplevel declarations. These declarations,
+           * however, may not depend on one another.
+           */
+          for (IStrategoTerm term : ATermCommands.getList(toplevelDecl))
+            processToplevelDeclaration(term);
+        else
+          throw new IllegalArgumentException("unexpected toplevel declaration, desugaring probably failed: " + toplevelDecl.toString(5));
+      } catch (Exception e) {
+        ATermCommands.setErrorMessage(toplevelDecl, e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString());
+        sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      }
+    }
+  }
+
+  private IStrategoTerm currentParse(String remainingInput, boolean recovery) throws IOException,
+      InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+    // recompile the current grammar definition
+    ParseTable currentGrammarTBL;
+    
+    currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfContext, makePermissiveContext);
+
+    IStrategoTerm parseResult = null;
+
+    parser.setUseRecovery(recovery);
+    
+    // read next toplevel decl and stop if that fails
+    try {
+      parseResult = SDFCommands.parseImplode(
+          currentGrammarTBL,
+          remainingInput,
+          "NextToplevelDeclaration",
+          false,
+          inputTreeBuilder,
+          parser);
+    } finally {
+      if (recovery)
+        driverResult.addBadTokenExceptions(parser.getCollectedErrors());
+    }
+    
+    return parseResult;
+  }
+
+  private IStrategoTerm currentDesugar(IStrategoTerm term) throws IOException,
+      InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+    // assimilate toplevelDec using current transformation
+
+    log.beginTask(
+        "desugaring",
+        "DESUGAR the current toplevel declaration.");
+    try {
+      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(), strParser, strjContext);
+
+      return STRCommands.assimilate(currentTransProg, term, interp);
+    } finally {
+      log.endTask();
+    }
+  }
+
+  private void processPackageDec(IStrategoTerm toplevelDecl) throws IOException {
+    log.beginTask("processing", "PROCESS the desugared package declaration.");
+    try {
+      sugaredPackageDecl = lastSugaredToplevelDecl;
+      
+      String packageName =
+          SDFCommands.prettyPrintJava(
+          getApplicationSubterm(toplevelDecl, "PackageDec", 1), interp);
+
+      log.log("The Java package name is '" + packageName + "'.");
+
+      relPackageName = FileCommands.getRelativeModulePath(packageName);
+
+      log.log("The SDF / Stratego package name is '" + relPackageName + "'.");
+
+      javaOutFile =
+          javaOutDir + sep + relPackageNameSep() + mainModuleName + ".java";
+      
+      driverResult.generateFile(javaOutFile, SDFCommands.prettyPrintJava(toplevelDecl, interp) + "\n");
+    } finally {
+      log.endTask();
+    }
+  }
+  
+  private void processImportDecs(IStrategoTerm toplevelDecl) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
+    List<IStrategoTerm> pendingImports = new ArrayList<IStrategoTerm>();
     pendingImports.add(toplevelDecl);
     
     while (true) {
       IncrementalParseResult res = null;
-      ATerm term = null;
+      IStrategoTerm term = null;
       
       try {
         log.beginSilent();
-        res = parseNextToplevelDeclaration(remainingInput);
+        res = parseNextToplevelDeclaration(remainingInput, false);
         term = res.getToplevelDecl();
       }
       catch (Throwable t) { }
@@ -349,291 +553,120 @@ public class Driver{
     
       if (res != null &&
           term != null &&
-          (match(term, "TypeImportDec(_)") ||
-           match(term, "TypeImportOnDemandDec(_)"))) {
-        FileCommands.writeToFile(remainingInput, res.getRest());
+          (isApplication(term, "TypeImportDec") ||
+           isApplication(term, "TypeImportOnDemandDec"))) {
+        remainingInput = res.getRest();
         pendingImports.add(term);
       }
-      else
+      else {
+        if (term != null)
+          inputTreeBuilder.retract(term);
         break;
+      }
     }
     
-    for (ATerm pendingImport : pendingImports)
+    for (IStrategoTerm pendingImport : pendingImports) {
+      lastSugaredToplevelDecl = pendingImport;
       processImportDec(pendingImport);
+    }
   }
 
-  private void processImportDec(ATerm toplevelDecl) throws IOException,
-      ClassNotFoundException, ParseException, InvalidParseTableException {
+  private void processImportDec(IStrategoTerm toplevelDecl) {
+    
+    sugaredImportDecls.add(lastSugaredToplevelDecl);
     
     if (javaOutFile == null)
       javaOutFile = javaOutDir + sep + mainModuleName + ".java";
     
     log.beginTask("processing", "PROCESS the desugared import declaration.");
     try {
-      String importModule = extractImportedModuleName(toplevelDecl);
-
-      log.beginTask("Generate Java code");
-      try {
-        FileCommands.appendToFile(
-            javaOutFile,
-            SDFCommands.prettyPrintJavaTerm(toplevelDecl) + "\n");
-      } finally {
-        log.endTask();
-      }
+      String importModule = ModuleSystemCommands.extractImportedModuleName(toplevelDecl, interp);
 
       // TODO handle import declarations with asterisks, e.g. import foo.*;
       
-      String importModuleRelativePath = getRelativeModulePath(importModule);
-      boolean isStdLibModule = importModuleRelativePath.startsWith("org/sugarj/"); 
+      String modulePath = FileCommands.getRelativeModulePath(importModule);
+  
+      boolean success = processImport(modulePath, toplevelDecl);
       
-      // indicates whether a sugar is imported
-      boolean newSyntax = false;
-
-      List<URI> files = searchClassFiles(importModuleRelativePath, isStdLibModule);
-
-      URI importModuleSourceFile = null;
-      importModuleSourceFile = searchSugjFile(importModuleRelativePath, false);
-      if (importModuleSourceFile == null)
-        importModuleSourceFile = searchJavaFile(importModuleRelativePath, false);
-
-      if (// the imported module was given as input by the user
-          importModuleSourceFile != null && pendingInputFiles.contains(importModuleSourceFile) ||
-          // class file could not be found
-          files.isEmpty() && !isStdLibModule && !importModuleRelativePath.endsWith("*") && importModuleSourceFile != null) {
-
-        log.log("Need to compile the imported module first ; processing it now.");
-        new Driver().process(importModuleSourceFile);
-        log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
-        
-        // try again
-        files = searchClassFiles(importModuleRelativePath, isStdLibModule);
-      }
+      URI sourceFile = ModuleSystemCommands.locateSourceFile(modulePath);
       
-      if (!files.isEmpty())
-        log.log("Found imported module on the class path.");
-      else
-        throw new ClassNotFoundException("could not find imported module "
-            + importModule);
-      
-      
-      for (URI importModuleClassFileURI : files)
-      {
-        URL importModuleClassFile = importModuleClassFileURI.toURL();
+      if (sourceFile != null &&
+          !modulePath.startsWith("org/sugarj") &&
+          !modulePath.endsWith("*")) {
         
-        String thisRelativePath = importModuleRelativePath;
-        
-        if (thisRelativePath.endsWith("*"))
-        {
-          thisRelativePath = thisRelativePath.substring(0, thisRelativePath.length() - 1);
-          thisRelativePath += FileCommands.fileName(importModuleClassFile.getPath());
-        }
-        
-	      URL importModuleSDFFile =
-	        new URL(importModuleClassFile.getProtocol() + ":" +
-	                importModuleClassFile.getFile().substring(0, importModuleClassFile.getPath().length() - 5) + "sdf"); 
-	      //searchSdfFile(importModuleRelativePath, isStdLibModule);
+        URI classUri = ModuleSystemCommands.searchFile(modulePath, ".class");
+        if (!success ||
+            pendingInputFiles.contains(sourceFile) ||
+            (classUri != null && new File(sourceFile).lastModified() > new File(classUri).lastModified())) {
 
-	      URL importModuleXTBLFile =
-          new URL(importModuleClassFile.getProtocol() + ":" +
-                  importModuleClassFile.getFile().substring(0, importModuleClassFile.getPath().length() - 5) + "xtbl");
-	      
-	      URL importModuleSTRFile = 
-	        new URL(importModuleClassFile.getProtocol() + ":" +
-	                importModuleClassFile.getFile().substring(0, importModuleClassFile.getPath().length() - 5) + "str");
-	      //searchStrFile(importModuleRelativePath, isStdLibModule);
-	
-	      
-	      
-	      if (new File(importModuleSDFFile.getPath()).exists()) {
-	        newSyntax = true;
-	        
-	        log.beginTask("Incorporation", "Incorporate the imported grammar " + thisRelativePath);
-	        try {
-	          // build extension of current grammar
-	          String newGrammarName = 
-	            FileCommands.hashFileName("sugarj", currentGrammarModule + thisRelativePath);
-	            
-	
-	          String newGrammar =
-	              Environment.tmpDir + sep + newGrammarName + ".sdf";
-	
-	          FileCommands.writeToFile(newGrammar, "module " + newGrammarName
-	              + "\n" + "imports " + currentGrammarModule + "\n" + "        "
-	              + thisRelativePath);
-	
-	          currentGrammarModule = newGrammarName;
-	          currentGrammarSDF = newGrammar;
-	
-	          availableSDFImports.add(thisRelativePath);
-	        } finally {
-	          log.endTask();
-	        }
-	      }
-	      
-	      if (Environment.xtblCompilation && 
-	          new File(importModuleXTBLFile.getPath()).exists() &&
-	          !isStdLibModule) {
-          newSyntax = true;
+          log.log("Need to compile the imported module first ; processing it now.");
+          compile(sourceFile);
+          log.log("CONTINUE PROCESSING'" + moduleName + "'.");
           
-          log.beginTask("Incorporation", "Incorporate the imported pre-compiled grammar " + thisRelativePath);
-          try {
-            String newXtbl = FileCommands.newTempFile("xtbl");
-            SDFCommands.composeXtbl(currentGrammarXTBL, importModuleXTBLFile.getPath(), newXtbl);
-            currentGrammarXTBL = newXtbl;
-          } finally {
-            log.endTask();
-          }
+          // try again
+          success = processImport(modulePath, toplevelDecl);
         }
-	      
-	      
-	
-	      if (new File(importModuleSTRFile.getPath()).exists()) {
-	        newSyntax = true;
-	        
-	        log.beginTask(
-	            "Incorporation",
-	            "Incorporate the imported desugaring rules " + thisRelativePath);
-	        try {
-	          // build extension of current transformation
-	          String newTransName =
-	            FileCommands.hashFileName("sugarj", currentTransModule + thisRelativePath);
-	
-	          String newTrans = Environment.tmpDir + sep + newTransName + ".str";
-	
-	          FileCommands.writeToFile(newTrans, "module " + newTransName + "\n"
-	              + "imports " + currentTransModule + "\n" + "        "
-	              + thisRelativePath);
-	
-	          currentTransModule = newTransName;
-	          currentTransSTR = newTrans;
-	
-	          availableSTRImports.add(thisRelativePath);
-	
-	          /*
-	           * do not delete any files here, since they are still
-	           * imported into the new grammar
-	           */
-	        } finally {
-	          log.endTask();
-	        }
-	      }
-	      
-	      if (importsChanged && newSyntax || importModuleSourceFile != null && allInputFiles.contains(importModuleSourceFile))
-	        skipCache = true;
       }
       
+      if (!success)
+        ATermCommands.setErrorMessage(toplevelDecl, "module not found " + importModule);
+      
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     } finally {
       log.endTask();
     }
   }
+  
+  private boolean processImport(String modulePath, IStrategoTerm importTerm) throws IOException {
+    boolean success = false;
+    
+    success |= ModuleSystemCommands.importClass(
+        modulePath, 
+        importTerm, 
+        javaOutFile,
+        interp, 
+        driverResult);
 
-  private String extractImportedModuleName(ATerm toplevelDecl) throws IOException {
-    String name = null;
-    log.beginTask("Extracting", "Extract name of imported module");
-    try {
-      if (match(toplevelDecl, "TypeImportDec(_)"))
-        name = extractJava(toplevelDecl, "TypeImportDec(?)");
-      
-      if (match(toplevelDecl, "TypeImportOnDemandDec(_)"))
-        name = extractJava(toplevelDecl, "TypeImportOnDemandDec(?)") + ".*";
-    } finally {
-      log.endTask(name);
-    }
-    return name;
-  }
-
-
-  private URI searchFile(String what, String where, String extension, String relativePath, List<String> searchPath, boolean searchStdLib) throws MalformedURLException {
-    URI result = null;
-    log.beginTask("Searching", "Search for " + what);
-    try {
-      ClassLoader cl = createClassLoader(where, searchPath, searchStdLib);
-      URL url = cl.getResource(relativePath + extension);
-      if (url != null)
-        result = url.toURI();
-    } catch (URISyntaxException e) {
-      e.printStackTrace();
-    } finally {
-      log.endTask(result != null);
+    String grammarModule = ModuleSystemCommands.importSdf(
+        modulePath, 
+        currentGrammarModule, 
+        availableSDFImports, 
+        driverResult);
+    if (grammarModule != null) {
+      success = true;
+      currentGrammarSDF = grammarModule;
+      currentGrammarModule = FileCommands.fileName(grammarModule);
     }
     
-    return result;
-  }
-  
-//  private URL searchClassFile(String relativePath, boolean searchStdLib) throws MalformedURLException {
-//    return searchFile("class file", "compiled files", ".class", relativePath, includePath, searchStdLib);
-//  }
-  
-  private List<URI> searchClassFiles(String relativePath, boolean searchStdLib) throws MalformedURLException {
-    List<URI> res = new ArrayList<URI>();
-    
-    URI classURL = searchFile("class file", "compiled files", ".class", relativePath, includePath, searchStdLib);
-    
-    if (classURL != null)
-    {
-      res.add(classURL);
-      return res;
+    String transModule = ModuleSystemCommands.importStratego(
+        modulePath, 
+        currentTransModule, 
+        availableSTRImports, 
+        driverResult);
+    if (transModule != null) {
+      success = true;
+      currentTransSTR = transModule;
+      currentTransModule = FileCommands.fileName(transModule);
     }
     
-    List<String> path = new ArrayList<String>(includePath);
-    path.add(Environment.stdLibDir);
+    success |= ModuleSystemCommands.importEditorServices(modulePath, driverResult);
     
-    if (relativePath.endsWith("/*"))
-      return ResourceList.getResources(relativePath, path, "class");
-    
-    return res;
+    return success;
   }
 
-  private URI searchJavaFile(String relativePath, boolean searchStdLib) throws MalformedURLException {
-    return searchFile("java file", "source files", ".java", relativePath, Environment.srcPath, searchStdLib);
-  }
-
-  private URI searchSugjFile(String relativePath, boolean searchStdLib) throws MalformedURLException {
-    return searchFile("extensible java file", "source files", ".sugj", relativePath, Environment.srcPath, searchStdLib);
-  }
-
-//  private URL searchSdfFile(String relativePath, boolean searchStdLib) throws MalformedURLException {
-//    return searchFile("compiled grammar", "compiled files", SDF_OUTPUT_EXTENSION, relativePath, includePath, searchStdLib);
-//  }
-
-//  private URL searchStrFile(String relativePath, boolean searchStdLib) throws MalformedURLException {
-//    return searchFile("compiled desugaring", "compiled files", STR_OUTPUT_EXTENSION, relativePath, includePath, searchStdLib);
-//  }
-  
-  private ClassLoader createClassLoader(String what, List<String> path, boolean searchStdLib) throws MalformedURLException {
-    // log.beginTask("Creating", "Create a class loader for " + what);
-    try {
-      URL[] urls = new URL[path.size() + 1];
-      
-      int i = 0;
-      for (String include : path)
-        urls[i++] = new File(include).toURI().toURL();
-
-      urls[urls.length - 1] = new File(Environment.stdLibDir).toURI().toURL();
-      
-      /*
-       * we use 'null' as the parent class loader purposely, so
-       * that only the given urls are searched.
-       */
-      return new URLClassLoader(urls, null);
-    } finally {
-      // log.endTask();
-    }
-  }
-  
-  private void processJavaTypeDec(ATerm toplevelDecl) throws IOException {
+  private void processJavaTypeDec(IStrategoTerm toplevelDecl) throws IOException {
     log.beginTask(
         "processing",
         "PROCESS the desugared Java type declaration.");
     try {
+      
+      sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      
       log.beginTask("Generate Java code.");
       try {
-        FileCommands.appendToFile(
-            javaOutFile,
-            SDFCommands.prettyPrintJavaTerm(extractTerm(
-                toplevelDecl,
-                "JavaTypeDec(?)"))
-                + "\n");
+        IStrategoTerm dec = getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0);
+        driverResult.appendToFile(javaOutFile, SDFCommands.prettyPrintJava(dec, interp) + "\n");
       } finally {
         log.endTask();
       }
@@ -642,42 +675,53 @@ public class Driver{
     }
   }
 
-  private void processSugarDec(ATerm toplevelDecl) throws IOException,
-      InvalidParseTableException {
+  private void processSugarDec(IStrategoTerm toplevelDecl) throws IOException,
+      InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     log.beginTask(
         "processing",
         "PROCESS the desugared sugar declaration.");
     try {
+      sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      
       boolean isNative;
       String extName = null;
       String fullExtName = null;
       boolean isPublic = false;
 
+      IStrategoTerm head = getApplicationSubterm(toplevelDecl, "SugarDec", 0);
+      IStrategoTerm body= getApplicationSubterm(toplevelDecl, "SugarDec", 1);
+      
       log.beginTask("Extracting name and accessibility of the sugar.");
       try {
-        isNative = !match(toplevelDecl, "SugarDec(SugarDecHead(_,_), _)");
+        isNative = isApplication(head, "NativeSugarDecHead");
         
         if (isNative) {
           extName =
-            SDFCommands.prettyPrintJavaTerm(extractTerm(
-                toplevelDecl,
-                "SugarDec(NativeSugarDecHead(_, _, ?), _)"));
+            SDFCommands.prettyPrintJava(
+            getApplicationSubterm(head, "NativeSugarDecHead", 2), interp);
           
-          isPublic =
-            match(
-                toplevelDecl,
-                "SugarDec(NativeSugarDecHead([Public], _, _) ,_)");
+          IStrategoTerm mods = getApplicationSubterm(head, "NativeSugarDecHead", 0);
+          
+          for (IStrategoTerm t : getList(mods))
+            if (isApplication(t, "Public"))
+            {
+              isPublic = true;
+              break;
+            }
         }
         else {
           extName =
-            SDFCommands.prettyPrintJavaTerm(extractTerm(
-                toplevelDecl,
-                "SugarDec(SugarDecHead(_, ?), _)"));
+            SDFCommands.prettyPrintJava(
+            getApplicationSubterm(head, "SugarDecHead", 1), interp);    
           
-          isPublic =
-            match(
-                toplevelDecl,
-                "SugarDec(SugarDecHead([Public], _) ,_)");
+          IStrategoTerm mods = getApplicationSubterm(head, "SugarDecHead", 0);
+          
+          for (IStrategoTerm t : getList(mods))
+            if (isApplication(t, "Public"))
+            {
+              isPublic = true;
+              break;
+            }
         }
         
         
@@ -686,16 +730,6 @@ public class Driver{
 
         log.log("The name of the sugar is '" + extName + "'.");
         log.log("The full name of the sugar is '" + fullExtName + "'.");
-
-        if (extName.equals(mainModuleName))
-          FileCommands.appendToFile(
-              javaOutFile,
-              "/* auto-generated dummy class as replacement\n" + 
-              " * for extracted sugar.\n" +
-              " */\n" +
-              (isPublic ? "public " : "") + "class " + mainModuleName + "{}\n");
-
-        
 
         if (isPublic)
           log.log("The sugar is public.");
@@ -716,180 +750,200 @@ public class Driver{
           bin + sep + relPackageNameSep()
               + extName + ".sdf";
   
-      FileCommands.createFile(sdfExtension);
-  
       String strExtension =
           bin + sep + relPackageNameSep()
               + extName + ".str";
-  
-      FileCommands.createFile(strExtension);
-
-      String sdfImports = "imports " + printListSeparated(availableSDFImports, " ") + "\n";
-      String strImports = "imports " + printListSeparated(availableSTRImports, " ") + "\n";
       
-      if (Environment.xtblCompilation)
-        sdfImports = "";
+      FileCommands.delete(sdfExtension);
+      FileCommands.delete(strExtension);
+
+      String sdfImports = " imports " + StringCommands.printListSeparated(availableSDFImports, " ") + "\n";
+      String strImports = " imports " + StringCommands.printListSeparated(availableSTRImports, " ") + "\n";
       
       if (isNative) {
-        String nativeModule = extractTerm(toplevelDecl, "SugarDec(_,NativeSugarBody(?))").toString();
+        String nativeModule = getString(getApplicationSubterm(body, "NativeSugarBody", 0)); 
         
         if (nativeModule.length() > 1)
             // remove quotes
           nativeModule = nativeModule.substring(1, nativeModule.length() - 1);
-            
+          
+        if (FileCommands.exists(ModuleSystemCommands.searchFile(nativeModule, ".sdf"))) {
           availableSDFImports.add(nativeModule);
+          driverResult.generateFile(
+              sdfExtension, 
+              "module " + fullExtName + "\n" 
+              + sdfImports 
+              + "imports " + nativeModule);
+        }
+
+        if (FileCommands.exists(ModuleSystemCommands.searchFile(nativeModule, ".str"))) {
           availableSTRImports.add(nativeModule);
-        
-        FileCommands.writeToFile(
-            sdfExtension, 
-            "module " + fullExtName + "\n" 
-            + sdfImports 
-            + "imports " + nativeModule);
-        
-        FileCommands.writeToFile(
-            strExtension, 
-            "module " + fullExtName + "\n" 
-            + strImports
-            + "imports " + nativeModule);
+          driverResult.generateFile(
+              strExtension, 
+              "module " + fullExtName + "\n" 
+              + strImports
+              + "imports " + nativeModule);
+        }
       }
       else {
         // this is a list of SDF and Stratego statements
-        ATerm body =
-            extractTerm(toplevelDecl, "SugarDec(_,SugarBody(?))");
-        String bodyFile = FileCommands.newTempFile("aterm");
-        atermToFile(body, bodyFile);
+        IStrategoTerm sugarBody = getApplicationSubterm(body, "SugarBody", 0);
   
-        String sdfExtractTmp = FileCommands.newTempFile("sdf");
-        String sdfExtract = FileCommands.newTempFile("sdf");
-        String strExtract = FileCommands.newTempFile("str");
-  
-        extractSDF(bodyFile, sdfExtractTmp);
-        fixSDF(sdfExtractTmp, sdfExtract);
-        extractSTR(bodyFile, strExtract);
-  
-        FileCommands.delete(bodyFile);
-        FileCommands.delete(sdfExtractTmp);
+        IStrategoTerm sdfExtract = fixSDF(extractSDF(sugarBody, extractionContext), interp);
+        IStrategoTerm strExtract = extractSTR(sugarBody, extractionContext);
         
-        SDFCommands.prettyPrintSDF(sdfExtract, sdfExtension);
-
+        
         String sdfExtensionHead =
-          "module " + fullExtName + "\n" + sdfImports
-                + (isPublic ? "exports " : "hiddens ") + "\n";
+          "module " + fullExtName + "\n" 
+          + sdfImports
+          + (isPublic ? "exports " : "hiddens ") + "\n"
+          + "  (/)" + "\n";
 
-        String sdfExtensionContent = FileCommands.readFileAsString(sdfExtension);
-        
-        FileCommands.writeToFile(sdfExtension, sdfExtensionHead
-            + sdfExtensionContent);
+        String sdfExtensionContent = SDFCommands.prettyPrintSDF(sdfExtract, interp);
 
-        String strExtensionTerm = FileCommands.newTempFile("aterm");
-
-        FileCommands.writeToFile(strExtensionTerm, "Module(\"" + fullExtName
-            + "\"" + ", " + atermFromFile(strExtract) + ")" + "\n");
-
-        SDFCommands.prettyPrintSTR(strExtensionTerm, strExtension);
-
-        FileCommands.insert(strImports, strExtension, 2);
-        
+        String sdfSource = SDFCommands.makePermissiveSdf(sdfExtensionHead + sdfExtensionContent, makePermissiveContext);
+        driverResult.generateFile(sdfExtension, sdfSource);
         availableSDFImports.add(fullExtName);
+        
+        if (CommandExecution.FULL_COMMAND_LINE)
+          log.log("Wrote SDF file to '" + new File(sdfExtension).getAbsolutePath() + "'.");
+        
+        String strExtensionTerm = 
+            "Module(" + "\"" + fullExtName+ "\"" + ", " 
+                      + strExtract + ")" + "\n";
+
+        String strExtensionContent = SDFCommands.prettyPrintSTR(ATermCommands.atermFromString(strExtensionTerm), interp);
+        
+        int index = strExtensionContent.indexOf('\n');
+        if (index >= 0)
+          strExtensionContent =
+            strExtensionContent.substring(0, index + 1) + "\n"
+            + strImports + "\n"
+            + strExtensionContent.substring(index + 1);
+        else
+          strExtensionContent += strImports;
+          
+        
+        driverResult.generateFile(strExtension, strExtensionContent);
         availableSTRImports.add(fullExtName);
+        
+        if (CommandExecution.FULL_COMMAND_LINE)
+          log.log("Wrote Stratego file to '" + new File(strExtension).getAbsolutePath() + "'.");
       }
 
-
-      if (CommandExecution.FULL_COMMAND_LINE) {
-        System.out.println("  Wrote SDF file to '" + sdfExtension + "'.");
-        System.out.println("  Wrote Stratego file to '" + strExtension + "'.");
-      }
-      
-      String currentGrammarName =
-        FileCommands.hashFileName("sugarj", currentGrammarModule + fullExtName);
-
-      currentGrammarSDF =
+      if (FileCommands.exists(sdfExtension)) {
+        String currentGrammarName =
+          FileCommands.hashFileName("sugarj", currentGrammarModule + fullExtName);
+        currentGrammarSDF =
           Environment.tmpDir + sep + currentGrammarName + ".sdf";
-
-      FileCommands.writeToFile(currentGrammarSDF, "module "
-          + currentGrammarName + "\n" + "imports " + currentGrammarModule
-          + "\n" + "        " + fullExtName);
-      currentGrammarModule = currentGrammarName;
-
-      if (Environment.xtblCompilation) {
-        String xtblExtension =
-          bin + sep + relPackageNameSep()
-              + extName + ".xtbl";
-        
-        SDFCommands.compileXtbl(sdfExtension, xtblExtension, fullExtName);
-        
-        String newXtbl = FileCommands.newTempFile("xtbl");
-        SDFCommands.composeXtbl(currentGrammarXTBL, xtblExtension, newXtbl);
-        currentGrammarXTBL = newXtbl;
+        driverResult.generateFile(currentGrammarSDF, 
+            "module " + currentGrammarName + "\n"
+            + "imports " + currentGrammarModule + "\n" 
+            + "        " + fullExtName);
+        currentGrammarModule = currentGrammarName;
+        driverResult.addFileDependency(sdfExtension);
       }
 
-      String currentTransName =
-        FileCommands.hashFileName("sugarj", currentTransModule + fullExtName);
+      if (FileCommands.exists(strExtension)) {
+        String currentTransName =
+          FileCommands.hashFileName("sugarj", currentTransModule + fullExtName);
+        currentTransSTR = Environment.tmpDir + sep + currentTransName + ".str";
+        driverResult.generateFile(currentTransSTR,
+            "module " + currentTransName + "\n" 
+            + "imports " + currentTransModule + "\n"
+            + "        " + fullExtName);
+        currentTransModule = currentTransName;
+        driverResult.addFileDependency(strExtension);
+      }
 
-      currentTransSTR = Environment.tmpDir + sep + currentTransName + ".str";
-
-      FileCommands.writeToFile(currentTransSTR, "module " + currentTransName
-          + "\n" + "imports " + currentTransModule + "\n" + "        "
-          + fullExtName);
-      currentTransModule = currentTransName;
-      
-      skipCache = true;
     } finally {
       log.endTask();
     }
   }
 
-  private void checkCurrentGrammar() throws IOException, InvalidParseTableException{
-    if (Environment.xtblCompilation)
-      // we already checked this when separately compiling the parse table
-      return;
-    
+  private void checkCurrentGrammar() throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     log.beginTask("checking grammar", "CHECK current grammar");
     
     try {
-      SDFCommands.check(currentGrammarSDF, currentGrammarModule);
+      SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfContext, makePermissiveContext);
     } finally {
       log.endTask();
     }
   }
   
-  private void checkCurrentTransformation() throws IOException, InvalidParseTableException{
+  private void checkCurrentTransformation() throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException{
     log.beginTask("checking transformation", "CHECK current transformation");
     
     try {
-      STRCommands.compile(currentTransSTR, "main");
+      STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(), strParser, strjContext);
     } finally {
       log.endTask();
     }
+  }
+  
+  private static void initialize() throws IOException {
+    Environment.init();
+    
+    if (Environment.cacheDir != null)
+      FileCommands.createDir(Environment.cacheDir);
+    
+    FileCommands.createDir(Environment.bin);
+    
+    initializeCaches();
+    
+    allInputFiles = new ArrayList<URI>();
+    pendingInputFiles = new ArrayList<URI>();
+    currentlyProcessing = new ArrayList<URI>();
+  }
+  
+  private void init(String moduleName) throws FileNotFoundException, IOException, InvalidParseTableException {
+    this.moduleName = moduleName;
+
+    javaOutDir = FileCommands.newTempDir();
+    javaOutFile = null; 
+    // FileCommands.createFile(tmpOutdir, relModulePath + ".java");
+
+    mainModuleName = moduleName;
+
+    currentGrammarSDF = StdLib.initGrammar.getPath();
+    currentGrammarModule = StdLib.initGrammarModule;
+
+    currentTransSTR = StdLib.initTrans.getPath();
+    currentTransModule = StdLib.initTransModule;
+
+    // list of imports that contain SDF extensions
+    availableSDFImports = new ArrayList<String>();
+
+    // list of imports that contain Stratego extensions
+    availableSTRImports = new ArrayList<String>();
+
+    inputTreeBuilder = new RetractableTreeBuilder();
+    
+    // XXX need to load ANY parse table, preferably an empty one.
+    parser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.sdfTbl.getPath()), "Sdf2Module");
+    
+    sdfParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.sdfTbl.getPath()), "Sdf2Module");
+    strParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.strategoTbl.getPath()), "StrategoModule");
+
+    interp = new HybridInterpreter(); //TODO (ATermCommands.factory);
+    sdfContext = tools.init();
+    makePermissiveContext = make_permissive.init();
+    extractionContext = extraction.init();
+    strjContext = org.strategoxt.strj.strj.init();
   }
   
   /**
    * @param args
-   * @throws ClassNotFoundException
    * @throws IOException
    */
   public static void main(String[] args) {
     // log.log("This is the extensible java compiler.");
     try {
+      initialize();
+      
       String[] sources = handleOptions(args);
-      Environment.init();
-      
-      if (Environment.cacheDir != null)
-        FileCommands.createDir(Environment.cacheDir);
-      
-      FileCommands.createDir(Environment.bin);
-      
-      initializeCaches();
-      
-      allInputFiles = new ArrayList<URI>();
-      pendingInputFiles = new ArrayList<URI>();
 
-      URL[] urls = new URL[Environment.srcPath.size()];
-      int i = 0;
-      for (String path : Environment.srcPath)
-        urls[i++] = new File(path).toURI().toURL();
-
-      ClassLoader loader = new URLClassLoader(urls);
+      ClassLoader loader = new URLClassLoader(new URL[] {new File(Environment.src).toURI().toURL()});
       
       for (String source : sources)
       {
@@ -904,10 +958,11 @@ public class Driver{
         pendingInputFiles.add(uri);
       }
       
-      for (URI source : allInputFiles)
-        new Driver().process(source);
-      
-      storeCaches();
+      for (URI source : allInputFiles) {
+        Result res = compile(source);
+        if (!DriverCLI.processResultCLI(res, source.getPath(), new File(".").getAbsolutePath()))
+          throw new RuntimeException("compilation of " + source.getPath() + " failed");
+      }
       
     } catch (Exception e) {
       e.printStackTrace();
@@ -973,7 +1028,7 @@ public class Driver{
         options,
         false);
   }
-
+  
   private static String[] processOptions(Options options, CommandLine line) throws org.apache.commons.cli.ParseException {
     if (line.hasOption("help")) {
       // TODO This is not exactly an error ...
@@ -1004,7 +1059,7 @@ public class Driver{
 
     if (line.hasOption("sourcepath"))
       for (String path : line.getOptionValue("sourcepath").split(Environment.classpathsep))
-        Environment.srcPath.add(path);
+        Environment.src = path;
  
     if (line.hasOption("d"))
       Environment.bin = line.getOptionValue("d");
@@ -1018,21 +1073,15 @@ public class Driver{
     if (line.hasOption("write-only-cache"))
       Environment.wocache = true;
     
-    if (line.hasOption("imports-changed"))
-      importsChanged = true;
-    
     if (line.hasOption("gen-java"))
-      genJava = true;
-    
-    if (line.hasOption("stdlibdir"))
-      Environment.stdLibDir = line.getOptionValue("stdlibdir");
-    
-    if (line.hasOption("xtbl"))
-      Environment.xtblCompilation = true;
+      Environment.generateJavaFile = true;
     
     if (line.hasOption("atomic-imports"))
       Environment.atomicImportParsing = true;
-    
+
+    if (line.hasOption("no-checking"))
+      Environment.noChecking = true;
+
     String[] sources = line.getArgs();
     if (sources.length < 1)
       throw new CLIError("No source files specified.", options);
@@ -1131,74 +1180,89 @@ public class Driver{
         "gen-java",
         false,
         "Generate the resulting Java file in the source folder.");
-    
-    options.addOption(
-        null,
-        "stdlibdir",
-        true,
-        "Specifiy the directory containing the standard library.");
-
-    options.addOption(
-        null,
-        "xtbl",
-        false,
-        "Separately compile parse tables.");
 
     options.addOption(
         null,
         "atomic-imports",
         false,
         "Parse all import statements simultaneously.");
+
+    options.addOption(
+        null,
+        "no-checking",
+        false,
+        "Do not check resulting SDF and Stratego files.");
     
     return options;
   }
 
   @SuppressWarnings("unchecked")
-  public static void initializeCaches() throws IOException, ClassNotFoundException {
+  private static synchronized void initializeCaches() throws IOException {
     if (Environment.cacheDir == null)
       return;
     
-    String sdfCache = FileCommands.findFile("sdfCache", Environment.cacheDir);
-    String strCache = FileCommands.findFile("strCache", Environment.cacheDir);
+    String sdfCache = FileCommands.findFile("sdfCache" + "-" + VERSION, Environment.cacheDir);
+    String strCache = FileCommands.findFile("strCache" + "-" + VERSION, Environment.cacheDir);
 
-    if (sdfCache != null)
-      SDFCommands.sdfCache =
-          (Cache<ModuleKey, String>) new ObjectInputStream(new FileInputStream(
-              sdfCache)).readObject();
-    else
-      SDFCommands.sdfCache = new Cache<ModuleKey, String>();
+    if (SDFCommands.sdfCache == null && sdfCache != null)
+      try {
+        log.log("load sdf cache from " + sdfCache);
+          SDFCommands.sdfCache =
+              (ModuleKeyCache<String>) new ObjectInputStream(new FileInputStream(
+                  sdfCache)).readObject();
+      } 
+      catch (Exception e) {
+        SDFCommands.sdfCache = new ModuleKeyCache<String>();
+        e.printStackTrace();
+      }
+    else if (SDFCommands.sdfCache == null)
+      SDFCommands.sdfCache = new ModuleKeyCache<String>();
     
-    if (strCache != null)
-      STRCommands.strCache =
-          (Cache<ModuleKey, String>) new ObjectInputStream(new FileInputStream(
-              strCache)).readObject();
-    else
-      STRCommands.strCache = new Cache<ModuleKey, String>();
+    if (STRCommands.strCache == null && strCache != null)
+      try {
+        log.log("load str cache from " + strCache);
+        STRCommands.strCache =
+            (ModuleKeyCache<String>) new ObjectInputStream(new FileInputStream(
+                strCache)).readObject();
+      } 
+      catch (Exception e) {
+        STRCommands.strCache = new ModuleKeyCache<String>();
+        e.printStackTrace();
+      }
+    else if (STRCommands.strCache == null)
+      STRCommands.strCache = new ModuleKeyCache<String>();
   }
 
   
-  public static void storeCaches() throws IOException {
+  private static synchronized void storeCaches() throws IOException {
     if (Environment.cacheDir == null || Environment.rocache)
       return;
     
-    String sdfCache = FileCommands.findFile("sdfCache", Environment.cacheDir);
-    String strCache = FileCommands.findFile("strCache", Environment.cacheDir);
+    String sdfCache = FileCommands.findFile("sdfCache" + "-" + VERSION , Environment.cacheDir);
+    String strCache = FileCommands.findFile("strCache" + "-" + VERSION, Environment.cacheDir);
 
     if (sdfCache == null) {
-      sdfCache = Environment.cacheDir + sep + "sdfCache";
+      sdfCache = Environment.cacheDir + sep + "sdfCache" + "-" + VERSION;
       FileCommands.createFile(sdfCache);
     }
 
     if (strCache == null) {
-      strCache = Environment.cacheDir + sep + "strCache";
+      strCache = Environment.cacheDir + sep + "strCache" + "-" + VERSION;
       FileCommands.createFile(strCache);
     }
-
-    if (SDFCommands.sdfCache != null)
-      new ObjectOutputStream(new FileOutputStream(sdfCache)).writeObject(SDFCommands.sdfCache);
     
-    if (STRCommands.strCache != null)
+    
+    if (SDFCommands.sdfCache != null) {
+      log.log("store sdf cache in " + sdfCache);
+      log.log("sdf cache size: " + SDFCommands.sdfCache.size());
+      new ObjectOutputStream(new FileOutputStream(sdfCache)).writeObject(SDFCommands.sdfCache);
+    }
+    
+    if (STRCommands.strCache != null) {
+      log.log("store str cache in " + strCache);
+      log.log("str cache size: " + STRCommands.strCache.size());
       new ObjectOutputStream(new FileOutputStream(strCache)).writeObject(STRCommands.strCache);
+    }
   }
 
   private String relPackageNameSep() {
@@ -1208,4 +1272,27 @@ public class Driver{
     return relPackageName + sep;
   }
   
+  /**
+   * @return the non-desugared syntax tree of the complete file.
+   */
+  private IStrategoTerm makeSugaredSyntaxTree() {
+    
+    // XXX empty lists => no tokens
+    IStrategoTerm packageDecl = ATermCommands.makeSome(sugaredPackageDecl, inputTreeBuilder.getTokenizer().getTokenAt(0));
+    IStrategoTerm imports = 
+      ATermCommands.makeList("JavaImportDec*", ImploderAttachment.getRightToken(packageDecl), sugaredImportDecls);
+    IStrategoTerm body =
+      ATermCommands.makeList("TypeOrSugarDec*", ImploderAttachment.getRightToken(imports), sugaredTypeOrSugarDecls);
+    
+    IStrategoTerm term =
+      ATermCommands.makeAppl("SugarCompilationUnit", "SugarCompilationUnit", 3,
+        packageDecl,
+        imports,
+        body);
+    
+    ImploderAttachment.getTokenizer(term).setAst(term);
+    ImploderAttachment.getTokenizer(term).initAstNodeBinding();
+    
+    return term;
+  }
 }

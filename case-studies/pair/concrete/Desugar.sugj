@@ -11,12 +11,12 @@ public sugar Desugar {
 
   rules
     pair2expr : 
-      java |[ (java_e1, java_e2) ]| 
+      |[ (~expr:e1, ~expr:e2) ]| 
       ->
-      java |[ new pair.Pair(java_e1, java_e2) ]|
+      |[ pair.Pair.create(~e1, ~e2) ]|
 
     pair2type :
-      java |[ (java_t1, java_t2) ]|
+      |[ (~type:t1, ~type:t2) ]|
       ->
-      java |[ pair.Pair<java_t1, java_t2> ]| 
+      |[ pair.Pair<~t1, ~t2> ]| 
 }

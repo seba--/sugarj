@@ -1,0 +1,24 @@
+package xml.schema;
+
+public sugar SharedStrategies {
+  
+  rules
+    is-error = where(?[(a,<id>)|c]; is-string)
+    head : [x|y] -> x
+    tail : [x|y] -> y
+    ensure-list = is-list <+ ![<id>]
+    
+  strategies
+    validate-base-string =
+      ?(t,<id>);
+      (is-string
+       <+ !(t,"not a string"))
+    
+    validate-base-integer =
+      ?(t,<id>);
+      (string-to-int
+       <+ !(t,"not an integer"))
+  
+    repeat-strategy(s) =
+      ?x; s < (is-error <+ ?x <+ repeat-strategy(s)) + id
+}

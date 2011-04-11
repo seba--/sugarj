@@ -10,13 +10,20 @@ builders
   // See the imported file for a brief introduction and examples.     
 
 builders
-                                                                                                                               
-  provider                  : include/sugarj.ctree                                                                             
-  provider                  : include/sugarj-java.jar                                                                          
-                                                                                                                               
-  observer                  : editor-analyze                                                                                   
-                                                                                                                               
-  builder                   : "Generate Java code (for selection)"   = generate-java (openeditor) (realtime)                   
-  builder                   : "Show abstract syntax (for selection)" = generate-aterm (openeditor) (realtime) (meta) (source)  
-                                                                                                                               
-  // on save: generate-java                                                                                                    
+                                                                                                              
+  provider : include/sugarj.ctree                                                                             
+  provider : include/sugarj-java.jar                                                                          
+                                                                                                              
+  // observer : editor-analyze                                                                                   
+                                                                                                              
+  builder  : "Generate Java code (for selection)"   = generate-java (openeditor) (realtime)                   
+  builder  : "Show abstract syntax (for selection)" = generate-aterm (openeditor) (realtime) (source)  
+                                                                                                              
+
+refactorings
+                                                                                        
+  pp-table                  : get-pp-table                                              
+  pretty-print              : prettyprint                                               
+                                                                                        
+                                                                                        
+  // on save: generate-java                                                             
