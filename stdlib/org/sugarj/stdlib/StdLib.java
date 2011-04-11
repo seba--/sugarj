@@ -59,7 +59,8 @@ public class StdLib {
   public static URI sdfTbl = ensureFile("org/sugarj/languages/Sdf2.tbl");
   public static URI strategoDef = ensureFile("org/sugarj/languages/Stratego.def");
   public static URI strategoTbl = ensureFile("org/sugarj/languages/Stratego.tbl");
-  public static URI editorServiceDef = ensureFile("org/sugarj/languages/EditorServices.def");
+  public static URI editorServicesDef = ensureFile("org/sugarj/languages/EditorServices.def");
+  public static URI editorServicesTbl = ensureFile("org/sugarj/languages/EditorServices.tbl");
 
   public static URI initGrammar = ensureFile("org/sugarj/init/initGrammar.sdf");
   public static String initGrammarModule = "org/sugarj/init/initGrammar";
@@ -68,6 +69,9 @@ public class StdLib {
   public static URI initGrammarXTBL = ensureFile("org/sugarj/init/initGrammar.xtbl");
   public static URI initTrans = ensureFile("org/sugarj/init/initTrans.str");
   public static String initTransModule = "org/sugarj/init/initTrans";
+  public static URI initEditor = ensureFile("org/sugarj/init/initEditor.serv");
+  public static String initEditorModule = "org/sugarj/init/initEditor";
+
 
   public static void main(String args[]) throws URISyntaxException {
     exists(javaDef);
@@ -75,10 +79,13 @@ public class StdLib {
     exists(sdfTbl);
     exists(strategoDef);
     exists(strategoTbl);
+    exists(editorServicesDef);
+    exists(editorServicesTbl);
     exists(initGrammar);
     exists(initGrammarAtomicImports);
     exists(initGrammarXTBL);
     exists(initTrans);
+    exists(initEditor);
     exists(stdLibDir.toURI());
   }
   

@@ -35,8 +35,6 @@ public class JavaCommands {
     
     cpBuilder.append(dir);
     
-    // TODO change to ejc
-    
     String[] cmd = new String[] {
         "-cp", cpBuilder.toString(),
         "-d", FileCommands.toWindowsPath(dir),

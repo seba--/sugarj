@@ -130,13 +130,14 @@ rules
     alt(_, _) -> "alt"
 
   get-symbol-name :
-    cf(sym) -> <concat-strings> ["cf-", name]
+    cf(sym) -> <concat-strings> ["cf", name]
     where <get-symbol-name> sym => name
 
   get-symbol-name :
-    lex(sym) -> <concat-strings> ["lex-", name]
+    lex(sym) -> <concat-strings> ["lex", name]
     where <get-symbol-name> sym => name
 
   get-symbol-name :
-    varsym(sym) -> <concat-strings> ["var-", name]
+    varsym(sym) -> <concat-strings> ["var", name]
     where <get-symbol-name> sym => name
+  

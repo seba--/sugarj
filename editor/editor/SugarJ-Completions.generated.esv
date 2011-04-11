@@ -41,18 +41,6 @@ completions
   // All semantic services may make use of the dynamic rules created by the observer.     
 
 completions
-                                      
-  // Derived completions may follow   
-                                      
-  completion keyword                : "\\TOP"
-  completion keyword                : "\\EOF"
-  completion keyword                : "\\BOT"
-  completion keyword                : "\\LABEL_START"
-  completion keyword                : "-CF"
-  completion keyword                : "-LEX"
-  completion keyword                : "-VAR"
-  completion keyword                : "\\n"
-  completion keyword                : "\\t"
-  completion keyword                : "<START>"
-  completion keyword                : "<Start>"
-  completion keyword                : "\n"
+                                     
+  // Derived completions may follow  
+                                     
