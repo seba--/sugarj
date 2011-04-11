@@ -17,5 +17,5 @@ public sugar Sugar {
       PType(t1, t2) -> |[ pair.Pair<~t1, ~t2> ]| 
 
     desugar-pair-expr : 
-      PExpr(e1, e2) -> |[ new pair.Pair.create(~e1, ~e2) ]|
+      PExpr(e1, e2) -> |[ pair.Pair.create(~e1, ~e2) ]|
 }
