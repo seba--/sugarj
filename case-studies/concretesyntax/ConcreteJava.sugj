@@ -25,8 +25,9 @@ public sugar ConcreteJava {
   
   context-free syntax
     "~id:"  StrategoTerm  -> JavaID  {cons("FromMetaExpr")}
+//    "~"  StrategoTerm  -> JavaID  {cons("FromMetaExpr"), avoid}
 
-
+ 
 
 %%%
  %% Expressions
@@ -221,6 +222,7 @@ context-free syntax
     "~type:"     StrategoTerm -> JavaType {cons("FromMetaExpr")}
     "~"          StrategoTerm -> JavaArrayBaseType {cons("FromMetaExpr")}
     "~arraybasetype:"     StrategoTerm -> JavaArrayBaseType {cons("FromMetaExpr")}
+    "~"  StrategoTerm -> JavaRefType {cons("FromMetaExpr"), avoid}
     "~reftype:"  StrategoTerm -> JavaRefType {cons("FromMetaExpr")}
 
 %%%

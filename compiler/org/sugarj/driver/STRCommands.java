@@ -4,19 +4,32 @@ import static org.sugarj.driver.FileCommands.toCygwinPath;
 import static org.sugarj.driver.FileCommands.toWindowsPath;
 import static org.sugarj.driver.Log.log;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
-import org.spoofax.jsglr.InvalidParseTableException;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.jsglr.client.InvalidParseTableException;
+import org.spoofax.jsglr.client.imploder.IToken;
+import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+import org.spoofax.jsglr.shared.BadTokenException;
+import org.spoofax.jsglr.shared.SGLRException;
+import org.spoofax.jsglr.shared.TokenExpectedException;
+import org.strategoxt.HybridInterpreter;
+import org.strategoxt.imp.runtime.parser.JSGLRI;
+import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
-import org.strategoxt.strj.Main;
-import org.sugarj.driver.caching.Cache;
+import org.strategoxt.strj.main_strj_0_0;
 import org.sugarj.driver.caching.ModuleKey;
-
-import aterm.ATerm;
+import org.sugarj.driver.caching.ModuleKeyCache;
+import org.sugarj.stdlib.StdLib;
 
 /**
  * This class provides methods for various SDF commands. Each
@@ -28,12 +41,14 @@ import aterm.ATerm;
 public class STRCommands {
   
   
-  public static Cache<ModuleKey, String> strCache = null;
+  public static ModuleKeyCache<String> strCache = null;
   
+  private final static Pattern STR_FILE_PATTERN = Pattern.compile(".*\\.str");
+
   /**
    *  Compiles a {@code *.str} file to a single {@code *.java} file. 
    */
-  private static void strj(String str, String java, String main) throws IOException {
+  private static void strj(String str, String java, String main, Context strjContext) throws IOException {
     
     /*
      * We can include as many paths as we want here, checking the
@@ -48,16 +63,22 @@ public class STRCommands {
         "-i", toWindowsPath(str),
         "-o", toWindowsPath(java),
         "-m", main,
-        "-I", toCygwinPath(Environment.stdLibDir)
+        "-I", StdLib.stdLibDir.getPath(),
+        "-p", "sugarj",
+        "--library",
+        "-O", "0"
     }));
     
-    for (String path : Environment.includePath) {
-      cmd.add("-I");
-      cmd.add(path);
-    }
+    for (String path : Environment.includePath)
+      if (new File(path).isDirectory()){
+        cmd.add("-I");
+        cmd.add(path);
+      }
     
     try {
-    Main.mainNoExit(cmd.toArray(new String[cmd.size()]));
+      // XXX strj does not create Java file with non-fresh context
+      Context c = org.strategoxt.strj.strj.init();
+      c.invokeStrategyCLI(main_strj_0_0.instance, "strj", cmd.toArray(new String[cmd.size()]));
     }
     catch (StrategoExit e) {
       if (e.getValue() != 0)
@@ -70,12 +91,12 @@ public class STRCommands {
   }
   
   
-  public static String compile(String str, String main) throws IOException, InvalidParseTableException {
-    ModuleKey key = getModuleKeyForAssimilation(str, main);
+  public static String compile(String str, String main, Collection<String> dependentFiles, JSGLRI strParser, Context strjContext) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+    ModuleKey key = getModuleKeyForAssimilation(str, main, dependentFiles, strParser);
     String prog = lookupAssimilationInCache(key);
     
     if (prog == null) {
-      prog = generateAssimilator(key, str, main);
+      prog = generateAssimilator(key, str, main, strjContext);
       cacheAssimilator(key, prog);
     }
     return prog;
@@ -83,23 +104,25 @@ public class STRCommands {
     
   private static String generateAssimilator(ModuleKey key,
                                             String str,
-                                            String main) throws IOException {
+                                            String main,
+                                            Context strjContext) throws IOException {
     log.beginTask("Generating", "Generate the assimilator");
     try {
-      String dir = null;
-      
-      if (Environment.cacheDir != null)
-        dir = FileCommands.createDir(Environment.cacheDir, key.hashCode());
-      else
-        dir = FileCommands.newTempDir();
-      
+      String dir = FileCommands.newTempDir();
+      FileCommands.createDir(dir + sep + "sugarj");
       String javaFilename = FileCommands.fileName(str).replace("-", "_");
-      String java = dir + sep + javaFilename + ".java";
-      strj(str, java, main);
-      JavaCommands.javac(java, dir, Environment.strategoxt_jar);
+      String java = dir + sep + "sugarj" + sep + javaFilename + ".java";
+      strj(str, java, main, strjContext);
+      
+      if (!JavaCommands.javac(java, dir, Environment.includePath))
+        throw new RuntimeException("java compilation failed");
+        
+      String jarfile = FileCommands.newTempFile("jar");
+      JavaCommands.jar(dir, jarfile);
+
       FileCommands.delete(java);
 
-      return dir + sep + javaFilename;
+      return jarfile;
     } finally {
       log.endTask();
     }
@@ -112,7 +135,6 @@ public class STRCommands {
     log.beginTask("Caching", "Cache assimilator");
     try {
       strCache.put(key, prog);
-      FileCommands.keepFiles.add(new File(prog).getParent());
 
       if (CommandExecution.CACHE_INFO)
         log.log("Cache Location: " + prog);
@@ -132,7 +154,7 @@ public class STRCommands {
       result = strCache.get(key);
       
       // Ignore non-existing files
-      if (result != null && !FileCommands.exists(result + ".class"))
+      if (result != null && !FileCommands.exists(result))
         result = null;
       
       if (result != null && CommandExecution.CACHE_INFO)
@@ -141,39 +163,63 @@ public class STRCommands {
       log.endTask(result != null);
     }
     
+    if (result != null && !new File(result).exists())
+      return null;
+    
     return result;
   }
 
 
-  private static ModuleKey getModuleKeyForAssimilation(String str, String main) throws IOException, InvalidParseTableException {
+  private static ModuleKey getModuleKeyForAssimilation(String str, String main, Collection<String> dependentFiles, JSGLRI strParser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     log.beginTask("Generating", "Generate module key for current assimilation");
     try {
-      String f = FileCommands.newTempFile("aterm");
-      SDFCommands.parseImplode(
-          Environment.strategoTbl,
-          str,
-          f,
-          "StrategoModule",
-          false);
+      IStrategoTerm aterm = strParser.parse(new BufferedInputStream(new FileInputStream(str)), str);
 
-      ATerm aterm = ATermCommands.atermFromFile(f);
-      FileCommands.delete(f);
+      aterm = ATermCommands.getApplicationSubterm(aterm, "Module", 1);
 
-      aterm = ATermCommands.extractTerm(aterm, "Module(_, ?)");
-
-      return new ModuleKey(aterm, main);
+      LinkedList<String> depList = new LinkedList<String>();
+      for (String file : dependentFiles)
+        if (STR_FILE_PATTERN.matcher(file).matches())
+          depList.add(file);
+      
+      return new ModuleKey(depList, aterm);
+    } catch (Exception e) {
+      throw new SGLRException(strParser.getParser(), "could not parse STR file " + str, e);
     } finally {
       log.endTask();
     }
     
   }
 
-
-  public static void assimilate(String prog, String in, String out) throws IOException {
-    File f = new File(prog);
-    String main = f.getName();
-    String dir = f.getParent();
-    
-    JavaCommands.java(dir, main, "-i", in, "-o", out);
+  public static IStrategoTerm assimilate(String jarfile, IStrategoTerm in, HybridInterpreter interp) throws IOException {
+    return assimilate("internal-main", jarfile, in, interp);
+  }
+  
+  public static IStrategoTerm assimilate(String strategy, String jarfile, IStrategoTerm in, HybridInterpreter interp) throws IOException {
+    try {
+      HybridInterpreter newInterp = new HybridInterpreter(interp);
+      newInterp.loadJars(new File(jarfile).toURI().toURL());
+      newInterp.setCurrent(in);
+      
+      if (newInterp.invoke(strategy)) {
+        IStrategoTerm term = newInterp.current();
+        
+        IToken left = ImploderAttachment.getLeftToken(in);
+        IToken right = ImploderAttachment.getRightToken(in);
+        String sort = ImploderAttachment.getSort(in);
+        
+        try {
+          ImploderAttachment.putImploderAttachment(term, false, sort, left, right);
+        } catch (Exception e) {
+          log.log("origin annotation failed");
+        }
+        return term;
+      }
+      else
+        throw new RuntimeException("hybrid interpreter failed");
+    }
+    catch (Exception e) {
+      throw new RuntimeException("desugaring failed", e);
+    }
   }
 }

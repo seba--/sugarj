@@ -14,6 +14,7 @@ public class Log {
   public static final Log log = new Log();
 
   private Stack<String> tasks = new Stack<String>();
+  private Stack<Long> timings = new Stack<Long>();
   private Stack<Boolean> lightweight = new Stack<Boolean>();
   private int silent = -1;
   
@@ -29,6 +30,7 @@ public class Log {
 
     tasks.push(shortText);
     lightweight.push(inline);
+    timings.push(System.currentTimeMillis());
   }
   
   public void beginTask(String shortText, String longText) {
@@ -43,13 +45,22 @@ public class Log {
     if (silent >= 0)
       return;
     
+    long endTime = System.currentTimeMillis();
+    
+    if (tasks.isEmpty())
+      return;
+    
     String shortText = tasks.pop();
+    Long startTime = timings.pop();
+    long duration = endTime - startTime;
     
     if (lightweight.pop()) {
-      System.out.println(" ... " + error);
+      System.out.println(" ... " + error + " - " + duration + "ms");
     } else if (doneMessage) {
-      log.log(shortText + " " + error);
+      log.log(shortText + " " + error + " - " + duration + "ms");
     }
+    else 
+      log.log(shortText + " " + error + " - " + duration + "ms");
   }
   
   public void endTask() {
@@ -69,6 +80,10 @@ public class Log {
       endTask(good);
     else
       endTask(bad);
+  }
+  
+  public void log(Object o) {
+    log(o.toString());
   }
   
   public synchronized void log(String text) {
@@ -93,13 +108,9 @@ public class Log {
       if (CommandExecution.WRAP_COMMAND_LINE) {
         beginTask("execute " + prefix);
         
-        beginTask("command line");
-        try {
-          logCommandLine(cmds);
-        } finally {
-          endTask();
-        }
-      } else {
+        logCommandLine(cmds);
+      } 
+      else {
         StringBuilder builder = new StringBuilder();
         builder.append("execute");
         for (String cmd : cmds)

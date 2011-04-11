@@ -1,40 +1,68 @@
 package org.sugarj.driver;
-import java.io.FileOutputStream;
+
+import static org.sugarj.driver.Log.log;
+
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
-import org.spoofax.jsglr.InvalidParseTableException;
+import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.interpreter.terms.IStrategoList;
+import org.spoofax.interpreter.terms.IStrategoString;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.jsglr.client.InvalidParseTableException;
+import org.spoofax.jsglr.client.imploder.IToken;
+import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+import org.spoofax.jsglr.client.imploder.Token;
+import org.spoofax.terms.StrategoListIterator;
+import org.spoofax.terms.TermFactory;
+import org.spoofax.terms.attachments.ParentAttachment;
+import org.spoofax.terms.attachments.ParentTermFactory;
+import org.spoofax.terms.io.InlinePrinter;
+import org.spoofax.terms.io.TAFTermReader;
+import org.strategoxt.HybridInterpreter;
+import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
-import org.sugarj.driver.transformations.extractSdf;
-import org.sugarj.driver.transformations.extractStr;
-import org.sugarj.driver.transformations.sdf_desugar;
+import org.strategoxt.tools.sdf_desugar_0_0;
+import org.sugarj.driver.transformations.extraction.extract_sdf_0_0;
+import org.sugarj.driver.transformations.extraction.extract_str_0_0;
 
-import aterm.ATerm;
-import aterm.ATermFactory;
-import aterm.pure.PureFactory;
-
+/**
+ * @author Sebastian Erdweg <seba at informatik uni-marburg de>
+ */
 public class ATermCommands {
   
   public static class MatchError extends Error {
-    private final ATerm scrutinee;
-    private final ATerm lowlevelPattern;
+    private static final long serialVersionUID = -3329736288449173760L;
+    private final IStrategoTerm scrutinee;
+    private final String kind;
     private final String highlevelPattern;
     
-    public MatchError(ATerm scrutinee, ATerm lowlevelPattern, String highlevelPattern) {
-      super("Error while matching against " + highlevelPattern);
+    public MatchError(IStrategoTerm scrutinee, String kind, String highlevelPattern) {
+      super("Error while matching " + kind + " of " + highlevelPattern);
       
       this.scrutinee = scrutinee;
-      this.lowlevelPattern = lowlevelPattern;
+      this.kind = kind;
       this.highlevelPattern = highlevelPattern;
     }
 
-    public ATerm getScrutinee() {
-      return scrutinee;
+    public MatchError(IStrategoTerm scrutinee, String kind) {
+      super("Error while matching " + kind);
+      
+      this.scrutinee = scrutinee;
+      this.kind = kind;
+      this.highlevelPattern = null;
     }
 
-    public ATerm getLowlevelPattern() {
-      return lowlevelPattern;
+    public IStrategoTerm getScrutinee() {
+      return scrutinee;
+    }
+    
+    public String getKind() {
+      return kind;
     }
 
     public String getHighlevelPattern() {
@@ -42,80 +70,166 @@ public class ATermCommands {
     }
   }
   
-  public static ATermFactory factory = new PureFactory();
+  public static ITermFactory factory = new ParentTermFactory(new TermFactory());
 
-  public static ATerm atermFromFile(String filename) throws IOException {
-    return factory.readFromFile(filename);
+  public static IStrategoTerm atermFromFile(String filename) throws IOException {
+    IStrategoTerm term = Environment.terms.get(filename);
+    
+    if (term != null)
+      return term;
+    
+    return new TAFTermReader(factory).parseFromFile(filename);
   }
   
-  public static ATerm atermFromString(String s) throws IOException {
-    return factory.parse(s);
+  public static IStrategoTerm atermFromString(String s) throws IOException {
+    return new TAFTermReader(factory).parseFromString(s);
   }
 
-  public static void atermToFile(ATerm aterm, String filename)
+  public static String atermToFile(IStrategoTerm aterm) throws IOException {
+    String file = FileCommands.newTempFile("ast");
+    atermToFile(aterm, file);
+    return file;
+  }
+  
+  public static void atermToFile(IStrategoTerm aterm, String filename)
       throws IOException {
-    FileOutputStream os = new FileOutputStream(filename);
-    os.write(aterm.toString().getBytes());
-  }
-
-  public static ATerm splitToplevel(ATerm aterm) {
-    return extractTerm(aterm, "NextToplevelDeclaration(?, _)");
-  }
-
-  public static String splitRest(ATerm aterm) {
-    return extractString(aterm, "NextToplevelDeclaration(_, ?)");
+    Environment.terms.put(filename, aterm);
+    FileCommands.writeToFile(filename, atermToString(aterm));
   }
   
-  public static String extractString(ATerm term, String pattern) {
-    return (String) extract(term, pattern, "str");
+  public static String atermToString(IStrategoTerm aterm) {
+    InlinePrinter printer = new InlinePrinter();
+    aterm.prettyPrint(printer);
+    return printer.getString();
   }
 
-  public static ATerm extractTerm(ATerm term, String pattern) {
-    return (ATerm) extract(term, pattern, "term");
+  public static boolean isApplication(IStrategoTerm term, String cons) {
+    return term.getTermType() == IStrategoTerm.APPL &&
+           ((IStrategoAppl) term).getConstructor().getName().equals(cons);
   }
   
-  public static String extractJava(ATerm term, String pattern) throws IOException {
-    return SDFCommands.prettyPrintJavaTerm(extractTerm(term, pattern));
+  public static IStrategoTerm getApplicationSubterm(IStrategoTerm term, String cons, int index) {
+    if (isApplication(term, cons))
+      return term.getSubterm(index);
+    
+    throw new MatchError(term, "application", cons);
   }
   
-  public static boolean match(ATerm term, String pattern) {
-    ATermFactory factory = term.getFactory();
-	  String converted = convertPattern(pattern, "term");
-	  ATerm parsed = factory.parse(converted);
-	  
-	  return term.match(parsed) != null;
+  public static String getString(IStrategoTerm term) {
+    if (term.getTermType() == IStrategoTerm.STRING)
+      return ((IStrategoString) term).stringValue();
+    
+    throw new MatchError(term, "string");
   }
 
-  @SuppressWarnings("unchecked")
-  private static Object extract(ATerm term, String pattern, String type) {
-    ATermFactory factory = term.getFactory();
-    String converted = convertPattern(pattern, type);
-    ATerm parsed = factory.parse(converted);
-    int index = countUnderscores(pattern);
-
-    List l = term.match(parsed);
-    
-    if (l == null || index >= l.size())
-      throw new MatchError(term, parsed, pattern);
-    
-    return l.get(index);
+  public static boolean isList(IStrategoTerm term) {
+    return term.getTermType() == IStrategoTerm.LIST;
   }
   
-  public static ATerm injectTerms(String pattern, ATerm... terms) {
-    List<ATerm> l = new ArrayList<ATerm>();
+  public static List<IStrategoTerm> getList(IStrategoTerm term) {
     
-    for (ATerm t : terms)
-      l.add(t);
+    if (term.getTermType() == IStrategoTerm.LIST)
+    {
+      List<IStrategoTerm> l = new ArrayList<IStrategoTerm>();
+      
+      for (Iterator<IStrategoTerm> it = new StrategoListIterator((IStrategoList) term);
+           it.hasNext(); )
+        l.add(it.next());
+      
+      return l;
+    }
     
-    return factory.make(convertPattern(pattern, "term"), l);
+    throw new MatchError(term, "list");
+  }
+  
+  public static IStrategoTerm makeTuple(IStrategoTerm... ts) {
+    return makeTuple(null, ts);
+  }
+  
+  public static IStrategoTerm makeTuple(IToken tok, IStrategoTerm... ts) {
+    IStrategoTerm t = factory.makeTuple(ts);
+    setAttachment(t, "Tuple", tok, ts);
+    return t;
+  }
+  
+  public static IStrategoTerm makeSome(IStrategoTerm term, IToken noneToken) {
+    if (term != null)
+      return makeAppl("Some", "Some", 1, noneToken, term);
+    
+    return makeAppl("None", "Some", 0, noneToken);
+  }
+  
+  public static IStrategoTerm makeString(String s, IToken token) {
+    IStrategoTerm t = factory.makeString(s);
+    setAttachment(t, "String", token);
+    return t;
+  }
+  
+  public static IStrategoList makeList(String sort, IStrategoTerm... ts) {
+    assert ts.length > 0;
+    return makeList(sort, null, ts);
+  }
+  
+  public static IStrategoList makeList(String sort, IToken emptyListToken, IStrategoTerm... ts) {
+    IStrategoList term = factory.makeList(ts);
+    
+    setAttachment(term, sort, emptyListToken, ts);
+    return term;
   }
 
-  private static String convertPattern(String pattern, String type) {
-    return pattern.replace("_", "<term>").replace("?", "<" + type + ">");
+  public static IStrategoList makeList(String sort, Collection<IStrategoTerm> ts) {
+    return makeList(sort, ts.toArray(new IStrategoTerm[ts.size()]));
   }
-
-  private static int countUnderscores(String pattern) {
-    return pattern.substring(0, pattern.indexOf('?')).split("_").length - 1;
+  
+  public static IStrategoList makeList(String sort, IToken emptyListToken, Collection<IStrategoTerm> ts) {
+    return makeList(sort, emptyListToken, ts.toArray(new IStrategoTerm[ts.size()]));
+  }
+  
+  public static IStrategoTerm makeAppl(String cons, String sort, int arity, IStrategoTerm... args) {
+    assert args.length > 0;
+    return makeAppl(cons, sort, arity, null, args);
+  }
+  
+  public static IStrategoTerm makeAppl(String cons, String sort, int arity, IToken emptyArgsToken, IStrategoTerm... args) {
+    assert emptyArgsToken != null || args.length > 0;
+    
+    IStrategoTerm appl =
+      factory.makeAppl(
+             factory.makeConstructor(cons, arity),
+             args);
+    
+    setAttachment(appl, sort, emptyArgsToken, args);
+    
+    return appl;
+  }
+  
+  private static void setAttachment(IStrategoTerm term, String sort, IToken emptyToken, IStrategoTerm... children) {
+    IToken left;
+    IToken right;
+    
+    if (children.length == 0) {
+      if (emptyToken == null)
+        return;
+      
+      left = emptyToken;
+      right = emptyToken;
+    }
+    else {
+      left = ImploderAttachment.getLeftToken(children[0]);
+      right = ImploderAttachment.getRightToken(children[children.length - 1]);
+    }
+    
+    if (left != null && right != null)
+      ImploderAttachment.putImploderAttachment(
+          term,
+          false,
+          sort, 
+          left,
+          right);
+    
+    
+    for (IStrategoTerm arg : children)
+      ParentAttachment.putParent(arg, term, null);
   }
   
   /**
@@ -127,15 +241,16 @@ public class ATermCommands {
    * @param sdf result file
    * @throws InvalidParseTableException 
    */
-  public static void extractSDF(String term, String sdf) throws IOException, InvalidParseTableException {
+  public static IStrategoTerm extractSDF(IStrategoTerm term, Context context) throws IOException, InvalidParseTableException {
+    IStrategoTerm result = null;
     try {
-      extractSdf.mainNoExit("-i", term, "-o", sdf);
+      result = extract_sdf_0_0.instance.invoke(context, term);
     }
     catch (StrategoExit e) {
-      if (e.getValue() != 0)
-        throw new RuntimeException("Sdf extraction failed", e);
+      if (e.getValue() != 0 || result == null)
+        throw new RuntimeException("Stratego extraction failed", e);
     }
-    // STRCommands.assimilate(STRCommands.getExtractSDFProg(), term, sdf);
+    return result;
   }
   
   /**
@@ -147,25 +262,81 @@ public class ATermCommands {
    * @param str result file
    * @throws InvalidParseTableException 
    */
-  public static void extractSTR(String term, String str) throws IOException, InvalidParseTableException {
+  public static IStrategoTerm extractSTR(IStrategoTerm term, Context context) throws IOException, InvalidParseTableException {
+    IStrategoTerm result = null;
     try {
-      extractStr.mainNoExit("-i", term, "-o", str);
+      result = extract_str_0_0.instance.invoke(context, term);
     }
     catch (StrategoExit e) {
-      if (e.getValue() != 0)
+      if (e.getValue() != 0 || result == null)
         throw new RuntimeException("Stratego extraction failed", e);
     }
-    // STRCommands.assimilate(STRCommands.getExtractSTRProg(), term, str);
+    return result;
   }
   
-  public static void fixSDF(String term, String fixed) throws IOException, InvalidParseTableException {
+  public static IStrategoTerm fixSDF(IStrategoTerm term, HybridInterpreter interp) throws IOException, InvalidParseTableException {
+    IStrategoTerm result = null;
     try {
-      sdf_desugar.mainNoExit("-i", term, "-o", fixed);
+      result = sdf_desugar_0_0.instance.invoke(interp.getCompiledContext(), term);
     }
     catch (StrategoExit e) {
-      if (e.getValue() != 0)
+      if (e.getValue() != 0 || result == null)
         throw new RuntimeException("Sdf desugaring failed", e);
     }
-    // STRCommands.assimilate(STRCommands.getSDFDesugarProg(), term, fixed);
+    
+    return result;
   }
+  
+  public static List<IStrategoTerm> registerSemanticProvider(Collection<IStrategoTerm> editorServices, String jarfile) throws IOException {
+    String jarfilePath = jarfile.replace("\\", "\\\\").replace("\"", "\\\"");
+    IStrategoTerm semanticProvider = atermFromString("SemanticProvider(\"" + jarfilePath + "\")");
+    
+    List<IStrategoTerm> newServices = new ArrayList<IStrategoTerm>();
+    
+    for (IStrategoTerm service : editorServices)
+    {
+      if (ATermCommands.isApplication(service, "Builders")) {
+        IStrategoTerm name = ATermCommands.getApplicationSubterm(service, "Builders", 0);
+        IStrategoTerm builders = ATermCommands.getApplicationSubterm(service, "Builders", 1);
+        if (ATermCommands.isList(builders)) {
+          List<IStrategoTerm> builderList = new ArrayList<IStrategoTerm>();
+          builderList.add(semanticProvider);
+          builderList.addAll(getList(builders));
+          builders = ATermCommands.makeList("SemanticRule*", builderList);
+        }
+        
+        service = ATermCommands.makeAppl("Builders", "Section", 2, name, builders);
+      }
+      
+      newServices.add(service);
+    }
+    
+    return newServices;
+  }
+
+  public static void setErrorMessage(IStrategoTerm toplevelDecl, String msg) {
+    IToken left = ImploderAttachment.getLeftToken(toplevelDecl);
+    IToken right = ImploderAttachment.getRightToken(toplevelDecl);
+    
+    String file = "no file";
+    try {
+      file = atermToFile(toplevelDecl);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    
+    if (left == null || right == null)
+      throw new IllegalStateException(msg + ": " + file);
+    
+    for (int i = left.getIndex(), max = right.getIndex(); i <= max; i++) {
+      Token tok = ((Token) left.getTokenizer().getTokenAt(i));
+      tok.setError(msg);
+      
+      if (tok.getTokenizer().getInput().charAt(tok.getStartOffset()) == '\n')
+        break;
+    }
+    
+    log.log(msg + ": " + file);
+  }
+  
 }

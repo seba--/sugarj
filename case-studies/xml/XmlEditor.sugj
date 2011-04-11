@@ -1,0 +1,27 @@
+package xml;
+
+import editor.Colors;
+import xml.XmlSyntax;
+
+public editor services XmlEditor {
+  colorer XmlHighlighting
+    Element : xmlParenthesis
+     
+    environment ElemName : blue
+    environment AttrName : darkorange
+    environment AttValue : darkred
+    environment CharData : black
+    environment CharDataSection : black
+    
+    xmlParenthesis = 0 0 200 bold
+
+  folding XmlFolding
+    Element.Element
+    
+  outliner XmlOutliner
+    ElemName._
+  
+  completions
+    completion template : ElemName = "author"
+    completion template : "<{lib}author title=\"<AttVal>\">\n</{lib}author>"
+}

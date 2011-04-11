@@ -10,8 +10,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URL;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -22,8 +27,6 @@ import java.util.Set;
 public class FileCommands {
 
   private final static boolean DO_DELETE = false;
-
-  public static Set<String> keepFiles = new HashSet<String>();
 
   public static String newTempFile(String suffix) throws IOException {
     File f =
@@ -38,12 +41,15 @@ public class FileCommands {
   }
 
   public static void delete(String file) throws IOException {
-    if (DO_DELETE && !keepFiles.contains(file))
-      new File(file).delete();
+    new File(file).delete();
   }
 
   public static void copyFile(String from, String to) throws IOException {
-    copyFile(new FileInputStream(from), new FileOutputStream(to));
+    FileInputStream fis = new FileInputStream(from);
+    FileOutputStream fos = new FileOutputStream(to);
+    copyFile(fis, fos);
+    fis.close();
+    fos.close();
   }
   
   public static void copyFile(InputStream in, OutputStream out) throws IOException {
@@ -65,12 +71,17 @@ public class FileCommands {
    */
   public static void writeToFile(String file, String content)
       throws IOException {
-    new FileOutputStream(file).write(content.getBytes());
+    FileCommands.createFile(file);
+    FileOutputStream fos = new FileOutputStream(file);
+    fos.write(content.getBytes());
+    fos.close();
   }
 
   public static void appendToFile(String file, String content)
       throws IOException {
-    new FileOutputStream(file, true).write(content.getBytes());
+    FileOutputStream fos = new FileOutputStream(file, true);
+    fos.write(content.getBytes());
+    fos.close();
   }
 
   // from http://snippets.dzone.com/posts/show/1335
@@ -89,6 +100,16 @@ public class FileCommands {
     return fileData.toString();
   }
 
+  
+  public static String fileName(URL url) {
+    return fileName(url.getPath());
+  }
+  
+  
+  public static String fileName(URI uri) {
+    return fileName(uri.getPath());
+  }
+  
   public static String fileName(String file_doof) {
     String file = toCygwinPath(file_doof);
     int index = file.lastIndexOf(sep);
@@ -163,6 +184,8 @@ public class FileCommands {
     while ((len = in.read(b)) > 0)
       out.write(b, 0, len);
 
+    in.close();
+    out.close();
     delete(tmp.getAbsolutePath());
   }
 
@@ -275,8 +298,12 @@ public class FileCommands {
     writeToFile(file, b.toString());
   }
 
-  public static boolean exists(String tbl) {
-    return new File(tbl).exists();
+  public static boolean exists(String file) {
+    return new File(file).exists();
+  }
+  
+  public static boolean exists(URI file) {
+    return new File(file).exists();
   }
 
   public static String hashFileName(String prefix, int hash) {
@@ -306,5 +333,40 @@ public class FileCommands {
       s = s.substring(1, s.length() - 1);
       writeToFile(file, s);
     }
+  }
+
+  public static String getRelativeModulePath(String module) {
+    return module.replace(".", sep);
+  }
+
+  private static String locateModule(String module, String fileExtension) {
+    
+    for (String path : Environment.includePath) {
+      File f = new File(path + Environment.sep + module + "." + fileExtension);
+      if (f.exists())
+        return f.getAbsolutePath();
+    }
+    
+    return null;
+  }
+  
+  public static Map<String, Long> locateModules(Collection<String> modules, String fileExtension) {
+    Map<String, Long> map = new HashMap<String, Long>();
+    
+    for (String module : modules) {
+      String path = locateModule(module, fileExtension);
+      
+      if (path != null)
+        map.put(path, new File(path).lastModified());
+    }
+      
+    return map;
+  }
+
+  public static int fileHash(String file) throws IOException {
+    if (exists(file))
+      return readFileAsString(file).hashCode();
+    
+    return 0;
   }
 }

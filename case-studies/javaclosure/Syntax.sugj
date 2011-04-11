@@ -6,13 +6,9 @@ import org.sugarj.languages.Java;
  * http://javac.info/closures-v06a.html
  */
 public sugar Syntax {
-  signature constructors
-    FunctionType   : JavaType * JavaType -> JavaType
-    BlockLambda : JavaType * JavaFormalParam * JavaBlock -> JavaLambda
-  
   context-free syntax
-    "#" JavaType "(" JavaType ")" -> JavaType {cons("FunctionType")}
-    "#" JavaType "(" JavaFormalParam ")" JavaBlock -> JavaExpr {cons("BlockLambda")}
+    "#" JavaType "(" JavaType ")" -> JavaType {cons("ClosureType")}
+    "#" JavaType "(" JavaFormalParam ")" JavaBlock -> JavaExpr {cons("Closure")}
   
   %% The remaining priorities follow by transitivity.
   context-free priorities

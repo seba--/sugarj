@@ -3,7 +3,6 @@ package javaclosure;
 import java.util.List;
 import java.util.ArrayList;
 
-import javaclosure.Function;
 import javaclosure.Syntax;
 import javaclosure.Transformation;
 
@@ -26,7 +25,7 @@ public class Test<T>{
   	}
   	
   	return s;
-  }
+  } 
   
   public static Test<Integer> create() {
 		Test<Integer> t = new Test<Integer>();

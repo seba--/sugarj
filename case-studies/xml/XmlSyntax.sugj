@@ -5,18 +5,28 @@ package xml;
  */
 public sugar XmlSyntax {
 
+
+  rules
+    constraint-error :
+      Element(lname, attrs, content, rname) -> 
+      [(lname, "element start and end tag need to coincide"),
+       (rname, "element start and end tag need to coincide")]
+      where <not(equal)> (lname, rname) 
+
+ 
+
 %% module xml-attribute
   context-free syntax
-
-    QName "=" AttValue -> Attribute {cons("Attribute")}
+    AttrName "=" AttValue -> Attribute {cons("Attribute")}
+    QName -> AttrName {cons("AttrName")}
 
   syntax
 
     "\"" DoubleQuotedPart* "\"" -> <AttValue-CF> {cons("DoubleQuoted")}
     "'"  SingleQuotedPart* "'" -> <AttValue-CF> {cons("SingleQuoted")}
 
-    FooDoubleQuotedText -> DoubleQuotedPart {cons("Literal")}
-    FooSingleQuotedText -> SingleQuotedPart {cons("Literal")}
+    FooDoubleQuotedText -> DoubleQuotedPart {cons("CharDataPart")}
+    FooSingleQuotedText -> SingleQuotedPart {cons("CharDataPart")}
 
     <DoubleQuotedText-LEX> -> FooDoubleQuotedText
     <SingleQuotedText-LEX> -> FooSingleQuotedText
@@ -42,7 +52,7 @@ public sugar XmlSyntax {
 
     CharDataPart+ -> CharData {cons("Text")}
 
-    FooCharDataText -> CharDataPart {cons("Literal")}
+    FooCharDataText -> CharDataPart {cons("CharDataPart")}
     <Ref-CF> -> CharDataPart
     "<![CDATA[" <CData-LEX> "]]>" -> CharDataPart {cons("CDATASection")}
 
@@ -163,25 +173,27 @@ public sugar XmlSyntax {
 
   sorts Document Element Content
   context-free syntax
-
     Prologue Element Epilogue -> Document {cons("Document")}
-
-    "<" QName Attribute* "/>" -> Element {cons("EmptyElement")}
 
     Element -> Content
     Comment -> Content {cons("Comment")}
     PI      -> Content
-  syntax
 
+  syntax
     CharData      -> <Content-CF>
     CDataSection  -> <Content-CF>
 
-  context-free syntax
-    "<" QName Attribute* ">"
-      Content* 
-    "</" QName ">"
-    -> Element {cons("Element")}
 
+  context-free syntax
+    "<" ElemName Attribute* "/>" -> Element {cons("EmptyElement")}
+
+    "<" ElemName Attribute* ">"
+      Content* 
+    "</" ElemName ">"
+    -> Element {cons("Element")}
+    
+    QName -> ElemName {cons("ElemName")}
+  
 
 %% module xml-names
 
@@ -201,7 +213,7 @@ public sugar XmlSyntax {
 %% module xml-comments
 
   lexical syntax
-    "<!--" (~[\-] | Dash)* "-->" -> Comment
+    CommentLeft (~[\-] | Dash)* CommentRight -> Comment
     "-" -> Dash
 
   lexical restrictions
@@ -218,22 +230,25 @@ public sugar XmlSyntax {
 
 
 
-
+/*
 	signature
 	  constructors
+	    ElemName         : QName -> ElemName
+      AttrName         : QName -> AttrName
 	                     : CharData -> Content
 	                     : PI -> Content
 	    Comment          : Comment -> Content
+	    Comment          : String * Comment * String -> Content
 	                     : Element -> Content
-	    Element          : QName * List(Attribute) * List(Content) * QName -> Element
+      Element          : QName * List(Attribute) * List(Content) * QName -> Element
 	    EmptyElement     : QName * List(Attribute) -> Element
 	    Document         : Prologue * Element * Epilogue -> Document
 	                     : String -> FooSingleQuotedText
 	                     : String -> FooDoubleQuotedText
 	                     : Ref -> SingleQuotedPart
-	    Literal          : FooSingleQuotedText -> SingleQuotedPart
+	    CharDataPart          : FooSingleQuotedText -> SingleQuotedPart
 	                     : Ref -> DoubleQuotedPart
-	    Literal          : FooDoubleQuotedText -> DoubleQuotedPart
+	    CharDataPart          : FooDoubleQuotedText -> DoubleQuotedPart
 	    SingleQuoted     : List(SingleQuotedPart) -> AttValue
 	    DoubleQuoted     : List(DoubleQuotedPart) -> AttValue
 	    Attribute        : QName * AttValue -> Attribute
@@ -247,7 +262,7 @@ public sugar XmlSyntax {
 	                     : String -> FooCharDataText
 	    CDATASection     : String -> CharDataPart
 	                     : Ref -> CharDataPart
-	    Literal          : FooCharDataText -> CharDataPart
+	    CharDataPart          : FooCharDataText -> CharDataPart
 	    Text             : List(CharDataPart) -> CharData
 	    DocTypeDecl      : QName * ExternalID -> DocTypeDecl
 	    DocTypePrologue  : DocTypeDecl * List(Misc) -> DocTypePrologue
@@ -280,5 +295,5 @@ public sugar XmlSyntax {
 	    QName            : Option(Qualifier) * NCName -> QName
 	                     : String -> NCName
 	                     : String -> Comment
-
+*/
 }
