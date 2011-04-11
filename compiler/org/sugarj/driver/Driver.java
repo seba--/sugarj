@@ -53,7 +53,7 @@ import org.sugarj.stdlib.StdLib;
  */
 public class Driver{
   
-  public final static String VERSION = "editor-services-0.1";
+  public final static String VERSION = "editor-base-0.2";
   
   private static class Key {
     private String source;
@@ -111,6 +111,7 @@ public class Driver{
   private RetractableTreeBuilder inputTreeBuilder;
   private JSGLRI sdfParser;
   private JSGLRI strParser;
+  private JSGLRI editorServicesParser;
   private HybridInterpreter interp;
   private JSGLRI parser;
   private Context sdfContext;
@@ -229,10 +230,8 @@ public class Driver{
       init(moduleName);
 
       remainingInput = source;
-      
-      driverResult.addEditorService(
-        ATermCommands.atermFromString(
-          "Builders(\"sugarj checking\", [SemanticObserver(Strategy(\"sugarj-analyze\"))])"));
+  
+      initEditorServices();
 
       boolean done = false;
       while (!done) {
@@ -881,6 +880,22 @@ public class Driver{
     }
   }
   
+  private void initEditorServices() throws IOException, TokenExpectedException, BadTokenException, SGLRException {
+    driverResult.addEditorService(
+        ATermCommands.atermFromString(
+          "Builders(\"sugarj checking\", [SemanticObserver(Strategy(\"sugarj-analyze\"))])"));
+    
+    IStrategoTerm initEditor = editorServicesParser.parse(new FileInputStream(StdLib.initEditor.getPath()), StdLib.initEditor.getPath());
+    
+    IStrategoTerm services = ATermCommands.getApplicationSubterm(initEditor, "Module", 2);
+    
+    if (!ATermCommands.isList(services))
+      throw new IllegalStateException("initial editor ill-formed");
+    
+    for (IStrategoTerm service : ATermCommands.getList(services))
+      driverResult.addEditorService(service);
+  }
+  
   private static void initialize() throws IOException {
     Environment.init();
     
@@ -924,6 +939,7 @@ public class Driver{
     
     sdfParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.sdfTbl.getPath()), "Sdf2Module");
     strParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.strategoTbl.getPath()), "StrategoModule");
+    editorServicesParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.editorServicesTbl.getPath()), "Module");
 
     interp = new HybridInterpreter(); //TODO (ATermCommands.factory);
     sdfContext = tools.init();
