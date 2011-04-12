@@ -1,9 +1,7 @@
 package xml.schema;
 
-import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
 import xml.AsSax;
 import xml.XmlJavaSyntax;
@@ -14,8 +12,8 @@ public class TestXmlSchema extends xml.Test {
 	public static void main(String[] args) throws SAXException {
     ContentHandler ch = new TestXmlSchema();
     
-    ch.write valid document
-        <{http://www.w3.org/2001/XMLSchema}schema
+    @Validate
+    ch.<{http://www.w3.org/2001/XMLSchema}schema
 		    targetNamespace="http://www.w3.org/2001/XMLSchema">
 		   	
 		   	
