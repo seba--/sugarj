@@ -1,11 +1,10 @@
 package xml.schema;
 
-import xml.schema.AsDesugaring;
-import xml.schema.XmlSchemaJavaSyntax;
+import xml.schema.XmlSchema;
 
 /*
  * example schema based on
- *   "An Introduction XML and Web Technologies"
+ *   "An Introduction to XML and Web Technologies"
  *   by Anders Moeller and Michael Schwartzbach,
  *   page 115,
  *   Addison-Wesley
