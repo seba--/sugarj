@@ -9,7 +9,11 @@ public editor services XmlEditor {
      
     environment ElemName : blue
     environment AttrName : darkorange
-    environment AttValue : darkred
+    
+    AttValue : darkred
+    _.CharDataPart : darkred
+    FooDoubleQuotedText : darkred
+    
     environment CharData : black
     environment CharDataSection : black
     
@@ -19,7 +23,7 @@ public editor services XmlEditor {
     Element.Element
     
   outliner XmlOutliner
-    ElemName._
+    Element._
   
   completions
     completion template : ElemName = "author"

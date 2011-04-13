@@ -14,7 +14,7 @@ public class BookTest extends xml.Test {
      
     String title = "Sweetness and Power: The Place of Sugar in Modern History";
     
-    ch.<book title="{title}" >
+    ch.<book title="{new String(title)}" >
          <author name="Sidney W. Mintz" />
        </book>;
   }
