@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description name="SugarJ" url="sugarj.org/update">
+      SugarJ
+   </description>
+   <feature url="features/org.sugarj.editor_1.0.1.201104161011.jar" id="org.sugarj.editor" version="1.0.1.201104161011">
+      <category name="SugarJ"/>
+   </feature>
+   <category-def name="SugarJ" label="SugarJ">
+      <description>
+         SugarJ plugin
+      </description>
+   </category-def>
+</site>
