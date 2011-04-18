@@ -26,6 +26,6 @@ public editor services XmlEditor {
     Element._
   
   completions
-    completion template : ElemName = "author"
-    completion template : "<{lib}author title=\"<AttVal>\">\n</{lib}author>"
+    completion trigger : "<"
+    completion template : Content = "<{lib}author title=\"" <AttVal> "\">\n</{lib}author>"
 }
