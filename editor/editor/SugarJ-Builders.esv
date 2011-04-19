@@ -1,8 +1,6 @@
 
 module SugarJ-Builders
 
-imports SugarJ-Builders.generated
-
 builders
                                                                       
   // This file can be used for custom analysis and builder rules.     
