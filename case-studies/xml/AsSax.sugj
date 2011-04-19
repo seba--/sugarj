@@ -1,6 +1,6 @@
 package xml;
 
-import concretesyntax.ConcreteJava;
+import concretesyntax.Java;
 
 import eblock.EBlock;
 

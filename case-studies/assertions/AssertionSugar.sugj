@@ -2,7 +2,7 @@ package assertions;
 
 import org.sugarj.languages.Stratego;
 
-import concretesyntax.ConcreteStratego;
+import concretesyntax.Stratego;
 
 public sugar AssertionSugar {
 

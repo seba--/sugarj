@@ -4,7 +4,7 @@ import org.sugarj.languages.Stratego;
 
 import concretesyntax.MetaExplode;
 
-public sugar ConcreteStratego {
+public sugar Stratego {
   context-free syntax
     "stratego-decl" "|[" StrategoDecl "]|" -> StrategoTerm {cons("ToMetaExpr")}
 	  "stratego"      "|[" StrategoDecl "]|" -> StrategoTerm {cons("ToMetaExpr")}

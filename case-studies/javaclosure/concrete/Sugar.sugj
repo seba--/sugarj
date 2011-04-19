@@ -1,6 +1,6 @@
 package javaclosure.concrete;
 
-import concretesyntax.ConcreteJava;
+import concretesyntax.Java;
 
 import javaclosure.Closure;
 import javaclosure.ToRefType;
