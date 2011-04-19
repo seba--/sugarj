@@ -29,3 +29,12 @@ colorer System colors
   pink      = 255 105 180   
   brown     = 139 69 19     
   default   = _      
+
+language
+  fences : ( )
+  fences : { }
+  fences : < >
+  fences : [ ]
+  fences : ' '
+  fences : "\"" "\""
+  
