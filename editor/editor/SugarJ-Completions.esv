@@ -1,7 +1,5 @@
 module SugarJ-Completions
 
-imports SugarJ-Completions.generated
-
 completions
                                                                    
   // This file is used to define content completion.               
