@@ -65,14 +65,21 @@ public class SugarJDescriptor extends Descriptor {
     return result;
   }
 
-  private void initObserver(StrategoObserver observer) {
-    observer.getLock().lock();
-    try {
-      observer.setPrototypeAllowed(false);
-      ((StrategoObserver) observer).getRuntime(); // eagerly initilize w/ current document
-    } finally {
-      observer.getLock().unlock();
-    }
+  private void initObserver(final StrategoObserver observer) {
+    new Thread(new Runnable() {
+      public void run() {
+        try {
+          observer.getLock().lockInterruptibly();
+          observer.setPrototypeAllowed(false);
+          ((StrategoObserver) observer).getRuntime(); // eagerly initilize w/ current document
+        } catch (InterruptedException e) {
+          Environment.logException("could not reinitialize editor: interrupted", e);
+        }
+        finally {
+          observer.getLock().unlock();
+        }
+      }
+    }).start();
   }
   
   private void reloadEditors(SGLRParseController controller) {
