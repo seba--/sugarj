@@ -28,4 +28,4 @@ public editor services XmlEditor {
   completions
     completion trigger : "<"
     completion template : Content = "<{lib}author title=\"" <AttVal> "\">\n</{lib}author>"
-}
+} 

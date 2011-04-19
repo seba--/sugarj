@@ -8,14 +8,16 @@ import xml.Test;
 import xml.XmlJavaSyntax;
 import xml.XmlEditor;
 
+import xml.XmlSyntax;
+
 public class BookTest extends xml.Test {
   public static void main(String[] args) throws SAXException {
     ContentHandler ch = new BookTest();
-     
+    
     String title = "Sweetness and Power: The Place of Sugar in Modern History";
     
-    ch.<book title="{new String(title)}" >
+    ch.<book title="{new String(title)}">
          <author name="Sidney W. Mintz" />
-       </book>;
+       </book>;   
   }
 }

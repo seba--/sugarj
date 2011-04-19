@@ -9,7 +9,7 @@ import concretesyntax.MetaExplode;
  * copied and adpated from
  *   https://svn.strategoxt.org/repos/StrategoXT/java-front/trunk/syntax-embedding/languages/java/EmbeddedJava.sdf
  */
-public sugar ConcreteJava {
+public sugar Java {
 
   context-free syntax
     "~" JavaExpr -> JavaExpr {reject}	

@@ -1,6 +1,6 @@
 package pair.concrete;
 
-import concretesyntax.ConcreteJava;
+import concretesyntax.Java;
 
 import pair.concrete.Syntax;
 

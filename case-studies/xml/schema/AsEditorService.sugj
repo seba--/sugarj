@@ -1,5 +1,7 @@
 package xml.schema;
 
+import concretesyntax.EditorServices;
+
 import xml.XmlSyntax;
 import xml.schema.XmlSchemaJavaSyntax;
 

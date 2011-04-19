@@ -1,6 +1,6 @@
 package xml.schema;
 
-import concretesyntax.ConcreteStratego;
+import concretesyntax.Stratego;
 
 import xml.ConcreteXml;
 import xml.XmlJavaSyntax;
