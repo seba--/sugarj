@@ -4,6 +4,8 @@ import concretesyntax.EditorServices;
 
 import xml.XmlSyntax;
 import xml.schema.XmlSchemaJavaSyntax;
+import xml.ConcreteXml;
+import xml.XmlEditor;
 
 public sugar AsEditorService {
   rules
@@ -11,8 +13,81 @@ public sugar AsEditorService {
       XsdSugarBody(XMLSchemaDoc(xsd)) -> <schema-editor> xsd
     
     schema-editor :
-      Document(pre, el, post) -> <schema-editor-element> el
+      Document(pre, el, post) -> <schema-editor-root-completion> el
 
-    schema-editor-element :
-      el -> []    
+    schema-editor-root-completion :
+      Element(
+        ElemName(QName(Some(URIPrefix("http://www.w3.org/2001/XMLSchema")), "schema")),
+        [Attribute(AttrName(QName(None(), "targetNamespace")), attval)],
+        contents,
+        _)
+      -> res
+      where
+        <xml-attr-value2string> attval => namespace;
+        <mapconcat(schema-editor-type-completion <+ ![])> contents => types;
+        <mapconcat(schema-editor-element-completion(|namespace, types); ensure-list <+ ![])> contents => res
+
+ 
+    schema-editor-element-completion(|namespace, types) :
+      Element(
+        ElemName(QName(Some(URIPrefix("http://www.w3.org/2001/XMLSchema")), name)),
+        _,
+        contents,
+        _)
+      -> res
+      where
+        <not(equal)> (name, "element");
+        <mapconcat(schema-editor-element-completion(|namespace, types); ensure-list <+ ![])> contents => res
+
+
+
+    schema-editor-element-completion(|namespace, types) :
+      |[
+        <{http://www.w3.org/2001/XMLSchema}element name=attval1 type=attval2>
+        </{http://www.w3.org/2001/XMLSchema}element>
+      ]|
+      -> 
+      |[  completions
+            completion trigger : "<"
+            ~completion
+       ]|
+      where
+        <xml-attr-value2string> attval1 => element;
+        <xml-attr-value2string> attval2 => type;
+
+        <concat-strings> ["<", "{", namespace, "}", element] => prefix;
+        !"\n" => content;
+        <concat-strings> ["</", "{", namespace, "}", element, ">"] => suffix;
+
+        <lookup> (type, types) => attributes;
+
+        !CompletionTemplateWithSort(
+           Sort("Content"),
+           String(prefix),
+           <conc> (attributes, [String(">"), String(content), String(suffix)]),
+           None())
+        => completion
+
+    
+    schema-editor-type-completion :
+      Element(
+        ElemName(QName(Some(URIPrefix("http://www.w3.org/2001/XMLSchema")), "complexType")),
+        [Attribute(AttrName(QName(None(), "name")), attval)],
+        contents,
+        ElemName(QName(Some(URIPrefix("http://www.w3.org/2001/XMLSchema")), "complexType"))) 
+      -> [(<xml-attr-value2string> attval, attributeCompletion)]
+      where
+        <mapconcat(schema-editor-attribute-completion <+ ![])> contents => attributeCompletion
+        
+    schema-editor-attribute-completion :
+      |[
+        <{http://www.w3.org/2001/XMLSchema}attribute name=attval1 type=attval2>
+        </{http://www.w3.org/2001/XMLSchema}attribute>
+      ]|
+      -> 
+      [String(attr-pre), Placeholder(attr-placeholder), String(attr-post)]
+      where
+        <concat-strings> [" ", <xml-attr-value2string> attval1, "=\""] => attr-pre;
+        <concat-strings> ["<", <xml-attr-value2string> attval2, ">"] => attr-placeholder;
+        <concat-strings> ["\""] => attr-post
 }

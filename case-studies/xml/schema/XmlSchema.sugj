@@ -4,6 +4,8 @@ import xml.schema.AsDesugaring;
 import xml.schema.XmlSchemaJavaSyntax;
 
 import xml.schema.XmlSchemaCompiled;
+ 
+import xml.schema.AsEditorService;
 
 public xmlschema XmlSchema {
   <{http://www.w3.org/2001/XMLSchema}schema 
@@ -11,7 +13,7 @@ public xmlschema XmlSchema {
    	
    	<{http://www.w3.org/2001/XMLSchema}element name="schema" type="SchemaType">
    	</{http://www.w3.org/2001/XMLSchema}element>
-   	   	
+
     <{http://www.w3.org/2001/XMLSchema}complexType name="SchemaType">
     	<{http://www.w3.org/2001/XMLSchema}choice maxOccurs="unbounded">
         
@@ -26,7 +28,7 @@ public xmlschema XmlSchema {
       
       </{http://www.w3.org/2001/XMLSchema}choice>
       
-      <{http://www.w3.org/2001/XMLSchema}attribute name="targetNamespace" type="StringType">
+      <{http://www.w3.org/2001/XMLSchema}attribute name="targetNamespace" type="string">
       </{http://www.w3.org/2001/XMLSchema}attribute>
     </{http://www.w3.org/2001/XMLSchema}complexType> 
     
@@ -53,7 +55,7 @@ public xmlschema XmlSchema {
       
       </{http://www.w3.org/2001/XMLSchema}sequence>
       
-      <{http://www.w3.org/2001/XMLSchema}attribute name="name" type="StringType">
+      <{http://www.w3.org/2001/XMLSchema}attribute name="name" type="string">
       </{http://www.w3.org/2001/XMLSchema}attribute>        
     </{http://www.w3.org/2001/XMLSchema}complexType>
     
@@ -96,7 +98,7 @@ public xmlschema XmlSchema {
     
       </{http://www.w3.org/2001/XMLSchema}choice>
       
-      <{http://www.w3.org/2001/XMLSchema}attribute name="maxOccurs" type="StringType">
+      <{http://www.w3.org/2001/XMLSchema}attribute name="maxOccurs" type="string">
       </{http://www.w3.org/2001/XMLSchema}attribute>
     </{http://www.w3.org/2001/XMLSchema}complexType>
     
@@ -105,10 +107,10 @@ public xmlschema XmlSchema {
       <{http://www.w3.org/2001/XMLSchema}sequence>
       </{http://www.w3.org/2001/XMLSchema}sequence>
       	
-      <{http://www.w3.org/2001/XMLSchema}attribute name="name" type="StringType">
+      <{http://www.w3.org/2001/XMLSchema}attribute name="name" type="string">
       </{http://www.w3.org/2001/XMLSchema}attribute>
     
-      <{http://www.w3.org/2001/XMLSchema}attribute name="type" type="StringType">
+      <{http://www.w3.org/2001/XMLSchema}attribute name="type" type="string">
       </{http://www.w3.org/2001/XMLSchema}attribute>
     </{http://www.w3.org/2001/XMLSchema}complexType>
     
@@ -117,10 +119,10 @@ public xmlschema XmlSchema {
       <{http://www.w3.org/2001/XMLSchema}sequence>
       </{http://www.w3.org/2001/XMLSchema}sequence>
       
- 	  <{http://www.w3.org/2001/XMLSchema}attribute name="name" type="StringType">
+ 	  <{http://www.w3.org/2001/XMLSchema}attribute name="name" type="string">
       </{http://www.w3.org/2001/XMLSchema}attribute>
     
-      <{http://www.w3.org/2001/XMLSchema}attribute name="type" type="StringType">
+      <{http://www.w3.org/2001/XMLSchema}attribute name="type" type="string">
       </{http://www.w3.org/2001/XMLSchema}attribute>
     </{http://www.w3.org/2001/XMLSchema}complexType>
     
@@ -131,23 +133,23 @@ public xmlschema XmlSchema {
         </{http://www.w3.org/2001/XMLSchema}element>
       </{http://www.w3.org/2001/XMLSchema}sequence>
       
-      <{http://www.w3.org/2001/XMLSchema}attribute name="name" type="StringType">
+      <{http://www.w3.org/2001/XMLSchema}attribute name="name" type="string">
       </{http://www.w3.org/2001/XMLSchema}attribute>
     </{http://www.w3.org/2001/XMLSchema}complexType>
     
     	
     
-	<{http://www.w3.org/2001/XMLSchema}complexType name="RestrictionType">
-	  <{http://www.w3.org/2001/XMLSchema}sequence>
+    <{http://www.w3.org/2001/XMLSchema}complexType name="RestrictionType">
+      <{http://www.w3.org/2001/XMLSchema}sequence>
       </{http://www.w3.org/2001/XMLSchema}sequence>
       
-      <{http://www.w3.org/2001/XMLSchema}attribute name="base" type="StringType">
+      <{http://www.w3.org/2001/XMLSchema}attribute name="base" type="string">
       </{http://www.w3.org/2001/XMLSchema}attribute>
     </{http://www.w3.org/2001/XMLSchema}complexType>    
     
     
     
-    <{http://www.w3.org/2001/XMLSchema}simpleType name="StringType">
+    <{http://www.w3.org/2001/XMLSchema}simpleType name="string">
     	<{http://www.w3.org/2001/XMLSchema}restriction base="string">
     	</{http://www.w3.org/2001/XMLSchema}restriction>
     </{http://www.w3.org/2001/XMLSchema}simpleType>

@@ -7,7 +7,7 @@ public xmlschema BookSchema {
     
     <{http://www.w3.org/2001/XMLSchema}element name="book" type="BookType">
     </{http://www.w3.org/2001/XMLSchema}element>
-    
+
     <{http://www.w3.org/2001/XMLSchema}complexType name="BookType">
       <{http://www.w3.org/2001/XMLSchema}sequence maxOccurs="unbounded">
         <{http://www.w3.org/2001/XMLSchema}element name="author" type="AuthorType">

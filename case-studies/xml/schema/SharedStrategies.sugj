@@ -6,7 +6,8 @@ public sugar SharedStrategies {
     is-error = where(?[(a,<id>)|c]; is-string)
     head : [x|y] -> x
     tail : [x|y] -> y
-    ensure-list = is-list <+ ![<id>]
+    is-a-list = is-list <+ \ l@[x] -> l \
+    ensure-list = is-a-list <+ ![<id>]
     
   strategies
     validate-base-string =
