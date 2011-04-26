@@ -33,8 +33,7 @@ colorer System colors
 language
   fences : ( )
   fences : { }
-  fences : < >
   fences : [ ]
   fences : ' '
-  fences : "\"" "\""
+//  fences : "\"" "\""
   
