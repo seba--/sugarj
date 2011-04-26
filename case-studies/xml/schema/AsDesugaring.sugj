@@ -1,4 +1,4 @@
-package xml.schema;
+package xml.schema; 
 
 import concretesyntax.Stratego;
 
@@ -356,7 +356,7 @@ public sugar AsDesugaring {
       stratego |[
         if ?[]
           then ![]
-          else is-list < (map(!(<id>,string~msg))) + ![(<id>,string~msg)]
+          else is-a-list < (map(!(<id>,string~msg))) + ![(<id>,string~msg)]
         end
       ]|
 }
