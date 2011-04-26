@@ -24,8 +24,4 @@ public editor services XmlEditor {
     
   outliner XmlOutliner
     Element._
-  
-  completions
-    completion trigger : "<"
-    completion template : Content = "<{lib}author title=\"" <AttVal> "\">\n</{lib}author>"
-} 
+}
