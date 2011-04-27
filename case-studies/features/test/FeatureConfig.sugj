@@ -1,0 +1,8 @@
+package features.test;
+
+import features.Features;
+import features.test.FeatureModel;
+
+config FeatureConfig for FeatureModel {
+  enable A, B;
+}
