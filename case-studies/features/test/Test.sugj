@@ -1,0 +1,23 @@
+package features.test;
+
+import features.Features;
+
+import features.test.FeatureModel;
+import features.test.FeatureConfig;
+
+
+#feature(A)
+class Test {
+  #feature(B)
+  void foo(){
+    foo();
+    #feature(B){
+    bar();
+    }
+  }
+  void bar(){}
+}
+
+#feature(!A)
+class Test {
+}
