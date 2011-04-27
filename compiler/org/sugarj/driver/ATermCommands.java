@@ -8,8 +8,14 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.activation.UnsupportedDataTypeException;
+
 import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.interpreter.terms.IStrategoConstructor;
+import org.spoofax.interpreter.terms.IStrategoInt;
 import org.spoofax.interpreter.terms.IStrategoList;
+import org.spoofax.interpreter.terms.IStrategoPlaceholder;
+import org.spoofax.interpreter.terms.IStrategoReal;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
@@ -332,11 +338,42 @@ public class ATermCommands {
       Token tok = ((Token) left.getTokenizer().getTokenAt(i));
       tok.setError(msg);
       
-      if (tok.getTokenizer().getInput().charAt(tok.getStartOffset()) == '\n')
+      if (tok.getTokenizer().getInput().length() <= tok.getStartOffset() || tok.getTokenizer().getInput().charAt(tok.getStartOffset()) == '\n')
         break;
     }
     
     log.log(msg + ": " + file);
+  }
+
+  public static IStrategoTerm makeMutable(IStrategoTerm term) {
+    if (term.getStorageType() == IStrategoTerm.MUTABLE)
+      return term;
+    
+    IStrategoTerm[] kids = new IStrategoTerm[term.getSubtermCount()];
+    
+    for (int i = 0; i < kids.length; i++)
+      kids[i] = makeMutable(term.getSubterm(i));
+    
+    switch (term.getTermType()) {
+      case IStrategoTerm.APPL :
+        return factory.makeAppl(((IStrategoAppl) term).getConstructor(), kids, term.getAnnotations());
+      case IStrategoTerm.LIST :
+        return factory.makeList(kids, term.getAnnotations());
+      case IStrategoTerm.INT :
+        return factory.makeInt(((IStrategoInt) term).intValue());
+      case IStrategoTerm.REAL :
+        return factory.makeReal(((IStrategoReal) term).realValue());
+      case IStrategoTerm.STRING :
+        return factory.makeString(((IStrategoString) term).stringValue());
+      case IStrategoTerm.CTOR :
+        return factory.makeConstructor(((IStrategoConstructor) term).getName(), ((IStrategoConstructor) term).getArity());
+      case IStrategoTerm.TUPLE :
+        return factory.makeTuple(kids, term.getAnnotations());
+      case IStrategoTerm.PLACEHOLDER :
+        return factory.makePlaceholder(((IStrategoPlaceholder) term).getTemplate());
+      default :
+        throw new UnsupportedOperationException();
+    }
   }
   
 }
