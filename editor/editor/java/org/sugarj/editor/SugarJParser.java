@@ -48,7 +48,7 @@ public class SugarJParser extends JSGLRI {
 
     
     Environment.atomicImportParsing = true;
-    // Environment.generateJavaFile = true;
+    Environment.generateJavaFile = true;
 
     // use this to temporarily deactivate caching
     // Environment.wocache = true;
