@@ -390,9 +390,6 @@ public class Driver{
         else
           log.log("The editor services is not public.");
       
-        log.log("The body of the editor services is:");
-        log.log(body.toString());
-        
         IStrategoTerm services = ATermCommands.getApplicationSubterm(body, "EditorServicesBody", 0);
         
         if (!ATermCommands.isList(services))

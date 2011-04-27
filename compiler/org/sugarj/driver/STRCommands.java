@@ -209,6 +209,7 @@ public class STRCommands {
         String sort = ImploderAttachment.getSort(in);
         
         try {
+          term = ATermCommands.makeMutable(term);
           ImploderAttachment.putImploderAttachment(term, false, sort, left, right);
         } catch (Exception e) {
           log.log("origin annotation failed");
