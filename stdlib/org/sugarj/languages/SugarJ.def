@@ -1,8 +1,11 @@
 definition
 
 module org/sugarj/languages/SugarJ
-imports org/sugarj/languages/Java org/sugarj/languages/Sdf2
-        org/sugarj/languages/Stratego org/sugarj/languages/EditorServices
+imports org/sugarj/languages/Java 
+        org/sugarj/languages/Sdf2
+        org/sugarj/languages/Stratego
+        org/sugarj/languages/EditorServices
+        org/sugarj/languages/Plain
 
 exports
   sorts WATER WATERTOKEN WATERTOKENSTART WATERTOKENSEPARATOR WATERTOKENSTAR

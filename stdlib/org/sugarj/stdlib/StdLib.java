@@ -61,7 +61,8 @@ public class StdLib {
   public static URI strategoTbl = ensureFile("org/sugarj/languages/Stratego.tbl");
   public static URI editorServicesDef = ensureFile("org/sugarj/languages/EditorServices.def");
   public static URI editorServicesTbl = ensureFile("org/sugarj/languages/EditorServices.tbl");
-
+  public static URI plainDef = ensureFile("org/sugarj/languages/Plain.def");
+  
   public static URI initGrammar = ensureFile("org/sugarj/init/initGrammar.sdf");
   public static String initGrammarModule = "org/sugarj/init/initGrammar";
   public static URI initGrammarAtomicImports = ensureFile("org/sugarj/init/initGrammar_atomicImports.sdf");
@@ -81,6 +82,7 @@ public class StdLib {
     exists(strategoTbl);
     exists(editorServicesDef);
     exists(editorServicesTbl);
+    exists(plainDef);
     exists(initGrammar);
     exists(initGrammarAtomicImports);
     exists(initGrammarXTBL);

@@ -63,6 +63,7 @@ public class SDFCommands {
       "-Idef", StdLib.sdfDef.getPath(),
       "-Idef", StdLib.strategoDef.getPath(),
       "-Idef", StdLib.editorServicesDef.getPath(),
+      "-Idef", StdLib.plainDef.getPath(),
       "-I", StdLib.stdLibDir.getPath(),
     }));
     
@@ -144,6 +145,9 @@ public class SDFCommands {
       tbl = generateParseTable(key, sdf, module, sdfContext, makePermissiveContext);
       cacheParseTable(key, tbl);
     }
+    
+    if (tbl != null)
+      log.log("use generated table " + tbl);
     
     return org.strategoxt.imp.runtime.Environment.loadParseTable(tbl);
   }
