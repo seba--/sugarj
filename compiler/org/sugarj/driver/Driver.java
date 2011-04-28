@@ -39,6 +39,7 @@ import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
+import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.lang.Context;
@@ -53,7 +54,7 @@ import org.sugarj.stdlib.StdLib;
  */
 public class Driver{
   
-  public final static String VERSION = "editor-base-0.2";
+  public final static String VERSION = "editor-base-0.3";
   
   private static class Key {
     private String source;
@@ -413,6 +414,67 @@ public class Driver{
     }
   }
   
+  private void processPlainDec(IStrategoTerm toplevelDecl) throws IOException {
+    log.beginTask(
+        "processing",
+        "PROCESS the desugared plain declaration.");
+    try {
+      sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      
+      String extName = null;
+      String fullExtName = null;
+      boolean isPublic = false;
+
+      IStrategoTerm head = getApplicationSubterm(toplevelDecl, "PlainDec", 0);
+      IStrategoTerm body= getApplicationSubterm(toplevelDecl, "PlainDec", 1);
+      
+      log.beginTask("Extracting name and accessibility.");
+      try {
+        extName =
+          SDFCommands.prettyPrintJava(
+          getApplicationSubterm(head, "PlainDecHead", 1), interp);    
+
+        String extension = null;
+        if (head.getSubtermCount() >= 3 && isApplication(getApplicationSubterm(head, "PlainDecHead", 2), "Some"))
+          extension = Term.asJavaString(
+                      getApplicationSubterm(getApplicationSubterm(head, "PlainDecHead", 2), "Some", 0));    
+ 
+
+        
+        IStrategoTerm mods = getApplicationSubterm(head, "PlainDecHead", 0);
+        
+        for (IStrategoTerm t : getList(mods))
+          if (isApplication(t, "Public"))
+          {
+            isPublic = true;
+            break;
+          }
+        
+        fullExtName = relPackageNameSep() + extName + (extension == null ? "" : ("." + extension));
+
+        log.log("The name is '" + extName + "'.");
+        log.log("The full name is '" + fullExtName + "'.");
+
+        if (isPublic)
+          log.log("The plain file is public.");
+        else
+          log.log("The plain file is not public.");
+      
+        String plainContent = Term.asJavaString(ATermCommands.getApplicationSubterm(body, "PlainBody", 0));
+        
+        String plainFile = bin + sep + relPackageNameSep() + extName + (extension == null ? "" : ("." + extension));
+        FileCommands.createFile(plainFile);
+  
+        log.log("writing plain content to " + plainFile);
+        driverResult.generateFile(plainFile, plainContent);
+      } finally {
+        log.endTask();
+      }
+    } finally {
+      log.endTask();
+    }
+  }
+  
   
   private void processToplevelDeclaration(IStrategoTerm toplevelDecl)
       throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
@@ -439,6 +501,8 @@ public class Driver{
           processSugarDec(toplevelDecl);
         else if (isApplication(toplevelDecl, "EditorServicesDec")) 
           processEditorServicesDec(toplevelDecl);
+        else if (isApplication(toplevelDecl, "PlainDec")) 
+          processPlainDec(toplevelDecl);
         else if (ATermCommands.isList(toplevelDecl))
           /* 
            * Desugarings may generate lists of toplevel declarations. These declarations,
@@ -449,7 +513,7 @@ public class Driver{
         else
           throw new IllegalArgumentException("unexpected toplevel declaration, desugaring probably failed: " + toplevelDecl.toString(5));
       } catch (Exception e) {
-        ATermCommands.setErrorMessage(toplevelDecl, e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString());
+        ATermCommands.setErrorMessage(toplevelDecl, e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString());
         sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
       }
     }
