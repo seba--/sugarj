@@ -10,7 +10,7 @@ exports
   context-free syntax %% ToplevelDeclaration
     JavaPackageDec -> ToplevelDeclaration
     JavaImportDec -> ToplevelDeclaration
-    JavaTypeDec -> ToplevelDeclaration {cons("JavaTypeDec")}
+    JavaTypeDec -> ToplevelDeclaration
     SugarDec -> ToplevelDeclaration
   
   context-free syntax %% NextToplevelDeclaration
