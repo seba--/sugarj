@@ -115,7 +115,7 @@ public class ATermCommands {
   }
   
   public static IStrategoTerm getApplicationSubterm(IStrategoTerm term, String cons, int index) {
-    if (isApplication(term, cons))
+    if (cons == null || isApplication(term, cons))
       return term.getSubterm(index);
     
     throw new MatchError(term, "application", cons);

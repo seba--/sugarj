@@ -375,16 +375,6 @@ public class Driver{
         log.log("The name of the editor services is '" + extName + "'.");
         log.log("The full name of the editor services is '" + fullExtName + "'.");
 
-        if (extName.equals(mainModuleName))
-          driverResult.appendToFile(
-              javaOutFile,
-              "/* auto-generated dummy class as replacement\n" + 
-              " * for extracted editor services.\n" +
-              " */\n" +
-              (isPublic ? "public " : "") + "class " + mainModuleName + "{}\n");
-
-        
-
         if (isPublic)
           log.log("The editor services is public.");
         else
@@ -439,7 +429,11 @@ public class Driver{
           else 
             processImportDecs(toplevelDecl);
         }
-        else if (isApplication(toplevelDecl, "JavaTypeDec"))
+        else if (isApplication(toplevelDecl, "JavaTypeDec") || //XXX remove this branch
+                 isApplication(toplevelDecl, "ClassDec") ||
+                 isApplication(toplevelDecl, "InterfaceDec") ||
+                 isApplication(toplevelDecl, "EnumDec") ||
+                 isApplication(toplevelDecl, "AnnoDec"))
           processJavaTypeDec(toplevelDecl);
         else if (isApplication(toplevelDecl, "SugarDec"))
           processSugarDec(toplevelDecl);
@@ -661,7 +655,7 @@ public class Driver{
       
       log.beginTask("Generate Java code.");
       try {
-        IStrategoTerm dec = getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0);
+        IStrategoTerm dec =  isApplication(toplevelDecl, "JavaTypeDec") ? getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0) : toplevelDecl;
         driverResult.appendToFile(javaOutFile, SDFCommands.prettyPrintJava(dec, interp) + "\n");
       } finally {
         log.endTask();
