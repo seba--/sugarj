@@ -2,7 +2,7 @@
 <feature
       id="org.sugarj.editor"
       label="SugarJ"
-      version="1.0.1.qualifier"
+      version="1.0.3.qualifier"
       provider-name="sugarj.org">
 
    <description url="http://www.sugarj.org/update">
@@ -60,136 +60,122 @@
          id="org.strategoxt.imp.metatooling"
          download-size="52"
          install-size="94"
-         version="0.1.1.201104091523"
-         unpack="false"/>
-
-   <plugin
-         id="org.strategoxt.imp.runtime"
-         download-size="364"
-         install-size="791"
-         version="0.1.1.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.spoofax.aterm"
          download-size="153"
          install-size="238"
-         version="0.2.3.201104091523"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.spoofax.compiler"
          download-size="8"
          install-size="12"
-         version="0.3.9.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.spoofax.interpreter.core"
          download-size="241"
          install-size="486"
-         version="0.4.0.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.spoofax.interpreter.library.jsglr"
          download-size="13"
          install-size="21"
-         version="0.3.9.201104091523"
-         unpack="false"/>
-
-   <plugin
-         id="org.spoofax.jsglr"
-         download-size="211"
-         install-size="436"
-         version="0.3.0.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.imp.lpg"
          download-size="2"
          install-size="2"
-         version="0.1.84.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.imp.runtime"
          download-size="687"
          install-size="1435"
-         version="0.1.101.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="lpg.runtime"
          download-size="89"
          install-size="94"
-         version="2.0.17.201104091523"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.imp.smapi"
          download-size="8"
          install-size="13"
-         version="0.1.89.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.imp.smapifier"
          download-size="11"
          install-size="19"
-         version="0.1.89.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.strategoxt.imp.editors.editorservice"
          download-size="801"
          install-size="1353"
-         version="0.1.1.201104091523"/>
+         version="0.0.0"/>
 
    <plugin
          id="com.ibm.wala.shrike"
          download-size="283"
          install-size="537"
-         version="1.1.3.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.imp.metatooling"
          download-size="591"
          install-size="1017"
-         version="0.1.92.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.imp.preferences"
          download-size="19"
          install-size="35"
-         version="0.1.86.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.imp.prefspecs"
          download-size="450"
          install-size="950"
-         version="0.1.89.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.imp.presentation"
          download-size="319"
          install-size="597"
-         version="0.1.7.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.strategoxt.strj"
          download-size="11053"
          install-size="13138"
-         version="0.17.92.201104091523"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.strategoxt.imp.generator"
          download-size="7781"
          install-size="8723"
-         version="0.1.2.201104091523"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.strategoxt.imp.editors.sdf"
@@ -201,13 +187,13 @@
          id="org.strategoxt.imp.editors.stratego"
          download-size="1728"
          install-size="2825"
-         version="0.1.1.201104091523"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.strategoxt.imp.editors.aterm"
          download-size="23"
          install-size="35"
-         version="0.1.1.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
@@ -220,88 +206,88 @@
          id="org.eclipse.imp.java.hosted"
          download-size="48"
          install-size="95"
-         version="0.1.2.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.imp.lpg.ide"
          download-size="1231"
          install-size="3031"
-         version="0.1.87.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.imp.xform"
          download-size="187"
          install-size="371"
-         version="0.1.91.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.strategoxt.imp.editors.aster"
          download-size="2239"
          install-size="2777"
-         version="0.1.0.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.strategoxt.imp.editors.pp"
          download-size="68"
          install-size="214"
-         version="0.1.0.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.strategoxt.imp.editors.rtg"
          download-size="55"
          install-size="190"
-         version="0.1.0.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.strategoxt.imp.testing"
          download-size="72"
          install-size="142"
-         version="1.0.0.201104091523"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.spoofax.terms"
          download-size="100"
          install-size="205"
-         version="1.0.0.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.strategoxt.imp.debug.core"
          download-size="48"
          install-size="100"
-         version="0.1.1.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.strategoxt.imp.debug.stratego.core"
          download-size="99"
          install-size="198"
-         version="0.1.1.201104091523"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.strategoxt.imp.debug.ui"
          download-size="22"
          install-size="37"
-         version="0.1.1.201104091523"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.strategoxt.imp.debug.stratego.runtime"
          download-size="83"
          install-size="143"
-         version="0.1.0.201104091523"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.strategoxt.imp.debug.stratego.transformer"
          download-size="1880"
          install-size="3605"
-         version="0.1.0.201104091523"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.sugarj.compiler"
@@ -321,5 +307,19 @@
          download-size="0"
          install-size="0"
          version="0.0.0"/>
+
+   <plugin
+         id="org.strategoxt.imp.runtime"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.spoofax.jsglr"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>
