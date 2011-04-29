@@ -1,0 +1,58 @@
+package text;
+
+import text.Bibtex;
+
+public sugar LatexLib {
+  syntax
+    "\\emph" "{" LatexTextContent "}" -> InTextCommand {cons("EmphCommand")}
+    "\\cite" "{" <BibtexEntries-CF> "}" -> InTextCommand {cons("CiteCommand")}
+  
+  context-free syntax
+    {BibtexEntryName ","}+ -> BibtexEntries
+    
+  rules
+    latex-environment = ?"abstract"
+  
+  rules
+    pp-latex = fail
+    
+    pp-latex-command :
+      EmphCommand(content)
+      ->
+      <conc-strings> ("\\emph{", <pp-latex> content, "}")
+
+    pp-latex-command :
+      CiteCommand(cites)
+      ->
+      <conc-strings> ("\\cite{", s , "}")
+      where
+        <map(?BibtexEntryName(<id>))> cites => names;
+        <intersperse(|","); concat-strings> names => s
+
+  rules
+    intersperse(|s) : [] -> []
+    intersperse(|s) : [x] -> [x]
+    intersperse(|s) : [x|y] -> [x,s| <intersperse(|s)> y]
+  
+  rules
+    constraint-error :
+      CiteCommand(cites)
+      -> <filter(cite-error)> cites
+    
+    bibtex-entry = fail
+    
+    cite-error :
+      t@BibtexEntryName(n) -> (t, <conc-strings> ("undefined citation: ", n))
+      where
+        <not(bibtex-entry)> n
+}
+
+public editor services LatexLib {
+  colorer
+    environment _.EmphCommand : 0 0 255 italic
+  
+  completions
+    completion template : LatexTextEnvironmentName = "abstract"
+  
+    completion template : LatexTextContentPart = "\emph{" <text> "}"
+}
