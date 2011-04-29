@@ -154,6 +154,7 @@ context-free syntax
     "java_lvdec"  "|[" JavaLocalVarDec "]|" -> StrategoTerm {cons("ToMetaExpr")}
 
     "java_vdec" "|[" JavaVarDec "]|" -> StrategoTerm {cons("ToMetaExpr")}
+    "java_tdec" "|[" JavaTypeDec "]|" -> StrategoTerm {cons("ToMetaExpr")}
 
   %%%
    %% Anti Quotations for Local Variable Declarations

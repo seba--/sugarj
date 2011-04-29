@@ -3,15 +3,23 @@ package text;
 import text.Bibtex;
 
 public sugar LatexLib {
+  lexical syntax
+    "\\maketitle" -> NullaryTextCommand
+    "\\and" -> NullaryTextCommand
+
+  
   syntax
     "\\emph" "{" LatexTextContent "}" -> InTextCommand {cons("EmphCommand")}
     "\\cite" "{" <BibtexEntries-CF> "}" -> InTextCommand {cons("CiteCommand")}
+    "\\title" "{" LatexTextContent "}" -> InTextCommand {cons("TitleCommand")}
+    
   
   context-free syntax
     {BibtexEntryName ","}+ -> BibtexEntries
     
   rules
     latex-environment = ?"abstract"
+    latex-environment = ?"document"
   
   rules
     pp-latex = fail
@@ -28,6 +36,11 @@ public sugar LatexLib {
       where
         <map(?BibtexEntryName(<id>))> cites => names;
         <intersperse(|","); concat-strings> names => s
+
+    pp-latex-command :
+      TitleCommand(content)
+      ->
+      <conc-strings> ("\\title{", <pp-latex> content, "}") 
 
   rules
     intersperse(|s) : [] -> []
@@ -50,9 +63,11 @@ public sugar LatexLib {
 public editor services LatexLib {
   colorer
     environment _.EmphCommand : 0 0 255 italic
+    environment _.TitleCommand : 0 128 0 bold
   
   completions
     completion template : LatexTextEnvironmentName = "abstract"
+    completion template : LatexTextEnvironmentName = "document"
   
     completion template : LatexTextContentPart = "\emph{" <text> "}"
 }

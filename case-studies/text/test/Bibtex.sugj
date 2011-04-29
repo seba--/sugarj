@@ -4,7 +4,7 @@ import text.Bibtex;
 
 public bibtex Bibtex {
  
-	@String{OOPSLA = {Proceedings of Conference on Object-Oriented Programming, Systems, Languages, and Applications (OOPSLA)}}
+  @String{OOPSLA = {Proceedings of Conference on Object-Oriented Programming, Systems, Languages, and Applications (OOPSLA)}}
   @String{POPL = {Proceedings of Symposium on Principles of Programming Languages (POPL)}}
   @String{GPCE = {Proceedings of Conference on Generative Programming and Component Engineering (GPCE)}}
   @String{SLE = {Proceedings of Conference on Software Language Engineering (SLE)}}
