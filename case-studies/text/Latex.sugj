@@ -141,7 +141,7 @@ public sugar Latex {
     pp-latex-command :
       InTextCommand#([com|args]) -> <debug;conc-strings> (com, args-string)
       where
-        <mapconcat(\ a -> <conc-strings> ("{", <pp-latex> a, "}") \); concat-strings> args => args-string
+        <mapconcat-strings(\ a -> <conc-strings> ("{", <pp-latex> a, "}") \)> args => args-string
       
     pp-latex-environment :
       StandardEnvironment(LatexTextEnvironmentName(lname), content, LatexTextEnvironmentName(rname)) ->
