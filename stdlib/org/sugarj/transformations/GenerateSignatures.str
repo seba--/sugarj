@@ -82,6 +82,10 @@ rules
 rules
 
   get-symbol-type :
+    sym -> []
+    where <is-layout> sym
+
+  get-symbol-type :
     sym -> ConstType(Sort(name, []))
     where <get-symbol-name> sym => name
 
@@ -140,4 +144,12 @@ rules
   get-symbol-name :
     varsym(sym) -> <concat-strings> ["var", name]
     where <get-symbol-name> sym => name
+    
+    
+  is-layout = ?layout()
+  is-layout = ?cf(<is-layout>)
+  is-layout = ?lex(<is-layout>)
+  is-layout = ?opt(<is-layout>)
+  is-layout = ?iter(<is-layout>)
+  is-layout = map(is-layout)
   
