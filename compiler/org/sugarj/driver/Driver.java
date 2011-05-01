@@ -266,8 +266,10 @@ public class Driver{
       // check final grammar and transformation for errors
       if (!Environment.noChecking) {
         checkCurrentGrammar();
-        checkCurrentTransformation();
       }
+      
+      // need to build current transformation program for editor services
+      checkCurrentTransformation();
       
       // COMPILE the generated java file
       compileGeneratedJavaFile();
@@ -347,7 +349,8 @@ public class Driver{
         "processing",
         "PROCESS the desugared editor services declaration.");
     try {
-      sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
+        sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
       
       String extName = null;
       String fullExtName = null;
@@ -387,8 +390,9 @@ public class Driver{
           throw new IllegalStateException("editor services are not a list: " + services);
         
         List<IStrategoTerm> editorServices = ATermCommands.getList(services);
-        if (currentTransProg != null)
-          editorServices = ATermCommands.registerSemanticProvider(editorServices, currentTransProg);
+        
+        // XXX if (currentTransProg != null)
+        editorServices = ATermCommands.registerSemanticProvider(editorServices, currentTransProg);
   
         String editorServicesFile = bin + sep + relPackageNameSep() + extName + ".serv";
         FileCommands.createFile(editorServicesFile);
@@ -419,7 +423,9 @@ public class Driver{
         "processing",
         "PROCESS the desugared plain declaration.");
     try {
-      sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
+        sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+
       
       String extName = null;
       String fullExtName = null;
@@ -514,7 +520,9 @@ public class Driver{
           throw new IllegalArgumentException("unexpected toplevel declaration, desugaring probably failed: " + toplevelDecl.toString(5));
       } catch (Exception e) {
         ATermCommands.setErrorMessage(toplevelDecl, e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString());
-        sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+        if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
+          sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+
       }
     }
   }
@@ -715,7 +723,9 @@ public class Driver{
         "PROCESS the desugared Java type declaration.");
     try {
       
-      sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
+        sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+
       
       log.beginTask("Generate Java code.");
       try {
@@ -735,7 +745,9 @@ public class Driver{
         "processing",
         "PROCESS the desugared sugar declaration.");
     try {
-      sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
+        sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+
       
       boolean isNative;
       String extName = null;
@@ -929,7 +941,7 @@ public class Driver{
     log.beginTask("checking transformation", "CHECK current transformation");
     
     try {
-      STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(), strParser, strjContext);
+      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(), strParser, strjContext);
     } finally {
       log.endTask();
     }
