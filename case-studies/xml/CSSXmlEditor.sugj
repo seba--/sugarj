@@ -1,0 +1,17 @@
+package xml;
+
+import editor.Colors;
+
+import xml.CSS;
+
+public css CSSXmlEditor {
+  Element  { color : darkblue; folding; outlining }
+  ElemName { environment-color : blue }
+  AttrName { environment-color : darkorange }
+  
+  AttValue { color : darkred }
+  _.CharDataPart { color : darkred }
+  FooDoubleQuotedText { color : darkred }
+  
+  CharData { environment-color : black }
+}
