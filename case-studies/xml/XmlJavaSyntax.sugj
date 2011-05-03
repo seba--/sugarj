@@ -22,9 +22,9 @@ public sugar XmlJavaSyntax {
     "<{" JavaStm  "}/>" -> Content {cons("FromMetaStm")}
     
   syntax
-    "{" <LAYOUT?-CF> <JavaExpr-CF> <LAYOUT?-CF> "}" -> FooDoubleQuotedText {cons("FromMetaExpr")}
+    "{" <LAYOUT?-CF> <JavaExpr-CF> <LAYOUT?-CF> "}" -> FooDoubleQuotedText {cons("FromMetaExpr"), prefer}
     "{" <LAYOUT?-CF> <JavaExpr-CF> <LAYOUT?-CF> "::" <LAYOUT?-CF> "cdata" <LAYOUT?-CF> "}" -> <Content-CF> {cons("TextFromMetaExpr")}
-    
+  
   signature constructors
     TextFromMetaExpr : a -> a
 

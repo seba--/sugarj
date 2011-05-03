@@ -11,7 +11,7 @@ import xml.schema.AsEditorService;
 import xml.schema.SharedStrategies;
 import xml.schema.XmlSchemaJavaSyntax;
 
-
+ 
 public sugar AsDesugaring {
 
   // validating XML schemas
@@ -234,6 +234,10 @@ public sugar AsDesugaring {
       	   (is-error <+ !xs)>
       	  x
       	\
+        +
+        \ [] ->
+          [([], <concat-strings> ["missing element ", string~ncname, " of namespace ", string~namespace])]
+        \
       ]|
       where
 	     <xml-attr-value2string> attval1 => ncname ; 
@@ -255,6 +259,10 @@ public sugar AsDesugaring {
 	         (is-error <+ !xs)> 
 	        x
 	      \
+        +
+        \ [] ->
+          [([], <concat-strings> ["missing attribute ", string~ncname])]
+        \
 	  ]|
       where
 	     <xml-attr-value2string> attval1 => ncname ; 
@@ -290,7 +298,9 @@ public sugar AsDesugaring {
           strategy~s; ?serr;
           if is-error
             then 
-              !x; strategy~(<any-error-free-strategy> ss) <+ !serr
+              !x; 
+              strategy~(<any-error-free-strategy> ss);
+              if is-error then !(serr, <id>); conc else id end
             else id
           end
          }
