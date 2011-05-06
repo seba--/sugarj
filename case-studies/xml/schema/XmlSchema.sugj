@@ -3,9 +3,9 @@ package xml.schema;
 import xml.schema.AsDesugaring;
 import xml.schema.XmlSchemaJavaSyntax;
 
-import xml.schema.XmlSchemaCompiled;
- 
 import xml.schema.AsEditorService;
+
+import xml.schema.SharedStrategies;   
 
 public xmlschema XmlSchema {
   <{http://www.w3.org/2001/XMLSchema}schema 
@@ -137,6 +137,7 @@ public xmlschema XmlSchema {
       </{http://www.w3.org/2001/XMLSchema}attribute>
     </{http://www.w3.org/2001/XMLSchema}complexType>
     
+ 
     	
     
     <{http://www.w3.org/2001/XMLSchema}complexType name="RestrictionType">
@@ -151,7 +152,7 @@ public xmlschema XmlSchema {
     
     <{http://www.w3.org/2001/XMLSchema}simpleType name="string">
     	<{http://www.w3.org/2001/XMLSchema}restriction base="string">
-    	</{http://www.w3.org/2001/XMLSchema}restriction>
+      </{http://www.w3.org/2001/XMLSchema}restriction>
     </{http://www.w3.org/2001/XMLSchema}simpleType>
   </{http://www.w3.org/2001/XMLSchema}schema>
 }

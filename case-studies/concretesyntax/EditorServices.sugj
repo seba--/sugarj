@@ -11,6 +11,8 @@ public sugar EditorServices {
                        "|[" EditorServiceSection* "]|" -> StrategoTerm {cons("ToMetaExpr")}
 
   context-free syntax
+    "~" StrategoTerm -> EditorServiceNode {cons("FromMetaExpr")}
+    "node~" StrategoTerm -> EditorServiceNode {cons("FromMetaExpr")}
     "~" StrategoTerm -> EditorServiceSemanticRule {cons("FromMetaExpr")}
     "~" StrategoTerm -> EditorServicePropertyValue {cons("FromMetaExpr")} 
     "~" StrategoTerm -> EditorServiceCompletionPart {cons("FromMetaExpr")} 

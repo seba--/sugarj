@@ -3,6 +3,7 @@ package xml.schema;
 import concretesyntax.EditorServices;
 
 import xml.XmlSyntax;
+import xml.XmlTextTools;
 import xml.schema.XmlSchemaJavaSyntax;
 import xml.ConcreteXml;
 import xml.XmlEditor;
