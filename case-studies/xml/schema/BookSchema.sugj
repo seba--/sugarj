@@ -1,35 +1,33 @@
 package xml.schema;
-  
+
 import xml.schema.XmlSchema;
 
 public xmlschema BookSchema {
   <{http://www.w3.org/2001/XMLSchema}schema targetNamespace="lib">
     
-    <{http://www.w3.org/2001/XMLSchema}element name="book" type="BookType">
+    <{http://www.w3.org/2001/XMLSchema}element name="book" type="Book">
     </{http://www.w3.org/2001/XMLSchema}element>
 
-    <{http://www.w3.org/2001/XMLSchema}complexType name="BookType">
-      <{http://www.w3.org/2001/XMLSchema}sequence maxOccurs="unbounded">
-        <{http://www.w3.org/2001/XMLSchema}element name="author" type="AuthorType">
+    <{http://www.w3.org/2001/XMLSchema}complexType name="Book">
+      <{http://www.w3.org/2001/XMLSchema}choice maxOccurs="unbounded">
+        <{http://www.w3.org/2001/XMLSchema}element name="author" type="Person">
         </{http://www.w3.org/2001/XMLSchema}element>
-      </{http://www.w3.org/2001/XMLSchema}sequence>
+
+        <{http://www.w3.org/2001/XMLSchema}element name="editor" type="Person">
+        </{http://www.w3.org/2001/XMLSchema}element>
+      </{http://www.w3.org/2001/XMLSchema}choice>
       
-      <{http://www.w3.org/2001/XMLSchema}attribute name="title" type="StringType">
+      <{http://www.w3.org/2001/XMLSchema}attribute name="title" type="string">
       </{http://www.w3.org/2001/XMLSchema}attribute>
     </{http://www.w3.org/2001/XMLSchema}complexType>
     
-    <{http://www.w3.org/2001/XMLSchema}complexType name="AuthorType">
-      <{http://www.w3.org/2001/XMLSchema}sequence maxOccurs="unbounded">
+    <{http://www.w3.org/2001/XMLSchema}complexType name="Person">
+      <{http://www.w3.org/2001/XMLSchema}sequence>
       </{http://www.w3.org/2001/XMLSchema}sequence>
       
-      <{http://www.w3.org/2001/XMLSchema}attribute name="name" type="StringType">
+      <{http://www.w3.org/2001/XMLSchema}attribute name="name" type="string">
       </{http://www.w3.org/2001/XMLSchema}attribute>
     </{http://www.w3.org/2001/XMLSchema}complexType>
-
-    <{http://www.w3.org/2001/XMLSchema}simpleType name="StringType">
-      <{http://www.w3.org/2001/XMLSchema}restriction base="string">
-      </{http://www.w3.org/2001/XMLSchema}restriction>
-    </{http://www.w3.org/2001/XMLSchema}simpleType>
 
   </{http://www.w3.org/2001/XMLSchema}schema>
 }

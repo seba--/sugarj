@@ -139,7 +139,7 @@ public sugar Latex {
       LatexEscape(code) -> code
     
     pp-latex-command :
-      InTextCommand#([com|args]) -> <debug;conc-strings> (com, args-string)
+      InTextCommand#([com|args]) -> <conc-strings> (com, args-string)
       where
         <mapconcat-strings(\ a -> <conc-strings> ("{", <pp-latex> a, "}") \)> args => args-string
       

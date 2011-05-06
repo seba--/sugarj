@@ -11,7 +11,6 @@ import xml.XmlEditor;
 
 import xml.schema.BookSchema;
 
-
 public class BookSchemaTest extends Test {
   public static void main(String[] args) throws SAXException {
     ContentHandler ch = new BookSchemaTest();
@@ -20,6 +19,6 @@ public class BookSchemaTest extends Test {
     ch.<{lib}book title="Sweetness and Power: The Place of Sugar in Modern History">
          <{lib}author name="Sidney W. Mintz">
          </{lib}author>
-       </{lib}book>;
+       </{lib}book>; 
   }
 } 

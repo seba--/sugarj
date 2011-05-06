@@ -24,7 +24,7 @@ public sugar AsDesugaring {
 
   // comment out for bootstrapping
     constraint-error :
-      XMLSchemaDoc(Document(pre, root, post)) -> (root, "document does not match any xml schema in scope")
+      XMLSchemaDoc(Document(pre, root, post)) -> (root, "document does not match any Xml schema in scope")
       where
         <not(xml-validate)> root
     
@@ -46,7 +46,6 @@ public sugar AsDesugaring {
   rules
     xml-validate = fail
     valWriteDocToStrategyCall = fail
-    report-error(|t) = !t;debug
     
   rules
     xsdDec : 
@@ -97,12 +96,13 @@ public sugar AsDesugaring {
       ]|
       -> 
       |[ rules 
-           xml-validate = strategy~namespace-match; ~elem-match ]|
+           xml-validate = strategy~namespace-match; strategy~elem-match ]|
       where
 	     <xml-attr-value2string> attval1 => ncname ;
 	     <xml-attr-value2string> attval2 => typename;
 	     <match-namespace> namespace => namespace-match;
 	     <match-element> (namespace, ncname, typename) => elem-match
+    
     
     // complex types
     xsdElement2stratego(|namespace) :
@@ -234,10 +234,10 @@ public sugar AsDesugaring {
       	   (is-error <+ !xs)>
       	  x
       	\
-        +
-        \ [] ->
-          [([], <concat-strings> ["missing element ", string~ncname, " of namespace ", string~namespace])]
-        \
+        // +
+        // \ [] ->
+        //   [([], <concat-strings> ["missing element ", string~ncname, " of namespace ", string~namespace])]
+        // \
       ]|
       where
 	     <xml-attr-value2string> attval1 => ncname ; 
@@ -259,10 +259,10 @@ public sugar AsDesugaring {
 	         (is-error <+ !xs)> 
 	        x
 	      \
-        +
-        \ [] ->
-          [([], <concat-strings> ["missing attribute ", string~ncname])]
-        \
+        // +
+        // \ [] ->
+        //   [([], <concat-strings> ["missing attribute ", string~ncname])]
+        // \
 	  ]|
       where
 	     <xml-attr-value2string> attval1 => ncname ; 
@@ -289,7 +289,7 @@ public sugar AsDesugaring {
     
   
   rules
-    any-error-free-strategy : [] -> Fail
+    any-error-free-strategy : [] -> stratego |[ fail ]|
     any-error-free-strategy :
        [s|ss] -> 
        stratego |[
@@ -299,8 +299,9 @@ public sugar AsDesugaring {
           if is-error
             then 
               !x; 
-              strategy~(<any-error-free-strategy> ss);
-              if is-error then !(serr, <id>); conc else id end
+              strategy~(<any-error-free-strategy> ss)
+              < if is-error then !(serr, <id>); conc else id end
+              + !serr
             else id
           end
          }

@@ -8,8 +8,8 @@ import org.sugarj.languages.Java;
  */
 public sugar ConcatIds {
   context-free syntax
-    { JavaID "#" }+ -> JavaID {cons("ConcatIds")}
-    
+    { JavaID "#" }+ -> JavaID {cons("ConcatIds"), avoid}
+     
   signature constructors
     ConcatIds : ID -> ID
 

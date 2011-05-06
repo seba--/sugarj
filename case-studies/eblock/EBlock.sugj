@@ -4,6 +4,7 @@ import org.sugarj.languages.Java;
 
 import eblock.ConcatIds;
 
+   
 /*
  * https://svn.strategoxt.org/repos/StrategoXT/java-front/trunk/syntax-embedding/languages/java/eblock/Main.sdf
  * https://svn.strategoxt.org/repos/StrategoXT/java-front/trunk/lib/java/postprocess/java-lift-eblocks.str
