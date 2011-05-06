@@ -95,6 +95,15 @@ public class Log {
     System.out.println(text);
   }
   
+  public synchronized void logErr(String text) {
+    if (silent >= 0)
+      return;
+    
+    noLongerLeaf();
+    indent();
+    System.err.println(text);
+  }
+  
   private void noLongerLeaf() {
     if (!lightweight.empty() && lightweight.peek()) {
       lightweight.pop();

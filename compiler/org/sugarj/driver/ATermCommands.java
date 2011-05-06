@@ -8,8 +8,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.activation.UnsupportedDataTypeException;
-
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoInt;
@@ -341,8 +339,6 @@ public class ATermCommands {
       if (tok.getTokenizer().getInput().length() <= tok.getStartOffset() || tok.getTokenizer().getInput().charAt(tok.getStartOffset()) == '\n')
         break;
     }
-    
-    log.log(msg + ": " + file);
   }
 
   public static IStrategoTerm makeMutable(IStrategoTerm term) {
