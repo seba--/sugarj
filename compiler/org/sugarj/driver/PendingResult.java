@@ -8,7 +8,18 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.shared.BadTokenException;
 
 class PendingResult extends Result {
-  final static PendingResult instance = new PendingResult(); 
+  public final static PendingResult Placeholder = new PendingResult(null);
+  
+  public final Driver driver;
+  
+  public PendingResult(Driver driver) {
+    this.driver = driver;
+  }
+  
+  public void interrupt() {
+    if (driver != null)
+      driver.interrupt();
+  }
   
   boolean isUpToDate() {
     return true;

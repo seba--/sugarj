@@ -1,7 +1,5 @@
 package org.sugarj.driver;
 
-import static org.sugarj.driver.Environment.sep;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -9,8 +7,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.shared.BadTokenException;
@@ -21,7 +19,7 @@ public class Result {
   private Set<IStrategoTerm> editorServices = new HashSet<IStrategoTerm>();
   private Set<BadTokenException> collectedErrors = new HashSet<BadTokenException>();
   private IStrategoTerm sugaredSyntaxTree = null;
-  private String generatedClassFile;
+  private List<String> generatedJavaClasses;
   private String desugaringsFile;
 
   void addFileDependency(String file) throws IOException {
@@ -51,8 +49,10 @@ public class Result {
   }
   
   boolean isUpToDate() throws IOException {
-    if (generatedClassFile != null && !new File(generatedClassFile).exists())
-      return false;
+    if (generatedJavaClasses != null)
+      for (String classFile : generatedJavaClasses)
+        if (!new File(classFile).exists())
+          return false;
 
     for (Entry<String, Integer> entry : fileDependencyHashes.entrySet())
       if (FileCommands.fileHash(entry.getKey()) != entry.getValue())
@@ -81,12 +81,8 @@ public class Result {
     return sugaredSyntaxTree;
   }
 
-  void compileJava(String javaOutFile, String bin, List<String> path, String relPackageName) throws IOException {
-    generatedClassFile = 
-      bin + sep 
-      + (relPackageName == null || relPackageName.isEmpty() ? "" : (relPackageName + sep))
-      + FileCommands.fileName(javaOutFile) + ".class";
-    
+  void compileJava(String javaOutFile, String bin, List<String> path, List<String> generatedJavaClasses) throws IOException {
+    this.generatedJavaClasses = generatedJavaClasses;    
     JavaCommands.javac(javaOutFile, bin, path);
   }
   
