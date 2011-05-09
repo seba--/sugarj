@@ -54,7 +54,7 @@ import org.sugarj.stdlib.StdLib;
  */
 public class Driver{
   
-  public final static String VERSION = "editor-base-0.4";
+  public final static String CACHE_VERSION = "editor-base-0.7";
   
   private static class Key {
     private String source;
@@ -78,7 +78,7 @@ public class Driver{
 
   private final static int PENDING_TIMEOUT = 120000;
 
-  private static LRUMap resultCache = new LRUMap(200);
+  private static LRUMap resultCache = new LRUMap(50);
 
   private static List<URI> allInputFiles;
   private static List<URI> pendingInputFiles;
@@ -1323,8 +1323,8 @@ public class Driver{
     if (Environment.cacheDir == null)
       return;
     
-    String sdfCache = FileCommands.findFile("sdfCache" + "-" + VERSION, Environment.cacheDir);
-    String strCache = FileCommands.findFile("strCache" + "-" + VERSION, Environment.cacheDir);
+    String sdfCache = FileCommands.findFile("sdfCache" + "-" + CACHE_VERSION, Environment.cacheDir);
+    String strCache = FileCommands.findFile("strCache" + "-" + CACHE_VERSION, Environment.cacheDir);
 
     if (SDFCommands.sdfCache == null && sdfCache != null)
       try {
@@ -1360,16 +1360,16 @@ public class Driver{
     if (Environment.cacheDir == null || Environment.rocache)
       return;
     
-    String sdfCache = FileCommands.findFile("sdfCache" + "-" + VERSION , Environment.cacheDir);
-    String strCache = FileCommands.findFile("strCache" + "-" + VERSION, Environment.cacheDir);
+    String sdfCache = FileCommands.findFile("sdfCache" + "-" + CACHE_VERSION , Environment.cacheDir);
+    String strCache = FileCommands.findFile("strCache" + "-" + CACHE_VERSION, Environment.cacheDir);
 
     if (sdfCache == null) {
-      sdfCache = Environment.cacheDir + sep + "sdfCache" + "-" + VERSION;
+      sdfCache = Environment.cacheDir + sep + "sdfCache" + "-" + CACHE_VERSION;
       FileCommands.createFile(sdfCache);
     }
 
     if (strCache == null) {
-      strCache = Environment.cacheDir + sep + "strCache" + "-" + VERSION;
+      strCache = Environment.cacheDir + sep + "strCache" + "-" + CACHE_VERSION;
       FileCommands.createFile(strCache);
     }
     
