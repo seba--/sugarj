@@ -15,7 +15,9 @@ public sugar CSS {
     "color" ":" CSSColor -> CSSRule {cons("ColorRule")}
     "background-color" ":" CSSColor -> CSSRule {cons("BackgroundColorRule")}
     "environment-color" ":" CSSColor -> CSSRule {cons("ColorAllRule")}
+    "color-recursive" ":" CSSColor -> CSSRule {cons("ColorAllRule")}
     "environment-background-color" ":" CSSColor -> CSSRule {cons("BackgroundColorAllRule")}
+    "background-color-recursive" ":" CSSColor -> CSSRule {cons("BackgroundColorAllRule")}
     "outlining" -> CSSRule {cons("OutliningRule")}
     "folding" -> CSSRule {cons("FoldingRule")}
     

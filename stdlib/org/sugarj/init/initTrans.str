@@ -3,6 +3,7 @@ imports libstrategolib
         org/sugarj/languages/SugarJ
 
 imports org/sugarj/transformations/GenerateSignatures
+        org/sugarj/transformations/EditorServiceExtension
 
 signature constructors
   NextToplevelDeclaration : ToplevelDeclaration * Rest -> NextToplevelDeclaration

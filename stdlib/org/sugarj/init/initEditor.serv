@@ -34,6 +34,25 @@ language
   fences : ( )
   fences : { }
   fences : [ ]
-  fences : ' '
-//  fences : "\"" "\""
+  
+  line comment                           : "//"
+  block comment                          : "/*" * "*/"
+
+folding
+  ToplevelDeclaration
+  EditorServiceSection
+  SugarDefElem
+  JavaFieldDec
+  JavaMethodDec    
+  JavaClassDec     
+  JavaInterfaceDec
+  JavaEnumDec 
+
+outliner
+  ToplevelDeclaration
+  JavaFieldDec
+  JavaMethodDec    
+  JavaClassDec     
+  JavaInterfaceDec
+  JavaEnumDec 
   

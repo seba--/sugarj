@@ -154,3 +154,14 @@ sorts Grammar Transformation Desugaring SugarDef SugarDefElem
     AnnoOrSugarMod* "editor" "services" JavaId -> EditorServicesDecHead {cons("EditorServicesDecHead")}
     "{" EditorServiceSection*  "}" -> EditorServicesBody {cons("EditorServicesBody")}
     
+  syntax
+    "checking" <EditorServiceSectionName-LEX> <LAYOUT?-CF> <CheckingRule*-CF> -> <EditorServiceSection-CF>      {cons("Checking")}
+    "checking"                                                                -> <EditorServiceReservedName-CF> 
+
+  context-free syntax
+    "errors" ":" CheckingRuleBody                          -> CheckingRule     {cons("CheckingRuleErrors")}
+    "warnings" ":" CheckingRuleBody                        -> CheckingRule     {cons("CheckingRuleWarnings")}
+    "notes" ":" CheckingRuleBody                           -> CheckingRule     {cons("CheckingRuleNotes")}
+    StrategoTerm "=" StrategoTerm                          -> CheckingRuleBody {cons("RuleNoCond")}
+    StrategoTerm "=" StrategoTerm "where" StrategoStrategy -> CheckingRuleBody {cons("Rule")}
+    StrategoTerm "=" StrategoTerm StrategoRuleCond+        -> CheckingRuleBody {cons("Rule"), avoid}

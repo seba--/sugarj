@@ -168,9 +168,11 @@ exports
 
   context-free syntax
   
+    ColorNode ":" Attribute "(recursive)" -> ColorRule {cons("ColorRuleAll")} %% One rule to rule them all
     "environment" ColorNode ":" Attribute -> ColorRule {cons("ColorRuleAll")} %% One rule to rule them all
                   ColorNode ":" Attribute -> ColorRule {cons("ColorRule")}
     
+    ColorNode ":" String "=" Attribute "(recursive)" -> ColorRule {cons("ColorRuleAllNamed")}
     "environment" ColorNode ":" String "=" Attribute -> ColorRule {cons("ColorRuleAllNamed")}
                   ColorNode ":" String "=" Attribute -> ColorRule {cons("ColorRuleNamed")}
 
@@ -180,6 +182,8 @@ exports
     Node          -> ColorNode
     TokenKindName -> ColorNode {cons("Token"), prefer}
     "token" Id    -> ColorNode {cons("Literal")}
+    
+    "(recursive)" -> ColorOption {cons("Recursive")}
     
     "identifier" -> TokenKindName {cons("TK_IDENTIFIER")}
     "number"     -> TokenKindName {cons("TK_NUMBER")}
@@ -213,6 +217,7 @@ exports
     String         -> AttributeId          %% Descriptive color name (could be shown in IDE)
     "_"            -> AttributeId {reject}
     Font           -> AttributeId {reject}
+    "rec"          -> AttributeId {reject}
     "environment"  -> AttributeId {reject}
 
 module OutlinerService
