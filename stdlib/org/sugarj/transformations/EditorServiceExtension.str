@@ -1,0 +1,82 @@
+module org/sugarj/transformations/EditorServiceExtension
+
+imports org/sugarj/languages/EditorServices 
+        org/sugarj/languages/SugarJ
+
+signature
+  constructors
+    Checking : lexEditorServiceSectionName() * cfiter-star() -> cfEditorServiceSection()
+
+
+signature
+  constructors
+    CheckingRuleErrors   : CheckingRuleBody() -> CheckingRule()
+    CheckingRuleWarnings : CheckingRuleBody() -> CheckingRule()
+    CheckingRuleNotes    : CheckingRuleBody() -> CheckingRule()
+    RuleNoCond           : StrategoTerm() * StrategoTerm() -> CheckingRuleBody()
+    Rule                 : StrategoTerm() * StrategoTerm() * StrategoStrategy() -> CheckingRuleBody()
+    Rule                 : StrategoTerm() * StrategoTerm() * iter() -> CheckingRuleBody()
+
+
+rules
+
+  service-to-sugar :
+    CheckingRuleErrors(r) -> ( []
+                             , [ transformation-elem(
+                                   Rules([RDefNoArgs("constraint-error", r)])
+                                 )
+                               ]
+                             )
+
+  service-to-sugar :
+    CheckingRuleWarnings(r) -> ( []
+                               , [ transformation-elem(
+                                     Rules([RDefNoArgs("constraint-warning", r)])
+                                   )
+                                 ]
+                               )
+
+  service-to-sugar :
+    CheckingRuleNotes(r) -> ( []
+                            , [ transformation-elem(
+                                  Rules([RDefNoArgs("constraint-note", r)])
+                                )
+                              ]
+                            )
+
+
+strategies
+  desugar =
+    changed-tree(extract-sugar-from-service)
+
+
+rules
+
+  extract-sugar-from-service :
+    EditorServicesDec(
+      EditorServicesDecHead(mods, n)
+    , EditorServicesBody(sections)
+    ) -> [ EditorServicesDec(
+             EditorServicesDecHead(mods, n)
+           , EditorServicesBody(newsections)
+           )
+         , SugarDec(
+             SugarDecHead(mods, n)
+           , SugarBody(elems)
+           )
+         ]
+    where <(extract-sugar-from-service-sections ; not(?(_, [])))> sections => (newsections, elems)
+
+  extract-sugar-from-service-sections :
+    [] -> ([], [])
+
+  extract-sugar-from-service-sections :
+    [x|xs] -> ( <conc> (ys, ys2)
+              , <conc> (zs, zs2)
+              )
+    where <service-to-sugar> x => (ys, zs)
+          ; <extract-sugar-from-service-sections> xs => (ys2, zs2)
+
+  extract-sugar-from-service-sections :
+    [x|xs] -> ([x|ys], zs)
+    where <extract-sugar-from-service-sections> xs => (ys, zs)

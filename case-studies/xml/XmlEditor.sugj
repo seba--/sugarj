@@ -5,20 +5,20 @@ import xml.XmlSyntax;
 
 public editor services XmlEditor {
   colorer XmlHighlighting
-    Element : darkblue
-     
-    environment ElemName : blue
-    environment AttrName : darkorange
-    
-    AttValue : darkred
-    _.CharDataPart : darkred
-    FooDoubleQuotedText : darkred
-    
-    environment CharData : black
+    ElemName : blue (recursive)
+    AttrName : darkorange (recursive)
+    AttValue : darkred (recursive)
+    CharData : black (recursive)
 
   folding XmlFolding
     Element
     
   outliner XmlOutliner
     Element
+  
+  checking
+    errors: Element(lname, attrs, content, rname) = 
+            [(lname, "element start and end tag need to coincide"),
+             (rname, "element start and end tag need to coincide")]
+            where <not(equal)> (lname, rname) 
 }

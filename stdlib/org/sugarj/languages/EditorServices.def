@@ -178,8 +178,10 @@ exports
     "colorer"                                                -> <ReservedName-CF> 
 
   context-free syntax
+    ColorNode ":" Attribute "(recursive)"            -> ColorRule     {cons("ColorRuleAll")} %% One rule to rule them all
     "environment" ColorNode ":" Attribute            -> ColorRule     {cons("ColorRuleAll")}
     ColorNode ":" Attribute                          -> ColorRule     {cons("ColorRule")}
+    ColorNode ":" String "=" Attribute "(recursive)" -> ColorRule     {cons("ColorRuleAllNamed")}
     "environment" ColorNode ":" String "=" Attribute -> ColorRule     {cons("ColorRuleAllNamed")}
     ColorNode ":" String "=" Attribute               -> ColorRule     {cons("ColorRuleNamed")}
     Color MaybeColor Font                            -> Attribute     {cons("Attribute")}
@@ -212,6 +214,7 @@ exports
     "_"                                              -> AttributeId   {reject}
     Font                                             -> AttributeId   {reject}
     "environment"                                    -> AttributeId   {reject}
+    "rec"                                            -> AttributeId   {reject}
 
 module OutlinerService
 imports Common
