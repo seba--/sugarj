@@ -339,30 +339,6 @@ public class FileCommands {
     return module.replace(".", sep);
   }
 
-  private static String locateModule(String module, String fileExtension) {
-    
-    for (String path : Environment.includePath) {
-      File f = new File(path + Environment.sep + module + "." + fileExtension);
-      if (f.exists())
-        return f.getAbsolutePath();
-    }
-    
-    return null;
-  }
-  
-  public static Map<String, Long> locateModules(Collection<String> modules, String fileExtension) {
-    Map<String, Long> map = new HashMap<String, Long>();
-    
-    for (String module : modules) {
-      String path = locateModule(module, fileExtension);
-      
-      if (path != null)
-        map.put(path, new File(path).lastModified());
-    }
-      
-    return map;
-  }
-
   public static int fileHash(String file) throws IOException {
     if (exists(file))
       return readFileAsString(file).hashCode();
