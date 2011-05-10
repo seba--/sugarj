@@ -19,30 +19,24 @@ signature
 
 
 rules
-
+  
   service-to-sugar :
-    CheckingRuleErrors(r) -> ( []
-                             , [ transformation-elem(
+    Checking(_, rs) -> ([], <map(checkingrule-to-sugar)> rs)
+  
+  checkingrule-to-sugar :
+    CheckingRuleErrors(r) -> transformation-elem(
                                    Rules([RDefNoArgs("constraint-error", r)])
                                  )
-                               ]
-                             )
 
-  service-to-sugar :
-    CheckingRuleWarnings(r) -> ( []
-                               , [ transformation-elem(
+  checkingrule-to-sugar :
+    CheckingRuleWarnings(r) -> transformation-elem(
                                      Rules([RDefNoArgs("constraint-warning", r)])
                                    )
-                                 ]
-                               )
 
-  service-to-sugar :
-    CheckingRuleNotes(r) -> ( []
-                            , [ transformation-elem(
+  checkingrule-to-sugar :
+    CheckingRuleNotes(r) -> transformation-elem(
                                   Rules([RDefNoArgs("constraint-note", r)])
                                 )
-                              ]
-                            )
 
 
 strategies
@@ -65,7 +59,7 @@ rules
            , SugarBody(elems)
            )
          ]
-    where <(extract-sugar-from-service-sections ; not(?(_, [])))> sections => (newsections, elems)
+    where <(extract-sugar-from-service-sections; not(?(_, [])))> sections => (newsections, elems)
 
   extract-sugar-from-service-sections :
     [] -> ([], [])

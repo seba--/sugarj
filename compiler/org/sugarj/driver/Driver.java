@@ -54,7 +54,7 @@ import org.sugarj.stdlib.StdLib;
  */
 public class Driver{
   
-  public final static String CACHE_VERSION = "editor-base-0.7";
+  public final static String CACHE_VERSION = "editor-base-0.7a";
   
   private static class Key {
     private String source;
