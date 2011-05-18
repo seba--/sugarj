@@ -20,8 +20,10 @@ signature
 
 rules
   
-  service-to-sugar :
-    Checking(_, rs) -> ([], <map(checkingrule-to-sugar)> rs)
+  desugar = changed-tree(checks-to-sugar)
+  
+  checks-to-sugar : 
+    ChecksDec(ChecksDecHead(mods, name), ChecksBody(rs)) -> SugarDec(SugarDecHead(mods, name), SugarBody(<map(checkingrule-to-sugar)> rs))
   
   checkingrule-to-sugar :
     CheckingRuleErrors(r) -> transformation-elem(
@@ -45,6 +47,8 @@ strategies
 
 
 rules
+	
+	service-to-sugar = fail
 
   extract-sugar-from-service :
     EditorServicesDec(
