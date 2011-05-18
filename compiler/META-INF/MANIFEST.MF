@@ -21,4 +21,5 @@ Export-Package: org.sugarj,
  org.sugarj.driver.transformations
 Bundle-ClassPath: make_permissive.jar,
  .,
- commons-cli-1.2.jar
+ commons-cli-1.2.jar,
+ commons-collections-3.2.1.jar

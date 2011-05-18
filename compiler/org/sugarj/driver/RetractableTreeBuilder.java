@@ -38,6 +38,10 @@ public class RetractableTreeBuilder extends TreeBuilder {
     setOffset(getTokenizer().getStartOffset());
   }
   
+  public void setOffset(int offset) {
+    super.setOffset(offset);
+  }
+  
   public boolean isInitialized() {
     return isInitialized;
   }
