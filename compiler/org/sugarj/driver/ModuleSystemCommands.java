@@ -43,8 +43,6 @@ public class ModuleSystemCommands {
     if (classUri == null)
       return false;
     
-    driverResult.addFileDependency(classUri.getPath());
-    
     log.beginTask("Generate Java code");
     try {
       driverResult.appendToFile(javaOutFile, SDFCommands.prettyPrintJava(importTerm, interp) + "\n");
@@ -70,8 +68,6 @@ public class ModuleSystemCommands {
     if (sdfUri == null)
       return null;
     
-    driverResult.addFileDependency(sdfUri.getPath());
-    
     log.beginTask("Incorporation", "Incorporate the imported grammar " + modulePath);
     try {
       // build extension of current grammar
@@ -86,7 +82,7 @@ public class ModuleSystemCommands {
       + "imports " + currentGrammarModule + "\n"
       + "        " + modulePath;
       
-      driverResult.generateFile(newGrammar, grammar);
+      FileCommands.writeToFile(newGrammar, grammar);
 
       availableSDFImports.add(modulePath);
 
@@ -111,8 +107,6 @@ public class ModuleSystemCommands {
     if (strUri == null)
       return null;
     
-    driverResult.addFileDependency(strUri.getPath());
-    
     log.beginTask("Incorporation", "Incorporate the imported desugaring rules " + modulePath);
     try {
       // build extension of current transformation
@@ -126,7 +120,7 @@ public class ModuleSystemCommands {
         + "imports " + currentTransModule + "\n"
         + "        " + modulePath;
       
-      driverResult.generateFile(newTrans, trans);
+      FileCommands.writeToFile(newTrans, trans);
 
       availableSTRImports.add(modulePath);
 
@@ -148,8 +142,6 @@ public class ModuleSystemCommands {
     
     if (servUri == null)
       return false;
-    
-    driverResult.addFileDependency(servUri.getPath());
     
     log.beginTask("Incorporation", "Incorporate the imported editor services " + modulePath);
     try {
@@ -226,7 +218,6 @@ public class ModuleSystemCommands {
   }
   
   private static ClassLoader createClassLoader(Collection<String> path) throws MalformedURLException {
-    // log.beginTask("Creating", "Create a class loader for " + what);
     try {
       URL[] urls = new URL[path.size() + 1];
       
@@ -242,7 +233,6 @@ public class ModuleSystemCommands {
        */
       return new URLClassLoader(urls, null);
     } finally {
-      // log.endTask();
     }
   }
 }

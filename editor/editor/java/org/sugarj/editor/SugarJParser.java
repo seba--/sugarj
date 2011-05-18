@@ -26,6 +26,7 @@ public class SugarJParser extends JSGLRI {
   private String projectPath;
   private String outputPath;
   private Result result;
+  private List<String> includePath;
 
   public SugarJParser(JSGLRI parser) {
     super(parser.getParseTable(), parser.getStartSymbol(), parser.getController());
@@ -40,8 +41,9 @@ public class SugarJParser extends JSGLRI {
     if (Environment.cacheDir == null)
       Environment.cacheDir = System.getProperty("user.home") + "/.sugarj/cache";
     
+    Environment.includePath.addAll(includePath);
     Environment.includePath.add(new StrategoJarAntPropertyProvider().getAntPropertyValue(""));
-
+    
     assert projectPath != null;
     Environment.src = projectPath;
     Environment.bin = outputPath != null ? outputPath : projectPath;
@@ -62,8 +64,7 @@ public class SugarJParser extends JSGLRI {
     try {
       result = Driver.compile(input, FileCommands.fileName(filename), filename);
     } catch (Throwable e) {
-      org.strategoxt.imp.runtime.Environment.logException(e);
-      return super.doParse(input, filename);
+      throw new RuntimeException("parsing " + FileCommands.fileName(filename) + " failed", e);
     }
     
     return result.getSugaredSyntaxTree();
@@ -76,6 +77,10 @@ public class SugarJParser extends JSGLRI {
 
   public void setOutputPath(String outputPath) {
     this.outputPath = outputPath;
+  }
+  
+  public void setIncludePath(List<String> includePath) {
+    this.includePath = includePath;
   }
 
   @Override
