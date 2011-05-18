@@ -69,13 +69,13 @@ exports
   (
 
   syntax
-    "refactorings" <SectionName-LEX> <LAYOUT?-CF> <SemanticRule*-CF> -> <Section-CF>      {cons("Refactorings")}
+    "refactorings" <SectionName-LEX> <LAYOUT?-CF> <RefactoringRule*-CF> -> <Section-CF>      {cons("Refactorings")}
     "refactorings"                                                   -> <ReservedName-CF> 
 
   context-free syntax
-    "pp-table" ":" StrategoCall                                            -> SemanticRule {cons("PPTable")}
-    "pretty-print" ":" StrategoCall                                        -> SemanticRule {cons("PrettyPrint")}
-    "refactoring" SemanticNode* ":" String "=" StrategoCall BuilderOption* -> SemanticRule {cons("Refactoring")}
+    "pp-table" ":" StrategoCall                                            -> RefactoringRule {cons("PPTable")}
+    "pretty-print" ":" StrategoCall                                        -> RefactoringRule {cons("PrettyPrint")}
+    "refactoring" SemanticNode* ":" String "=" StrategoCall BuilderOption* -> RefactoringRule {cons("Refactoring")}
 
   )
 
@@ -84,15 +84,15 @@ imports SemanticServices
 
 exports
   syntax
-    "builders" <SectionName-LEX> <LAYOUT?-CF> <SemanticRule*-CF> -> <Section-CF>      {cons("Builders")}
+    "builders" <SectionName-LEX> <LAYOUT?-CF> <BuilderRule*-CF> -> <Section-CF>      {cons("Builders")}
     "builders"                                                   -> <ReservedName-CF> 
-    "analysis" <SectionName-LEX> <LAYOUT?-CF> <SemanticRule*-CF> -> <Section-CF>      {cons("Builders"), deprecated("Use 'builders' instead")}
+    "analysis" <SectionName-LEX> <LAYOUT?-CF> <BuilderRule*-CF> -> <Section-CF>      {cons("Builders"), deprecated("Use 'builders' instead")}
     "analysis"                                                   -> <ReservedName-CF> 
 
   context-free syntax
-    "observer" ":" StrategoCall                          -> SemanticRule  {cons("SemanticObserver")}
-    "builder" ":" String "=" StrategoCall BuilderOption* -> SemanticRule  {cons("Builder")}
-    "builder" "caption" ":" PropertyValue                -> SemanticRule  {cons("BuilderCaption")}
+    "observer" ":" StrategoCall                          -> BuilderRule  {cons("SemanticObserver")}
+    "builder" ":" String "=" StrategoCall BuilderOption* -> BuilderRule  {cons("Builder")}
+    "builder" "caption" ":" PropertyValue                -> BuilderRule  {cons("BuilderCaption")}
     "(openeditor)"                                       -> BuilderOption {cons("OpenEditor")}
     "(realtime)"                                         -> BuilderOption {cons("RealTime")}
     "(persistent)"                                       -> BuilderOption {cons("Persistent")}
@@ -107,20 +107,20 @@ exports
   sorts CompletionPart CompletionAnno
 
   syntax
-    "completions" <SectionName-LEX> <LAYOUT?-CF> <SemanticRule*-CF> -> <Section-CF>      {cons("Completions")}
+    "completions" <SectionName-LEX> <LAYOUT?-CF> <CompletionRule*-CF> -> <Section-CF>      {cons("Completions")}
     "completions"                                                   -> <ReservedName-CF> 
 
   context-free syntax
-    "completion" "proposer" ":" StrategoCall                                           -> SemanticRule {cons("CompletionProposer")}
-    "completion" "lexical" ":" PropertyValue                                           -> SemanticRule {cons("IdentifierLexical"), deprecated("Use 'identifier lexical' instead")}
-    "identifier" "lexical" ":" PropertyValue                                           -> SemanticRule {cons("IdentifierLexical")}
-    "completion" "keyword" ":" PropertyValue CompletionAnno                            -> SemanticRule {cons("CompletionKeyword")}
-    "completion" "template" ":" CompletionPart CompletionPart* CompletionAnno          -> SemanticRule {cons("CompletionTemplate")}
-    "completion" "template" ":" Id CompletionPart+ CompletionAnno                      -> SemanticRule {cons("CompletionTemplate"), avoid, deprecated("Add quotes to the starting literal")}
-    "completion" "template" ":" Sort "=" CompletionPart CompletionPart* CompletionAnno -> SemanticRule {cons("CompletionTemplateWithSort")}
-    "completion" "template" ":" PropertyValue CompletionPart* CompletionAnno           -> SemanticRule {cons("CompletionTemplate"), recover, avoid}
-    "completion" "template" ":" Sort "=" PropertyValue CompletionPart* CompletionAnno  -> SemanticRule {cons("CompletionTemplateWithSort"), recover, avoid}
-    "completion" "trigger" ":" PropertyValue CompletionAnno                            -> SemanticRule {cons("CompletionTrigger")}
+    "completion" "proposer" ":" StrategoCall                                           -> CompletionRule {cons("CompletionProposer")}
+    "completion" "lexical" ":" PropertyValue                                           -> CompletionRule {cons("IdentifierLexical"), deprecated("Use 'identifier lexical' instead")}
+    "identifier" "lexical" ":" PropertyValue                                           -> CompletionRule {cons("IdentifierLexical")}
+    "completion" "keyword" ":" PropertyValue CompletionAnno                            -> CompletionRule {cons("CompletionKeyword")}
+    "completion" "template" ":" CompletionPart CompletionPart* CompletionAnno          -> CompletionRule {cons("CompletionTemplate")}
+    "completion" "template" ":" Id CompletionPart+ CompletionAnno                      -> CompletionRule {cons("CompletionTemplate"), avoid, deprecated("Add quotes to the starting literal")}
+    "completion" "template" ":" Sort "=" CompletionPart CompletionPart* CompletionAnno -> CompletionRule {cons("CompletionTemplateWithSort")}
+    "completion" "template" ":" PropertyValue CompletionPart* CompletionAnno           -> CompletionRule {cons("CompletionTemplate"), recover, avoid}
+    "completion" "template" ":" Sort "=" PropertyValue CompletionPart* CompletionAnno  -> CompletionRule {cons("CompletionTemplateWithSort"), recover, avoid}
+    "completion" "trigger" ":" PropertyValue CompletionAnno                            -> CompletionRule {cons("CompletionTrigger")}
 
   context-free syntax
     "completions" -> StrategoCall   {reject}
@@ -152,14 +152,14 @@ imports SemanticServices
 
 exports
   syntax
-    "references" <SectionName-LEX> <LAYOUT?-CF> <SemanticRule*-CF> -> <Section-CF>      {cons("References")}
+    "references" <SectionName-LEX> <LAYOUT?-CF> <ReferenceRule*-CF> -> <Section-CF>      {cons("References")}
     "references"                                                   -> <ReservedName-CF> 
 
   context-free syntax
-    "reference" SemanticNode ":" StrategoCall StrategoCall -> SemanticRule {cons("ReferenceHoverRule"), deprecated}
-    "reference" SemanticNode ":" StrategoCall              -> SemanticRule {cons("ReferenceRule")}
-    "hover" SemanticNode ":" StrategoCall                  -> SemanticRule {cons("HoverRule")}
-    "occurrence" SemanticNode ":" StrategoCall             -> SemanticRule {cons("OccurrenceRule")}
+    "reference" SemanticNode ":" StrategoCall StrategoCall -> ReferenceRule {cons("ReferenceHoverRule"), deprecated}
+    "reference" SemanticNode ":" StrategoCall              -> ReferenceRule {cons("ReferenceRule")}
+    "hover" SemanticNode ":" StrategoCall                  -> ReferenceRule {cons("HoverRule")}
+    "occurrence" SemanticNode ":" StrategoCall             -> ReferenceRule {cons("OccurrenceRule")}
 
   context-free syntax
     "references" -> StrategoCall {reject}
@@ -262,9 +262,18 @@ exports
 
   context-free syntax
     Node                                    -> SemanticNode 
-    "provider" PropertyValue                -> SemanticRule {cons("SemanticProvider"), deprecated("Use 'provider :'")}
-    "provider" ":" PropertyValue            -> SemanticRule {cons("SemanticProvider")}
-    "on" "save" ":" StrategoCall OnSaveAnno -> SemanticRule {cons("OnSave")}
+    "provider" PropertyValue                -> RefactoringRule {cons("SemanticProvider"), deprecated("Use 'provider :'")}
+    "provider" ":" PropertyValue            -> RefactoringRule {cons("SemanticProvider")}
+    "on" "save" ":" StrategoCall OnSaveAnno -> RefactoringRule {cons("OnSave")}
+    "provider" PropertyValue                -> BuilderRule {cons("SemanticProvider"), deprecated("Use 'provider :'")}
+    "provider" ":" PropertyValue            -> BuilderRule {cons("SemanticProvider")}
+    "on" "save" ":" StrategoCall OnSaveAnno -> BuilderRule {cons("OnSave")}
+    "provider" PropertyValue                -> CompletionRule {cons("SemanticProvider"), deprecated("Use 'provider :'")}
+    "provider" ":" PropertyValue            -> CompletionRule {cons("SemanticProvider")}
+    "on" "save" ":" StrategoCall OnSaveAnno -> CompletionRule {cons("OnSave")}
+    "provider" PropertyValue                -> ReferenceRule {cons("SemanticProvider"), deprecated("Use 'provider :'")}
+    "provider" ":" PropertyValue            -> ReferenceRule {cons("SemanticProvider")}
+    "on" "save" ":" StrategoCall OnSaveAnno -> ReferenceRule {cons("OnSave")}
     StrategoId                              -> StrategoCall {cons("Strategy")}
     "id" "." StrategoId                     -> StrategoCall {cons("Attribute")}
                                             -> OnSaveAnno   {cons("None")}
@@ -433,7 +442,10 @@ imports EditorService
             Section          => EditorServiceSection
             OnSaveAnno       => EditorServiceOnSaveAnno
             StrategoCall     => EditorServiceStrategoCall
-            SemanticRule     => EditorServiceSemanticRule
+            RefactoringRule  => EditorServiceRefactoringRule
+            BuilderRule      => EditorServiceBuilderRule
+            CompletionRule   => EditorServiceCompletionRule
+            ReferenceRule    => EditorServiceReferenceRule
             SemanticNode     => EditorServiceSemanticNode
             StrategoId       => EditorServiceStrategoId
             ModuleName       => EditorServiceModuleName
