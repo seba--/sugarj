@@ -1,6 +1,7 @@
 package org.sugarj.editor;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.imp.model.ISourceProject;
@@ -23,6 +24,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
   private String projectPath;
 
   private String outputPath;
+  private ArrayList<String> includePath;
   
   @Override
   public IParseController getWrapped() {
@@ -35,6 +37,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
 
         sugarjParser.setProjectPath(projectPath);
         sugarjParser.setOutputPath(outputPath);
+        sugarjParser.setIncludePath(includePath);
         
         ((SGLRParseController) result).setParser(sugarjParser);
       }
@@ -71,6 +74,14 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
         try { 
           
           outputPath = projectPath + File.separator + javaProject.getOutputLocation().makeRelativeTo(project.getRawProject().getFullPath()).toString();
+          
+          includePath = new ArrayList<String>();
+          for (String reqProject : javaProject.getRequiredProjectNames()) {
+            IJavaProject reqJavaProject = JavaCore.create(project.getRawProject().getWorkspace().getRoot().getProject(reqProject));
+            IPath reqProjectPath = reqJavaProject.getProject().getLocation().makeAbsolute();
+            if (reqJavaProject != null)
+              includePath.add(reqProjectPath + File.separator  + reqJavaProject.getOutputLocation().makeRelativeTo(reqJavaProject.getProject().getFullPath()).toPortableString());
+          }
         } catch (JavaModelException e) { 
           outputPath = null; 
         }
@@ -81,6 +92,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
     if (sugarjParser != null) {
       sugarjParser.setProjectPath(projectPath);
       sugarjParser.setOutputPath(outputPath);
+      sugarjParser.setIncludePath(includePath);
     }
   }
 }

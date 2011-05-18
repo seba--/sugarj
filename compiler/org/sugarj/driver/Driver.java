@@ -22,8 +22,12 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.ParseException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -80,6 +84,7 @@ public class Driver{
   private final static int PENDING_TIMEOUT = 120000;
 
   private static LRUMap resultCache = new LRUMap(50);
+  private static Map<String, Entry<String, Driver>> pendingRuns = new HashMap<String, Map.Entry<String,Driver>>();
 
   private static List<URI> allInputFiles;
   private static List<URI> pendingInputFiles;
@@ -132,29 +137,58 @@ public class Driver{
   
   private List<String> generatedJavaClasses = new ArrayList<String>();
   
+  
+  
+  static {
+    try {
+      Environment.init();
+      
+      if (Environment.cacheDir != null)
+        FileCommands.createDir(Environment.cacheDir);
+      
+      FileCommands.createDir(Environment.bin);
+      
+      initializeCaches();
+    } catch (IOException e) {
+      throw new RuntimeException("error while initializin driver", e);
+    }
+    
+    allInputFiles = new ArrayList<URI>();
+    pendingInputFiles = new ArrayList<URI>();
+    currentlyProcessing = new ArrayList<URI>();
+  }
+  
+  
+  
+  
+  
   private static synchronized Result getResult(String source, String moduleName) {
     return (Result) resultCache.get(new Key(source, moduleName));
   }
   
-  private static Result getNonPendingResult(String source, String moduleName) {
-    Key key = new Key(source, moduleName);
-    Result r;
-    int count = 0;
-    synchronized (key) {
+  private static synchronized Entry<String, Driver> getPendingRun(String file) {
+    return pendingRuns.get(file);
+  }
+  
+  private static synchronized void putPendingRun(String file, String source, Driver driver) {
+    pendingRuns.put(file, new AbstractMap.SimpleImmutableEntry<String, Driver>(source, driver));
+  }
+  
+  private static void waitForPending(String file) {
+    Integer count = 0;
+    synchronized (count) {
       while (true) {
-        synchronized (resultCache) {
-          r = (Result) resultCache.get(key);
+        synchronized (pendingRuns) {
+          if (!pendingRuns.containsKey(file))
+            return;
         }
         
-        if (r != null && !(r instanceof PendingResult))
-          return r;
-        
         if (count > PENDING_TIMEOUT)
-          throw new IllegalStateException("pending result timed out for module " + moduleName);
+          throw new IllegalStateException("pending result timed out for " + file);
         
         count += 100;
         try {
-          key.wait(100);
+          count.wait(100);
         } catch (InterruptedException e) {
         }
       }
@@ -189,29 +223,36 @@ public class Driver{
   
   public static Result compile(String source, String moduleName, String file) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     Driver driver = new Driver();
+    Entry<String, Driver> pending = null;
     
-    boolean isPending = false;
     synchronized (Driver.class) {
-      Result result = getResult(source, moduleName);
-      if (result != null && result instanceof PendingResult)
-        isPending = true;
-      else if (result != null && result.isUpToDate())
-        return result;
+      pending = getPendingRun(file);
+      if (pending != null && !pending.getKey().equals(source)) {
+        log.log("interrupting " + moduleName);
+        pending.getValue().interrupt();
+      }
+
+      if (pending == null) {
+        Result result = getResult(source, file);
+        if (result != null && result.isUpToDate(source.hashCode()))
+          return result;
+      }
       
-      // mark this module as pending 
-      if (!isPending)
-        putResult(source, moduleName, new PendingResult(driver));
+      if (pending == null)
+        putPendingRun(file, source, driver);
     }
     
-    if (isPending && getNonPendingResult(source, moduleName) != null) 
+    if (pending != null) {
+      waitForPending(file);
       return compile(source, moduleName, file);
+    }
     
     try {
-      initialize();
-      driver.process(source, moduleName);
+      driver.process(source, moduleName, file);
       storeCaches();
     } finally {
-        putResult(source, moduleName, driver == null || driver.driverResult.getSugaredSyntaxTree() == null ? null : driver.driverResult);
+        pendingRuns.remove(file);
+        putResult(source, file, driver.driverResult.getSugaredSyntaxTree() == null ? null : driver.driverResult);
     }
     
     return driver.driverResult;
@@ -232,11 +273,12 @@ public class Driver{
    * @throws TokenExpectedException 
    * @throws InterruptedException 
    */
-  private void process(String source, String moduleName) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private void process(String source, String moduleName, String file) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     log.beginTask("processing", "BEGIN PROCESSING " + moduleName);
     boolean success = false;
     try {
       init(moduleName);
+      driverResult.setSourceFile(file, source.hashCode());
 
       remainingInput = source;
   
@@ -247,7 +289,7 @@ public class Driver{
         boolean wocache = Environment.wocache;
         Environment.wocache |= skipCache;
         
-        if (interrupt) throw new InterruptedException();
+        stopIfInterrupted();
         
         // PARSE the next top-level declaration
         IncrementalParseResult parseResult =
@@ -255,7 +297,7 @@ public class Driver{
         lastSugaredToplevelDecl = parseResult.getToplevelDecl();
         remainingInput = parseResult.getRest();
         
-        if (interrupt) throw new InterruptedException();
+        stopIfInterrupted();
         
         // DESUGAR the parsed top-level declaration
         IStrategoTerm desugared = currentDesugar(lastSugaredToplevelDecl);
@@ -263,7 +305,7 @@ public class Driver{
         // reset cache skipping
         Environment.wocache = wocache;
         
-        if (interrupt) throw new InterruptedException();
+        stopIfInterrupted();
         
         // PROCESS the assimilated top-level declaration
         processToplevelDeclaration(desugared);
@@ -271,21 +313,15 @@ public class Driver{
         done = parseResult.parsingFinished();
       }
       
-      if (interrupt) throw new InterruptedException();
+      stopIfInterrupted();
             
-      if (Environment.generateJavaFile && !generatedJavaClasses.isEmpty()) {
-        String f = Environment.bin + sep + relPackageNameSep() + mainModuleName + ".java";
-        driverResult.generateFile(f, FileCommands.readFileAsString(javaOutFile));
-        log.log("Wrote generated Java file to " + f);
-      }
-      
       try {
         // check final grammar and transformation for errors
         if (!Environment.noChecking) {
           checkCurrentGrammar();
         }
         
-        if (interrupt) throw new InterruptedException();
+        stopIfInterrupted();
         
         // need to build current transformation program for editor services
         checkCurrentTransformation();
@@ -294,7 +330,7 @@ public class Driver{
         e.printStackTrace();
       }
       
-      if (interrupt) throw new InterruptedException();
+      stopIfInterrupted();
       
       // COMPILE the generated java file
       compileGeneratedJavaFile();
@@ -344,7 +380,7 @@ public class Driver{
       String rest = getString(restTerm);
 
       if (input.equals(rest))
-        throw new RuntimeException("empty toplevel declaration parse rule");
+        throw new SGLRException(parser.getParser(), "empty toplevel declaration parse rule");
       
       try {
         if (!rest.isEmpty())
@@ -370,7 +406,7 @@ public class Driver{
       
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
       
-      if (!(e instanceof StrategoException))
+      if (!(e instanceof StrategoException) && !(e instanceof SGLRException))
         e.printStackTrace();
       else
         log.logErr(msg);
@@ -445,6 +481,7 @@ public class Driver{
         editorServices = ATermCommands.registerSemanticProvider(editorServices, currentTransProg);
   
         String editorServicesFile = bin + sep + relPackageNameSep() + extName + ".serv";
+        String depFile = bin + sep + relPackageNameSep() + extName + ".dep";
         FileCommands.createFile(editorServicesFile);
   
         log.log("writing editor services to " + editorServicesFile);
@@ -460,6 +497,7 @@ public class Driver{
         }
         
         driverResult.generateFile(editorServicesFile, buf.toString());
+        driverResult.writeDependencyFile(depFile);
       } finally {
         log.endTask();
       }
@@ -519,10 +557,12 @@ public class Driver{
         String plainContent = Term.asJavaString(ATermCommands.getApplicationSubterm(body, "PlainBody", 0));
         
         String plainFile = bin + sep + relPackageNameSep() + extName + (extension == null ? "" : ("." + extension));
+        String depFile = bin + sep + relPackageNameSep() + extName + ".dep";
         FileCommands.createFile(plainFile);
   
         log.log("writing plain content to " + plainFile);
         driverResult.generateFile(plainFile, plainContent);
+        driverResult.writeDependencyFile(depFile);
       } finally {
         log.endTask();
       }
@@ -701,9 +741,6 @@ public class Driver{
     
     sugaredImportDecls.add(lastSugaredToplevelDecl);
     
-    if (javaOutFile == null)
-      javaOutFile = javaOutDir + sep + mainModuleName + ".java";
-    
     log.beginTask("processing", "PROCESS the desugared import declaration.");
     try {
       String importModule = ModuleSystemCommands.extractImportedModuleName(toplevelDecl, interp);
@@ -712,27 +749,37 @@ public class Driver{
       
       String modulePath = FileCommands.getRelativeModulePath(importModule);
   
-      boolean success = processImport(modulePath, toplevelDecl);
-      
-      URI sourceFile = ModuleSystemCommands.locateSourceFile(modulePath);
-      
-      if (sourceFile != null &&
-          !modulePath.startsWith("org/sugarj") &&
-          !modulePath.endsWith("*")) {
+      if (!modulePath.startsWith("org/sugarj")) {
+        URI depUri = ModuleSystemCommands.searchFile(modulePath, ".dep");
+        Result res = null;
+        URI sourceUri = null;
         
-        URI classUri = ModuleSystemCommands.searchFile(modulePath, ".class");
-        if (!success ||
-            pendingInputFiles.contains(sourceFile) ||
-            (classUri != null && new File(sourceFile).lastModified() > new File(classUri).lastModified())) {
-
-          log.log("Need to compile the imported module first ; processing it now.");
-          compile(sourceFile);
-          log.log("CONTINUE PROCESSING'" + moduleName + "'.");
+        if (depUri != null) {
+          res = Result.readDependencyFile(depUri.getPath());
           
-          // try again
-          success = processImport(modulePath, toplevelDecl);
+          if (res != null && res.getSourceFile() != null)
+            sourceUri = new File(res.getSourceFile()).toURI();
         }
+
+        if (sourceUri == null)
+          sourceUri = ModuleSystemCommands.locateSourceFile(modulePath);
+
+        if (sourceUri != null && (res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile()))) {
+          log.log("Need to compile the imported module first ; processing it now.");
+          compile(sourceUri);
+          log.log("CONTINUE PROCESSING'" + moduleName + "'.");
+        }
+        
+        if (depUri == null)
+          depUri = ModuleSystemCommands.searchFile(modulePath, ".dep");
+        
+        if (depUri == null)
+          throw new IllegalStateException("dependency descriptor for module not found " + importModule);
+        
+        driverResult.addDependency(depUri.getPath());
       }
+      
+      boolean success = processImport(modulePath, toplevelDecl);
       
       if (!success)
         ATermCommands.setErrorMessage(toplevelDecl, "module not found " + importModule);
@@ -797,12 +844,11 @@ public class Driver{
         
         String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
         
-        generatedJavaClasses.add(
-            bin + sep 
-          + (relPackageName == null || relPackageName.isEmpty() ? "" : (relPackageName + sep))
-          + decName + ".class");
-      
+        String outName = bin + sep + relPackageNameSep() + decName;
+        
+        generatedJavaClasses.add(outName + ".class");
         driverResult.appendToFile(javaOutFile, SDFCommands.prettyPrintJava(dec, interp) + "\n");
+        driverResult.writeDependencyFile(outName + ".dep");
       } finally {
         log.endTask();
       }
@@ -884,13 +930,9 @@ public class Driver{
         log.endTask();
       }
       
-      String sdfExtension =
-          bin + sep + relPackageNameSep()
-              + extName + ".sdf";
-  
-      String strExtension =
-          bin + sep + relPackageNameSep()
-              + extName + ".str";
+      String sdfExtension = bin + sep + relPackageNameSep() + extName + ".sdf";
+      String strExtension = bin + sep + relPackageNameSep() + extName + ".str";
+      String depFile = bin + sep + relPackageNameSep() + extName + ".dep";
       
       FileCommands.delete(sdfExtension);
       FileCommands.delete(strExtension);
@@ -968,30 +1010,36 @@ public class Driver{
         if (CommandExecution.FULL_COMMAND_LINE)
           log.log("Wrote Stratego file to '" + new File(strExtension).getAbsolutePath() + "'.");
       }
+      
+      driverResult.writeDependencyFile(depFile);
 
+      /*
+       * adapt current grammar
+       */
       if (FileCommands.exists(sdfExtension)) {
         String currentGrammarName =
           FileCommands.hashFileName("sugarj", currentGrammarModule + fullExtName);
         currentGrammarSDF =
           Environment.tmpDir + sep + currentGrammarName + ".sdf";
-        driverResult.generateFile(currentGrammarSDF, 
+        FileCommands.writeToFile(currentGrammarSDF, 
             "module " + currentGrammarName + "\n"
             + "imports " + currentGrammarModule + "\n" 
             + "        " + fullExtName);
         currentGrammarModule = currentGrammarName;
-        driverResult.addFileDependency(sdfExtension);
       }
 
+      /*
+       * adapt current transformation
+       */
       if (FileCommands.exists(strExtension)) {
         String currentTransName =
           FileCommands.hashFileName("sugarj", currentTransModule + fullExtName);
         currentTransSTR = Environment.tmpDir + sep + currentTransName + ".str";
-        driverResult.generateFile(currentTransSTR,
+        FileCommands.writeToFile(currentTransSTR,
             "module " + currentTransName + "\n" 
             + "imports " + currentTransModule + "\n"
             + "        " + fullExtName);
         currentTransModule = currentTransName;
-        driverResult.addFileDependency(strExtension);
       }
 
     } finally {
@@ -1035,25 +1083,10 @@ public class Driver{
       driverResult.addEditorService(service);
   }
   
-  private static void initialize() throws IOException {
-    Environment.init();
-    
-    if (Environment.cacheDir != null)
-      FileCommands.createDir(Environment.cacheDir);
-    
-    FileCommands.createDir(Environment.bin);
-    
-    initializeCaches();
-    
-    allInputFiles = new ArrayList<URI>();
-    pendingInputFiles = new ArrayList<URI>();
-    currentlyProcessing = new ArrayList<URI>();
-  }
-  
   private void init(String moduleName) throws FileNotFoundException, IOException, InvalidParseTableException {
     this.moduleName = moduleName;
 
-    javaOutDir = FileCommands.newTempDir();
+    javaOutDir = Environment.bin;
     javaOutFile = null; 
     // FileCommands.createFile(tmpOutdir, relModulePath + ".java");
 
@@ -1094,8 +1127,6 @@ public class Driver{
   public static void main(String[] args) {
     // log.log("This is the extensible java compiler.");
     try {
-      initialize();
-      
       String[] sources = handleOptions(args);
 
       ClassLoader loader = new URLClassLoader(new URL[] {new File(Environment.src).toURI().toURL()});
@@ -1453,5 +1484,12 @@ public class Driver{
   
   public synchronized void interrupt() {
     this.interrupt = true;
+  }
+  
+  private synchronized void stopIfInterrupted() throws InterruptedException {
+    if (interrupt) {
+      log.log("interrupted " + mainModuleName);
+      throw new InterruptedException();
+    }
   }
 }

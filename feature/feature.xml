@@ -2,7 +2,7 @@
 <feature
       id="org.sugarj.editor"
       label="SugarJ"
-      version="1.0.6.qualifier"
+      version="1.0.9.qualifier"
       provider-name="sugarj.org">
 
    <description url="http://www.sugarj.org/update">
