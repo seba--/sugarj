@@ -10,6 +10,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -45,6 +50,11 @@ import org.sugarj.stdlib.StdLib;
 public class SDFCommands {
   
   private final static Pattern SDF_FILE_PATTERN = Pattern.compile(".*\\.sdf");
+  
+  /*
+   * timeout for parsing files (in milliseconds)
+   */
+  private final static long PARSE_TIMEOUT = 30000;
   
   public static ModuleKeyCache<String> sdfCache = null;
   
@@ -267,7 +277,7 @@ public class SDFCommands {
    * @throws BadTokenException 
    * @throws TokenExpectedException 
    */
-  private static IStrategoTerm jsglri(ParseTable table, String source, String start, ITreeBuilder treeBuilder, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  private static IStrategoTerm jsglri(ParseTable table, final String source, String start, ITreeBuilder treeBuilder, final JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     parser.setParseTable(table);
     parser.setStartSymbol(start);
     
@@ -276,7 +286,25 @@ public class SDFCommands {
     
     parser.getParser().setTreeBuilder(treeBuilder);
 
-    return parser.parse(source, "in-file declaration");
+    FutureTask<IStrategoTerm> res = new FutureTask<IStrategoTerm>(new Callable<IStrategoTerm>() {
+      @Override
+      public IStrategoTerm call() throws Exception {
+        return parser.parse(source, "in-file declaration");
+      }
+    });
+    
+    try {
+      new Thread(res).start();
+      return res.get(PARSE_TIMEOUT, TimeUnit.MILLISECONDS);
+    } catch (ExecutionException e) {
+      if (e.getCause() instanceof SGLRException)
+        throw (SGLRException) e.getCause();
+      throw new SGLRException(parser.getParser(), "unexpected execution error", e);
+    } catch (InterruptedException e) {
+      throw new SGLRException(parser.getParser(), "parser was interrupted", e);
+    } catch (TimeoutException e) {
+      throw new SGLRException(parser.getParser(), "parser timed out, timeout at " + PARSE_TIMEOUT + "ms", e);
+    }
   }
   
 //  /**

@@ -1,7 +1,5 @@
 package org.sugarj.driver;
 
-import static org.sugarj.driver.Log.log;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -129,6 +127,11 @@ public class ATermCommands {
   public static boolean isList(IStrategoTerm term) {
     return term.getTermType() == IStrategoTerm.LIST;
   }
+  
+  public static boolean isString(IStrategoTerm term) {
+    return term.getTermType() == IStrategoTerm.STRING;
+  }
+
   
   public static List<IStrategoTerm> getList(IStrategoTerm term) {
     
@@ -371,5 +374,4 @@ public class ATermCommands {
         throw new UnsupportedOperationException();
     }
   }
-  
 }

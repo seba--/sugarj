@@ -39,8 +39,11 @@ public class ModuleSystemCommands {
    * @throws IOException
    */
   public static boolean importClass(String modulePath, IStrategoTerm importTerm, String javaOutFile, HybridInterpreter interp, Result driverResult) throws IOException {
-    if (searchFile(modulePath, ".class") == null)
+    URI classUri = searchFile(modulePath, ".class");
+    if (classUri == null)
       return false;
+    
+    driverResult.addFileDependency(classUri.getPath());
     
     log.beginTask("Generate Java code");
     try {

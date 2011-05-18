@@ -1,11 +1,11 @@
 package org.sugarj.driver;
 
-import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getLeftToken;
 import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getTokenizer;
 
 import org.spoofax.interpreter.terms.ISimpleTerm;
 import org.spoofax.jsglr.client.KeywordRecognizer;
 import org.spoofax.jsglr.client.imploder.IToken;
+import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.spoofax.jsglr.client.imploder.Tokenizer;
 
 /**
@@ -19,8 +19,11 @@ public class RetractableTokenizer extends Tokenizer {
   
   public void retract(ISimpleTerm node) {
     assert getTokenizer(node) == this;
-    
-    IToken tok = getLeftToken(node);
+    retractTo(ImploderAttachment.getLeftToken(node).getIndex());
+  }
+  
+  public void retractTo(int index) {
+    IToken tok = getTokenAt(index);
     
     int start = tok.getIndex();
     

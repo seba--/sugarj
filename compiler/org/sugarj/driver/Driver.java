@@ -34,6 +34,7 @@ import org.apache.commons.collections.map.LRUMap;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.InvalidParseTableException;
 import org.spoofax.jsglr.client.ParseTable;
+import org.spoofax.jsglr.client.imploder.IToken;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.SGLRException;
@@ -54,7 +55,7 @@ import org.sugarj.stdlib.StdLib;
  */
 public class Driver{
   
-  public final static String CACHE_VERSION = "editor-base-0.7a";
+  public final static String CACHE_VERSION = "editor-base-0.9";
   
   private static class Key {
     private String source;
@@ -329,6 +330,7 @@ public class Driver{
 
   private IncrementalParseResult parseNextToplevelDeclaration(String input, boolean recovery)
       throws IOException, ParseException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+    int start = inputTreeBuilder.getTokenizer() == null ? 0 : inputTreeBuilder.getTokenizer().getStartOffset();
     log.beginTask("parsing", "PARSE the next toplevel declaration.");
     try {
       IStrategoTerm remainingInputTerm = currentParse(input, recovery);
@@ -362,6 +364,30 @@ public class Driver{
       log.log("next toplevel declaration parsed: " + tmpFile);
 
       return new IncrementalParseResult(toplevelDecl, rest);
+    } catch (Exception e) {
+      if (!recovery)
+        throw new SGLRException(parser.getParser(), "parsing failed", e);
+      
+      String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
+      
+      if (!(e instanceof StrategoException))
+        e.printStackTrace();
+      else
+        log.logErr(msg);
+      
+      if (inputTreeBuilder.getTokenizer().getStartOffset() > start) {
+        IToken token = inputTreeBuilder.getTokenizer().getTokenAtOffset(start);
+        ((RetractableTokenizer) inputTreeBuilder.getTokenizer()).retractTo(token.getIndex());
+        inputTreeBuilder.setOffset(start);
+      }
+      
+      IToken right = inputTreeBuilder.getTokenizer().makeToken(start + input.length() - 1, IToken.TK_STRING, true);
+      IToken left = inputTreeBuilder.getTokenizer().getTokenAtOffset(start);
+      inputTreeBuilder.getTokenizer().makeToken(inputTreeBuilder.getTokenizer().getStartOffset() - 1, IToken.TK_EOF, true);
+      IStrategoTerm term = ATermCommands.factory.makeString(input);
+      ImploderAttachment.putImploderAttachment(term, false, "String", left, right);
+      ATermCommands.setErrorMessage(term, msg);
+      return new IncrementalParseResult(term, "");
     } finally {
       log.endTask();
     }
@@ -540,6 +566,10 @@ public class Driver{
            */
           for (IStrategoTerm term : ATermCommands.getList(toplevelDecl))
             processToplevelDeclaration(term);
+        else if (ATermCommands.isString(toplevelDecl)) {
+          if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
+            sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+        }
         else
           throw new IllegalArgumentException("unexpected toplevel declaration, desugaring probably failed: " + toplevelDecl.toString(5));
       } catch (Exception e) {
@@ -639,7 +669,10 @@ public class Driver{
         res = parseNextToplevelDeclaration(remainingInput, false);
         term = res.getToplevelDecl();
       }
-      catch (Throwable t) { }
+      catch (Throwable t) {
+        res = null;
+        term = null;
+      }
       finally {         
         log.endSilent(); 
       }
