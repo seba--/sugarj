@@ -175,8 +175,9 @@ public class Driver{
   }
   
   private static void waitForPending(String file) {
-    Integer count = 0;
-    synchronized (count) {
+    int count = 0;
+    Object lock = new Object();
+    synchronized (lock) {
       while (true) {
         synchronized (pendingRuns) {
           if (!pendingRuns.containsKey(file))
@@ -188,7 +189,7 @@ public class Driver{
         
         count += 100;
         try {
-          count.wait(100);
+          lock.wait(100);
         } catch (InterruptedException e) {
         }
       }
@@ -773,10 +774,8 @@ public class Driver{
         if (depUri == null)
           depUri = ModuleSystemCommands.searchFile(modulePath, ".dep");
         
-        if (depUri == null)
-          throw new IllegalStateException("dependency descriptor for module not found " + importModule);
-        
-        driverResult.addDependency(depUri.getPath());
+        if (depUri != null)
+          driverResult.addDependency(depUri.getPath());
       }
       
       boolean success = processImport(modulePath, toplevelDecl);
