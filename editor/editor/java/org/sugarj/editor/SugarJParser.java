@@ -64,6 +64,7 @@ public class SugarJParser extends JSGLRI {
     try {
       result = Driver.compile(input, FileCommands.fileName(filename), filename);
     } catch (Throwable e) {
+      e.printStackTrace();
       throw new RuntimeException("parsing " + FileCommands.fileName(filename) + " failed", e);
     }
     
