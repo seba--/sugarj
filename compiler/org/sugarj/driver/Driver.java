@@ -59,7 +59,7 @@ import org.sugarj.stdlib.StdLib;
  */
 public class Driver{
   
-  public final static String CACHE_VERSION = "editor-base-0.9";
+  public final static String CACHE_VERSION = "editor-base-0.10";
   
   private static class Key {
     private String source;
@@ -370,12 +370,27 @@ public class Driver{
     int start = inputTreeBuilder.getTokenizer() == null ? 0 : inputTreeBuilder.getTokenizer().getStartOffset();
     log.beginTask("parsing", "PARSE the next toplevel declaration.");
     try {
-      IStrategoTerm remainingInputTerm = currentParse(input, recovery);
+      IStrategoTerm remainingInputTerm = null;
+      
+      try {
+        remainingInputTerm = currentParse(input, recovery);
+      } catch (Exception e) {
+        if (recovery) {
+          e.printStackTrace();
+          remainingInputTerm = currentParse(input, false);
+        }
+        
+        if (remainingInputTerm == null)
+          throw e;
+      }
 
       if (remainingInputTerm == null)
         throw new ParseException("could not parse toplevel declaration in:\n"
             + input, -1);
 
+      if (!isApplication(remainingInputTerm, "NextToplevelDeclaration"))
+        throw new ATermCommands.MatchError(remainingInputTerm, "NextToplevelDeclaration");
+      
       IStrategoTerm toplevelDecl = getApplicationSubterm(remainingInputTerm, "NextToplevelDeclaration", 0);
       IStrategoTerm restTerm = getApplicationSubterm(remainingInputTerm, "NextToplevelDeclaration", 1);
       String rest = getString(restTerm);

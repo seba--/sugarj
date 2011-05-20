@@ -54,7 +54,15 @@ public class SDFCommands {
   /*
    * timeout for parsing files (in milliseconds)
    */
-  private final static long PARSE_TIMEOUT = 30000;
+  private static long PARSE_TIMEOUT = 60000;
+  
+  static {
+    try {
+      PARSE_TIMEOUT = Long.parseLong(System.getProperty("org.sugarj.parse_timeout"));
+      Log.log.log("set parse timeout to " + PARSE_TIMEOUT);
+    } catch (Exception e) {
+    }
+  }
   
   public static ModuleKeyCache<String> sdfCache = null;
   
@@ -299,7 +307,7 @@ public class SDFCommands {
     } catch (ExecutionException e) {
       if (e.getCause() instanceof SGLRException)
         throw (SGLRException) e.getCause();
-      throw new SGLRException(parser.getParser(), "unexpected execution error", e);
+      throw new RuntimeException("unexpected execution error", e);
     } catch (InterruptedException e) {
       throw new SGLRException(parser.getParser(), "parser was interrupted", e);
     } catch (TimeoutException e) {

@@ -589,7 +589,7 @@ exports
   lexical syntax
     ShortCom -> LAYOUT 
     LongCom  -> LAYOUT 
-    Ws       -> LAYOUT 
+%%    Ws       -> LAYOUT 
 
   context-free restrictions
     LAYOUT? -/- [\ \t\n\r]

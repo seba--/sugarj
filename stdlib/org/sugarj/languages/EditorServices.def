@@ -351,7 +351,7 @@ exports
     ~[\*]                           -> CommChar    
     Asterisk                        -> CommChar    
     "*"                             -> Asterisk    
-    Ws                              -> LAYOUT      
+%%    Ws                              -> LAYOUT      
     ShortCom                        -> LAYOUT      
     LongCom                         -> LAYOUT      
                                     -> Eof         
