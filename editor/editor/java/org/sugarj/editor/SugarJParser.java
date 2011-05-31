@@ -16,6 +16,7 @@ import org.sugarj.driver.CommandExecution;
 import org.sugarj.driver.Driver;
 import org.sugarj.driver.Environment;
 import org.sugarj.driver.FileCommands;
+import org.sugarj.driver.Log;
 import org.sugarj.driver.Result;
 
 /**
@@ -28,6 +29,8 @@ public class SugarJParser extends JSGLRI {
   private Result result;
   private List<String> includePath;
 
+  
+  
   public SugarJParser(JSGLRI parser) {
     super(parser.getParseTable(), parser.getStartSymbol(), parser.getController());
   }
@@ -38,9 +41,7 @@ public class SugarJParser extends JSGLRI {
       throws TokenExpectedException, BadTokenException, SGLRException, IOException {
     
     Environment.wocache = false;
-    if (Environment.cacheDir == null)
-      Environment.cacheDir = System.getProperty("user.home") + "/.sugarj/cache";
-    
+
     Environment.includePath.addAll(includePath);
     Environment.includePath.add(new StrategoJarAntPropertyProvider().getAntPropertyValue(""));
     
@@ -48,6 +49,8 @@ public class SugarJParser extends JSGLRI {
     Environment.src = projectPath;
     Environment.bin = outputPath != null ? outputPath : projectPath;
 
+    if (Environment.cacheDir == null)
+      Environment.cacheDir = projectPath + "/.sugarjcache";
     
     Environment.atomicImportParsing = true;
     Environment.generateJavaFile = true;
@@ -60,6 +63,9 @@ public class SugarJParser extends JSGLRI {
     CommandExecution.SILENT_EXECUTION = false;
     CommandExecution.SUB_SILENT_EXECUTION = false;
     CommandExecution.FULL_COMMAND_LINE = true;
+    
+    Log.out = SugarJConsole.getOutputPrintStream();
+    Log.err = SugarJConsole.getErrorPrintStream();
     
     try {
       result = Driver.compile(input, FileCommands.fileName(filename), filename);

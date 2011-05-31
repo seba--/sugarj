@@ -59,7 +59,7 @@ import org.sugarj.stdlib.StdLib;
  */
 public class Driver{
   
-  public final static String CACHE_VERSION = "editor-base-0.10";
+  public final static String CACHE_VERSION = "editor-base-0.11";
   
   private static class Key {
     private String source;
@@ -198,7 +198,7 @@ public class Driver{
 
   private static synchronized void putResult(String source, String moduleName, Result result) {
     resultCache.put(new Key(source, moduleName), result);
-    System.out.println(resultCache.size());
+    Log.log.log(resultCache.size());
   }
   
   public static Result compile(URI sourceFile) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
@@ -776,7 +776,7 @@ public class Driver{
           if (res != null && res.getSourceFile() != null)
             sourceUri = new File(res.getSourceFile()).toURI();
         }
-
+        
         if (sourceUri == null)
           sourceUri = ModuleSystemCommands.locateSourceFile(modulePath);
 
@@ -1167,8 +1167,8 @@ public class Driver{
     } catch (Exception e) {
       e.printStackTrace();
     } catch (CLIError e) {
-      System.out.println(e.getMessage());
-      System.out.println();
+      Log.log.log(e.getMessage());
+      Log.log.log("");
       e.showUsage();
     }
 
