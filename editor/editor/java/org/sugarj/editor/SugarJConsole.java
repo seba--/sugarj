@@ -42,6 +42,8 @@ public class SugarJConsole {
   private static AutoFlushOutputStreamWriter lastConsoleOutputWriter;
 
   private static AutoFlushOutputStreamWriter lastConsoleErrorWriter;
+  
+  private static boolean consoleActivatedOnce = false;
 
   public static Writer getErrorWriter() {
     MessageConsole console = getConsole();
@@ -75,16 +77,14 @@ public class SugarJConsole {
   public static OutputStream getOutputStream() {
     return ((AutoFlushOutputStreamWriter) getOutputWriter()).stream;
   }
-  
+
   public static PrintStream getErrorPrintStream() {
     return new PrintStream(getErrorStream());
   }
-  
+
   public static PrintStream getOutputPrintStream() {
     return new PrintStream(getOutputStream());
   }
-  
-  
 
   /**
    * Gets or opens the Eclipse console for this plugin.
@@ -112,6 +112,13 @@ public class SugarJConsole {
   public static void activateConsole() {
     activateConsole(false);
   }
+
+  public static void activateConsoleOnce() {
+  	  if (!consoleActivatedOnce) {
+  	    activateConsole(false);
+  	    consoleActivatedOnce = true;
+  	  }
+	  }
 
   /**
    * Activates the console for this plugin.

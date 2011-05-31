@@ -36,7 +36,8 @@ public class FileCommands {
   }
 
   public static void delete(String file) throws IOException {
-    new File(file).delete();
+    if (file != null)
+      new File(file).delete();
   }
 
   public static void copyFile(String from, String to) throws IOException {

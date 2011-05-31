@@ -179,7 +179,8 @@ public class SDFCommands {
     try {
       String cacheTbl = Environment.cacheDir + Environment.sep + new File(tbl).getName();
       FileCommands.copyFile(tbl, cacheTbl);
-      sdfCache.put(key, cacheTbl);
+      String oldTbl = sdfCache.putGet(key, cacheTbl);
+      FileCommands.delete(oldTbl);
 
       if (CommandExecution.CACHE_INFO)
         log.log("Cache Location: " + cacheTbl);

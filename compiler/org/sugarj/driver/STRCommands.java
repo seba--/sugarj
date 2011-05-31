@@ -136,7 +136,8 @@ public class STRCommands {
     try {
       String cacheProg = Environment.cacheDir + Environment.sep + new File(prog).getName();
       FileCommands.copyFile(prog, cacheProg);
-      strCache.put(key, cacheProg);
+      String oldProg = strCache.putGet(key, cacheProg);
+      FileCommands.delete(oldProg);
 
       if (CommandExecution.CACHE_INFO)
         log.log("Cache Location: " + cacheProg);

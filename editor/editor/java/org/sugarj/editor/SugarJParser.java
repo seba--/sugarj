@@ -66,6 +66,7 @@ public class SugarJParser extends JSGLRI {
     
     Log.out = SugarJConsole.getOutputPrintStream();
     Log.err = SugarJConsole.getErrorPrintStream();
+    SugarJConsole.activateConsoleOnce();
     
     try {
       result = Driver.compile(input, FileCommands.fileName(filename), filename);
