@@ -54,7 +54,7 @@ public class SDFCommands {
   /*
    * timeout for parsing files (in milliseconds)
    */
-  private static long PARSE_TIMEOUT = 60000;
+  private static long PARSE_TIMEOUT = 30000;
   
   static {
     try {
@@ -171,13 +171,18 @@ public class SDFCommands {
   }
   
   
-  private static void cacheParseTable(ModuleKey key, String tbl) {
-    if (sdfCache == null)
+  private static void cacheParseTable(ModuleKey key, String tbl) throws IOException {
+    if (sdfCache == null || Environment.cacheDir == null)
       return;
     
     log.beginTask("Caching", "Cache parse table");
     try {
-      sdfCache.put(key, tbl);
+      String cacheTbl = Environment.cacheDir + Environment.sep + new File(tbl).getName();
+      FileCommands.copyFile(tbl, cacheTbl);
+      sdfCache.put(key, cacheTbl);
+
+      if (CommandExecution.CACHE_INFO)
+        log.log("Cache Location: " + cacheTbl);
     } finally {
       log.endTask();
     }

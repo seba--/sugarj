@@ -1,6 +1,5 @@
 package org.sugarj.driver;
 import static org.sugarj.driver.Environment.sep;
-import static org.sugarj.driver.FileCommands.toCygwinPath;
 import static org.sugarj.driver.FileCommands.toWindowsPath;
 import static org.sugarj.driver.Log.log;
 
@@ -128,16 +127,19 @@ public class STRCommands {
     }
   }
     
-  private static void cacheAssimilator(ModuleKey key, String prog) {
-    if (strCache == null)
+  private static void cacheAssimilator(ModuleKey key, String prog) throws IOException {
+    if (strCache == null || Environment.cacheDir == null)
       return;
     
+
     log.beginTask("Caching", "Cache assimilator");
     try {
-      strCache.put(key, prog);
+      String cacheProg = Environment.cacheDir + Environment.sep + new File(prog).getName();
+      FileCommands.copyFile(prog, cacheProg);
+      strCache.put(key, cacheProg);
 
       if (CommandExecution.CACHE_INFO)
-        log.log("Cache Location: " + prog);
+        log.log("Cache Location: " + cacheProg);
     } finally {
       log.endTask();
     }

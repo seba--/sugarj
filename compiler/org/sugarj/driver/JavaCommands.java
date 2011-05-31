@@ -46,8 +46,8 @@ public class JavaCommands {
     // this is ECJ
     return BatchCompiler.compile(
         cmd,
-        new PrintWriter(System.out),
-        new PrintWriter(System.err),
+        new PrintWriter(Log.out),
+        new PrintWriter(Log.err),
         null);
   }
 

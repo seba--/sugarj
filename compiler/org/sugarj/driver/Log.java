@@ -1,5 +1,6 @@
 package org.sugarj.driver;
 
+import java.io.PrintStream;
 import java.util.Stack;
 
 public class Log {
@@ -18,6 +19,9 @@ public class Log {
   private Stack<Boolean> lightweight = new Stack<Boolean>();
   private int silent = -1;
   
+  public static PrintStream out = System.out;
+  public static PrintStream err = System.err;
+  
   public synchronized void beginTask(String shortText, String longText, boolean inline) {
     if (silent >= 0)
       return;
@@ -25,8 +29,9 @@ public class Log {
     noLongerLeaf();
 
     indent();
-    System.out.print(longText);
-    if (!inline) System.out.println();
+    out.print(longText);
+    if (!inline) 
+      out.println();
 
     tasks.push(shortText);
     lightweight.push(inline);
@@ -55,7 +60,7 @@ public class Log {
     long duration = endTime - startTime;
     
     if (lightweight.pop()) {
-      System.out.println(" ... " + error + " - " + duration + "ms");
+      out.println(" ... " + error + " - " + duration + "ms");
     } else if (doneMessage) {
       log.log(shortText + " " + error + " - " + duration + "ms");
     }
@@ -92,7 +97,7 @@ public class Log {
     
     noLongerLeaf();
     indent();
-    System.out.println(text);
+    out.println(text);
   }
   
   public synchronized void logErr(String text) {
@@ -101,14 +106,14 @@ public class Log {
     
     noLongerLeaf();
     indent();
-    System.err.println(text);
+    err.println(text);
   }
   
   private void noLongerLeaf() {
     if (!lightweight.empty() && lightweight.peek()) {
       lightweight.pop();
       lightweight.push(false);
-      System.out.println();
+      out.println();
     }
   }
 
@@ -167,9 +172,9 @@ public class Log {
   }
 
   private void indent() {
-    // System.out.print("$$$");
+    // out.print("$$$");
     for (int i = tasks.size(); i > 0; i--)
-      System.out.print("  ");
+      out.print("  ");
   }
 
   public void endExecution(int exitValue) {
