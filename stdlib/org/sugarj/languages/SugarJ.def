@@ -160,6 +160,7 @@ exports
 
   context-free syntax
     ChecksDecHead ChecksBody   -> ToplevelDeclaration              {cons("ChecksDec")}
+    AnnoOrSugarMod* "analysis" JavaId -> ChecksDecHead {cons("ChecksDecHead")}
     AnnoOrSugarMod* "checks" JavaId -> ChecksDecHead {cons("ChecksDecHead")}
     "{" CheckingRule* "}"              -> ChecksBody    {cons("ChecksBody")}
 
