@@ -28,6 +28,7 @@ public class Result {
   private String sourceFile;
   private Integer sourceFileHash;
   private Set<String> allDependentFiles = new HashSet<String>();
+  private boolean failed = false;
 
   private final static Result OUTDATED_RESULT = new Result() {
     @Override
@@ -200,5 +201,13 @@ public class Result {
 
   public String getSourceFile() {
     return sourceFile;
+  }
+  
+  public boolean hasFailed() {
+    return failed;
+  }
+  
+  public void setFailed(boolean hasFailed) {
+    this.failed = hasFailed;
   }
 }

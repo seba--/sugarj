@@ -2,7 +2,6 @@ package org.sugarj.driver;
 
 import static org.sugarj.driver.ATermCommands.isApplication;
 import static org.sugarj.driver.Environment.includePath;
-import static org.sugarj.driver.Environment.sep;
 import static org.sugarj.driver.Log.log;
 
 import java.io.BufferedReader;
@@ -16,7 +15,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -62,34 +60,14 @@ public class ModuleSystemCommands {
    * @return path to new grammar or null if no sdf file existed.
    * @throws IOException 
    */
-  public static String importSdf(String modulePath, String currentGrammarModule, List<String> availableSDFImports, Result driverResult) throws IOException {
+  public static URI importSdf(String modulePath) throws IOException {
     URI sdfUri = searchFile(modulePath, ".sdf");
     
     if (sdfUri == null)
       return null;
     
-    log.beginTask("Incorporation", "Incorporate the imported grammar " + modulePath);
-    try {
-      // build extension of current grammar
-      String newGrammarName = 
-        FileCommands.hashFileName("sugarj", currentGrammarModule + modulePath);
-        
-
-      String newGrammar = Environment.tmpDir + sep + newGrammarName + ".sdf";
-
-      String grammar = 
-        "module " + newGrammarName + "\n"
-      + "imports " + currentGrammarModule + "\n"
-      + "        " + modulePath;
-      
-      FileCommands.writeToFile(newGrammar, grammar);
-
-      availableSDFImports.add(modulePath);
-
-      return newGrammar;
-    } finally {
-      log.endTask();
-    }
+    log.log("Found syntax definition for " + modulePath);
+    return sdfUri;
   }
   
   /**
@@ -101,33 +79,14 @@ public class ModuleSystemCommands {
    * @return path to new Stratego module or null of no str file existed
    * @throws IOException 
    */
-  public static String importStratego(String modulePath, String currentTransModule, List<String> availableSTRImports, Result driverResult) throws IOException {
+  public static URI importStratego(String modulePath) throws IOException {
     URI strUri = searchFile(modulePath, ".str");
     
     if (strUri == null)
       return null;
-    
-    log.beginTask("Incorporation", "Incorporate the imported desugaring rules " + modulePath);
-    try {
-      // build extension of current transformation
-      String newTransName =
-        FileCommands.hashFileName("sugarj", currentTransModule + modulePath);
 
-      String newTrans = Environment.tmpDir + sep + newTransName + ".str";
-
-      String trans =
-          "module " + newTransName + "\n"
-        + "imports " + currentTransModule + "\n"
-        + "        " + modulePath;
-      
-      FileCommands.writeToFile(newTrans, trans);
-
-      availableSTRImports.add(modulePath);
-
-      return newTrans;
-    } finally {
-      log.endTask();
-    }
+    log.log("Found desugaring for " + modulePath);
+    return strUri;
   }
   
   /**

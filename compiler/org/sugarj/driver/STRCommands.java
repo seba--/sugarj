@@ -154,22 +154,19 @@ public class STRCommands {
     
     log.beginTask("Searching", "Search assimilator in cache");
     try {
+      int h = key.hashCode();
       result = strCache.get(key);
       
-      // Ignore non-existing files
-      if (result != null && !FileCommands.exists(result))
-        result = null;
-      
-      if (result != null && CommandExecution.CACHE_INFO)
+      if (result == null || !new File(result).exists())
+        return null;
+
+      if (CommandExecution.CACHE_INFO)
         log.log("Cache location: '" + result + "'");
+      
+      return result;
     } finally {
       log.endTask(result != null);
     }
-    
-    if (result != null && !new File(result).exists())
-      return null;
-    
-    return result;
   }
 
 
