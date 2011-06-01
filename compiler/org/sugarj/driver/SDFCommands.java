@@ -198,14 +198,17 @@ public class SDFCommands {
     log.beginTask("Searching", "Search parse table in cache");
     try {
       result = sdfCache.get(key);
+      
+      if (result == null || !new File(result).exists())
+        return null;
+
+      if (CommandExecution.CACHE_INFO)
+        log.log("Cache location: '" + result + "'");
+
+      return result;
     } finally {
       log.endTask(result != null);
     }
-    
-    if (result != null && !new File(result).exists())
-      return null;
-    
-    return result;
   }
   
   private static ModuleKey getModuleKeyForGrammar(String sdf, String module, Collection<String> dependentFiles, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {

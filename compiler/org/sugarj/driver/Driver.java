@@ -321,20 +321,15 @@ public class Driver{
       
       stopIfInterrupted();
             
-      try {
-        // check final grammar and transformation for errors
-        if (!Environment.noChecking) {
-          checkCurrentGrammar();
-        }
-        
-        stopIfInterrupted();
-        
-        // need to build current transformation program for editor services
-        checkCurrentTransformation();
-        
-      } catch (Exception e) {
-        e.printStackTrace();
+      // check final grammar and transformation for errors
+      if (!Environment.noChecking) {
+        checkCurrentGrammar();
       }
+      
+      stopIfInterrupted();
+      
+      // need to build current transformation program for editor services
+      checkCurrentTransformation();
       
       stopIfInterrupted();
       
@@ -354,6 +349,7 @@ public class Driver{
     }
     finally {
       log.endTask(success, "done processing " + moduleName, "failed processing " + moduleName);
+      driverResult.setFailed(!success);
     }
   }
 
@@ -688,6 +684,16 @@ public class Driver{
       currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(), strParser, strjContext);
 
       return STRCommands.assimilate(currentTransProg, term, interp);
+    } catch (RuntimeException e) {
+      String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
+      
+      if (!(e instanceof StrategoException))
+        e.printStackTrace();
+      else
+        log.logErr(msg);
+
+      ATermCommands.setErrorMessage(term, msg);
+      return term;
     } finally {
       log.endTask();
     }
@@ -787,7 +793,15 @@ public class Driver{
 
         if (sourceUri != null && (res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile()))) {
           log.log("Need to compile the imported module first ; processing it now.");
-          compile(sourceUri);
+          
+          try {
+            Result importResult = compile(sourceUri);
+            if (importResult.hasFailed())
+              ATermCommands.setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
+          } catch (Exception e) {
+            ATermCommands.setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
+          }
+            
           log.log("CONTINUE PROCESSING'" + moduleName + "'.");
         }
         
@@ -820,26 +834,18 @@ public class Driver{
         interp, 
         driverResult);
 
-    String grammarModule = ModuleSystemCommands.importSdf(
-        modulePath, 
-        currentGrammarModule, 
-        availableSDFImports, 
-        driverResult);
+    URI grammarModule = ModuleSystemCommands.importSdf(modulePath);
     if (grammarModule != null) {
       success = true;
-      currentGrammarSDF = grammarModule;
-      currentGrammarModule = FileCommands.fileName(grammarModule);
+      availableSDFImports.add(modulePath);
+      buildCompoundSdfModule();
     }
     
-    String transModule = ModuleSystemCommands.importStratego(
-        modulePath, 
-        currentTransModule, 
-        availableSTRImports, 
-        driverResult);
-    if (transModule != null) {
+    URI strModule = ModuleSystemCommands.importStratego(modulePath);
+    if (strModule != null) {
       success = true;
-      currentTransSTR = transModule;
-      currentTransModule = FileCommands.fileName(transModule);
+      availableSTRImports.add(modulePath);
+      buildCompoundStrModule();
     }
     
     success |= ModuleSystemCommands.importEditorServices(modulePath, driverResult);
@@ -1036,34 +1042,42 @@ public class Driver{
        * adapt current grammar
        */
       if (FileCommands.exists(sdfExtension)) {
-        String currentGrammarName =
-          FileCommands.hashFileName("sugarj", currentGrammarModule + fullExtName);
-        currentGrammarSDF =
-          Environment.tmpDir + sep + currentGrammarName + ".sdf";
-        FileCommands.writeToFile(currentGrammarSDF, 
-            "module " + currentGrammarName + "\n"
-            + "imports " + currentGrammarModule + "\n" 
-            + "        " + fullExtName);
-        currentGrammarModule = currentGrammarName;
+        buildCompoundSdfModule();
       }
 
       /*
        * adapt current transformation
        */
-      if (FileCommands.exists(strExtension)) {
-        String currentTransName =
-          FileCommands.hashFileName("sugarj", currentTransModule + fullExtName);
-        currentTransSTR = Environment.tmpDir + sep + currentTransName + ".str";
-        FileCommands.writeToFile(currentTransSTR,
-            "module " + currentTransName + "\n" 
-            + "imports " + currentTransModule + "\n"
-            + "        " + fullExtName);
-        currentTransModule = currentTransName;
-      }
+      if (FileCommands.exists(strExtension))
+        buildCompoundStrModule();
 
     } finally {
       log.endTask();
     }
+  }
+  
+  private void buildCompoundSdfModule() throws IOException {
+    currentGrammarSDF = FileCommands.newTempFile("sdf");
+    currentGrammarModule = FileCommands.fileName(currentGrammarSDF);
+    StringBuilder builder = new StringBuilder();
+    builder.append("module ").append(currentGrammarModule).append("\n");
+    builder.append("imports ");
+    for (String m : availableSDFImports)
+      builder.append(m).append(" ");
+    
+    FileCommands.writeToFile(currentGrammarSDF, builder.toString());
+  }
+  
+  private void buildCompoundStrModule() throws IOException {
+    currentTransSTR = FileCommands.newTempFile("str");
+    currentTransModule = FileCommands.fileName(currentTransSTR);
+    StringBuilder builder = new StringBuilder();
+    builder.append("module ").append(currentTransModule).append("\n");
+    builder.append("imports ");
+    for (String m : availableSTRImports)
+      builder.append(m).append(" ");
+    
+    FileCommands.writeToFile(currentTransSTR, builder.toString());
   }
 
   private void checkCurrentGrammar() throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
@@ -1076,7 +1090,7 @@ public class Driver{
     }
   }
   
-  private void checkCurrentTransformation() throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException{
+  private void checkCurrentTransformation() throws TokenExpectedException, BadTokenException, IOException, InvalidParseTableException, SGLRException {
     log.beginTask("checking transformation", "CHECK current transformation");
     
     try {
@@ -1119,9 +1133,11 @@ public class Driver{
 
     // list of imports that contain SDF extensions
     availableSDFImports = new ArrayList<String>();
+    availableSDFImports.add(StdLib.initGrammarModule);
 
     // list of imports that contain Stratego extensions
     availableSTRImports = new ArrayList<String>();
+    availableSTRImports.add(StdLib.initTransModule);
 
     inputTreeBuilder = new RetractableTreeBuilder();
     

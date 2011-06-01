@@ -337,7 +337,8 @@ public class ATermCommands {
     
     for (int i = left.getIndex(), max = right.getIndex(); i <= max; i++) {
       Token tok = ((Token) left.getTokenizer().getTokenAt(i));
-      tok.setError(msg);
+      if (tok.getError() == null || tok.getError().isEmpty())
+        tok.setError(msg);
       
       if (tok.getTokenizer().getInput().length() <= tok.getStartOffset() || tok.getTokenizer().getInput().charAt(tok.getStartOffset()) == '\n')
         break;
