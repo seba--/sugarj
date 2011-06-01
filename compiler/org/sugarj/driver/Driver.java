@@ -209,14 +209,19 @@ public class Driver{
       currentlyProcessing.add(sourceFile);
     }
 
-    String source = FileCommands.readFileAsString(sourceFile.getPath());
-    String moduleName = FileCommands.fileName(sourceFile);
+    Result res;
     
-    Result res = compile(source, moduleName, sourceFile.getPath());
-
-    synchronized (currentlyProcessing) {
-      currentlyProcessing.remove(sourceFile);
+    try {
+      String source = FileCommands.readFileAsString(sourceFile.getPath());
+      String moduleName = FileCommands.fileName(sourceFile);
+      
+      res = compile(source, moduleName, sourceFile.getPath());
+    } finally {
+      synchronized (currentlyProcessing) {
+        currentlyProcessing.remove(sourceFile);
+      }
     }
+
     pendingInputFiles.remove(sourceFile);
 
     return res;
