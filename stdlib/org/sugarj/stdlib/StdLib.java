@@ -68,8 +68,8 @@ public class StdLib {
   public static URI initGrammarAtomicImports = ensureFile("org/sugarj/init/initGrammar_atomicImports.sdf");
   public static String initGrammarAtomicImportsModule = "org/sugarj/init/initGrammar_atomicImports";
   public static URI initGrammarXTBL = ensureFile("org/sugarj/init/initGrammar.xtbl");
-  public static URI initTrans = ensureFile("org/sugarj/init/initTrans.str");
-  public static String initTransModule = "org/sugarj/init/initTrans";
+  public static URI initTrans = ensureFile("org/sugarj/init/InitTrans.str");
+  public static String initTransModule = "org/sugarj/init/InitTrans";
   public static URI initEditor = ensureFile("org/sugarj/init/initEditor.serv");
   public static String initEditorModule = "org/sugarj/init/initEditor";
 
