@@ -3,7 +3,7 @@
    <description name="SugarJ" url="sugarj.org/update">
       SugarJ
    </description>
-   <feature url="features/org.sugarj.editor_1.1.1.201105311536.jar" id="org.sugarj.editor" version="1.1.1.201105311536">
+   <feature url="features/org.sugarj.editor_1.2.3.201106021749.jar" id="org.sugarj.editor" version="1.2.3.201106021749">
       <category name="SugarJ"/>
    </feature>
    <category-def name="SugarJ" label="SugarJ">

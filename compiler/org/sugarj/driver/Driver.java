@@ -35,6 +35,7 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.collections.map.LRUMap;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.InvalidParseTableException;
 import org.spoofax.jsglr.client.ParseTable;
@@ -90,6 +91,8 @@ public class Driver{
   private static List<URI> pendingInputFiles;
   private static List<URI> currentlyProcessing;
 
+  private IProgressMonitor monitor;
+  
   private Result driverResult = new Result();
   
   private String moduleName;
@@ -201,7 +204,7 @@ public class Driver{
     Log.log.log(resultCache.size());
   }
   
-  public static Result compile(URI sourceFile) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  public static Result compile(URI sourceFile, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     synchronized (currentlyProcessing) {
       // TODO we need better circular dependency handling
       if (currentlyProcessing.contains(sourceFile))
@@ -215,7 +218,7 @@ public class Driver{
       String source = FileCommands.readFileAsString(sourceFile.getPath());
       String moduleName = FileCommands.fileName(sourceFile);
       
-      res = compile(source, moduleName, sourceFile.getPath());
+      res = compile(source, moduleName, sourceFile.getPath(), monitor);
     } finally {
       synchronized (currentlyProcessing) {
         currentlyProcessing.remove(sourceFile);
@@ -227,7 +230,7 @@ public class Driver{
     return res;
   }
   
-  public static Result compile(String source, String moduleName, String file) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  public static Result compile(String source, String moduleName, String file, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     Driver driver = new Driver();
     Entry<String, Driver> pending = null;
     
@@ -250,11 +253,11 @@ public class Driver{
     
     if (pending != null) {
       waitForPending(file);
-      return compile(source, moduleName, file);
+      return compile(source, moduleName, file, monitor);
     }
     
     try {
-      driver.process(source, moduleName, file);
+      driver.process(source, moduleName, file, monitor);
       storeCaches();
     } finally {
         pendingRuns.remove(file);
@@ -279,7 +282,8 @@ public class Driver{
    * @throws TokenExpectedException 
    * @throws InterruptedException 
    */
-  private void process(String source, String moduleName, String file) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private void process(String source, String moduleName, String file, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    this.monitor = monitor;
     log.beginTask("processing", "BEGIN PROCESSING " + moduleName);
     boolean success = false;
     try {
@@ -295,7 +299,7 @@ public class Driver{
         boolean wocache = Environment.wocache;
         Environment.wocache |= skipCache;
         
-        stopIfInterrupted();
+        stepped();
         
         // PARSE the next top-level declaration
         IncrementalParseResult parseResult =
@@ -303,7 +307,7 @@ public class Driver{
         lastSugaredToplevelDecl = parseResult.getToplevelDecl();
         remainingInput = parseResult.getRest();
         
-        stopIfInterrupted();
+        stepped();
         
         // DESUGAR the parsed top-level declaration
         IStrategoTerm desugared = currentDesugar(lastSugaredToplevelDecl);
@@ -311,7 +315,7 @@ public class Driver{
         // reset cache skipping
         Environment.wocache = wocache;
         
-        stopIfInterrupted();
+        stepped();
         
         // PROCESS the assimilated top-level declaration
         processToplevelDeclaration(desugared);
@@ -319,19 +323,19 @@ public class Driver{
         done = parseResult.parsingFinished();
       }
       
-      stopIfInterrupted();
+      stepped();
             
       // check final grammar and transformation for errors
       if (!Environment.noChecking) {
         checkCurrentGrammar();
       }
       
-      stopIfInterrupted();
+      stepped();
       
       // need to build current transformation program for editor services
       checkCurrentTransformation();
       
-      stopIfInterrupted();
+      stepped();
       
       // COMPILE the generated java file
       compileGeneratedJavaFile();
@@ -795,7 +799,7 @@ public class Driver{
           log.log("Need to compile the imported module first ; processing it now.");
           
           try {
-            Result importResult = compile(sourceUri);
+            Result importResult = compile(sourceUri, monitor);
             if (importResult.hasFailed())
               ATermCommands.setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
           } catch (Exception e) {
@@ -1179,8 +1183,11 @@ public class Driver{
         pendingInputFiles.add(uri);
       }
       
-      for (URI source : allInputFiles) {
-        Result res = compile(source);
+      IProgressMonitor monitor = new PrintProgressMonitor(System.out);
+      
+      for (final URI source : allInputFiles) {
+        monitor.beginTask("compile " + source.getPath(), IProgressMonitor.UNKNOWN);
+        Result res = compile(source, monitor);
         if (!DriverCLI.processResultCLI(res, source.getPath(), new File(".").getAbsolutePath()))
           throw new RuntimeException("compilation of " + source.getPath() + " failed");
       }
@@ -1523,8 +1530,14 @@ public class Driver{
   
   private synchronized void stopIfInterrupted() throws InterruptedException {
     if (interrupt) {
+      monitor.setCanceled(true);
       log.log("interrupted " + mainModuleName);
       throw new InterruptedException();
     }
+  }
+
+  private void stepped() throws InterruptedException {
+    stopIfInterrupted();
+    monitor.worked(1);
   }
 }
