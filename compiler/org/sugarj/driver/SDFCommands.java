@@ -155,7 +155,7 @@ public class SDFCommands {
    * @throws BadTokenException 
    * @throws TokenExpectedException 
    */
-  public static ParseTable compile(String sdf, String module, Collection<String> dependentFiles, JSGLRI sdfParser, Context sdfContext, Context makePermissiveContext) throws IOException,
+  public static String compile(String sdf, String module, Collection<String> dependentFiles, JSGLRI sdfParser, Context sdfContext, Context makePermissiveContext) throws IOException,
       InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     ModuleKey key = getModuleKeyForGrammar(sdf, module, dependentFiles, sdfParser);
     String tbl = lookupGrammarInCache(key);
@@ -167,7 +167,7 @@ public class SDFCommands {
     if (tbl != null)
       log.log("use generated table " + tbl);
     
-    return org.strategoxt.imp.runtime.Environment.loadParseTable(tbl);
+    return tbl;
   }
   
   

@@ -60,7 +60,7 @@ import org.sugarj.stdlib.StdLib;
  */
 public class Driver{
   
-  public final static String CACHE_VERSION = "editor-base-0.11";
+  public final static String CACHE_VERSION = "editor-base-0.12";
   
   private static class Key {
     private String source;
@@ -652,10 +652,10 @@ public class Driver{
   private IStrategoTerm currentParse(String remainingInput, boolean recovery) throws IOException,
       InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     // recompile the current grammar definition
-    ParseTable currentGrammarTBL;
+    String currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfContext, makePermissiveContext);
+    driverResult.setLastParseTable(currentGrammarTBL);
+    ParseTable table = org.strategoxt.imp.runtime.Environment.loadParseTable(currentGrammarTBL);
     
-    currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfContext, makePermissiveContext);
-
     IStrategoTerm parseResult = null;
 
     parser.setUseRecovery(recovery);
@@ -663,7 +663,7 @@ public class Driver{
     // read next toplevel decl and stop if that fails
     try {
       parseResult = SDFCommands.parseImplode(
-          currentGrammarTBL,
+          table,
           remainingInput,
           "NextToplevelDeclaration",
           false,
@@ -1429,9 +1429,21 @@ public class Driver{
     if (Environment.cacheDir == null)
       return;
     
-    String sdfCache = FileCommands.findFile("sdfCache" + "-" + CACHE_VERSION, Environment.cacheDir);
-    String strCache = FileCommands.findFile("strCache" + "-" + CACHE_VERSION, Environment.cacheDir);
-
+    String cacheVersion = FileCommands.findFile("version", Environment.cacheDir);
+    
+    if (cacheVersion == null || !FileCommands.readFileAsString(cacheVersion).equals(CACHE_VERSION)) {
+      if (cacheVersion == null)
+        cacheVersion = Environment.cacheDir + Environment.sep + "version";
+      
+      for (File f : new File(Environment.cacheDir).listFiles())
+        f.delete();
+      
+      FileCommands.writeToFile(cacheVersion, CACHE_VERSION);
+    }
+    
+    String sdfCache = FileCommands.findFile("sdfCache", Environment.cacheDir);
+    String strCache = FileCommands.findFile("strCache", Environment.cacheDir);
+    
     if (SDFCommands.sdfCache == null && sdfCache != null)
       try {
         log.log("load sdf cache from " + sdfCache);
@@ -1466,16 +1478,23 @@ public class Driver{
     if (Environment.cacheDir == null || Environment.rocache)
       return;
     
-    String sdfCache = FileCommands.findFile("sdfCache" + "-" + CACHE_VERSION , Environment.cacheDir);
-    String strCache = FileCommands.findFile("strCache" + "-" + CACHE_VERSION, Environment.cacheDir);
+    String cacheVersion = FileCommands.findFile("version", Environment.cacheDir);
+    if (cacheVersion == null || !FileCommands.readFileAsString(cacheVersion).equals(CACHE_VERSION)) {
+      if (cacheVersion == null)
+        cacheVersion = Environment.cacheDir + Environment.sep + "version";
+      FileCommands.writeToFile(cacheVersion, CACHE_VERSION);
+    }
+    
+    String sdfCache = FileCommands.findFile("sdfCache", Environment.cacheDir);
+    String strCache = FileCommands.findFile("strCache", Environment.cacheDir);
 
     if (sdfCache == null) {
-      sdfCache = Environment.cacheDir + sep + "sdfCache" + "-" + CACHE_VERSION;
+      sdfCache = Environment.cacheDir + sep + "sdfCache";
       FileCommands.createFile(sdfCache);
     }
 
     if (strCache == null) {
-      strCache = Environment.cacheDir + sep + "strCache" + "-" + CACHE_VERSION;
+      strCache = Environment.cacheDir + sep + "strCache";
       FileCommands.createFile(strCache);
     }
     
@@ -1529,7 +1548,7 @@ public class Driver{
   }
   
   private synchronized void stopIfInterrupted() throws InterruptedException {
-    if (interrupt) {
+    if (interrupt || monitor.isCanceled()) {
       monitor.setCanceled(true);
       log.log("interrupted " + mainModuleName);
       throw new InterruptedException();
