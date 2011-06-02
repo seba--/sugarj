@@ -29,6 +29,7 @@ public class Result {
   private Integer sourceFileHash;
   private Set<String> allDependentFiles = new HashSet<String>();
   private boolean failed = false;
+  private String lastParseTable;
 
   private final static Result OUTDATED_RESULT = new Result() {
     @Override
@@ -37,7 +38,7 @@ public class Result {
     }
 
     @Override
-    boolean isUpToDate(int hash) {
+    public boolean isUpToDate(int hash) {
       return false;
     }
   };
@@ -80,7 +81,7 @@ public class Result {
     return isUpToDate(FileCommands.fileHash(inputFile));
   }
   
-  boolean isUpToDate(int inputHash) throws IOException {
+  public boolean isUpToDate(int inputHash) throws IOException {
     if (inputHash != sourceFileHash)
       return false;
     
@@ -209,5 +210,13 @@ public class Result {
   
   public void setFailed(boolean hasFailed) {
     this.failed = hasFailed;
+  }
+  
+  public void setLastParseTable(String parseTable) {
+    this.lastParseTable = parseTable;
+  }
+  
+  public String getLastParseTable() {
+    return lastParseTable;
   }
 }

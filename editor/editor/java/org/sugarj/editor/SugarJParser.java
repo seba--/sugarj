@@ -13,11 +13,16 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.jsglr.client.ITreeBuilder;
+import org.spoofax.jsglr.client.ParseTable;
+import org.spoofax.jsglr.client.imploder.TermTreeFactory;
+import org.spoofax.jsglr.client.imploder.TreeBuilder;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.strategoxt.eclipse.ant.StrategoJarAntPropertyProvider;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
+import org.sugarj.driver.ATermCommands;
 import org.sugarj.driver.CommandExecution;
 import org.sugarj.driver.Driver;
 import org.sugarj.driver.Environment;
@@ -37,6 +42,8 @@ public class SugarJParser extends JSGLRI {
   
   private static Map<String, Result> results = new HashMap<String, Result>();
   private Result result;
+  private JSGLRI parser;
+  private String parserTable;
   
   public SugarJParser(JSGLRI parser) {
     super(parser.getParseTable(), parser.getStartSymbol(), parser.getController());
@@ -49,13 +56,40 @@ public class SugarJParser extends JSGLRI {
     
     result = getResult(filename);
 
-    if (result instanceof PendingResult || (doJustReturn() && result.isUpToDate(filename)))
+    if (result instanceof PendingResult)
       setJustReturn(false);
+    else if (doJustReturn() && result.isUpToDate(input.hashCode())) {
+      setJustReturn(false);
+      return result.getSugaredSyntaxTree();
+    }
     else 
       scheduleParse(input, filename);
         
     if (result == null)
       return null;
+    
+    String lastParseTable;
+    
+    if (result instanceof PendingResult)
+      lastParseTable = ((PendingResult) result).getResult().getLastParseTable();
+    else
+      lastParseTable = result.getLastParseTable();
+  
+    if (lastParseTable != null && lastParseTable.equals(parserTable))
+      return parser.parse(input, filename);
+    
+    if (lastParseTable != null) {
+      try {
+        ParseTable parseTable = org.strategoxt.imp.runtime.Environment.loadParseTable(lastParseTable);
+        ITreeBuilder builder = new TreeBuilder(new TermTreeFactory(ATermCommands.factory));
+        
+        parser = new JSGLRI(parseTable, "SugarCompilationUnit");
+        parserTable = lastParseTable;
+        parser.getParser().setTreeBuilder(builder);
+        return parser.parse(input, filename);
+      } catch (Exception e) {
+      }
+    }
     
     if (result instanceof PendingResult)
       return ((PendingResult) result).getResult().getSugaredSyntaxTree();
@@ -64,28 +98,37 @@ public class SugarJParser extends JSGLRI {
   }
   
   private synchronized void scheduleParse(final String input, final String filename) {
-    putResult(filename, new PendingResult(getResult(filename)));
+    final Result oldResult = getResult(filename);
+    putResult(filename, new PendingResult(oldResult));
     
     Job parseJob = new Job("SugarJ parser: " + projectRelativePath(filename)) {
       @Override
       protected IStatus run(IProgressMonitor monitor) {
         monitor.beginTask("parse " + projectRelativePath(filename), IProgressMonitor.UNKNOWN);
+        Result result = null;
         try {
-          Result result = runParser(input, filename, monitor);
+          result = runParser(input, filename, monitor);
           putResult(filename, result);
+        } catch (InterruptedException e) {
+          result = null;
+        } catch (Exception e) {
+          org.strategoxt.imp.runtime.Environment.logException(e);
         } finally {
           monitor.done();
-          setJustReturn(true);
-          getController().scheduleParserUpdate(0, false);
+          if (result != null) {
+            setJustReturn(true);
+            getController().scheduleParserUpdate(0, false);
+          } 
+          else
+            putResult(filename, oldResult);
         }
         return Status.OK_STATUS;
       }
     };
-    
     parseJob.schedule();
   }
   
-  private Result runParser(String input, String filename, IProgressMonitor monitor) {
+  private Result runParser(String input, String filename, IProgressMonitor monitor) throws InterruptedException {
     Environment.wocache = false;
 
     Environment.includePath.addAll(includePath);
@@ -116,7 +159,9 @@ public class SugarJParser extends JSGLRI {
     
     try {
       return Driver.compile(input, FileCommands.fileName(filename), filename, monitor);
-    } catch (Throwable e) {
+    } catch (InterruptedException e) {
+      throw e;
+    } catch (Exception e) {
       e.printStackTrace();
       throw new RuntimeException("parsing " + FileCommands.fileName(filename) + " failed", e);
     }
