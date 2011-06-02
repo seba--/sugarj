@@ -32,7 +32,7 @@ public class Result {
 
   private final static Result OUTDATED_RESULT = new Result() {
     @Override
-    boolean isUpToDate(String file) {
+    public boolean isUpToDate(String file) {
       return false;
     }
 
@@ -76,7 +76,7 @@ public class Result {
     return editorServices;
   }
   
-  boolean isUpToDate(String inputFile) throws IOException {
+  public boolean isUpToDate(String inputFile) throws IOException {
     return isUpToDate(FileCommands.fileHash(inputFile));
   }
   

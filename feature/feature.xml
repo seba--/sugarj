@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.sugarj.editor"
-      label="SugarJ"
-      version="1.1.1.qualifier"
+      label="Sugarclipse"
+      version="1.2.3.qualifier"
       provider-name="sugarj.org">
 
    <description url="http://sugarj.org">
