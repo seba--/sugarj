@@ -30,6 +30,7 @@ public class Result {
   private Set<String> allDependentFiles = new HashSet<String>();
   private boolean failed = false;
   private String lastParseTable;
+  private String generationLog;
 
   private final static Result OUTDATED_RESULT = new Result() {
     @Override
@@ -58,10 +59,21 @@ public class Result {
     return allDependentFiles;
   }
   
+  void setGenerationLog(String file) {
+    this.generationLog = file;
+  }
+  
+  String getGenerationLog() {
+    return generationLog;
+  }
+  
   void generateFile(String file, String content) throws IOException {
     FileCommands.writeToFile(file, content);
     generatedFileHashes.put(file, FileCommands.fileHash(file));
     allDependentFiles.add(file);
+    
+    if (generationLog != null)
+      FileCommands.appendToFile(generationLog, file + "\n");
   }
   
   void appendToFile(String file, String content) throws IOException {
@@ -133,6 +145,9 @@ public class Result {
   }
   
   void writeDependencyFile(String dep) throws IOException {
+    if (generationLog != null)
+      FileCommands.appendToFile(generationLog, dep + "\n");
+
     BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(dep));
     
     try {

@@ -56,9 +56,6 @@ public class STRCommands {
     
     
     List<String> cmd = new ArrayList<String>(Arrays.asList(new String[] {
-//        "java",
-//        "-Xss4M",
-//        "-jar", toWindowsPath(Environment.strategoxt_jar),
         "-i", toWindowsPath(str),
         "-o", toWindowsPath(java),
         "-m", main,
@@ -154,7 +151,6 @@ public class STRCommands {
     
     log.beginTask("Searching", "Search assimilator in cache");
     try {
-      int h = key.hashCode();
       result = strCache.get(key);
       
       if (result == null || !new File(result).exists())

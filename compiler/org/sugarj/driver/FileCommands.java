@@ -318,6 +318,15 @@ public class FileCommands {
     
     return null;
   }
+  
+  public static String dropExtension(String file) {
+    int i = file.lastIndexOf('.');
+    
+    if (i > 0)
+      return file.substring(0, i);
+    
+    return file;
+  }
 
   public static void trimQuotes(String file) throws IOException {
     String s = readFileAsString(file);
