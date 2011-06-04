@@ -75,6 +75,9 @@ exports
     SugarJLayout? -/- [\/] . [\*]
     SugarJLayout? -/- [\/] . [\/]
 
+  context-free start-symbols
+  	SugarCompilationUnit
+
   context-free syntax
     JavaPackageDec? JavaImportDec* TypeOrSugarDec* -> SugarCompilationUnit {prefer, cons("CompilationUnit")}
     JavaTypeDec                                    -> TypeOrSugarDec       {cons("JavaTypeDec")}
