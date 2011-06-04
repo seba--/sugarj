@@ -158,7 +158,7 @@ public class SugarJParser extends JSGLRI {
     SugarJConsole.activateConsoleOnce();
     
     try {
-      return Driver.compile(input, FileCommands.fileName(filename), filename, monitor);
+      return Driver.compile(input, projectRelativePath(filename), filename, monitor);
     } catch (InterruptedException e) {
       throw e;
     } catch (Exception e) {

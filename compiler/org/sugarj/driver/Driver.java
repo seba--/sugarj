@@ -11,10 +11,12 @@ import static org.sugarj.driver.Environment.bin;
 import static org.sugarj.driver.Environment.sep;
 import static org.sugarj.driver.Log.log;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -95,11 +97,9 @@ public class Driver{
   
   private Result driverResult = new Result();
   
-  private String moduleName;
-  private String javaOutDir;
   private String javaOutFile;
   private String relPackageName;
-  private String mainModuleName;
+  private String relativePath;
 
   private String currentGrammarSDF;
   private String currentGrammarModule;
@@ -204,7 +204,7 @@ public class Driver{
     Log.log.log(resultCache.size());
   }
   
-  public static Result compile(URI sourceFile, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  public static Result compile(URI sourceFile, String relativePath, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     synchronized (currentlyProcessing) {
       // TODO we need better circular dependency handling
       if (currentlyProcessing.contains(sourceFile))
@@ -216,9 +216,7 @@ public class Driver{
     
     try {
       String source = FileCommands.readFileAsString(sourceFile.getPath());
-      String moduleName = FileCommands.fileName(sourceFile);
-      
-      res = compile(source, moduleName, sourceFile.getPath(), monitor);
+      res = compile(source, relativePath, sourceFile.getPath(), monitor);
     } finally {
       synchronized (currentlyProcessing) {
         currentlyProcessing.remove(sourceFile);
@@ -230,14 +228,14 @@ public class Driver{
     return res;
   }
   
-  public static Result compile(String source, String moduleName, String file, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  public static Result compile(String source, String relativePath, String file, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     Driver driver = new Driver();
     Entry<String, Driver> pending = null;
     
     synchronized (Driver.class) {
       pending = getPendingRun(file);
       if (pending != null && !pending.getKey().equals(source)) {
-        log.log("interrupting " + moduleName);
+        log.log("interrupting " + relativePath);
         pending.getValue().interrupt();
       }
 
@@ -253,11 +251,11 @@ public class Driver{
     
     if (pending != null) {
       waitForPending(file);
-      return compile(source, moduleName, file, monitor);
+      return compile(source, relativePath, file, monitor);
     }
     
     try {
-      driver.process(source, moduleName, file, monitor);
+      driver.process(source, relativePath, file, monitor);
       storeCaches();
     } finally {
         pendingRuns.remove(file);
@@ -270,10 +268,6 @@ public class Driver{
   /**
    * Process the given Extensible Java file.
    * 
-   * @param moduleFileName
-   *        the file to process.
-   * @param outdir
-   *        the directory to write the output into.
    * @throws IOException 
    * @throws SGLRException 
    * @throws InvalidParseTableException 
@@ -282,13 +276,20 @@ public class Driver{
    * @throws TokenExpectedException 
    * @throws InterruptedException 
    */
-  private void process(String source, String moduleName, String file, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private void process(String source, String relativePath, String file, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     this.monitor = monitor;
-    log.beginTask("processing", "BEGIN PROCESSING " + moduleName);
+    log.beginTask("processing", "BEGIN PROCESSING " + relativePath);
     boolean success = false;
     try {
-      init(moduleName);
+      relativePath = FileCommands.dropExtension(relativePath);
+      init(relativePath);
       driverResult.setSourceFile(file, source.hashCode());
+      
+      if (relativePath != null) {
+        javaOutFile = Environment.bin + sep + relativePath + ".java";
+        driverResult.setGenerationLog(Environment.bin + sep + relativePath + ".gen");
+        clearGeneratedStuff();
+      }
 
       remainingInput = source;
   
@@ -352,7 +353,7 @@ public class Driver{
       success = false;
     }
     finally {
-      log.endTask(success, "done processing " + moduleName, "failed processing " + moduleName);
+      log.endTask(success, "done processing " + relativePath, "failed processing " + relativePath);
       driverResult.setFailed(!success);
     }
   }
@@ -362,7 +363,7 @@ public class Driver{
     try {
       List<String> path = new ArrayList<String>(Environment.includePath);
       path.add(StdLib.stdLibDir.getPath());
-      path.add(javaOutDir);
+      path.add(Environment.bin);
       
       driverResult.compileJava(javaOutFile, bin, path, generatedJavaClasses);
     } finally {
@@ -598,9 +599,10 @@ public class Driver{
     if (isApplication(toplevelDecl, "PackageDec"))
       processPackageDec(toplevelDecl);
     else {
+      if (relPackageName == null)
+        checkPackageName(toplevelDecl);
       if (javaOutFile == null)
-        javaOutFile = javaOutDir + sep + relPackageNameSep() + mainModuleName + ".java";
-      
+        javaOutFile = Environment.bin + sep + relPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".java";
       try {
         if (isApplication(toplevelDecl, "TypeImportDec") || isApplication(toplevelDecl, "TypeImportOnDemandDec")) {
           if (!Environment.atomicImportParsing)
@@ -718,12 +720,28 @@ public class Driver{
 
       log.log("The SDF / Stratego package name is '" + relPackageName + "'.");
 
-      javaOutFile =
-          javaOutDir + sep + relPackageNameSep() + mainModuleName + ".java";
+      checkPackageName(toplevelDecl);
       
+      if (javaOutFile == null)
+        javaOutFile = Environment.bin + sep + relPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".java";
       driverResult.generateFile(javaOutFile, SDFCommands.prettyPrintJava(toplevelDecl, interp) + "\n");
     } finally {
       log.endTask();
+    }
+  }
+  
+  private void checkPackageName(IStrategoTerm toplevelDecl) {
+    if (relativePath != null) {
+      String packageName = relPackageName == null ? "" : relPackageName.replace('/', '.');
+      
+      int i = relativePath.lastIndexOf('/');
+      String expectedPackage = i >= 0 ? relativePath.substring(0, i) : relativePath;
+      expectedPackage = expectedPackage.replace('/', '.');
+      if (!packageName.equals(expectedPackage))
+        ATermCommands.setErrorMessage(
+            toplevelDecl,
+            "The declared package " + packageName +
+            " does not match the expected package " + expectedPackage + ".");
     }
   }
   
@@ -799,14 +817,14 @@ public class Driver{
           log.log("Need to compile the imported module first ; processing it now.");
           
           try {
-            Result importResult = compile(sourceUri, monitor);
+            Result importResult = compile(sourceUri, modulePath, monitor);
             if (importResult.hasFailed())
               ATermCommands.setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
           } catch (Exception e) {
             ATermCommands.setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
           }
             
-          log.log("CONTINUE PROCESSING'" + moduleName + "'.");
+          log.log("CONTINUE PROCESSING'" + relativePath + "'.");
         }
         
         if (depUri == null)
@@ -1120,14 +1138,11 @@ public class Driver{
       driverResult.addEditorService(service);
   }
   
-  private void init(String moduleName) throws FileNotFoundException, IOException, InvalidParseTableException {
-    this.moduleName = moduleName;
-
-    javaOutDir = Environment.bin;
+  private void init(String relativePath) throws FileNotFoundException, IOException, InvalidParseTableException {
     javaOutFile = null; 
     // FileCommands.createFile(tmpOutdir, relModulePath + ".java");
 
-    mainModuleName = moduleName;
+    this.relativePath = relativePath;
 
     currentGrammarSDF = StdLib.initGrammar.getPath();
     currentGrammarModule = StdLib.initGrammarModule;
@@ -1187,7 +1202,7 @@ public class Driver{
       
       for (final URI source : allInputFiles) {
         monitor.beginTask("compile " + source.getPath(), IProgressMonitor.UNKNOWN);
-        Result res = compile(source, monitor);
+        Result res = compile(source, null, monitor);
         if (!DriverCLI.processResultCLI(res, source.getPath(), new File(".").getAbsolutePath()))
           throw new RuntimeException("compilation of " + source.getPath() + " failed");
       }
@@ -1550,7 +1565,7 @@ public class Driver{
   private synchronized void stopIfInterrupted() throws InterruptedException {
     if (interrupt || monitor.isCanceled()) {
       monitor.setCanceled(true);
-      log.log("interrupted " + mainModuleName);
+      log.log("interrupted " + relativePath);
       throw new InterruptedException();
     }
   }
@@ -1558,5 +1573,16 @@ public class Driver{
   private void stepped() throws InterruptedException {
     stopIfInterrupted();
     monitor.worked(1);
+  }
+  
+  private void clearGeneratedStuff() throws IOException {
+    if (driverResult.getGenerationLog() != null && FileCommands.exists(driverResult.getGenerationLog())) {
+      BufferedReader br = new BufferedReader(new FileReader(driverResult.getGenerationLog()));
+      String line;
+      while ((line = br.readLine()) != null)
+        FileCommands.delete(line);
+      br.close();
+      FileCommands.writeToFile(driverResult.getGenerationLog(), "");
+    }
   }
 }
