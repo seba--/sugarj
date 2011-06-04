@@ -24,7 +24,8 @@ public class Environment {
   public static String sep = "/";
   public static String classpathsep = File.pathSeparator;
   
-  public static String src = ".";
+  public static Set<String> sourcePath = new HashSet<String>();
+  
   public static String bin = ".";
   public static String cacheDir = null;
   

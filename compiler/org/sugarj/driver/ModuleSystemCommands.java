@@ -14,7 +14,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -120,10 +119,10 @@ public class ModuleSystemCommands {
     if (modulePath.startsWith("org/sugarj"))
       return null;
     
-    URI result = searchFile(modulePath, ".sugj", Collections.singleton(Environment.src));
+    URI result = searchFile(modulePath, ".sugj", Environment.sourcePath);
     
     if (result == null)
-      result = searchFile(modulePath, ".java", Collections.singleton(Environment.src));
+      result = searchFile(modulePath, ".java", Environment.sourcePath);
     
     return result;
   }

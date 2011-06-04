@@ -1183,7 +1183,15 @@ public class Driver{
     try {
       String[] sources = handleOptions(args);
 
-      ClassLoader loader = new URLClassLoader(new URL[] {new File(Environment.src).toURI().toURL()});
+      if (Environment.sourcePath.isEmpty())
+        Environment.sourcePath.add(".");
+      
+      URL[] urls = new URL[Environment.sourcePath.size()];
+      int i = 0;
+      for (String path : Environment.sourcePath)
+        urls[i++] = new File(path).toURI().toURL();
+      
+      ClassLoader loader = new URLClassLoader(urls);
       
       for (String source : sources)
       {
@@ -1302,7 +1310,7 @@ public class Driver{
 
     if (line.hasOption("sourcepath"))
       for (String path : line.getOptionValue("sourcepath").split(Environment.classpathsep))
-        Environment.src = path;
+        Environment.sourcePath.add(path);
  
     if (line.hasOption("d"))
       Environment.bin = line.getOptionValue("d");

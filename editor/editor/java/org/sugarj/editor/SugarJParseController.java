@@ -8,6 +8,7 @@ import org.eclipse.imp.model.ISourceProject;
 import org.eclipse.imp.parser.IMessageHandler;
 import org.eclipse.imp.parser.IParseController;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.strategoxt.imp.runtime.Environment;
@@ -25,6 +26,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
 
   private String outputPath;
   private ArrayList<String> includePath;
+  private ArrayList<String> sourcePath;
   
   @Override
   public IParseController getWrapped() {
@@ -38,6 +40,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
         sugarjParser.setProjectPath(projectPath);
         sugarjParser.setOutputPath(outputPath);
         sugarjParser.setIncludePath(includePath);
+        sugarjParser.setSourcePath(sourcePath);
         
         ((SGLRParseController) result).setParser(sugarjParser);
       }
@@ -75,7 +78,18 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
           
           outputPath = projectPath + File.separator + javaProject.getOutputLocation().makeRelativeTo(project.getRawProject().getFullPath()).toString();
           
+          sourcePath = new ArrayList<String>();
           includePath = new ArrayList<String>();
+          for (IPackageFragmentRoot root : javaProject.getAllPackageFragmentRoots()) {
+            IPath path = root.getPath();
+            boolean externalPath = root.getResource() == null;
+            String p = externalPath ? path.toString() : projectPath + File.separator + path.makeRelativeTo(project.getRawProject().getFullPath());
+            if (root.getKind() == IPackageFragmentRoot.K_SOURCE)
+              sourcePath.add(p);
+            else if (root.getKind() == IPackageFragmentRoot.K_BINARY)
+              includePath.add(p);
+          }
+          
           for (String reqProject : javaProject.getRequiredProjectNames()) {
             IJavaProject reqJavaProject = JavaCore.create(project.getRawProject().getWorkspace().getRoot().getProject(reqProject));
             IPath reqProjectPath = reqJavaProject.getProject().getLocation().makeAbsolute();
@@ -93,6 +107,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
       sugarjParser.setProjectPath(projectPath);
       sugarjParser.setOutputPath(outputPath);
       sugarjParser.setIncludePath(includePath);
+      sugarjParser.setSourcePath(sourcePath);
     }
   }
 }
