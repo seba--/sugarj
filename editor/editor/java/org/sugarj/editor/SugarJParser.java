@@ -38,6 +38,7 @@ public class SugarJParser extends JSGLRI {
   private String projectPath;
   private String outputPath;
   private List<String> includePath;
+  private List<String> sourcePath;
   private boolean justReturn;
   
   private static Map<String, Result> results = new HashMap<String, Result>();
@@ -131,11 +132,14 @@ public class SugarJParser extends JSGLRI {
   private Result runParser(String input, String filename, IProgressMonitor monitor) throws InterruptedException {
     Environment.wocache = false;
 
+    assert includePath != null;
     Environment.includePath.addAll(includePath);
     Environment.includePath.add(new StrategoJarAntPropertyProvider().getAntPropertyValue(""));
     
+    assert sourcePath != null;
+    Environment.sourcePath.addAll(sourcePath);
+    
     assert projectPath != null;
-    Environment.src = projectPath;
     Environment.bin = outputPath != null ? outputPath : projectPath;
 
     if (Environment.cacheDir == null)
@@ -180,6 +184,10 @@ public class SugarJParser extends JSGLRI {
     this.includePath = includePath;
   }
 
+  public void setSourcePath(List<String> sourcePath) {
+    this.sourcePath = sourcePath;
+  }
+
   @Override
   public Set<BadTokenException> getCollectedErrors() {
     final Set<BadTokenException> empty = Collections.emptySet();
@@ -209,8 +217,17 @@ public class SugarJParser extends JSGLRI {
   }
   
   private String projectRelativePath(String filename) {
-    if (filename.startsWith(projectPath))
-      return filename.substring(projectPath.length() + 1);
-    return filename;
+    String path = null;
+    for (String s : sourcePath)
+      if (filename.startsWith(s)) {
+        String newPath = filename.substring(s.length() + 1);
+        if (path == null || newPath.length() < path.length())
+          path = newPath;
+      }
+    
+    if (path != null)
+      return path;
+    
+    throw new IllegalStateException("Ressource " + filename + " not inside any source folder.");
   }
 }
