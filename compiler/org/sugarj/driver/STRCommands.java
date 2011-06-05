@@ -28,6 +28,9 @@ import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.strj.main_strj_0_0;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
+import org.sugarj.driver.path.Path;
+import org.sugarj.driver.path.RelativePath;
+import org.sugarj.driver.path.RelativePathCache;
 import org.sugarj.stdlib.StdLib;
 
 /**
@@ -40,14 +43,14 @@ import org.sugarj.stdlib.StdLib;
 public class STRCommands {
   
   
-  public static ModuleKeyCache<String> strCache = null;
+  public static ModuleKeyCache<Path> strCache = null;
   
   private final static Pattern STR_FILE_PATTERN = Pattern.compile(".*\\.str");
 
   /**
    *  Compiles a {@code *.str} file to a single {@code *.java} file. 
    */
-  private static void strj(String str, String java, String main, Context strjContext) throws IOException {
+  private static void strj(Path str, Path java, String main, Context strjContext) throws IOException {
     
     /*
      * We can include as many paths as we want here, checking the
@@ -56,8 +59,8 @@ public class STRCommands {
     
     
     List<String> cmd = new ArrayList<String>(Arrays.asList(new String[] {
-        "-i", toWindowsPath(str),
-        "-o", toWindowsPath(java),
+        "-i", toWindowsPath(str.getAbsolutePath()),
+        "-o", toWindowsPath(java.getAbsolutePath()),
         "-m", main,
         "-I", StdLib.stdLibDir.getPath(),
         "-p", "sugarj",
@@ -87,9 +90,9 @@ public class STRCommands {
   }
   
   
-  public static String compile(String str, String main, Collection<String> dependentFiles, JSGLRI strParser, Context strjContext) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  public static Path compile(Path str, String main, Collection<Path> dependentFiles, JSGLRI strParser, Context strjContext) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     ModuleKey key = getModuleKeyForAssimilation(str, main, dependentFiles, strParser);
-    String prog = lookupAssimilationInCache(key);
+    Path prog = lookupAssimilationInCache(key);
     
     if (prog == null) {
       prog = generateAssimilator(key, str, main, strjContext);
@@ -98,22 +101,22 @@ public class STRCommands {
     return prog;
   }
     
-  private static String generateAssimilator(ModuleKey key,
-                                            String str,
-                                            String main,
-                                            Context strjContext) throws IOException {
+  private static Path generateAssimilator(ModuleKey key,
+                                          Path str,
+                                          String main,
+                                          Context strjContext) throws IOException {
     log.beginTask("Generating", "Generate the assimilator");
     try {
-      String dir = FileCommands.newTempDir();
-      FileCommands.createDir(dir + sep + "sugarj");
+      Path dir = FileCommands.newTempDir();
+      FileCommands.createDir(new RelativePath(dir, "sugarj"));
       String javaFilename = FileCommands.fileName(str).replace("-", "_");
-      String java = dir + sep + "sugarj" + sep + javaFilename + ".java";
+      Path java = new RelativePath(dir, "sugarj" + sep + javaFilename + ".java");
       strj(str, java, main, strjContext);
       
       if (!JavaCommands.javac(java, dir, Environment.includePath))
         throw new RuntimeException("java compilation failed");
         
-      String jarfile = FileCommands.newTempFile("jar");
+      Path jarfile = FileCommands.newTempFile("jar");
       JavaCommands.jar(dir, jarfile);
 
       FileCommands.delete(java);
@@ -124,16 +127,16 @@ public class STRCommands {
     }
   }
     
-  private static void cacheAssimilator(ModuleKey key, String prog) throws IOException {
+  private static void cacheAssimilator(ModuleKey key, Path prog) throws IOException {
     if (strCache == null || Environment.cacheDir == null)
       return;
     
 
     log.beginTask("Caching", "Cache assimilator");
     try {
-      String cacheProg = Environment.cacheDir + Environment.sep + new File(prog).getName();
+      Path cacheProg = new RelativePathCache(prog.getFile().getName());
       FileCommands.copyFile(prog, cacheProg);
-      String oldProg = strCache.putGet(key, cacheProg);
+      Path oldProg = strCache.putGet(key, cacheProg);
       FileCommands.delete(oldProg);
 
       if (CommandExecution.CACHE_INFO)
@@ -143,17 +146,17 @@ public class STRCommands {
     }
   }
   
-  private static String lookupAssimilationInCache(ModuleKey key) {
+  private static Path lookupAssimilationInCache(ModuleKey key) {
     if (strCache == null)
       return null;
     
-    String result = null;
+    Path result = null;
     
     log.beginTask("Searching", "Search assimilator in cache");
     try {
       result = strCache.get(key);
       
-      if (result == null || !new File(result).exists())
+      if (result == null || !result.getFile().exists())
         return null;
 
       if (CommandExecution.CACHE_INFO)
@@ -166,16 +169,16 @@ public class STRCommands {
   }
 
 
-  private static ModuleKey getModuleKeyForAssimilation(String str, String main, Collection<String> dependentFiles, JSGLRI strParser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  private static ModuleKey getModuleKeyForAssimilation(Path str, String main, Collection<Path> dependentFiles, JSGLRI strParser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     log.beginTask("Generating", "Generate module key for current assimilation");
     try {
-      IStrategoTerm aterm = strParser.parse(new BufferedInputStream(new FileInputStream(str)), str);
+      IStrategoTerm aterm = strParser.parse(new BufferedInputStream(new FileInputStream(str.getFile())), str.getAbsolutePath());
 
       aterm = ATermCommands.getApplicationSubterm(aterm, "Module", 1);
 
-      LinkedList<String> depList = new LinkedList<String>();
-      for (String file : dependentFiles)
-        if (STR_FILE_PATTERN.matcher(file).matches())
+      LinkedList<Path> depList = new LinkedList<Path>();
+      for (Path file : dependentFiles)
+        if (STR_FILE_PATTERN.matcher(file.getAbsolutePath()).matches())
           depList.add(file);
       
       return new ModuleKey(depList, aterm);
@@ -187,14 +190,14 @@ public class STRCommands {
     
   }
 
-  public static IStrategoTerm assimilate(String jarfile, IStrategoTerm in, HybridInterpreter interp) throws IOException {
+  public static IStrategoTerm assimilate(Path jarfile, IStrategoTerm in, HybridInterpreter interp) throws IOException {
     return assimilate("internal-main", jarfile, in, interp);
   }
   
-  public static IStrategoTerm assimilate(String strategy, String jarfile, IStrategoTerm in, HybridInterpreter interp) throws IOException {
+  public static IStrategoTerm assimilate(String strategy, Path jarfile, IStrategoTerm in, HybridInterpreter interp) throws IOException {
     try {
       HybridInterpreter newInterp = new HybridInterpreter(interp);
-      newInterp.loadJars(new File(jarfile).toURI().toURL());
+      newInterp.loadJars(jarfile.getFile().toURI().toURL());
       newInterp.setCurrent(in);
       
       if (newInterp.invoke(strategy)) {

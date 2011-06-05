@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.sugarj.driver.path.Path;
+import org.sugarj.stdlib.StdLib;
 
 
 /**
@@ -19,10 +21,12 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
  */
 public class Environment {
   
-  public static Map<String, IStrategoTerm> terms = new WeakHashMap<String, IStrategoTerm>();
+  public static Map<Path, IStrategoTerm> terms = new WeakHashMap<Path, IStrategoTerm>();
   
   public static String sep = "/";
   public static String classpathsep = File.pathSeparator;
+  
+  public static String root = ".";
   
   public static Set<String> sourcePath = new HashSet<String>();
   
@@ -56,6 +60,7 @@ public class Environment {
   
   public static void init() throws IOException {
     includePath.add(bin);
+    includePath.add(StdLib.stdLibDir.getPath());
   }
 
   private static Long tick;

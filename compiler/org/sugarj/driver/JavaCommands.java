@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.util.Collection;
 
 import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
+import org.sugarj.driver.path.Path;
 
 /**
  * 
@@ -16,11 +17,11 @@ import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
  */
 public class JavaCommands {
 
-  public static boolean javac(String java, String dir, Collection<String> cp) throws IOException {
+  public static boolean javac(Path java, Path dir, Collection<String> cp) throws IOException {
     return javac(java, dir, cp.toArray(new String[] {}));
   }
 
-  public static boolean javac(String java, String dir, String... cp) throws IOException {
+  public static boolean javac(Path java, Path dir, String... cp) throws IOException {
     StringBuilder cpBuilder = new StringBuilder();
     
     for (int i = 0; i < cp.length; i++) {
@@ -37,10 +38,10 @@ public class JavaCommands {
     
     String[] cmd = new String[] {
         "-cp", cpBuilder.toString(),
-        "-d", FileCommands.toWindowsPath(dir),
+        "-d", FileCommands.toWindowsPath(dir.getAbsolutePath()),
         "-source", "1.5",
         "-nowarn",
-        FileCommands.toWindowsPath(java)
+        FileCommands.toWindowsPath(java.getAbsolutePath())
     };
     
     // this is ECJ
@@ -55,9 +56,9 @@ public class JavaCommands {
    * Runs a compiled java program, linking against  {@code strategoxt.jar},
    * and providing a bunch of parameters. 
    */
-  public static void java(String dir, String main, String... args) throws IOException {
+  public static void java(Path dir, String main, String... args) throws IOException {
     StringBuilder classpath = new StringBuilder();
-    classpath.append(FileCommands.toWindowsPath(dir));
+    classpath.append(FileCommands.toWindowsPath(dir.getAbsolutePath()));
     classpath.append(Environment.classpathsep);
     
     for (String path : Environment.includePath)
@@ -77,12 +78,12 @@ public class JavaCommands {
   }
   
   
-  public static void jar(String dir, String output) {
+  public static void jar(Path dir, Path output) {
     String[] cmd = {
         "jar",
         "cf",
-        output,
-        "-C", dir,
+        output.getAbsolutePath(),
+        "-C", dir.getAbsolutePath(),
         "."
         };
     

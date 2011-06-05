@@ -1,11 +1,11 @@
 package org.sugarj.driver;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,25 +16,29 @@ import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.shared.BadTokenException;
+import org.sugarj.driver.path.Path;
+import org.sugarj.driver.path.RelativePath;
 
+/**
+ * @author Sebastian Erdweg <seba at informatik uni-marburg de>
+ */
 public class Result {
-  // private Map<String, Integer> fileDependencyHashes = new HashMap<String, Integer>();
-  private Map<String, Integer> dependencies = new HashMap<String, Integer>();
-  private Map<String, Integer> generatedFileHashes = new HashMap<String, Integer>();
+  private Map<Path, Integer> dependencies = new HashMap<Path, Integer>();
+  private Map<Path, Integer> generatedFileHashes = new HashMap<Path, Integer>();
   private Set<IStrategoTerm> editorServices = new HashSet<IStrategoTerm>();
   private Set<BadTokenException> collectedErrors = new HashSet<BadTokenException>();
   private IStrategoTerm sugaredSyntaxTree = null;
-  private String desugaringsFile;
-  private String sourceFile;
+  private Path desugaringsFile;
+  private RelativePath sourceFile;
   private Integer sourceFileHash;
-  private Set<String> allDependentFiles = new HashSet<String>();
+  private Set<Path> allDependentFiles = new HashSet<Path>();
   private boolean failed = false;
-  private String lastParseTable;
-  private String generationLog;
+  private Path lastParseTable;
+  private Path generationLog;
 
   private final static Result OUTDATED_RESULT = new Result() {
     @Override
-    public boolean isUpToDate(String file) {
+    public boolean isUpToDate(Path file) {
       return false;
     }
 
@@ -44,39 +48,49 @@ public class Result {
     }
   };
   
-  void addDependency(String depFile) throws IOException {
+  void addDependency(Path depFile) throws IOException {
     dependencies.put(depFile, FileCommands.fileHash(depFile));
     allDependentFiles.addAll(readDependencyFile(depFile).getFileDependencies());
   }
   
-  public Collection<String> getFileDependencies() throws IOException {
+  public Collection<Path> getFileDependencies() throws IOException {
     if (allDependentFiles == null) {
-      allDependentFiles = new HashSet<String>(generatedFileHashes.keySet());
-      for (String depFile : dependencies.keySet())
+      allDependentFiles = new HashSet<Path>(generatedFileHashes.keySet());
+      for (Path depFile : dependencies.keySet())
         allDependentFiles.addAll(readDependencyFile(depFile).getFileDependencies());
     }
     
     return allDependentFiles;
   }
   
-  void setGenerationLog(String file) {
+  void setGenerationLog(Path file) {
     this.generationLog = file;
   }
   
-  String getGenerationLog() {
+  Path getGenerationLog() {
     return generationLog;
   }
   
-  void generateFile(String file, String content) throws IOException {
+  void generateFile(Path file, String content) throws IOException {
     FileCommands.writeToFile(file, content);
     generatedFileHashes.put(file, FileCommands.fileHash(file));
     allDependentFiles.add(file);
     
-    if (generationLog != null)
-      FileCommands.appendToFile(generationLog, file + "\n");
+    logGeneration(file);
   }
   
-  void appendToFile(String file, String content) throws IOException {
+  private void logGeneration(Object o) throws IOException {
+    if (generationLog != null) {
+      ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(generationLog.getFile(), true));
+      try {
+        oos.writeObject(o);
+      } finally {
+        oos.close();
+      }
+    }
+  }
+  
+  void appendToFile(Path file, String content) throws IOException {
     FileCommands.appendToFile(file, content);
     generatedFileHashes.put(file, FileCommands.fileHash(file));
   }
@@ -89,7 +103,7 @@ public class Result {
     return editorServices;
   }
   
-  public boolean isUpToDate(String inputFile) throws IOException {
+  public boolean isUpToDate(Path inputFile) throws IOException {
     return isUpToDate(FileCommands.fileHash(inputFile));
   }
   
@@ -97,11 +111,11 @@ public class Result {
     if (inputHash != sourceFileHash)
       return false;
     
-    for (Entry<String, Integer> entry : generatedFileHashes.entrySet())
+    for (Entry<Path, Integer> entry : generatedFileHashes.entrySet())
       if (FileCommands.fileHash(entry.getKey()) != entry.getValue())
         return false;
 
-    for (Entry<String, Integer> entry : dependencies.entrySet()) {
+    for (Entry<Path, Integer> entry : dependencies.entrySet()) {
       if (FileCommands.fileHash(entry.getKey()) != entry.getValue())
         return false;
       
@@ -129,93 +143,94 @@ public class Result {
     return sugaredSyntaxTree;
   }
 
-  void compileJava(String javaOutFile, String bin, List<String> path, List<String> generatedJavaClasses) throws IOException {
+  void compileJava(Path javaOutFile, Path bin, List<String> path, List<Path> generatedJavaClasses) throws IOException {
     JavaCommands.javac(javaOutFile, bin, path);
-    for (String cl : generatedJavaClasses)
+    for (Path cl : generatedJavaClasses)
       generatedFileHashes.put(cl, FileCommands.fileHash(cl));
   }
   
-  void registerEditorDesugarings(String jarfile) throws IOException {
+  void registerEditorDesugarings(Path jarfile) throws IOException {
     desugaringsFile = jarfile;
     editorServices = new HashSet<IStrategoTerm>(ATermCommands.registerSemanticProvider(editorServices, jarfile));
   }
   
-  String getDesugaringsFile() {
+  Path getDesugaringsFile() {
     return desugaringsFile;
   }
   
-  void writeDependencyFile(String dep) throws IOException {
-    if (generationLog != null)
-      FileCommands.appendToFile(generationLog, dep + "\n");
+  void writeDependencyFile(Path dep) throws IOException {
+    logGeneration(dep);
 
-    BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(dep));
+    ObjectOutputStream oos = null;
     
     try {
-      byte[] newline = "\n".getBytes();
+      oos = new ObjectOutputStream(new FileOutputStream(dep.getFile()));
+
+      oos.writeObject(sourceFile);
+      oos.writeInt(sourceFileHash);
       
-      out.write(sourceFile.getBytes());
-      out.write(newline);
-      out.write(Integer.toString(sourceFileHash).getBytes());
-      out.write(newline);
-      
-      for (Entry<String, Integer> entry : dependencies.entrySet()) {
-        out.write(entry.getKey().getBytes());
-        out.write(newline);
-        out.write(Integer.toString(entry.getValue()).getBytes());
-        out.write(newline);
+      oos.writeInt(dependencies.size());
+      for (Entry<Path, Integer> e : dependencies.entrySet()) {
+        oos.writeObject(e.getKey());
+        oos.writeInt(e.getValue());
       }
       
-      out.write(newline);
-      
-      for (Entry<String, Integer> e : generatedFileHashes.entrySet()) {
-        out.write(e.getKey().getBytes());
-        out.write(newline);
-        out.write(e.getValue().toString().getBytes());
-        out.write(newline);
+      oos.writeInt(generatedFileHashes.size());
+      for (Entry<Path, Integer> e : generatedFileHashes.entrySet()) {
+        oos.writeObject(e.getKey());
+        oos.writeInt(e.getValue());
       }
     } finally {
-      out.close();
+      if (oos != null)
+        oos.close();
     }
   }
   
-  static Result readDependencyFile(String dep) throws IOException {
+  static Result readDependencyFile(Path dep) throws IOException {
     Result result = new Result();
     result.allDependentFiles = null;
+    ObjectInputStream ois = null;
     
     try {
-      BufferedReader in = new BufferedReader(new FileReader(dep));
+      ois = new ObjectInputStream(new FileInputStream(dep.getFile()));
       
-      result.sourceFile = in.readLine();
-      result.sourceFileHash = Integer.parseInt(in.readLine());
+      result.sourceFile = (RelativePath) ois.readObject();
+      result.sourceFileHash = ois.readInt();
       
-      String line;
-      while ((line = in.readLine()) != null && !line.isEmpty()) {
-        String file = line;
-        Integer hash = Integer.parseInt(in.readLine());
+      int numDependencies = ois.readInt();
+      for (int i = 0; i < numDependencies; i++) {
+        Path file = (Path) ois.readObject();
+        int hash = ois.readInt();
         result.dependencies.put(file, hash);
       }
       
-      while ((line = in.readLine()) != null && !line.isEmpty()) {
-        String file = line;
-        Integer hash = Integer.parseInt(in.readLine());
+      int numGeneratedFiles = ois.readInt();
+      for (int i = 0; i< numGeneratedFiles; i++) {
+        Path file = (Path) ois.readObject();
+        int hash = ois.readInt();
         result.generatedFileHashes.put(file, hash);
       }
     } catch (FileNotFoundException e) {
       return OUTDATED_RESULT;
+    } catch (ClassNotFoundException e) {
+      throw new IllegalStateException(e);
     } catch (Exception e) {
       e.printStackTrace();
       return OUTDATED_RESULT;
+    } finally {
+      if (ois != null)
+        ois.close();
     }
     
     return result;
   }
   
-  void setSourceFile(String sourceFile, int sourceFileHash) {
+  void setSourceFile(RelativePath sourceFile, int sourceFileHash) {
     this.sourceFile = sourceFile;
     this.sourceFileHash = sourceFileHash;
   }
 
-  public String getSourceFile() {
+  public RelativePath getSourceFile() {
     return sourceFile;
   }
   
@@ -227,11 +242,11 @@ public class Result {
     this.failed = hasFailed;
   }
   
-  public void setLastParseTable(String parseTable) {
+  public void setLastParseTable(Path parseTable) {
     this.lastParseTable = parseTable;
   }
   
-  public String getLastParseTable() {
+  public Path getLastParseTable() {
     return lastParseTable;
   }
 }

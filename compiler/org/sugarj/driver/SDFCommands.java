@@ -38,6 +38,8 @@ import org.strategoxt.strc.pp_stratego_string_0_0;
 import org.strategoxt.tools.main_pack_sdf_0_0;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
+import org.sugarj.driver.path.Path;
+import org.sugarj.driver.path.RelativePathCache;
 import org.sugarj.stdlib.StdLib;
 
 /**
@@ -64,9 +66,9 @@ public class SDFCommands {
     }
   }
   
-  public static ModuleKeyCache<String> sdfCache = null;
+  public static ModuleKeyCache<Path> sdfCache = null;
   
-  private static void packSdf(String sdf, String def, Context sdfContext) throws IOException {
+  private static void packSdf(Path sdf, Path def, Context sdfContext) throws IOException {
     
     /*
      * We can include as many paths as we want here, checking the
@@ -74,8 +76,8 @@ public class SDFCommands {
      */
     List<String> cmd = new ArrayList<String>(Arrays.asList(new String[] {
 //      PACK_SDF,
-      "-i", sdf,
-      "-o", def,
+      "-i", sdf.getAbsolutePath(),
+      "-o", def.getAbsolutePath(),
       "-Idef", StdLib.sugarjDef.getPath(),
       "-Idef", StdLib.javaDef.getPath(),
       "-Idef", StdLib.sdfDef.getPath(),
@@ -99,27 +101,27 @@ public class SDFCommands {
       }
     }
     
-    if (!new File(def).exists())
+    if (!def.getFile().exists())
       throw new RuntimeException("execution of pack-sdf failed");
   }
   
-  private static void sdf2Table(String def, String tbl, String module) throws IOException {
+  private static void sdf2Table(Path def, Path tbl, String module) throws IOException {
     sdf2Table(def, tbl, module, false);
   }
   
-  private static void sdf2Table(String def, String tbl, String module, boolean normalize) throws IOException {
+  private static void sdf2Table(Path def, Path tbl, String module, boolean normalize) throws IOException {
     String[] cmd; 
     
     if (!normalize)
       cmd = new String[] {
-        "-i", toCygwinPath(def),
-        "-o", toCygwinPath(tbl),
+        "-i", toCygwinPath(def.getAbsolutePath()),
+        "-o", toCygwinPath(tbl.getAbsolutePath()),
         "-m", module
       };
     else
       cmd = new String[] {
-        "-i", toCygwinPath(def),
-        "-o", toCygwinPath(tbl),
+        "-i", toCygwinPath(def.getAbsolutePath()),
+        "-o", toCygwinPath(tbl.getAbsolutePath()),
         "-m", module,
         "-n"
       };
@@ -132,16 +134,16 @@ public class SDFCommands {
     SDFBundleCommand.getInstance().init();
     SDFBundleCommand.getInstance().invoke(context, "sdf2table", termArgs);
     
-    if (!new File(tbl).exists())
+    if (!tbl.getFile().exists())
       throw new RuntimeException("execution of sdf2table failed");
   }
 
-  private static void normalizeTable(String def, String module) throws IOException {
+  private static void normalizeTable(Path def, String module) throws IOException {
     sdf2Table(def, FileCommands.newTempFile("tbl"), module, true);
   }
   
-  public static void check(String sdf, String module, Context sdfContext) throws IOException {
-    String def = FileCommands.newTempFile("def");
+  public static void check(Path sdf, String module, Context sdfContext) throws IOException {
+    Path def = FileCommands.newTempFile("def");
     packSdf(sdf, def, sdfContext);
     normalizeTable(def, module);
   }
@@ -155,10 +157,10 @@ public class SDFCommands {
    * @throws BadTokenException 
    * @throws TokenExpectedException 
    */
-  public static String compile(String sdf, String module, Collection<String> dependentFiles, JSGLRI sdfParser, Context sdfContext, Context makePermissiveContext) throws IOException,
+  public static Path compile(Path sdf, String module, Collection<Path> dependentFiles, JSGLRI sdfParser, Context sdfContext, Context makePermissiveContext) throws IOException,
       InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     ModuleKey key = getModuleKeyForGrammar(sdf, module, dependentFiles, sdfParser);
-    String tbl = lookupGrammarInCache(key);
+    Path tbl = lookupGrammarInCache(key);
     if (tbl == null) {
       tbl = generateParseTable(key, sdf, module, sdfContext, makePermissiveContext);
       cacheParseTable(key, tbl);
@@ -171,15 +173,15 @@ public class SDFCommands {
   }
   
   
-  private static void cacheParseTable(ModuleKey key, String tbl) throws IOException {
+  private static void cacheParseTable(ModuleKey key, Path tbl) throws IOException {
     if (sdfCache == null || Environment.cacheDir == null)
       return;
     
     log.beginTask("Caching", "Cache parse table");
     try {
-      String cacheTbl = Environment.cacheDir + Environment.sep + new File(tbl).getName();
+      Path cacheTbl = new RelativePathCache(tbl.getFile().getName());
       FileCommands.copyFile(tbl, cacheTbl);
-      String oldTbl = sdfCache.putGet(key, cacheTbl);
+      Path oldTbl = sdfCache.putGet(key, cacheTbl);
       FileCommands.delete(oldTbl);
 
       if (CommandExecution.CACHE_INFO)
@@ -189,17 +191,17 @@ public class SDFCommands {
     }
   }
 
-  private static String lookupGrammarInCache(ModuleKey key) {
+  private static Path lookupGrammarInCache(ModuleKey key) {
     if (sdfCache == null)
       return null;
     
-    String result = null;
+    Path result = null;
     
     log.beginTask("Searching", "Search parse table in cache");
     try {
       result = sdfCache.get(key);
       
-      if (result == null || !new File(result).exists())
+      if (result == null || !result.getFile().exists())
         return null;
 
       if (CommandExecution.CACHE_INFO)
@@ -211,18 +213,18 @@ public class SDFCommands {
     }
   }
   
-  private static ModuleKey getModuleKeyForGrammar(String sdf, String module, Collection<String> dependentFiles, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  private static ModuleKey getModuleKeyForGrammar(Path sdf, String module, Collection<Path> dependentFiles, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     log.beginTask("Generating", "Generate module key for current grammar");
     try {
-      IStrategoTerm aterm = parser.parse(new FileInputStream(sdf), sdf);
+      IStrategoTerm aterm = parser.parse(new FileInputStream(sdf.getFile()), sdf.getAbsolutePath());
 
       IStrategoTerm imports = ATermCommands.getApplicationSubterm(aterm, "module", 1);
       IStrategoTerm body = ATermCommands.getApplicationSubterm(aterm, "module", 2);
       IStrategoTerm term = ATermCommands.makeTuple(imports, body);
 
-      LinkedList<String> depList = new LinkedList<String>();
-      for (String file : dependentFiles)
-        if (SDF_FILE_PATTERN.matcher(file).matches())
+      LinkedList<Path> depList = new LinkedList<Path>();
+      for (Path file : dependentFiles)
+        if (SDF_FILE_PATTERN.matcher(file.getAbsolutePath()).matches())
           depList.add(file);
       
       return new ModuleKey(depList, term);
@@ -233,19 +235,19 @@ public class SDFCommands {
     }
   }
 
-  private static String generateParseTable(ModuleKey key,
-                                           String sdf,
-                                           String module,
-                                           Context sdfContext,
-                                           Context makePermissiveContext)
+  private static Path generateParseTable(ModuleKey key,
+                                         Path sdf,
+                                         String module,
+                                         Context sdfContext,
+                                         Context makePermissiveContext)
       throws IOException, InvalidParseTableException {
     log.beginTask("Generating", "Generate the parse table");
     try {
-      String tblFile = null;
+      Path tblFile = null;
       
       tblFile = FileCommands.newTempFile("tbl");
 
-      String def = FileCommands.newTempFile("def");
+      Path def = FileCommands.newTempFile("def");
       packSdf(sdf, def, sdfContext);
       sdf2Table(def, tblFile, module);
       return tblFile;
@@ -255,8 +257,8 @@ public class SDFCommands {
   }
   
   public static String makePermissiveSdf(String source, Context context) throws IOException {
-    String def = FileCommands.newTempFile("def");
-    String permissiveDef = FileCommands.newTempFile("def-permissive");
+    Path def = FileCommands.newTempFile("def");
+    Path permissiveDef = FileCommands.newTempFile("def-permissive");
     
     FileCommands.writeToFile(def, sdfToDef(source));
     makePermissive(def, permissiveDef, context);
@@ -264,10 +266,10 @@ public class SDFCommands {
     return defToSdf(FileCommands.readFileAsString(permissiveDef)); // drop "definition\n"
   }
   
-  private static void makePermissive(String def, String permissiveDef, Context context) throws IOException {
-    log.beginExecution("make permissive", "-i", def, "-o", permissiveDef);
+  private static void makePermissive(Path def, Path permissiveDef, Context context) throws IOException {
+    log.beginExecution("make permissive", "-i", def.getAbsolutePath(), "-o", permissiveDef.getAbsolutePath());
     try {
-      make_permissive.mainNoExit(context, "-i", def, "-o", permissiveDef);
+      make_permissive.mainNoExit(context, "-i", def.getAbsolutePath(), "-o", permissiveDef.getAbsolutePath());
     }
     catch (StrategoExit e) {
       if (e.getValue() != 0) {
@@ -343,10 +345,10 @@ public class SDFCommands {
 //  }
   
   public static IStrategoTerm parseImplode(ParseTable table, String source, String start, boolean binary, ITreeBuilder treeBuilder, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
-    return parseImplode(table, "unknown", source, start, binary, treeBuilder, parser);
+    return parseImplode(table, null, source, start, binary, treeBuilder, parser);
   }
   
-  private static IStrategoTerm parseImplode(ParseTable table, String tbl, String source, String start, boolean binary, ITreeBuilder treeBuilder, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  private static IStrategoTerm parseImplode(ParseTable table, Path tbl, String source, String start, boolean binary, ITreeBuilder treeBuilder, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     log.beginExecution("parsing", "parsing source using table " + tbl);
 
     IStrategoTerm result = null;
@@ -357,10 +359,10 @@ public class SDFCommands {
       if (result != null)
         log.endTask();
       else {
-        String sourceFile = FileCommands.newTempFile("");
+        Path sourceFile = FileCommands.newTempFile("");
         FileCommands.writeToFile(sourceFile, source.toString());
         log.endTask("failed: " + 
-            log.commandLineAsString(new String[] {"jsglri", "-p", tbl, "-i " + sourceFile + "-s", start}));
+            log.commandLineAsString(new String[] {"jsglri", "-p", tbl.getAbsolutePath(), "-i " + sourceFile + "-s", start}));
       }
     }
     

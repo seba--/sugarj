@@ -2,6 +2,8 @@ package org.sugarj.driver.caching;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.sugarj.driver.Environment;
 
@@ -40,5 +42,9 @@ public class Cache<K extends Serializable,V extends Serializable> implements Ser
   
   public int size() {
     return cache.size();
+  }
+  
+  public Set<Entry<K, V>> entrySet() {
+    return cache.entrySet();
   }
 }

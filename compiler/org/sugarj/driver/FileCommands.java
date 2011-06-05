@@ -14,6 +14,10 @@ import java.net.URI;
 import java.net.URL;
 import java.util.List;
 
+import org.sugarj.driver.path.AbsolutePath;
+import org.sugarj.driver.path.Path;
+import org.sugarj.driver.path.RelativePath;
+
 /**
  * Provides methods for doing stuff with files.
  * 
@@ -23,7 +27,7 @@ public class FileCommands {
 
   private final static boolean DO_DELETE = false;
 
-  public static String newTempFile(String suffix) throws IOException {
+  public static Path newTempFile(String suffix) throws IOException {
     File f =
         File.createTempFile(
             "sugarj",
@@ -32,17 +36,17 @@ public class FileCommands {
     if (DO_DELETE)
       f.deleteOnExit();
 
-    return f.getAbsolutePath();
+    return new AbsolutePath(f.getAbsolutePath());
   }
 
-  public static void delete(String file) throws IOException {
+  public static void delete(Path file) throws IOException {
     if (file != null)
-      new File(file).delete();
+      file.getFile().delete();
   }
 
-  public static void copyFile(String from, String to) throws IOException {
-    FileInputStream fis = new FileInputStream(from);
-    FileOutputStream fos = new FileOutputStream(to);
+  public static void copyFile(Path from, Path to) throws IOException {
+    FileInputStream fis = new FileInputStream(from.getFile());
+    FileOutputStream fos = new FileOutputStream(to.getFile());
     copyFile(fis, fos);
     fis.close();
     fos.close();
@@ -65,17 +69,17 @@ public class FileCommands {
    * @param content
    * @throws IOException
    */
-  public static void writeToFile(String file, String content)
+  public static void writeToFile(Path file, String content)
       throws IOException {
     FileCommands.createFile(file);
-    FileOutputStream fos = new FileOutputStream(file);
+    FileOutputStream fos = new FileOutputStream(file.getFile());
     fos.write(content.getBytes());
     fos.close();
   }
 
-  public static void appendToFile(String file, String content)
+  public static void appendToFile(Path file, String content)
       throws IOException {
-    FileOutputStream fos = new FileOutputStream(file, true);
+    FileOutputStream fos = new FileOutputStream(file.getFile(), true);
     fos.write(content.getBytes());
     fos.close();
   }
@@ -84,9 +88,9 @@ public class FileCommands {
   // Author: http://snippets.dzone.com/user/daph2001
   //
   // TODO fix legal issues
-  public static String readFileAsString(String filePath) throws IOException {
+  public static String readFileAsString(Path filePath) throws IOException {
     StringBuffer fileData = new StringBuffer(1000);
-    BufferedReader reader = new BufferedReader(new FileReader(filePath));
+    BufferedReader reader = new BufferedReader(new FileReader(filePath.getFile()));
     char[] buf = new char[1024];
     int numRead = 0;
     while ((numRead = reader.read(buf)) != -1) {
@@ -98,16 +102,16 @@ public class FileCommands {
 
   
   public static String fileName(URL url) {
-    return fileName(url.getPath());
+    return fileName(new AbsolutePath(url.getPath()));
   }
   
   
   public static String fileName(URI uri) {
-    return fileName(uri.getPath());
+    return fileName(new AbsolutePath(uri.getPath()));
   }
   
-  public static String fileName(String file_doof) {
-    String file = toCygwinPath(file_doof);
+  public static String fileName(Path file_doof) {
+    String file = toCygwinPath(file_doof.getAbsolutePath());
     int index = file.lastIndexOf(sep);
 
     if (index >= 0)
@@ -130,6 +134,7 @@ public class FileCommands {
    *        list of possible paths to filename
    * @return full file path to filename or null
    */
+  @Deprecated
   public static String findFile(String filename, List<String> paths) {
     return findFile(filename, paths.toArray(new String[] {}));
   }
@@ -143,6 +148,7 @@ public class FileCommands {
    *        list of possible paths to filename
    * @return full file path to filename or null
    */
+  @Deprecated
   public static String findFile(String filename, String... paths) {
     for (String path : paths) {
       File f = new File(path + sep + filename);
@@ -153,7 +159,7 @@ public class FileCommands {
     return null;
   }
 
-  public static String newTempDir() throws IOException {
+  public static Path newTempDir() throws IOException {
     File f = File.createTempFile("SugarJ", "");
     // need to delete the file, but want to reuse the filename
     f.delete();
@@ -162,15 +168,15 @@ public class FileCommands {
     // TODO add shutdownHook to recursively delete this temporary
     // directory
 
-    return f.getAbsolutePath();
+    return new AbsolutePath(f.getAbsolutePath());
   }
 
-  public static void prependToFile(String file, String head) throws IOException {
-    File tmp = new File(newTempFile(""));
-    new File(file).renameTo(tmp);
+  public static void prependToFile(Path file, String head) throws IOException {
+    Path tmp = newTempFile("");
+    file.getFile().renameTo(tmp.getFile());
 
-    FileInputStream in = new FileInputStream(tmp);
-    FileOutputStream out = new FileOutputStream(file);
+    FileInputStream in = new FileInputStream(tmp.getFile());
+    FileOutputStream out = new FileOutputStream(file.getFile());
 
     out.write(head.getBytes());
 
@@ -182,11 +188,11 @@ public class FileCommands {
 
     in.close();
     out.close();
-    delete(tmp.getAbsolutePath());
+    delete(tmp);
   }
 
-  public static void createFile(String file) throws IOException {
-    File f = new File(file);
+  public static void createFile(Path file) throws IOException {
+    File f = file.getFile();
     if (f.getParentFile().exists() || f.getParentFile().mkdirs())
       f.createNewFile();
   }
@@ -199,15 +205,14 @@ public class FileCommands {
    * @return
    * @throws IOException
    */
-  public static String createFile(String dir, int hash) throws IOException {
-    String s = dir + sep + hashFileName("sugarj", hash);
-    createFile(s);
-    return s;
+  public static Path createFile(Path dir, int hash) throws IOException {
+    Path p = new RelativePath(dir, hashFileName("sugarj", hash));
+    createFile(p);
+    return p;
   }
 
-  public static void createDir(String dir) throws IOException {
-    File f = new File(dir);
-    f.mkdirs();
+  public static void createDir(Path dir) throws IOException {
+    dir.getFile().mkdirs();
   }
 
   /**
@@ -218,10 +223,10 @@ public class FileCommands {
    * @return
    * @throws IOException
    */
-  public static String createDir(String dir, int hash) throws IOException {
-    String s = dir + sep + hashFileName("SugarJ", hash);
-    createDir(s);
-    return s;
+  public static Path createDir(Path dir, int hash) throws IOException {
+    Path p = new RelativePath(dir, hashFileName("SugarJ", hash));
+    createDir(p);
+    return p;
   }
 
   /**
@@ -259,43 +264,12 @@ public class FileCommands {
    * 
    * @return true iff f1 was modified after f2.
    */
-  public static boolean isModifiedLater(String f1, String f2) {
-    return new File(f1).lastModified() > new File(f2).lastModified();
+  public static boolean isModifiedLater(Path f1, Path f2) {
+    return f1.getFile().lastModified() > f2.getFile().lastModified();
   }
 
-  /**
-   * Inserts string s into the given file as the given line
-   * number.
-   * 
-   * @param s
-   * @param file
-   * @param line
-   * @throws IOException
-   */
-  public static void insert(String s, String file, int line) throws IOException {
-    StringBuilder b = new StringBuilder();
-    BufferedReader br = new BufferedReader(new FileReader(file));
-
-    String in;
-    int i = 0;
-
-    while ((in = br.readLine()) != null) {
-      i++;
-      if (i == line)
-        b.append(s).append('\n');
-
-      b.append(in).append('\n');
-    }
-
-    if (i < line)
-      b.append(s);
-
-    br.close();
-    writeToFile(file, b.toString());
-  }
-
-  public static boolean exists(String file) {
-    return new File(file).exists();
+  public static boolean exists(Path file) {
+    return file.getFile().exists();
   }
   
   public static boolean exists(URI file) {
@@ -328,23 +302,11 @@ public class FileCommands {
     return file;
   }
 
-  public static void trimQuotes(String file) throws IOException {
-    String s = readFileAsString(file);
-    s = s.trim();
-    
-    Log.log.log("trim: " + s);
-    
-    if (s.startsWith("\"") && s.endsWith("\"")) {
-      s = s.substring(1, s.length() - 1);
-      writeToFile(file, s);
-    }
-  }
-
   public static String getRelativeModulePath(String module) {
     return module.replace(".", sep);
   }
 
-  public static int fileHash(String file) throws IOException {
+  public static int fileHash(Path file) throws IOException {
     if (exists(file))
       return readFileAsString(file).hashCode();
     

@@ -29,6 +29,9 @@ import org.sugarj.driver.Environment;
 import org.sugarj.driver.FileCommands;
 import org.sugarj.driver.Log;
 import org.sugarj.driver.Result;
+import org.sugarj.driver.path.AbsolutePath;
+import org.sugarj.driver.path.Path;
+import org.sugarj.driver.path.RelativePath;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -39,12 +42,11 @@ public class SugarJParser extends JSGLRI {
   private String outputPath;
   private List<String> includePath;
   private List<String> sourcePath;
-  private boolean justReturn;
   
   private static Map<String, Result> results = new HashMap<String, Result>();
   private Result result;
   private JSGLRI parser;
-  private String parserTable;
+  private Path parserTable;
   
   public SugarJParser(JSGLRI parser) {
     super(parser.getParseTable(), parser.getStartSymbol(), parser.getController());
@@ -57,19 +59,15 @@ public class SugarJParser extends JSGLRI {
     
     result = getResult(filename);
 
-    if (result instanceof PendingResult)
-      setJustReturn(false);
-    else if (doJustReturn() && result.isUpToDate(input.hashCode())) {
-      setJustReturn(false);
+    if (result != null && result.isUpToDate(input.hashCode()))
       return result.getSugaredSyntaxTree();
-    }
-    else 
+    else if (result == null || !(result instanceof PendingResult)) 
       scheduleParse(input, filename);
         
     if (result == null)
       return null;
     
-    String lastParseTable;
+    Path lastParseTable;
     
     if (result instanceof PendingResult)
       lastParseTable = ((PendingResult) result).getResult().getLastParseTable();
@@ -81,7 +79,7 @@ public class SugarJParser extends JSGLRI {
     
     if (lastParseTable != null) {
       try {
-        ParseTable parseTable = org.strategoxt.imp.runtime.Environment.loadParseTable(lastParseTable);
+        ParseTable parseTable = org.strategoxt.imp.runtime.Environment.loadParseTable(lastParseTable.getAbsolutePath());
         ITreeBuilder builder = new TreeBuilder(new TermTreeFactory(ATermCommands.factory));
         
         parser = new JSGLRI(parseTable, "SugarCompilationUnit");
@@ -116,10 +114,8 @@ public class SugarJParser extends JSGLRI {
           org.strategoxt.imp.runtime.Environment.logException(e);
         } finally {
           monitor.done();
-          if (result != null) {
-            setJustReturn(true);
+          if (result != null)
             getController().scheduleParserUpdate(0, false);
-          } 
           else
             putResult(filename, oldResult);
         }
@@ -140,6 +136,7 @@ public class SugarJParser extends JSGLRI {
     Environment.sourcePath.addAll(sourcePath);
     
     assert projectPath != null;
+    Environment.root = projectPath;
     Environment.bin = outputPath != null ? outputPath : projectPath;
 
     if (Environment.cacheDir == null)
@@ -162,12 +159,12 @@ public class SugarJParser extends JSGLRI {
     SugarJConsole.activateConsoleOnce();
     
     try {
-      return Driver.compile(input, projectRelativePath(filename), filename, monitor);
+      return Driver.compile(input, projectRelativePath(filename), monitor);
     } catch (InterruptedException e) {
       throw e;
     } catch (Exception e) {
       e.printStackTrace();
-      throw new RuntimeException("parsing " + FileCommands.fileName(filename) + " failed", e);
+      throw new RuntimeException("parsing " + FileCommands.fileName(new AbsolutePath(filename)) + " failed", e);
     }
   }
   
@@ -199,14 +196,6 @@ public class SugarJParser extends JSGLRI {
     final List<IStrategoTerm> empty = Collections.emptyList();
     return result == null ? empty : new ArrayList<IStrategoTerm>(result.getEditorServices());
   }
-  
-  private synchronized boolean doJustReturn() {
-    return justReturn;
-  }
-  
-  private synchronized void setJustReturn(boolean justReturn) {
-    this.justReturn = justReturn;
-  }
 
   private static synchronized Result getResult(String file) {
     return results.get(file);
@@ -216,12 +205,12 @@ public class SugarJParser extends JSGLRI {
     results.put(file, result);
   }
   
-  private String projectRelativePath(String filename) {
-    String path = null;
+  private RelativePath projectRelativePath(String filename) {
+    RelativePath path = null;
     for (String s : sourcePath)
       if (filename.startsWith(s)) {
-        String newPath = filename.substring(s.length() + 1);
-        if (path == null || newPath.length() < path.length())
+        RelativePath newPath = new RelativePath(new AbsolutePath(s), filename.substring(s.length()));
+        if (path == null || newPath.getBasePath().getAbsolutePath().length() < path.getBasePath().getAbsolutePath().length())
           path = newPath;
       }
     

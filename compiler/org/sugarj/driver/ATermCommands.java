@@ -29,6 +29,7 @@ import org.strategoxt.HybridInterpreter;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.tools.sdf_desugar_0_0;
+import org.sugarj.driver.path.Path;
 import org.sugarj.driver.transformations.extraction.extract_sdf_0_0;
 import org.sugarj.driver.transformations.extraction.extract_str_0_0;
 
@@ -87,13 +88,13 @@ public class ATermCommands {
     return new TAFTermReader(factory).parseFromString(s);
   }
 
-  public static String atermToFile(IStrategoTerm aterm) throws IOException {
-    String file = FileCommands.newTempFile("ast");
+  public static Path atermToFile(IStrategoTerm aterm) throws IOException {
+    Path file = FileCommands.newTempFile("ast");
     atermToFile(aterm, file);
     return file;
   }
   
-  public static void atermToFile(IStrategoTerm aterm, String filename)
+  public static void atermToFile(IStrategoTerm aterm, Path filename)
       throws IOException {
     Environment.terms.put(filename, aterm);
     FileCommands.writeToFile(filename, atermToString(aterm));
@@ -294,8 +295,8 @@ public class ATermCommands {
     return result;
   }
   
-  public static List<IStrategoTerm> registerSemanticProvider(Collection<IStrategoTerm> editorServices, String jarfile) throws IOException {
-    String jarfilePath = jarfile.replace("\\", "\\\\").replace("\"", "\\\"");
+  public static List<IStrategoTerm> registerSemanticProvider(Collection<IStrategoTerm> editorServices, Path jarfile) throws IOException {
+    String jarfilePath = jarfile.getAbsolutePath().replace("\\", "\\\\").replace("\"", "\\\"");
     IStrategoTerm semanticProvider = atermFromString("SemanticProvider(\"" + jarfilePath + "\")");
     
     List<IStrategoTerm> newServices = new ArrayList<IStrategoTerm>();
@@ -325,7 +326,7 @@ public class ATermCommands {
     IToken left = ImploderAttachment.getLeftToken(toplevelDecl);
     IToken right = ImploderAttachment.getRightToken(toplevelDecl);
     
-    String file = "no file";
+    Path file = null;
     try {
       file = atermToFile(toplevelDecl);
     } catch (IOException e) {
