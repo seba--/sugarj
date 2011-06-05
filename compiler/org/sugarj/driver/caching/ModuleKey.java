@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.sugarj.driver.FileCommands;
+import org.sugarj.driver.path.Path;
 
 /**
  * The key of some SDF module as needed for caching.
@@ -25,7 +26,7 @@ import org.sugarj.driver.FileCommands;
 public class ModuleKey implements Externalizable {
 
   private boolean checkGet;
-  public Map<String, Integer> imports;
+  public Map<Path, Integer> imports;
   public String body;
   
   /**
@@ -33,14 +34,14 @@ public class ModuleKey implements Externalizable {
    */
   public ModuleKey() {}
   
-  public ModuleKey(Collection<String> dependentFiles, IStrategoTerm module) throws IOException {
-    this.imports = new HashMap<String, Integer>();
+  public ModuleKey(Collection<Path> dependentFiles, IStrategoTerm module) throws IOException {
+    this.imports = new HashMap<Path, Integer>();
     
     StringBuffer buf = new StringBuffer();
     module.writeAsString(buf, Integer.MAX_VALUE);
     this.body = buf.toString();
     
-    for (String file : dependentFiles)
+    for (Path file : dependentFiles)
       imports.put(file, FileCommands.fileHash(file));
   }
   
@@ -59,10 +60,10 @@ public class ModuleKey implements Externalizable {
 
   @Override
   public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-    imports = new HashMap<String, Integer>();
+    imports = new HashMap<Path, Integer>();
     int entries = in.readInt();
     for (int i = 0; i < entries; i++) {
-      imports.put((String) in.readObject(), in.readInt());
+      imports.put((Path) in.readObject(), in.readInt());
     }
     
     body = (String) in.readObject();
@@ -71,7 +72,7 @@ public class ModuleKey implements Externalizable {
   @Override
   public void writeExternal(ObjectOutput out) throws IOException {
     out.writeInt(imports.size());
-    for (Entry<String, Integer> entry : imports.entrySet()) {
+    for (Entry<Path, Integer> entry : imports.entrySet()) {
       out.writeObject(entry.getKey());
       out.writeInt(entry.getValue());
     }

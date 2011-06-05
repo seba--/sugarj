@@ -26,6 +26,7 @@ import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.spoofax.terms.TermVisitor;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.runtime.Environment;
+import org.sugarj.driver.path.Path;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -62,7 +63,7 @@ public class DriverCLI {
     }
   }
   
-  static boolean processResultCLI(Result res, String file, String project) throws IOException {
+  static boolean processResultCLI(Result res, Path file, String project) throws IOException {
     log.log("");
     
     boolean success = res.getCollectedErrors().isEmpty();
@@ -76,7 +77,7 @@ public class DriverCLI {
     IStrategoTerm tuple = ATermCommands.makeTuple(
         tok,
         res.getSugaredSyntaxTree(), 
-        ATermCommands.makeString(file, tok), 
+        ATermCommands.makeString(file.getAbsolutePath(), tok), 
         ATermCommands.makeString(project, tok));
     
     List<Error> errors = gatherNonFatalErrors(res.getSugaredSyntaxTree());
