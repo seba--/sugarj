@@ -5,8 +5,12 @@ import static org.sugarj.driver.Environment.includePath;
 import static org.sugarj.driver.Log.log;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -32,8 +36,8 @@ public class ModuleSystemCommands {
    * @throws IOException
    */
   public static boolean importClass(String modulePath, IStrategoTerm importTerm, Path javaOutFile, HybridInterpreter interp, Result driverResult) throws IOException {
-    RelativePath classUri = searchFile(modulePath, ".class");
-    if (classUri == null)
+    RelativePath clazz = searchFile(modulePath, ".class");
+    if (clazz == null)
       return false;
     
     log.beginTask("Generate Java code");
@@ -168,6 +172,14 @@ public class ModuleSystemCommands {
       RelativePath p = new RelativePath(new AbsolutePath(base), relativePath + extension);
       if (p.getFile().exists())
         return p;
+      
+      try {
+        ClassLoader cl = new URLClassLoader(new URL[] {new File(base).toURI().toURL()}, null);
+        if (cl.getResource(relativePath + extension) != null)
+          return new RelativePath(new AbsolutePath(base), relativePath + extension);
+      } catch (MalformedURLException e) {
+        e.printStackTrace();
+      }
     }
     
     return null;

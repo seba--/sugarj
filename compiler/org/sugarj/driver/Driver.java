@@ -62,28 +62,8 @@ import org.sugarj.stdlib.StdLib;
  */
 public class Driver{
   
-  public final static String CACHE_VERSION = "editor-base-0.12";
+  public final static String CACHE_VERSION = "editor-base-0.13";
   
-  private static class Key {
-    private String source;
-    private Path file;
-    
-    private Key(String source, Path file) {
-      this.source = source;
-      this.file = file;
-    }
-    
-    public int hashCode() {
-      return source.hashCode() + file.hashCode();
-    }
-    
-    public boolean equals(Object o) {
-      return o instanceof Key 
-          && ((Key) o).source.equals(source)
-          && ((Key) o).file.equals(file);
-    }
-  }
-
   private final static int PENDING_TIMEOUT = 120000;
 
   private static LRUMap resultCache = new LRUMap(50);
@@ -165,8 +145,8 @@ public class Driver{
   
   
   
-  private static synchronized Result getResult(String source, Path file) {
-    return (Result) resultCache.get(new Key(source, file));
+  private static synchronized Result getResult(Path file) {
+    return (Result) resultCache.get(file);
   }
   
   private static synchronized Entry<String, Driver> getPendingRun(Path file) {
@@ -199,8 +179,8 @@ public class Driver{
     }
   }
 
-  private static synchronized void putResult(String source, Path file, Result result) {
-    resultCache.put(new Key(source, file), result);
+  private static synchronized void putResult(Path file, Result result) {
+    resultCache.put(file, result);
     Log.log.log(resultCache.size());
   }
   
@@ -240,7 +220,7 @@ public class Driver{
       }
 
       if (pending == null) {
-        Result result = getResult(source, sourceFile);
+        Result result = getResult(sourceFile);
         if (result != null && result.isUpToDate(source.hashCode()))
           return result;
       }
@@ -259,7 +239,7 @@ public class Driver{
       storeCaches();
     } finally {
         pendingRuns.remove(sourceFile);
-        putResult(source, sourceFile, driver.driverResult.getSugaredSyntaxTree() == null ? null : driver.driverResult);
+        putResult(sourceFile, driver.driverResult.getSugaredSyntaxTree() == null ? null : driver.driverResult);
     }
     
     return driver.driverResult;
@@ -285,8 +265,8 @@ public class Driver{
       driverResult.setSourceFile(sourceFile, source.hashCode());
       
       if (sourceFile != null) {
-        javaOutFile = new RelativePathBin(sourceFile + ".java");
-        driverResult.setGenerationLog(new RelativePathBin(sourceFile + ".gen"));
+        javaOutFile = new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".java");
+        driverResult.setGenerationLog(new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".gen"));
         clearGeneratedStuff();
       }
 
@@ -741,8 +721,8 @@ public class Driver{
       if (!packageName.equals(expectedPackage))
         ATermCommands.setErrorMessage(
             toplevelDecl,
-            "The declared package " + packageName +
-            " does not match the expected package " + expectedPackage + ".");
+            "The declared package '" + packageName + "'" +
+            " does not match the expected package '" + expectedPackage + "'.");
     }
   }
   
@@ -1503,13 +1483,24 @@ public class Driver{
     if (SDFCommands.sdfCache != null) {
       log.log("store sdf cache in " + sdfCache);
       log.log("sdf cache size: " + SDFCommands.sdfCache.size());
-      new ObjectOutputStream(new FileOutputStream(sdfCache.getFile())).writeObject(SDFCommands.sdfCache);
+      FileCommands.createFile(sdfCache);
+      ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(sdfCache.getFile()));
+      try {
+        oos.writeObject(SDFCommands.sdfCache);
+      } finally {
+        oos.close();
+      }
     }
     
     if (STRCommands.strCache != null) {
       log.log("store str cache in " + strCache);
       log.log("str cache size: " + STRCommands.strCache.size());
-      new ObjectOutputStream(new FileOutputStream(strCache.getFile())).writeObject(STRCommands.strCache);
+      ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(strCache.getFile()));
+      try {
+        oos.writeObject(STRCommands.strCache);
+      } finally {
+        oos.close();
+      }
     }
   }
 

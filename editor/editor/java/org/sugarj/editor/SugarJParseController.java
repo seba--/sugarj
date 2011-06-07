@@ -83,7 +83,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
           for (IPackageFragmentRoot root : javaProject.getAllPackageFragmentRoots()) {
             IPath path = root.getPath();
             boolean externalPath = root.getResource() == null;
-            String p = externalPath ? path.toString() : projectPath + File.separator + path.makeRelativeTo(project.getRawProject().getFullPath());
+            String p = externalPath ? path.toString() : projectPath + "/" + path.makeRelativeTo(project.getRawProject().getFullPath());
             if (root.getKind() == IPackageFragmentRoot.K_SOURCE)
               sourcePath.add(p);
             else if (root.getKind() == IPackageFragmentRoot.K_BINARY)
@@ -94,7 +94,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
             IJavaProject reqJavaProject = JavaCore.create(project.getRawProject().getWorkspace().getRoot().getProject(reqProject));
             IPath reqProjectPath = reqJavaProject.getProject().getLocation().makeAbsolute();
             if (reqJavaProject != null)
-              includePath.add(reqProjectPath + File.separator  + reqJavaProject.getOutputLocation().makeRelativeTo(reqJavaProject.getProject().getFullPath()).toPortableString());
+              includePath.add(reqProjectPath + "/" + reqJavaProject.getOutputLocation().makeRelativeTo(reqJavaProject.getProject().getFullPath()).toPortableString());
           }
         } catch (JavaModelException e) { 
           outputPath = null; 

@@ -14,8 +14,13 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.ITreeBuilder;
+import org.spoofax.jsglr.client.KeywordRecognizer;
 import org.spoofax.jsglr.client.ParseTable;
+import org.spoofax.jsglr.client.imploder.IToken;
+import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.spoofax.jsglr.client.imploder.TermTreeFactory;
+import org.spoofax.jsglr.client.imploder.Token;
+import org.spoofax.jsglr.client.imploder.Tokenizer;
 import org.spoofax.jsglr.client.imploder.TreeBuilder;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.SGLRException;
@@ -58,15 +63,16 @@ public class SugarJParser extends JSGLRI {
       throws TokenExpectedException, BadTokenException, SGLRException, IOException {
     
     result = getResult(filename);
+    if (result == null) {
+      result = parseFailureResult();
+      putResult(filename, result);
+    }
 
     if (result != null && result.isUpToDate(input.hashCode()))
       return result.getSugaredSyntaxTree();
     else if (result == null || !(result instanceof PendingResult)) 
       scheduleParse(input, filename);
         
-    if (result == null)
-      return null;
-    
     Path lastParseTable;
     
     if (result instanceof PendingResult)
@@ -100,10 +106,10 @@ public class SugarJParser extends JSGLRI {
     final Result oldResult = getResult(filename);
     putResult(filename, new PendingResult(oldResult));
     
-    Job parseJob = new Job("SugarJ parser: " + projectRelativePath(filename)) {
+    Job parseJob = new Job("SugarJ parser: " + projectRelativePath(filename).getRelativePath()) {
       @Override
       protected IStatus run(IProgressMonitor monitor) {
-        monitor.beginTask("parse " + projectRelativePath(filename), IProgressMonitor.UNKNOWN);
+        monitor.beginTask("parse " + projectRelativePath(filename).getRelativePath(), IProgressMonitor.UNKNOWN);
         Result result = null;
         try {
           result = runParser(input, filename, monitor);
@@ -207,16 +213,30 @@ public class SugarJParser extends JSGLRI {
   
   private RelativePath projectRelativePath(String filename) {
     RelativePath path = null;
-    for (String s : sourcePath)
+    for (String s : sourcePath) {
       if (filename.startsWith(s)) {
-        RelativePath newPath = new RelativePath(new AbsolutePath(s), filename.substring(s.length()));
+        RelativePath newPath = new RelativePath(new AbsolutePath(s), filename.substring(s.length() + 1));
         if (path == null || newPath.getBasePath().getAbsolutePath().length() < path.getBasePath().getAbsolutePath().length())
           path = newPath;
       }
+    }
     
     if (path != null)
       return path;
     
     throw new IllegalStateException("Ressource " + filename + " not inside any source folder.");
+  }
+  
+  private Result parseFailureResult() {
+    IStrategoTerm term = ATermCommands.makeList("SugarCompilationUnit");
+    Tokenizer tokenizer = new Tokenizer(" ", " ", new KeywordRecognizer(null) {});
+    Token tok = tokenizer.makeToken(0, IToken.TK_UNKNOWN, true);
+    ImploderAttachment.putImploderAttachment(term, true, "SugarCompilationUnit", tok, tok);
+    
+    Result r = new Result() {
+      public boolean isUpToDate(int h) { return false; }
+    };
+    r.setSugaredSyntaxTree(term);
+    return r;
   }
 }
