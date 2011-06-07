@@ -81,6 +81,7 @@ public class Result {
   
   private void logGeneration(Object o) throws IOException {
     if (generationLog != null) {
+      FileCommands.createFile(generationLog);
       ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(generationLog.getFile(), true));
       try {
         oos.writeObject(o);
@@ -135,7 +136,7 @@ public class Result {
     return collectedErrors;
   }
   
-  void setSugaredSyntaxTree(IStrategoTerm sugaredSyntaxTree) {
+  public void setSugaredSyntaxTree(IStrategoTerm sugaredSyntaxTree) {
     this.sugaredSyntaxTree = sugaredSyntaxTree;
   }
   
@@ -164,6 +165,7 @@ public class Result {
     ObjectOutputStream oos = null;
     
     try {
+      FileCommands.createFile(dep);
       oos = new ObjectOutputStream(new FileOutputStream(dep.getFile()));
 
       oos.writeObject(sourceFile);

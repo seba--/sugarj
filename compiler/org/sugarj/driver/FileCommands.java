@@ -25,27 +25,43 @@ import org.sugarj.driver.path.RelativePath;
  */
 public class FileCommands {
 
-  private final static boolean DO_DELETE = false;
+  private final static boolean DO_DELETE = true;
 
   public static Path newTempFile(String suffix) throws IOException {
     File f =
         File.createTempFile(
             "sugarj",
             suffix == null || suffix.isEmpty() ? suffix : "." + suffix);
-
+    final Path p = new AbsolutePath(f.getAbsolutePath());
+    
     if (DO_DELETE)
-      f.deleteOnExit();
+      Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            FileCommands.delete(p);
+          } catch (IOException e) {
+          }
+        }
+      }));
 
-    return new AbsolutePath(f.getAbsolutePath());
+    return p;
   }
 
   public static void delete(Path file) throws IOException {
-    if (file != null)
-      file.getFile().delete();
+    if (file == null)
+      return;
+    
+    if (file.getFile().listFiles() != null)
+      for (File f : file.getFile().listFiles())
+        FileCommands.delete(new AbsolutePath(f.getPath()));
+    
+    file.getFile().delete();
   }
 
   public static void copyFile(Path from, Path to) throws IOException {
     FileInputStream fis = new FileInputStream(from.getFile());
+    createFile(to);
     FileOutputStream fos = new FileOutputStream(to.getFile());
     copyFile(fis, fos);
     fis.close();
@@ -79,6 +95,7 @@ public class FileCommands {
 
   public static void appendToFile(Path file, String content)
       throws IOException {
+    createFile(file);
     FileOutputStream fos = new FileOutputStream(file.getFile(), true);
     fos.write(content.getBytes());
     fos.close();
@@ -86,16 +103,14 @@ public class FileCommands {
 
   // from http://snippets.dzone.com/posts/show/1335
   // Author: http://snippets.dzone.com/user/daph2001
-  //
-  // TODO fix legal issues
   public static String readFileAsString(Path filePath) throws IOException {
-    StringBuffer fileData = new StringBuffer(1000);
+    StringBuilder fileData = new StringBuilder(1000);
     BufferedReader reader = new BufferedReader(new FileReader(filePath.getFile()));
     char[] buf = new char[1024];
     int numRead = 0;
-    while ((numRead = reader.read(buf)) != -1) {
+    while ((numRead = reader.read(buf)) != -1)
       fileData.append(buf, 0, numRead);
-    }
+
     reader.close();
     return fileData.toString();
   }
@@ -160,15 +175,24 @@ public class FileCommands {
   }
 
   public static Path newTempDir() throws IOException {
-    File f = File.createTempFile("SugarJ", "");
+    final File f = File.createTempFile("SugarJ", "");
     // need to delete the file, but want to reuse the filename
     f.delete();
     f.mkdir();
+    final Path p = new AbsolutePath(f.getAbsolutePath());
+    
+    if (DO_DELETE)
+      Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            FileCommands.delete(p);
+          } catch (IOException e) {
+          }
+        }
+      }));
 
-    // TODO add shutdownHook to recursively delete this temporary
-    // directory
-
-    return new AbsolutePath(f.getAbsolutePath());
+    return p;
   }
 
   public static void prependToFile(Path file, String head) throws IOException {
