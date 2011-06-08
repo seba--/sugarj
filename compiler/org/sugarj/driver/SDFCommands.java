@@ -362,7 +362,7 @@ public class SDFCommands {
         Path sourceFile = FileCommands.newTempFile("");
         FileCommands.writeToFile(sourceFile, source.toString());
         log.endTask("failed: " + 
-            log.commandLineAsString(new String[] {"jsglri", "-p", tbl.getAbsolutePath(), "-i " + sourceFile + "-s", start}));
+            log.commandLineAsString(new String[] {"jsglri", "-p", tbl == null ? "unknown" : tbl.getAbsolutePath(), "-i " + sourceFile + "-s", start}));
       }
     }
     
