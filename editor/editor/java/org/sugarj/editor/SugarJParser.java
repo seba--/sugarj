@@ -215,7 +215,8 @@ public class SugarJParser extends JSGLRI {
     RelativePath path = null;
     for (String s : sourcePath) {
       if (filename.startsWith(s)) {
-        RelativePath newPath = new RelativePath(new AbsolutePath(s), filename.substring(s.length() + 1));
+        int sepOffset = s.endsWith(Environment.sep) ? 0 : 1;
+        RelativePath newPath = new RelativePath(new AbsolutePath(s), filename.substring(s.length() + sepOffset));
         if (path == null || newPath.getBasePath().getAbsolutePath().length() < path.getBasePath().getAbsolutePath().length())
           path = newPath;
       }
