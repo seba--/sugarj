@@ -1554,9 +1554,11 @@ public class Driver{
   
   private void clearGeneratedStuff() throws IOException {
     if (driverResult.getGenerationLog() != null && FileCommands.exists(driverResult.getGenerationLog())) {
-      ObjectInputStream ois = new ObjectInputStream(new FileInputStream(driverResult.getGenerationLog().getFile()));
+
+      ObjectInputStream ois = null;
       
       try {
+        ois = new ObjectInputStream(new FileInputStream(driverResult.getGenerationLog().getFile()));
         while (true) {
           try {
             Path p = (Path) ois.readObject();
@@ -1566,7 +1568,8 @@ public class Driver{
         }
       } catch (Exception e) {
       } finally {
-        ois.close();
+        if (ois != null)
+          ois.close();
       }
 
       FileCommands.writeToFile(driverResult.getGenerationLog(), "");
