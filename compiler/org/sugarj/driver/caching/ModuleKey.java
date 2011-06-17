@@ -34,6 +34,11 @@ public class ModuleKey implements Externalizable {
    */
   public ModuleKey() {}
   
+  public ModuleKey(Map<Path, Integer> imports, String body) {
+    this.imports = imports;
+    this.body = body;
+  }
+  
   public ModuleKey(Collection<Path> dependentFiles, IStrategoTerm module) throws IOException {
     this.imports = new HashMap<Path, Integer>();
     

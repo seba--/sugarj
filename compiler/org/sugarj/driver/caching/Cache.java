@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.sugarj.driver.Environment;
-
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -24,20 +22,15 @@ public class Cache<K extends Serializable,V extends Serializable> implements Ser
   }
 
   public void put(K k, V v) {
-    if (!Environment.rocache)
-      cache.put(k, v);
+    cache.put(k, v);
   }
 
   public V get(K k) {
-    if (Environment.wocache)
-      return null;
-    
     return cache.get(k);
   }
   
   public void remove(K k) {
-    if (!Environment.rocache)
-      cache.remove(k);
+    cache.remove(k);
   }
   
   public int size() {

@@ -25,7 +25,6 @@ public class ModuleKeyCache<V extends Serializable> extends Cache<ModuleKey, V> 
 
   public V get(ModuleKey k) {
     k.doGet();
-    
     return super.get(k);
   }
 }

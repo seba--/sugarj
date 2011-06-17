@@ -1,4 +1,5 @@
 package org.sugarj.driver;
+
 import static org.sugarj.driver.FileCommands.toCygwinPath;
 import static org.sugarj.driver.Log.log;
 
@@ -39,7 +40,6 @@ import org.strategoxt.tools.main_pack_sdf_0_0;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.path.Path;
-import org.sugarj.driver.path.RelativePathCache;
 import org.sugarj.stdlib.StdLib;
 
 /**
@@ -68,7 +68,7 @@ public class SDFCommands {
   
   public static ModuleKeyCache<Path> sdfCache = null;
   
-  private static void packSdf(Path sdf, Path def, Context sdfContext) throws IOException {
+  private static void packSdf(Path sdf, Path def, Context sdfContext, Collection<String> paths) throws IOException {
     
     /*
      * We can include as many paths as we want here, checking the
@@ -87,7 +87,7 @@ public class SDFCommands {
       "-I", StdLib.stdLibDir.getPath(),
     }));
     
-    for (String path : Environment.includePath) 
+    for (String path : paths) 
       if (new File(path).isDirectory()){
         cmd.add("-I");
         cmd.add(path);
@@ -139,13 +139,16 @@ public class SDFCommands {
   }
 
   private static void normalizeTable(Path def, String module) throws IOException {
-    sdf2Table(def, FileCommands.newTempFile("tbl"), module, true);
+    Path tbl = FileCommands.newTempFile("tbl");
+    sdf2Table(def, tbl, module, true);
+    FileCommands.deleteTempFiles(tbl);
   }
   
-  public static void check(Path sdf, String module, Context sdfContext) throws IOException {
+  public static void check(Path sdf, String module, Context sdfContext, Collection<String> paths) throws IOException {
     Path def = FileCommands.newTempFile("def");
-    packSdf(sdf, def, sdfContext);
+    packSdf(sdf, def, sdfContext, paths);
     normalizeTable(def, module);
+    FileCommands.deleteTempFiles(def);
   }
   
   /**
@@ -157,13 +160,13 @@ public class SDFCommands {
    * @throws BadTokenException 
    * @throws TokenExpectedException 
    */
-  public static Path compile(Path sdf, String module, Collection<Path> dependentFiles, JSGLRI sdfParser, Context sdfContext, Context makePermissiveContext) throws IOException,
+  public static Path compile(Path sdf, String module, Collection<Path> dependentFiles, JSGLRI sdfParser, Context sdfContext, Context makePermissiveContext, Environment environment) throws IOException,
       InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     ModuleKey key = getModuleKeyForGrammar(sdf, module, dependentFiles, sdfParser);
     Path tbl = lookupGrammarInCache(key);
     if (tbl == null) {
-      tbl = generateParseTable(key, sdf, module, sdfContext, makePermissiveContext);
-      cacheParseTable(key, tbl);
+      tbl = generateParseTable(key, sdf, module, sdfContext, makePermissiveContext, environment.getIncludePath());
+      cacheParseTable(key, tbl, environment);
     }
     
     if (tbl != null)
@@ -173,16 +176,19 @@ public class SDFCommands {
   }
   
   
-  private static void cacheParseTable(ModuleKey key, Path tbl) throws IOException {
-    if (sdfCache == null || Environment.cacheDir == null)
+  private static void cacheParseTable(ModuleKey key, Path tbl, Environment environment) throws IOException {
+    if (sdfCache == null)
       return;
     
     log.beginTask("Caching", "Cache parse table");
     try {
-      Path cacheTbl = new RelativePathCache(tbl.getFile().getName());
+      Path cacheTbl = environment.new RelativePathCache(tbl.getFile().getName());
       FileCommands.copyFile(tbl, cacheTbl);
-      Path oldTbl = sdfCache.putGet(key, cacheTbl);
-      FileCommands.delete(oldTbl);
+      
+      if (!Environment.rocache) {
+        Path oldTbl = sdfCache.putGet(key, cacheTbl);
+        FileCommands.delete(oldTbl);
+      }
 
       if (CommandExecution.CACHE_INFO)
         log.log("Cache Location: " + cacheTbl);
@@ -199,7 +205,8 @@ public class SDFCommands {
     
     log.beginTask("Searching", "Search parse table in cache");
     try {
-      result = sdfCache.get(key);
+      if (!Environment.wocache)
+        result = sdfCache.get(key);
       
       if (result == null || !result.getFile().exists())
         return null;
@@ -239,7 +246,8 @@ public class SDFCommands {
                                          Path sdf,
                                          String module,
                                          Context sdfContext,
-                                         Context makePermissiveContext)
+                                         Context makePermissiveContext,
+                                         Collection<String> paths)
       throws IOException, InvalidParseTableException {
     log.beginTask("Generating", "Generate the parse table");
     try {
@@ -248,8 +256,9 @@ public class SDFCommands {
       tblFile = FileCommands.newTempFile("tbl");
 
       Path def = FileCommands.newTempFile("def");
-      packSdf(sdf, def, sdfContext);
+      packSdf(sdf, def, sdfContext, paths);
       sdf2Table(def, tblFile, module);
+      FileCommands.deleteTempFiles(def);
       return tblFile;
     } finally {
       log.endTask();
@@ -263,7 +272,10 @@ public class SDFCommands {
     FileCommands.writeToFile(def, sdfToDef(source));
     makePermissive(def, permissiveDef, context);
     
-    return defToSdf(FileCommands.readFileAsString(permissiveDef)); // drop "definition\n"
+    String s = defToSdf(FileCommands.readFileAsString(permissiveDef)); // drop "definition\n"
+    FileCommands.deleteTempFiles(def);
+    FileCommands.deleteTempFiles(permissiveDef);
+    return s;
   }
   
   private static void makePermissive(Path def, Path permissiveDef, Context context) throws IOException {

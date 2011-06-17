@@ -30,7 +30,6 @@ import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
-import org.sugarj.driver.path.RelativePathCache;
 import org.sugarj.stdlib.StdLib;
 
 /**
@@ -50,7 +49,7 @@ public class STRCommands {
   /**
    *  Compiles a {@code *.str} file to a single {@code *.java} file. 
    */
-  private static void strj(Path str, Path java, String main, Context strjContext) throws IOException {
+  private static void strj(Path str, Path java, String main, Context strjContext, Collection<String> paths) throws IOException {
     
     /*
      * We can include as many paths as we want here, checking the
@@ -68,7 +67,7 @@ public class STRCommands {
         "-O", "0"
     }));
     
-    for (String path : Environment.includePath)
+    for (String path : paths)
       if (new File(path).isDirectory()){
         cmd.add("-I");
         cmd.add(path);
@@ -90,13 +89,13 @@ public class STRCommands {
   }
   
   
-  public static Path compile(Path str, String main, Collection<Path> dependentFiles, JSGLRI strParser, Context strjContext) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  public static Path compile(Path str, String main, Collection<Path> dependentFiles, JSGLRI strParser, Context strjContext, Environment environment) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     ModuleKey key = getModuleKeyForAssimilation(str, main, dependentFiles, strParser);
     Path prog = lookupAssimilationInCache(key);
     
     if (prog == null) {
-      prog = generateAssimilator(key, str, main, strjContext);
-      cacheAssimilator(key, prog);
+      prog = generateAssimilator(key, str, main, strjContext, environment.getIncludePath());
+      cacheAssimilator(key, prog, environment);
     }
     return prog;
   }
@@ -104,22 +103,24 @@ public class STRCommands {
   private static Path generateAssimilator(ModuleKey key,
                                           Path str,
                                           String main,
-                                          Context strjContext) throws IOException {
+                                          Context strjContext,
+                                          Collection<String> paths) throws IOException {
     log.beginTask("Generating", "Generate the assimilator");
     try {
       Path dir = FileCommands.newTempDir();
       FileCommands.createDir(new RelativePath(dir, "sugarj"));
       String javaFilename = FileCommands.fileName(str).replace("-", "_");
       Path java = new RelativePath(dir, "sugarj" + sep + javaFilename + ".java");
-      strj(str, java, main, strjContext);
+      strj(str, java, main, strjContext, paths);
       
-      if (!JavaCommands.javac(java, dir, Environment.includePath))
+      if (!JavaCommands.javac(java, dir, paths))
         throw new RuntimeException("java compilation failed");
         
       Path jarfile = FileCommands.newTempFile("jar");
       JavaCommands.jar(dir, jarfile);
 
-      FileCommands.delete(java);
+      FileCommands.deleteTempFiles(dir);
+      FileCommands.deleteTempFiles(java);
 
       return jarfile;
     } finally {
@@ -127,17 +128,20 @@ public class STRCommands {
     }
   }
     
-  private static void cacheAssimilator(ModuleKey key, Path prog) throws IOException {
-    if (strCache == null || Environment.cacheDir == null)
+  private static void cacheAssimilator(ModuleKey key, Path prog, Environment environment) throws IOException {
+    if (strCache == null)
       return;
     
 
     log.beginTask("Caching", "Cache assimilator");
     try {
-      Path cacheProg = new RelativePathCache(prog.getFile().getName());
+      Path cacheProg = environment.new RelativePathCache(prog.getFile().getName());
       FileCommands.copyFile(prog, cacheProg);
-      Path oldProg = strCache.putGet(key, cacheProg);
-      FileCommands.delete(oldProg);
+      
+      if (!Environment.rocache) {
+        Path oldProg = strCache.putGet(key, cacheProg);
+        FileCommands.delete(oldProg);
+      }
 
       if (CommandExecution.CACHE_INFO)
         log.log("Cache Location: " + cacheProg);
@@ -154,7 +158,8 @@ public class STRCommands {
     
     log.beginTask("Searching", "Search assimilator in cache");
     try {
-      result = strCache.get(key);
+      if (!Environment.wocache)
+        result = strCache.get(key);
       
       if (result == null || !result.getFile().exists())
         return null;

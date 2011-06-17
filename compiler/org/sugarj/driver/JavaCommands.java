@@ -56,12 +56,12 @@ public class JavaCommands {
    * Runs a compiled java program, linking against  {@code strategoxt.jar},
    * and providing a bunch of parameters. 
    */
-  public static void java(Path dir, String main, String... args) throws IOException {
+  public static void java(Path dir, String main, Collection<String> paths, String... args) throws IOException {
     StringBuilder classpath = new StringBuilder();
     classpath.append(FileCommands.toWindowsPath(dir.getAbsolutePath()));
     classpath.append(Environment.classpathsep);
     
-    for (String path : Environment.includePath)
+    for (String path : paths)
       classpath.append(path).append(Environment.classpathsep);
     
     String[] cmd = new String[args.length + 5];

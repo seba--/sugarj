@@ -38,26 +38,26 @@ public class Result {
 
   private final static Result OUTDATED_RESULT = new Result() {
     @Override
-    public boolean isUpToDate(Path file) {
+    public boolean isUpToDate(Path file, Environment env) {
       return false;
     }
 
     @Override
-    public boolean isUpToDate(int hash) {
+    public boolean isUpToDate(int hash, Environment env) {
       return false;
     }
   };
   
-  void addDependency(Path depFile) throws IOException {
+  void addDependency(Path depFile, Environment env) throws IOException {
     dependencies.put(depFile, FileCommands.fileHash(depFile));
-    allDependentFiles.addAll(readDependencyFile(depFile).getFileDependencies());
+    allDependentFiles.addAll(readDependencyFile(depFile, env).getFileDependencies(env));
   }
   
-  public Collection<Path> getFileDependencies() throws IOException {
+  public Collection<Path> getFileDependencies(Environment env) throws IOException {
     if (allDependentFiles == null) {
       allDependentFiles = new HashSet<Path>(generatedFileHashes.keySet());
       for (Path depFile : dependencies.keySet())
-        allDependentFiles.addAll(readDependencyFile(depFile).getFileDependencies());
+        allDependentFiles.addAll(readDependencyFile(depFile, env).getFileDependencies(env));
     }
     
     return allDependentFiles;
@@ -104,11 +104,11 @@ public class Result {
     return editorServices;
   }
   
-  public boolean isUpToDate(Path inputFile) throws IOException {
-    return isUpToDate(FileCommands.fileHash(inputFile));
+  public boolean isUpToDate(Path inputFile, Environment env) throws IOException {
+    return isUpToDate(FileCommands.fileHash(inputFile), env);
   }
   
-  public boolean isUpToDate(int inputHash) throws IOException {
+  public boolean isUpToDate(int inputHash, Environment env) throws IOException {
     if (inputHash != sourceFileHash)
       return false;
     
@@ -120,8 +120,8 @@ public class Result {
       if (FileCommands.fileHash(entry.getKey()) != entry.getValue())
         return false;
       
-      Result r = Result.readDependencyFile(entry.getKey());
-      if (r == null || !r.isUpToDate(r.getSourceFile()))
+      Result r = Result.readDependencyFile(entry.getKey(), env);
+      if (r == null || !r.isUpToDate(r.getSourceFile(), env))
         return false;
     }
 
@@ -188,7 +188,7 @@ public class Result {
     }
   }
   
-  static Result readDependencyFile(Path dep) throws IOException {
+  static Result readDependencyFile(Path dep, Environment env) throws IOException {
     Result result = new Result();
     result.allDependentFiles = null;
     ObjectInputStream ois = null;
@@ -196,26 +196,26 @@ public class Result {
     try {
       ois = new ObjectInputStream(new FileInputStream(dep.getFile()));
       
-      result.sourceFile = (RelativePath) ois.readObject();
+      result.sourceFile = (RelativePath) Path.readPath(ois, env);
       result.sourceFileHash = ois.readInt();
       
       int numDependencies = ois.readInt();
       for (int i = 0; i < numDependencies; i++) {
-        Path file = (Path) ois.readObject();
+        Path file = Path.readPath(ois, env);
         int hash = ois.readInt();
         result.dependencies.put(file, hash);
       }
       
       int numGeneratedFiles = ois.readInt();
       for (int i = 0; i< numGeneratedFiles; i++) {
-        Path file = (Path) ois.readObject();
+        Path file = Path.readPath(ois, env);
         int hash = ois.readInt();
         result.generatedFileHashes.put(file, hash);
       }
     } catch (FileNotFoundException e) {
       return OUTDATED_RESULT;
     } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
+      throw new IOException(e);
     } catch (Exception e) {
       e.printStackTrace();
       return OUTDATED_RESULT;
