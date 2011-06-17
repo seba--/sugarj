@@ -25,8 +25,17 @@ import org.sugarj.driver.path.RelativePath;
  */
 public class FileCommands {
 
-  private final static boolean DO_DELETE = true;
+  public final static boolean DO_DELETE = true;
 
+  public final static String TMP_DIR;
+  static {
+    try {
+      TMP_DIR = File.createTempFile("tmp", "").getParent();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
   public static Path newTempFile(String suffix) throws IOException {
     File f =
         File.createTempFile(
@@ -34,20 +43,23 @@ public class FileCommands {
             suffix == null || suffix.isEmpty() ? suffix : "." + suffix);
     final Path p = new AbsolutePath(f.getAbsolutePath());
     
-    if (DO_DELETE)
-      Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            FileCommands.delete(p);
-          } catch (IOException e) {
-          }
-        }
-      }));
-
     return p;
   }
 
+  public static void deleteTempFiles(Path file) throws IOException {
+    if (file == null)
+      return;
+    
+    String parent = file.getFile().getParent();
+    
+    if (parent == null)
+      return;
+    else if (parent.equals(TMP_DIR))
+      delete(file);
+    else 
+      deleteTempFiles(new AbsolutePath(parent));
+  }
+  
   public static void delete(Path file) throws IOException {
     if (file == null)
       return;
@@ -181,17 +193,6 @@ public class FileCommands {
     f.mkdir();
     final Path p = new AbsolutePath(f.getAbsolutePath());
     
-    if (DO_DELETE)
-      Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            FileCommands.delete(p);
-          } catch (IOException e) {
-          }
-        }
-      }));
-
     return p;
   }
 

@@ -7,7 +7,6 @@ import static org.sugarj.driver.ATermCommands.getApplicationSubterm;
 import static org.sugarj.driver.ATermCommands.getList;
 import static org.sugarj.driver.ATermCommands.getString;
 import static org.sugarj.driver.ATermCommands.isApplication;
-import static org.sugarj.driver.Environment.bin;
 import static org.sugarj.driver.Environment.sep;
 import static org.sugarj.driver.Log.log;
 
@@ -48,12 +47,11 @@ import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoException;
 import org.strategoxt.permissivegrammars.make_permissive;
 import org.strategoxt.tools.tools;
+import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.path.AbsolutePath;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
-import org.sugarj.driver.path.RelativePathBin;
-import org.sugarj.driver.path.RelativePathCache;
 import org.sugarj.driver.transformations.extraction.extraction;
 import org.sugarj.stdlib.StdLib;
 
@@ -62,7 +60,7 @@ import org.sugarj.stdlib.StdLib;
  */
 public class Driver{
   
-  public final static String CACHE_VERSION = "editor-base-0.13";
+  public final static String CACHE_VERSION = "editor-base-0.14";
   
   private final static int PENDING_TIMEOUT = 120000;
 
@@ -74,6 +72,8 @@ public class Driver{
   private static List<Path> currentlyProcessing;
 
   private IProgressMonitor monitor;
+  
+  private Environment environment = new Environment();
   
   private Result driverResult = new Result();
   
@@ -113,36 +113,26 @@ public class Driver{
   
   private boolean interrupt = false;
   
-  /**
-   * the next parsing and desugaring uses no cache lookup if skipCache.
-   */
-  private boolean skipCache = false;
-  
   private List<Path> generatedJavaClasses = new ArrayList<Path>();
   
-  
-  
-  static {
-    try {
-      Environment.init();
+  public Driver(Environment env) {
+    this.environment=env;
+    
+    try {      
+      if (environment.getCacheDir() != null)
+        FileCommands.createDir(new AbsolutePath(environment.getCacheDir()));
       
-      if (Environment.cacheDir != null)
-        FileCommands.createDir(new AbsolutePath(Environment.cacheDir));
+      FileCommands.createDir(new AbsolutePath(environment.getBin()));
       
-      FileCommands.createDir(new AbsolutePath(Environment.bin));
-      
-      initializeCaches();
+      initializeCaches(environment);
     } catch (IOException e) {
-      throw new RuntimeException("error while initializin driver", e);
+      throw new RuntimeException("error while initializing driver", e);
     }
     
     allInputFiles = new ArrayList<RelativePath>();
     pendingInputFiles = new ArrayList<Path>();
     currentlyProcessing = new ArrayList<Path>();
-  }
-  
-  
-  
+  }  
   
   
   private static synchronized Result getResult(Path file) {
@@ -184,7 +174,7 @@ public class Driver{
     Log.log.log(resultCache.size());
   }
   
-  public static Result compile(RelativePath sourceFile, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  public static Result compile(RelativePath sourceFile, IProgressMonitor monitor, Environment environment) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     synchronized (currentlyProcessing) {
       // TODO we need better circular dependency handling
       if (currentlyProcessing.contains(sourceFile))
@@ -196,7 +186,7 @@ public class Driver{
     
     try {
       String source = FileCommands.readFileAsString(sourceFile);
-      res = compile(source, sourceFile, monitor);
+      res = compile(source, sourceFile, monitor, environment);
     } finally {
       synchronized (currentlyProcessing) {
         currentlyProcessing.remove(sourceFile);
@@ -208,8 +198,8 @@ public class Driver{
     return res;
   }
   
-  public static Result compile(String source, RelativePath sourceFile, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    Driver driver = new Driver();
+  public static Result compile(String source, RelativePath sourceFile, IProgressMonitor monitor, Environment environment) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    Driver driver = new Driver(environment);
     Entry<String, Driver> pending = null;
     
     synchronized (Driver.class) {
@@ -221,7 +211,7 @@ public class Driver{
 
       if (pending == null) {
         Result result = getResult(sourceFile);
-        if (result != null && result.isUpToDate(source.hashCode()))
+        if (result != null && result.isUpToDate(source.hashCode(), environment))
           return result;
       }
       
@@ -231,12 +221,13 @@ public class Driver{
     
     if (pending != null) {
       waitForPending(sourceFile);
-      return compile(source, sourceFile, monitor);
+      return compile(source, sourceFile, monitor, environment);
     }
     
     try {
       driver.process(source, sourceFile, monitor);
-      storeCaches();
+      if (!Environment.rocache)
+        storeCaches(environment);
     } finally {
         pendingRuns.remove(sourceFile);
         putResult(sourceFile, driver.driverResult.getSugaredSyntaxTree() == null ? null : driver.driverResult);
@@ -265,8 +256,9 @@ public class Driver{
       driverResult.setSourceFile(sourceFile, source.hashCode());
       
       if (sourceFile != null) {
-        javaOutFile = new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".java");
-        driverResult.setGenerationLog(new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".gen"));
+        javaOutFile = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".java");
+        Path genLog= environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".gen");
+        driverResult.setGenerationLog(genLog);
         clearGeneratedStuff();
       }
 
@@ -276,9 +268,6 @@ public class Driver{
 
       boolean done = false;
       while (!done) {
-        boolean wocache = Environment.wocache;
-        Environment.wocache |= skipCache;
-        
         stepped();
         
         // PARSE the next top-level declaration
@@ -292,9 +281,6 @@ public class Driver{
         // DESUGAR the parsed top-level declaration
         IStrategoTerm desugared = currentDesugar(lastSugaredToplevelDecl);
         
-        // reset cache skipping
-        Environment.wocache = wocache;
-        
         stepped();
         
         // PROCESS the assimilated top-level declaration
@@ -306,7 +292,7 @@ public class Driver{
       stepped();
             
       // check final grammar and transformation for errors
-      if (!Environment.noChecking) {
+      if (!environment.isNoChecking()) {
         checkCurrentGrammar();
       }
       
@@ -340,11 +326,11 @@ public class Driver{
   private void compileGeneratedJavaFile() throws IOException {
     log.beginTask("compilation", "COMPILE the generated java file");
     try {
-      List<String> path = new ArrayList<String>(Environment.includePath);
+      List<String> path = new ArrayList<String>(environment.getIncludePath());
       path.add(StdLib.stdLibDir.getPath());
-      path.add(Environment.bin);
+      path.add(environment.getBin());
       
-      driverResult.compileJava(javaOutFile, new AbsolutePath(bin), path, generatedJavaClasses);
+      driverResult.compileJava(javaOutFile, new AbsolutePath(environment.getBin()), path, generatedJavaClasses);
     } finally {
       log.endTask();
     }
@@ -481,8 +467,8 @@ public class Driver{
         // XXX if (currentTransProg != null)
         editorServices = ATermCommands.registerSemanticProvider(editorServices, currentTransProg);
   
-        Path editorServicesFile = new RelativePathBin(relPackageNameSep() + extName + ".serv");
-        Path depFile = new RelativePathBin(relPackageNameSep() + extName + ".dep");
+        Path editorServicesFile = environment.new RelativePathBin(relPackageNameSep() + extName + ".serv");
+        Path depFile = environment.new RelativePathBin(relPackageNameSep() + extName + ".dep");
         FileCommands.createFile(editorServicesFile);
   
         log.log("writing editor services to " + editorServicesFile);
@@ -558,8 +544,8 @@ public class Driver{
         String plainContent = Term.asJavaString(ATermCommands.getApplicationSubterm(body, "PlainBody", 0));
         
         String ext = extension == null ? "" : ("." + extension);
-        Path plainFile = new RelativePathBin(relPackageNameSep() + extName + ext);
-        Path depFile = new RelativePathBin(relPackageNameSep() + extName + ".dep");
+        Path plainFile = environment.new RelativePathBin(relPackageNameSep() + extName + ext);
+        Path depFile = environment.new RelativePathBin(relPackageNameSep() + extName + ".dep");
         FileCommands.createFile(plainFile);
   
         log.log("writing plain content to " + plainFile);
@@ -582,10 +568,10 @@ public class Driver{
       if (relPackageName == null)
         checkPackageName(toplevelDecl);
       if (javaOutFile == null)
-        javaOutFile = new RelativePathBin(relPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".java");
+        javaOutFile = environment.new RelativePathBin(relPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".java");
       try {
         if (isApplication(toplevelDecl, "TypeImportDec") || isApplication(toplevelDecl, "TypeImportOnDemandDec")) {
-          if (!Environment.atomicImportParsing)
+          if (!environment.isAtomicImportParsing())
             processImportDec(toplevelDecl);
           else 
             processImportDecs(toplevelDecl);
@@ -634,7 +620,8 @@ public class Driver{
   private IStrategoTerm currentParse(String remainingInput, boolean recovery) throws IOException,
       InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     // recompile the current grammar definition
-    Path currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfContext, makePermissiveContext);
+    Path currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfContext, makePermissiveContext, environment);
+    FileCommands.deleteTempFiles(driverResult.getLastParseTable());
     driverResult.setLastParseTable(currentGrammarTBL);
     ParseTable table = org.strategoxt.imp.runtime.Environment.loadParseTable(currentGrammarTBL.getAbsolutePath());
     
@@ -667,7 +654,8 @@ public class Driver{
         "desugaring",
         "DESUGAR the current toplevel declaration.");
     try {
-      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(), strParser, strjContext);
+      FileCommands.deleteTempFiles(currentTransProg);
+      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, environment);
 
       return STRCommands.assimilate(currentTransProg, term, interp);
     } catch (RuntimeException e) {
@@ -703,7 +691,7 @@ public class Driver{
       checkPackageName(toplevelDecl);
       
       if (javaOutFile == null)
-        javaOutFile = new RelativePathBin(relPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".java");
+        javaOutFile = environment.new RelativePathBin(relPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".java");
       driverResult.generateFile(javaOutFile, SDFCommands.prettyPrintJava(toplevelDecl, interp) + "\n");
     } finally {
       log.endTask();
@@ -780,25 +768,29 @@ public class Driver{
       String modulePath = FileCommands.getRelativeModulePath(importModule);
   
       if (!modulePath.startsWith("org/sugarj")) {
-        Path dep = ModuleSystemCommands.searchFile(modulePath, ".dep");
+        Path dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
         Result res = null;
         RelativePath sourceFile = null;
         
         if (dep != null) {
-          res = Result.readDependencyFile(dep);
+          try {
+            res = Result.readDependencyFile(dep, environment);
+          } catch (IOException e) {
+            log.logErr("could not read dependency file " + dep);
+          }
           
           if (res != null && res.getSourceFile() != null)
             sourceFile = res.getSourceFile();
         }
         
         if (sourceFile == null)
-          sourceFile = ModuleSystemCommands.locateSourceFile(modulePath);
+          sourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
 
-        if (sourceFile != null && (res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile()))) {
+        if (sourceFile != null && (res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment))) {
           log.log("Need to compile the imported module first ; processing it now.");
           
           try {
-            Result importResult = compile(sourceFile, monitor);
+            Result importResult = compile(sourceFile, monitor, environment);
             if (importResult.hasFailed())
               ATermCommands.setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
           } catch (Exception e) {
@@ -809,10 +801,10 @@ public class Driver{
         }
         
         if (dep == null)
-          dep = ModuleSystemCommands.searchFile(modulePath, ".dep");
+          dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
         
         if (dep != null)
-          driverResult.addDependency(dep);
+          driverResult.addDependency(dep, environment);
       }
       
       boolean success = processImport(modulePath, toplevelDecl);
@@ -835,23 +827,24 @@ public class Driver{
         importTerm, 
         javaOutFile,
         interp, 
-        driverResult);
+        driverResult,
+        environment);
 
-    Path sdf = ModuleSystemCommands.importSdf(modulePath);
+    Path sdf = ModuleSystemCommands.importSdf(modulePath, environment);
     if (sdf != null) {
       success = true;
       availableSDFImports.add(modulePath);
       buildCompoundSdfModule();
     }
     
-    Path str = ModuleSystemCommands.importStratego(modulePath);
+    Path str = ModuleSystemCommands.importStratego(modulePath, environment);
     if (str != null) {
       success = true;
       availableSTRImports.add(modulePath);
       buildCompoundStrModule();
     }
     
-    success |= ModuleSystemCommands.importEditorServices(modulePath, driverResult);
+    success |= ModuleSystemCommands.importEditorServices(modulePath, driverResult, environment);
     
     return success;
   }
@@ -872,8 +865,8 @@ public class Driver{
         
         String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
         
-        Path clazz = new RelativePathBin(relPackageNameSep() + decName + ".class");
-        Path dep = new RelativePathBin(relPackageNameSep() + decName + ".dep");
+        Path clazz = environment.new RelativePathBin(relPackageNameSep() + decName + ".class");
+        Path dep = environment.new RelativePathBin(relPackageNameSep() + decName + ".dep");
         
         generatedJavaClasses.add(clazz);
         driverResult.appendToFile(javaOutFile, SDFCommands.prettyPrintJava(dec, interp) + "\n");
@@ -959,10 +952,10 @@ public class Driver{
         log.endTask();
       }
       
-      Path sdfExtension = new RelativePathBin(relPackageNameSep() + extName + ".sdf");
-      Path strExtension = new RelativePathBin(relPackageNameSep() + extName + ".str");;
-      Path depFile = new RelativePathBin(relPackageNameSep() + extName + ".dep");;
-      
+      Path sdfExtension = environment.new RelativePathBin(relPackageNameSep() + extName + ".sdf");
+      Path strExtension = environment.new RelativePathBin(relPackageNameSep() + extName + ".str");
+      Path depFile = environment.new RelativePathBin(relPackageNameSep() + extName + ".dep");
+
       FileCommands.delete(sdfExtension);
       FileCommands.delete(strExtension);
 
@@ -976,7 +969,7 @@ public class Driver{
             // remove quotes
           nativeModule = nativeModule.substring(1, nativeModule.length() - 1);
           
-        if (FileCommands.exists(ModuleSystemCommands.searchFile(nativeModule, ".sdf"))) {
+        if (FileCommands.exists(ModuleSystemCommands.searchFile(nativeModule, ".sdf", environment))) {
           availableSDFImports.add(nativeModule);
           driverResult.generateFile(
               sdfExtension, 
@@ -985,7 +978,7 @@ public class Driver{
               + "imports " + nativeModule);
         }
 
-        if (FileCommands.exists(ModuleSystemCommands.searchFile(nativeModule, ".str"))) {
+        if (FileCommands.exists(ModuleSystemCommands.searchFile(nativeModule, ".str", environment))) {
           availableSTRImports.add(nativeModule);
           driverResult.generateFile(
               strExtension, 
@@ -1061,6 +1054,7 @@ public class Driver{
   }
   
   private void buildCompoundSdfModule() throws IOException {
+    FileCommands.deleteTempFiles(currentGrammarSDF);
     currentGrammarSDF = FileCommands.newTempFile("sdf");
     currentGrammarModule = FileCommands.fileName(currentGrammarSDF);
     StringBuilder builder = new StringBuilder();
@@ -1073,6 +1067,7 @@ public class Driver{
   }
   
   private void buildCompoundStrModule() throws IOException {
+    FileCommands.deleteTempFiles(currentTransSTR);
     currentTransSTR = FileCommands.newTempFile("str");
     currentTransModule = FileCommands.fileName(currentTransSTR);
     StringBuilder builder = new StringBuilder();
@@ -1088,7 +1083,8 @@ public class Driver{
     log.beginTask("checking grammar", "CHECK current grammar");
     
     try {
-      SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfContext, makePermissiveContext);
+      Path p = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfContext, makePermissiveContext, environment);
+      FileCommands.deleteTempFiles(p);
     } finally {
       log.endTask();
     }
@@ -1098,7 +1094,8 @@ public class Driver{
     log.beginTask("checking transformation", "CHECK current transformation");
     
     try {
-      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(), strParser, strjContext);
+      FileCommands.deleteTempFiles(currentTransProg);
+      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, environment);
     } finally {
       log.endTask();
     }
@@ -1162,15 +1159,17 @@ public class Driver{
    */
   public static void main(String[] args) {
     // log.log("This is the extensible java compiler.");
+    Environment environment = new Environment();
+    
     try {
-      String[] sources = handleOptions(args);
+      String[] sources = handleOptions(args, environment);
 
-      if (Environment.sourcePath.isEmpty())
-        Environment.sourcePath.add(".");
+      if (environment.getSourcePath().isEmpty())
+        environment.getSourcePath().add(".");
       
       for (String source : sources)
       {
-        RelativePath p = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(source));
+        RelativePath p = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(source), environment.getSourcePath());
         
         allInputFiles.add(p);
         pendingInputFiles.add(p);
@@ -1180,7 +1179,7 @@ public class Driver{
       
       for (final RelativePath sourceFile : allInputFiles) {
         monitor.beginTask("compile " + sourceFile, IProgressMonitor.UNKNOWN);
-        Result res = compile(sourceFile, monitor);
+        Result res = compile(sourceFile, monitor, environment);
         if (!DriverCLI.processResultCLI(res, sourceFile, new File(".").getAbsolutePath()))
           throw new RuntimeException("compilation of " + sourceFile + " failed");
       }
@@ -1231,12 +1230,12 @@ public class Driver{
    * @throws CLIError
    *         when the command line is not correct
    */
-  private static String[] handleOptions(String[] args) {
+  private static String[] handleOptions(String[] args, Environment environment) {
     Options options = specifyOptions();
 
     try {
       CommandLine line = parseOptions(options, args);
-      return processOptions(options, line);
+      return processOptions(options, line, environment);
     } catch (org.apache.commons.cli.ParseException e) {
       throw new CLIError(e.getMessage(), options);
     }
@@ -1250,7 +1249,7 @@ public class Driver{
         false);
   }
   
-  private static String[] processOptions(Options options, CommandLine line) throws org.apache.commons.cli.ParseException {
+  private static String[] processOptions(Options options, CommandLine line, Environment environment) throws org.apache.commons.cli.ParseException {
     if (line.hasOption("help")) {
       // TODO This is not exactly an error ...
       throw new CLIError("help requested", options);
@@ -1276,17 +1275,17 @@ public class Driver{
 
     if (line.hasOption("buildpath"))
       for (String path : line.getOptionValue("buildpath").split(Environment.classpathsep))
-        Environment.includePath.add(path);
+        environment.getIncludePath().add(path);
 
     if (line.hasOption("sourcepath"))
       for (String path : line.getOptionValue("sourcepath").split(Environment.classpathsep))
-        Environment.sourcePath.add(path);
+        environment.getSourcePath().add(path);
  
     if (line.hasOption("d"))
-      Environment.bin = line.getOptionValue("d");
+      environment.setBin(line.getOptionValue("d"));
     
     if (line.hasOption("cache"))
-      Environment.cacheDir = line.getOptionValue("cache");
+      environment.setCacheDir(line.getOptionValue("cache"));
 
     if (line.hasOption("read-only-cache"))
       Environment.rocache = true;
@@ -1295,13 +1294,13 @@ public class Driver{
       Environment.wocache = true;
     
     if (line.hasOption("gen-java"))
-      Environment.generateJavaFile = true;
+      environment.setGenerateJavaFile(true);
     
     if (line.hasOption("atomic-imports"))
-      Environment.atomicImportParsing = true;
+      environment.setAtomicImportParsing(true);
 
     if (line.hasOption("no-checking"))
-      Environment.noChecking = true;
+      environment.setNoChecking(true);
 
     String[] sources = line.getArgs();
     if (sources.length < 1)
@@ -1418,29 +1417,30 @@ public class Driver{
   }
 
   @SuppressWarnings("unchecked")
-  private static synchronized void initializeCaches() throws IOException {
-    if (Environment.cacheDir == null)
+  private static synchronized void initializeCaches(Environment environment) throws IOException {
+    if (environment.getCacheDir() == null)
       return;
     
-    Path cacheVersion = new RelativePathCache("version");
+    Path cacheVersion = environment.new RelativePathCache("version");
     
     if (!cacheVersion.getFile().exists() ||
         !FileCommands.readFileAsString(cacheVersion).equals(CACHE_VERSION)) {
 
-      for (File f : new File(Environment.cacheDir).listFiles())
+      for (File f : new File(environment.getCacheDir()).listFiles())
         f.delete();
       
       FileCommands.writeToFile(cacheVersion, CACHE_VERSION);
     }
     
-    Path sdfCache = new RelativePathCache("sdfCache");
-    Path strCache = new RelativePathCache("strCache");
+    Path sdfCache = environment.new RelativePathCache("sdfCache");
+    Path strCache = environment.new RelativePathCache("strCache");
     
     if (SDFCommands.sdfCache == null && sdfCache != null)
       try {
         log.log("load sdf cache from " + sdfCache);
-          SDFCommands.sdfCache =
-              (ModuleKeyCache<Path>) new ObjectInputStream(new FileInputStream(sdfCache.getFile())).readObject();
+          SDFCommands.sdfCache = reallocate(
+              (ModuleKeyCache<Path>) new ObjectInputStream(new FileInputStream(sdfCache.getFile())).readObject(),
+              environment);
       } 
       catch (Exception e) {
         SDFCommands.sdfCache = new ModuleKeyCache<Path>();
@@ -1452,8 +1452,9 @@ public class Driver{
     if (STRCommands.strCache == null && strCache != null)
       try {
         log.log("load str cache from " + strCache);
-        STRCommands.strCache =
-            (ModuleKeyCache<Path>) new ObjectInputStream(new FileInputStream(strCache.getFile())).readObject();
+        STRCommands.strCache = reallocate(
+            (ModuleKeyCache<Path>) new ObjectInputStream(new FileInputStream(strCache.getFile())).readObject(),
+            environment);
       } 
       catch (Exception e) {
         STRCommands.strCache = new ModuleKeyCache<Path>();
@@ -1464,15 +1465,30 @@ public class Driver{
   }
 
   
-  private static synchronized void storeCaches() throws IOException {
-    if (Environment.cacheDir == null || Environment.rocache)
+  private static ModuleKeyCache<Path> reallocate(ModuleKeyCache<Path> cache, Environment env) {
+    ModuleKeyCache<Path> res = new ModuleKeyCache<Path>();
+    
+    for (Entry<ModuleKey, Path> e : cache.entrySet()) {
+      Map<Path, Integer> imports = new HashMap<Path, Integer>();
+      for (Entry<Path, Integer> e2 : e.getKey().imports.entrySet())
+        imports.put(Path.reallocate(e2.getKey(), env), e2.getValue());
+      
+      res.put(new ModuleKey(imports, e.getKey().body), Path.reallocate(e.getValue(), env));
+    }
+    
+    return res;
+  }
+
+
+  private static synchronized void storeCaches(Environment environment) throws IOException {
+    if (environment.getCacheDir() == null)
       return;
     
-    Path cacheVersion = new RelativePathCache("version");
+    Path cacheVersion = environment.new RelativePathCache("version");
     FileCommands.writeToFile(cacheVersion, CACHE_VERSION);
     
-    Path sdfCache = new RelativePathCache("sdfCache");
-    Path strCache = new RelativePathCache("strCache");
+    Path sdfCache = environment.new RelativePathCache("sdfCache");
+    Path strCache = environment.new RelativePathCache("strCache");
 
     if (!sdfCache.getFile().exists())
       FileCommands.createFile(sdfCache);
@@ -1561,7 +1577,7 @@ public class Driver{
         ois = new ObjectInputStream(new FileInputStream(driverResult.getGenerationLog().getFile()));
         while (true) {
           try {
-            Path p = (Path) ois.readObject();
+            Path p = Path.readPath(ois, environment);
             FileCommands.delete(p);
           } catch (ClassNotFoundException e) { 
           }

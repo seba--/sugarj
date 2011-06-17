@@ -17,7 +17,6 @@ import org.spoofax.jsglr.client.ITreeBuilder;
 import org.spoofax.jsglr.client.KeywordRecognizer;
 import org.spoofax.jsglr.client.ParseTable;
 import org.spoofax.jsglr.client.imploder.IToken;
-import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.spoofax.jsglr.client.imploder.TermTreeFactory;
 import org.spoofax.jsglr.client.imploder.Token;
 import org.spoofax.jsglr.client.imploder.Tokenizer;
@@ -62,16 +61,42 @@ public class SugarJParser extends JSGLRI {
   protected IStrategoTerm doParse(String input, String filename)
       throws TokenExpectedException, BadTokenException, SGLRException, IOException {
     
+    Environment environment = new Environment();
+    
+    Environment.wocache = false;
+
+    assert includePath != null;
+    environment.getIncludePath().addAll(includePath);
+    environment.getIncludePath().add(new StrategoJarAntPropertyProvider().getAntPropertyValue(""));
+    
+    assert sourcePath != null;
+    environment.getSourcePath().addAll(sourcePath);
+    
+    assert projectPath != null;
+    environment.setRoot(projectPath);
+    environment.setBin(outputPath != null ? outputPath : projectPath);
+
+    if (environment.getCacheDir() == null)
+      environment.setCacheDir(projectPath + "/.sugarjcache");
+    
+    environment.setAtomicImportParsing(true);
+    environment.setGenerateJavaFile(true);
+
+    // use this to temporarily deactivate caching
+    // Environment.wocache = true;
+    
+    environment.setNoChecking(true);
+
     result = getResult(filename);
     if (result == null) {
       result = parseFailureResult();
       putResult(filename, result);
     }
 
-    if (result != null && result.isUpToDate(input.hashCode()))
+    if (result != null && result.isUpToDate(input.hashCode(), environment))
       return result.getSugaredSyntaxTree();
     else if (result == null || !(result instanceof PendingResult)) 
-      scheduleParse(input, filename);
+      scheduleParse(input, filename, environment);
         
     Path lastParseTable;
     
@@ -102,7 +127,7 @@ public class SugarJParser extends JSGLRI {
     return result.getSugaredSyntaxTree();
   }
   
-  private synchronized void scheduleParse(final String input, final String filename) {
+  private synchronized void scheduleParse(final String input, final String filename, final Environment environment) {
     final Result oldResult = getResult(filename);
     putResult(filename, new PendingResult(oldResult));
     
@@ -112,7 +137,7 @@ public class SugarJParser extends JSGLRI {
         monitor.beginTask("parse " + projectRelativePath(filename).getRelativePath(), IProgressMonitor.UNKNOWN);
         Result result = null;
         try {
-          result = runParser(input, filename, monitor);
+          result = runParser(input, filename, monitor, environment);
           putResult(filename, result);
         } catch (InterruptedException e) {
           result = null;
@@ -131,31 +156,7 @@ public class SugarJParser extends JSGLRI {
     parseJob.schedule();
   }
   
-  private Result runParser(String input, String filename, IProgressMonitor monitor) throws InterruptedException {
-    Environment.wocache = false;
-
-    assert includePath != null;
-    Environment.includePath.addAll(includePath);
-    Environment.includePath.add(new StrategoJarAntPropertyProvider().getAntPropertyValue(""));
-    
-    assert sourcePath != null;
-    Environment.sourcePath.addAll(sourcePath);
-    
-    assert projectPath != null;
-    Environment.root = projectPath;
-    Environment.bin = outputPath != null ? outputPath : projectPath;
-
-    if (Environment.cacheDir == null)
-      Environment.cacheDir = projectPath + "/.sugarjcache";
-    
-    Environment.atomicImportParsing = true;
-    Environment.generateJavaFile = true;
-
-    // use this to temporarily deactivate caching
-    // Environment.wocache = true;
-    
-    Environment.noChecking = true;
-    
+  private Result runParser(String input, String filename, IProgressMonitor monitor, Environment environment) throws InterruptedException {
     CommandExecution.SILENT_EXECUTION = false;
     CommandExecution.SUB_SILENT_EXECUTION = false;
     CommandExecution.FULL_COMMAND_LINE = true;
@@ -165,7 +166,7 @@ public class SugarJParser extends JSGLRI {
     SugarJConsole.activateConsoleOnce();
     
     try {
-      return Driver.compile(input, projectRelativePath(filename), monitor);
+      return Driver.compile(input, projectRelativePath(filename), monitor, environment);
     } catch (InterruptedException e) {
       throw e;
     } catch (Exception e) {
@@ -229,13 +230,12 @@ public class SugarJParser extends JSGLRI {
   }
   
   private Result parseFailureResult() {
-    IStrategoTerm term = ATermCommands.makeList("SugarCompilationUnit");
     Tokenizer tokenizer = new Tokenizer(" ", " ", new KeywordRecognizer(null) {});
     Token tok = tokenizer.makeToken(0, IToken.TK_UNKNOWN, true);
-    ImploderAttachment.putImploderAttachment(term, true, "SugarCompilationUnit", tok, tok);
+    IStrategoTerm term = ATermCommands.makeList("SugarCompilationUnit", tok);
     
     Result r = new Result() {
-      public boolean isUpToDate(int h) { return false; }
+      public boolean isUpToDate(int h, Environment env) { return false; }
     };
     r.setSugaredSyntaxTree(term);
     return r;
