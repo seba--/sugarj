@@ -13,7 +13,10 @@ public sugar EditorServices {
   context-free syntax
     "~" StrategoTerm -> EditorServiceNode {cons("FromMetaExpr")}
     "node~" StrategoTerm -> EditorServiceNode {cons("FromMetaExpr")}
-    "~" StrategoTerm -> EditorServiceSemanticRule {cons("FromMetaExpr")}
+    "~" StrategoTerm -> EditorServiceRefactoringRule {cons("FromMetaExpr")}
+    "~" StrategoTerm -> EditorServiceBuilderRule {cons("FromMetaExpr")}
+    "~" StrategoTerm -> EditorServiceCompletionRule {cons("FromMetaExpr")}
+    "~" StrategoTerm -> EditorServiceReferenceRule {cons("FromMetaExpr")}
     "~" StrategoTerm -> EditorServicePropertyValue {cons("FromMetaExpr")} 
     "~" StrategoTerm -> EditorServiceCompletionPart {cons("FromMetaExpr")} 
     "~" StrategoTerm -> EditorServiceStrategoCall {cons("FromMetaExpr")}

@@ -5,7 +5,7 @@ import concretesyntax.Stratego;
 import xml.ConcreteXml;
 import xml.XmlJavaSyntax;
 import xml.XmlTextTools;
-import xml.XmlEditor;
+import xml.Editor;
 
 import xml.schema.AsEditorService;
 import xml.schema.SharedStrategies;
@@ -156,13 +156,20 @@ public sugar AsDesugaring {
             where
               <xml-attr-value2string> attr => attrstring ;
               <strategy~simplecheck> (attr,attrstring) => err
+          
+          // generate a warning instead (see below)
+          ~(<val-type-attval> typename) :
+            FromMetaExpr(e) -> []
       ]| ]
       where <xml-attr-value2string> attval => typename;
             <simpleType2stratego(|typename)> content => simplecheck
             
-   
-   
-   
+  constraint-warning :
+    ValWriteDoc(ch, doc) -> warns
+    where
+      !"skipping validation of quoted attribute value" => msg;
+      <collect-all(\ Attribute(_, e@FromMetaExpr(_)) -> [(e, msg)] \)> doc => warns
+    
     
    
   // complex types to stratego
@@ -328,24 +335,37 @@ public sugar AsDesugaring {
           attributes,
           contents,
           ElemName(QName(Some(URIPrefix(string~namespace)), name2)))
+        +
+        ?EmptyElement(ElemName(QName(Some(URIPrefix(string~namespace)), name1)), attrbutes2)
         ]|
 
     match-element :
       (namespace,ncname,typename) -> 
       stratego |[
-        {err :
+        {err, doc, attributes, contents, name2 :
          \  doc @
               Element(
 				        ElemName(QName(Some(URIPrefix(string~namespace)), string~ncname)),
 				        attributes,
 				        contents,
-				        ElemName(QName(Some(URIPrefix(string~namespace)), string~ncname)))
+				        name2)
             -> err
             where
               <id~(<val-type> typename) <+ ![(doc, <concat-strings>["no type definition ", string~typename, " for element ", string~ncname, " found"])]> doc => err
          \
          }
-         <+ ![(<id>, <concat-strings> ["expected element: ", string~ncname, " of namespace: ", string~namespace])]  
+         <+
+         {err, edoc, doc, attributes, name :
+         \  edoc@EmptyElement(
+                name@ElemName(QName(Some(URIPrefix(string~namespace)), string~ncname)),
+                attributes)
+            -> err
+            where
+              !Element(name, attributes, [], name) => doc;
+              <id~(<val-type> typename) <+ ![(edoc, <concat-strings>["no type definition ", string~typename, " for element ", string~ncname, " found"])]> doc => err
+         \
+         }
+         <+ ![(<id>, <concat-strings> ["expected element ", string~ncname, " of namespace ", string~namespace])]  
         ]|
     
     match-attribute :
@@ -359,7 +379,7 @@ public sugar AsDesugaring {
             <id~(<val-type-attval> atttypename) <+ ![(att, <concat-strings> ["no type definition for ", string~atttypename, " of attribute ", string~ncname, " found"])]> attval => err
         \
         }
-        <+ ![(<id>, <concat-strings> ["expected attribute: ", string~ncname])]
+        <+ ![(<id>, <concat-strings> ["expected attribute ", string~ncname])]
       ]|
   
     empty-check :

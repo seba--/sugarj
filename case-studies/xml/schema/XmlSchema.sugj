@@ -4,8 +4,9 @@ import xml.schema.AsDesugaring;
 import xml.schema.XmlSchemaJavaSyntax;
 
 import xml.schema.AsEditorService;
-
 import xml.schema.SharedStrategies;   
+
+import xml.schema.Editor;
 
 public xmlschema XmlSchema {
   <{http://www.w3.org/2001/XMLSchema}schema 

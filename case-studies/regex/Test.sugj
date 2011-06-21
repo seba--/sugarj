@@ -2,10 +2,12 @@ package regex;
 
 import regex.Regex;
 import regex.RegexAsString;
+import regex.Editor;
 
 public class Test {
   public static void main(String[] args) {
-    boolean b = args[0].matches(/a* \_[b-y]*\_ z*/);
+    boolean b = args[0].matches(/Sugar\S[A-Z]*/);
+    
     System.out.println(b);
   }
 }

@@ -10,6 +10,7 @@ import xml.XmlJavaSyntax;
 import xml.XmlSyntax;
 import xml.XmlTextTools;
 
+
 /*
  * https://svn.strategoxt.org/repos/StrategoXT/java-borg/trunk/trans/java-xml/meta-explode-sax.str
  */
@@ -121,6 +122,13 @@ public sugar AsSax {
 	    bottomup( try( \ Conc(l1, l2) -> <conc> (l1, l2) \ ))
     
     
+    content-to-stm(|java_x) :
+      Comment(_) ->
+        java_bstm* |[
+          ;
+        ]|
+
+
   rules
     java-string-prefix :
       None -> <java-string-expr> ""

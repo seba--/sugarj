@@ -6,7 +6,7 @@ import xml.XmlSyntax;
 import xml.XmlTextTools;
 import xml.schema.XmlSchemaJavaSyntax;
 import xml.ConcreteXml;
-import xml.XmlEditor;
+import xml.Editor;
 
 public sugar AsEditorService {
   rules
@@ -51,6 +51,7 @@ public sugar AsEditorService {
       |[  completions
             completion trigger : "<"
             ~completion
+            ~completion2
        ]|
       where
         <xml-attr-value2string> attval1 => element;
@@ -63,11 +64,18 @@ public sugar AsEditorService {
         <lookup> (type, types) => attributes;
 
         !CompletionTemplateWithSort(
-           Sort("Content"),
+           Sort("Content"), 
            String(prefix),
            <conc> (attributes, [String(">"), String(content), String(suffix)]),
            None())
-        => completion
+        => completion;
+
+        !CompletionTemplateWithSort(
+           Sort("CharData"),  // HACK to fix SGLR's misleading candidate sorts
+           String(prefix),
+           <conc> (attributes, [String(">"), String(content), String(suffix)]),
+           None())
+        => completion2
 
     
     schema-editor-type-completion :

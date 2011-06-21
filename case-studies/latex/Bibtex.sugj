@@ -1,0 +1,188 @@
+package latex;
+
+import org.sugarj.languages.Plain;
+
+import concretesyntax.Stratego;
+import editor.Colors;
+import concretesyntax.EditorServices;
+
+public sugar Bibtex {
+  context-free syntax
+    AnnoOrSugarMod* "bibtex" JavaId BibtexBody -> ToplevelDeclaration{cons("BibtexDec")}
+    "{" BibtexStm* "}" -> BibtexBody {cons("BibtexBody")}
+    
+    BibtexStringKeyword "{" BibtexConstNameBinding "=" "{" BibtexValue "}" "}" -> BibtexStm {cons("BibtexStringStm")}
+    BibtexEntryKeyword "{" BibtexEntryName Commas {BibtexAttribute ","}* Commas "}" -> BibtexStm {cons("BibtexEntryStm")}
+    
+    BibtexID -> BibtexConstNameBinding {cons("BibtexConstName")}
+    BibtexID -> BibtexConstNameBound {cons("BibtexConstName")}
+    BibtexID -> BibtexEntryName {cons("BibtexEntryName")}
+    BibtexID -> BibtexAttributeName {cons("BibtexAttributeName")}
+    CitationID -> CitationName {cons("CitationName")}
+    
+    BibtexAttributeName "=" "{" BibtexValue "}" -> BibtexAttribute {cons("BibtexAttribute")}
+    BibtexAttributeName "=" BibtexConstNameBound -> BibtexAttribute {cons("BibtexAttributeUnwrapped")}
+
+  lexical syntax
+    [\@][sS][tT][rR][iI][nN][gG] -> BibtexStringKeyword
+    [\,]* -> Commas
+    [a-zA-Z\_\--\/0-9\:\.\&]+ -> BibtexID
+    ~[\,\}]+ -> CitationID 
+    
+    [\@][a-zA-Z]* -> BibtexEntryKeyword
+    [\@][sS][tT][rR][iI][nN][gG] -> BibtexEntryKeyword {reject}
+    
+    ~[\{\}]* -> BibtexValue
+    ~[\{\}]* "{" BibtexValue "}" BibtexValue -> BibtexValue
+  
+  lexical restrictions
+    BibtexValue -/- ~[\}]
+  
+  desugarings
+    desugar-bibtex 
+  
+  rules
+    desugar-bibtex :
+      BibtexDec(mods, n, BibtexBody(stms))
+      ->
+      [PlainDec(PlainDecHead(mods, n, Some("bib")), PlainBody(<map(pp-bibtex); concat-strings> stms)),
+       EditorServicesDec(EditorServicesDecHead(mods, n), EditorServicesBody(<filter(bibtex-to-service)> stms)),
+       SugarDec(SugarDecHead(mods, n), SugarBody(<filter(bibtex-to-sugar)> stms))]
+     
+    pp-bibtex :
+      BibtexStringStm(keyword, BibtexConstName(var), val)
+      -> 
+      <concat-strings> [keyword, "{", var, "=", "{", val, "}", "}", "\n"]
+    
+    pp-bibtex :
+      BibtexEntryStm(keyword, BibtexEntryName(n), _, attrs, _)
+      ->
+      <concat-strings> [keyword, "{", n, ",", "\n", attrs-string, "}\n"]
+      where
+        <map(pp-bibtex-attr); concat-strings> attrs => attrs-string
+      
+    
+    pp-bibtex-attr :
+      BibtexAttributeUnwrapped(BibtexAttributeName(attr), BibtexConstName(val))
+      ->
+      <concat-strings> ["  ", attr, " = ", val, ",\n"]
+    
+    pp-bibtex-attr :
+      BibtexAttribute(BibtexAttributeName(attr), val)
+      ->
+      <concat-strings> ["  ", attr, " = ", "{", val, "}", ",\n"]
+
+  rules
+    tooltip-bibtex :
+      BibtexStringStm(keyword, BibtexConstName(var), val)
+      -> 
+      <concat-strings> ["<p>", "<b>", keyword, "</b>", "{", var, " = ", "{", val, "}", "}", "</p>"]
+    
+    tooltip-bibtex :
+      BibtexEntryStm(keyword, BibtexEntryName(n), _, attrs, _)
+      ->
+      <concat-strings> ["<p>", "<b>", keyword, "</b>", "{", n, ",", "</p>", attrs-string, "<p>", "}", "</p>"]
+      where
+        <map(tooltip-bibtex-attr); concat-strings> attrs => attrs-string
+    
+    tooltip-bibtex-attr :
+      BibtexAttributeUnwrapped(BibtexAttributeName(attr), BibtexConstName(val))
+      ->
+      <concat-strings> ["<p>&nbsp;&nbsp;", attr, " = ", val, ",</p>"]
+    
+    tooltip-bibtex-attr :
+      BibtexAttribute(BibtexAttributeName(attr), val)
+      ->
+      <concat-strings> ["<p>&nbsp;&nbsp;", attr, " = ", "{", val, "}", ",</p>"]
+    
+    
+  rules
+    bibtex-to-service :
+      BibtexEntryStm(_, BibtexEntryName(n), _, attrs, _)
+      ->
+      |[
+        completions
+          completion template : CitationName = string~n
+      ]|
+      
+    bibtex-to-service :
+      BibtexStringStm(_, BibtexConstName(n), v)
+      ->
+      |[
+        completions
+          completion template : BibtexConstNameBound = string~n
+      ]| 
+
+   
+   
+  rules
+    bibtex-to-sugar :
+      s@BibtexEntryStm(_, BibtexEntryName(n), _, attrs, _)
+      ->
+      <!transformation-elem(<id>)> |[ rules bibtex-entry : string~n -> term~<trm-explode> s ]|
+      where <!NoAnnoList(<id>)> s => t
+    
+  rules
+    constraint-warning :
+      BibtexAttributeUnwrapped(_, BibtexConstName(n)) 
+      -> 
+      (n, <concat-strings> [n, " is not defined and will be interpreted literally."])
+      where
+        not(<resolve-BibtexConstName> n)
+  
+  strategies
+    // Should this be part of the SugarJ core? 
+    analyze =
+      ?(term, name, path);
+      !term;
+      topdown(try(analyze-node))
+    
+    analyze-node =
+      ?s@BibtexStringStm(_, BibtexConstName(n), _);
+      rules (
+      	resolve-BibtexConstName :+ n -> s
+      )
+
+    analyze-node =
+      ?e@BibtexEntryStm(_, BibtexEntryName(n), _, _, _);
+      rules (
+        resolve-BibtexEntryName :+ n -> e
+      )
+
+    resolve-bibtex :
+      (BibtexConstName(t),pos,ast,file,project) -> r
+      where <resolve-BibtexConstName; ?BibtexStringStm(_, <id>, _)> t => r
+
+    hover-bibtex :
+      (BibtexConstName(t),pos,ast,file,project) -> r
+      where <resolve-BibtexConstName; ?BibtexStringStm(_, _, <id>)> t => r
+    
+    hover-entry :
+      (BibtexEntryName(t),pos,ast,file,project) -> r
+      where <resolve-BibtexEntryName; write-to-string> t => r
+}
+
+public editor services Bibtex {
+  colorer
+    BibtexStringKeyword : blue
+    BibtexEntryKeyword : blue
+    BibtexAttributeName : darkorange
+    BibtexConstNameBound : turquoise
+    BibtexConstNameBinding : turquoise
+    BibtexEntryName : turquoise
+    BibtexValue : black
+    CitationName : turquoise
+    
+    turquoise = 24 150 150
+    
+  folding
+    BibtexStm
+   
+  outliner
+    BibtexConstNameBinding
+    BibtexEntryName
+  
+  references
+    reference BibtexConstNameBound : resolve-bibtex
+    hover _.BibtexConstName : hover-bibtex
+}

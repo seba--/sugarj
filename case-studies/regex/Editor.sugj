@@ -1,0 +1,33 @@
+package regex;
+
+import editor.Colors;
+import regex.Regex;
+import util.Strategies;
+
+public sugar Editor {
+  rules
+    regex-complete : 
+      (node, position, ast, path, project-path) 
+      -> [("\\s", "A whitespace character:<br/>[ \\t\\n\\x0B\\f\\r]."),
+          ("\\S", "A non-whitespace character: <br/>[^\\s]."),
+          ("\\w", "A word character: <br/>[a-zA-Z_0-9]."),
+          ("\\W", "A non-word character: <br/>[^\\w]."),
+          ("\\d", "A digit: <br/>[0-9]."),
+          ("\\D", "A non-digit: <br/>[^0-9]."),
+          (["[", Placeholder("<from>"), "-", Placeholder("<to>"), "]"], "A character class range.")]
+      where
+        <at-position(?regex-lit(_)|<butlast>position)> ast
+}
+
+public editor services Editor {
+  colorer
+    _.delimited-regex : 255 0 0 bold
+    _.regex-lit : darkgreen
+    _.regex-ccexp-predefined : 127 0 85 bold
+    _.ccexp-predefined : 200 50 100
+    _.ccexp-range : darkorange
+    _.ccexp-lit : darkorange
+  
+  completions
+    completion proposer : regex-complete
+}
