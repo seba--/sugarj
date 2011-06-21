@@ -10,19 +10,26 @@ public sugar CSS {
     
   context-free syntax
     Selector "{" {CSSRule ";"}* Semicolon? "}" -> CSSStm {cons("CSSStm")}
+//    StrategoTerm "{" {CheckingCSSRule ";"}* Semicolon? "}" -> CSSStm {cons("CheckingCSSStm")}
     EditorServiceNode -> Selector {cons("Selector")}
   
     "color" ":" CSSColor -> CSSRule {cons("ColorRule")}
     "background-color" ":" CSSColor -> CSSRule {cons("BackgroundColorRule")}
+    "rec-color" ":" CSSColor -> CSSRule {cons("ColorAllRule")}
     "environment-color" ":" CSSColor -> CSSRule {cons("ColorAllRule")}
-    "color-recursive" ":" CSSColor -> CSSRule {cons("ColorAllRule")}
+    "rec-background-color" ":" CSSColor -> CSSRule {cons("BackgroundColorAllRule")}
     "environment-background-color" ":" CSSColor -> CSSRule {cons("BackgroundColorAllRule")}
-    "background-color-recursive" ":" CSSColor -> CSSRule {cons("BackgroundColorAllRule")}
     "outlining" -> CSSRule {cons("OutliningRule")}
     "folding" -> CSSRule {cons("FoldingRule")}
     
     EditorServiceColor -> CSSColor
     EditorServiceAttributeId -> CSSColor {cons("AttributeRef")}
+
+//    "errors" ":" StrategoTerm -> CheckingCSSRule {cons("ErrorsRule")}
+//    "warnings" ":" StrategoTerm -> CheckingCSSRule {cons("WarningsRule")}
+//    "notes" ":" StrategoTerm -> CheckingCSSRule {cons("NotesRule")}
+//    "where" ":" StrategoStrategy -> CheckingCSSRule {cons("WhereRule")}
+
 
 
   lexical syntax
@@ -40,7 +47,6 @@ public sugar CSS {
     compile-css :
       CSSStm(Selector(node), rs, _) -> <map(compile-css-rule(|node))> rs
 
-    
     compile-css-rule(|node) :
       ColorRule(color)
       ->
@@ -86,5 +92,4 @@ public sugar CSS {
       |[ outliner
            ~node
        ]|
-
 }

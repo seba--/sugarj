@@ -1,0 +1,25 @@
+package latex;
+
+import editor.SpellChecking;
+import latex.Core;
+
+public sugar SpellChecking {
+  rules
+    constraint-warning :
+      Text(s) -> warnings
+      where
+        <spellcheck-text> s => mispelled-words;
+        <?[] < ![] +
+         (?[x] < !(s, <concat-strings> ["unknown word: ", x]) + 
+                 !(s, <concat-strings> ["unknown words: " | <id; intersperse(|", ")>]))> mispelled-words => warnings
+    
+    spellcheck-text =
+      string-tokenize(|[' ', '\n', '\r', '\t', '.', ':', ';', ',', '?', '!', '`', '«', '"', '/', '&', '(', ')']);
+      filter(not(spellcheck-word); not(lower-case; spellcheck-word))
+    
+  rules
+    intersperse(|s) : [] -> []
+    intersperse(|s) : [x] -> [x]
+    intersperse(|s) : [x|y] -> [x,s| <intersperse(|s)> y]
+
+}

@@ -3,6 +3,8 @@ package regex;
 import org.sugarj.languages.Java;
 import regex.Regex;
 
+import util.Strategies;
+
 public sugar RegexAsString {
   sorts Regex
   
@@ -16,8 +18,13 @@ public sugar RegexAsString {
    rules
      r2str : 
        regex-lit(lit)
-       -> escaped-lit
-     with escaped-lit := <string-replace(|"\\","\\\\")> lit
+       -> lit
+       where <elem> (lit, ["\\\\", "\\t", "\\n", "\\r", "\\f", "\\a", "\\e"])
+     
+     r2str : 
+       regex-lit(lit)
+       -> <string-replace(|"\\", "\\\\")> lit
+       where <not(elem)> (lit, ["\\\\", "\\t", "\\n", "\\r", "\\f", "\\a", "\\e"])
      
      r2str : 
        regex-ccexp(ce) 
@@ -46,6 +53,10 @@ public sugar RegexAsString {
      r2str :
        regex-group(e)
        -> <conc-strings> ("(", <r2str> e, ")")
+
+     r2str :
+       regex-ccexp-predefined(e)
+       -> <conc-strings> ("\\", e)
    
    rules
      ce2str :
@@ -53,8 +64,8 @@ public sugar RegexAsString {
        -> lit
      
      ce2str :
-       ccexp-range(range)
-       -> <bracket> range
+       ccexp-range(from, to)
+       -> <conc-strings; bracket> (from, "-", to)
      
      ce2str :
        ccexp-negation(ce)
@@ -67,6 +78,14 @@ public sugar RegexAsString {
      ce2str :
        ccexp-intersection(ce1, ce2)
        -> <conc-strings; bracket> (<ce2str> ce1, <ce2str> ce2) 
+
+     ce2str :
+       ccexp-predefined(".")
+       -> "."
+    
+     ce2str :
+       ccexp-predefined(e)
+       -> <conc-strings> ("\\", e)
      
    rules
      bracket : 

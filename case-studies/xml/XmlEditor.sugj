@@ -15,10 +15,12 @@ public editor services XmlEditor {
     
   outliner XmlOutliner
     Element
-  
-  checking
-    errors: Element(lname, attrs, content, rname) = 
-            [(lname, "element start and end tag need to coincide"),
-             (rname, "element start and end tag need to coincide")]
-            where <not(equal)> (lname, rname) 
+}
+
+public checks XmlEditor {
+    errors
+      Element(lname, attrs, content, rname) = 
+        [(lname, "element start and end tag need to coincide"),
+         (rname, "element start and end tag need to coincide")]
+        where <not(equal)> (lname, rname) 
 }

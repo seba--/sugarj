@@ -5,37 +5,56 @@ package regex;
  */
 public sugar Regex {
   sorts Regex RegexLit CCExp CCExpLit CCExpRange
+
+  lexical syntax
+    [a-z] -> LCChar
+    [A-Z] -> UCChar
+    [0-9] -> Digit
+
+    "\\" [\\tnrfae\.\-\@\+] -> EscapedChar
+
   
   // character class literals and ranges
   lexical syntax
     [a-zA-Z0-9\ ]     -> CCExpLit
-    "\\" ~[\"\\\n\13] -> CCExpLit
-        
-    [a-z] "-" [a-z] -> CCExpRange
-    [A-Z] "-" [A-Z] -> CCExpRange
-    [0-9] "-" [0-9] -> CCExpRange
-
+    EscapedChar -> CCExpLit
+    
+    "."   -> CCPredefined
+    "\\s" -> CCPredefined
+    "\\S" -> CCPredefined
+    "\\d" -> CCPredefined
+    "\\D" -> CCPredefined
+    "\\w" -> CCPredefined
+    "\\W" -> CCPredefined
+    
   syntax
     <CCExpLit-LEX>    -> CCExp {cons("ccexp-lit")}
-    <CCExpRange-LEX>  -> CCExp {cons("ccexp-range")}
+    <LCChar-LEX> "-" <LCChar-LEX> -> CCExp {cons("ccexp-range")}
+    <UCChar-LEX> "-" <UCChar-LEX> -> CCExp {cons("ccexp-range")}
+    <Digit-LEX>  "-" <Digit-LEX>  -> CCExp {cons("ccexp-range")}
     "^" CCExp         -> CCExp {cons("ccexp-negation")}
     CCExp CCExp       -> CCExp {left, cons("ccexp-union")}
     CCExp "&&" CCExp  -> CCExp {left, cons("ccexp-intersection")}
     "[" CCExp "]"     -> CCExp {bracket}
+    <CCPredefined-LEX> -> CCExp {cons("ccexp-predefined")}
 
   priorities // of character class operators
     <CCExpLit-LEX>    -> CCExp {cons("ccexp-lit")}
   > "^" CCExp         -> CCExp {cons("ccexp-negation")}
   > "[" CCExp "]"     -> CCExp {bracket}
-  > CCExpRange        -> CCExp {cons("ccexp-range")}
+  > {
+     <LCChar-LEX> "-" <LCChar-LEX> -> CCExp {cons("ccexp-range")}
+     <UCChar-LEX> "-" <UCChar-LEX> -> CCExp {cons("ccexp-range")}
+     <Digit-LEX>  "-" <Digit-LEX>  -> CCExp {cons("ccexp-range")}
+    }
   > CCExp CCExp       -> CCExp {left, cons("ccexp-union")}
   > CCExp "&&" CCExp  -> CCExp {left, cons("ccexp-intersection")}
   
 
   // regex literals
   lexical syntax
-    [a-zA-Z0-9\.\ ]   -> RegexLit
-    "\\" ~[\"\\\n\13] -> RegexLit
+    [a-zA-Z0-9\ ]   -> RegexLit
+    EscapedChar -> RegexLit
     
   
   // regular expressions
@@ -44,6 +63,7 @@ public sugar Regex {
   
 	  <RegexLit-LEX>  -> Regex {cons("regex-lit")}
 	  "[" CCExp "]"   -> Regex {bracket, cons("regex-ccexp")}
+	  <CCPredefined-LEX> -> Regex {bracket, cons("regex-ccexp-predefined")}
 	  Regex "?"       -> Regex {cons("regex-option")}
 	  Regex "*"       -> Regex {cons("regex-many")}
 	  Regex "+"       -> Regex {cons("regex-many1")}
@@ -61,22 +81,4 @@ public sugar Regex {
   > Regex Regex     -> Regex {left, cons("regex-sequence")}
   > Regex "|" Regex -> Regex {left, cons("regex-alternative")}
   
-  
-  signature constructors
-    delimited-regex : Regex -> Regex
-    
-    regex-lit : RegexLit -> Regex
-    regex-ccexp : CCExp -> Regex
-    regex-option : Regex -> Regex
-    regex-many : Regex -> Regex
-    regex-many1 : Regex -> Regex
-    regex-sequence : Regex * Regex -> Regex
-    regex-alternative : Regex * Regex -> Regex
-    regex-group : Regex -> Regex
-    
-    ccexp-lit : CCExpLit -> CCExp
-    ccexp-range : CCExpRange -> CCExp
-    ccexp-negation : CCExp -> CCExp
-    ccexp-union : CCExp * CCExp -> CCExp
-    ccexp-intersection : CCExp * CCExp -> CCExp
 }

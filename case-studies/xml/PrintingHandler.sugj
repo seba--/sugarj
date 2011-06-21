@@ -7,45 +7,11 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import xml.Sugar;
-import xml.Editor;
-
 /*
  * code for printing based on http://www.informit.com/articles/article.aspx?p=26351&seqNum=5
  */
-public class Test extends DefaultHandler {
-  public static void main(String[] args) throws SAXException {
-    ContentHandler ch = new Test();
-    
-    ch.<xsd:schema
-		     targetNamespace="http://www.w3.org/2001/XMLSchema"
-		     blockDefault="#all"
-		     elementFormDefault="qualified"
-		     version="1.0">
-		     <{http://www.w3.org/2001/XMLSchema}simpleType name="derivationSet">
-		       <annotation>
-		         <documentation>
-		           A utility type, not for public use
-		         </documentation> 
-		         <documentation>
-		           #all or (possibly empty) subset of {extension, restriction}
-		         </documentation>
- 		      </annotation>
-	 	      <union>
-		         <simpleType>
-		           <restriction base="token">
-		             <enumeration value="#all"/>
-		           </restriction>
-		         </simpleType>
-		         <simpleType>
-		           <list itemType="reducedDerivationControl"/>
- 		        </simpleType>
-	 	      </union>
-		     </{http://www.w3.org/2001/XMLSchema}simpleType>  
-		   </xsd:schema>;
-  }
-  	
-	private int indentation = 0;
+public class PrintingHandler extends DefaultHandler {
+  private int indentation = 0;
 
   /** When you see a start tag, print it out and then
    *  increase indentation by two spaces. If the

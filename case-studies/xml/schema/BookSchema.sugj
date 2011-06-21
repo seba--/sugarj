@@ -1,6 +1,7 @@
 package xml.schema;
-
+import xml.schema.AsDesugaring;
 import xml.schema.XmlSchema;
+import xml.schema.Editor;
 
 public xmlschema BookSchema {
   <{http://www.w3.org/2001/XMLSchema}schema targetNamespace="lib">
@@ -12,20 +13,40 @@ public xmlschema BookSchema {
       <{http://www.w3.org/2001/XMLSchema}choice maxOccurs="unbounded">
         <{http://www.w3.org/2001/XMLSchema}element name="author" type="Person">
         </{http://www.w3.org/2001/XMLSchema}element>
-
-        <{http://www.w3.org/2001/XMLSchema}element name="editor" type="Person">
+        
+        <{http://www.w3.org/2001/XMLSchema}element name="editions" type="Editions">
         </{http://www.w3.org/2001/XMLSchema}element>
       </{http://www.w3.org/2001/XMLSchema}choice>
       
       <{http://www.w3.org/2001/XMLSchema}attribute name="title" type="string">
       </{http://www.w3.org/2001/XMLSchema}attribute>
     </{http://www.w3.org/2001/XMLSchema}complexType>
+
     
     <{http://www.w3.org/2001/XMLSchema}complexType name="Person">
       <{http://www.w3.org/2001/XMLSchema}sequence>
       </{http://www.w3.org/2001/XMLSchema}sequence>
       
       <{http://www.w3.org/2001/XMLSchema}attribute name="name" type="string">
+      </{http://www.w3.org/2001/XMLSchema}attribute>
+    </{http://www.w3.org/2001/XMLSchema}complexType>
+
+
+    <{http://www.w3.org/2001/XMLSchema}complexType name="Editions">
+      <{http://www.w3.org/2001/XMLSchema}sequence maxOccurs="unbounded">
+        <{http://www.w3.org/2001/XMLSchema}element name="edition" type="Edition">
+        </{http://www.w3.org/2001/XMLSchema}element>
+      </{http://www.w3.org/2001/XMLSchema}sequence>
+    </{http://www.w3.org/2001/XMLSchema}complexType>
+
+
+    <{http://www.w3.org/2001/XMLSchema}complexType name="Edition">
+      <{http://www.w3.org/2001/XMLSchema}sequence>
+      </{http://www.w3.org/2001/XMLSchema}sequence>
+      
+      <{http://www.w3.org/2001/XMLSchema}attribute name="year" type="string">
+      </{http://www.w3.org/2001/XMLSchema}attribute>
+      <{http://www.w3.org/2001/XMLSchema}attribute name="publisher" type="string">
       </{http://www.w3.org/2001/XMLSchema}attribute>
     </{http://www.w3.org/2001/XMLSchema}complexType>
 

@@ -1,0 +1,265 @@
+package latex;
+
+import editor.Colors;
+import editor.Editor;
+
+import util.Strategies;
+
+import org.sugarj.languages.Plain;
+
+public sugar Core {
+  context-free syntax
+    AnnoOrSugarMod* "latex" JavaId LatexBody -> ToplevelDeclaration{cons("LatexDec")}
+  
+  syntax
+    "{" LatexDocument "}" -> <LatexBody-CF> {cons("LatexBody")}
+    
+    <TextContent-LEX> -> LatexTextContentPart {cons("Text")}
+    "\n" -> LatexTextContentPart {cons("TextNewline")}
+    "{" LatexTextContent? "}" -> LatexTextContentPart {cons("TextBlock")}
+    InTextCommand -> LatexTextContentPart {cons("TextCommand")}
+    InTextEnvironment -> LatexTextContentPart {cons("TextEnvironment")}
+    "%" <LatexLineCommentText-LEX> -> LatexTextContentPart {cons("TextComment")}
+    "~" -> LatexTextContentPart {cons("UnbreakableSpace")}
+
+    
+    LatexTextContentPart+ -> LatexTextContent
+    
+    LatexTextContent -> LatexCommentText {cons("CommentText")}
+    
+    "\\part" "{" LatexHeader "}" LatexPartContent -> LatexPart {cons("Part")}
+    "\\chapter" "{" LatexHeader "}" LatexChapterContent -> LatexChapter {cons("Chapter")}
+    "\\section" "{" LatexHeader "}" LatexSectionContent -> LatexSection {cons("Section")}
+    "\\subsection" "{" LatexHeader "}" LatexSubsectionContent -> LatexSubsection {cons("Subsection")}
+    "\\subsubsection" "{" LatexHeader "}" LatexSubsubsectionContent -> LatexSubsubsection {cons("Subsubsection")}
+    "\\paragraph" "{" LatexHeader "}" LatexParagraphContent -> LatexParagraph {cons("Paragraph")}
+    
+    LatexPartContent LatexPart+ -> LatexDocument
+    LatexPartContent -> LatexDocument
+    
+    LatexChapterContent LatexChapter+ -> LatexPartContent
+    LatexChapterContent -> LatexPartContent
+    
+    LatexSectionContent LatexSection+ -> LatexChapterContent
+    LatexSectionContent -> LatexChapterContent
+    
+    LatexSubsectionContent LatexSubsection+ -> LatexSectionContent
+    LatexSubsectionContent -> LatexSectionContent
+    
+    LatexSubsubsectionContent LatexSubsubsection+ -> LatexSubsectionContent
+    LatexSubsubsectionContent -> LatexSubsectionContent
+    
+    LatexParagraphContent LatexParagraph+ -> LatexSubsubsectionContent
+    LatexParagraphContent -> LatexSubsubsectionContent
+    
+    LatexTextContent? -> LatexParagraphContent
+    
+    LatexTextContent -> LatexHeader {cons("Header")}
+
+  lexical syntax  
+    ~[\\\{\}\%\~\n\$\[\]]+ -> TextContent
+    ~[\n]* "\n" -> LatexLineCommentText
+    
+  lexical restrictions
+    TextContent -/- ~[\\\{\}\%\~\n\$\[\]]
+
+  syntax
+    "\\latex" "{" <PlainContent-LEX> "}" -> InTextCommand {cons("LatexEscape")}
+  
+    <NullaryTextCommand-LEX> -> InTextCommand {cons("InTextCommand")}
+    <UnaryTextCommand-LEX> <LAYOUT?-CF> OptionalArg? <LAYOUT?-CF> "{" LatexTextContent? "}" -> InTextCommand {cons("InTextCommand")}
+    <BinaryTextCommand-LEX> <LAYOUT?-CF> OptionalArg? <LAYOUT?-CF> "{" LatexTextContent? "}" <LAYOUT?-CF> "{" LatexTextContent? "}" -> InTextCommand {cons("InTextCommand")}
+    <TrenaryTextCommand-LEX> <LAYOUT?-CF> OptionalArg? <LAYOUT?-CF> "{" LatexTextContent? "}" <LAYOUT?-CF> "{" LatexTextContent? "}" <LAYOUT?-CF> "{" LatexTextContent? "}" -> InTextCommand {cons("InTextCommand")}
+    
+    "[" LatexTextContent? "]"-> OptionalArg {cons("LatexOptionalArg")}
+    
+  
+  lexical syntax
+    [a-zA-Z]+ -> LatexTextEnvironmentName
+  
+  syntax
+    <LatexTextEnvironmentName-LEX> -> LatexTextEnvironmentName {cons("LatexTextEnvironmentName")}
+    
+    "\\begin" "{" LatexTextEnvironmentName "}" OptionalArg?
+      LatexTextContent
+    "\\end" "{" LatexTextEnvironmentName "}" 
+    ->
+    InTextEnvironment {cons("StandardEnvironment")}
+  
+  
+  desugarings
+    desugar-latex
+  
+  rules
+    desugar-latex :
+      latex -> [<latex-to-plain> latex, <latex-to-sugar> latex, <latex-to-services> latex]
+  
+    latex-to-sugar :
+      LatexDec(mods, n, LatexBody(content))
+      ->
+      SugarDec(SugarDecHead(mods, n), SugarBody(<collect-all(latex-to-sugar)> content))
+  
+    latex-to-services :
+      LatexDec(mods, n, LatexBody(content))
+      ->
+      EditorServicesDec(EditorServicesDecHead(mods, n), EditorServicesBody(<collect-all(latex-to-services)> content))
+      
+    latex-to-plain :
+      LatexDec(mods, n, LatexBody(content))
+      ->
+      PlainDec(PlainDecHead(mods, n, Some("tex")), PlainBody(<pp-latex> content))
+    
+    pp-latex :
+      (a, b) -> <conc-strings> (s1, s2)
+      where <pp-latex> a => s1; 
+            <pp-latex> b => s2
+    
+    pp-latex :
+      l -> s
+      where <?[] + ?[_] + is-list> l;
+            <mapconcat-strings(pp-latex)> l => s
+
+    pp-latex :
+      None -> ""
+    
+    pp-latex :
+      s -> s
+      where <is-string> s
+    
+    pp-latex :
+      Some(t) -> <pp-latex> t
+    
+    pp-latex :
+      Text(s) -> s
+    
+    pp-latex :
+      TextNewline() -> "\n"
+      
+    pp-latex :
+      TextBlock(t) -> <conc-strings> ("{", s, "}")
+      where
+        <pp-latex> t => s
+    
+    pp-latex :
+      TextComment(comment) -> <conc-strings> ("%", comment)
+    
+    pp-latex :
+      CommentText(t) -> <pp-latex> t
+    
+    pp-latex :
+      UnbreakableSpace() -> "~"
+    
+    pp-latex :
+      TextCommand(c) -> <pp-latex-command> c
+    
+    pp-latex :
+      TextEnvironment(e) -> <pp-latex-environment> e
+    
+    pp-latex :
+      Header(h) -> <pp-latex> h
+
+    pp-latex-structure(|struct) :
+      (h, p) -> <conc-strings> ("\\", struct, "{", hs, "}", ps)
+      where
+        <pp-latex> h => hs;
+        <pp-latex> p => ps 
+    
+    pp-latex :
+      Part(h, p) -> <pp-latex-structure(|"part")> (h, p)
+    pp-latex :
+      Chapter(h, p) -> <pp-latex-structure(|"chapter")> (h, p)
+    pp-latex :
+      Section(h, p) -> <pp-latex-structure(|"section")> (h, p)
+    pp-latex :
+      Subsection(h, p) -> <pp-latex-structure(|"subsection")> (h, p)
+    pp-latex :
+      Subsubsection(h, p) -> <pp-latex-structure(|"subsubsection")> (h, p)
+    pp-latex :
+      Paragraph(h, p) -> <pp-latex-structure(|"paragraph")> (h, p)
+    
+    pp-latex :
+      LatexOptionalArg(a) -> <conc-strings> ("[", <pp-latex> a, "]")
+    
+    pp-latex-command :
+      LatexEscape(code) -> code
+    
+    pp-latex-command :
+      InTextCommand#([com]) -> com
+    pp-latex-command :
+      InTextCommand#([com,opt-arg|args]) -> <conc-strings> (com, <pp-latex> opt-arg, args-string)
+      where
+        <mapconcat-strings(\ a -> <conc-strings> ("{", <pp-latex> a, "}") \)> args => args-string
+
+    pp-latex-environment :
+      StandardEnvironment(lname, opt-arg, content, rname) ->
+      <conc-strings> ("\\begin{", <pp-latex> lname, "}", <pp-latex> opt-arg, 
+                        <pp-latex> content,
+                      "\\end{", <pp-latex> rname, "}")
+    
+    pp-latex :
+      LatexTextEnvironmentName(s) -> s
+  
+  rules
+    latex-text-environment = fail
+    
+    constraint-error :
+      e@LatexTextEnvironmentName(name) -> (<id>, <conc-strings> ("undefined environment: ", name))
+      where <not(latex-text-environment)> name
+    
+    constraint-error :
+      StandardEnvironment(lname, _, _, rname) -> [(lname, msg), (rname, msg)]
+      where
+        <not(equal)> (lname, rname); 
+        !"begin and end name must coincide" => msg
+}
+
+
+public editor services Core {
+  colorer
+    TextContent : black
+    LatexTextEnvironmentName : black
+ 
+    UnbreakableSpace : keyword
+    NullaryTextCommand : keyword
+    UnaryTextCommand : keyword
+    BinaryTextCommand : keyword
+    TrenaryTextCommand : keyword
+    
+    environment _.LatexEscape : black
+    environment LatexHeader : 0 0 255 bold
+    
+    darkgreenBold = 0 128 0 bold
+    
+    LatexLineCommentText : darkgreen
+    _.TextComment : darkgreenBold
+    environment LatexCommentText : darkgreen
+    
+  
+  outliner
+    LatexPart
+    LatexChapter
+    LatexSection
+    LatexSubsection
+    LatexSubsubsection
+    LatexParagraph
+  
+  folding
+    LatexPart
+    LatexChapter
+    LatexSection
+    LatexSubsection
+    LatexSubsubsection
+    LatexParagraph
+    
+    InTextEnvironment
+
+  completions
+    completion template : LatexTextContentPart = "\part{" <name> "}"
+    completion template : LatexTextContentPart = "\chapter{" <name> "}"
+    completion template : LatexTextContentPart = "\section{" <name> "}"
+    completion template : LatexTextContentPart = "\subsection{" <name> "}"
+    completion template : LatexTextContentPart = "\subsubsection{" <name> "}"
+    completion template : LatexTextContentPart = "\paragraph{" <name> "}"
+    
+    completion template : LatexTextContentPart = "\begin{" <name> "}\n" "  \n" "\end{" <name> "}"
+}

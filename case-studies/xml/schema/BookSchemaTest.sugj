@@ -1,24 +1,27 @@
 package xml.schema;
- 
+
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
-import xml.AsSax;
-import xml.Test; 
-import xml.XmlJavaSyntax;
-
-import xml.XmlEditor;
-
+import xml.Sugar;
+import xml.Editor;
 import xml.schema.BookSchema;
 
-public class BookSchemaTest extends Test {
-  public static void main(String[] args) throws SAXException {
-    ContentHandler ch = new BookSchemaTest();
-    
+public class BookSchemaTest {
+  public void appendBook(ContentHandler ch) throws SAXException {
+    String title = "Sweetness and Power";
     @Validate
-    ch.<{lib}book title="Sweetness and Power: The Place of Sugar in Modern History">
-         <{lib}author name="Sidney W. Mintz">
-         </{lib}author>
-       </{lib}book>; 
+    ch.<{lib}book title="{new String(title)}">
+         <{lib}author name="Sidney W. Mintz" />
+         <{lib}editions>
+           <{lib}edition year="1985" publisher="Viking Press" />
+           <{lib}edit year="1986" publisher="Penguin Books" />
+         </{lib}editions>
+         
+       </{lib}book>;   
   }
-} 
+  
+  public void appendProceedings(ContentHandler ch)  {
+    
+  }
+}

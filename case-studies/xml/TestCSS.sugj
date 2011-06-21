@@ -7,9 +7,8 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import xml.AsSax;
-import xml.XmlJavaSyntax;
-import xml.CSSXmlEditor;
+import xml.Sugar;
+import xml.CSSEditor;
 
 /*
  * code for printing based on http://www.informit.com/articles/article.aspx?p=26351&seqNum=5
@@ -18,33 +17,11 @@ public class TestCSS extends DefaultHandler {
   public static void main(String[] args) throws SAXException {
     ContentHandler ch = new Test();
     
-    ch.<xsd:schema
-		     targetNamespace="http://www.w3.org/2001/XMLSchema"
-		     blockDefault="#all"
-		     elementFormDefault="qualified"
-		     version="1.0">   
-		     <{http://www.w3.org/2001/XMLSchema}simpleType name="derivationSet">
-		       <annotation>
-		       
-		         <documentation>
-		           A utility type, not for public use
-		         </documentation> 
-		         <documentation>
-		           #all or (possibly empty) subset of {extension, restriction}
-		         </documentation>
- 		      </annotation>
-	 	      <union>
-		         <simpleType>
-		           <restriction base="token">
-		             <enumeration value="#all"/>
-		           </restriction>
-		         </simpleType>
-		         <simpleType>
-		           <list itemType="reducedDerivationControl"/>
- 		        </simpleType>
-	 	      </union>
-		     </{http://www.w3.org/2001/XMLSchema}simpleType>  
-		   </xsd:schema>;
+    String title = "Sweetness and Power: The Place of Sugar in Modern History";
+    
+    ch.<book title="{new String(title)}">
+         <author name="Sidney W. Mintz" />
+       </book>;
   }
   	
 	private int indentation = 0;

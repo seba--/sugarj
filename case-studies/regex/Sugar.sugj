@@ -1,0 +1,7 @@
+package regex;
+
+import regex.Regex;
+import regex.RegexAsString;
+
+public sugar Sugar {
+}
