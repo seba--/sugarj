@@ -30,6 +30,7 @@ public class Environment implements Serializable {
   public static String sep = "/";
   public static String classpathsep = File.pathSeparator;
 
+  
   /**
    * @author Sebastian Erdweg <seba at informatik uni-marburg de>
    */
@@ -77,7 +78,6 @@ public class Environment implements Serializable {
   private Set<String> sourcePath = new HashSet<String>();
   
   private String bin = ".";
-  
   
   
   /* 
