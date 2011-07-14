@@ -33,9 +33,18 @@ public abstract class Path implements Serializable {
     return o instanceof Path && ((Path) o).getAbsolutePath().equals(getAbsolutePath());
   }
   
+//  /**
+//   * @throws IllegalArgumentException if this is not a descendant of p
+//   */
+//  public abstract RelativePath makeRelativeTo(Path p);
+
   public static Path readPath(ObjectInputStream ois, Environment env) throws IOException, ClassNotFoundException {
+    return readPath(ois, env, true);
+  }
+  
+  public static Path readPath(ObjectInputStream ois, Environment env, boolean reallocate) throws IOException, ClassNotFoundException {
     Path p = (Path) ois.readObject();
-    return reallocate(p, env);
+    return reallocate ? reallocate(p, env) : p;
   }
   
   public static Path reallocate(Path p, Environment env) {

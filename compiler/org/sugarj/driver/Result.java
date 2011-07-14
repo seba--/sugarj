@@ -109,7 +109,7 @@ public class Result {
   }
   
   public boolean isUpToDate(int inputHash, Environment env) throws IOException {
-    if (inputHash != sourceFileHash)
+    if (sourceFileHash == null || inputHash != sourceFileHash)
       return false;
     
     for (Entry<Path, Integer> entry : generatedFileHashes.entrySet())
@@ -199,16 +199,18 @@ public class Result {
       result.sourceFile = (RelativePath) Path.readPath(ois, env);
       result.sourceFileHash = ois.readInt();
       
+      boolean reallocate = result.sourceFile.getBasePath().toString().equals(env.getRoot());
+      
       int numDependencies = ois.readInt();
       for (int i = 0; i < numDependencies; i++) {
-        Path file = Path.readPath(ois, env);
+        Path file = Path.readPath(ois, env, reallocate);
         int hash = ois.readInt();
         result.dependencies.put(file, hash);
       }
       
       int numGeneratedFiles = ois.readInt();
       for (int i = 0; i< numGeneratedFiles; i++) {
-        Path file = Path.readPath(ois, env);
+        Path file = Path.readPath(ois, env, reallocate);
         int hash = ois.readInt();
         result.generatedFileHashes.put(file, hash);
       }

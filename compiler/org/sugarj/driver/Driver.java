@@ -779,7 +779,7 @@ public class Driver{
             log.logErr("could not read dependency file " + dep);
           }
           
-          if (res != null && res.getSourceFile() != null)
+          if (res != null && res.getSourceFile() != null && res.getSourceFile().getBasePath().toString().equals(environment.getRoot()))
             sourceFile = res.getSourceFile();
         }
         

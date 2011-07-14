@@ -25,6 +25,8 @@ public sugar Java {
   
   context-free syntax
     "~id:"  StrategoTerm  -> JavaID  {cons("FromMetaExpr")}
+    "~Id:"  StrategoTerm  -> JavaId  {cons("FromMetaExpr")}
+
 //    "~"  StrategoTerm  -> JavaID  {cons("FromMetaExpr"), avoid}
 
  
@@ -319,6 +321,10 @@ context-free syntax
     "~string:" <StrategoTerm-CF> -> JavaStringChars {cons("FromMetaExpr"), prefer}
     "~char:"   <StrategoTerm-CF> <LAYOUT?-CF> -> JavaSingleChar  {cons("FromMetaExpr"), prefer}
   
+  context-free syntax
+    "java_method-dec"  "|[" JavaMethodDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
+    "java"             "|[" JavaMethodDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                       "|[" JavaMethodDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
    
   
   strategies

@@ -84,7 +84,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
             IPath path = root.getPath();
             boolean externalPath = root.getResource() == null;
             String p = externalPath ? path.toString() : projectPath + "/" + path.makeRelativeTo(project.getRawProject().getFullPath());
-            if (root.getKind() == IPackageFragmentRoot.K_SOURCE)
+            if (root.getKind() == IPackageFragmentRoot.K_SOURCE && project.getRawProject().getFullPath().isPrefixOf(path))
               sourcePath.add(p);
             else if (root.getKind() == IPackageFragmentRoot.K_BINARY)
               includePath.add(p);
