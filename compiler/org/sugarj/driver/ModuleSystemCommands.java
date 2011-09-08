@@ -4,7 +4,6 @@ import static org.sugarj.driver.ATermCommands.isApplication;
 import static org.sugarj.driver.Log.log;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -14,9 +13,10 @@ import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.HybridInterpreter;
-import org.sugarj.driver.path.AbsolutePath;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
+import org.sugarj.driver.path.RelativeSourceLocationPath;
+import org.sugarj.driver.path.SourceLocation;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -113,14 +113,14 @@ public class ModuleSystemCommands {
     }
   }
   
-  public static RelativePath locateSourceFile(String modulePath, Set<String> sourcePath) {
+  public static RelativeSourceLocationPath locateSourceFile(String modulePath, Set<SourceLocation> sourcePath) {
     if (modulePath.startsWith("org/sugarj"))
       return null;
     
-    RelativePath result = searchFileInSearchPath(modulePath, ".sugj", sourcePath);
+    RelativeSourceLocationPath result = searchFileInSourceLocationPath(modulePath, ".sugj", sourcePath);
     
     if (result == null)
-      result = searchFileInSearchPath(modulePath, ".java", sourcePath);
+      result = searchFileInSourceLocationPath(modulePath, ".java", sourcePath);
     
     return result;
   }
@@ -165,19 +165,42 @@ public class ModuleSystemCommands {
     return null;
   }
   
-  private static RelativePath searchFileInSearchPath(String relativePath, String extension, Set<String> searchPath) {
-    for (String base : searchPath) {
-      RelativePath p = new RelativePath(new AbsolutePath(base), relativePath + extension);
-      if (p.getFile().exists())
+  private static RelativePath searchFileInSearchPath(String relativePath, String extension, Set<Path> searchPath) {
+    for (Path base : searchPath) {
+      RelativePath p = searchFile(base, relativePath, extension);
+      if (p != null)
         return p;
-      
-      try {
-        ClassLoader cl = new URLClassLoader(new URL[] {new File(base).toURI().toURL()}, null);
-        if (cl.getResource(relativePath + extension) != null)
-          return new RelativePath(new AbsolutePath(base), relativePath + extension);
-      } catch (MalformedURLException e) {
-        e.printStackTrace();
-      }
+    }
+    
+    return null;
+  }
+
+  private static RelativeSourceLocationPath searchFileInSourceLocationPath(String relativePath, String extension, Set<SourceLocation> searchPath) {
+    for (SourceLocation loc : searchPath) {
+      RelativePath p = searchFile(loc.getPath(), relativePath, extension);
+      if (p != null)
+        return new RelativeSourceLocationPath(loc, p);
+    }
+    
+    return null;
+  }
+
+  private static RelativePath searchFile(Path base, String relativePath, String extension) {
+    if (relativePath.startsWith(base.getAbsolutePath())) {
+      int sepOffset = relativePath.endsWith(Environment.sep) ? 0 : 1;
+      relativePath = relativePath.substring(base.getAbsolutePath().length() + sepOffset);
+    }
+    
+    RelativePath p = new RelativePath(base, relativePath + extension);
+    if (p.getFile().exists())
+      return p;
+    
+    try {
+      ClassLoader cl = new URLClassLoader(new URL[] {base.getFile().toURI().toURL()}, null);
+      if (cl.getResource(relativePath + extension) != null)
+        return new RelativePath(base, relativePath + extension);
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
     }
     
     return null;

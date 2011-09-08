@@ -6,7 +6,7 @@
 	</projects>
 	<buildSpec>
 		<buildCommand>
-			<name>org.eclipse.jdt.core.javabuilder</name>
+			<name>org.sugarj.editor.SugarJBuilder</name>
 			<arguments>
 			</arguments>
 		</buildCommand>

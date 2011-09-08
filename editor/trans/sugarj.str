@@ -12,6 +12,14 @@ imports
   refactorings
 
 rules // Main editor interface (defined by editor/SugarJ-Builders and -References.esv)
+
+  generate-desugared :
+  	(selected, position, ast, path, project-path) -> (filename, result)
+  	where
+  	  filename := <guarantee-extension(|"desug")> path;
+  	  result   := <internal-main> selected // we just return the input term
+  
+  internal-main = fail
   
   // Analyzes the current program, returning a tuple with errors, warnings, and notes;
   // each a list of (term, message) tuples or simply (message) terms.

@@ -12,12 +12,15 @@ public class RelativePath extends Path {
   private Path base;
     
   public RelativePath(String relativePath) {
-    this.relativePath = relativePath;
+    this(null, relativePath);
   }
   
   public RelativePath(Path base, String relativePath) {
-    this.relativePath = relativePath;
+    this.relativePath = trimFront(trimBack(relativePath));
     this.base = base;
+    
+    if (relativePath == null || relativePath.isEmpty())
+      throw new IllegalArgumentException();
   }
   
   public String getRelativePath() {

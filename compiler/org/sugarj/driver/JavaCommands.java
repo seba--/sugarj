@@ -17,15 +17,15 @@ import org.sugarj.driver.path.Path;
  */
 public class JavaCommands {
 
-  public static boolean javac(Path java, Path dir, Collection<String> cp) throws IOException {
-    return javac(java, dir, cp.toArray(new String[] {}));
+  public static boolean javac(Path java, Path dir, Collection<Path> cp) throws IOException {
+    return javac(java, dir, cp.toArray(new Path[cp.size()]));
   }
 
-  public static boolean javac(Path java, Path dir, String... cp) throws IOException {
+  public static boolean javac(Path java, Path dir, Path... cp) throws IOException {
     StringBuilder cpBuilder = new StringBuilder();
     
     for (int i = 0; i < cp.length; i++) {
-      cpBuilder.append(FileCommands.toWindowsPath(cp[i]));
+      cpBuilder.append(FileCommands.toWindowsPath(cp[i].getAbsolutePath()));
       
       if (i < cp.length - 1)
         cpBuilder.append(Environment.classpathsep);

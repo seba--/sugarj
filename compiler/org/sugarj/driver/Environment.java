@@ -13,6 +13,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.sugarj.driver.path.AbsolutePath;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
+import org.sugarj.driver.path.SourceLocation;
 import org.sugarj.stdlib.StdLib;
 
 
@@ -43,7 +44,7 @@ public class Environment implements Serializable {
     
     @Override
     public Path getBasePath() {
-      return new AbsolutePath(bin);
+      return bin;
     }
   }
   
@@ -59,10 +60,11 @@ public class Environment implements Serializable {
     
     @Override
     public Path getBasePath() {
-      return new AbsolutePath(cacheDir);
+      return cacheDir;
     }
   }
 
+  
   /*
    * read-only/write-only cache flags.
    */
@@ -71,13 +73,11 @@ public class Environment implements Serializable {
   
   
   
-  private String cacheDir = null;
+  private Path cacheDir = null;
   
-  private String root = ".";
+  private Path root = new AbsolutePath(".");
   
-  private Set<String> sourcePath = new HashSet<String>();
-  
-  private String bin = ".";
+  private Path bin = new AbsolutePath(".");
   
   
   /* 
@@ -93,48 +93,48 @@ public class Environment implements Serializable {
   private boolean generateJavaFile = false;
   
   
-  private String trans = "sugarj" + sep + "driver" + sep + "transformations";
-  private String tmpDir = System.getProperty("java.io.tmpdir");
+  private Path tmpDir = new AbsolutePath(System.getProperty("java.io.tmpdir"));
   
-  private Set<String> includePath = new HashSet<String>();
+  private Set<SourceLocation> sourcePath = new HashSet<SourceLocation>();
+  private Set<Path> includePath = new HashSet<Path>();
   
   public Environment() {
     includePath.add(bin);
-    includePath.add(StdLib.stdLibDir.getPath());
+    includePath.add(new AbsolutePath(StdLib.stdLibDir.getPath()));
   }
   
-  public String getRoot() {
+  public Path getRoot() {
     return root;
   }
 
-  public void setRoot(String root) {
+  public void setRoot(Path root) {
     this.root = root;
   }
 
-  public Set<String> getSourcePath() {
+  public Set<SourceLocation> getSourcePath() {
     return sourcePath;
   }
 
-  public void setSourcePath(Set<String> sourcePath) {
+  public void setSourcePath(Set<SourceLocation> sourcePath) {
     this.sourcePath = sourcePath;
   }
 
-  public String getBin() {
+  public Path getBin() {
     return bin;
   }
 
-  public void setBin(String bin) {
+  public void setBin(Path bin) {
     if (this.bin!=null)
       includePath.remove(this.bin);
     this.bin = bin;
     includePath.add(bin);
   }
 
-  public String getCacheDir() {
+  public Path getCacheDir() {
     return cacheDir;
   }
 
-  public void setCacheDir(String cacheDir) {
+  public void setCacheDir(Path cacheDir) {
     this.cacheDir = cacheDir;
   }
 
@@ -162,27 +162,19 @@ public class Environment implements Serializable {
     this.generateJavaFile = generateJavaFile;
   }
 
-  public String getTrans() {
-    return trans;
-  }
-
-  public void setTrans(String trans) {
-    this.trans = trans;
-  }
-
-  public String getTmpDir() {
+  public Path getTmpDir() {
     return tmpDir;
   }
 
-  public void setTmpDir(String tmpDir) {
+  public void setTmpDir(Path tmpDir) {
     this.tmpDir = tmpDir;
   }
 
-  public Set<String> getIncludePath() {
+  public Set<Path> getIncludePath() {
     return includePath;
   }
 
-  public void setIncludePath(Set<String> includePath) {
+  public void setIncludePath(Set<Path> includePath) {
     this.includePath = includePath;
   }
 

@@ -6,6 +6,6 @@
 	<classpathentry exported="true" kind="lib" path="make_permissive.jar"/>
 	<classpathentry exported="true" kind="lib" path="commons-cli-1.2.jar"/>
 	<classpathentry kind="lib" path="commons-collections-3.2.1.jar"/>
-	<classpathentry kind="lib" path="/Users/seba/Library/eclipse/plugins/org.strategoxt.imp.nativebundle_0.1.1.201105211714"/>
+	<classpathentry kind="lib" path="/Users/seba/Library/eclipse-sugarj/plugins/org.strategoxt.imp.nativebundle_0.1.1.201108031014"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

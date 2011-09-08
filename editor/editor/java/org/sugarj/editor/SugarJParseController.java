@@ -1,8 +1,5 @@
 package org.sugarj.editor;
 
-import java.io.File;
-import java.util.ArrayList;
-
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.imp.model.ISourceProject;
 import org.eclipse.imp.parser.IMessageHandler;
@@ -11,22 +8,23 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.strategoxt.imp.runtime.Environment;
+import org.strategoxt.eclipse.ant.StrategoJarAntPropertyProvider;
 import org.strategoxt.imp.runtime.dynamicloading.BadDescriptorException;
 import org.strategoxt.imp.runtime.dynamicloading.Descriptor;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.imp.runtime.parser.SGLRParseController;
+import org.sugarj.driver.Environment;
+import org.sugarj.driver.path.AbsolutePath;
+import org.sugarj.driver.path.Path;
+import org.sugarj.driver.path.RelativePath;
+import org.sugarj.driver.path.SourceLocation;
 
 public class SugarJParseController extends SugarJParseControllerGenerated {
   
   private static Descriptor descriptor;
 
   private SugarJParser sugarjParser;
-  private String projectPath;
-
-  private String outputPath;
-  private ArrayList<String> includePath;
-  private ArrayList<String> sourcePath;
+  private Environment environment;
   
   @Override
   public IParseController getWrapped() {
@@ -37,10 +35,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
       if (!(parser instanceof SugarJParser)) {
         sugarjParser = new SugarJParser(parser);
 
-        sugarjParser.setProjectPath(projectPath);
-        sugarjParser.setOutputPath(outputPath);
-        sugarjParser.setIncludePath(includePath);
-        sugarjParser.setSourcePath(sourcePath);
+        sugarjParser.setEnvironment(environment);
         
         ((SGLRParseController) result).setParser(sugarjParser);
       }
@@ -56,11 +51,11 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
         descriptor.setAttachmentProvider(SugarJParseControllerGenerated.class);
         setDescriptor(descriptor);
         // TODO: Optimize - generated parse controller also registers and reinitializes the descriptor...
-        Environment.registerDescriptor(descriptor.getLanguage(), descriptor);
+        org.strategoxt.imp.runtime.Environment.registerDescriptor(descriptor.getLanguage(), descriptor);
       }
       return descriptor;
     } catch (BadDescriptorException e) {
-      Environment.logException("Bad descriptor for " + LANGUAGE + " plugin", e);
+      org.strategoxt.imp.runtime.Environment.logException("Bad descriptor for " + LANGUAGE + " plugin", e);
       throw new RuntimeException("Bad descriptor for " + LANGUAGE + " plugin", e);
     }
   }
@@ -71,43 +66,67 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
     super.initialize(filePath, project, handler);
     
     if (project != null) {
-      projectPath = project.getRawProject().getLocation().makeAbsolute().toString();
       IJavaProject javaProject = JavaCore.create(project.getRawProject());
       if (javaProject != null)
-        try { 
-          
-          outputPath = projectPath + File.separator + javaProject.getOutputLocation().makeRelativeTo(project.getRawProject().getFullPath()).toString();
-          
-          sourcePath = new ArrayList<String>();
-          includePath = new ArrayList<String>();
-          for (IPackageFragmentRoot root : javaProject.getAllPackageFragmentRoots()) {
-            IPath path = root.getPath();
-            boolean externalPath = root.getResource() == null;
-            String p = externalPath ? path.toString() : projectPath + "/" + path.makeRelativeTo(project.getRawProject().getFullPath());
-            if (root.getKind() == IPackageFragmentRoot.K_SOURCE && project.getRawProject().getFullPath().isPrefixOf(path))
-              sourcePath.add(p);
-            else if (root.getKind() == IPackageFragmentRoot.K_BINARY)
-              includePath.add(p);
-          }
-          
-          for (String reqProject : javaProject.getRequiredProjectNames()) {
-            IJavaProject reqJavaProject = JavaCore.create(project.getRawProject().getWorkspace().getRoot().getProject(reqProject));
-            IPath reqProjectPath = reqJavaProject.getProject().getLocation().makeAbsolute();
-            if (reqJavaProject != null)
-              includePath.add(reqProjectPath + "/" + reqJavaProject.getOutputLocation().makeRelativeTo(reqJavaProject.getProject().getFullPath()).toPortableString());
-          }
-        } catch (JavaModelException e) { 
-          outputPath = null; 
+        try {
+          environment = makeProjectEnvironment(javaProject);
+        } catch (JavaModelException e) {
+          environment = null;
+          throw new RuntimeException(e);
         }
-      else
-        outputPath = null;
     }
     
-    if (sugarjParser != null) {
-      sugarjParser.setProjectPath(projectPath);
-      sugarjParser.setOutputPath(outputPath);
-      sugarjParser.setIncludePath(includePath);
-      sugarjParser.setSourcePath(sourcePath);
+    if (sugarjParser != null)
+      sugarjParser.setEnvironment(environment);
+  }
+  
+  public static Environment makeProjectEnvironment(IJavaProject project) throws JavaModelException {
+    Environment env = new Environment();
+    
+    IPath fullPath = project.getProject().getFullPath();
+    Path root = new AbsolutePath(project.getProject().getLocation().makeAbsolute().toString());
+    Path bin = new RelativePath(root, project.getOutputLocation().makeRelativeTo(fullPath).toString());
+    env.setRoot(root);
+    env.setBin(bin);
+    
+    for (IPackageFragmentRoot fragment : project.getAllPackageFragmentRoots()) {
+      IPath path = fragment.getPath();
+      boolean externalPath = fragment.getResource() == null;
+      String p = externalPath ? path.toString() : path.makeRelativeTo(fullPath).toString();
+      if (fragment.getKind() == IPackageFragmentRoot.K_SOURCE && fullPath.isPrefixOf(path)) {
+        Path relPath = p.isEmpty() ? root : new RelativePath(root, p);
+        env.getSourcePath().add(new SourceLocation(relPath, env));
+      }
+      else if (fragment.getKind() == IPackageFragmentRoot.K_BINARY)
+        env.getIncludePath().add(new AbsolutePath(p));
     }
+    
+    for (String reqProject : project.getRequiredProjectNames()) {
+      IJavaProject reqJavaProject = JavaCore.create(project.getProject().getWorkspace().getRoot().getProject(reqProject));
+      if (reqJavaProject != null) {
+        Environment projEnv = makeProjectEnvironment(reqJavaProject);
+        env.getSourcePath().addAll(projEnv.getSourcePath());
+        env.getIncludePath().add(projEnv.getBin());
+      }
+    }
+  
+    setDefaultEnvironmentOptions(env);
+    
+    return env;
+  }
+  
+  private static void setDefaultEnvironmentOptions(Environment environment) {
+    // set this to true to temporarily deactivate caching
+    Environment.wocache = false;
+
+    if (environment.getCacheDir() == null)
+      environment.setCacheDir(new RelativePath(environment.getRoot(), ".sugarjcache"));
+    
+    environment.setAtomicImportParsing(true);
+    environment.setGenerateJavaFile(true);
+    
+    environment.setNoChecking(true);
+
+    environment.getIncludePath().add(new AbsolutePath(new StrategoJarAntPropertyProvider().getAntPropertyValue("")));
   }
 }

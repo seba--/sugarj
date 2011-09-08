@@ -4,7 +4,8 @@ Bundle-Name: org.sugarj.editor
 Bundle-SymbolicName: org.sugarj.editor;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.sugarj.editor.Activator
-Export-Package: org.sugarj.editor;
+Export-Package: org.sugarj.builder,
+ org.sugarj.editor;
   uses:="org.eclipse.imp.preferences,
    org.eclipse.imp.parser,
    org.eclipse.imp.runtime,
