@@ -96,6 +96,10 @@ public class Builder extends IncrementalProjectBuilder {
             final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(
                     FileCommands.dropExtension(path.toString()),
                     environment.getSourcePath());
+            
+            if (sourceFile == null)
+              throw new IllegalStateException("cannot locate source file for ressource " + resource.getFullPath());
+              
             resources.add(sourceFile);
           }
           return true;
