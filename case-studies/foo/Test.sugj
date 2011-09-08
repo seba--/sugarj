@@ -3,11 +3,8 @@ package foo;
 import foo.FooSugar;
 import foo.FooEditorServices;
 
-import foo.FooTest;
-
 public class Test {
   TYPE v = nil;
   String x = nil;
   String y = null;
-}
-
+} 

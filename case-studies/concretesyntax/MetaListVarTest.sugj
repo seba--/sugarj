@@ -1,6 +1,6 @@
 package concretesyntax;
 
-import concretesyntax.ConcreteJava;
+import concretesyntax.Java;
 
 public sugar MetaListVarTest {
   
@@ -8,4 +8,4 @@ public sugar MetaListVarTest {
     foo1 : java |[ {java_bstm*} ]| -> ""
     foo2 : java |[ {~bstm*:bstm*} ]| -> ""
     foo3 : java |[ {~bstm:bstms} ]| -> ""
-}
+} 
