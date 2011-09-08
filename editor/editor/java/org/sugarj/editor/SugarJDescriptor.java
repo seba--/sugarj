@@ -4,6 +4,8 @@ import static org.spoofax.interpreter.core.Tools.termAt;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.eclipse.imp.language.ILanguageService;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -32,6 +34,8 @@ public class SugarJDescriptor extends Descriptor {
   
   private List<IStrategoTerm> lastServices;
 
+  private ExecutorService reloadEditorExecutorService = Executors.newSingleThreadExecutor();
+  
   public SugarJDescriptor(Descriptor baseDescriptor) throws BadDescriptorException {
     super(baseDescriptor.getDocument());
     baseDocument = baseDescriptor.getDocument();
@@ -66,7 +70,7 @@ public class SugarJDescriptor extends Descriptor {
   }
 
   private void initObserver(final StrategoObserver observer) {
-    new Thread(new Runnable() {
+    reloadEditorExecutorService.execute(new Runnable() {
       public void run() {
         try {
           observer.getLock().lockInterruptibly();
@@ -79,7 +83,7 @@ public class SugarJDescriptor extends Descriptor {
           observer.getLock().unlock();
         }
       }
-    }).start();
+    });
   }
   
   private void reloadEditors(SGLRParseController controller) {

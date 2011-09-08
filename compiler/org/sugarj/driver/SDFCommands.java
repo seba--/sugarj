@@ -12,7 +12,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
@@ -52,6 +54,8 @@ public class SDFCommands {
   
   private final static Pattern SDF_FILE_PATTERN = Pattern.compile(".*\\.sdf");
   
+  private static ExecutorService parseExecutorService = Executors.newSingleThreadExecutor();
+  
   /*
    * timeout for parsing files (in milliseconds)
    */
@@ -81,6 +85,7 @@ public class SDFCommands {
       "-Idef", StdLib.strategoDef.getPath(),
       "-Idef", StdLib.editorServicesDef.getPath(),
       "-Idef", StdLib.plainDef.getPath(),
+      "-Idef", StdLib.modeldrivenDef.getPath(),
       "-I", StdLib.stdLibDir.getPath(),
     }));
     
@@ -314,15 +319,14 @@ public class SDFCommands {
     
     parser.getParser().setTreeBuilder(treeBuilder);
 
-    FutureTask<IStrategoTerm> res = new FutureTask<IStrategoTerm>(new Callable<IStrategoTerm>() {
+    Callable<IStrategoTerm> parseCallable = new Callable<IStrategoTerm>() {
       @Override
       public IStrategoTerm call() throws Exception {
         return parser.parse(source, "in-file declaration");
-      }
-    });
+    }};
     
     try {
-      new Thread(res).start();
+      Future<IStrategoTerm> res = parseExecutorService.submit(parseCallable);
       return res.get(PARSE_TIMEOUT, TimeUnit.MILLISECONDS);
     } catch (ExecutionException e) {
       if (e.getCause() instanceof SGLRException)

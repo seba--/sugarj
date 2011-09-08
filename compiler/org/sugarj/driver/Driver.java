@@ -1030,7 +1030,7 @@ public class Driver{
         driverResult.generateFile(sdfExtension, sdfSource);
         availableSDFImports.add(fullExtName);
         
-        if (CommandExecution.FULL_COMMAND_LINE)
+        if (CommandExecution.FULL_COMMAND_LINE && generateFiles)
           log.log("Wrote SDF file to '" + sdfExtension.getAbsolutePath() + "'.");
         
         String strExtensionTerm = 
@@ -1052,7 +1052,7 @@ public class Driver{
         driverResult.generateFile(strExtension, strExtensionContent);
         availableSTRImports.add(fullExtName);
         
-        if (CommandExecution.FULL_COMMAND_LINE)
+        if (CommandExecution.FULL_COMMAND_LINE && generateFiles)
           log.log("Wrote Stratego file to '" + strExtension.getAbsolutePath() + "'.");
       }
       
