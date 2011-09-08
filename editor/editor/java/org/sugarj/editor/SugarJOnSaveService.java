@@ -31,6 +31,6 @@ public class SugarJOnSaveService implements IOnSaveService {
   @Override
   public void documentChanged(DocumentEvent event) {
     baseService.documentChanged(event);
-    descriptor.reloadAllEditors(0);
+    // descriptor.reloadAllEditors(0);
   }
 }

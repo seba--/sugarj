@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.JavaCore;
-import org.strategoxt.strc.strc;
 import org.sugarj.driver.CommandExecution;
 import org.sugarj.driver.Driver;
 import org.sugarj.driver.Environment;
@@ -33,6 +32,9 @@ import org.sugarj.editor.SugarJConsole;
 import org.sugarj.editor.SugarJParseController;
 
 /**
+ * TODO update editors to show newly built result
+ * TODO annotate errors/warnings in package explorer
+ * 
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
 public class Builder extends IncrementalProjectBuilder {
