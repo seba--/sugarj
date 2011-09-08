@@ -1,6 +1,6 @@
 package concretesyntax;
 
-import concretesyntax.ConcreteJava;
+import concretesyntax.Java;
 
 public sugar TestAux {
   desugarings
