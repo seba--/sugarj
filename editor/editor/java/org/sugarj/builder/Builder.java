@@ -92,7 +92,7 @@ public class Builder extends IncrementalProjectBuilder {
             return false;
           
           if ("sugj".equals(resource.getFileExtension())) {
-            IPath path = resource.getFullPath().makeRelativeTo(getProject().getFullPath());
+            String path = getProject().getLocation().makeAbsolute() + "/" + relPath;
             final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(
                     FileCommands.dropExtension(path.toString()),
                     environment.getSourcePath());
