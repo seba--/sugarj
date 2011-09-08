@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,6 +40,8 @@ public class SugarJParser extends JSGLRI {
   private Environment environment;
   
   private static Map<String, Result> results = new HashMap<String, Result>();
+  private static Set<String> pending = new HashSet<String>();
+  
   private Result result;
 //  private JSGLRI parser;
 //  private Path parserTable;
@@ -55,14 +58,12 @@ public class SugarJParser extends JSGLRI {
     assert environment != null;
     
     result = getResult(filename);
-    if (result == null) {
+    if (result == null)
       result = parseFailureResult();
-      putResult(filename, result);
-    }
 
-    if (result != null && result.isUpToDateShallow(input.hashCode(), environment))
+    if (result.isUpToDateShallow(input.hashCode(), environment))
       return result.getSugaredSyntaxTree();
-    else if (result == null || !(result instanceof PendingResult)) 
+    else if (!isPending(filename)) 
       scheduleParse(input, filename);
         
 //    Path lastParseTable;
@@ -88,15 +89,11 @@ public class SugarJParser extends JSGLRI {
 //      }
 //    }
     
-    if (result instanceof PendingResult)
-      return ((PendingResult) result).getResult().getSugaredSyntaxTree();
-    
     return result.getSugaredSyntaxTree();
   }
   
   private synchronized void scheduleParse(final String input, final String filename) {
-    final Result oldResult = getResult(filename);
-    putResult(filename, new PendingResult(oldResult));
+    SugarJParser.setPending(filename, true);
 
     final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(filename), environment.getSourcePath());
 
@@ -108,19 +105,17 @@ public class SugarJParser extends JSGLRI {
         Result result = null;
         try {
           result = runParser(input, sourceFile, monitor);
-          if (result.getSugaredSyntaxTree() == null)
-            result.setSugaredSyntaxTree(oldResult.getSugaredSyntaxTree());
-          putResult(filename, result);
         } catch (InterruptedException e) {
           result = null;
         } catch (Exception e) {
           org.strategoxt.imp.runtime.Environment.logException(e);
         } finally {
           monitor.done();
-          if (result != null)
+          if (result != null) {
+            SugarJParser.putResult(filename, result);
             getController().scheduleParserUpdate(0, false);
-          else
-            putResult(filename, oldResult);
+          }
+          SugarJParser.setPending(filename, false);
         }
         return Status.OK_STATUS;
       }
@@ -164,12 +159,31 @@ public class SugarJParser extends JSGLRI {
     return result == null ? empty : new ArrayList<IStrategoTerm>(result.getEditorServices());
   }
 
-  private static synchronized Result getResult(String file) {
-    return results.get(file);
+  private static Result getResult(String file) {
+    synchronized (results) {
+      return results.get(file);
+    }
   }
   
-  private static synchronized void putResult(String file, Result result) {
-    results.put(file, result);
+  public static void putResult(String file, Result result) {
+    synchronized (results) {
+      results.put(file, result);
+    }
+  }
+  
+  private static boolean isPending(String file) {
+    synchronized (pending) {
+      return pending.contains(file);      
+    }
+  }
+  
+  private static void setPending(String file, boolean isPending) {
+    synchronized (pending) {
+      if (isPending)
+        pending.add(file);
+      else
+        pending.remove(file);
+    }
   }
   
   private Result parseFailureResult() {

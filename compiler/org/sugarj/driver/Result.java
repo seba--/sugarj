@@ -184,7 +184,7 @@ public class Result {
     return desugaringsFile;
   }
   
-  void writeDependencyFile(Path dep) throws IOException {
+  public void writeDependencyFile(Path dep) throws IOException {
     if (!generateFiles)
       return;
     
@@ -216,7 +216,7 @@ public class Result {
     }
   }
   
-  static Result readDependencyFile(Path dep, Environment env) throws IOException {
+  public static Result readDependencyFile(Path dep, Environment env) throws IOException {
     Result result = new Result(true);
     result.allDependentFiles = null;
     ObjectInputStream ois = null;

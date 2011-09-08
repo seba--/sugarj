@@ -329,7 +329,9 @@ public class Driver{
       driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
       if (currentTransProg != null)
         driverResult.registerEditorDesugarings(currentTransProg);
-      
+
+      driverResult.writeDependencyFile(depOutFile);
+
       success = true;
     } 
     catch (CommandExecution.ExecutionError e) {
@@ -501,7 +503,6 @@ public class Driver{
         }
         
         driverResult.generateFile(editorServicesFile, buf.toString());
-        driverResult.writeDependencyFile(depOutFile);
       } finally {
         log.endTask();
       }
@@ -566,7 +567,6 @@ public class Driver{
   
         log.log("writing plain content to " + plainFile);
         driverResult.generateFile(plainFile, plainContent);
-        driverResult.writeDependencyFile(depOutFile);
       } finally {
         log.endTask();
       }
@@ -639,8 +639,8 @@ public class Driver{
       InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     // recompile the current grammar definition
     Path currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfContext, makePermissiveContext, sdfCache, environment);
-    FileCommands.deleteTempFiles(driverResult.getLastParseTable());
-    driverResult.setLastParseTable(currentGrammarTBL);
+//    FileCommands.deleteTempFiles(driverResult.getLastParseTable());
+//    driverResult.setLastParseTable(currentGrammarTBL);
     ParseTable table = org.strategoxt.imp.runtime.Environment.loadParseTable(currentGrammarTBL.getAbsolutePath());
     
     IStrategoTerm parseResult = null;
@@ -894,7 +894,6 @@ public class Driver{
         
         generatedJavaClasses.add(clazz);
         driverResult.appendToFile(javaOutFile, SDFCommands.prettyPrintJava(dec, interp) + "\n");
-        driverResult.writeDependencyFile(depOutFile);
       } finally {
         log.endTask();
       }
@@ -1056,8 +1055,6 @@ public class Driver{
           log.log("Wrote Stratego file to '" + strExtension.getAbsolutePath() + "'.");
       }
       
-      driverResult.writeDependencyFile(depOutFile);
-
       /*
        * adapt current grammar
        */
