@@ -3,7 +3,6 @@ package org.sugarj.driver;
 import static org.sugarj.driver.FileCommands.toCygwinPath;
 import static org.sugarj.driver.Log.log;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -66,9 +65,7 @@ public class SDFCommands {
     }
   }
   
-  public static ModuleKeyCache<Path> sdfCache = null;
-  
-  private static void packSdf(Path sdf, Path def, Context sdfContext, Collection<String> paths) throws IOException {
+  private static void packSdf(Path sdf, Path def, Context sdfContext, Collection<Path> paths) throws IOException {
     
     /*
      * We can include as many paths as we want here, checking the
@@ -87,10 +84,10 @@ public class SDFCommands {
       "-I", StdLib.stdLibDir.getPath(),
     }));
     
-    for (String path : paths) 
-      if (new File(path).isDirectory()){
+    for (Path path : paths) 
+      if (path.getFile().isDirectory()){
         cmd.add("-I");
-        cmd.add(path);
+        cmd.add(path.getAbsolutePath());
       }
     
     try {
@@ -144,7 +141,7 @@ public class SDFCommands {
     FileCommands.deleteTempFiles(tbl);
   }
   
-  public static void check(Path sdf, String module, Context sdfContext, Collection<String> paths) throws IOException {
+  public static void check(Path sdf, String module, Context sdfContext, Collection<Path> paths) throws IOException {
     Path def = FileCommands.newTempFile("def");
     packSdf(sdf, def, sdfContext, paths);
     normalizeTable(def, module);
@@ -160,13 +157,13 @@ public class SDFCommands {
    * @throws BadTokenException 
    * @throws TokenExpectedException 
    */
-  public static Path compile(Path sdf, String module, Collection<Path> dependentFiles, JSGLRI sdfParser, Context sdfContext, Context makePermissiveContext, Environment environment) throws IOException,
+  public static Path compile(Path sdf, String module, Collection<Path> dependentFiles, JSGLRI sdfParser, Context sdfContext, Context makePermissiveContext, ModuleKeyCache<Path> sdfCache, Environment environment) throws IOException,
       InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     ModuleKey key = getModuleKeyForGrammar(sdf, module, dependentFiles, sdfParser);
-    Path tbl = lookupGrammarInCache(key);
+    Path tbl = lookupGrammarInCache(sdfCache, key);
     if (tbl == null) {
       tbl = generateParseTable(key, sdf, module, sdfContext, makePermissiveContext, environment.getIncludePath());
-      cacheParseTable(key, tbl, environment);
+      cacheParseTable(sdfCache, key, tbl, environment);
     }
     
     if (tbl != null)
@@ -176,7 +173,7 @@ public class SDFCommands {
   }
   
   
-  private static void cacheParseTable(ModuleKey key, Path tbl, Environment environment) throws IOException {
+  private static void cacheParseTable(ModuleKeyCache<Path> sdfCache, ModuleKey key, Path tbl, Environment environment) throws IOException {
     if (sdfCache == null)
       return;
     
@@ -197,7 +194,7 @@ public class SDFCommands {
     }
   }
 
-  private static Path lookupGrammarInCache(ModuleKey key) {
+  private static Path lookupGrammarInCache(ModuleKeyCache<Path> sdfCache, ModuleKey key) {
     if (sdfCache == null)
       return null;
     
@@ -247,7 +244,7 @@ public class SDFCommands {
                                          String module,
                                          Context sdfContext,
                                          Context makePermissiveContext,
-                                         Collection<String> paths)
+                                         Collection<Path> paths)
       throws IOException, InvalidParseTableException {
     log.beginTask("Generating", "Generate the parse table");
     try {

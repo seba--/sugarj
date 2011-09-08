@@ -8,5 +8,16 @@
        <extension id="org.sugarj.editor.parser" name="SugarJ Parser" point="org.eclipse.imp.runtime.parser">
           <parser class="org.sugarj.editor.SugarJParseController" language="SugarJ">
           </parser>
+       </extension>
+       <extension
+             id="SugarJBuilder"
+             name="SugarJ builder"
+             point="org.eclipse.core.resources.builders">
+          <builder>
+	         <run class="org.sugarj.builder.Builder">
+	            <parameter name="optimize" value="true"/>
+	            <parameter name="comment" value="SugarJ Builder"/>
+	         </run>
+          </builder>
        </extension>    
     </plugin>

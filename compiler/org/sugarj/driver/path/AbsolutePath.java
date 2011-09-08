@@ -1,6 +1,5 @@
 package org.sugarj.driver.path;
 
-import org.sugarj.driver.Environment;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -11,10 +10,7 @@ public class AbsolutePath extends Path {
   private String path;
   
   public AbsolutePath(String path) {
-    while (path.endsWith(Environment.sep))
-      path = path.substring(0, path.length() - 1);
-    
-    this.path = path;
+    this.path = trimBack(path);
   }
   
   @Override

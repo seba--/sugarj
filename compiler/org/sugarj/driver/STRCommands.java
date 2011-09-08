@@ -4,7 +4,6 @@ import static org.sugarj.driver.FileCommands.toWindowsPath;
 import static org.sugarj.driver.Log.log;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,14 +41,12 @@ import org.sugarj.stdlib.StdLib;
 public class STRCommands {
   
   
-  public static ModuleKeyCache<Path> strCache = null;
-  
   private final static Pattern STR_FILE_PATTERN = Pattern.compile(".*\\.str");
 
   /**
    *  Compiles a {@code *.str} file to a single {@code *.java} file. 
    */
-  private static void strj(Path str, Path java, String main, Context strjContext, Collection<String> paths) throws IOException {
+  private static void strj(Path str, Path java, String main, Context strjContext, Collection<Path> paths) throws IOException {
     
     /*
      * We can include as many paths as we want here, checking the
@@ -67,10 +64,10 @@ public class STRCommands {
         "-O", "0"
     }));
     
-    for (String path : paths)
-      if (new File(path).isDirectory()){
+    for (Path path : paths)
+      if (path.getFile().isDirectory()){
         cmd.add("-I");
-        cmd.add(path);
+        cmd.add(path.getAbsolutePath());
       }
     
     try {
@@ -82,20 +79,16 @@ public class STRCommands {
       if (e.getValue() != 0)
         throw new RuntimeException("STRJ failed", e);
     }
-        
-//    CommandExecution.executeWithPrefix("strategoxt.jar",
-        
-        
   }
   
   
-  public static Path compile(Path str, String main, Collection<Path> dependentFiles, JSGLRI strParser, Context strjContext, Environment environment) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  public static Path compile(Path str, String main, Collection<Path> dependentFiles, JSGLRI strParser, Context strjContext, ModuleKeyCache<Path> strCache, Environment environment) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     ModuleKey key = getModuleKeyForAssimilation(str, main, dependentFiles, strParser);
-    Path prog = lookupAssimilationInCache(key);
+    Path prog = lookupAssimilationInCache(strCache, key);
     
     if (prog == null) {
       prog = generateAssimilator(key, str, main, strjContext, environment.getIncludePath());
-      cacheAssimilator(key, prog, environment);
+      cacheAssimilator(strCache, key, prog, environment);
     }
     return prog;
   }
@@ -104,7 +97,7 @@ public class STRCommands {
                                           Path str,
                                           String main,
                                           Context strjContext,
-                                          Collection<String> paths) throws IOException {
+                                          Collection<Path> paths) throws IOException {
     log.beginTask("Generating", "Generate the assimilator");
     try {
       Path dir = FileCommands.newTempDir();
@@ -128,7 +121,7 @@ public class STRCommands {
     }
   }
     
-  private static void cacheAssimilator(ModuleKey key, Path prog, Environment environment) throws IOException {
+  private static void cacheAssimilator(ModuleKeyCache<Path> strCache, ModuleKey key, Path prog, Environment environment) throws IOException {
     if (strCache == null)
       return;
     
@@ -150,7 +143,7 @@ public class STRCommands {
     }
   }
   
-  private static Path lookupAssimilationInCache(ModuleKey key) {
+  private static Path lookupAssimilationInCache(ModuleKeyCache<Path> strCache, ModuleKey key) {
     if (strCache == null)
       return null;
     
@@ -202,12 +195,15 @@ public class STRCommands {
   public static IStrategoTerm assimilate(String strategy, Path jarfile, IStrategoTerm in, HybridInterpreter interp) throws IOException {
     try {
       // XXX try release loaded classes by creating a completely new interpreter
-      HybridInterpreter newInterp = new HybridInterpreter(interp.getFactory());
+      HybridInterpreter newInterp = new HybridInterpreter(interp.getFactory(), interp.getProgramFactory());
       newInterp.loadJars(jarfile.getFile().toURI().toURL());
       newInterp.setCurrent(in);
       
       if (newInterp.invoke(strategy)) {
         IStrategoTerm term = newInterp.current();
+        
+        // XXX does this improve memory consumption?
+        newInterp.reset();
         
         IToken left = ImploderAttachment.getLeftToken(in);
         IToken right = ImploderAttachment.getRightToken(in);

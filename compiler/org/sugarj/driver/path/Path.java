@@ -32,6 +32,19 @@ public abstract class Path implements Serializable {
   public boolean equals(Object o) {
     return o instanceof Path && ((Path) o).getAbsolutePath().equals(getAbsolutePath());
   }
+
+  protected String trimFront(String path) {
+    while (path.startsWith(Environment.sep))
+      path = path.substring(1, path.length());
+    return path;
+  }
+  
+  protected String trimBack(String path) {
+    while (path.endsWith(Environment.sep))
+      path = path.substring(0, path.length() - 1);
+    return path;
+  }
+
   
 //  /**
 //   * @throws IllegalArgumentException if this is not a descendant of p

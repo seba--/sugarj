@@ -17,26 +17,29 @@ import java.util.Set;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.sugarj.driver.path.Path;
-import org.sugarj.driver.path.RelativePath;
+import org.sugarj.driver.path.RelativeSourceLocationPath;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
 public class Result {
+  
+  private final boolean generateFiles;
+  
   private Map<Path, Integer> dependencies = new HashMap<Path, Integer>();
   private Map<Path, Integer> generatedFileHashes = new HashMap<Path, Integer>();
   private Set<IStrategoTerm> editorServices = new HashSet<IStrategoTerm>();
   private Set<BadTokenException> collectedErrors = new HashSet<BadTokenException>();
   private IStrategoTerm sugaredSyntaxTree = null;
   private Path desugaringsFile;
-  private RelativePath sourceFile;
+  private RelativeSourceLocationPath sourceFile;
   private Integer sourceFileHash;
   private Set<Path> allDependentFiles = new HashSet<Path>();
   private boolean failed = false;
   private Path lastParseTable;
   private Path generationLog;
 
-  private final static Result OUTDATED_RESULT = new Result() {
+  private final static Result OUTDATED_RESULT = new Result(true) {
     @Override
     public boolean isUpToDate(Path file, Environment env) {
       return false;
@@ -47,6 +50,10 @@ public class Result {
       return false;
     }
   };
+  
+  public Result(boolean generateFiles) {
+    this.generateFiles = generateFiles;
+  }
   
   void addDependency(Path depFile, Environment env) throws IOException {
     dependencies.put(depFile, FileCommands.fileHash(depFile));
@@ -72,11 +79,12 @@ public class Result {
   }
   
   void generateFile(Path file, String content) throws IOException {
-    FileCommands.writeToFile(file, content);
-    generatedFileHashes.put(file, FileCommands.fileHash(file));
-    allDependentFiles.add(file);
-    
-    logGeneration(file);
+    if (generateFiles) {
+      FileCommands.writeToFile(file, content);
+      generatedFileHashes.put(file, FileCommands.fileHash(file));
+      allDependentFiles.add(file);
+      logGeneration(file);
+    }
   }
   
   private void logGeneration(Object o) throws IOException {
@@ -92,8 +100,10 @@ public class Result {
   }
   
   void appendToFile(Path file, String content) throws IOException {
-    FileCommands.appendToFile(file, content);
-    generatedFileHashes.put(file, FileCommands.fileHash(file));
+    if (generateFiles) {
+      FileCommands.appendToFile(file, content);
+      generatedFileHashes.put(file, FileCommands.fileHash(file));
+    }
   }
   
   void addEditorService(IStrategoTerm service) {
@@ -104,11 +114,15 @@ public class Result {
     return editorServices;
   }
   
+  public boolean isUpToDateShallow(Path inputFile, Environment env) throws IOException {
+    return isUpToDateShallow(FileCommands.fileHash(inputFile), env);
+  }
+  
   public boolean isUpToDate(Path inputFile, Environment env) throws IOException {
     return isUpToDate(FileCommands.fileHash(inputFile), env);
   }
-  
-  public boolean isUpToDate(int inputHash, Environment env) throws IOException {
+
+  public boolean isUpToDateShallow(int inputHash, Environment env) throws IOException {
     if (sourceFileHash == null || inputHash != sourceFileHash)
       return false;
     
@@ -119,7 +133,16 @@ public class Result {
     for (Entry<Path, Integer> entry : dependencies.entrySet()) {
       if (FileCommands.fileHash(entry.getKey()) != entry.getValue())
         return false;
-      
+    }
+
+    return true;
+  }
+
+  public boolean isUpToDate(int inputHash, Environment env) throws IOException {
+    if (!isUpToDateShallow(inputHash, env))
+      return false;
+
+    for (Entry<Path, Integer> entry : dependencies.entrySet()) {
       Result r = Result.readDependencyFile(entry.getKey(), env);
       if (r == null || !r.isUpToDate(r.getSourceFile(), env))
         return false;
@@ -144,10 +167,12 @@ public class Result {
     return sugaredSyntaxTree;
   }
 
-  void compileJava(Path javaOutFile, Path bin, List<String> path, List<Path> generatedJavaClasses) throws IOException {
-    JavaCommands.javac(javaOutFile, bin, path);
-    for (Path cl : generatedJavaClasses)
-      generatedFileHashes.put(cl, FileCommands.fileHash(cl));
+  void compileJava(Path javaOutFile, Path bin, List<Path> path, List<Path> generatedJavaClasses) throws IOException {
+    if (generateFiles) {
+      JavaCommands.javac(javaOutFile, bin, path);
+      for (Path cl : generatedJavaClasses)
+        generatedFileHashes.put(cl, FileCommands.fileHash(cl));
+    }
   }
   
   void registerEditorDesugarings(Path jarfile) throws IOException {
@@ -160,6 +185,9 @@ public class Result {
   }
   
   void writeDependencyFile(Path dep) throws IOException {
+    if (!generateFiles)
+      return;
+    
     logGeneration(dep);
 
     ObjectOutputStream oos = null;
@@ -189,14 +217,14 @@ public class Result {
   }
   
   static Result readDependencyFile(Path dep, Environment env) throws IOException {
-    Result result = new Result();
+    Result result = new Result(true);
     result.allDependentFiles = null;
     ObjectInputStream ois = null;
     
     try {
       ois = new ObjectInputStream(new FileInputStream(dep.getFile()));
       
-      result.sourceFile = (RelativePath) Path.readPath(ois, env);
+      result.sourceFile = (RelativeSourceLocationPath) Path.readPath(ois, env);
       result.sourceFileHash = ois.readInt();
       
       boolean reallocate = result.sourceFile.getBasePath().toString().equals(env.getRoot());
@@ -229,12 +257,12 @@ public class Result {
     return result;
   }
   
-  void setSourceFile(RelativePath sourceFile, int sourceFileHash) {
+  void setSourceFile(RelativeSourceLocationPath sourceFile, int sourceFileHash) {
     this.sourceFile = sourceFile;
     this.sourceFileHash = sourceFileHash;
   }
 
-  public RelativePath getSourceFile() {
+  public RelativeSourceLocationPath getSourceFile() {
     return sourceFile;
   }
   
