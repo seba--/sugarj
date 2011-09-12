@@ -86,9 +86,11 @@ public class Result {
       logGeneration(file);
     }
   }
-  
+
+  // TODO subsequent ObjectOutputStream writes seem to misbehave: raises StreamCorruptedException in Driver.clearGeneratedStuff().
+  //   => how to append an object to an ObjectOutputStream
   private void logGeneration(Object o) throws IOException {
-    if (generationLog != null) {
+    if (generateFiles && generationLog != null) {
       FileCommands.createFile(generationLog);
       ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(generationLog.getFile(), true));
       try {

@@ -30,6 +30,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.sugarj.stdlib,
  org.eclipse.ant.core,
  org.eclipse.jdt.core,
- org.eclipse.ui.console
+ org.eclipse.ui.console,
+ org.eclipse.ui.ide;bundle-version="3.6.2"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
