@@ -488,8 +488,7 @@ public class Driver{
         editorServices = ATermCommands.registerSemanticProvider(editorServices, currentTransProg);
   
         Path editorServicesFile = environment.new RelativePathBin(relPackageNameSep() + extName + ".serv");
-        FileCommands.createFile(editorServicesFile);
-  
+        
         log.log("writing editor services to " + editorServicesFile);
         
         StringBuffer buf = new StringBuffer();
@@ -808,8 +807,10 @@ public class Driver{
           sourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
 
         if (sourceFile != null && (res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment))) {
-          if (!generateFiles)
+          if (!generateFiles) {
+            boolean b = pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment);
             ATermCommands.setErrorMessage(toplevelDecl, "module outdated, compile first: " + importModule);
+          }
           else {
             log.log("Need to compile the imported module first ; processing it now.");
             
@@ -1602,7 +1603,7 @@ public class Driver{
   }
   
   private void clearGeneratedStuff() throws IOException {
-    if (driverResult.getGenerationLog() != null && FileCommands.exists(driverResult.getGenerationLog())) {
+    if (generateFiles && driverResult.getGenerationLog() != null && FileCommands.exists(driverResult.getGenerationLog())) {
 
       ObjectInputStream ois = null;
       
@@ -1616,6 +1617,7 @@ public class Driver{
           }
         }
       } catch (Exception e) {
+        e.printStackTrace();
       } finally {
         if (ois != null)
           ois.close();

@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
@@ -17,7 +18,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.imp.editor.UniversalEditor;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.FileEditorInput;
 import org.sugarj.driver.CommandExecution;
 import org.sugarj.driver.Driver;
 import org.sugarj.driver.Environment;
@@ -32,8 +40,7 @@ import org.sugarj.editor.SugarJConsole;
 import org.sugarj.editor.SugarJParseController;
 
 /**
- * TODO update editors to show newly built result
- * TODO annotate errors/warnings in package explorer
+ * updates editors to show newly built results
  * 
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
@@ -131,6 +138,22 @@ public class Builder extends IncrementalProjectBuilder {
             monitor.beginTask("compile " + sourceFile.getRelativePath(),
                 IProgressMonitor.UNKNOWN);
             Driver.compile(sourceFile, monitor);
+            
+            IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
+            for (IWorkbenchWindow workbenchWindow : workbenchWindows)
+              for (IWorkbenchPage page : workbenchWindow.getPages())
+                for (IEditorReference editorRef : page.getEditorReferences()) {
+                  IEditorPart editor = editorRef.getEditor(false);
+                  if (editor != null && 
+                      editor instanceof UniversalEditor && 
+                      editor.getEditorInput() instanceof FileEditorInput) {
+                    IFile file = ((FileEditorInput) editor.getEditorInput()).getFile();
+                    if (file.getLocation().toString().equals(sourceFile.toString()))
+                      ((UniversalEditor) editor).fParserScheduler.schedule();
+                  }
+                }
+            
+            
           } catch (InterruptedException e) {
             monitor.setCanceled(true);
             monitor.done();
