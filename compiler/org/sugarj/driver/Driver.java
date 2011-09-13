@@ -10,6 +10,7 @@ import static org.sugarj.driver.ATermCommands.isApplication;
 import static org.sugarj.driver.Environment.sep;
 import static org.sugarj.driver.Log.log;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -21,15 +22,11 @@ import java.text.ParseException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Options;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.InvalidParseTableException;
@@ -48,6 +45,8 @@ import org.strategoxt.permissivegrammars.make_permissive;
 import org.strategoxt.tools.tools;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
+import org.sugarj.driver.cli.CLIError;
+import org.sugarj.driver.cli.DriverCLI;
 import org.sugarj.driver.path.AbsolutePath;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
@@ -55,6 +54,7 @@ import org.sugarj.driver.path.RelativeSourceLocationPath;
 import org.sugarj.driver.path.SourceLocation;
 import org.sugarj.driver.transformations.extraction.extraction;
 import org.sugarj.stdlib.StdLib;
+import org.sugarj.util.ProcessingListener;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -72,6 +72,9 @@ public class Driver{
   private static List<Path> pendingInputFiles = new ArrayList<Path>();
   private static List<Path> currentlyProcessing = new ArrayList<Path>();
 
+  private static List<ProcessingListener> processingListener = new LinkedList<ProcessingListener>();
+  
+  
   private IProgressMonitor monitor;
   
   private Environment environment = new Environment();
@@ -148,6 +151,14 @@ public class Driver{
   
   private static synchronized void putPendingRun(Path file, String source, Driver driver) {
     pendingRuns.put(file, new AbstractMap.SimpleImmutableEntry<String, Driver>(source, driver));
+  }
+  
+  public static synchronized void addProcessingDoneListener(ProcessingListener listener) {
+    processingListener.add(listener);
+  }
+  
+  public static synchronized void removeProcessingDoneListener(ProcessingListener listener) {
+    processingListener.remove(listener);
   }
   
   private static void waitForPending(Path file) {
@@ -243,15 +254,26 @@ public class Driver{
     }
     
     try {
+      synchronized (processingListener) {
+        for (ProcessingListener listener : processingListener)
+          listener.processingStarts(sourceFile);
+      }
+    
       driver.process(source, sourceFile, monitor, generateFiles);
       if (!Environment.rocache)
         driver.storeCaches(sourceFile.getSourceLocation().getEnvironment());
-    } finally {
-        pendingRuns.remove(sourceFile);
-        if (generateFiles)
-          putResult(sourceFile, driver.driverResult.getSugaredSyntaxTree() == null ? null : driver.driverResult);
-    }
     
+      synchronized (processingListener) {
+        for (ProcessingListener listener : processingListener)
+          listener.processingDone(driver.driverResult);
+      }
+
+    } finally {
+      pendingRuns.remove(sourceFile);
+      if (generateFiles)
+        putResult(sourceFile, driver.driverResult.getSugaredSyntaxTree() == null ? null : driver.driverResult);
+    }
+
     return driver.driverResult;
   }
   
@@ -277,7 +299,7 @@ public class Driver{
       if (sourceFile != null) {
         javaOutFile = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".java");
         depOutFile = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".dep");
-        Path genLog= environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".gen");
+        Path genLog = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".gen");
         driverResult.setGenerationLog(genLog);
         clearGeneratedStuff();
       }
@@ -429,7 +451,7 @@ public class Driver{
       inputTreeBuilder.getTokenizer().makeToken(inputTreeBuilder.getTokenizer().getStartOffset() - 1, IToken.TK_EOF, true);
       IStrategoTerm term = ATermCommands.factory.makeString(input);
       ImploderAttachment.putImploderAttachment(term, false, "String", left, right);
-      ATermCommands.setErrorMessage(term, msg);
+      setErrorMessage(term, msg);
       return new IncrementalParseResult(term, "");
     } finally {
       log.endTask();
@@ -626,7 +648,7 @@ public class Driver{
         else
           log.logErr(msg);
 
-        ATermCommands.setErrorMessage(toplevelDecl, msg);
+        setErrorMessage(toplevelDecl, msg);
         if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
           sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
 
@@ -656,8 +678,10 @@ public class Driver{
           inputTreeBuilder,
           parser);
     } finally {
-      if (recovery)
-        driverResult.addBadTokenExceptions(parser.getCollectedErrors());
+      if (recovery) {
+        for (BadTokenException e : parser.getCollectedErrors())
+          driverResult.logParseError(e);
+      }
     }
     
     return parseResult;
@@ -683,7 +707,7 @@ public class Driver{
       else
         log.logErr(msg);
 
-      ATermCommands.setErrorMessage(term, msg);
+      setErrorMessage(term, msg);
       return term;
     } finally {
       log.endTask();
@@ -727,7 +751,7 @@ public class Driver{
       String expectedPackage = i >= 0 ? rel.substring(0, i) : rel;
       expectedPackage = expectedPackage.replace('/', '.');
       if (!packageName.equals(expectedPackage))
-        ATermCommands.setErrorMessage(
+        setErrorMessage(
             toplevelDecl,
             "The declared package '" + packageName + "'" +
             " does not match the expected package '" + expectedPackage + "'.");
@@ -809,7 +833,8 @@ public class Driver{
         if (sourceFile != null && (res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment))) {
           if (!generateFiles) {
             boolean b = pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment);
-            ATermCommands.setErrorMessage(toplevelDecl, "module outdated, compile first: " + importModule);
+            System.out.println(b);
+            setErrorMessage(toplevelDecl, "module outdated, compile first: " + importModule);
           }
           else {
             log.log("Need to compile the imported module first ; processing it now.");
@@ -817,9 +842,9 @@ public class Driver{
             try {
               Result importResult = compile(sourceFile, monitor);
               if (importResult.hasFailed())
-                ATermCommands.setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
+                setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
             } catch (Exception e) {
-              ATermCommands.setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
+              setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
             }
               
             log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
@@ -836,7 +861,7 @@ public class Driver{
       boolean success = processImport(modulePath, toplevelDecl);
       
       if (!success)
-        ATermCommands.setErrorMessage(toplevelDecl, "module not found: " + importModule);
+        setErrorMessage(toplevelDecl, "module not found: " + importModule);
       
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -979,9 +1004,6 @@ public class Driver{
       Path sdfExtension = environment.new RelativePathBin(relPackageNameSep() + extName + ".sdf");
       Path strExtension = environment.new RelativePathBin(relPackageNameSep() + extName + ".str");
       
-      FileCommands.delete(sdfExtension);
-      FileCommands.delete(strExtension);
-
       String sdfImports = " imports " + StringCommands.printListSeparated(availableSDFImports, " ") + "\n";
       String strImports = " imports " + StringCommands.printListSeparated(availableSTRImports, " ") + "\n";
       
@@ -1125,7 +1147,7 @@ public class Driver{
       else
         log.logErr(msg);
 
-      ATermCommands.setErrorMessage(lastSugaredToplevelDecl, msg);
+      setErrorMessage(lastSugaredToplevelDecl, msg);
     } finally {
       log.endTask();
     }
@@ -1196,7 +1218,7 @@ public class Driver{
     Environment environment = new Environment();
     
     try {
-      String[] sources = handleOptions(args, environment);
+      String[] sources = DriverCLI.handleOptions(args, environment);
 
       if (environment.getSourcePath().isEmpty())
         environment.getSourcePath().add(new SourceLocation(new AbsolutePath("."), environment));
@@ -1232,218 +1254,6 @@ public class Driver{
   }
   
   
-  /**
-   * This is thrown when a problem during option processing
-   * occurs.
-   *  
-   * @author rendel@informatik.uni-marburg.de
-   */
-  public static class CLIError extends Error {
-    private static final long serialVersionUID = -918505242287737113L;
-
-    private final Options options; 
-    
-    public CLIError(String message, Options options) {
-      super(message);
-      this.options = options;
-    }
-    
-    public void showUsage() {
-      showUsageMessage(options);
-    }
-  }
-
-  /**
-   * Parses and processes command line options. This method may
-   * set paths and flags in {@link CommandExecution} and
-   * {@link Environment} in the process.
-   * 
-   * @param args
-   *        the command line arguments to be parsed
-   * @return the source file to be processed
-   * @throws CLIError
-   *         when the command line is not correct
-   */
-  private static String[] handleOptions(String[] args, Environment environment) {
-    Options options = specifyOptions();
-
-    try {
-      CommandLine line = parseOptions(options, args);
-      return processOptions(options, line, environment);
-    } catch (org.apache.commons.cli.ParseException e) {
-      throw new CLIError(e.getMessage(), options);
-    }
-  }
-
-  private static void showUsageMessage(Options options) {
-    HelpFormatter formatter = new HelpFormatter();
-    formatter.printHelp(
-        "java -java sugarj.jar [options] source-files",
-        options,
-        false);
-  }
-  
-  private static String[] processOptions(Options options, CommandLine line, Environment environment) throws org.apache.commons.cli.ParseException {
-    if (line.hasOption("help")) {
-      // TODO This is not exactly an error ...
-      throw new CLIError("help requested", options);
-    }
-
-    if (line.hasOption("verbose")) {
-      CommandExecution.SILENT_EXECUTION = false;
-      CommandExecution.SUB_SILENT_EXECUTION = false;
-      CommandExecution.FULL_COMMAND_LINE = true;
-    }
-
-    if (line.hasOption("silent-execution"))
-      CommandExecution.SILENT_EXECUTION = true;
-
-    if (line.hasOption("sub-silent-execution"))
-      CommandExecution.SUB_SILENT_EXECUTION = true;
-
-    if (line.hasOption("full-command-line"))
-      CommandExecution.FULL_COMMAND_LINE = true;
-
-    if (line.hasOption("cache-info"))
-      CommandExecution.CACHE_INFO = true;
-
-    if (line.hasOption("buildpath"))
-      for (String path : line.getOptionValue("buildpath").split(Environment.classpathsep))
-        environment.getIncludePath().add(new AbsolutePath(path));
-
-    if (line.hasOption("sourcepath"))
-      for (String path : line.getOptionValue("sourcepath").split(Environment.classpathsep))
-        environment.getSourcePath().add(new SourceLocation(new AbsolutePath(path), environment));
- 
-    if (line.hasOption("d"))
-      environment.setBin(new AbsolutePath(line.getOptionValue("d")));
-    
-    if (line.hasOption("cache"))
-      environment.setCacheDir(new AbsolutePath(line.getOptionValue("cache")));
-
-    if (line.hasOption("read-only-cache"))
-      Environment.rocache = true;
-    
-    if (line.hasOption("write-only-cache"))
-      Environment.wocache = true;
-    
-    if (line.hasOption("gen-java"))
-      environment.setGenerateJavaFile(true);
-    
-    if (line.hasOption("atomic-imports"))
-      environment.setAtomicImportParsing(true);
-
-    if (line.hasOption("no-checking"))
-      environment.setNoChecking(true);
-
-    String[] sources = line.getArgs();
-    if (sources.length < 1)
-      throw new CLIError("No source files specified.", options);
-
-    return sources;
-  }
-
-  private static CommandLine parseOptions(Options options, String[] args) throws org.apache.commons.cli.ParseException {
-    CommandLineParser parser = new GnuParser();
-    return parser.parse(options, args);
-  }
-
-  private static Options specifyOptions() {
-    Options options = new Options();
-
-    options.addOption(
-        "v", 
-        "verbose", 
-        false, 
-        "show verbose output");
-
-    options.addOption(
-        null, 
-        "silent-execution", 
-        false, 
-        "try to be silent");
-
-    options.addOption(
-        null,
-        "sub-silent-execution",
-        false,
-        "do not display output of subprocesses");
-
-    options.addOption(
-        null,
-        "full-command-line",
-        false,
-        "show all arguments to subprocesses");
-
-    options.addOption(
-        null, 
-        "cache-info", 
-        false, 
-        "show where files are cached");
-
-    options.addOption(
-        null,
-        "buildpath",
-        true,
-        "Specify where to find compiled files. Multiple paths can be given separated by \'" + Environment.classpathsep + "\'.");
-
-    options.addOption(
-        null,
-        "sourcepath",
-        true,
-        "Specify where to find source files. Multiple paths can be given separated by \'" + Environment.classpathsep + "\'.");
-
-    options.addOption(
-        "d", 
-        null,
-        true, 
-        "Specify where to place compiled files");
-
-    options.addOption(
-        null, 
-        "help", 
-        false, 
-        "Print this synopsis of options");
-    
-    options.addOption(
-        null,
-        "cache",
-        true,
-        "Specifiy a directory for caching.");
-    
-    options.addOption(
-        null,
-        "read-only-cache",
-        false,
-        "Specify the cache to be read-only.");
-
-    options.addOption(
-        null,
-        "write-only-cache",
-        false,
-        "Specify the cache to be write-only.");
-    
-    options.addOption(
-        null,
-        "gen-java",
-        false,
-        "Generate the resulting Java file in the source folder.");
-
-    options.addOption(
-        null,
-        "atomic-imports",
-        false,
-        "Parse all import statements simultaneously.");
-
-    options.addOption(
-        null,
-        "no-checking",
-        false,
-        "Do not check resulting SDF and Stratego files.");
-    
-    return options;
-  }
-
   @SuppressWarnings("unchecked")
   private void initializeCaches(Environment environment) throws IOException {
     if (environment.getCacheDir() == null)
@@ -1616,14 +1426,19 @@ public class Driver{
           } catch (ClassNotFoundException e) { 
           }
         }
+      } catch (EOFException e) {
       } catch (Exception e) {
         e.printStackTrace();
       } finally {
         if (ois != null)
           ois.close();
+        FileCommands.delete(driverResult.getGenerationLog());
       }
-
-      FileCommands.writeToFile(driverResult.getGenerationLog(), "");
     }
+  }
+  
+  private void setErrorMessage(IStrategoTerm toplevelDecl, String msg) {
+    driverResult.logError(msg);
+    ATermCommands.setErrorMessage(toplevelDecl, msg);
   }
 }

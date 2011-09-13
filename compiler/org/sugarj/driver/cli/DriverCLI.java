@@ -1,4 +1,4 @@
-package org.sugarj.driver;
+package org.sugarj.driver.cli;
 
 import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getLeftToken;
 import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getRightToken;
@@ -10,6 +10,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -26,7 +31,13 @@ import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.spoofax.terms.TermVisitor;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.runtime.Environment;
+import org.sugarj.driver.ATermCommands;
+import org.sugarj.driver.CommandExecution;
+import org.sugarj.driver.Result;
+import org.sugarj.driver.STRCommands;
+import org.sugarj.driver.path.AbsolutePath;
 import org.sugarj.driver.path.Path;
+import org.sugarj.driver.path.SourceLocation;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -63,12 +74,12 @@ public class DriverCLI {
     }
   }
   
-  static boolean processResultCLI(Result res, Path file, String project) throws IOException {
+  public static boolean processResultCLI(Result res, Path file, String project) throws IOException {
     log.log("");
     
     boolean success = res.getCollectedErrors().isEmpty();
     
-    for (BadTokenException e : res.getCollectedErrors())
+    for (BadTokenException e : res.getParseErrors())
       log.log("syntax error: line " + e.getLineNumber() + " column " + e.getColumnNumber() + ": " + e.getMessage());
     
     
@@ -301,5 +312,196 @@ public class DriverCLI {
   
   private static void reportErrorAtFirstLine(String message, List<Error> errors) {
     errors.add(new Error(message));
+  }
+
+  /**
+   * Parses and processes command line options. This method may
+   * set paths and flags in {@link CommandExecution} and
+   * {@link Environment} in the process.
+   * 
+   * @param args
+   *        the command line arguments to be parsed
+   * @return the source file to be processed
+   * @throws CLIError
+   *         when the command line is not correct
+   */
+  public static String[] handleOptions(String[] args, org.sugarj.driver.Environment environment) {
+    Options options = specifyOptions();
+  
+    try {
+      CommandLine line = parseOptions(options, args);
+      return processOptions(options, line, environment);
+    } catch (org.apache.commons.cli.ParseException e) {
+      throw new CLIError(e.getMessage(), options);
+    }
+  }
+
+  static void showUsageMessage(Options options) {
+    HelpFormatter formatter = new HelpFormatter();
+    formatter.printHelp(
+        "java -java sugarj.jar [options] source-files",
+        options,
+        false);
+  }
+
+  private static String[] processOptions(Options options, CommandLine line, org.sugarj.driver.Environment environment) throws org.apache.commons.cli.ParseException {
+    if (line.hasOption("help")) {
+      // TODO This is not exactly an error ...
+      throw new CLIError("help requested", options);
+    }
+  
+    if (line.hasOption("verbose")) {
+      CommandExecution.SILENT_EXECUTION = false;
+      CommandExecution.SUB_SILENT_EXECUTION = false;
+      CommandExecution.FULL_COMMAND_LINE = true;
+    }
+  
+    if (line.hasOption("silent-execution"))
+      CommandExecution.SILENT_EXECUTION = true;
+  
+    if (line.hasOption("sub-silent-execution"))
+      CommandExecution.SUB_SILENT_EXECUTION = true;
+  
+    if (line.hasOption("full-command-line"))
+      CommandExecution.FULL_COMMAND_LINE = true;
+  
+    if (line.hasOption("cache-info"))
+      CommandExecution.CACHE_INFO = true;
+  
+    if (line.hasOption("buildpath"))
+      for (String path : line.getOptionValue("buildpath").split(org.sugarj.driver.Environment.classpathsep))
+        environment.getIncludePath().add(new AbsolutePath(path));
+  
+    if (line.hasOption("sourcepath"))
+      for (String path : line.getOptionValue("sourcepath").split(org.sugarj.driver.Environment.classpathsep))
+        environment.getSourcePath().add(new SourceLocation(new AbsolutePath(path), environment));
+  
+    if (line.hasOption("d"))
+      environment.setBin(new AbsolutePath(line.getOptionValue("d")));
+    
+    if (line.hasOption("cache"))
+      environment.setCacheDir(new AbsolutePath(line.getOptionValue("cache")));
+  
+    if (line.hasOption("read-only-cache"))
+      org.sugarj.driver.Environment.rocache = true;
+    
+    if (line.hasOption("write-only-cache"))
+      org.sugarj.driver.Environment.wocache = true;
+    
+    if (line.hasOption("gen-java"))
+      environment.setGenerateJavaFile(true);
+    
+    if (line.hasOption("atomic-imports"))
+      environment.setAtomicImportParsing(true);
+  
+    if (line.hasOption("no-checking"))
+      environment.setNoChecking(true);
+  
+    String[] sources = line.getArgs();
+    if (sources.length < 1)
+      throw new CLIError("No source files specified.", options);
+  
+    return sources;
+  }
+
+  private static CommandLine parseOptions(Options options, String[] args) throws org.apache.commons.cli.ParseException {
+    CommandLineParser parser = new GnuParser();
+    return parser.parse(options, args);
+  }
+
+  private static Options specifyOptions() {
+    Options options = new Options();
+  
+    options.addOption(
+        "v", 
+        "verbose", 
+        false, 
+        "show verbose output");
+  
+    options.addOption(
+        null, 
+        "silent-execution", 
+        false, 
+        "try to be silent");
+  
+    options.addOption(
+        null,
+        "sub-silent-execution",
+        false,
+        "do not display output of subprocesses");
+  
+    options.addOption(
+        null,
+        "full-command-line",
+        false,
+        "show all arguments to subprocesses");
+  
+    options.addOption(
+        null, 
+        "cache-info", 
+        false, 
+        "show where files are cached");
+  
+    options.addOption(
+        null,
+        "buildpath",
+        true,
+        "Specify where to find compiled files. Multiple paths can be given separated by \'" + org.sugarj.driver.Environment.classpathsep + "\'.");
+  
+    options.addOption(
+        null,
+        "sourcepath",
+        true,
+        "Specify where to find source files. Multiple paths can be given separated by \'" + org.sugarj.driver.Environment.classpathsep + "\'.");
+  
+    options.addOption(
+        "d", 
+        null,
+        true, 
+        "Specify where to place compiled files");
+  
+    options.addOption(
+        null, 
+        "help", 
+        false, 
+        "Print this synopsis of options");
+    
+    options.addOption(
+        null,
+        "cache",
+        true,
+        "Specifiy a directory for caching.");
+    
+    options.addOption(
+        null,
+        "read-only-cache",
+        false,
+        "Specify the cache to be read-only.");
+  
+    options.addOption(
+        null,
+        "write-only-cache",
+        false,
+        "Specify the cache to be write-only.");
+    
+    options.addOption(
+        null,
+        "gen-java",
+        false,
+        "Generate the resulting Java file in the source folder.");
+  
+    options.addOption(
+        null,
+        "atomic-imports",
+        false,
+        "Parse all import statements simultaneously.");
+  
+    options.addOption(
+        null,
+        "no-checking",
+        false,
+        "Do not check resulting SDF and Stratego files.");
+    
+    return options;
   }
 }

@@ -2,6 +2,7 @@ package org.sugarj.builder;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.imp.editor.UniversalEditor;
 import org.eclipse.jdt.core.JavaCore;
@@ -32,12 +34,14 @@ import org.sugarj.driver.Environment;
 import org.sugarj.driver.FileCommands;
 import org.sugarj.driver.Log;
 import org.sugarj.driver.ModuleSystemCommands;
+import org.sugarj.driver.Result;
 import org.sugarj.driver.path.AbsolutePath;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
 import org.sugarj.driver.path.RelativeSourceLocationPath;
 import org.sugarj.editor.SugarJConsole;
 import org.sugarj.editor.SugarJParseController;
+import org.sugarj.util.ProcessingListener;
 
 /**
  * updates editors to show newly built results
@@ -46,6 +50,25 @@ import org.sugarj.editor.SugarJParseController;
  */
 public class Builder extends IncrementalProjectBuilder {
 
+  private class BuildInput {
+    public IResource resource;
+    public RelativeSourceLocationPath sourceFile;
+    public BuildInput(IResource resource, RelativeSourceLocationPath path) {
+      this.resource = resource; this.sourceFile = path;
+    }
+  }
+
+  private static Map<IProject, ILock> buildLocks = new HashMap<IProject, ILock>();
+  
+  private synchronized static ILock getLock(IProject project) {
+    ILock lock = buildLocks.get(project);
+    if (lock != null)
+      return lock;
+    lock = Job.getJobManager().newLock();
+    buildLocks.put(project, lock);
+    return lock;
+  }
+  
   protected IProject[] build(int kind, @SuppressWarnings("rawtypes") Map args,
       IProgressMonitor monitor) {
     if (kind == IncrementalProjectBuilder.FULL_BUILD) {
@@ -85,7 +108,7 @@ public class Builder extends IncrementalProjectBuilder {
   }
 
   private void fullBuild(IProgressMonitor monitor) {
-    final List<RelativeSourceLocationPath> resources = new LinkedList<RelativeSourceLocationPath>();
+    final LinkedList<BuildInput> resources = new LinkedList<BuildInput>();
     try {
       getProject().accept(new IResourceVisitor() {
         Environment environment = SugarJParseController.makeProjectEnvironment(JavaCore.create(getProject()));
@@ -109,7 +132,7 @@ public class Builder extends IncrementalProjectBuilder {
             if (sourceFile == null)
               throw new IllegalStateException("cannot locate source file for ressource " + resource.getFullPath());
               
-            resources.add(sourceFile);
+            resources.addFirst(new BuildInput(resource, sourceFile));
           }
           return true;
         }
@@ -121,7 +144,7 @@ public class Builder extends IncrementalProjectBuilder {
     build(monitor, resources, "project " + getProject().getName());
   }
 
-  private void build(IProgressMonitor monitor, final List<RelativeSourceLocationPath> resources, String what) {
+  private void build(IProgressMonitor monitor, final List<BuildInput> inputs, String what) {
     CommandExecution.SILENT_EXECUTION = false;
     CommandExecution.SUB_SILENT_EXECUTION = false;
     CommandExecution.FULL_COMMAND_LINE = true;
@@ -133,11 +156,14 @@ public class Builder extends IncrementalProjectBuilder {
     Job buildJob = new Job("Build " + what) {
       @Override
       protected IStatus run(IProgressMonitor monitor) {
-        for (RelativeSourceLocationPath sourceFile : resources)
+        ProcessingListener marker = new MarkingProcessingListener(getProject());
+        Driver.addProcessingDoneListener(marker);
+        getLock(getProject()).acquire();
+        for (BuildInput input : inputs)
           try {
-            monitor.beginTask("compile " + sourceFile.getRelativePath(),
-                IProgressMonitor.UNKNOWN);
-            Driver.compile(sourceFile, monitor);
+            monitor.beginTask("compile " + input.sourceFile.getRelativePath(), IProgressMonitor.UNKNOWN);
+
+            Result res = Driver.compile(input.sourceFile, monitor);
             
             IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
             for (IWorkbenchWindow workbenchWindow : workbenchWindows)
@@ -148,21 +174,20 @@ public class Builder extends IncrementalProjectBuilder {
                       editor instanceof UniversalEditor && 
                       editor.getEditorInput() instanceof FileEditorInput) {
                     IFile file = ((FileEditorInput) editor.getEditorInput()).getFile();
-                    if (file.getLocation().toString().equals(sourceFile.toString()))
+                    if (file.getLocation().toString().equals(input.sourceFile.toString()))
                       ((UniversalEditor) editor).fParserScheduler.schedule();
                   }
                 }
-            
-            
           } catch (InterruptedException e) {
             monitor.setCanceled(true);
             monitor.done();
             return Status.CANCEL_STATUS;
           } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("compilation of "
-                + FileCommands.fileName(sourceFile) + " failed", e);
+            throw new RuntimeException("compilation of " + FileCommands.fileName(input.sourceFile) + " failed", e);
           } finally {
+            getLock(getProject()).release();
+            Driver.removeProcessingDoneListener(marker);
             monitor.done();
           }
           return Status.OK_STATUS;
