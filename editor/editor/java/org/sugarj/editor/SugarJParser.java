@@ -63,7 +63,8 @@ public class SugarJParser extends JSGLRI {
 
     if (result.isUpToDateShallow(input.hashCode(), environment))
       return result.getSugaredSyntaxTree();
-    else if (!isPending(filename)) 
+    
+    if (!isPending(filename)) 
       scheduleParse(input, filename);
         
 //    Path lastParseTable;
@@ -150,7 +151,7 @@ public class SugarJParser extends JSGLRI {
   @Override
   public Set<BadTokenException> getCollectedErrors() {
     final Set<BadTokenException> empty = Collections.emptySet();
-    return result == null ? empty : result.getCollectedErrors();
+    return result == null ? empty : new HashSet(result.getCollectedErrors());
   }
 
 
@@ -160,6 +161,7 @@ public class SugarJParser extends JSGLRI {
   }
 
   private static Result getResult(String file) {
+    
     synchronized (results) {
       return results.get(file);
     }

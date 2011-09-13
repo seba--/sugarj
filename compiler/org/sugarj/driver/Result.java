@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,6 +19,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativeSourceLocationPath;
+import org.sugarj.util.AppendableObjectOutputStream;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -29,14 +31,14 @@ public class Result {
   private Map<Path, Integer> dependencies = new HashMap<Path, Integer>();
   private Map<Path, Integer> generatedFileHashes = new HashMap<Path, Integer>();
   private Set<IStrategoTerm> editorServices = new HashSet<IStrategoTerm>();
-  private Set<BadTokenException> collectedErrors = new HashSet<BadTokenException>();
+  private List<String> collectedErrors = new LinkedList<String>();
+  private Set<BadTokenException> parseErrors = new HashSet<BadTokenException>();
   private IStrategoTerm sugaredSyntaxTree = null;
   private Path desugaringsFile;
   private RelativeSourceLocationPath sourceFile;
   private Integer sourceFileHash;
   private Set<Path> allDependentFiles = new HashSet<Path>();
   private boolean failed = false;
-  private Path lastParseTable;
   private Path generationLog;
 
   private final static Result OUTDATED_RESULT = new Result(true) {
@@ -87,12 +89,13 @@ public class Result {
     }
   }
 
-  // TODO subsequent ObjectOutputStream writes seem to misbehave: raises StreamCorruptedException in Driver.clearGeneratedStuff().
-  //   => how to append an object to an ObjectOutputStream
   private void logGeneration(Object o) throws IOException {
     if (generateFiles && generationLog != null) {
-      FileCommands.createFile(generationLog);
-      ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(generationLog.getFile(), true));
+      boolean exists = FileCommands.exists(generationLog);
+      if (!exists)
+          FileCommands.createFile(generationLog);
+      ObjectOutputStream oos = exists ? new AppendableObjectOutputStream(new FileOutputStream(generationLog.getFile(), true))
+                                      : new ObjectOutputStream(new FileOutputStream(generationLog.getFile()));
       try {
         oos.writeObject(o);
       } finally {
@@ -153,12 +156,20 @@ public class Result {
     return true;
   }
   
-  void addBadTokenExceptions(Collection<? extends BadTokenException> exceptions) {
-    collectedErrors.addAll(exceptions);
+  void logError(String error) {
+    collectedErrors.add(error);
   }
   
-  public Set<BadTokenException> getCollectedErrors() {
+  public List<String> getCollectedErrors() {
     return collectedErrors;
+  }
+  
+  void logParseError(BadTokenException e) {
+    parseErrors.add(e);  
+  }
+  
+  public Set<BadTokenException> getParseErrors() {
+    return parseErrors;
   }
   
   public void setSugaredSyntaxTree(IStrategoTerm sugaredSyntaxTree) {
@@ -182,7 +193,7 @@ public class Result {
     editorServices = new HashSet<IStrategoTerm>(ATermCommands.registerSemanticProvider(editorServices, jarfile));
   }
   
-  Path getDesugaringsFile() {
+  public Path getDesugaringsFile() {
     return desugaringsFile;
   }
   
@@ -212,6 +223,13 @@ public class Result {
         oos.writeObject(e.getKey());
         oos.writeInt(e.getValue());
       }
+      
+//      new TermReader(ATermCommands.factory).unparseToFile(sugaredSyntaxTree, oos);
+//      oos.writeBoolean(failed);
+//      oos.writeObject(collectedErrors);
+//      oos.writeObject(parseErrors);
+//      oos.writeObject(generationLog);
+//      oos.writeObject(desugaringsFile);
     } finally {
       if (oos != null)
         oos.close();
@@ -244,6 +262,14 @@ public class Result {
         int hash = ois.readInt();
         result.generatedFileHashes.put(file, hash);
       }
+      
+//      result.sugaredSyntaxTree = new TermReader(ATermCommands.factory).parseFromStream(ois);
+//      result.failed = ois.readBoolean();
+//      result.collectedErrors = (List<String>) ois.readObject();
+//      result.parseErrors = (Set<BadTokenException>) ois.readObject();
+//      result.generationLog = Path.readPath(ois, env);
+//      result.desugaringsFile = Path.readPath(ois, env);
+      
     } catch (FileNotFoundException e) {
       return OUTDATED_RESULT;
     } catch (ClassNotFoundException e) {
@@ -275,12 +301,4 @@ public class Result {
   public void setFailed(boolean hasFailed) {
     this.failed = hasFailed;
   }
-  
-  public void setLastParseTable(Path parseTable) {
-    this.lastParseTable = parseTable;
   }
-  
-  public Path getLastParseTable() {
-    return lastParseTable;
-  }
-}
