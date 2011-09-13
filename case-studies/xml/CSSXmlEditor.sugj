@@ -6,8 +6,8 @@ import xml.CSS;
 
 public css CSSXmlEditor {
   Element  { folding; outlining }
-  ElemName { color-recursive : blue }
-  AttrName { color-recursive : darkorange }
-  AttValue { color-recursive : darkred }
-  CharData { color-recursive : black }
+  ElemName { rec-color : blue }
+  AttrName { rec-color : darkorange }
+  AttValue { rec-color : darkred }
+  CharData { rec-color : black }
 }

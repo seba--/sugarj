@@ -205,12 +205,13 @@ public class Driver{
   }
 
   private static Result run(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    synchronized (currentlyProcessing) {
-      // TODO we need better circular dependency handling
-      if (currentlyProcessing.contains(sourceFile))
-        throw new IllegalStateException("circular processing");
-      currentlyProcessing.add(sourceFile);
-    }
+    if (generateFiles)
+      synchronized (currentlyProcessing) {
+        // TODO we need better circular dependency handling
+        if (currentlyProcessing.contains(sourceFile))
+          throw new IllegalStateException("circular processing");
+        currentlyProcessing.add(sourceFile);
+      }
 
     Result res;
     
@@ -218,9 +219,10 @@ public class Driver{
       String source = FileCommands.readFileAsString(sourceFile);
       res = run(source, sourceFile, monitor, generateFiles);
     } finally {
-      synchronized (currentlyProcessing) {
-        currentlyProcessing.remove(sourceFile);
-      }
+      if (generateFiles)
+        synchronized (currentlyProcessing) {
+          currentlyProcessing.remove(sourceFile);
+        }
       pendingInputFiles.remove(sourceFile);
     }
 
