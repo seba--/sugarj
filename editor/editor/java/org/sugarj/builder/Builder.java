@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
@@ -19,6 +20,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ILock;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.imp.editor.UniversalEditor;
 import org.eclipse.jdt.core.JavaCore;
@@ -58,16 +60,16 @@ public class Builder extends IncrementalProjectBuilder {
     }
   }
 
-  private static Map<IProject, ILock> buildLocks = new HashMap<IProject, ILock>();
-  
-  private synchronized static ILock getLock(IProject project) {
-    ILock lock = buildLocks.get(project);
-    if (lock != null)
-      return lock;
-    lock = Job.getJobManager().newLock();
-    buildLocks.put(project, lock);
-    return lock;
-  }
+//  private static Map<IProject, ILock> buildLocks = new HashMap<IProject, ILock>();
+//  
+//  private synchronized static ILock getLock(IProject project) {
+//    ILock lock = buildLocks.get(project);
+//    if (lock != null)
+//      return lock;
+//    lock = Job.getJobManager().newLock();
+//    buildLocks.put(project, lock);
+//    return lock;
+//  }
   
   protected IProject[] build(int kind, @SuppressWarnings("rawtypes") Map args,
       IProgressMonitor monitor) {
@@ -158,7 +160,7 @@ public class Builder extends IncrementalProjectBuilder {
       protected IStatus run(IProgressMonitor monitor) {
         ProcessingListener marker = new MarkingProcessingListener(getProject());
         Driver.addProcessingDoneListener(marker);
-        getLock(getProject()).acquire();
+//        getLock(getProject()).acquire();
         for (BuildInput input : inputs)
           try {
             monitor.beginTask("compile " + input.sourceFile.getRelativePath(), IProgressMonitor.UNKNOWN);
@@ -184,15 +186,20 @@ public class Builder extends IncrementalProjectBuilder {
             return Status.CANCEL_STATUS;
           } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("compilation of " + FileCommands.fileName(input.sourceFile) + " failed", e);
+            try {
+              IMarker m = input.resource.createMarker(IMarker.PROBLEM);
+              m.setAttribute(IMarker.MESSAGE, "compilation failed: " + e.getMessage());
+            } catch (CoreException ce) {
+            }
           } finally {
-            getLock(getProject()).release();
+//            getLock(getProject()).release();
             Driver.removeProcessingDoneListener(marker);
             monitor.done();
           }
           return Status.OK_STATUS;
       }
     };
+    buildJob.setRule(getProject());
     buildJob.schedule();
   }
 }

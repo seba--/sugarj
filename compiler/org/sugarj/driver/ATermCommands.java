@@ -230,7 +230,7 @@ public class ATermCommands {
     if (left != null && right != null)
       ImploderAttachment.putImploderAttachment(
           term,
-          false,
+          term.isList(),
           sort, 
           left,
           right);

@@ -61,7 +61,7 @@ import org.sugarj.util.ProcessingListener;
  */
 public class Driver{
   
-  public final static String CACHE_VERSION = "editor-base-0.14";
+  public final static String CACHE_VERSION = "editor-base-0.15";
   
   private final static int PENDING_TIMEOUT = 120000;
 
@@ -117,6 +117,7 @@ public class Driver{
   private ModuleKeyCache<Path> sdfCache = null;
   private ModuleKeyCache<Path> strCache = null;
   
+  private Path currentGrammarTBL;
   private Path currentTransProg;
   
   private boolean interrupt = false;
@@ -209,7 +210,8 @@ public class Driver{
       synchronized (currentlyProcessing) {
         // TODO we need better circular dependency handling
         if (currentlyProcessing.contains(sourceFile))
-          throw new IllegalStateException("circular processing");
+          ;
+          // throw new IllegalStateException("circular processing");
         currentlyProcessing.add(sourceFile);
       }
 
@@ -351,6 +353,10 @@ public class Driver{
       compileGeneratedJavaFile();
       
       driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
+      
+      if (currentGrammarTBL != null)
+        driverResult.registerParseTable(currentGrammarTBL);
+      
       if (currentTransProg != null)
         driverResult.registerEditorDesugarings(currentTransProg);
 
@@ -661,7 +667,7 @@ public class Driver{
   private IStrategoTerm currentParse(String remainingInput, boolean recovery) throws IOException,
       InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     // recompile the current grammar definition
-    Path currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfContext, makePermissiveContext, sdfCache, environment);
+    currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfContext, makePermissiveContext, sdfCache, environment);
 //    FileCommands.deleteTempFiles(driverResult.getLastParseTable());
 //    driverResult.setLastParseTable(currentGrammarTBL);
     ParseTable table = org.strategoxt.imp.runtime.Environment.loadParseTable(currentGrammarTBL.getAbsolutePath());
@@ -834,8 +840,8 @@ public class Driver{
 
         if (sourceFile != null && (res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment))) {
           if (!generateFiles) {
-            boolean b = pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment);
-            System.out.println(b);
+            // boolean b = res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment);
+            // System.out.println(b);
             setErrorMessage(toplevelDecl, "module outdated, compile first: " + importModule);
           }
           else {

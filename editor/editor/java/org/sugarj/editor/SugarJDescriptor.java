@@ -78,6 +78,8 @@ public class SugarJDescriptor extends Descriptor {
           ((StrategoObserver) observer).getRuntime(); // eagerly initilize w/ current document
         } catch (InterruptedException e) {
           Environment.logException("could not reinitialize editor: interrupted", e);
+        } catch (Exception e) {
+          Environment.logException("could not reinitialize editor: exception", e);
         }
         finally {
           observer.getLock().unlock();
