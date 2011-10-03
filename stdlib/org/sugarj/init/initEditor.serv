@@ -42,19 +42,27 @@ folding
   ToplevelDeclaration
   EditorServiceSection
   SugarDefElem
+  SugarDec
   JavaFieldDec
   JavaMethodDec    
   JavaClassDec     
   JavaInterfaceDec
   JavaEnumDec 
+  JavaConstrDec
+  JavaNewInstance
+  JavaQNewInstance
 
 outliner
   ToplevelDeclaration
+  SugarDec
   JavaFieldDec
   JavaMethodDec    
   JavaClassDec     
   JavaInterfaceDec
   JavaEnumDec 
+  JavaConstrDec
+  JavaNewInstance
+  JavaQNewInstance
 
   completions SDF
     completion template : SugarDefElem =

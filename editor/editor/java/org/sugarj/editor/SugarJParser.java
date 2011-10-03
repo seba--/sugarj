@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,7 +14,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.spoofax.interpreter.terms.IStrategoList;
+import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.jsglr.client.InvalidParseTableException;
 import org.spoofax.jsglr.client.KeywordRecognizer;
 import org.spoofax.jsglr.client.imploder.IToken;
 import org.spoofax.jsglr.client.imploder.Token;
@@ -21,7 +26,9 @@ import org.spoofax.jsglr.client.imploder.Tokenizer;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
+import org.spoofax.terms.attachments.ParentAttachment;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
+import org.strategoxt.imp.runtime.services.ContentProposer;
 import org.sugarj.driver.ATermCommands;
 import org.sugarj.driver.CommandExecution;
 import org.sugarj.driver.Driver;
@@ -30,6 +37,7 @@ import org.sugarj.driver.FileCommands;
 import org.sugarj.driver.Log;
 import org.sugarj.driver.ModuleSystemCommands;
 import org.sugarj.driver.Result;
+import org.sugarj.driver.RetractableTreeBuilder;
 import org.sugarj.driver.path.RelativeSourceLocationPath;
 
 /**
@@ -58,6 +66,10 @@ public class SugarJParser extends JSGLRI {
     assert environment != null;
     
     result = getResult(filename);
+    
+    if (input.contains(ContentProposer.COMPLETION_TOKEN) && result != null && result.getParseTable() != null)
+      return parseCompletionTree(input, filename);
+      
     if (result == null)
       result = parseFailureResult();
 
@@ -151,7 +163,7 @@ public class SugarJParser extends JSGLRI {
   @Override
   public Set<BadTokenException> getCollectedErrors() {
     final Set<BadTokenException> empty = Collections.emptySet();
-    return result == null ? empty : new HashSet(result.getCollectedErrors());
+    return result == null ? empty : result.getParseErrors();
   }
 
 
@@ -199,5 +211,53 @@ public class SugarJParser extends JSGLRI {
     };
     r.setSugaredSyntaxTree(term);
     return r;
+  }
+  
+  private IStrategoTerm parseCompletionTree(String input, String filename) throws IOException, TokenExpectedException, BadTokenException, SGLRException {
+    JSGLRI jsglri = null;
+    try {
+      jsglri = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(result.getParseTable().getAbsolutePath()), "NextToplevelDeclaration");
+    } catch (InvalidParseTableException e) {
+      e.printStackTrace();
+    }
+    
+    if (jsglri == null)
+      return null;
+    
+    jsglri.setUseRecovery(true);
+    jsglri.getParser().setUseStructureRecovery(true);
+    RetractableTreeBuilder treeBuilder = new RetractableTreeBuilder();
+    jsglri.getParser().setTreeBuilder(treeBuilder);
+    
+    
+    String remainingInput = input;
+    List<IStrategoTerm> list = new LinkedList<IStrategoTerm>();
+    
+    while (true) {
+      if (remainingInput.isEmpty())
+        return null;
+
+      IStrategoTerm term = jsglri.parse(remainingInput, filename);
+      if (!ATermCommands.isApplication(term, "NextToplevelDeclaration"))
+        return null;
+      
+      IStrategoTerm nextDecl = ATermCommands.getApplicationSubterm(term, "NextToplevelDeclaration", 0);
+      list.add(nextDecl);
+      if (nextDecl.toString().contains(ContentProposer.COMPLETION_TOKEN)) {
+        IStrategoList termList = ATermCommands.makeList("NextToplevelDeclaration", list);
+        
+        IStrategoList listIt = termList;
+        while (!listIt.isEmpty()) {
+          ParentAttachment.putParent(listIt.head(), termList, listIt);
+          listIt = listIt.tail();
+        }
+        
+        return termList;
+      }
+        
+      IStrategoTerm remainingInputTerm = ATermCommands.getApplicationSubterm(term, "NextToplevelDeclaration", 1);
+      treeBuilder.retract(remainingInputTerm);
+      remainingInput = ((IStrategoString) remainingInputTerm).stringValue();
+    }
   }
 }

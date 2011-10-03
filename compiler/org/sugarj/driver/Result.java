@@ -34,6 +34,7 @@ public class Result {
   private List<String> collectedErrors = new LinkedList<String>();
   private Set<BadTokenException> parseErrors = new HashSet<BadTokenException>();
   private IStrategoTerm sugaredSyntaxTree = null;
+  private Path parseTableFile;
   private Path desugaringsFile;
   private RelativeSourceLocationPath sourceFile;
   private Integer sourceFileHash;
@@ -186,6 +187,14 @@ public class Result {
       for (Path cl : generatedJavaClasses)
         generatedFileHashes.put(cl, FileCommands.fileHash(cl));
     }
+  }
+  
+  void registerParseTable(Path tbl) {
+    this.parseTableFile = tbl;
+  }
+  
+  public Path getParseTable() {
+    return parseTableFile;
   }
   
   void registerEditorDesugarings(Path jarfile) throws IOException {
