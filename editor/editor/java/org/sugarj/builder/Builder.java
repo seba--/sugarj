@@ -2,7 +2,6 @@ package org.sugarj.builder;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +11,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
@@ -19,8 +19,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.ILock;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.imp.editor.UniversalEditor;
 import org.eclipse.jdt.core.JavaCore;
@@ -95,18 +93,28 @@ public class Builder extends IncrementalProjectBuilder {
   }
 
   private void incrementalBuild(IResourceDelta delta, IProgressMonitor monitor) {
-    fullBuild(monitor);
-    // System.out.println("incremental build on " + delta);
-    // try {
-    // delta.accept(new IResourceDeltaVisitor() {
-    // public boolean visit(IResourceDelta delta) {
-    // System.out.println("changed: " + delta.getResource().getRawLocation());
-    // return true; // visit children too
-    // }
-    // });
-    // } catch (CoreException e) {
-    // e.printStackTrace();
-    // }
+    boolean rebuild = true;
+    try {
+      class ShouldRebuildResourceDeltaVisitor implements IResourceDeltaVisitor {
+        boolean rebuild = false;
+        public boolean visit(IResourceDelta delta) {
+          if ("sugj".equals(delta.getFullPath().getFileExtension()))
+            rebuild = true;
+          
+          // continue rebuild has not been required so far
+          return !rebuild;
+        }
+      };
+      
+      ShouldRebuildResourceDeltaVisitor visitor = new ShouldRebuildResourceDeltaVisitor();
+      delta.accept(visitor);
+      rebuild = visitor.rebuild;
+    } catch (CoreException e) {
+      e.printStackTrace();
+    }
+    
+    if (rebuild)
+      fullBuild(monitor);
   }
 
   private void fullBuild(IProgressMonitor monitor) {
