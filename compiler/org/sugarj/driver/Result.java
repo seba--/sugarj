@@ -58,6 +58,11 @@ public class Result {
     this.generateFiles = generateFiles;
   }
   
+  void addFileDependency(Path file) throws IOException {
+    allDependentFiles.add(file);
+    generatedFileHashes.put(file, FileCommands.fileHash(file));
+  }
+  
   void addDependency(Path depFile, Environment env) throws IOException {
     dependencies.put(depFile, FileCommands.fileHash(depFile));
     allDependentFiles.addAll(readDependencyFile(depFile, env).getFileDependencies(env));

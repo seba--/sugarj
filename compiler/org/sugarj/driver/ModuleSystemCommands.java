@@ -48,6 +48,10 @@ public class ModuleSystemCommands {
     return true;
   }
   
+  public static void registerSearchedClassFiles(String modulePath, Result driverResult, Environment environment) throws IOException {
+    registerSearchedFiles(modulePath, ".class", driverResult, environment);
+  }
+  
   /**
    * 
    * @param modulePath
@@ -67,6 +71,11 @@ public class ModuleSystemCommands {
     return sdf;
   }
   
+  public static void registerSearchedSdfFiles(String modulePath, Result driverResult, Environment environment) throws IOException {
+    registerSearchedFiles(modulePath, ".sdf", driverResult, environment);
+  }
+
+  
   /**
    * 
    * @param modulePath
@@ -85,6 +94,11 @@ public class ModuleSystemCommands {
     log.log("Found desugaring for " + modulePath);
     return str;
   }
+  
+  public static void registerSearchedStrategoFiles(String modulePath, Result driverResult, Environment environment) throws IOException {
+    registerSearchedFiles(modulePath, ".str", driverResult, environment);
+  }
+
   
   /**
    * 
@@ -112,6 +126,12 @@ public class ModuleSystemCommands {
       log.endTask();
     }
   }
+  
+  public static void registerSearchedEditorServicesFiles(String modulePath, Result driverResult, Environment environment) throws IOException {
+    registerSearchedFiles(modulePath, ".serv", driverResult, environment);
+  }
+
+  
   
   public static RelativeSourceLocationPath locateSourceFile(String modulePath, Set<SourceLocation> sourcePath) {
     if (modulePath.startsWith("org/sugarj"))
@@ -204,5 +224,23 @@ public class ModuleSystemCommands {
     }
     
     return null;
+  }
+  
+  
+  
+  public static void registerSearchedFiles(String relativePath, String extension, Result driverResult, Environment environment) throws IOException {
+    RelativePath binFile = environment.new RelativePathBin(relativePath + extension);
+    driverResult.addFileDependency(binFile);
+    
+    for (Path searchPath : environment.getIncludePath()) {
+      String relPath = relativePath;
+      if (relPath.startsWith(searchPath.getAbsolutePath())) {
+        int sepOffset = relativePath.endsWith(Environment.sep) ? 0 : 1;
+        relPath = relPath.substring(searchPath.getAbsolutePath().length() + sepOffset);
+      }
+      
+      RelativePath p = new RelativePath(searchPath, relPath + extension);
+      driverResult.addFileDependency(p);
+    }
   }
 }

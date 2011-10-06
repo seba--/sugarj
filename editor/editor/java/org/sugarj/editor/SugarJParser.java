@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.jsglr.client.InvalidParseTableException;
 import org.spoofax.jsglr.client.KeywordRecognizer;
 import org.spoofax.jsglr.client.imploder.IToken;
@@ -65,16 +64,22 @@ public class SugarJParser extends JSGLRI {
     
     assert environment != null;
     
-    result = getResult(filename);
-    
-    if (input.contains(ContentProposer.COMPLETION_TOKEN) && result != null && result.getParseTable() != null)
-      return parseCompletionTree(input, filename);
-      
+
+    this.result = null;
+    Result result = getResult(filename);
+
     if (result == null)
       result = parseFailureResult();
 
-    if (result.isUpToDateShallow(input.hashCode(), environment))
+    if (input.contains(ContentProposer.COMPLETION_TOKEN) && result != null && result.getParseTable() != null) {
+      this.result = result;
+      return parseCompletionTree(input, filename, result);
+    }
+
+    if (result.isUpToDateShallow(input.hashCode(), environment)) {
+      this.result = result;
       return result.getSugaredSyntaxTree();
+    }
     
     if (!isPending(filename)) 
       scheduleParse(input, filename);
@@ -124,6 +129,7 @@ public class SugarJParser extends JSGLRI {
           org.strategoxt.imp.runtime.Environment.logException(e);
         } finally {
           monitor.done();
+          SugarJParser.this.result = result;
           if (result != null) {
             SugarJParser.putResult(filename, result);
             getController().scheduleParserUpdate(0, false);
@@ -173,7 +179,6 @@ public class SugarJParser extends JSGLRI {
   }
 
   private static Result getResult(String file) {
-    
     synchronized (results) {
       return results.get(file);
     }
@@ -213,7 +218,7 @@ public class SugarJParser extends JSGLRI {
     return r;
   }
   
-  private IStrategoTerm parseCompletionTree(String input, String filename) throws IOException, TokenExpectedException, BadTokenException, SGLRException {
+  private IStrategoTerm parseCompletionTree(String input, String filename, Result result) throws IOException, TokenExpectedException, BadTokenException, SGLRException {
     JSGLRI jsglri = null;
     try {
       jsglri = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(result.getParseTable().getAbsolutePath()), "NextToplevelDeclaration");

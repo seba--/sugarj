@@ -61,7 +61,7 @@ import org.sugarj.util.ProcessingListener;
  */
 public class Driver{
   
-  public final static String CACHE_VERSION = "editor-base-0.15";
+  public final static String CACHE_VERSION = "editor-base-0.16";
   
   private final static int PENDING_TIMEOUT = 120000;
 
@@ -357,8 +357,12 @@ public class Driver{
       if (currentGrammarTBL != null)
         driverResult.registerParseTable(currentGrammarTBL);
       
-      if (currentTransProg != null)
+      if (currentTransProg != null) {
+        driverResult.addEditorService(
+            ATermCommands.atermFromString(
+              "Builders(\"sugarj checking\", [SemanticObserver(Strategy(\"sugarj-analyze\"))])"));
         driverResult.registerEditorDesugarings(currentTransProg);
+      }
 
       driverResult.writeDependencyFile(depOutFile);
 
@@ -888,8 +892,10 @@ public class Driver{
         interp, 
         driverResult,
         environment);
+    ModuleSystemCommands.registerSearchedClassFiles(modulePath, driverResult, environment);
 
     Path sdf = ModuleSystemCommands.importSdf(modulePath, environment);
+    ModuleSystemCommands.registerSearchedSdfFiles(modulePath, driverResult, environment);
     if (sdf != null) {
       success = true;
       availableSDFImports.add(modulePath);
@@ -897,6 +903,7 @@ public class Driver{
     }
     
     Path str = ModuleSystemCommands.importStratego(modulePath, environment);
+    ModuleSystemCommands.registerSearchedStrategoFiles(modulePath, driverResult, environment);
     if (str != null) {
       success = true;
       availableSTRImports.add(modulePath);
@@ -904,6 +911,7 @@ public class Driver{
     }
     
     success |= ModuleSystemCommands.importEditorServices(modulePath, driverResult, environment);
+    ModuleSystemCommands.registerSearchedEditorServicesFiles(modulePath, driverResult, environment);
     
     return success;
   }
@@ -1162,10 +1170,6 @@ public class Driver{
   }
   
   private void initEditorServices() throws IOException, TokenExpectedException, BadTokenException, SGLRException {
-    driverResult.addEditorService(
-        ATermCommands.atermFromString(
-          "Builders(\"sugarj checking\", [SemanticObserver(Strategy(\"sugarj-analyze\"))])"));
-    
     IStrategoTerm initEditor = editorServicesParser.parse(new FileInputStream(StdLib.initEditor.getPath()), StdLib.initEditor.getPath());
     
     IStrategoTerm services = ATermCommands.getApplicationSubterm(initEditor, "Module", 2);

@@ -21,23 +21,26 @@ signature
 rules
   
   desugar = changed-tree(checks-to-sugar)
-  
+
   checks-to-sugar : 
     ChecksDec(ChecksDecHead(mods, name), ChecksBody(rs)) -> SugarDec(SugarDecHead(mods, name), SugarBody(<map(checkingrule-to-sugar)> rs))
+
+  checkingrule-to-sugar :
+    Rules(rs) -> transformation-elem(Rules(rs))
   
   checkingrule-to-sugar :
-    CheckingRuleErrors(r) -> transformation-elem(
-                                   Rules([RDefNoArgs("constraint-error", r)])
+    CheckingRuleErrors(rs) -> transformation-elem(
+                                   Rules(<map(!RDefNoArgs("constraint-error", <id>))> rs)
                                  )
 
   checkingrule-to-sugar :
-    CheckingRuleWarnings(r) -> transformation-elem(
-                                     Rules([RDefNoArgs("constraint-warning", r)])
+    CheckingRuleWarnings(rs) -> transformation-elem(
+                                   Rules(<map(!RDefNoArgs("constraint-warning", <id>))> rs)
                                    )
 
   checkingrule-to-sugar :
-    CheckingRuleNotes(r) -> transformation-elem(
-                                  Rules([RDefNoArgs("constraint-note", r)])
+    CheckingRuleNotes(rs) -> transformation-elem(
+                                   Rules(<map(!RDefNoArgs("constraint-note", <id>))> rs)
                                 )
 
 
