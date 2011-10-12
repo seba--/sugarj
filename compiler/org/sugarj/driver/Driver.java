@@ -135,7 +135,7 @@ public class Driver{
       
       FileCommands.createDir(environment.getBin());
       
-      initializeCaches(environment);
+      initializeCaches(environment, false);
     } catch (IOException e) {
       throw new RuntimeException("error while initializing driver", e);
     }
@@ -852,7 +852,9 @@ public class Driver{
             log.log("Need to compile the imported module first ; processing it now.");
             
             try {
+              storeCaches(environment);
               Result importResult = compile(sourceFile, monitor);
+              initializeCaches(environment, true);
               if (importResult.hasFailed())
                 setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
             } catch (Exception e) {
@@ -1267,7 +1269,7 @@ public class Driver{
   
   
   @SuppressWarnings("unchecked")
-  private void initializeCaches(Environment environment) throws IOException {
+  private void initializeCaches(Environment environment, boolean force) throws IOException {
     if (environment.getCacheDir() == null)
       return;
     
@@ -1285,7 +1287,7 @@ public class Driver{
     Path sdfCachePath = environment.new RelativePathCache("sdfCache");
     Path strCachePath = environment.new RelativePathCache("strCache");
     
-    if (sdfCache == null)
+    if (sdfCache == null || force)
       try {
         // log.log("load sdf cache from " + sdfCachePath);
           sdfCache = reallocate(
@@ -1302,7 +1304,7 @@ public class Driver{
     else if (sdfCache == null)
       sdfCache = new ModuleKeyCache<Path>();
     
-    if (strCache == null)
+    if (strCache == null || force)
       try {
         // log.log("load str cache from " + strCachePath);
         strCache = reallocate(

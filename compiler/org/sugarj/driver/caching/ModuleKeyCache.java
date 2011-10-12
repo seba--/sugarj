@@ -13,6 +13,7 @@ public class ModuleKeyCache<V extends Serializable> extends Cache<ModuleKey, V> 
     k.doPut();
     super.remove(k);
     super.put(k, v);
+    k.doGet();
   }
 
   public V putGet(ModuleKey k, V v) {

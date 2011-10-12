@@ -55,8 +55,11 @@ public class ModuleKey implements Externalizable {
       return false;
     
     ModuleKey k = (ModuleKey) o;
-    return body.equals(k.body) && 
-      (checkGet ? imports.equals(k.imports) : imports.keySet().equals(k.imports.keySet()));
+    
+    if (!body.equals(k.body))
+      return false;
+    
+    return (checkGet ? imports.equals(k.imports) : imports.keySet().equals(k.imports.keySet()));
   }
   
   public int hashCode() {
