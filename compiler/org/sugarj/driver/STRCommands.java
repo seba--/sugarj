@@ -176,7 +176,7 @@ public class STRCommands {
 
       LinkedList<Path> depList = new LinkedList<Path>();
       for (Path file : dependentFiles)
-        if (STR_FILE_PATTERN.matcher(file.getAbsolutePath()).matches())
+        if (STR_FILE_PATTERN.matcher(file.getAbsolutePath()).matches() && FileCommands.exists(file))
           depList.add(file);
       
       return new ModuleKey(depList, aterm);

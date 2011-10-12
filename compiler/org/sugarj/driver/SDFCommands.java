@@ -232,7 +232,7 @@ public class SDFCommands {
 
       LinkedList<Path> depList = new LinkedList<Path>();
       for (Path file : dependentFiles)
-        if (SDF_FILE_PATTERN.matcher(file.getAbsolutePath()).matches())
+        if (SDF_FILE_PATTERN.matcher(file.getAbsolutePath()).matches() && FileCommands.exists(file))
           depList.add(file);
       
       return new ModuleKey(depList, term);
