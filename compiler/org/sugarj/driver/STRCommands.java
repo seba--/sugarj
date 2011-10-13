@@ -1,11 +1,16 @@
 package org.sugarj.driver;
+
 import static org.sugarj.driver.Environment.sep;
 import static org.sugarj.driver.FileCommands.toWindowsPath;
 import static org.sugarj.driver.Log.log;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,6 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.InvalidParseTableException;
 import org.spoofax.jsglr.client.imploder.IToken;
@@ -23,6 +29,7 @@ import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.lang.Context;
+import org.strategoxt.lang.StrategoException;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.strj.main_strj_0_0;
 import org.sugarj.driver.caching.ModuleKey;
@@ -30,6 +37,7 @@ import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
 import org.sugarj.stdlib.StdLib;
+import org.sugarj.util.LoggingOutputStream;
 
 /**
  * This class provides methods for various SDF commands. Each
@@ -69,15 +77,41 @@ public class STRCommands {
         cmd.add("-I");
         cmd.add(path.getAbsolutePath());
       }
-    
+
+    final ByteArrayOutputStream log = new ByteArrayOutputStream();
+
     try {
       // XXX strj does not create Java file with non-fresh context
       Context c = org.strategoxt.strj.strj.init();
+      
+      c.setIOAgent(new IOAgent() {
+        private final PrintStream err = new PrintStream(log, true);
+        private final Writer errWriter = new org.sugarj.util.PrintStreamWriter(err);
+        
+        public Writer getWriter(int fd) {
+            if (fd == CONST_STDERR)
+              return errWriter; 
+            else 
+              return super.getWriter(fd);
+        }
+        
+        public OutputStream internalGetOutputStream(int fd) {
+            if (fd == CONST_STDERR)
+              return err; 
+            else 
+              return super.internalGetOutputStream(fd);
+        }
+      });
+      
       c.invokeStrategyCLI(main_strj_0_0.instance, "strj", cmd.toArray(new String[cmd.size()]));
     }
     catch (StrategoExit e) {
       if (e.getValue() != 0)
-        throw new RuntimeException("STRJ failed", e);
+        throw new StrategoException("STRJ failed", e);
+    } finally {
+      if (log.size() > 0 && !log.toString().contains("Compilation succeeded"))
+        throw new StrategoException(log.toString());
+
     }
   }
   
@@ -98,12 +132,14 @@ public class STRCommands {
                                           String main,
                                           Context strjContext,
                                           Collection<Path> paths) throws IOException {
+    boolean success = false;
     log.beginTask("Generating", "Generate the assimilator");
     try {
       Path dir = FileCommands.newTempDir();
       FileCommands.createDir(new RelativePath(dir, "sugarj"));
       String javaFilename = FileCommands.fileName(str).replace("-", "_");
       Path java = new RelativePath(dir, "sugarj" + sep + javaFilename + ".java");
+      log.log("calling STRJ");
       strj(str, java, main, strjContext, paths);
       
       if (!JavaCommands.javac(java, dir, paths))
@@ -115,9 +151,10 @@ public class STRCommands {
       FileCommands.deleteTempFiles(dir);
       FileCommands.deleteTempFiles(java);
 
+      success = jarfile != null;
       return jarfile;
     } finally {
-      log.endTask();
+      log.endTask(success);
     }
   }
     

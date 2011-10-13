@@ -711,13 +711,10 @@ public class Driver{
       currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
 
       return STRCommands.assimilate(currentTransProg, term, interp);
-    } catch (RuntimeException e) {
+    } catch (StrategoException e) {
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
       
-      if (!(e instanceof StrategoException))
-        e.printStackTrace();
-      else
-        log.logErr(msg);
+      log.logErr(msg);
 
       setErrorMessage(term, msg);
       return term;
@@ -1157,14 +1154,9 @@ public class Driver{
     try {
       FileCommands.deleteTempFiles(currentTransProg);
       currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
-    } catch (RuntimeException e) {
+    } catch (StrategoException e) {
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
-      
-      if (!(e instanceof StrategoException))
-        e.printStackTrace();
-      else
-        log.logErr(msg);
-
+      log.logErr(msg);
       setErrorMessage(lastSugaredToplevelDecl, msg);
     } finally {
       log.endTask();
