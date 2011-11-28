@@ -1,0 +1,55 @@
+package oneoone;
+
+import concretesyntax.Java;
+
+/**
+ * @author Sebastian Erdweg <seba at informatik uni-marburg de>
+ */
+public sugar Sugar {
+  context-free syntax
+    "company" JavaId "{" Department* "}" -> Company {cons("Company")}
+    "department" JavaId "{" Manager Employee* Subunit* "}" -> Department {cons("Department")}
+    Department -> Subunit {cons("Subunit")}
+    "employee" Person -> Employee {cons("Employee")}
+    "manager" Person -> Manager {cons("Manager")}
+    JavaId "{" "address" JavaStringLiteral "salary" JavaDeciLiteral "}" -> Person {cons("Person") }
+
+
+  context-free syntax
+    Company -> JavaExpr
+    
+  desugarings
+    des
+
+  rules
+    des-list : (t, l) -> <list-exp> (TypeName(Id(t)), ArrayInit(<map(des)> l)) 
+    list-exp :
+      (t, init) ->
+      |[ java.util.Arrays.asList(new ~t[] ~init)) ]|
+
+
+    des :
+      Company(name, depts) ->
+      |[ new Company(~id:name, java_e) ]|
+     where <des-list> ("Department", depts) => java_e
+    
+    des :
+      Department(name, mgr, empls, subs) ->
+      |[ new Department(~id:name, java_e1, java_e2, java_e3) ]|
+     where <des> mgr => java_e1;
+           <des-list> ("Employee", empls) => java_e2;
+           <des-list> ("Department", subs) => java_e3
+
+    des :
+      Subunit(dept) -> <des> dept
+
+    des :
+      Employee(Person(name, addr, java_i)) ->
+      |[ new Employee(~id:name, java_e, java_i) ]|
+     where <!Lit(<id>)> addr => java_e 
+
+    des :
+      Manager(Person(name, addr, java_i)) ->
+      |[ new Manager(~id:name, java_e, java_i) ]|
+     where <!Lit(<id>)> addr => java_e 
+}
