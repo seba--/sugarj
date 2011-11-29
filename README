@@ -14,7 +14,7 @@ Installation
 
 In addition, please ensure enough stack space (about 4-16 MB) is available for
 the SDF parser. You can set the stack space of your Java runtime using the
--Xss16m command line argument when starting Eclipse or setting -Xss16m in you
+-Xss16m command line argument when starting Eclipse or setting -Xss16m in your
 eclipse.ini file.
 
 
