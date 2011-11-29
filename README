@@ -8,7 +8,8 @@ Installation
 2. Start Eclipse.
 3. In Eclipse, select 'Install New Software' in the 'Help' menu.
 4. In the 'work with' field, copy the SugarJ update site http://update.sugarj.org and hit enter.
-5. Select the latest instance of Sugarclipse and click continue. This will
+5. Be sure to deselect the 'Group items by category' checkbox on the bottom of the window.
+6. Select the latest instance of Sugarclipse and click continue. This will
    install the SugarJ compiler, Spoofax and the Sugarclipse plugin.
 
 
