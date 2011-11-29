@@ -1,0 +1,84 @@
+SugarJ Eclipse plugin (recommended)
+===================================
+
+Installation
+------------
+
+1. Install Eclipse (follow instructions on eclipse.org).
+2. Start Eclipse.
+3. In Eclipse, select 'Install New Software' in the 'Help' menu.
+4. In the 'work with' field, copy the SugarJ update site http://update.sugarj.org and hit enter.
+5. Select the latest instance of Sugarclipse and click continue. This will
+   install the SugarJ compiler, Spoofax and the Sugarclipse plugin.
+
+
+In addition, please ensure enough stack space (about 4-16 MB) is available for
+the SDF parser. You can set the stack space of your Java runtime using the
+-Xss16m command line argument when starting Eclipse or setting -Xss16m in you
+eclipse.ini file.
+
+
+Setting up a SugarJ project
+---------------------------
+
+1. Create a new Java project.
+2. As for now, we need to register the SugarJ builder for this project by hand:
+   Open your project's '.project' file in any text editor and replace the Java
+   build command by the following code:
+     <buildCommand>
+       <name>org.sugarj.editor.SugarJBuilder</name>
+       <arguments></arguments>
+     </buildCommand> 
+3. We're ready to go. Note: SugarJ source files must have the file extension
+   ".sugj".
+
+
+
+SugarJ standalone compiler
+==========================
+
+
+Installing SugarJ
+-----------------
+
+The SugarJ compiler is almost self-contained and only requires an installation
+of a Java runtime version 6 or higher.
+
+
+Invoking SugarJ
+---------------
+
+We have included a shell script `sugarjc.sh` for calling the SugarJ
+compiler. Its main duty is to include the numerous library dependencies in the
+class path. The script also sets up a few useful compiler options.
+
+> ./sugarjc.sh --sourcepath case-studies/ \
+>    javaclosure/Closure.sugj \
+>    javaclosure/concrete/Sugar.sugj \
+>    javaclosure/concrete/Test.sugj
+
+
+Compiler options
+----------------
+
+    --atomic-imports         Parse all import statements simultaneously.
+    --buildpath <arg>        Specify where to find compiled files.
+                             Multiple paths can be given separated by ':'.
+    --cache <arg>            Specifiy a directory for caching.
+    --cache-info             show where files are cached
+    -d <arg>                 Specify where to place compiled files
+    --full-command-line      show all arguments to subprocesses
+    --gen-java               Generate the resulting Java file in the
+                             source folder.
+    --help                   Print this synopsis of options
+    --imports-changed        Declare that the imported modules have
+                             changed since last compilation.
+    --no-checing             Do not check resulting SDF and Stratego
+                             files.
+    --read-only-cache        Specify the cache to be read-only.
+    --silent-execution       try to be silent
+    --sourcepath <arg>       Specify where to find source files. Multiple
+                             paths can be given separated by ':'.
+    --sub-silent-execution   do not display output of subprocesses
+     -v,--verbose            show verbose output
+    --write-only-cache       Specify the cache to be write-only.
