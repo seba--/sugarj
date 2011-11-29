@@ -7,8 +7,10 @@ Installation
 1. Install Eclipse (follow instructions on eclipse.org).
 2. Start Eclipse.
 3. In Eclipse, select 'Install New Software' in the 'Help' menu.
-4. In the 'work with' field, copy the SugarJ update site http://update.sugarj.org and hit enter.
-5. Be sure to deselect the 'Group items by category' checkbox on the bottom of the window.
+4. In the 'work with' field, copy the SugarJ update site
+   http://update.sugarj.org and hit enter.
+5. Be sure to deselect the 'Group items by category' checkbox on the bottom of
+   the window.
 6. Select the latest instance of Sugarclipse and click continue. This will
    install the SugarJ compiler, Spoofax and the Sugarclipse plugin.
 
@@ -43,20 +45,19 @@ Installing SugarJ
 -----------------
 
 The SugarJ compiler is almost self-contained and only requires an installation
-of a Java runtime version 6 or higher.
+of a Java runtime version 6 or higher. Download and compile the SugarJ compiler
+as well as the standard library (stdlib).
 
 
 Invoking SugarJ
 ---------------
 
-We have included a shell script `sugarjc.sh` for calling the SugarJ
-compiler. Its main duty is to include the numerous library dependencies in the
-class path. The script also sets up a few useful compiler options.
+The main class of the compiler is org.sugarj.driver.Driver. You can invoke the
+SugarJ compiler like this:
 
-> ./sugarjc.sh --sourcepath case-studies/ \
->    javaclosure/Closure.sugj \
->    javaclosure/concrete/Sugar.sugj \
->    javaclosure/concrete/Test.sugj
+    java -Xss64M -Xmx1024M \
+      -cp bin:strategoxt.jar:commons-cli-1.2.jar:commons-collections-3.2.1.jar:make_permissive.jar \
+       org.sugarj.driver.Driver <source_file>
 
 
 Compiler options
