@@ -6,6 +6,7 @@ imports org/sugarj/languages/Java
         org/sugarj/languages/Stratego
         org/sugarj/languages/EditorServices
         org/sugarj/languages/Plain
+        org/sugarj/languages/ModelDriven
 
 exports
   sorts WATER WATERTOKEN WATERTOKENSTART WATERTOKENSEPARATOR WATERTOKENSTAR

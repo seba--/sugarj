@@ -4,6 +4,7 @@ imports libstrategolib
 
 imports org/sugarj/transformations/GenerateSignatures
         org/sugarj/transformations/EditorServiceExtension
+        org/sugarj/transformations/ModelDrivenTransformation
 
 signature constructors
   NextToplevelDeclaration : ToplevelDeclaration * Rest -> NextToplevelDeclaration
