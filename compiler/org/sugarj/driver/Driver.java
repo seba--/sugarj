@@ -38,6 +38,7 @@ import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
+import org.strategoxt.eclipse.ant.StrategoJarAntPropertyProvider;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoException;
@@ -55,6 +56,7 @@ import org.sugarj.driver.path.SourceLocation;
 import org.sugarj.driver.transformations.extraction.extraction;
 import org.sugarj.stdlib.StdLib;
 import org.sugarj.util.ProcessingListener;
+import org.sugarj.util.ToplevelDeclarationProvider;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -66,7 +68,7 @@ public class Driver{
   private final static int PENDING_TIMEOUT = 120000;
 
   private static Map<Path, Result> resultCache = new HashMap<Path, Result>(); // new LRUMap(50);
-  private static Map<Path, Entry<String, Driver>> pendingRuns = new HashMap<Path, Map.Entry<String,Driver>>();
+  private static Map<Path, Entry<ToplevelDeclarationProvider, Driver>> pendingRuns = new HashMap<Path, Map.Entry<ToplevelDeclarationProvider,Driver>>();
 
   private static List<RelativeSourceLocationPath> allInputFiles = new ArrayList<RelativeSourceLocationPath>();
   private static List<Path> pendingInputFiles = new ArrayList<Path>();
@@ -83,6 +85,7 @@ public class Driver{
   
   private Path javaOutFile;
   private Path depOutFile;
+  private Path modelOutFile;
   private String relPackageName;
   private RelativeSourceLocationPath sourceFile;
 
@@ -90,25 +93,22 @@ public class Driver{
   private String currentGrammarModule;
   private Path currentTransSTR;
   private String currentTransModule;
-  private String remainingInput;
-  
-  // private Collection<String> dependentFiles;
-
-  private List<String> availableSDFImports;
-  private List<String> availableSTRImports;
+  private List<RelativePath> availableSDFImports;
+  private List<RelativePath> availableSTRImports;
   
   private IStrategoTerm sugaredPackageDecl;
+  private IStrategoTerm desugaredPackageDecl;
   private List<IStrategoTerm> sugaredImportDecls = new ArrayList<IStrategoTerm>();
-  private List<IStrategoTerm> sugaredTypeOrSugarDecls = new ArrayList<IStrategoTerm>();
+  private List<IStrategoTerm> desugaredImportDecls = new ArrayList<IStrategoTerm>();
+  private List<IStrategoTerm> sugaredBodyDecls = new ArrayList<IStrategoTerm>();
+  private List<IStrategoTerm> desugaredBodyDecls = new ArrayList<IStrategoTerm>();
   
   private IStrategoTerm lastSugaredToplevelDecl;
   
-  private RetractableTreeBuilder inputTreeBuilder;
   private JSGLRI sdfParser;
   private JSGLRI strParser;
   private JSGLRI editorServicesParser;
   private HybridInterpreter interp;
-  private JSGLRI parser;
   private Context sdfContext;
   private Context makePermissiveContext;
   private Context extractionContext;
@@ -125,6 +125,10 @@ public class Driver{
   private boolean generateFiles;
   
   private List<Path> generatedJavaClasses = new ArrayList<Path>();
+  
+  private ToplevelDeclarationProvider declProvider;
+
+  private RetractableTreeBuilder inputTreeBuilder;
   
   public Driver(Environment env) {
     this.environment=env;
@@ -146,12 +150,12 @@ public class Driver{
     return (Result) resultCache.get(file);
   }
   
-  private static synchronized Entry<String, Driver> getPendingRun(Path file) {
+  private static synchronized Entry<ToplevelDeclarationProvider, Driver> getPendingRun(Path file) {
     return pendingRuns.get(file);
   }
   
-  private static synchronized void putPendingRun(Path file, String source, Driver driver) {
-    pendingRuns.put(file, new AbstractMap.SimpleImmutableEntry<String, Driver>(source, driver));
+  private static synchronized void putPendingRun(Path file, ToplevelDeclarationProvider source, Driver driver) {
+    pendingRuns.put(file, new AbstractMap.SimpleImmutableEntry<ToplevelDeclarationProvider, Driver>(source, driver));
   }
   
   public static synchronized void addProcessingDoneListener(ProcessingListener listener) {
@@ -205,6 +209,14 @@ public class Driver{
     return run(source, sourceFile, monitor, false);
   }
 
+  public static Result compile(IStrategoTerm source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    return run(source, sourceFile, monitor, true);
+  }
+
+  public static Result parse(IStrategoTerm source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    return run(source, sourceFile, monitor, false);
+  }
+
   private static Result run(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     if (generateFiles)
       synchronized (currentlyProcessing) {
@@ -233,28 +245,40 @@ public class Driver{
   
   private static Result run(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     Driver driver = new Driver(sourceFile.getSourceLocation().getEnvironment());
-    Entry<String, Driver> pending = null;
+    ToplevelDeclarationProvider declProvider = driver.new SourceCodeToplevelDeclarationProvider(source);
+    return run(driver, declProvider, sourceFile, monitor, generateFiles);
+  }
+  
+  private static Result run(IStrategoTerm source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    Driver driver = new Driver(sourceFile.getSourceLocation().getEnvironment());
+    ToplevelDeclarationProvider declProvider = driver.new TermToplevelDeclarationProvider(source);
+    return run(driver, declProvider, sourceFile, monitor, generateFiles);
+  }
+  
+  
+  private static Result run(Driver driver, ToplevelDeclarationProvider declProvider, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    Entry<ToplevelDeclarationProvider, Driver> pending = null;
     
     synchronized (Driver.class) {
       pending = getPendingRun(sourceFile);
-      if (pending != null && !pending.getKey().equals(source)) {
+      if (pending != null && !pending.getKey().equals(declProvider)) {
         log.log("interrupting " + sourceFile);
         pending.getValue().interrupt();
       }
 
       if (pending == null) {
         Result result = getResult(sourceFile);
-        if (result != null && result.isUpToDate(source.hashCode(), sourceFile.getSourceLocation().getEnvironment()))
+        if (result != null && result.isUpToDate(declProvider.getSourceHashCode(), sourceFile.getSourceLocation().getEnvironment()))
           return result;
       }
       
       if (pending == null)
-        putPendingRun(sourceFile, source, driver);
+        putPendingRun(sourceFile, declProvider, driver);
     }
     
     if (pending != null) {
       waitForPending(sourceFile);
-      return run(source, sourceFile, monitor, generateFiles);
+      return run(driver, declProvider, sourceFile, monitor, generateFiles);
     }
     
     try {
@@ -263,7 +287,7 @@ public class Driver{
           listener.processingStarts(sourceFile);
       }
     
-      driver.process(source, sourceFile, monitor, generateFiles);
+      driver.process(declProvider, sourceFile, monitor, generateFiles);
       if (!Environment.rocache)
         driver.storeCaches(sourceFile.getSourceLocation().getEnvironment());
     
@@ -292,47 +316,44 @@ public class Driver{
    * @throws TokenExpectedException 
    * @throws InterruptedException 
    */
-  private void process(String source, RelativePath sourceFile, IProgressMonitor monitor, boolean generateFiles) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private void process(ToplevelDeclarationProvider declProvider, RelativePath sourceFile, IProgressMonitor monitor, boolean generateFiles) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     this.monitor = monitor;
     log.beginTask("processing", "BEGIN PROCESSING " + sourceFile.getRelativePath());
     boolean success = false;
     try {
-      init(sourceFile, generateFiles);
-      driverResult.setSourceFile(this.sourceFile, source.hashCode());
+      init(declProvider, sourceFile, generateFiles);
+      driverResult.setSourceFile(this.sourceFile, declProvider.getSourceHashCode());
       
       if (sourceFile != null) {
         javaOutFile = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".java");
         depOutFile = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".dep");
+        modelOutFile = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".model");
         Path genLog = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".gen");
         driverResult.setGenerationLog(genLog);
-        clearGeneratedStuff();
+//        clearGeneratedStuff();
       }
 
-      remainingInput = source;
-  
       initEditorServices();
 
       boolean done = false;
       while (!done) {
         stepped();
         
-        // PARSE the next top-level declaration
-        IncrementalParseResult parseResult =
-            parseNextToplevelDeclaration(remainingInput, true);
-        lastSugaredToplevelDecl = parseResult.getToplevelDecl();
-        remainingInput = parseResult.getRest();
         
+        // PARSE the next top-level declaration
+        lastSugaredToplevelDecl = declProvider.getNextToplevelDecl(true);
+       
         stepped();
         
         // DESUGAR the parsed top-level declaration
-        IStrategoTerm desugared = currentDesugar(lastSugaredToplevelDecl);
+        IStrategoTerm desugared = declProvider.desugarToplevelDecl(lastSugaredToplevelDecl);
         
         stepped();
         
         // PROCESS the assimilated top-level declaration
         processToplevelDeclaration(desugared);
 
-        done = parseResult.parsingFinished();
+        done = !declProvider.hasNextToplevelDecl();
       }
       
       stepped();
@@ -349,10 +370,16 @@ public class Driver{
       
       stepped();
       
-      // COMPILE the generated java file
-      compileGeneratedJavaFile();
+      if (environment.isModelDrivenProcessing() && !environment.isModelCompilation()) {
+        driverResult.generateFile(modelOutFile, ATermCommands.atermToString(makeDesugaredSyntaxTree()));
+      } 
+      else {
+        // COMPILE the generated java file
+        compileGeneratedJavaFile();
+      }
       
-      driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
+       driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
+      
       
       if (currentGrammarTBL != null)
         driverResult.registerParseTable(currentGrammarTBL);
@@ -363,8 +390,9 @@ public class Driver{
               "Builders(\"sugarj checking\", [SemanticObserver(Strategy(\"sugarj-analyze\"))])"));
         driverResult.registerEditorDesugarings(currentTransProg);
       }
-
-      driverResult.writeDependencyFile(depOutFile);
+      
+      if (!environment.isModelDrivenProcessing() || !environment.isModelCompilation())
+        driverResult.writeDependencyFile(depOutFile);
 
       success = true;
     } 
@@ -383,101 +411,20 @@ public class Driver{
     boolean good = false;
     log.beginTask("compilation", "COMPILE the generated java file");
     try {
-      driverResult.compileJava(javaOutFile, environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), generatedJavaClasses);
+        driverResult.compileJava(javaOutFile, environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), generatedJavaClasses);
       good = true;
     } finally {
       log.endTask(good, "compilation succeeded", "compilation failed");
     }
   }
 
-  private IncrementalParseResult parseNextToplevelDeclaration(String input, boolean recovery)
-      throws IOException, ParseException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
-    int start = inputTreeBuilder.getTokenizer() == null ? 0 : inputTreeBuilder.getTokenizer().getStartOffset();
-    log.beginTask("parsing", "PARSE the next toplevel declaration.");
-    try {
-      IStrategoTerm remainingInputTerm = null;
-      
-      try {
-        remainingInputTerm = currentParse(input, recovery);
-      } catch (Exception e) {
-        if (recovery) {
-          e.printStackTrace();
-          remainingInputTerm = currentParse(input, false);
-        }
-        
-        if (remainingInputTerm == null)
-          throw e;
-      }
-
-      if (remainingInputTerm == null)
-        throw new ParseException("could not parse toplevel declaration in:\n"
-            + input, -1);
-
-      if (!isApplication(remainingInputTerm, "NextToplevelDeclaration"))
-        throw new ATermCommands.MatchError(remainingInputTerm, "NextToplevelDeclaration");
-      
-      IStrategoTerm toplevelDecl = getApplicationSubterm(remainingInputTerm, "NextToplevelDeclaration", 0);
-      IStrategoTerm restTerm = getApplicationSubterm(remainingInputTerm, "NextToplevelDeclaration", 1);
-      String rest = getString(restTerm);
-
-      if (input.equals(rest))
-        throw new SGLRException(parser.getParser(), "empty toplevel declaration parse rule");
-      
-      try {
-        if (!rest.isEmpty())
-          inputTreeBuilder.retract(restTerm);
-      } catch (Throwable t) {
-        t.printStackTrace();
-      }
-      
-      if (toplevelDecl == null || rest == null)
-        throw new ParseException(
-            "could not parse next toplevel declaration in:\n"
-                + remainingInputTerm.toString(),
-            -1);
-      
-      Path tmpFile = FileCommands.newTempFile("aterm");
-      FileCommands.writeToFile(tmpFile, toplevelDecl.toString());
-      log.log("next toplevel declaration parsed: " + tmpFile);
-
-      return new IncrementalParseResult(toplevelDecl, rest);
-    } catch (Exception e) {
-      if (!recovery)
-        throw new SGLRException(parser.getParser(), "parsing failed", e);
-      
-      String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
-      
-      if (!(e instanceof StrategoException) && !(e instanceof SGLRException))
-        e.printStackTrace();
-      else
-        log.logErr(msg);
-      
-      if (inputTreeBuilder.getTokenizer().getStartOffset() > start) {
-        IToken token = inputTreeBuilder.getTokenizer().getTokenAtOffset(start);
-        ((RetractableTokenizer) inputTreeBuilder.getTokenizer()).retractTo(token.getIndex());
-        inputTreeBuilder.setOffset(start);
-      }
-      
-      IToken right = inputTreeBuilder.getTokenizer().makeToken(start + input.length() - 1, IToken.TK_STRING, true);
-      IToken left = inputTreeBuilder.getTokenizer().getTokenAtOffset(start);
-      inputTreeBuilder.getTokenizer().makeToken(inputTreeBuilder.getTokenizer().getStartOffset() - 1, IToken.TK_EOF, true);
-      IStrategoTerm term = ATermCommands.factory.makeString(input);
-      ImploderAttachment.putImploderAttachment(term, false, "String", left, right);
-      setErrorMessage(term, msg);
-      return new IncrementalParseResult(term, "");
-    } finally {
-      log.endTask();
-    }
-  }
-
-  
   private void processEditorServicesDec(IStrategoTerm toplevelDecl) throws IOException {
     log.beginTask(
         "processing",
         "PROCESS the desugared editor services declaration.");
     try {
-      if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
-        sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
+        sugaredBodyDecls.add(lastSugaredToplevelDecl);
       
       String extName = null;
       String fullExtName = null;
@@ -549,8 +496,8 @@ public class Driver{
         "processing",
         "PROCESS the desugared plain declaration.");
     try {
-      if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
-        sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
+        sugaredBodyDecls.add(lastSugaredToplevelDecl);
 
       
       String extName = null;
@@ -621,12 +568,24 @@ public class Driver{
       if (depOutFile == null)
         depOutFile = environment.new RelativePathBin(relPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       try {
-        if (isApplication(toplevelDecl, "TypeImportDec") || isApplication(toplevelDecl, "TypeImportOnDemandDec")) {
+        if (isApplication(toplevelDecl, "TypeImportDec") || isApplication(toplevelDecl, "TypeImportOnDemandDec") || isApplication(toplevelDecl, "TransImportDec")) {
           if (!environment.isAtomicImportParsing())
             processImportDec(toplevelDecl);
           else 
             processImportDecs(toplevelDecl);
         }
+        else if (ATermCommands.isList(toplevelDecl))
+          /* 
+           * Desugarings may generate lists of toplevel declarations. These declarations,
+           * however, may not depend on one another.
+           */
+          for (IStrategoTerm term : ATermCommands.getList(toplevelDecl))
+            processToplevelDeclaration(term);
+        /*
+         * model driven development
+         */
+        else if (environment.isModelDrivenProcessing() && !environment.isModelCompilation())
+          processModel(toplevelDecl);
         else if (isApplication(toplevelDecl, "JavaTypeDec") || //XXX remove this branch
                  isApplication(toplevelDecl, "ClassDec") ||
                  isApplication(toplevelDecl, "InterfaceDec") ||
@@ -639,16 +598,9 @@ public class Driver{
           processEditorServicesDec(toplevelDecl);
         else if (isApplication(toplevelDecl, "PlainDec")) 
           processPlainDec(toplevelDecl);
-        else if (ATermCommands.isList(toplevelDecl))
-          /* 
-           * Desugarings may generate lists of toplevel declarations. These declarations,
-           * however, may not depend on one another.
-           */
-          for (IStrategoTerm term : ATermCommands.getList(toplevelDecl))
-            processToplevelDeclaration(term);
         else if (ATermCommands.isString(toplevelDecl)) {
-          if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
-            sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+          if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
+            sugaredBodyDecls.add(lastSugaredToplevelDecl);
         }
         else
           throw new IllegalArgumentException("unexpected toplevel declaration, desugaring probably failed: " + toplevelDecl.toString(5));
@@ -661,65 +613,10 @@ public class Driver{
           log.logErr(msg);
 
         setErrorMessage(toplevelDecl, msg);
-        if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
-          sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+        if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
+          sugaredBodyDecls.add(lastSugaredToplevelDecl);
 
       }
-    }
-  }
-
-  private IStrategoTerm currentParse(String remainingInput, boolean recovery) throws IOException,
-      InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
-    // recompile the current grammar definition
-    currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfContext, makePermissiveContext, sdfCache, environment);
-//    FileCommands.deleteTempFiles(driverResult.getLastParseTable());
-//    driverResult.setLastParseTable(currentGrammarTBL);
-    ParseTable table = org.strategoxt.imp.runtime.Environment.loadParseTable(currentGrammarTBL.getAbsolutePath());
-    
-    IStrategoTerm parseResult = null;
-
-    parser.setUseRecovery(recovery);
-    
-    // read next toplevel decl and stop if that fails
-    try {
-      parseResult = SDFCommands.parseImplode(
-          table,
-          remainingInput,
-          "NextToplevelDeclaration",
-          false,
-          inputTreeBuilder,
-          parser);
-    } finally {
-      if (recovery) {
-        for (BadTokenException e : parser.getCollectedErrors())
-          driverResult.logParseError(e);
-      }
-    }
-    
-    return parseResult;
-  }
-
-  private IStrategoTerm currentDesugar(IStrategoTerm term) throws IOException,
-      InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
-    // assimilate toplevelDec using current transformation
-
-    log.beginTask(
-        "desugaring",
-        "DESUGAR the current toplevel declaration.");
-    try {
-      FileCommands.deleteTempFiles(currentTransProg);
-      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
-
-      return STRCommands.assimilate(currentTransProg, term, interp);
-    } catch (StrategoException e) {
-      String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
-      
-      log.logErr(msg);
-
-      setErrorMessage(term, msg);
-      return term;
-    } finally {
-      log.endTask();
     }
   }
 
@@ -727,6 +624,7 @@ public class Driver{
     log.beginTask("processing", "PROCESS the desugared package declaration.");
     try {
       sugaredPackageDecl = lastSugaredToplevelDecl;
+      desugaredPackageDecl = toplevelDecl;
       
       String packageName =
           SDFCommands.prettyPrintJava(
@@ -744,8 +642,9 @@ public class Driver{
         javaOutFile = environment.new RelativePathBin(relPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".java");
       if (depOutFile == null)
         depOutFile = environment.new RelativePathBin(relPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
-        
-      driverResult.generateFile(javaOutFile, SDFCommands.prettyPrintJava(toplevelDecl, interp) + "\n");
+      
+      if (!environment.isModelDrivenProcessing() || environment.isModelCompilation())
+        driverResult.generateFile(javaOutFile, SDFCommands.prettyPrintJava(toplevelDecl, interp) + "\n");
     } finally {
       log.endTask();
     }
@@ -767,37 +666,37 @@ public class Driver{
     }
   }
   
+  private void processModel(IStrategoTerm toplevelDecl) {
+    if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
+        sugaredBodyDecls.add(lastSugaredToplevelDecl);
+    desugaredBodyDecls.add(toplevelDecl);
+  }
+  
   private void processImportDecs(IStrategoTerm toplevelDecl) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
     List<IStrategoTerm> pendingImports = new ArrayList<IStrategoTerm>();
     pendingImports.add(toplevelDecl);
     
     while (true) {
-      IncrementalParseResult res = null;
       IStrategoTerm term = null;
       
       try {
         log.beginSilent();
-        res = parseNextToplevelDeclaration(remainingInput, false);
-        term = res.getToplevelDecl();
+        term = declProvider.getNextToplevelDecl(false);
       }
       catch (Throwable t) {
-        res = null;
         term = null;
       }
       finally {         
         log.endSilent(); 
       }
     
-      if (res != null &&
-          term != null &&
+      if (term != null &&
           (isApplication(term, "TypeImportDec") ||
            isApplication(term, "TypeImportOnDemandDec"))) {
-        remainingInput = res.getRest();
         pendingImports.add(term);
       }
       else {
-        if (term != null)
-          inputTreeBuilder.retract(term);
+        declProvider.retract(term);
         break;
       }
     }
@@ -811,18 +710,26 @@ public class Driver{
   private void processImportDec(IStrategoTerm toplevelDecl) {
     
     sugaredImportDecls.add(lastSugaredToplevelDecl);
+    desugaredImportDecls.add(toplevelDecl);
     
     log.beginTask("processing", "PROCESS the desugared import declaration.");
     try {
+      
       String importModule = ModuleSystemCommands.extractImportedModuleName(toplevelDecl, interp);
-
+      List<String> importTransformations = ModuleSystemCommands.extractImportedTransformationNames(toplevelDecl, interp);
+      
       // TODO handle import declarations with asterisks, e.g. import foo.*;
       
       String modulePath = FileCommands.getRelativeModulePath(importModule);
-  
-      if (!modulePath.startsWith("org/sugarj")) {
-        Path dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
-        Result res = null;
+      List<String> transformationPaths = new ArrayList<String>();
+      for (String importTransformation : importTransformations) {
+        transformationPaths.add(FileCommands.getRelativeModulePath(importTransformation));
+      }
+
+      Result res = null;
+      Path dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
+
+      if (!modulePath.startsWith("org.sugarj")) { 
         RelativeSourceLocationPath sourceFile = null;
         
         if (dep != null) {
@@ -846,7 +753,7 @@ public class Driver{
             setErrorMessage(toplevelDecl, "module outdated, compile first: " + importModule);
           }
           else {
-            log.log("Need to compile the imported module first ; processing it now.");
+            log.log("Need to compile the imported module first; processing it now.");
             
             try {
               storeCaches(environment);
@@ -858,18 +765,17 @@ public class Driver{
               setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
             }
               
-            log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
+            log.log("CONTINUE PROCESSING '" + sourceFile + "'.");
           }
         }
         
         if (dep == null)
           dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
-        
         if (dep != null)
           driverResult.addDependency(dep, environment);
       }
       
-      boolean success = processImport(modulePath, toplevelDecl);
+      boolean success = processImport(modulePath, res, dep, transformationPaths, toplevelDecl, false);
       
       if (!success)
         setErrorMessage(toplevelDecl, "module not found: " + importModule);
@@ -881,10 +787,13 @@ public class Driver{
     }
   }
   
-  private boolean processImport(String modulePath, IStrategoTerm importTerm) throws IOException {
+  private boolean processImport(String modulePath, Result importedResult, Path importedResultPath, List<String> transformationPaths, IStrategoTerm importTerm, boolean modelRecursive) throws IOException {
     boolean success = false;
+    if (environment.isModelCompilation() && importedResult != null) {
+      environment.getIncludePath().add(importedResult.getModelBinPath());
+    }
     
-    success |= ModuleSystemCommands.importClass(
+    boolean classImport = ModuleSystemCommands.importClass(
         modulePath, 
         importTerm, 
         javaOutFile,
@@ -892,25 +801,143 @@ public class Driver{
         driverResult,
         environment);
     ModuleSystemCommands.registerSearchedClassFiles(modulePath, driverResult, environment);
+    if (classImport) {
+      success = true;
+      if (!environment.isModelDrivenProcessing()  || environment.isModelCompilation())
+        driverResult.appendToFile(javaOutFile, SDFCommands.prettyPrintJava(importTerm, interp) + "\n");
+    }
 
-    Path sdf = ModuleSystemCommands.importSdf(modulePath, environment);
+    RelativePath sdf = ModuleSystemCommands.importSdf(modulePath, environment);
     ModuleSystemCommands.registerSearchedSdfFiles(modulePath, driverResult, environment);
     if (sdf != null) {
       success = true;
-      availableSDFImports.add(modulePath);
+      availableSDFImports.add(sdf);
       buildCompoundSdfModule();
     }
     
-    Path str = ModuleSystemCommands.importStratego(modulePath, environment);
+    RelativePath str = ModuleSystemCommands.importStratego(modulePath, environment);
     ModuleSystemCommands.registerSearchedStrategoFiles(modulePath, driverResult, environment);
     if (str != null) {
       success = true;
-      availableSTRImports.add(modulePath);
+      availableSTRImports.add(str);
       buildCompoundStrModule();
     }
     
     success |= ModuleSystemCommands.importEditorServices(modulePath, driverResult, environment);
     ModuleSystemCommands.registerSearchedEditorServicesFiles(modulePath, driverResult, environment);
+    
+    
+    if (!modelRecursive && environment.isModelDrivenProcessing() && !environment.isModelCompilation()) {
+      RelativePath model = ModuleSystemCommands.importModel(modulePath, environment);
+      if (model != null) {
+        
+        IStrategoTerm term = ATermCommands.atermFromFile(model.getAbsolutePath());
+        // QST: Which class to use for these paths ?!
+        List<RelativePath> resolvedTransformationPaths = new ArrayList<RelativePath>();
+        
+        log.beginTask("Resolving transformation paths for '"+modulePath+"'.");
+        for (String transformationPath : transformationPaths) {
+          if (!transformationPath.contains("/")) {
+            boolean moduleFound = false;
+            for (RelativePath importPath : availableSTRImports) {
+              if (FileCommands.dropExtension(importPath.getAbsolutePath()).endsWith(transformationPath)) {
+                // QST: Adding only transformationPath correct?
+                resolvedTransformationPaths.add(importPath);
+                moduleFound = true;
+                break;
+              }
+            }
+            if (!moduleFound) {
+              log.logErr("module '"+ transformationPath +"' not found in available imports");
+              // QST: Which Path should be added? Problem with AbsolutePath...
+              resolvedTransformationPaths.add(environment.new RelativePathBin(transformationPath+".str"));
+            }
+          } else {
+            // QST: Use of searchFile correct here?
+            RelativePath p = ModuleSystemCommands.searchFile(transformationPath, ".str", environment);
+            if (p==null)
+              ATermCommands.setErrorMessage(importTerm, "cannot resolve module '"+ transformationPath.replace("/", ".") + "'");
+            else
+              resolvedTransformationPaths.add(p);
+          }
+        }
+        log.endTask();
+        
+        IStrategoTerm transformedTerm = term;
+        for (RelativePath strPath : resolvedTransformationPaths) {
+          Path compoundStr = FileCommands.newTempFile("str");
+          StringBuilder builder = new StringBuilder();
+          builder.append("module ").append(FileCommands.fileName(compoundStr)).append("\n");
+          builder.append("imports ");
+          builder.append(StringCommands.printModuleList(availableSTRImports, " "));
+          builder.append(" ").append(FileCommands.dropExtension(strPath.getRelativePath()));
+          FileCommands.writeToFile(compoundStr, builder.toString());
+          
+          Path trans = null;
+          try {
+            trans = STRCommands.compile(compoundStr, "main-" + FileCommands.fileName(strPath), driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
+          } catch (TokenExpectedException e) {
+          } catch (BadTokenException e) {
+          } catch (InvalidParseTableException e) {
+          } catch (SGLRException e) {
+          }
+          
+          if (trans == null) {
+            ATermCommands.setErrorMessage(importTerm, "compilation of transformation " + FileCommands.fileName(strPath) + " failed");
+            break;
+          }
+          
+          IStrategoTerm newTransformedTerm = STRCommands.assimilate("main-" + FileCommands.fileName(strPath), trans, transformedTerm, interp);
+          
+          if (newTransformedTerm == null) {
+            ATermCommands.setErrorMessage(importTerm, "transformation " + FileCommands.fileName(strPath) + " failed");
+            break;
+          }
+          transformedTerm = newTransformedTerm;
+        }
+
+        Path modelBinPath;
+        if (importedResult != null && importedResult.getModelBinPath() != null)
+          modelBinPath = importedResult.getModelBinPath();
+        else {
+          modelBinPath = FileCommands.newTempDir();
+          importedResult.setModelBinPath(modelBinPath);
+          importedResult.writeDependencyFile(importedResultPath);
+        }
+  
+        Environment modelEnvironment = new Environment();
+        modelEnvironment.setModelDrivenProcessing(true);
+        modelEnvironment.setModelCompilation(true);
+        modelEnvironment.setAtomicImportParsing(environment.isAtomicImportParsing());
+        modelEnvironment.setGenerateJavaFile(environment.isGenerateJavaFile());
+        modelEnvironment.setSourcePath(environment.getSourcePath());
+        modelEnvironment.setRoot(environment.getRoot());
+        modelEnvironment.setBin(modelBinPath);
+        modelEnvironment.getIncludePath().add(environment.getBin());
+        
+        Path modelResultPath = modelEnvironment.new RelativePathBin(modulePath + ".dep");
+        
+        boolean recompile = !FileCommands.exists(modelResultPath) || !Result.readDependencyFile(modelResultPath, modelEnvironment).isUpToDate(model, modelEnvironment);
+        
+        if (recompile) {
+          try {
+            log.log("Need to compile the imported model first; processing it now.");
+            compile(transformedTerm, new RelativeSourceLocationPath(new SourceLocation(model.getBasePath(), modelEnvironment), model.getRelativePath()), monitor);
+          } catch (Exception e) {
+            setErrorMessage(importTerm, "compilation of imported module failed: " + e.getLocalizedMessage());
+          } finally {
+            // QST: setting model compilation to >false< here correct/needed?
+            modelEnvironment.setModelCompilation(false); 
+            log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
+          }
+        }
+          
+        environment.getIncludePath().add(modelBinPath);
+        success = processImport(modulePath, Result.readDependencyFile(modelResultPath, modelEnvironment), modelResultPath, null, importTerm, true);
+      
+      }
+    }
+    
     
     return success;
   }
@@ -921,8 +948,8 @@ public class Driver{
         "PROCESS the desugared Java type declaration.");
     try {
       
-      if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
-        sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
+        sugaredBodyDecls.add(lastSugaredToplevelDecl);
 
       
       log.beginTask("Generate Java code.");
@@ -949,8 +976,8 @@ public class Driver{
         "processing",
         "PROCESS the desugared sugar declaration.");
     try {
-      if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
-        sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
+        sugaredBodyDecls.add(lastSugaredToplevelDecl);
 
       
       boolean isNative;
@@ -1016,11 +1043,11 @@ public class Driver{
         log.endTask();
       }
       
-      Path sdfExtension = environment.new RelativePathBin(relPackageNameSep() + extName + ".sdf");
-      Path strExtension = environment.new RelativePathBin(relPackageNameSep() + extName + ".str");
+      RelativePath sdfExtension = environment.new RelativePathBin(relPackageNameSep() + extName + ".sdf");
+      RelativePath strExtension = environment.new RelativePathBin(relPackageNameSep() + extName + ".str");
       
-      String sdfImports = " imports " + StringCommands.printListSeparated(availableSDFImports, " ") + "\n";
-      String strImports = " imports " + StringCommands.printListSeparated(availableSTRImports, " ") + "\n";
+      String sdfImports = " imports " + StringCommands.printModuleList(availableSDFImports, " ") + "\n";
+      String strImports = " imports " + StringCommands.printModuleList(availableSTRImports, " ") + "\n";
       
       if (isNative) {
         String nativeModule = getString(getApplicationSubterm(body, "NativeSugarBody", 0)); 
@@ -1029,8 +1056,9 @@ public class Driver{
             // remove quotes
           nativeModule = nativeModule.substring(1, nativeModule.length() - 1);
           
-        if (FileCommands.exists(ModuleSystemCommands.searchFile(nativeModule, ".sdf", environment))) {
-          availableSDFImports.add(nativeModule);
+        RelativePath nativeSdf = ModuleSystemCommands.searchFile(nativeModule, ".sdf", environment);
+        if (FileCommands.exists(nativeSdf)) {
+          availableSDFImports.add(nativeSdf);
           driverResult.generateFile(
               sdfExtension, 
               "module " + fullExtName + "\n" 
@@ -1038,8 +1066,9 @@ public class Driver{
               + "imports " + nativeModule);
         }
 
-        if (FileCommands.exists(ModuleSystemCommands.searchFile(nativeModule, ".str", environment))) {
-          availableSTRImports.add(nativeModule);
+        RelativePath nativeStr = ModuleSystemCommands.searchFile(nativeModule, ".str", environment);
+        if (FileCommands.exists(nativeStr)) {
+          availableSTRImports.add(nativeStr);
           driverResult.generateFile(
               strExtension, 
               "module " + fullExtName + "\n" 
@@ -1065,7 +1094,7 @@ public class Driver{
 
         String sdfSource = SDFCommands.makePermissiveSdf(sdfExtensionHead + sdfExtensionContent, makePermissiveContext);
         driverResult.generateFile(sdfExtension, sdfSource);
-        availableSDFImports.add(fullExtName);
+        availableSDFImports.add(sdfExtension);
         
         if (CommandExecution.FULL_COMMAND_LINE && generateFiles)
           log.log("Wrote SDF file to '" + sdfExtension.getAbsolutePath() + "'.");
@@ -1087,7 +1116,7 @@ public class Driver{
           
         
         driverResult.generateFile(strExtension, strExtensionContent);
-        availableSTRImports.add(fullExtName);
+        availableSTRImports.add(strExtension);
         
         if (CommandExecution.FULL_COMMAND_LINE && generateFiles)
           log.log("Wrote Stratego file to '" + strExtension.getAbsolutePath() + "'.");
@@ -1118,8 +1147,7 @@ public class Driver{
     StringBuilder builder = new StringBuilder();
     builder.append("module ").append(currentGrammarModule).append("\n");
     builder.append("imports ");
-    for (String m : availableSDFImports)
-      builder.append(m).append(" ");
+    builder.append(StringCommands.printModuleList(availableSDFImports, " "));
     
     FileCommands.writeToFile(currentGrammarSDF, builder.toString());
   }
@@ -1131,8 +1159,7 @@ public class Driver{
     StringBuilder builder = new StringBuilder();
     builder.append("module ").append(currentTransModule).append("\n");
     builder.append("imports ");
-    for (String m : availableSTRImports)
-      builder.append(m).append(" ");
+    builder.append(StringCommands.printModuleList(availableSTRImports, " "));
     
     FileCommands.writeToFile(currentTransSTR, builder.toString());
   }
@@ -1175,11 +1202,12 @@ public class Driver{
       driverResult.addEditorService(service);
   }
   
-  private void init(RelativePath sourceFile, boolean generateFiles) throws FileNotFoundException, IOException, InvalidParseTableException {
+  private void init(ToplevelDeclarationProvider declProvider, RelativePath sourceFile, boolean generateFiles) throws FileNotFoundException, IOException, InvalidParseTableException {
     javaOutFile = null;
     depOutFile = null;
     // FileCommands.createFile(tmpOutdir, relModulePath + ".java");
 
+    this.declProvider = declProvider;
     this.sourceFile = new RelativeSourceLocationPath(new SourceLocation(sourceFile.getBasePath(), environment), sourceFile);
     this.generateFiles = generateFiles;
     
@@ -1192,17 +1220,14 @@ public class Driver{
     currentTransModule = StdLib.initTransModule;
 
     // list of imports that contain SDF extensions
-    availableSDFImports = new ArrayList<String>();
-    availableSDFImports.add(StdLib.initGrammarModule);
+    availableSDFImports = new ArrayList<RelativePath>();
+    availableSDFImports.add(new RelativePath(new AbsolutePath(StdLib.stdLibDir.getPath()), StdLib.initGrammarModule + ".sdf"));
 
     // list of imports that contain Stratego extensions
-    availableSTRImports = new ArrayList<String>();
-    availableSTRImports.add(StdLib.initTransModule);
+    availableSTRImports = new ArrayList<RelativePath>();
+    availableSTRImports.add(new RelativePath(new AbsolutePath(StdLib.stdLibDir.getPath()), StdLib.initTransModule + ".str"));
 
     inputTreeBuilder = new RetractableTreeBuilder();
-    
-    // XXX need to load ANY parse table, preferably an empty one.
-    parser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.sdfTbl.getPath()), "Sdf2Module");
     
     sdfParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.sdfTbl.getPath()), "Sdf2Module");
     strParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.strategoTbl.getPath()), "StrategoModule");
@@ -1383,11 +1408,11 @@ public class Driver{
   private IStrategoTerm makeSugaredSyntaxTree() {
     
     // XXX empty lists => no tokens
-    IStrategoTerm packageDecl = ATermCommands.makeSome(sugaredPackageDecl, inputTreeBuilder.getTokenizer().getTokenAt(0));
+    IStrategoTerm packageDecl = ATermCommands.makeSome(sugaredPackageDecl, inputTreeBuilder.getTokenizer() == null ? null : inputTreeBuilder.getTokenizer().getTokenAt(0));
     IStrategoTerm imports = 
       ATermCommands.makeList("JavaImportDec*", ImploderAttachment.getRightToken(packageDecl), sugaredImportDecls);
     IStrategoTerm body =
-      ATermCommands.makeList("TypeOrSugarDec*", ImploderAttachment.getRightToken(imports), sugaredTypeOrSugarDecls);
+      ATermCommands.makeList("TypeOrSugarDec*", ImploderAttachment.getRightToken(imports), sugaredBodyDecls);
     
     IStrategoTerm term =
       ATermCommands.makeAppl("SugarCompilationUnit", "SugarCompilationUnit", 3,
@@ -1395,8 +1420,29 @@ public class Driver{
         imports,
         body);
     
-    ImploderAttachment.getTokenizer(term).setAst(term);
-    ImploderAttachment.getTokenizer(term).initAstNodeBinding();
+    if (ImploderAttachment.getTokenizer(term) != null) {
+      ImploderAttachment.getTokenizer(term).setAst(term);
+      ImploderAttachment.getTokenizer(term).initAstNodeBinding();
+    }
+    
+    return term;
+  }
+  
+  /**
+   * @return the desugared syntax tree of the complete file.
+   */
+  private IStrategoTerm makeDesugaredSyntaxTree() {
+    IStrategoTerm packageDecl = ATermCommands.makeSome(desugaredPackageDecl, inputTreeBuilder.getTokenizer() == null ? null : inputTreeBuilder.getTokenizer().getTokenAt(0));
+    IStrategoTerm imports = 
+      ATermCommands.makeList("JavaImportDec*", ImploderAttachment.getRightToken(packageDecl), desugaredImportDecls);
+    IStrategoTerm body =
+      ATermCommands.makeList("TypeOrSugarDec*", ImploderAttachment.getRightToken(imports), desugaredBodyDecls);
+    
+    IStrategoTerm term =
+      ATermCommands.makeAppl("SugarCompilationUnit", "SugarCompilationUnit", 3,
+        packageDecl,
+        imports,
+        body);
     
     return term;
   }
@@ -1446,5 +1492,250 @@ public class Driver{
   private void setErrorMessage(IStrategoTerm toplevelDecl, String msg) {
     driverResult.logError(msg);
     ATermCommands.setErrorMessage(toplevelDecl, msg);
+  }
+  
+  
+  class SourceCodeToplevelDeclarationProvider implements ToplevelDeclarationProvider {
+
+    private String lastRemainingInput;
+    private String remainingInput;
+    private final int hash;
+    private JSGLRI parser;
+
+    public SourceCodeToplevelDeclarationProvider(String source) {
+      this.remainingInput = source;
+      hash = source.hashCode();
+      // XXX need to load ANY parse table, preferably an empty one.
+      try {
+        parser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.sdfTbl.getPath()), "Sdf2Module");
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+    
+    @Override
+    public IStrategoTerm getNextToplevelDecl(boolean recovery) throws IOException, ParseException, InvalidParseTableException, SGLRException {
+      IncrementalParseResult parseResult =
+        parseNextToplevelDeclaration(remainingInput, recovery);
+      lastRemainingInput = remainingInput;
+      remainingInput = parseResult.getRest();
+      return parseResult.getToplevelDecl();
+    }
+
+    private IncrementalParseResult parseNextToplevelDeclaration(String input, boolean recovery) throws IOException, ParseException, InvalidParseTableException, SGLRException {
+      int start = inputTreeBuilder.getTokenizer() == null ? 0 : inputTreeBuilder.getTokenizer().getStartOffset();
+      log.beginTask("parsing", "PARSE the next toplevel declaration.");
+      try {
+        IStrategoTerm remainingInputTerm = null;
+        
+        try {
+          remainingInputTerm = currentParse(input, recovery);
+        } catch (Exception e) {
+          if (recovery) {
+            e.printStackTrace();
+            remainingInputTerm = currentParse(input, false);
+          }
+          
+          if (remainingInputTerm == null)
+            throw e;
+        }
+    
+        if (remainingInputTerm == null)
+          throw new ParseException("could not parse toplevel declaration in:\n"
+              + input, -1);
+    
+        if (!isApplication(remainingInputTerm, "NextToplevelDeclaration"))
+          throw new ATermCommands.MatchError(remainingInputTerm, "NextToplevelDeclaration");
+        
+        IStrategoTerm toplevelDecl = getApplicationSubterm(remainingInputTerm, "NextToplevelDeclaration", 0);
+        IStrategoTerm restTerm = getApplicationSubterm(remainingInputTerm, "NextToplevelDeclaration", 1);
+        String rest = getString(restTerm);
+    
+        if (input.equals(rest))
+          throw new SGLRException(parser.getParser(), "empty toplevel declaration parse rule");
+        
+        try {
+          if (!rest.isEmpty())
+            inputTreeBuilder.retract(restTerm);
+        } catch (Throwable t) {
+          t.printStackTrace();
+        }
+        
+        if (toplevelDecl == null || rest == null)
+          throw new ParseException(
+              "could not parse next toplevel declaration in:\n"
+                  + remainingInputTerm.toString(),
+              -1);
+        
+        Path tmpFile = FileCommands.newTempFile("aterm");
+        FileCommands.writeToFile(tmpFile, toplevelDecl.toString());
+        log.log("next toplevel declaration parsed: " + tmpFile);
+    
+        return new IncrementalParseResult(toplevelDecl, rest);
+      } catch (Exception e) {
+        if (!recovery)
+          throw new SGLRException(parser.getParser(), "parsing failed", e);
+        
+        String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
+        
+        if (!(e instanceof StrategoException) && !(e instanceof SGLRException))
+          e.printStackTrace();
+        else
+          log.logErr(msg);
+        
+        if (inputTreeBuilder.getTokenizer().getStartOffset() > start) {
+          IToken token = inputTreeBuilder.getTokenizer().getTokenAtOffset(start);
+          ((RetractableTokenizer) inputTreeBuilder.getTokenizer()).retractTo(token.getIndex());
+          inputTreeBuilder.setOffset(start);
+        }
+        
+        IToken right = inputTreeBuilder.getTokenizer().makeToken(start + input.length() - 1, IToken.TK_STRING, true);
+        IToken left = inputTreeBuilder.getTokenizer().getTokenAtOffset(start);
+        inputTreeBuilder.getTokenizer().makeToken(inputTreeBuilder.getTokenizer().getStartOffset() - 1, IToken.TK_EOF, true);
+        IStrategoTerm term = ATermCommands.factory.makeString(input);
+        ImploderAttachment.putImploderAttachment(term, false, "String", left, right);
+        setErrorMessage(term, msg);
+        return new IncrementalParseResult(term, "");
+      } finally {
+        log.endTask();
+      }
+    }
+
+    @Override
+    public void retract(IStrategoTerm term) {
+      if (lastRemainingInput == null)
+        throw new IllegalStateException("cannot retract now");
+        
+      if (term != null) {
+        remainingInput = lastRemainingInput;
+        lastRemainingInput = null;
+        inputTreeBuilder.retract(term);
+      }
+    }
+
+    @Override
+    public IStrategoTerm desugarToplevelDecl(IStrategoTerm term) throws TokenExpectedException, BadTokenException, IOException, InvalidParseTableException, SGLRException {
+      return currentDesugar(term);
+    }
+
+
+    private IStrategoTerm currentParse(String remainingInput, boolean recovery) throws IOException,
+        InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+      // recompile the current grammar definition
+      currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfContext, makePermissiveContext, sdfCache, environment);
+    //  FileCommands.deleteTempFiles(driverResult.getLastParseTable());
+    //  driverResult.setLastParseTable(currentGrammarTBL);
+      ParseTable table = org.strategoxt.imp.runtime.Environment.loadParseTable(currentGrammarTBL.getAbsolutePath());
+      
+      IStrategoTerm parseResult = null;
+    
+      parser.setUseRecovery(recovery);
+      
+      // read next toplevel decl and stop if that fails
+      try {
+        parseResult = SDFCommands.parseImplode(
+            table,
+            remainingInput,
+            "NextToplevelDeclaration",
+            false,
+            inputTreeBuilder,
+            parser);
+      } finally {
+        if (recovery) {
+          for (BadTokenException e : parser.getCollectedErrors())
+            driverResult.logParseError(e);
+        }
+      }
+      
+      return parseResult;
+    }
+
+    private IStrategoTerm currentDesugar(IStrategoTerm term) throws IOException,
+        InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+      // assimilate toplevelDec using current transformation
+    
+      log.beginTask(
+          "desugaring",
+          "DESUGAR the current toplevel declaration.");
+      try {
+        FileCommands.deleteTempFiles(currentTransProg);
+        currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
+    
+        return STRCommands.assimilate(currentTransProg, term, interp);
+      } catch (StrategoException e) {
+        String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
+        
+        log.logErr(msg);
+    
+        setErrorMessage(term, msg);
+        return term;
+      } finally {
+        log.endTask();
+      }
+    }
+
+    @Override
+    public boolean hasNextToplevelDecl() {
+      return !remainingInput.isEmpty();
+    }
+
+    @Override
+    public int getSourceHashCode() {
+      return hash;
+    }
+    
+  }
+  
+  
+  class TermToplevelDeclarationProvider implements ToplevelDeclarationProvider {
+
+    private List<IStrategoTerm> terms;
+    int index;
+    
+    public TermToplevelDeclarationProvider(IStrategoTerm source) {
+      IStrategoTerm packageDecOption = ATermCommands.getApplicationSubterm(source, "SugarCompilationUnit", 0);
+      IStrategoTerm importDecs = ATermCommands.getApplicationSubterm(source, "SugarCompilationUnit", 1);
+      IStrategoTerm bodyDecs = ATermCommands.getApplicationSubterm(source, "SugarCompilationUnit", 2);
+      
+      index = 0;
+      terms = new ArrayList<IStrategoTerm>();
+      
+      if (ATermCommands.isApplication(packageDecOption, "Some"))
+        terms.add(ATermCommands.getApplicationSubterm(packageDecOption, "Some", 0));
+      terms.addAll(ATermCommands.getList(importDecs));
+      terms.addAll(ATermCommands.getList(bodyDecs));
+    }
+    
+    @Override
+    public IStrategoTerm getNextToplevelDecl(boolean recovery) {
+      return terms.get(index++);
+    }
+
+    @Override
+    public IStrategoTerm desugarToplevelDecl(IStrategoTerm term) {
+      return term;
+    }
+
+    @Override
+    public boolean hasNextToplevelDecl() {
+      return index < terms.size();
+    }
+
+    @Override
+    public int getSourceHashCode() {
+      return terms.hashCode();
+    }
+
+    @Override
+    public void retract(IStrategoTerm term) {
+      if (index <= 0)
+        throw new IllegalStateException();
+      
+      if (terms.get(index - 1).equals(term))
+        index--;
+      else
+        throw new IllegalArgumentException();
+    }
+    
   }
 }

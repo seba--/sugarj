@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.strategoxt.eclipse.ant.StrategoJarAntPropertyProvider;
 import org.sugarj.driver.path.AbsolutePath;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
@@ -98,11 +99,16 @@ public class Environment implements Serializable {
   private Set<SourceLocation> sourcePath = new HashSet<SourceLocation>();
   private Set<Path> includePath = new HashSet<Path>();
   
+  private boolean modelDrivenProcessing = true;
+
+  private boolean modelCompilation = false;
+  
   public Environment() {
     includePath.add(bin);
     includePath.add(new AbsolutePath(StdLib.stdLibDir.getPath()));
+    includePath.add(new AbsolutePath(new StrategoJarAntPropertyProvider().getAntPropertyValue("")));
   }
-  
+
   public Path getRoot() {
     return root;
   }
@@ -168,6 +174,22 @@ public class Environment implements Serializable {
 
   public void setTmpDir(Path tmpDir) {
     this.tmpDir = tmpDir;
+  }
+
+  public boolean isModelDrivenProcessing() {
+    return modelDrivenProcessing;
+  }
+
+  public void setModelDrivenProcessing(boolean modelDrivenProcessing) {
+    this.modelDrivenProcessing = modelDrivenProcessing;
+  }
+
+  public boolean isModelCompilation() {
+    return modelCompilation;
+  }
+
+  public void setModelCompilation(boolean modelCompilation) {
+    this.modelCompilation = modelCompilation;
   }
 
   public Set<Path> getIncludePath() {

@@ -85,6 +85,7 @@ public class SDFCommands {
       "-Idef", StdLib.strategoDef.getPath(),
       "-Idef", StdLib.editorServicesDef.getPath(),
       "-Idef", StdLib.plainDef.getPath(),
+      "-Idef", StdLib.modeldrivenDef.getPath(),
       "-I", StdLib.stdLibDir.getPath(),
     }));
     

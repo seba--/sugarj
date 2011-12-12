@@ -41,6 +41,7 @@ public class Result {
   private Set<Path> allDependentFiles = new HashSet<Path>();
   private boolean failed = false;
   private Path generationLog;
+  private Path modelBinPath;
 
   private final static Result OUTDATED_RESULT = new Result(true) {
     @Override
@@ -216,7 +217,7 @@ public class Result {
       return;
     
     logGeneration(dep);
-
+    
     ObjectOutputStream oos = null;
     
     try {
@@ -244,6 +245,9 @@ public class Result {
 //      oos.writeObject(parseErrors);
 //      oos.writeObject(generationLog);
 //      oos.writeObject(desugaringsFile);
+      
+      oos.writeObject(modelBinPath);
+      
     } finally {
       if (oos != null)
         oos.close();
@@ -284,6 +288,8 @@ public class Result {
 //      result.generationLog = Path.readPath(ois, env);
 //      result.desugaringsFile = Path.readPath(ois, env);
       
+      result.modelBinPath = Path.readPath(ois, env);
+      
     } catch (FileNotFoundException e) {
       return OUTDATED_RESULT;
     } catch (ClassNotFoundException e) {
@@ -314,5 +320,13 @@ public class Result {
   
   public void setFailed(boolean hasFailed) {
     this.failed = hasFailed;
+  }
+
+  public void setModelBinPath(Path modelBinPath) {
+    this.modelBinPath = modelBinPath;
+  }
+
+  public Path getModelBinPath() {
+    return modelBinPath;
   }
   }

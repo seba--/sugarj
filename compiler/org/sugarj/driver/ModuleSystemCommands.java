@@ -4,11 +4,14 @@ import static org.sugarj.driver.ATermCommands.isApplication;
 import static org.sugarj.driver.Log.log;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -127,12 +130,22 @@ public class ModuleSystemCommands {
     }
   }
   
+
+  public static RelativePath importModel(String modulePath, Environment environment) throws IOException {
+    RelativePath model = searchFile(modulePath, ".model", environment);
+    
+    if (model == null)
+      return null;
+
+    log.log("Found model for " + modulePath);
+    return model;
+  }
+  
+
   public static void registerSearchedEditorServicesFiles(String modulePath, Result driverResult, Environment environment) throws IOException {
     registerSearchedFiles(modulePath, ".serv", driverResult, environment);
   }
 
-  
-  
   public static RelativeSourceLocationPath locateSourceFile(String modulePath, Set<SourceLocation> sourcePath) {
     if (modulePath.startsWith("org/sugarj"))
       return null;
@@ -153,14 +166,34 @@ public class ModuleSystemCommands {
     try {
       if (isApplication(toplevelDecl, "TypeImportDec"))
         name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp);
-      
       if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
         name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp) + ".*";
+      if (isApplication(toplevelDecl, "TransImportDec"))
+        name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp);
     } finally {
       log.endTask(name);
     }
     return name;
   }
+  
+  public static List<String> extractImportedTransformationNames(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
+    List<String> names = new ArrayList<String>();
+    log.beginTask("Extracting", "Extract names of imported transformation modules");
+    try {
+      if (isApplication(toplevelDecl, "TransImportDec")) {
+        List<IStrategoTerm> terms = ATermCommands.getList(toplevelDecl.getSubterm(1));
+        
+        for (IStrategoTerm term : terms) {
+          names.add(SDFCommands.prettyPrintJava(term, interp));
+        }
+      }
+
+    } finally {
+      log.endTask(names.toString());
+    }
+    return names;
+  }
+  
 
   
   /**
