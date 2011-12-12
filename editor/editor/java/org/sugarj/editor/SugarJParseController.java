@@ -85,7 +85,8 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
     
     IPath fullPath = project.getProject().getFullPath();
     Path root = new AbsolutePath(project.getProject().getLocation().makeAbsolute().toString());
-    Path bin = new RelativePath(root, project.getOutputLocation().makeRelativeTo(fullPath).toString());
+    IPath out = project.getOutputLocation().makeRelativeTo(fullPath);
+    Path bin = out.isEmpty() ? root : new RelativePath(root, out.toString());
     env.setRoot(root);
     env.setBin(bin);
     
