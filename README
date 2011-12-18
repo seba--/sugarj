@@ -46,7 +46,7 @@ Installing SugarJ
 
 The SugarJ compiler is almost self-contained and only requires an installation
 of a Java runtime version 6 or higher. Download and compile the SugarJ compiler
-as well as the standard library (stdlib).
+as well as the standard library (stdlib) using javac.
 
 
 Invoking SugarJ
