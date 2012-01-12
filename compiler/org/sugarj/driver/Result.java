@@ -41,7 +41,13 @@ public class Result {
   private Set<Path> allDependentFiles = new HashSet<Path>();
   private boolean failed = false;
   private Path generationLog;
+  /*
+   * MDP: Added modelBinPath, that indicates in which temp-Folder the 
+   * output is stored.
+   * Added modelBinPaths for transitive available modelBins.
+   */
   private Path modelBinPath;
+  private HashSet<Path> modelBinPaths = new HashSet<Path>();
 
   private final static Result OUTDATED_RESULT = new Result(true) {
     @Override
@@ -248,6 +254,11 @@ public class Result {
       
       oos.writeObject(modelBinPath);
       
+      oos.writeInt(modelBinPaths.size());
+      for (Path transitiveModelBin : modelBinPaths) {
+        oos.writeObject(transitiveModelBin);
+      }
+      
     } finally {
       if (oos != null)
         oos.close();
@@ -290,6 +301,12 @@ public class Result {
       
       result.modelBinPath = Path.readPath(ois, env);
       
+      int numTransitiveModelBins = ois.readInt();
+      for (int i = 0; i< numTransitiveModelBins; i++) {
+        result.modelBinPaths.add(Path.readPath(ois, env, reallocate));
+      }
+      
+      
     } catch (FileNotFoundException e) {
       return OUTDATED_RESULT;
     } catch (ClassNotFoundException e) {
@@ -322,11 +339,16 @@ public class Result {
     this.failed = hasFailed;
   }
 
-  public void setModelBinPath(Path modelBinPath) {
-    this.modelBinPath = modelBinPath;
-  }
-
   public Path getModelBinPath() {
     return modelBinPath;
   }
+  
+  public void setModelBinPath(Path modelBinPath) {
+    this.modelBinPath = modelBinPath;
   }
+  
+  public Set<Path> getModelBinPaths() {
+    return modelBinPaths; 
+  }
+
+}

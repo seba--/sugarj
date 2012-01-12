@@ -1,0 +1,40 @@
+module ModelDrivenTransformation
+
+imports org/sugarj/languages/ModelDriven
+        org/sugarj/languages/Java 
+        org/sugarj/languages/Stratego
+        org/sugarj/languages/SugarJ
+        
+rules
+  desugar = changed-tree(transformation-to-sugar)
+
+  transformation-to-sugar :
+  	TransDec(TransDecHead(mods, Id(name)), TransBody(body))
+    ->
+    SugarDec(SugarDecHead(mods, Id(name)), SugarBody(sugarbody))
+    where <rename-rules(|name)> body => sugarbody
+  
+  rename-rules(|name) = map(try(rename-rules-block(|name)))
+  
+  rename-rules-block(|name) :
+  	Strategies(ss) -> transformation-elem(Strategies(<map(try(rename-rule(|name)))> ss))
+  rename-rules-block(|name) :
+  	Rules(rs) -> transformation-elem(Rules(<map(try(debug; rename-rule(|name)))> rs))
+
+  rename-rule(|name) :
+    RDefNoArgs("main", rule) -> RDefNoArgs(<conc-strings> ("main", "-", name), rule)
+    
+  rename-rule(|name) :
+    RDef("main", typeids, rule) -> RDef(<conc-strings> ("main", "-", name), typeids, rule)
+    
+  rename-rule(|name) :
+  	RDefT("main", typeids1,typeids2, rule ) -> RDefT(<conc-strings> ("main", "-", name), typeids1, typeids2, rule)
+  	
+  rename-rule(|name) :
+  	SDefNoArgs("main", strategy) -> SDefNoArgs(<conc-strings> ("main", "-", name), strategy)
+  	
+  rename-rule(|name) :
+  	SDef("main", typeids, strategy) -> SDef(<conc-strings> ("main", "-", name), typeids, strategy)
+    
+  
+    

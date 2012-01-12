@@ -38,7 +38,6 @@ import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
-import org.strategoxt.eclipse.ant.StrategoJarAntPropertyProvider;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoException;
@@ -239,7 +238,6 @@ public class Driver{
         }
       pendingInputFiles.remove(sourceFile);
     }
-
     return res;
   }
   
@@ -325,6 +323,7 @@ public class Driver{
       driverResult.setSourceFile(this.sourceFile, declProvider.getSourceHashCode());
       
       if (sourceFile != null) {
+        // QST: delete this java File?
         javaOutFile = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".java");
         depOutFile = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".dep");
         modelOutFile = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".model");
@@ -692,7 +691,8 @@ public class Driver{
     
       if (term != null &&
           (isApplication(term, "TypeImportDec") ||
-           isApplication(term, "TypeImportOnDemandDec"))) {
+           isApplication(term, "TypeImportOnDemandDec")) ||
+           isApplication(term, "TransImportDec")) {
         pendingImports.add(term);
       }
       else {
@@ -707,6 +707,7 @@ public class Driver{
     }
   }
 
+  //TODO handle import declarations with asterisks, e.g. import foo.*;
   private void processImportDec(IStrategoTerm toplevelDecl) {
     
     sugaredImportDecls.add(lastSugaredToplevelDecl);
@@ -717,9 +718,8 @@ public class Driver{
       
       String importModule = ModuleSystemCommands.extractImportedModuleName(toplevelDecl, interp);
       List<String> importTransformations = ModuleSystemCommands.extractImportedTransformationNames(toplevelDecl, interp);
-      
-      // TODO handle import declarations with asterisks, e.g. import foo.*;
-      
+      IStrategoTerm stdImportTerm = ATermCommands.makeStdImport(toplevelDecl);
+          
       String modulePath = FileCommands.getRelativeModulePath(importModule);
       List<String> transformationPaths = new ArrayList<String>();
       for (String importTransformation : importTransformations) {
@@ -775,7 +775,7 @@ public class Driver{
           driverResult.addDependency(dep, environment);
       }
       
-      boolean success = processImport(modulePath, res, dep, transformationPaths, toplevelDecl, false);
+      boolean success = processImport(modulePath, res, dep, transformationPaths, stdImportTerm, false);
       
       if (!success)
         setErrorMessage(toplevelDecl, "module not found: " + importModule);
@@ -789,8 +789,14 @@ public class Driver{
   
   private boolean processImport(String modulePath, Result importedResult, Path importedResultPath, List<String> transformationPaths, IStrategoTerm importTerm, boolean modelRecursive) throws IOException {
     boolean success = false;
+    
+    /*
+     * during recompilation of an import, this ensures that model bin folders
+     * of further imports are added to the include path
+     */
     if (environment.isModelCompilation() && importedResult != null) {
       environment.getIncludePath().add(importedResult.getModelBinPath());
+      environment.getIncludePath().addAll(importedResult.getModelBinPaths());
     }
     
     boolean classImport = ModuleSystemCommands.importClass(
@@ -832,12 +838,12 @@ public class Driver{
       if (model != null) {
         
         IStrategoTerm term = ATermCommands.atermFromFile(model.getAbsolutePath());
-        // QST: Which class to use for these paths ?!
         List<RelativePath> resolvedTransformationPaths = new ArrayList<RelativePath>();
         
         log.beginTask("Resolving transformation paths for '"+modulePath+"'.");
         for (String transformationPath : transformationPaths) {
-          if (!transformationPath.contains("/")) {
+          if (!transformationPath.contains("/")) {  // this branch searches for relative imports
+            
             boolean moduleFound = false;
             for (RelativePath importPath : availableSTRImports) {
               if (FileCommands.dropExtension(importPath.getAbsolutePath()).endsWith(transformationPath)) {
@@ -849,10 +855,10 @@ public class Driver{
             }
             if (!moduleFound) {
               log.logErr("module '"+ transformationPath +"' not found in available imports");
-              // QST: Which Path should be added? Problem with AbsolutePath...
+              // QST: Which Path should be added? (to produce an error) Which absolute path should it be?
               resolvedTransformationPaths.add(environment.new RelativePathBin(transformationPath+".str"));
             }
-          } else {
+          } else { // this branch searches for FQN imports
             // QST: Use of searchFile correct here?
             RelativePath p = ModuleSystemCommands.searchFile(transformationPath, ".str", environment);
             if (p==null)
@@ -863,6 +869,10 @@ public class Driver{
         }
         log.endTask();
         
+        /*
+         * creates a tempFile that ???
+         * for each assigned transformation for this import
+         */
         IStrategoTerm transformedTerm = term;
         for (RelativePath strPath : resolvedTransformationPaths) {
           Path compoundStr = FileCommands.newTempFile("str");
@@ -886,7 +896,11 @@ public class Driver{
             ATermCommands.setErrorMessage(importTerm, "compilation of transformation " + FileCommands.fileName(strPath) + " failed");
             break;
           }
-          
+
+          /*  
+           * applies each transformation's "main-<transformation name>" rule on the AST of
+           * the current import
+           */
           IStrategoTerm newTransformedTerm = STRCommands.assimilate("main-" + FileCommands.fileName(strPath), trans, transformedTerm, interp);
           
           if (newTransformedTerm == null) {
@@ -896,6 +910,11 @@ public class Driver{
           transformedTerm = newTransformedTerm;
         }
 
+        /*
+         * A new temp directory is created to work as the current model
+         * import's bin directory. If the imported module already has a model bin
+         * it is taken instead.
+         */
         Path modelBinPath;
         if (importedResult != null && importedResult.getModelBinPath() != null)
           modelBinPath = importedResult.getModelBinPath();
@@ -905,6 +924,10 @@ public class Driver{
           importedResult.writeDependencyFile(importedResultPath);
         }
   
+        /*
+         * modelEnvironment is the environment for compiling imported modules.
+         * The output is stored in a temporary bin which has been created before.
+         */
         Environment modelEnvironment = new Environment();
         modelEnvironment.setModelDrivenProcessing(true);
         modelEnvironment.setModelCompilation(true);
@@ -931,14 +954,16 @@ public class Driver{
             log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
           }
         }
-          
+        
         environment.getIncludePath().add(modelBinPath);
+        environment.getIncludePath().addAll(importedResult.getModelBinPaths());
+        driverResult.getModelBinPaths().add(modelBinPath);
+        driverResult.getModelBinPaths().addAll(importedResult.getModelBinPaths());
+        
         success = processImport(modulePath, Result.readDependencyFile(modelResultPath, modelEnvironment), modelResultPath, null, importTerm, true);
-      
+ 
       }
     }
-    
-    
     return success;
   }
 

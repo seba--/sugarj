@@ -1,0 +1,8 @@
+module org/sugarj/languages/ModelDriven
+
+signature constructors
+  TransDec : TransformationDecHead * TransformationBody -> ToplevelDeclaration
+  TransDecHead : List(AnnoOrSugarMod) * JavaId -> TransformationDecHead
+  TransBody : TransformationDef -> TransformationBody
+
+  TransImportDec : JavaTypeName * List(JavaTypeName) -> JavaImportDec

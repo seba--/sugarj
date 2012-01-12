@@ -1,0 +1,17 @@
+definition
+module org/sugarj/languages/ModelDriven
+exports
+  context-free syntax
+    TransformationDecHead TransformationBody   -> ToplevelDeclaration {cons("TransDec")}
+    AnnoOrSugarMod* "transformation" JavaId -> TransformationDecHead {cons("TransDecHead")}
+    
+    "{" TransformationDef "}" -> TransformationBody {cons("TransBody")}
+    Transformation*  -> TransformationDef 
+    
+    "strategies" StrategoDef*   -> Transformation {cons("Strategies")}
+    "signature" StrategoSdecl*  -> Transformation {cons("Signature")}
+    "rules" StrategoDef*        -> Transformation {cons("Rules")}
+    "overlays" StrategoOverlay* -> Transformation {cons("Overlays")}
+
+    "import" JavaTypeName "(" {JavaTypeName ","}* ")" ";" -> JavaImportDec {cons("TransImportDec")}
+    

@@ -376,4 +376,11 @@ public class ATermCommands {
         throw new UnsupportedOperationException();
     }
   }
+
+  public static IStrategoTerm makeStdImport(IStrategoTerm term) {
+    if (isApplication(term, "TransImportDec"))
+      return makeAppl("TypeImportDec", "ImportDec", 1, term.getSubterm(0));
+    
+    return term;
+  }
 }
