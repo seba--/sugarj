@@ -297,7 +297,7 @@ public class Driver{
     } finally {
       pendingRuns.remove(sourceFile);
       if (generateFiles)
-        putResult(sourceFile, driver.driverResult.getSugaredSyntaxTree() == null ? null : driver.driverResult);
+        putResult(sourceFile, driver.driverResult != null && driver.driverResult.getSugaredSyntaxTree() == null ? null : driver.driverResult);
     }
 
     return driver.driverResult;
