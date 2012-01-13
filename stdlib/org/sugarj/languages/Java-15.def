@@ -23,9 +23,9 @@ exports
   context-free syntax
     WATER -> LAYOUT {cons("WATER")}
 
+  (
+
   sorts WATEREOF
-
-
 
   lexical restrictions
     WATEREOF -/- ~[]
@@ -58,6 +58,8 @@ exports
     "'"                                       -> INSERTOPENQUOTE0 {recover}
     INSERTOPENQUOTE0 CharContent "\n"         -> CharLiteral      {cons("INSERTEND")}
     INSERTOPENQUOTE0 CharContent WATEREOF     -> CharLiteral      {cons("INSERTEND")}
+
+  )
 
 
   (

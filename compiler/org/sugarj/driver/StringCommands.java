@@ -5,7 +5,6 @@ package org.sugarj.driver;
 
 import java.util.Iterator;
 import java.util.List;
-
 import org.sugarj.driver.path.RelativePath;
 
 /**
@@ -24,7 +23,6 @@ public class StringCommands {
   
     return b.toString();
   }
-
   
   public static String printModuleList(List<RelativePath> l, String sep) {
     StringBuilder b = new StringBuilder();

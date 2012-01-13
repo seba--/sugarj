@@ -249,7 +249,7 @@ public class STRCommands {
         try {
           term = ATermCommands.makeMutable(term);
           if (left != null && right != null && sort != null)
-            ImploderAttachment.putImploderAttachment(term, false, sort, left, right);
+            ImploderAttachment.putImploderAttachment(term, false, sort, left, right)
         } catch (Exception e) {
           log.log("origin annotation failed");
         }
