@@ -845,7 +845,7 @@ public class Driver{
     ModuleSystemCommands.registerSearchedEditorServicesFiles(modulePath, driverResult, environment);
     
     
-    if (!modelRecursive && environment.isModelDrivenProcessing() && !environment.isModelCompilation()) {
+    if (!modelRecursive && environment.isModelDrivenProcessing()) {
       RelativePath model = ModuleSystemCommands.importModel(modulePath, environment);
       if (model != null) {
         
