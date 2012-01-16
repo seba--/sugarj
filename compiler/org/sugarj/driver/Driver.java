@@ -64,7 +64,7 @@ public class Driver{
   
   public final static String CACHE_VERSION = "editor-base-0.16";
   
-  private final static int PENDING_TIMEOUT = 120000;
+  private final static int PENDING_TIMEOUT = 30000;
 
   private static Map<Path, Result> resultCache = new HashMap<Path, Result>(); // new LRUMap(50);
   private static Map<Path, Entry<ToplevelDeclarationProvider, Driver>> pendingRuns = new HashMap<Path, Map.Entry<ToplevelDeclarationProvider,Driver>>();
@@ -175,8 +175,13 @@ public class Driver{
             return;
         }
         
-        if (count > PENDING_TIMEOUT)
-          throw new IllegalStateException("pending result timed out for " + file);
+        if (count > PENDING_TIMEOUT) {
+          log.logErr("pending result timed out for " + file);
+          synchronized (pendingRuns) {
+            pendingRuns.remove(file);
+          }
+          return;
+        }
         
         count += 100;
         try {
