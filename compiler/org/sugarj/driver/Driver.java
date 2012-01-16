@@ -769,9 +769,9 @@ public class Driver{
             
             try {
               storeCaches(environment);
-              Result importResult = compile(sourceFile, monitor);
+              res = compile(sourceFile, monitor);
               initializeCaches(environment, true);
-              if (importResult.hasFailed())
+              if (res.hasFailed())
                 setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
             } catch (Exception e) {
               setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
