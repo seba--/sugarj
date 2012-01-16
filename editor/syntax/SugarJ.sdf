@@ -5,3 +5,7 @@ exports
   
   context-free syntax
     "abc" -> SugarCompilationUnit {cons("abc")}
+
+  context-free priorities
+    "abc" -> SugarCompilationUnit
+  > "def" -> SugarCompilationUnit
