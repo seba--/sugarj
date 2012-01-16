@@ -703,8 +703,8 @@ public class Driver{
     
       if (term != null &&
           (isApplication(term, "TypeImportDec") ||
-           isApplication(term, "TypeImportOnDemandDec")) ||
-           isApplication(term, "TransImportDec")) {
+           isApplication(term, "TypeImportOnDemandDec") ||
+           isApplication(term, "TransImportDec"))) {
         pendingImports.add(term);
       }
       else {
