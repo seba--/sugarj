@@ -178,7 +178,8 @@ public class Builder extends IncrementalProjectBuilder {
             Result res = Result.readDependencyFile(depFile, environment);
             if (res == null || !res.isUpToDate(input.sourceFile, environment))
               res = Driver.compile(input.sourceFile, monitor);
-            
+            while (!PlatformUI.isWorkbenchRunning())
+              wait(500);
             IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
             for (IWorkbenchWindow workbenchWindow : workbenchWindows)
               for (IWorkbenchPage page : workbenchWindow.getPages())
