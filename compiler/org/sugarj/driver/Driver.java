@@ -802,15 +802,6 @@ public class Driver{
   private boolean processImport(String modulePath, Result importedResult, Path importedResultPath, List<String> transformationPaths, IStrategoTerm importTerm, boolean modelRecursive) throws IOException {
     boolean success = false;
     
-    /*
-     * during recompilation of an import, this ensures that model bin folders
-     * of further imports are added to the include path
-     */
-    if (environment.isModelCompilation() && importedResult != null) {
-      environment.getIncludePath().add(importedResult.getModelBinPath());
-      environment.getIncludePath().addAll(importedResult.getModelBinPaths());
-    }
-    
     boolean classImport = ModuleSystemCommands.importClass(
         modulePath, 
         importTerm, 
