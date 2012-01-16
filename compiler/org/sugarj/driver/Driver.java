@@ -1248,7 +1248,7 @@ public class Driver{
     this.sourceFile = new RelativeSourceLocationPath(new SourceLocation(sourceFile.getBasePath(), environment), sourceFile);
     this.generateFiles = generateFiles;
     
-    this.driverResult = new Result(generateFiles);
+    this.driverResult = new Result(generateFiles, environment.getBin());
 
     currentGrammarSDF = new AbsolutePath(StdLib.initGrammar.getPath());
     currentGrammarModule = StdLib.initGrammarModule;

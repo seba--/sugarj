@@ -210,10 +210,7 @@ public class SugarJParser extends JSGLRI {
     Token tok = tokenizer.makeToken(0, IToken.TK_UNKNOWN, true);
     IStrategoTerm term = ATermCommands.makeList("SugarCompilationUnit", tok);
     
-    Result r = new Result(true) {
-      public boolean isUpToDateShallow(int h, Environment env) { return false; }
-      public boolean isUpToDate(int h, Environment env) { return false; }
-    };
+    Result r = Result.OUTDATED_RESULT;
     r.setSugaredSyntaxTree(term);
     return r;
   }
