@@ -1,0 +1,13 @@
+*~
+*.bak
+# .gitignore
+
+# Eclipse project
+.metadata/
+
+# Eclipse-generated files
+bin/
+
+# SugarJ cache
+.sugarjcache/
+
