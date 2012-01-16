@@ -464,7 +464,14 @@ public class Driver{
         
         List<IStrategoTerm> editorServices = ATermCommands.getList(services);
         
-        // XXX if (currentTransProg != null)
+        if (currentTransProg == null)
+          try {
+            currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
+          } catch (SGLRException e) {
+            log.logErr(e.toString());
+          } catch (InvalidParseTableException e) {
+            log.logErr(e.toString());
+          }
         editorServices = ATermCommands.registerSemanticProvider(editorServices, currentTransProg);
   
         Path editorServicesFile = environment.new RelativePathBin(relPackageNameSep() + extName + ".serv");
