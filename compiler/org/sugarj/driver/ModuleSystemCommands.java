@@ -146,6 +146,11 @@ public class ModuleSystemCommands {
     registerSearchedFiles(modulePath, ".serv", driverResult, environment);
   }
 
+  public static void registerSearchedModelFiles(String modulePath, Result driverResult, Environment environment) throws IOException {
+    registerSearchedFiles(modulePath, ".model", driverResult, environment);
+  }
+
+
   public static RelativeSourceLocationPath locateSourceFile(String modulePath, Set<SourceLocation> sourcePath) {
     if (modulePath.startsWith("org/sugarj"))
       return null;

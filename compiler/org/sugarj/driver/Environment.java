@@ -99,10 +99,6 @@ public class Environment implements Serializable {
   private Set<SourceLocation> sourcePath = new HashSet<SourceLocation>();
   private Set<Path> includePath = new HashSet<Path>();
   
-  private boolean modelDrivenProcessing = true;
-
-  private boolean modelCompilation = false;
-  
   public Environment() {
     includePath.add(bin);
     includePath.add(new AbsolutePath(StdLib.stdLibDir.getPath()));
@@ -174,22 +170,6 @@ public class Environment implements Serializable {
 
   public void setTmpDir(Path tmpDir) {
     this.tmpDir = tmpDir;
-  }
-
-  public boolean isModelDrivenProcessing() {
-    return modelDrivenProcessing;
-  }
-
-  public void setModelDrivenProcessing(boolean modelDrivenProcessing) {
-    this.modelDrivenProcessing = modelDrivenProcessing;
-  }
-
-  public boolean isModelCompilation() {
-    return modelCompilation;
-  }
-
-  public void setModelCompilation(boolean modelCompilation) {
-    this.modelCompilation = modelCompilation;
   }
 
   public Set<Path> getIncludePath() {
