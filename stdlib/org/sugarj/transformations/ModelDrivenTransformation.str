@@ -1,6 +1,6 @@
 module ModelDrivenTransformation
 
-imports org/sugarj/languages/ModelDriven
+imports org/sugarj/languages/Model
         org/sugarj/languages/Java 
         org/sugarj/languages/Stratego
         org/sugarj/languages/SugarJ
