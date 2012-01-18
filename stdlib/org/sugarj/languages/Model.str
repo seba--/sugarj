@@ -1,0 +1,27 @@
+module org/sugarj/languages/Model
+
+signature
+  constructors
+    Annotation  : List(ModelTerm) -> ModelAnnotation
+    Annotated   : ModelTerm * ModelAnnotation -> ModelTerm
+    List        : List(ModelTerm) -> ModelTerm
+    Placeholder : ModelTerm -> ModelTerm
+    Appl        : ModelFun * List(ModelTerm) -> ModelTerm
+    Fun         : ModelFun -> ModelTerm
+    Real        : ModelRealCon -> ModelTerm
+    Int         : ModelIntCon -> ModelTerm
+    Unquoted    : ModelIdCon -> ModelFun
+    Quoted      : ModelStrCon -> ModelFun
+    RealCon     : ModelIntCon * ModelNatCon * ModelOptExp -> ModelRealCon
+    Absent      : ModelOptExp
+    Present     : ModelIntCon -> ModelOptExp
+    Negative    : ModelNatCon -> ModelIntCon
+    Positive    : ModelNatCon -> ModelIntCon
+    Natural     : ModelNatCon -> ModelIntCon
+
+signature constructors
+  TransDec : TransformationDecHead * TransformationBody -> ToplevelDeclaration
+  TransDecHead : List(AnnoOrSugarMod) * JavaId -> TransformationDecHead
+  TransBody : TransformationDef -> TransformationBody
+
+  TransImportDec : JavaTypeName * List(JavaTypeName) -> JavaImportDec

@@ -1,0 +1,77 @@
+definition
+module org/sugarj/languages/Model
+imports org/sugarj/languages/ModelTerms
+imports org/sugarj/languages/Transformation
+exports
+context-free start-symbols
+  ModelTerm ToplevelDeclaration
+
+%% model terms
+module org/sugarj/languages/ModelTerms
+exports
+
+  lexical syntax
+    head:[A-Za-z] tail:[A-Za-z\-0-9]* -> ModelIdCon
+
+  lexical restrictions
+    ModelIdCon -/- [A-Za-z\-0-9]
+
+  lexical syntax
+    "\\n"                        -> ModelStrChar
+    "\\t"                        -> ModelStrChar
+    "\\\""                       -> ModelStrChar
+    "\\\\"                       -> ModelStrChar
+    "\\" a:[0-9] b:[0-9] c:[0-9] -> ModelStrChar
+    ~[\0-\31\n\t\"\\]            -> ModelStrChar
+    [\"] chars:ModelStrChar* [\"]     -> ModelStrCon
+
+  lexical syntax
+    [0-9]+ -> ModelNatCon
+
+  lexical restrictions
+    ModelNatCon -/- [0-9]
+
+  context-free syntax
+    ModelNatCon         -> ModelIntCon {cons("Natural")}
+    pos:"+" ModelNatCon -> ModelIntCon {cons("Positive")}
+    neg:"-" ModelNatCon -> ModelIntCon {cons("Negative")}
+
+  context-free syntax
+    "e" ModelIntCon                           -> ModelOptExp  {cons("Present")}
+                                              -> ModelOptExp  {cons("Absent")}
+    base:ModelIntCon "." decimal:ModelNatCon exp:ModelOptExp -> ModelRealCon {cons("RealCon")}
+
+  context-free syntax
+    ModelStrCon -> ModelFun {cons("Quoted")}
+    ModelIdCon  -> ModelFun {cons("Unquoted")}
+
+  context-free syntax
+    ModelIntCon                            -> ModelTerm {cons("Int")}
+    ModelRealCon                           -> ModelTerm {cons("Real")}
+    fun:ModelFun                           -> ModelTerm {cons("Fun")}
+    fun:ModelFun "(" args:{ModelTerm ","}+ ")" -> ModelTerm {cons("Appl")}
+    "<" type:ModelTerm ">"                 -> ModelTerm {cons("Placeholder")}
+    "[" elems:{ModelTerm ","}* "]"         -> ModelTerm {cons("List")}
+    trm:ModelTerm ModelAnnotation          -> ModelTerm {cons("Annotated")}
+
+  context-free syntax
+    "{" annos:{ModelTerm ","}+ "}" -> ModelAnnotation {cons("Annotation")}
+
+
+%% transformations
+module org/sugarj/languages/Transformation
+exports
+  context-free syntax
+    TransformationDecHead TransformationBody   -> ToplevelDeclaration {cons("TransDec")}
+    AnnoOrSugarMod* "transformation" JavaId -> TransformationDecHead {cons("TransDecHead")}
+    
+    "{" TransformationDef "}" -> TransformationBody {cons("TransBody")}
+    Transformation*  -> TransformationDef 
+    
+    "strategies" StrategoDef*   -> Transformation {cons("Strategies")}
+    "signature" StrategoSdecl*  -> Transformation {cons("Signature")}
+    "rules" StrategoDef*        -> Transformation {cons("Rules")}
+    "overlays" StrategoOverlay* -> Transformation {cons("Overlays")}
+
+    "import" JavaTypeName "(" {JavaTypeName ","}* ")" ";" -> JavaImportDec {cons("TransImportDec")}
+    

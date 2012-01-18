@@ -6,7 +6,7 @@ imports org/sugarj/languages/Java
         org/sugarj/languages/Stratego
         org/sugarj/languages/EditorServices
         org/sugarj/languages/Plain
-        org/sugarj/languages/ModelDriven
+        org/sugarj/languages/Model
 
 exports
   sorts WATER WATERTOKEN WATERTOKENSTART WATERTOKENSEPARATOR WATERTOKENSTAR
@@ -181,4 +181,11 @@ exports
   lexical syntax
          -> "}" {recover, reject}
 
+  %% models
+  sorts ModelDecHead ModelBody
+
+  context-free syntax
+    ModelDecHead ModelBody         -> ToplevelDeclaration     {cons("ModelDec")}
+    AnnoOrSugarMod* "model" JavaId -> ModelDecHead {cons("ModelDecHead")}
+    "{" ModelTerm "}"              -> ModelBody    {cons("ModelBody")}
   )
