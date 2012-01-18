@@ -2,6 +2,7 @@ definition
 
 module org/sugarj/languages/SugarJ
 imports org/sugarj/languages/Java 
+        org/sugarj/languages/ATerm
         org/sugarj/languages/Sdf2
         org/sugarj/languages/Stratego
         org/sugarj/languages/EditorServices
@@ -187,5 +188,5 @@ exports
   context-free syntax
     ModelDecHead ModelBody         -> ToplevelDeclaration     {cons("ModelDec")}
     AnnoOrSugarMod* "model" JavaId -> ModelDecHead {cons("ModelDecHead")}
-    "{" ModelTerm "}"              -> ModelBody    {cons("ModelBody")}
+    "{" ATerm "}"              -> ModelBody    {cons("ModelBody")}
   )

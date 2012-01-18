@@ -55,6 +55,7 @@ public class StdLib {
   
   public static URI sugarjDef = ensureFile("org/sugarj/languages/SugarJ.def");
   public static URI javaDef = ensureFile("org/sugarj/languages/Java-15.def");
+  public static URI atermDef = ensureFile("org/sugarj/languages/ATerm.def");
   public static URI sdfDef = ensureFile("org/sugarj/languages/Sdf2.def");
   public static URI sdfTbl = ensureFile("org/sugarj/languages/Sdf2.tbl");
   public static URI strategoDef = ensureFile("org/sugarj/languages/Stratego.def");
@@ -76,6 +77,7 @@ public class StdLib {
 
   public static void main(String args[]) throws URISyntaxException {
     exists(javaDef);
+    exists(atermDef);
     exists(sdfDef);
     exists(sdfTbl);
     exists(strategoDef);
@@ -96,6 +98,6 @@ public class StdLib {
     if (new File(uri).exists())
       System.out.println(uri.getPath() + " exists.");
     else
-      System.out.println(uri.getPath() + " does not exist.");
+      System.out.println("***" + uri.getPath() + " does not exist.");
   }
 }

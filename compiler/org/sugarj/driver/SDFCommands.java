@@ -81,6 +81,7 @@ public class SDFCommands {
       "-o", def.getAbsolutePath(),
       "-Idef", StdLib.sugarjDef.getPath(),
       "-Idef", StdLib.javaDef.getPath(),
+      "-Idef", StdLib.atermDef.getPath(),
       "-Idef", StdLib.sdfDef.getPath(),
       "-Idef", StdLib.strategoDef.getPath(),
       "-Idef", StdLib.editorServicesDef.getPath(),

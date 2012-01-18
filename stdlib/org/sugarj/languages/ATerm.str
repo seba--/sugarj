@@ -1,0 +1,22 @@
+module org/sugarj/languages/ATerm
+
+signature constructors
+    default                    : List(Sdf2ATerm) -> Sdf2Annotation
+    annotated                  : Sdf2ATerm * Sdf2Annotation -> Sdf2ATerm
+    list                       : List(Sdf2ATerm) -> Sdf2ATerm
+    placeholder                : Sdf2ATerm -> Sdf2ATerm
+    appl                       : Sdf2AFun * List(Sdf2ATerm) -> Sdf2ATerm
+    fun                        : Sdf2AFun -> Sdf2ATerm
+    real                       : Sdf2RealCon -> Sdf2ATerm
+    int                        : Sdf2IntCon -> Sdf2ATerm
+    unquoted                   : Sdf2IdCon -> Sdf2AFun
+    quoted                     : Sdf2StrCon -> Sdf2AFun
+                               : String -> Sdf2IdCon
+                               : String -> Sdf2StrCon
+    real-con                   : Sdf2IntCon * Sdf2NatCon * Sdf2OptExp -> Sdf2RealCon
+    absent                     : Sdf2OptExp
+    present                    : Sdf2IntCon -> Sdf2OptExp
+    negative                   : Sdf2NatCon -> Sdf2IntCon
+    positive                   : Sdf2NatCon -> Sdf2IntCon
+    natural                    : Sdf2NatCon -> Sdf2IntCon
+                               : String -> Sdf2NatCon

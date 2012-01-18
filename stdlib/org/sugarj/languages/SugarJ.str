@@ -46,4 +46,7 @@ signature constructors
     ChecksDec          : EditorServicesDecHead * EditorServicesDecBody -> SugarDec
     ChecksDecHead      : List(Annos) * JavaId -> EditorServicesDecHead
     ChecksBody         : List(EditorServicesSection) -> EditorServiceBody
+    ModelDec          : EditorServicesDecHead * EditorServicesDecBody -> SugarDec
+    ModelDecHead      : List(Annos) * JavaId -> EditorServicesDecHead
+    ModelBody         : List(EditorServicesSection) -> EditorServiceBody
     
