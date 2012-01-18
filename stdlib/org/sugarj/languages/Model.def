@@ -2,9 +2,6 @@ definition
 module org/sugarj/languages/Model
 imports org/sugarj/languages/ModelTerms
 imports org/sugarj/languages/Transformation
-exports
-context-free start-symbols
-  ModelTerm ToplevelDeclaration
 
 %% model terms
 module org/sugarj/languages/ModelTerms
