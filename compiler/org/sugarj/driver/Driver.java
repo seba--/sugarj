@@ -62,7 +62,7 @@ import org.sugarj.util.ToplevelDeclarationProvider;
  */
 public class Driver{
   
-  public final static String CACHE_VERSION = "editor-base-0.16";
+  public final static String CACHE_VERSION = "model-0.1a";
   
   private final static int PENDING_TIMEOUT = 30000;
 
@@ -1334,8 +1334,8 @@ public class Driver{
               environment);
       } 
       catch (Exception e) {
+        log.logErr("Could read sdf cache, generating new one.");
         sdfCache = new ModuleKeyCache<Path>();
-        e.printStackTrace();
         for (File f : environment.getCacheDir().getFile().listFiles())
           if (f.getPath().endsWith(".tbl"))
             f.delete();
@@ -1351,8 +1351,8 @@ public class Driver{
             environment);
       } 
       catch (Exception e) {
+        log.logErr("Could read str cache, generating new one.");
         strCache = new ModuleKeyCache<Path>();
-        e.printStackTrace();
         for (File f : environment.getCacheDir().getFile().listFiles())
           if (f.getPath().endsWith(".jar"))
             f.delete();
