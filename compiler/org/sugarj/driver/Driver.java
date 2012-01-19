@@ -843,10 +843,6 @@ public class Driver{
         IStrategoTerm term = ATermCommands.atermFromFile(model.getAbsolutePath());
         List<RelativePath> resolvedTransformationPaths = resolveTransformationPaths(modulePath, transformationPaths, importTerm);
         
-        /*
-         * creates a tempFile that ???
-         * for each assigned transformation for this import
-         */
         IStrategoTerm transformedTerm = term;
         for (RelativePath strPath : resolvedTransformationPaths) {
           transformedTerm = processTransformation(strPath, importTerm, transformedTerm);
@@ -911,6 +907,10 @@ public class Driver{
 
 
   private IStrategoTerm processTransformation(RelativePath strPath, IStrategoTerm importTerm, IStrategoTerm currentTerm) throws IOException {
+    /*
+     * create a temporary stratego file that connects already available imports
+     * with the currently processed transformation
+     */
     Path compoundStr = FileCommands.newTempFile("str");
     StringBuilder builder = new StringBuilder();
     builder.append("module ").append(FileCommands.fileName(compoundStr)).append("\n");
