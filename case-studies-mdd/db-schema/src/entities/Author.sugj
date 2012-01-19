@@ -1,0 +1,10 @@
+package entities;
+
+import metamodel.Entity;
+
+public entity Author {
+  name     :: String
+  email    :: Email
+  password :: Secret
+  posts    -> Set<Post> (inverse=Post.author)
+}

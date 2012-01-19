@@ -19,6 +19,7 @@ public sugar Entity {
       ModelDec(ModelDecHead(mods, name), <meta-explode> body) 
 
   context-free syntax
+    Entity -> ToplevelDeclaration
     AnnoOrSugarMod* "entity" JavaId "{" EntityBodyDeclaration* "}" -> Entity {cons("EntityDec")}
     Property -> EntityBodyDeclaration
 
