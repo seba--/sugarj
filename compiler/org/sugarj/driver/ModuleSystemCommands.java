@@ -227,7 +227,16 @@ public class ModuleSystemCommands {
   }
   
   
-  
+  /**
+   * Registers searched files in the driverResult. Existing as well as non-existent files are registers,
+   * so that the emergence of a file triggers recompilation.
+   * 
+   * @param relativePath
+   * @param extension
+   * @param driverResult
+   * @param environment
+   * @throws IOException
+   */
   public static void registerSearchedFiles(String relativePath, String extension, Result driverResult, Environment environment) throws IOException {
     RelativePath binFile = environment.new RelativePathBin(relativePath + extension);
     driverResult.addFileDependency(binFile);
