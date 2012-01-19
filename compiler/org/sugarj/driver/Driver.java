@@ -839,7 +839,10 @@ public class Driver{
     
     RelativePath model = ModuleSystemCommands.importModel(modulePath, environment);
     ModuleSystemCommands.registerSearchedModelFiles(modulePath, driverResult, environment);
-    if (model != null) {
+    if (model != null && transformationPaths == null) {
+      success = true;
+    }
+    else if (model != null) {
       
       IStrategoTerm term = ATermCommands.atermFromFile(model.getAbsolutePath());
       List<RelativePath> resolvedTransformationPaths = new ArrayList<RelativePath>();
