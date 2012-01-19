@@ -673,8 +673,13 @@ public class Driver{
     IStrategoTerm head = getApplicationSubterm(toplevelDecl, "ModelDec", 0);
 //    IStrategoTerm body= getApplicationSubterm(toplevelDecl, "ModelDec", 1);
     
+    String modelName;
     log.beginTask("Extracting name and accessibility of the model.");
-    String modelName = SDFCommands.prettyPrintJava(getApplicationSubterm(head, "ModelDecHead", 1), interp);    
+    try {
+      modelName = SDFCommands.prettyPrintJava(getApplicationSubterm(head, "ModelDecHead", 1), interp);    
+    } finally {
+      log.endTask();
+    }
     
     RelativePath modelOutFile = environment.new RelativePathBin(relPackageNameSep() + modelName + ".model");
 
