@@ -16,7 +16,7 @@ public sugar Entity {
   rules
     entity-model :
       EntityDec(mods, name, body) -> 
-      ModelDec(ModelDecHead(mods, name), <meta-explode> body) 
+      ModelDec(ModelDecHead(mods, name), ModelBody(<meta-explode> body)) 
 
   context-free syntax
     Entity -> ToplevelDeclaration
