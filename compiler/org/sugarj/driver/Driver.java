@@ -845,131 +845,150 @@ public class Driver{
     else if (model != null) {
       
       IStrategoTerm term = ATermCommands.atermFromFile(model.getAbsolutePath());
-      List<RelativePath> resolvedTransformationPaths = new ArrayList<RelativePath>();
+      List<RelativePath> resolvedTransformationPaths = resolveTransformationPaths(modulePath, transformationPaths, importTerm);
       
-      log.beginTask("Resolving transformation paths for '"+modulePath+"'.");
-      for (String transformationPath : transformationPaths) {
-        if (!transformationPath.contains("/")) {  // this branch searches for relative imports
-          
-          boolean moduleFound = false;
-          for (RelativePath importPath : availableSTRImports) {
-            if (FileCommands.dropExtension(importPath.getAbsolutePath()).endsWith(transformationPath)) {
-              // QST: Adding only transformationPath correct?
-              resolvedTransformationPaths.add(importPath);
-              moduleFound = true;
-              break;
-            }
-          }
-          if (!moduleFound) {
-            log.logErr("module '"+ transformationPath +"' not found in available imports");
-            // QST: Which Path should be added? (to produce an error) Which absolute path should it be?
-            resolvedTransformationPaths.add(environment.new RelativePathBin(transformationPath+".str"));
-          }
-        } else { // this branch searches for FQN imports
-          // QST: Use of searchFile correct here?
-          RelativePath p = ModuleSystemCommands.searchFile(transformationPath, ".str", environment);
-          if (p==null)
-            ATermCommands.setErrorMessage(importTerm, "cannot resolve module '"+ transformationPath.replace("/", ".") + "'");
-          else
-            resolvedTransformationPaths.add(p);
-        }
-      }
-      log.endTask();
-      
-      /*
-       * creates a tempFile that ???
-       * for each assigned transformation for this import
-       */
       IStrategoTerm transformedTerm = term;
       for (RelativePath strPath : resolvedTransformationPaths) {
-        Path compoundStr = FileCommands.newTempFile("str");
-        StringBuilder builder = new StringBuilder();
-        builder.append("module ").append(FileCommands.fileName(compoundStr)).append("\n");
-        builder.append("imports ");
-        builder.append(StringCommands.printModuleList(availableSTRImports, " "));
-        builder.append(" ").append(FileCommands.dropExtension(strPath.getRelativePath()));
-        FileCommands.writeToFile(compoundStr, builder.toString());
-        
-        Path trans = null;
-        try {
-          trans = STRCommands.compile(compoundStr, "main-" + FileCommands.fileName(strPath), driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
-        } catch (TokenExpectedException e) {
-        } catch (BadTokenException e) {
-        } catch (InvalidParseTableException e) {
-        } catch (SGLRException e) {
-        }
-        
-        if (trans == null) {
-          ATermCommands.setErrorMessage(importTerm, "compilation of transformation " + FileCommands.fileName(strPath) + " failed");
-          break;
-        }
-
-        /*  
-         * applies each transformation's "main-<transformation name>" rule on the AST of
-         * the current import
-         */
-        IStrategoTerm newTransformedTerm = STRCommands.assimilate("main-" + FileCommands.fileName(strPath), trans, transformedTerm, interp);
-        
-        if (newTransformedTerm == null) {
-          ATermCommands.setErrorMessage(importTerm, "transformation " + FileCommands.fileName(strPath) + " failed");
-          break;
-        }
-        transformedTerm = newTransformedTerm;
+        transformedTerm = processTransformation(strPath, importTerm, transformedTerm);
       }
-
-      /*
-       * A new temp directory is created to work as the current model
-       * import's bin directory. If the imported module already has a model bin
-       * it is taken instead.
-       */
-      Path modelBinPath;
-      if (importedResult != null && importedResult.getModelBinPath() != null)
-        modelBinPath = importedResult.getModelBinPath();
-      else {
-        modelBinPath = FileCommands.newTempDir();
-        importedResult.setModelBinPath(modelBinPath);
-        importedResult.writeDependencyFile(importedResultPath);
-      }
-
-      /*
-       * modelEnvironment is the environment for compiling imported modules.
-       * The output is stored in a temporary bin which has been created before.
-       */
-      Environment modelEnvironment = new Environment();
-//      modelEnvironment.setModelDrivenProcessing(true);
-//      modelEnvironment.setModelCompilation(true);
-      modelEnvironment.setAtomicImportParsing(environment.isAtomicImportParsing());
-      modelEnvironment.setGenerateJavaFile(environment.isGenerateJavaFile());
-      modelEnvironment.setSourcePath(environment.getSourcePath());
-      modelEnvironment.setRoot(environment.getRoot());
-      modelEnvironment.setBin(modelBinPath);
-      modelEnvironment.getIncludePath().add(environment.getBin());
-      
+    
+      Environment modelEnvironment = compileImportedModel(model, modulePath, importedResult, importedResultPath, transformedTerm, importTerm);
       Path modelResultPath = modelEnvironment.new RelativePathBin(modulePath + ".dep");
-      
-      boolean recompile = !FileCommands.exists(modelResultPath) || !Result.readDependencyFile(modelResultPath, modelEnvironment).isUpToDate(model, modelEnvironment);
-      
-      if (recompile) {
-        try {
-          log.log("Need to compile the imported model first; processing it now.");
-          compile(transformedTerm, new RelativeSourceLocationPath(new SourceLocation(model.getBasePath(), modelEnvironment), model.getRelativePath()), monitor);
-        } catch (Exception e) {
-          setErrorMessage(importTerm, "compilation of imported module failed: " + e.getLocalizedMessage());
-        } finally {
-          log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
-        }
-      }
-      
-      environment.getIncludePath().add(modelBinPath);
-      environment.getIncludePath().addAll(importedResult.getModelBinPaths());
-      driverResult.getModelBinPaths().add(modelBinPath);
-      driverResult.getModelBinPaths().addAll(importedResult.getModelBinPaths());
-      
       success = processImport(modulePath, Result.readDependencyFile(modelResultPath, modelEnvironment), modelResultPath, null, importTerm, true);
- 
     }
 
     return success;
+  }
+
+
+  private Environment compileImportedModel(RelativePath model, String modulePath, Result importedResult, 
+      Path importedResultPath, IStrategoTerm transformedTerm, IStrategoTerm importTerm) throws IOException {
+    /*
+     * A new temp directory is created to work as the current model
+     * import's bin directory. If the imported module already has a model bin
+     * it is taken instead.
+     */
+    Path modelBinPath;
+    if (importedResult != null && importedResult.getModelBinPath() != null)
+      modelBinPath = importedResult.getModelBinPath();
+    else {
+      modelBinPath = FileCommands.newTempDir();
+      importedResult.setModelBinPath(modelBinPath);
+      importedResult.writeDependencyFile(importedResultPath);
+    }
+
+    /*
+     * modelEnvironment is the environment for compiling imported modules.
+     * The output is stored in a temporary bin which has been created before.
+     */
+    Environment modelEnvironment = new Environment();
+    modelEnvironment.setAtomicImportParsing(environment.isAtomicImportParsing());
+    modelEnvironment.setGenerateJavaFile(environment.isGenerateJavaFile());
+    modelEnvironment.setSourcePath(environment.getSourcePath());
+    modelEnvironment.setRoot(environment.getRoot());
+    modelEnvironment.setBin(modelBinPath);
+    modelEnvironment.getIncludePath().add(environment.getBin());
+    
+    Path modelResultPath = modelEnvironment.new RelativePathBin(modulePath + ".dep");
+    
+    boolean recompile = !FileCommands.exists(modelResultPath) || !Result.readDependencyFile(modelResultPath, modelEnvironment).isUpToDate(model, modelEnvironment);
+    
+    if (recompile) {
+      try {
+        log.log("Need to compile the imported model first; processing it now.");
+        compile(transformedTerm, new RelativeSourceLocationPath(new SourceLocation(model.getBasePath(), modelEnvironment), model.getRelativePath()), monitor);
+      } catch (Exception e) {
+        setErrorMessage(importTerm, "compilation of imported module failed: " + e.getLocalizedMessage());
+      } finally {
+        log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
+      }
+    }
+    
+    environment.getIncludePath().add(modelBinPath);
+    environment.getIncludePath().addAll(importedResult.getModelBinPaths());
+    driverResult.getModelBinPaths().add(modelBinPath);
+    driverResult.getModelBinPaths().addAll(importedResult.getModelBinPaths());
+    
+    /*
+     * returns the Environment used for compiling the import
+     */
+    return modelEnvironment;
+  }
+
+
+  private IStrategoTerm processTransformation(RelativePath strPath, IStrategoTerm importTerm, IStrategoTerm currentTerm) throws IOException {
+    /*
+     * create a temporary stratego file that connects already available imports
+     * with the currently processed transformation
+     */
+    Path compoundStr = FileCommands.newTempFile("str");
+    StringBuilder builder = new StringBuilder();
+    builder.append("module ").append(FileCommands.fileName(compoundStr)).append("\n");
+    builder.append("imports ");
+    builder.append(StringCommands.printModuleList(availableSTRImports, " "));
+    builder.append(" ").append(FileCommands.dropExtension(strPath.getRelativePath()));
+    FileCommands.writeToFile(compoundStr, builder.toString());
+    
+    Path trans = null;
+    try {
+      trans = STRCommands.compile(compoundStr, "main-" + FileCommands.fileName(strPath), driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
+    } catch (TokenExpectedException e) {
+    } catch (BadTokenException e) {
+    } catch (InvalidParseTableException e) {
+    } catch (SGLRException e) {
+    }
+    
+    if (trans == null) {
+      ATermCommands.setErrorMessage(importTerm, "compilation of transformation " + FileCommands.fileName(strPath) + " failed");
+      return null;
+    }
+    /*  
+     * applies each transformation's "main-<transformation name>" rule on the AST of
+     * the current import
+     */
+    IStrategoTerm newTransformedTerm = STRCommands.assimilate("main-" + FileCommands.fileName(strPath), trans, currentTerm, interp);
+    
+    if (newTransformedTerm == null) {
+      ATermCommands.setErrorMessage(importTerm, "transformation " + FileCommands.fileName(strPath) + " failed");
+      return null;
+    }
+    return newTransformedTerm;
+  }
+
+
+  private List<RelativePath> resolveTransformationPaths(String modulePath,
+      List<String> transformationPaths, 
+      IStrategoTerm importTerm) {
+    log.beginTask("Resolving transformation paths for '"+modulePath+"'.");
+    List<RelativePath> resolvedTransformationPaths = new ArrayList<RelativePath>();
+    for (String transformationPath : transformationPaths) {
+      if (!transformationPath.contains("/")) {  // this branch searches for relative imports
+        
+        boolean moduleFound = false;
+        for (RelativePath importPath : availableSTRImports) {
+          if (FileCommands.dropExtension(importPath.getAbsolutePath()).endsWith(transformationPath)) {
+            // QST: Adding only transformationPath correct?
+            resolvedTransformationPaths.add(importPath);
+            moduleFound = true;
+            break;
+          }
+        }
+        if (!moduleFound) {
+          log.logErr("module '"+ transformationPath +"' not found in available imports");
+          // QST: Which Path should be added? (to produce an error) Which absolute path should it be?
+          resolvedTransformationPaths.add(environment.new RelativePathBin(transformationPath+".str"));
+        }
+      } else { // this branch searches for FQN imports
+        // QST: Use of searchFile correct here?
+        RelativePath p = ModuleSystemCommands.searchFile(transformationPath, ".str", environment);
+        if (p==null)
+          ATermCommands.setErrorMessage(importTerm, "cannot resolve module '"+ transformationPath.replace("/", ".") + "'");
+        else
+          resolvedTransformationPaths.add(p);
+      }
+    }
+    log.endTask();
+    return resolvedTransformationPaths;
   }
 
   private void processJavaTypeDec(IStrategoTerm toplevelDecl) throws IOException {
