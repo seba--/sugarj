@@ -841,36 +841,7 @@ public class Driver{
       if (model != null) {
         
         IStrategoTerm term = ATermCommands.atermFromFile(model.getAbsolutePath());
-        List<RelativePath> resolvedTransformationPaths = new ArrayList<RelativePath>();
-        
-        log.beginTask("Resolving transformation paths for '"+modulePath+"'.");
-        for (String transformationPath : transformationPaths) {
-          if (!transformationPath.contains("/")) {  // this branch searches for relative imports
-            
-            boolean moduleFound = false;
-            for (RelativePath importPath : availableSTRImports) {
-              if (FileCommands.dropExtension(importPath.getAbsolutePath()).endsWith(transformationPath)) {
-                // QST: Adding only transformationPath correct?
-                resolvedTransformationPaths.add(importPath);
-                moduleFound = true;
-                break;
-              }
-            }
-            if (!moduleFound) {
-              log.logErr("module '"+ transformationPath +"' not found in available imports");
-              // QST: Which Path should be added? (to produce an error) Which absolute path should it be?
-              resolvedTransformationPaths.add(environment.new RelativePathBin(transformationPath+".str"));
-            }
-          } else { // this branch searches for FQN imports
-            // QST: Use of searchFile correct here?
-            RelativePath p = ModuleSystemCommands.searchFile(transformationPath, ".str", environment);
-            if (p==null)
-              ATermCommands.setErrorMessage(importTerm, "cannot resolve module '"+ transformationPath.replace("/", ".") + "'");
-            else
-              resolvedTransformationPaths.add(p);
-          }
-        }
-        log.endTask();
+        List<RelativePath> resolvedTransformationPaths = resolveTransformationPaths(modulePath, transformationPaths, importTerm);
         
         /*
          * creates a tempFile that ???
@@ -968,6 +939,42 @@ public class Driver{
       }
     }
     return success;
+  }
+
+
+  private List<RelativePath> resolveTransformationPaths(String modulePath,
+      List<String> transformationPaths, 
+      IStrategoTerm importTerm) {
+    log.beginTask("Resolving transformation paths for '"+modulePath+"'.");
+    List<RelativePath> resolvedTransformationPaths = new ArrayList<RelativePath>();
+    for (String transformationPath : transformationPaths) {
+      if (!transformationPath.contains("/")) {  // this branch searches for relative imports
+        
+        boolean moduleFound = false;
+        for (RelativePath importPath : availableSTRImports) {
+          if (FileCommands.dropExtension(importPath.getAbsolutePath()).endsWith(transformationPath)) {
+            // QST: Adding only transformationPath correct?
+            resolvedTransformationPaths.add(importPath);
+            moduleFound = true;
+            break;
+          }
+        }
+        if (!moduleFound) {
+          log.logErr("module '"+ transformationPath +"' not found in available imports");
+          // QST: Which Path should be added? (to produce an error) Which absolute path should it be?
+          resolvedTransformationPaths.add(environment.new RelativePathBin(transformationPath+".str"));
+        }
+      } else { // this branch searches for FQN imports
+        // QST: Use of searchFile correct here?
+        RelativePath p = ModuleSystemCommands.searchFile(transformationPath, ".str", environment);
+        if (p==null)
+          ATermCommands.setErrorMessage(importTerm, "cannot resolve module '"+ transformationPath.replace("/", ".") + "'");
+        else
+          resolvedTransformationPaths.add(p);
+      }
+    }
+    log.endTask();
+    return resolvedTransformationPaths;
   }
 
   private void processJavaTypeDec(IStrategoTerm toplevelDecl) throws IOException {
