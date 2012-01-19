@@ -10,7 +10,7 @@
 !/test-workspace/.metadata/.plugins
 
 /test-workspace/.metadata/.plugins/*
-!/test-workspace/.metadata/.plugins/org.eclipse.core.resources/.projects/
+!/test-workspace/.metadata/.plugins/org.eclipse.core.resources/
 !/test-workspace/.metadata/.plugins/org.eclipse.ui.workbench/
 
 /test-workspace/.metadata/.plugins/org.eclipse.core.resources/*
