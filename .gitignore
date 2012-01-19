@@ -7,12 +7,12 @@
 
 # Eclipse-generated files
 bin/
+.cache
 
 # SugarJ cache
 .sugarjcache/
 
 # Spoofax stuff
-/editor/.cache
 /editor/editor/*.generated.esv
 /editor/include/
 /editor/syntax/*generated.pp
