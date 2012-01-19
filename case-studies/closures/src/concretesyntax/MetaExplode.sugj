@@ -1,0 +1,237 @@
+package concretesyntax;
+
+import org.sugarj.languages.Stratego;
+
+/*
+ * copied from the Stratego svn repository at Sept. 20, 2010:
+ *   https://svn.strategoxt.org/repos/StrategoXT/strategoxt/trunk/strc-core/lib/stratego/strc/parse/meta-explode.str
+ *   https://svn.strategoxt.org/repos/StrategoXT/strategoxt/trunk/stratego-front/sig/Stratego-MetaTransition.str
+ */
+public sugar MetaExplode {
+  desugarings
+    meta-explode
+  
+	signature
+	  constructors
+	    ToTerm       : a -> Term       // quotation
+	    FromTerm     : Term -> a       // antiquotation
+	
+	    ToBuild  : a -> Strategy   // quotation denoting !t
+	
+	    FromApp      : Strategy -> a   // antiquotation denoting <s>
+	
+	    ToStrategy   : a -> Strategy
+	    FromStrategy : Strategy -> a
+	
+	    WithAnno     : a * ListTerm -> a
+	
+	    meta-var     : String -> a
+	    meta-listvar : String -> a
+	    Cong         : String * List(Strategy) -> Strategy
+	    Ins    : Term -> Term
+	
+	    ManglePrefix : String * Var -> Term
+	    MangleSuffix : Var * String -> Term
+	  
+	
+	signature
+	  constructors
+	    AsFix        : Option
+	    appl         : Term * List(Term)        -> Term
+	    prod         : List(Term) * Term * Term -> Term
+	    cf           : Term                     -> Term
+	    opt          : Term                     -> Term
+	    layout       : Term
+	
+	    ConsAux      : a * List(a) -> List(a)
+	
+	rules
+	
+	  // There is no Wld/0 in asfix so this not buggy.
+	
+	  Clean :
+	    Op("Wld",[]) -> Wld()
+	
+	  Clean : 
+	    Op(i,[]) -> NoAnnoList(Int(<int-to-string> i))
+	    where <is-int> i
+	
+	strategies
+	
+	  meta-explode = 
+	    MetaExplode; topdown(try(Clean))
+	      
+	  MetaExplode =
+	    alltd(
+	       Anno(?ToTerm(<pretrm-explode>), MetaExplode)
+	     + AnnoList(?ToTerm(<pretrm-explode>), MetaExplode)
+	     + NoAnnoList(?ToTerm(<pretrm-explode>))
+	     + ?ToTerm(<trm-explode>)
+	     + ?ToMetaExpr(<trm-explode>)
+	     + ?ToMetaListExpr(<trm-explode>)
+	     + ?ToBuild(<!Build(<trm-explode>)>)
+	     + ?ToStrategy(<str-explode>)
+	   )
+	
+	  trm-explode =
+	    ToTermToTerm
+	    <+ TrmMetaVar 
+	    <+ LstMetaVar 
+	    <+ TrmFromTerm 
+	    <+ TrmFromApp
+	    <+ TrmFromStr 
+	    <+ TrmAnno
+	    <+ ConcAssocR; trm-explode
+	    <+ ConcCons; trm-explode
+	    <+ ConcNil; trm-explode
+	    <+ !NoAnnoList(<
+	          TrmInt 
+	          <+ TrmStr 
+	    <+ TrmConc 
+	    <+ TrmNil 
+	    <+ TrmCons 
+	    <+ TrmOp
+	        >)
+	
+	  pretrm-explode = 
+	    ToTermToTerm
+	    <+ TrmMetaVar 
+	    <+ LstMetaVar 
+	    <+ TrmInt 
+	    <+ TrmStr 
+	    <+ TrmFromTerm 
+	    <+ TrmFromApp
+	    <+ TrmFromStr 
+	    <+ TrmAnno; fatal-err(|"anno in anno")
+	    <+ ConcAssocR; pretrm-explode
+	    <+ ConcCons; pretrm-explode
+	    <+ ConcNil; pretrm-explode
+	    <+ TrmConc
+	    <+ TrmNil 
+	    <+ TrmCons 
+	    <+ TrmOp
+	
+	// match ToTerm nested in ToTerm; take structure literally
+	
+	  // todo: what do various combinations mean
+	  // ToTerm(ToTerm(A(FromTerm(x))))
+	  // ToTerm(ToTerm(A(FromTerm(FromTerm(x)))))
+	
+	  // todo: does not cover all variants of quotation constructors 
+	 
+	  ToTermToTerm = 
+	    ?ToTerm(t); quoted-trm-explode
+	
+	  quoted-trm-explode =
+	    QuotedOp 
+	
+	  QuotedOp :
+	    op#(ts) -> Op(op, <map(quoted-trm-explode)> ts)
+	
+	// regular explode
+	
+	  TrmOp : 
+	    op#(ts) -> Op(op, <map(trm-explode)> ts)
+	
+	  TrmMetaVar :
+	    meta-var(x) -> Var(x)
+	
+	  LstMetaVar :
+	    meta-listvar(x) -> Var(y)
+	    where if <explode-string; last> x => '*' then
+	      !ListVar(x)
+	    else
+	      !x 
+	          end => y
+	
+	  TrmInt = 
+	    !Int(<is-int; int-to-string>)
+	
+	  TrmStr = 
+	    !Str(<is-string>)
+	
+	  TrmFromTerm = 
+	    ?FromTerm(<MetaExplode>)
+	
+	  TrmFromTerm = 
+	    ?FromMetaExpr(<MetaExplode>)
+	
+	  TrmFromTerm = 
+	    ?FromMetaListExpr(<MetaExplode>)
+	
+	  TrmFromStr =  
+	    ?FromStrategy(<MetaExplode>)
+	
+	  TrmFromApp =
+	    ?FromApp(<!RootApp(<MetaExplode>)>)
+	
+	  TrmAnno : 
+	    WithAnno(t1, t2) -> Anno(t1', t2')
+	    where <trm-explode; try(?NoAnnoList(<id>))> t1 => t1'
+	        ; (<is-list>t2 <+ ![t2])
+	        ; foldr(!NoAnnoList(Op("Nil",[]))
+	         ,!NoAnnoList(Op("Cons", [<Fst>, <Snd>]))
+	         , MetaExplode)
+	        ; try(?NoAnnoList(<id>)) => t2'
+	
+	  TrmNil :
+	    [] -> Op("Nil", [])
+	
+	  TrmCons :
+	    [x | xs] -> 
+	    Op("Cons",[<trm-explode>x, <trm-explode> xs])
+	
+	  TrmCons :
+	    ConsAux(x, xs) -> 
+	    Op("Cons",[<trm-explode>x, <trm-explode> xs])
+	
+	  ConcAssocR : 
+	    Conc(Conc(t1, t2), t3) -> "Conc"#([t1, "Conc"#([t2, t3])])
+	
+	  ConcCons :
+	    Conc([t1 | t2], t3) -> ConsAux(t1, "Conc"#([t2, t3]))
+	
+	  ConcCons :
+	    Conc(ConsAux(t1, t2), t3) -> ConsAux(t1, "Conc"#([t2, t3]))
+	
+	  ConcNil :
+	    Conc([], t) -> t
+	
+	  ConcNil :
+	    Conc(t, []) -> t
+	   
+	  TrmConc :
+	    Conc(t1, t2) -> Op("Conc", [<trm-explode>t1, <trm-explode>t2])
+	
+	/*
+	  TrmConc :
+	    Conc(ts1,ts2) -> t
+	    where <try(![<LstMetaVar>])
+	     ; foldr(!<TrmLMetaVar <+ trm-explode> ts2, 
+	       !NoAnnoList(Op("Cons", [<Fst>, <Snd>])), 
+	       trm-explode)> ts1 => t
+	*/
+	
+	  TrmFromMangle : 
+	    ManglePrefix(x, y) -> App(Call(SVar("conc-strings"),[]), Tuple([Str(x), Var(y)]))
+	
+	  TrmFromMangle : 
+	    MangleSuffix(x, y) -> App(Call(SVar("conc-strings"),[]), Tuple([Var(x), Str(y)]))
+	
+	  str-explode =
+	    \ meta-var(x) -> Match(Var(x)) \
+	    <+ TrmFromTerm
+	    <+ TrmFromStr
+	    <+ ?FromApp(<MetaExplode>)
+	    <+ \ [] -> Cong("Nil", []) \
+	    <+ \ [t | ts] -> Cong("Cons", [<str-explode>t,<str-explode>ts]) \
+	    <+ is-string; !Match(NoAnnoList(Str(<id>)))
+	    <+ \ op#(ts) -> Cong(op, <map(str-explode)> ts) \
+	
+	signature
+	  constructors
+	    ToMetaExpr       : a -> b
+	    ToMetaListExpr   : a -> b
+	    FromMetaExpr     : a -> StrategoTerm
+	    FromMetaListExpr : a -> StrategoTerm
+}
