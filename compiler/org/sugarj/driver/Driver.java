@@ -849,39 +849,7 @@ public class Driver{
          */
         IStrategoTerm transformedTerm = term;
         for (RelativePath strPath : resolvedTransformationPaths) {
-          Path compoundStr = FileCommands.newTempFile("str");
-          StringBuilder builder = new StringBuilder();
-          builder.append("module ").append(FileCommands.fileName(compoundStr)).append("\n");
-          builder.append("imports ");
-          builder.append(StringCommands.printModuleList(availableSTRImports, " "));
-          builder.append(" ").append(FileCommands.dropExtension(strPath.getRelativePath()));
-          FileCommands.writeToFile(compoundStr, builder.toString());
-          
-          Path trans = null;
-          try {
-            trans = STRCommands.compile(compoundStr, "main-" + FileCommands.fileName(strPath), driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
-          } catch (TokenExpectedException e) {
-          } catch (BadTokenException e) {
-          } catch (InvalidParseTableException e) {
-          } catch (SGLRException e) {
-          }
-          
-          if (trans == null) {
-            ATermCommands.setErrorMessage(importTerm, "compilation of transformation " + FileCommands.fileName(strPath) + " failed");
-            break;
-          }
-
-          /*  
-           * applies each transformation's "main-<transformation name>" rule on the AST of
-           * the current import
-           */
-          IStrategoTerm newTransformedTerm = STRCommands.assimilate("main-" + FileCommands.fileName(strPath), trans, transformedTerm, interp);
-          
-          if (newTransformedTerm == null) {
-            ATermCommands.setErrorMessage(importTerm, "transformation " + FileCommands.fileName(strPath) + " failed");
-            break;
-          }
-          transformedTerm = newTransformedTerm;
+          transformedTerm = processTransformation(strPath, importTerm, transformedTerm);
         }
 
         /*
@@ -939,6 +907,42 @@ public class Driver{
       }
     }
     return success;
+  }
+
+
+  private IStrategoTerm processTransformation(RelativePath strPath, IStrategoTerm importTerm, IStrategoTerm currentTerm) throws IOException {
+    Path compoundStr = FileCommands.newTempFile("str");
+    StringBuilder builder = new StringBuilder();
+    builder.append("module ").append(FileCommands.fileName(compoundStr)).append("\n");
+    builder.append("imports ");
+    builder.append(StringCommands.printModuleList(availableSTRImports, " "));
+    builder.append(" ").append(FileCommands.dropExtension(strPath.getRelativePath()));
+    FileCommands.writeToFile(compoundStr, builder.toString());
+    
+    Path trans = null;
+    try {
+      trans = STRCommands.compile(compoundStr, "main-" + FileCommands.fileName(strPath), driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
+    } catch (TokenExpectedException e) {
+    } catch (BadTokenException e) {
+    } catch (InvalidParseTableException e) {
+    } catch (SGLRException e) {
+    }
+    
+    if (trans == null) {
+      ATermCommands.setErrorMessage(importTerm, "compilation of transformation " + FileCommands.fileName(strPath) + " failed");
+      return null;
+    }
+    /*  
+     * applies each transformation's "main-<transformation name>" rule on the AST of
+     * the current import
+     */
+    IStrategoTerm newTransformedTerm = STRCommands.assimilate("main-" + FileCommands.fileName(strPath), trans, currentTerm, interp);
+    
+    if (newTransformedTerm == null) {
+      ATermCommands.setErrorMessage(importTerm, "transformation " + FileCommands.fileName(strPath) + " failed");
+      return null;
+    }
+    return newTransformedTerm;
   }
 
 
