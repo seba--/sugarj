@@ -848,61 +848,74 @@ public class Driver{
           transformedTerm = processTransformation(strPath, importTerm, transformedTerm);
         }
 
-        /*
-         * A new temp directory is created to work as the current model
-         * import's bin directory. If the imported module already has a model bin
-         * it is taken instead.
-         */
-        Path modelBinPath;
-        if (importedResult != null && importedResult.getModelBinPath() != null)
-          modelBinPath = importedResult.getModelBinPath();
-        else {
-          modelBinPath = FileCommands.newTempDir();
-          importedResult.setModelBinPath(modelBinPath);
-          importedResult.writeDependencyFile(importedResultPath);
-        }
-  
-        /*
-         * modelEnvironment is the environment for compiling imported modules.
-         * The output is stored in a temporary bin which has been created before.
-         */
-        Environment modelEnvironment = new Environment();
-        modelEnvironment.setModelDrivenProcessing(true);
-        modelEnvironment.setModelCompilation(true);
-        modelEnvironment.setAtomicImportParsing(environment.isAtomicImportParsing());
-        modelEnvironment.setGenerateJavaFile(environment.isGenerateJavaFile());
-        modelEnvironment.setSourcePath(environment.getSourcePath());
-        modelEnvironment.setRoot(environment.getRoot());
-        modelEnvironment.setBin(modelBinPath);
-        modelEnvironment.getIncludePath().add(environment.getBin());
+
         
+        Environment modelEnvironment = compileImportedModel(model, modulePath, importedResult, importedResultPath, transformedTerm, importTerm);
         Path modelResultPath = modelEnvironment.new RelativePathBin(modulePath + ".dep");
-        
-        boolean recompile = !FileCommands.exists(modelResultPath) || !Result.readDependencyFile(modelResultPath, modelEnvironment).isUpToDate(model, modelEnvironment);
-        
-        if (recompile) {
-          try {
-            log.log("Need to compile the imported model first; processing it now.");
-            compile(transformedTerm, new RelativeSourceLocationPath(new SourceLocation(model.getBasePath(), modelEnvironment), model.getRelativePath()), monitor);
-          } catch (Exception e) {
-            setErrorMessage(importTerm, "compilation of imported module failed: " + e.getLocalizedMessage());
-          } finally {
-            // QST: setting model compilation to >false< here correct/needed?
-            modelEnvironment.setModelCompilation(false); 
-            log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
-          }
-        }
-        
-        environment.getIncludePath().add(modelBinPath);
-        environment.getIncludePath().addAll(importedResult.getModelBinPaths());
-        driverResult.getModelBinPaths().add(modelBinPath);
-        driverResult.getModelBinPaths().addAll(importedResult.getModelBinPaths());
-        
         success = processImport(modulePath, Result.readDependencyFile(modelResultPath, modelEnvironment), modelResultPath, null, importTerm, true);
  
       }
     }
     return success;
+  }
+
+
+  private Environment compileImportedModel(RelativePath model, String modulePath, Result importedResult, 
+      Path importedResultPath, IStrategoTerm transformedTerm, IStrategoTerm importTerm) throws IOException {
+    /*
+     * A new temp directory is created to work as the current model
+     * import's bin directory. If the imported module already has a model bin
+     * it is taken instead.
+     */
+    Path modelBinPath;
+    if (importedResult != null && importedResult.getModelBinPath() != null)
+      modelBinPath = importedResult.getModelBinPath();
+    else {
+      modelBinPath = FileCommands.newTempDir();
+      importedResult.setModelBinPath(modelBinPath);
+      importedResult.writeDependencyFile(importedResultPath);
+    }
+
+    /*
+     * modelEnvironment is the environment for compiling imported modules.
+     * The output is stored in a temporary bin which has been created before.
+     */
+    Environment modelEnvironment = new Environment();
+    modelEnvironment.setModelDrivenProcessing(true);
+    modelEnvironment.setModelCompilation(true);
+    modelEnvironment.setAtomicImportParsing(environment.isAtomicImportParsing());
+    modelEnvironment.setGenerateJavaFile(environment.isGenerateJavaFile());
+    modelEnvironment.setSourcePath(environment.getSourcePath());
+    modelEnvironment.setRoot(environment.getRoot());
+    modelEnvironment.setBin(modelBinPath);
+    modelEnvironment.getIncludePath().add(environment.getBin());
+    
+    Path modelResultPath = modelEnvironment.new RelativePathBin(modulePath + ".dep");
+    
+    boolean recompile = !FileCommands.exists(modelResultPath) || !Result.readDependencyFile(modelResultPath, modelEnvironment).isUpToDate(model, modelEnvironment);
+    
+    if (recompile) {
+      try {
+        log.log("Need to compile the imported model first; processing it now.");
+        compile(transformedTerm, new RelativeSourceLocationPath(new SourceLocation(model.getBasePath(), modelEnvironment), model.getRelativePath()), monitor);
+      } catch (Exception e) {
+        setErrorMessage(importTerm, "compilation of imported module failed: " + e.getLocalizedMessage());
+      } finally {
+        // QST: setting model compilation to >false< here correct/needed?
+        modelEnvironment.setModelCompilation(false); 
+        log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
+      }
+    }
+    
+    environment.getIncludePath().add(modelBinPath);
+    environment.getIncludePath().addAll(importedResult.getModelBinPaths());
+    driverResult.getModelBinPaths().add(modelBinPath);
+    driverResult.getModelBinPaths().addAll(importedResult.getModelBinPaths());
+    
+    /*
+     * returns the Environment used for compiling the import
+     */
+    return modelEnvironment;
   }
 
 
