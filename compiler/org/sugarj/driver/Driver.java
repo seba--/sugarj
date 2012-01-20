@@ -72,7 +72,6 @@ public class Driver{
   private static List<Path> pendingInputFiles = new ArrayList<Path>();
   
   private static List<Path> currentlyProcessing = new ArrayList<Path>();
-  private static Map<Path, Map<Path, Map<Path, List<Path>>>> circularDependance = new HashMap<Path, Map<Path, Map<Path, List<Path>>>>();
 
   private static List<ProcessingListener> processingListener = new LinkedList<ProcessingListener>();
   
@@ -353,36 +352,10 @@ public class Driver{
       stepped();
       
       // COMPILE the generated java file
-      if (delegateCompilation == null) {
-        Map<Path, Map<Path, List<Path>>> dependants = circularDependance.get(sourceFile);
-        List<Path> javaOutFiles = new ArrayList<Path>();
-        javaOutFiles.add(javaOutFile);
-        List<Path> generatedClasses = new ArrayList<Path>(generatedJavaClasses);
-        if (dependants != null) {
-          for (Map<Path, List<Path>> deps : dependants.values()) { 
-            javaOutFiles.addAll(deps.keySet());
-            for (List<Path> classes : deps.values())
-              generatedClasses.addAll(classes);
-          }
-          circularDependance.remove(sourceFile);
-        }
-
-        compileGeneratedJavaFiles(javaOutFiles, generatedClasses);
-      }
-      else {
-        Map<Path, Map<Path, List<Path>>> dependants = circularDependance.get(sourceFile);
-        if (dependants == null)
-          dependants = new HashMap<Path, Map<Path, List<Path>>>();
-        Map<Path, List<Path>> deps = new HashMap<Path, List<Path>>();
-        deps.put(javaOutFile, generatedJavaClasses);
-        dependants.put(sourceFile, deps);
-        
-        Map<Path, Map<Path, List<Path>>> delegateDependants = circularDependance.get(delegateCompilation);
-        if (dependants != null && delegateDependants != null)
-            delegateDependants.putAll(dependants);
-        else if (dependants != null)
-          circularDependance.put(delegateCompilation, dependants);
-      }
+      if (delegateCompilation == null)
+        compileGeneratedJavaFiles();
+      else
+        driverResult.delegateCompilation(delegateCompilation, javaOutFile, generatedJavaClasses);
       
       driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
       
@@ -411,11 +384,11 @@ public class Driver{
     }
   }
 
-  private void compileGeneratedJavaFiles(List<Path> javaOutFiles, List<Path> generatedClasses) throws IOException {
+  private void compileGeneratedJavaFiles() throws IOException {
     boolean good = false;
     log.beginTask("compilation", "COMPILE the generated java file");
     try {
-      driverResult.compileJava(javaOutFiles, environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), generatedClasses);
+      driverResult.compileJava(javaOutFile, environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), generatedJavaClasses);
       good = true;
     } finally {
       log.endTask(good, "compilation succeeded", "compilation failed");
@@ -895,7 +868,7 @@ public class Driver{
                 initializeCaches(environment, true);
                 if (importResult.hasFailed())
                   setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
-                if (circularDependance.get(sourceFile) != null && circularDependance.get(sourceFile).containsKey(importSourceFile)) {
+                if (driverResult.hasDelegatedCompilation(importSourceFile)) {
                   driverResult.appendToFile(javaOutFile, "import " + importModule + ";\n");
                   skipProcessImport = true;
                 }
