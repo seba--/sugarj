@@ -868,10 +868,6 @@ public class Driver{
                 initializeCaches(environment, true);
                 if (importResult.hasFailed())
                   setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
-                if (driverResult.hasDelegatedCompilation(importSourceFile)) {
-                  driverResult.appendToFile(javaOutFile, "import " + importModule + ";\n");
-                  skipProcessImport = true;
-                }
               }
             } catch (Exception e) {
               setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
@@ -886,8 +882,13 @@ public class Driver{
         
         if (dep != null)
           driverResult.addDependency(dep, environment);
+
+        if (driverResult.hasDelegatedCompilation(importSourceFile)) {
+          driverResult.appendToFile(javaOutFile, "import " + importModule + ";\n");
+          skipProcessImport = true;
+        }
       }
-      
+
       boolean success = skipProcessImport || processImport(modulePath, toplevelDecl);
       
       if (!success)

@@ -240,6 +240,9 @@ public class Result {
       delegated = new HashMap<Path, Map<Path,List<Path>>>();
     delegated.put(sourceFile, deferred);
     
+    if (delegatedCompilation.containsKey(sourceFile))
+      delegated.putAll(delegatedCompilation.get(sourceFile));
+    
     delegatedCompilation.put(delegate, delegated);
   }
   
