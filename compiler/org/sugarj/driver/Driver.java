@@ -63,14 +63,16 @@ public class Driver{
   
   public final static String CACHE_VERSION = "editor-base-0.16";
   
-  private final static int PENDING_TIMEOUT = 120000;
+  private final static int PENDING_TIMEOUT = 30000;
 
   private static Map<Path, Result> resultCache = new HashMap<Path, Result>(); // new LRUMap(50);
   private static Map<Path, Entry<String, Driver>> pendingRuns = new HashMap<Path, Map.Entry<String,Driver>>();
 
   private static List<RelativeSourceLocationPath> allInputFiles = new ArrayList<RelativeSourceLocationPath>();
   private static List<Path> pendingInputFiles = new ArrayList<Path>();
+  
   private static List<Path> currentlyProcessing = new ArrayList<Path>();
+  private static Map<Path, Map<Path, Map<Path, List<Path>>>> circularDependance = new HashMap<Path, Map<Path, Map<Path, List<Path>>>>();
 
   private static List<ProcessingListener> processingListener = new LinkedList<ProcessingListener>();
   
@@ -123,6 +125,7 @@ public class Driver{
   private boolean interrupt = false;
   
   private boolean generateFiles;
+  private Path delegateCompilation = null;
   
   private List<Path> generatedJavaClasses = new ArrayList<Path>();
   
@@ -350,7 +353,36 @@ public class Driver{
       stepped();
       
       // COMPILE the generated java file
-      compileGeneratedJavaFile();
+      if (delegateCompilation == null) {
+        Map<Path, Map<Path, List<Path>>> dependants = circularDependance.get(sourceFile);
+        List<Path> javaOutFiles = new ArrayList<Path>();
+        javaOutFiles.add(javaOutFile);
+        List<Path> generatedClasses = new ArrayList<Path>(generatedJavaClasses);
+        if (dependants != null) {
+          for (Map<Path, List<Path>> deps : dependants.values()) { 
+            javaOutFiles.addAll(deps.keySet());
+            for (List<Path> classes : deps.values())
+              generatedClasses.addAll(classes);
+          }
+          circularDependance.remove(sourceFile);
+        }
+
+        compileGeneratedJavaFiles(javaOutFiles, generatedClasses);
+      }
+      else {
+        Map<Path, Map<Path, List<Path>>> dependants = circularDependance.get(sourceFile);
+        if (dependants == null)
+          dependants = new HashMap<Path, Map<Path, List<Path>>>();
+        Map<Path, List<Path>> deps = new HashMap<Path, List<Path>>();
+        deps.put(javaOutFile, generatedJavaClasses);
+        dependants.put(sourceFile, deps);
+        
+        Map<Path, Map<Path, List<Path>>> delegateDependants = circularDependance.get(delegateCompilation);
+        if (dependants != null && delegateDependants != null)
+            delegateDependants.putAll(dependants);
+        else if (dependants != null)
+          circularDependance.put(delegateCompilation, dependants);
+      }
       
       driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
       
@@ -379,11 +411,11 @@ public class Driver{
     }
   }
 
-  private void compileGeneratedJavaFile() throws IOException {
+  private void compileGeneratedJavaFiles(List<Path> javaOutFiles, List<Path> generatedClasses) throws IOException {
     boolean good = false;
     log.beginTask("compilation", "COMPILE the generated java file");
     try {
-      driverResult.compileJava(javaOutFile, environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), generatedJavaClasses);
+      driverResult.compileJava(javaOutFiles, environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), generatedClasses);
       good = true;
     } finally {
       log.endTask(good, "compilation succeeded", "compilation failed");
@@ -819,11 +851,12 @@ public class Driver{
       // TODO handle import declarations with asterisks, e.g. import foo.*;
       
       String modulePath = FileCommands.getRelativeModulePath(importModule);
+      boolean skipProcessImport = false;
   
       if (!modulePath.startsWith("org/sugarj")) {
         Path dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
         Result res = null;
-        RelativeSourceLocationPath sourceFile = null;
+        RelativeSourceLocationPath importSourceFile = null;
         
         if (dep != null) {
           try {
@@ -833,13 +866,13 @@ public class Driver{
           }
           
           if (res != null && res.getSourceFile() != null && res.getSourceFile().getBasePath().equals(environment.getRoot()))
-            sourceFile = res.getSourceFile();
+            importSourceFile = res.getSourceFile();
         }
         
-        if (sourceFile == null)
-          sourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
+        if (importSourceFile == null)
+          importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
 
-        if (sourceFile != null && (res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment))) {
+        if (importSourceFile != null && (res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment))) {
           if (!generateFiles) {
             // boolean b = res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment);
             // System.out.println(b);
@@ -850,15 +883,28 @@ public class Driver{
             
             try {
               storeCaches(environment);
-              Result importResult = compile(sourceFile, monitor);
-              initializeCaches(environment, true);
-              if (importResult.hasFailed())
-                setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
+   
+              if (currentlyProcessing.contains(importSourceFile)) {
+                // assume source file does not provide syntactic sugar
+                driverResult.appendToFile(javaOutFile, "import " + importModule + ";\n");
+                skipProcessImport = true;
+                delegateCompilation = importSourceFile;
+              }
+              else {
+                Result importResult = compile(importSourceFile, monitor);
+                initializeCaches(environment, true);
+                if (importResult.hasFailed())
+                  setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
+                if (circularDependance.get(sourceFile) != null && circularDependance.get(sourceFile).containsKey(importSourceFile)) {
+                  driverResult.appendToFile(javaOutFile, "import " + importModule + ";\n");
+                  skipProcessImport = true;
+                }
+              }
             } catch (Exception e) {
               setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
             }
               
-            log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
+            log.log("CONTINUE PROCESSING'" + importSourceFile + "'.");
           }
         }
         
@@ -869,7 +915,7 @@ public class Driver{
           driverResult.addDependency(dep, environment);
       }
       
-      boolean success = processImport(modulePath, toplevelDecl);
+      boolean success = skipProcessImport || processImport(modulePath, toplevelDecl);
       
       if (!success)
         setErrorMessage(toplevelDecl, "module not found: " + importModule);

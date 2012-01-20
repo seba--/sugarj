@@ -2,7 +2,9 @@ package org.sugarj.driver;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
 import org.sugarj.driver.path.Path;
@@ -17,11 +19,17 @@ import org.sugarj.driver.path.Path;
  */
 public class JavaCommands {
 
-  public static boolean javac(Path java, Path dir, Collection<Path> cp) throws IOException {
-    return javac(java, dir, cp.toArray(new Path[cp.size()]));
+  public static boolean javac(Path sourceFile, Path dir, Collection<Path> cp) throws IOException {
+    ArrayList<Path> sourceFiles = new ArrayList<Path>();
+    sourceFiles.add(sourceFile);
+    return javac(sourceFiles, dir, cp);
+  }
+  
+  public static boolean javac(List<Path> sourceFiles, Path dir, Collection<Path> cp) throws IOException {
+    return javac(sourceFiles, dir, cp.toArray(new Path[cp.size()]));
   }
 
-  public static boolean javac(Path java, Path dir, Path... cp) throws IOException {
+  public static boolean javac(List<Path> sourceFiles, Path dir, Path... cp) throws IOException {
     StringBuilder cpBuilder = new StringBuilder();
     
     for (int i = 0; i < cp.length; i++) {
@@ -36,13 +44,17 @@ public class JavaCommands {
     
     cpBuilder.append(dir);
     
-    String[] cmd = new String[] {
-        "-cp", cpBuilder.toString(),
-        "-d", FileCommands.toWindowsPath(dir.getAbsolutePath()),
-        "-source", "1.5",
-        "-nowarn",
-        FileCommands.toWindowsPath(java.getAbsolutePath())
-    };
+    String[] cmd = new String[7 + sourceFiles.size()];
+    cmd[0] = "-cp";
+    cmd[1] = cpBuilder.toString();
+    cmd[2] = "-d";
+    cmd[3] = FileCommands.toWindowsPath(dir.getAbsolutePath());
+    cmd[4] = "-source";
+    cmd[5] = "1.5";
+    cmd[6] = "-nowarn";
+    
+    for (int i = 0; i < sourceFiles.size(); i++)
+      cmd[i + 7] = FileCommands.toWindowsPath(sourceFiles.get(i).getAbsolutePath());
     
     // this is ECJ
     return BatchCompiler.compile(

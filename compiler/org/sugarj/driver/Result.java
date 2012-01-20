@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,6 +42,8 @@ public class Result {
   private Set<Path> allDependentFiles = new HashSet<Path>();
   private boolean failed = false;
   private Path generationLog;
+  
+  private static Map<Path, Set<Path>> circularDependance = new HashMap<Path, Set<Path>>();
 
   private final static Result OUTDATED_RESULT = new Result(true) {
     @Override
@@ -187,8 +190,14 @@ public class Result {
   }
 
   void compileJava(Path javaOutFile, Path bin, List<Path> path, List<Path> generatedJavaClasses) throws IOException {
+    ArrayList<Path> javaOutFiles = new ArrayList<Path>();
+    javaOutFiles.add(javaOutFile);
+    compileJava(javaOutFiles, bin, path, generatedJavaClasses);
+  }
+  
+  void compileJava(List<Path> javaOutFiles, Path bin, List<Path> path, List<Path> generatedJavaClasses) throws IOException {
     if (generateFiles) {
-      JavaCommands.javac(javaOutFile, bin, path);
+      JavaCommands.javac(javaOutFiles, bin, path);
       for (Path cl : generatedJavaClasses)
         generatedFileHashes.put(cl, FileCommands.fileHash(cl));
     }
