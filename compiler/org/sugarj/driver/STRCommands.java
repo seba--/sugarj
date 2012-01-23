@@ -37,7 +37,6 @@ import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
 import org.sugarj.stdlib.StdLib;
-import org.sugarj.util.LoggingOutputStream;
 
 /**
  * This class provides methods for various SDF commands. Each
