@@ -49,4 +49,4 @@ signature constructors
     ModelDec          : EditorServicesDecHead * EditorServicesDecBody -> SugarDec
     ModelDecHead      : List(Annos) * JavaId -> EditorServicesDecHead
     ModelBody         : List(EditorServicesSection) -> EditorServiceBody
-    
+    ToModelTerm       : ATerm -> ModelTerm

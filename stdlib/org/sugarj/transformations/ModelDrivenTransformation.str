@@ -4,7 +4,7 @@ imports org/sugarj/languages/Model
         org/sugarj/languages/Java 
         org/sugarj/languages/Stratego
         org/sugarj/languages/SugarJ
-        
+
 rules
   desugar = changed-tree(transformation-to-sugar)
 
@@ -35,6 +35,14 @@ rules
   	
   rename-rule(|name) :
   	SDef("main", typeids, strategy) -> SDef(<conc-strings> ("main", "-", name), typeids, strategy)
+
     
-  
-    
+/*
+ * use 
+ *   import libstratego-aterm
+ * instead as soon as this bug in STRJ is fixed: http://yellowgrass.org/issue/Spoofax/487
+ */
+imports org/sugarj/transformations/ATerm 
+
+rules
+  desugar : ToModelTerm(t) -> <implode-aterm> t

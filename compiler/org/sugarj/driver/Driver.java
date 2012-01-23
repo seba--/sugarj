@@ -676,15 +676,9 @@ public class Driver{
     
     
     IStrategoTerm head = getApplicationSubterm(toplevelDecl, "ModelDec", 0);
-    IStrategoTerm bodyDec = getApplicationSubterm(toplevelDecl, "ModelDec", 1);
-    IStrategoTerm body = getApplicationSubterm(bodyDec, "ModelBody", 0);
+    // IStrategoTerm bodyDec = getApplicationSubterm(toplevelDecl, "ModelDec", 1);
     
-    IStrategoTerm modelTerm = ATermCommands.implodeAterm(body, interp);
-    
-    IStrategoTerm modelDec = ATermCommands.makeAppl("ModelDec", "ToplevelDeclaration", 2, head, 
-                             ATermCommands.makeAppl("ModelBody", "ModelBody", 1, modelTerm));
-    
-    desugaredBodyDecls.add(modelDec);
+    desugaredBodyDecls.add(toplevelDecl);
     
     String modelName;
     log.beginTask("Extracting name and accessibility of the model.");

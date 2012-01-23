@@ -188,5 +188,6 @@ exports
   context-free syntax
     ModelDecHead ModelBody         -> ToplevelDeclaration     {cons("ModelDec")}
     AnnoOrSugarMod* "model" JavaId -> ModelDecHead {cons("ModelDecHead")}
-    "{" ATerm "}"              -> ModelBody    {cons("ModelBody")}
+    "{" ModelTerm "}"              -> ModelBody    {cons("ModelBody")}
+    ATerm -> ModelTerm {cons("ToModelTerm")}
   )
