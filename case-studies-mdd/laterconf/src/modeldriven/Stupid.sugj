@@ -1,0 +1,8 @@
+package modeldriven;
+
+import modeldriven.Later;
+ 
+public class Stupid {
+    public int i = $LATER;
+    public int j = $LATER2;
+}  

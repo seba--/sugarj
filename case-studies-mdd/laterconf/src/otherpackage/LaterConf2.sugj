@@ -1,0 +1,7 @@
+package otherpackage;
+
+public transformation LaterConf2 {
+  rules
+    main = bottomup(try(delater))
+    delater = fail
+}  

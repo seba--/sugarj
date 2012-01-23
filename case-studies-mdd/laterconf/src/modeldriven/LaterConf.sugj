@@ -1,0 +1,7 @@
+package modeldriven;
+
+public transformation LaterConf {
+  rules
+    main = bottomup(try(delater))
+    delater = fail
+}    
