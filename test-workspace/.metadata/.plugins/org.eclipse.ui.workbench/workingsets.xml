@@ -7,8 +7,8 @@
 <item elementID="=all" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
 </workingSet>
 <workingSet editPageId="org.eclipse.jdt.ui.JavaWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327317426334_29" label="mdd" name="mdd">
-<item elementID="=base-model-test" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
 <item elementID="=laterconf" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=base-model-test" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
 <item elementID="=db-schema" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
 </workingSet>
 <workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1326982705927_0" label="Window Working Set" name="Aggregate for window 1326982705926"/>
@@ -42,4 +42,7 @@
 <workingSet IMemento.internal.id="mdd"/>
 <workingSet IMemento.internal.id="sugarj"/>
 </workingSet>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327331350915_31" label="Window Working Set" name="Aggregate for window 1327331350914"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327331530206_32" label="Window Working Set" name="Aggregate for window 1327331530206"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327331671592_33" label="Window Working Set" name="Aggregate for window 1327331671592"/>
 </workingSetManager>
