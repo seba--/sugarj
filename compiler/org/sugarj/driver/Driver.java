@@ -776,11 +776,6 @@ public class Driver{
             setErrorMessage(toplevelDecl, "module outdated, compile first: " + importModule);
           }
           else {
-            log.log("Need to compile the imported module first; processing it now.");
-            
-            try {
-              storeCaches(environment);
-   
               if (currentlyProcessing.contains(importSourceFile)) {
                 // assume source file does not provide syntactic sugar
                 driverResult.appendToFile(javaOutFile, "import " + importModule + ";\n");
@@ -788,16 +783,21 @@ public class Driver{
                 delegateCompilation = importSourceFile;
               }
               else {
-                Result importResult = compile(importSourceFile, monitor);
-                initializeCaches(environment, true);
-                if (importResult.hasFailed())
+                log.log("Need to compile the imported module first; processing it now.");
+
+                try {
+                  storeCaches(environment);
+       
+                  Result importResult = compile(importSourceFile, monitor);
+                  initializeCaches(environment, true);
+                  if (importResult.hasFailed())
+                    setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
+                } catch (Exception e) {
                   setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
+                }
+                  
+                log.log("CONTINUE PROCESSING'" + importSourceFile + "'.");
               }
-            } catch (Exception e) {
-              setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
-            }
-              
-            log.log("CONTINUE PROCESSING'" + importSourceFile + "'.");
           }
         }
         
