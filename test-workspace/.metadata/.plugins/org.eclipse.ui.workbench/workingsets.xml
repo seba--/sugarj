@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workingSetManager>
+<workingSet editPageId="org.eclipse.jdt.ui.JavaWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1326982719495_1" label="sugarj" name="sugarj">
+<item elementID="=pairs" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=test-circularity" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=closures" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=all" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+</workingSet>
+<workingSet editPageId="org.eclipse.jdt.ui.JavaWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327317426334_29" label="mdd" name="mdd">
+<item elementID="=base-model-test" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=laterconf" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=db-schema" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+</workingSet>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1326982705927_0" label="Window Working Set" name="Aggregate for window 1326982705926"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1326983598377_3" label="Window Working Set" name="Aggregate for window 1326983598377"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1326984255351_4" label="Window Working Set" name="Aggregate for window 1326984255351"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1326987297868_5" label="Window Working Set" name="Aggregate for window 1326987297868"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327051084294_6" label="Window Working Set" name="Aggregate for window 1327051084294"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327051360721_7" label="Window Working Set" name="Aggregate for window 1327051360721"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327051846155_8" label="Window Working Set" name="Aggregate for window 1327051846155"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327052584794_9" label="Window Working Set" name="Aggregate for window 1327052584793"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327053031008_10" label="Window Working Set" name="Aggregate for window 1327053031008"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327053431608_11" label="Window Working Set" name="Aggregate for window 1327053431608"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327053568388_12" label="Window Working Set" name="Aggregate for window 1327053568388"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327054064267_13" label="Window Working Set" name="Aggregate for window 1327054064267"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327054527248_14" label="Window Working Set" name="Aggregate for window 1327054527248"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327056623085_15" label="Window Working Set" name="Aggregate for window 1327056623085"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327056782311_16" label="Window Working Set" name="Aggregate for window 1327056782311"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327074134574_17" label="Window Working Set" name="Aggregate for window 1327074134574"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327074483204_18" label="Window Working Set" name="Aggregate for window 1327074483204"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327074956856_19" label="Window Working Set" name="Aggregate for window 1327074956856"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327312972082_20" label="Window Working Set" name="Aggregate for window 1327312972082"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327315011387_21" label="Window Working Set" name="Aggregate for window 1327315011386"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327315147920_22" label="Window Working Set" name="Aggregate for window 1327315147920"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327315202890_23" label="Window Working Set" name="Aggregate for window 1327315202890"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327315664565_24" label="Window Working Set" name="Aggregate for window 1327315664565"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327315893795_25" label="Window Working Set" name="Aggregate for window 1327315893795"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327316496145_26" label="Window Working Set" name="Aggregate for window 1327316496145"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327316641796_27" label="Window Working Set" name="Aggregate for window 1327316641796"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327317409731_28" label="Window Working Set" name="Aggregate for window 1327317409731"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1327318094984_30" label="Multiple Working Sets" name="Aggregate:mdd:sugarj:">
+<workingSet IMemento.internal.id="mdd"/>
+<workingSet IMemento.internal.id="sugarj"/>
+</workingSet>
+</workingSetManager>
