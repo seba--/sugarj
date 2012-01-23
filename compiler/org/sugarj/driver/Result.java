@@ -349,7 +349,7 @@ public class Result {
     } catch (ClassNotFoundException e) {
       throw new IOException(e);
     } catch (Exception e) {
-      e.printStackTrace();
+//      e.printStackTrace();
       return OUTDATED_RESULT;
     } finally {
       if (ois != null)
