@@ -803,7 +803,8 @@ public class Driver{
         
         if (dep == null)
           dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
-        if (dep != null)
+
+        if (dep != null && !skipProcessImport)
           driverResult.addDependency(dep, environment);
 
         if (driverResult.hasDelegatedCompilation(importSourceFile)) {
