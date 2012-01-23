@@ -28,6 +28,7 @@ import org.spoofax.terms.io.TAFTermReader;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
+import org.strategoxt.stratego_aterm.implode_aterm_0_0;
 import org.strategoxt.tools.sdf_desugar_0_0;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.transformations.extraction.extract_sdf_0_0;
@@ -382,5 +383,9 @@ public class ATermCommands {
       return makeAppl("TypeImportDec", "ImportDec", 1, term.getSubterm(0));
     
     return term;
+  }
+  
+  public static IStrategoTerm implodeAterm(IStrategoTerm term, HybridInterpreter interp) {
+    return implode_aterm_0_0.instance.invoke(interp.getCompiledContext(), term);
   }
 }

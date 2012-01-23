@@ -1,5 +1,5 @@
 package test;
 
 public model ModelDec {
-  appl("Add", list(int(1), int(2)))
+  Add(4, 2)
 }

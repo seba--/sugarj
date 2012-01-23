@@ -673,10 +673,18 @@ public class Driver{
   private void processModel(IStrategoTerm toplevelDecl) throws IOException {
     if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
         sugaredBodyDecls.add(lastSugaredToplevelDecl);
-    desugaredBodyDecls.add(toplevelDecl);
+    
     
     IStrategoTerm head = getApplicationSubterm(toplevelDecl, "ModelDec", 0);
-//    IStrategoTerm body= getApplicationSubterm(toplevelDecl, "ModelDec", 1);
+    IStrategoTerm bodyDec = getApplicationSubterm(toplevelDecl, "ModelDec", 1);
+    IStrategoTerm body = getApplicationSubterm(bodyDec, "ModelBody", 0);
+    
+    IStrategoTerm modelTerm = ATermCommands.implodeAterm(body, interp);
+    
+    IStrategoTerm modelDec = ATermCommands.makeAppl("ModelDec", "ToplevelDeclaration", 2, head, 
+                             ATermCommands.makeAppl("ModelBody", "ModelBody", 1, modelTerm));
+    
+    desugaredBodyDecls.add(modelDec);
     
     String modelName;
     log.beginTask("Extracting name and accessibility of the model.");
