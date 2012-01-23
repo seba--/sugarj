@@ -1,0 +1,20 @@
+package test;
+
+import test.B;
+
+public class A {
+  public B b = new B();
+
+  public A() {
+    b.a = this;
+  } 
+
+  public static void main(String[] args) {
+    A a = new A();
+    System.out.println(a);
+    System.out.println(a.b);
+    System.out.println(a.b.c);
+    System.out.println(a.b.c.d1);
+    System.out.println(a.b.c.d1.d2);
+  }
+}

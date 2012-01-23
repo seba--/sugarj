@@ -71,6 +71,7 @@ public class Driver{
 
   private static List<RelativeSourceLocationPath> allInputFiles = new ArrayList<RelativeSourceLocationPath>();
   private static List<Path> pendingInputFiles = new ArrayList<Path>();
+  
   private static List<Path> currentlyProcessing = new ArrayList<Path>();
 
   private static List<ProcessingListener> processingListener = new LinkedList<ProcessingListener>();
@@ -121,6 +122,7 @@ public class Driver{
   private boolean interrupt = false;
   
   private boolean generateFiles;
+  private Path delegateCompilation = null;
   
   private List<Path> generatedJavaClasses = new ArrayList<Path>();
   
@@ -373,7 +375,10 @@ public class Driver{
       stepped();
       
       // COMPILE the generated java file
-      compileGeneratedJavaFile();
+      if (delegateCompilation == null)
+        compileGeneratedJavaFiles();
+      else
+        driverResult.delegateCompilation(delegateCompilation, javaOutFile, generatedJavaClasses);
       
        driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
       
@@ -403,7 +408,7 @@ public class Driver{
     }
   }
 
-  private void compileGeneratedJavaFile() throws IOException {
+  private void compileGeneratedJavaFiles() throws IOException {
     boolean good = false;
     log.beginTask("compilation", "COMPILE the generated java file");
     try {
@@ -736,6 +741,7 @@ public class Driver{
       IStrategoTerm stdImportTerm = ATermCommands.makeStdImport(toplevelDecl);
           
       String modulePath = FileCommands.getRelativeModulePath(importModule);
+
       List<String> transformationPaths = new ArrayList<String>();
       for (String importTransformation : importTransformations) {
         transformationPaths.add(FileCommands.getRelativeModulePath(importTransformation));
@@ -744,8 +750,10 @@ public class Driver{
       Result res = null;
       Path dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
 
-      if (!modulePath.startsWith("org.sugarj")) { 
-        RelativeSourceLocationPath sourceFile = null;
+      boolean skipProcessImport = false;
+
+      if (!modulePath.startsWith("org/sugarj")) {
+        RelativeSourceLocationPath importSourceFile = null;
         
         if (dep != null) {
           try {
@@ -755,13 +763,13 @@ public class Driver{
           }
           
           if (res != null && res.getSourceFile() != null && res.getSourceFile().getBasePath().equals(environment.getRoot()))
-            sourceFile = res.getSourceFile();
+            importSourceFile = res.getSourceFile();
         }
         
-        if (sourceFile == null)
-          sourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
+        if (importSourceFile == null)
+          importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
 
-        if (sourceFile != null && (res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment))) {
+        if (importSourceFile != null && (res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment))) {
           if (!generateFiles) {
             // boolean b = res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment);
             // System.out.println(b);
@@ -772,15 +780,24 @@ public class Driver{
             
             try {
               storeCaches(environment);
-              res = compile(sourceFile, monitor);
-              initializeCaches(environment, true);
-              if (res.hasFailed())
-                setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
+   
+              if (currentlyProcessing.contains(importSourceFile)) {
+                // assume source file does not provide syntactic sugar
+                driverResult.appendToFile(javaOutFile, "import " + importModule + ";\n");
+                skipProcessImport = true;
+                delegateCompilation = importSourceFile;
+              }
+              else {
+                Result importResult = compile(importSourceFile, monitor);
+                initializeCaches(environment, true);
+                if (importResult.hasFailed())
+                  setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
+              }
             } catch (Exception e) {
               setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
             }
               
-            log.log("CONTINUE PROCESSING '" + sourceFile + "'.");
+            log.log("CONTINUE PROCESSING'" + importSourceFile + "'.");
           }
         }
         
@@ -788,9 +805,14 @@ public class Driver{
           dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
         if (dep != null)
           driverResult.addDependency(dep, environment);
+
+        if (driverResult.hasDelegatedCompilation(importSourceFile)) {
+          driverResult.appendToFile(javaOutFile, "import " + importModule + ";\n");
+          skipProcessImport = true;
+        }
       }
       
-      boolean success = processImport(modulePath, res, dep, transformationPaths, stdImportTerm, false);
+      boolean success = skipProcessImport || processImport(modulePath, res, dep, transformationPaths, stdImportTerm, false);
       
       if (!success)
         setErrorMessage(toplevelDecl, "module not found: " + importModule);
