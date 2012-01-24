@@ -611,17 +611,10 @@ public class Driver{
         else
           throw new IllegalArgumentException("unexpected toplevel declaration, desugaring probably failed: " + toplevelDecl.toString(5));
       } catch (Exception e) {
-        String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
-        
-        if (!(e instanceof StrategoException))
-          e.printStackTrace();
-        else
-          log.logErr(msg);
-
-        setErrorMessage(toplevelDecl, msg);
+        handleException(e, toplevelDecl);
+      } finally {
         if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
           sugaredBodyDecls.add(lastSugaredToplevelDecl);
-
       }
     }
   }
@@ -726,8 +719,14 @@ public class Driver{
     
     for (IStrategoTerm pendingImport : pendingImports) {
       lastSugaredToplevelDecl = pendingImport;
-      processImportDec(pendingImport);
+      try {
+        processImportDec(pendingImport);
+      } catch (Exception e) {
+        handleException(e, pendingImport);
+      }
     }
+    
+    return pendingImports.get(pendingImports.size() - 1);
   }
 
   //TODO handle import declarations with asterisks, e.g. import foo.*;
@@ -976,13 +975,17 @@ public class Driver{
      * applies each transformation's "main-<transformation name>" rule on the AST of
      * the current import
      */
-    IStrategoTerm newTransformedTerm = STRCommands.assimilate("main-" + FileCommands.fileName(strPath), trans, currentTerm, interp);
-    
-    if (newTransformedTerm == null) {
-      ATermCommands.setErrorMessage(importTerm, "transformation " + FileCommands.fileName(strPath) + " failed");
-      return null;
+    try {
+      IStrategoTerm newTransformedTerm = STRCommands.assimilate("main-" + FileCommands.fileName(strPath), trans, currentTerm, interp);
+      
+      if (newTransformedTerm == null) {
+        ATermCommands.setErrorMessage(importTerm, "transformation " + FileCommands.fileName(strPath) + " failed");
+        return null;
+      }
+      return newTransformedTerm;
+    } catch (Exception e) {
+      throw new RuntimeException("model transformation failed; " + strPath.getRelativePath() + " applied to " + currentTerm, e);
     }
-    return newTransformedTerm;
   }
 
 
@@ -1816,5 +1819,16 @@ public class Driver{
         throw new IllegalArgumentException();
     }
     
+  }
+  
+  private void handleException(Exception e, IStrategoTerm trm) {
+    String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
+    
+    if (!(e instanceof StrategoException))
+      e.printStackTrace();
+    else
+      log.logErr(msg);
+
+    setErrorMessage(trm, msg);
   }
 }
