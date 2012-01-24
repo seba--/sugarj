@@ -1,6 +1,7 @@
 module org/sugarj/transformations/GenerateSignatures
 
 imports org/sugarj/languages/Sdf2
+        org/sugarj/languages/ATerm
         org/sugarj/languages/Stratego
         org/sugarj/languages/SugarJ
         org/sugarj/init/InitTrans
@@ -19,6 +20,12 @@ rules
     where <(map(gen-signature-elem <+ ![<id>])
             ; concat)> elems => res
 
+  gen-signature :
+    m@ModelDec(ModelDecHead(mods, name), ModelBody(model))
+    -> [Locked(m), SugarDec(SugarDecHead(mods, name), SugarBody([res]))]
+    where <not(?ToModelTerm(_))> model;
+          <gen-opdecl-from-model> model => cons;
+          <!transformation-elem(Signature([Constructors(<id>)]))> cons => res 
 
 rules
 
@@ -78,6 +85,21 @@ rules
     ; (is-list < id + ![<id>])
     <+ ![]
 
+rules
+  gen-opdecl-from-model : c#(xs) -> [opDecl | opDecls]
+    where <length> xs => arity;
+          <gen-arity-type> arity => type;
+          <!OpDecl(<id>, type)> c => opDecl;
+          <map(gen-opdecl-from-model)> xs => opDecls
+
+  dummy-type = !ConstType(Sort("XXX", []))
+
+  gen-arity-type : 0 -> <dummy-type> 0
+  gen-arity-type : n -> FunType(<replicate(|<dummy-type> 0)> n, <dummy-type> 0)
+
+  replicate(|t) : 0 -> []
+  replicate(|t) : n -> [t | <replicate(|t)> <dec> n]
+  
 
 rules
 
