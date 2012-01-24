@@ -878,7 +878,7 @@ public class Driver{
       
       IStrategoTerm transformedTerm = term;
       for (RelativePath strPath : resolvedTransformationPaths) {
-        transformedTerm = processTransformation(strPath, importTerm, transformedTerm);
+        transformedTerm = executeTransformation(strPath, importTerm, transformedTerm);
       }
     
       Environment modelEnvironment = compileImportedModel(model, modulePath, importedResult, importedResultPath, transformedTerm, importTerm);
@@ -945,7 +945,7 @@ public class Driver{
   }
 
 
-  private IStrategoTerm processTransformation(RelativePath strPath, IStrategoTerm importTerm, IStrategoTerm currentTerm) throws IOException {
+  private IStrategoTerm executeTransformation(RelativePath strPath, IStrategoTerm importTerm, IStrategoTerm currentTerm) throws IOException {
     /*
      * create a temporary stratego file that connects already available imports
      * with the currently processed transformation
