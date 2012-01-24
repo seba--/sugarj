@@ -169,7 +169,7 @@ public class SDFCommands {
     Path tbl = lookupGrammarInCache(sdfCache, key);
     if (tbl == null) {
       tbl = generateParseTable(key, sdf, module, sdfContext, makePermissiveContext, environment.getIncludePath());
-      cacheParseTable(sdfCache, key, tbl, environment);
+      tbl = cacheParseTable(sdfCache, key, tbl, environment);
     }
     
     if (tbl != null)
@@ -179,14 +179,14 @@ public class SDFCommands {
   }
   
   
-  private static void cacheParseTable(ModuleKeyCache<Path> sdfCache, ModuleKey key, Path tbl, Environment environment) throws IOException {
+  private static Path cacheParseTable(ModuleKeyCache<Path> sdfCache, ModuleKey key, Path tbl, Environment environment) throws IOException {
     if (sdfCache == null)
-      return;
+      return tbl;
     
     log.beginTask("Caching", "Cache parse table");
     try {
       Path cacheTbl = environment.new RelativePathCache(tbl.getFile().getName());
-      FileCommands.copyFile(tbl, cacheTbl);
+      FileCommands.moveFile(tbl, cacheTbl);
       
       if (!Environment.rocache) {
         Path oldTbl = sdfCache.putGet(key, cacheTbl);
@@ -195,6 +195,8 @@ public class SDFCommands {
 
       if (CommandExecution.CACHE_INFO)
         log.log("Cache Location: " + cacheTbl);
+      
+      return cacheTbl;
     } finally {
       log.endTask();
     }
