@@ -62,7 +62,7 @@ import org.sugarj.util.ToplevelDeclarationProvider;
  */
 public class Driver{
   
-  public final static String CACHE_VERSION = "model-0.1c";
+  public final static String CACHE_VERSION = "model-0.1d";
   
   private final static int PENDING_TIMEOUT = 30000;
 
@@ -977,10 +977,9 @@ public class Driver{
     try {
       IStrategoTerm newTransformedTerm = STRCommands.assimilate("main-" + FileCommands.fileName(strPath), trans, currentTerm, interp);
       
-      if (newTransformedTerm == null) {
-        ATermCommands.setErrorMessage(importTerm, "transformation " + FileCommands.fileName(strPath) + " failed");
-        return null;
-      }
+      if (newTransformedTerm == null)
+        throw new StrategoException("transformation failed: " + currentTerm);
+      
       return newTransformedTerm;
     } catch (Exception e) {
       throw new RuntimeException("model transformation failed; " + strPath.getRelativePath() + " applied to " + currentTerm, e);
