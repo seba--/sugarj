@@ -1,0 +1,7 @@
+package trans;
+
+public transformation ToJava {
+  rules
+    main = foo-to-string
+    foo-to-string = id
+}
