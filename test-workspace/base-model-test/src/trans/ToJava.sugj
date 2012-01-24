@@ -26,6 +26,9 @@ public transformation ToJava {
       s; ?exp;
       !|[ System.out.println(~exp); ]|
 
+  signature constructors
+    Add : Exp * Exp -> Exp
+
   rules
     compile-exp = is-int; !Lit(Deci(<int-to-string>))
     compile-exp : Add(e1, e2) -> |[ ~e1' + ~e2' ]|
