@@ -744,11 +744,15 @@ public class Driver{
           
       String modulePath = FileCommands.getRelativeModulePath(importModule);
 
-      List<String> transformationPaths = new ArrayList<String>();
-      for (String importTransformation : importTransformations) {
-        transformationPaths.add(FileCommands.getRelativeModulePath(importTransformation));
+      List<String> transformationPaths;
+      if (importTransformations == null)
+        transformationPaths = null;
+      else {
+        transformationPaths= new ArrayList<String>();
+        for (String importTransformation : importTransformations)
+          transformationPaths.add(FileCommands.getRelativeModulePath(importTransformation));
       }
-
+      
       Result res = null;
       Path dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
 

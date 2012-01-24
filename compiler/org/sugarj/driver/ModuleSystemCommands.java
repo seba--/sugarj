@@ -191,6 +191,8 @@ public class ModuleSystemCommands {
           names.add(SDFCommands.prettyPrintJava(term, interp));
         }
       }
+      else
+        return null;
 
     } finally {
       log.endTask(names.toString());
