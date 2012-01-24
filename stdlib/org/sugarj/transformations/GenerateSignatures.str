@@ -20,12 +20,14 @@ rules
     where <(map(gen-signature-elem <+ ![<id>])
             ; concat)> elems => res
 
+/*
   gen-signature :
     m@ModelDec(ModelDecHead(mods, name), ModelBody(model))
     -> [Locked(m), SugarDec(SugarDecHead(mods, name), SugarBody([res]))]
     where <not(?ToModelTerm(_))> model;
           <gen-opdecl-from-model> model => cons;
           <!transformation-elem(Signature([Constructors(<id>)]))> cons => res 
+*/
 
 rules
 
@@ -85,7 +87,11 @@ rules
     ; (is-list < id + ![<id>])
     <+ ![]
 
+/*
 rules
+  gen-opdecl-from-model : t -> []
+    where <is-int + string-to-int> t
+
   gen-opdecl-from-model : c#(xs) -> [opDecl | opDecls]
     where <length> xs => arity;
           <gen-arity-type> arity => type;
@@ -99,7 +105,7 @@ rules
 
   replicate(|t) : 0 -> []
   replicate(|t) : n -> [t | <replicate(|t)> <dec> n]
-  
+*/  
 
 rules
 
