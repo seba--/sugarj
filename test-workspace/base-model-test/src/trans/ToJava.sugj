@@ -28,6 +28,7 @@ public transformation ToJava {
 
   signature constructors
     Add : Exp * Exp -> Exp
+    Sub : Exp * Exp -> Exp
 
   rules
     compile-exp = is-int; !Lit(Deci(<int-to-string>))
