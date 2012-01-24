@@ -147,6 +147,14 @@ public class Result {
     return editorServices;
   }
   
+  public boolean hasSourceFileChanged(Path inputFile) throws IOException {
+    return inputFile == null || hasSourceFileChanged(FileCommands.fileHash(inputFile));
+  }
+  
+  public boolean hasSourceFileChanged(int inputHash) {
+    return sourceFileHash == null || inputHash != sourceFileHash;
+  }
+  
   public boolean isUpToDateShallow(Path inputFile, Environment env) throws IOException {
     return isUpToDateShallow(FileCommands.fileHash(inputFile), env);
   }
@@ -156,7 +164,7 @@ public class Result {
   }
 
   public boolean isUpToDateShallow(int inputHash, Environment env) throws IOException {
-    if (sourceFileHash == null || inputHash != sourceFileHash)
+    if (hasSourceFileChanged(inputHash))
       return false;
     
     for (Entry<Path, Integer> entry : generatedFileHashes.entrySet())
