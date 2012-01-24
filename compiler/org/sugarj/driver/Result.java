@@ -181,6 +181,9 @@ public class Result {
     if (hasSourceFileChanged(inputHash))
       return false;
     
+    if (desugaringsFile != null && !FileCommands.exists(desugaringsFile))
+      return false;
+    
     for (Entry<Path, Integer> entry : generatedFileHashes.entrySet())
       if (FileCommands.fileHash(entry.getKey()) != entry.getValue())
         return false;
