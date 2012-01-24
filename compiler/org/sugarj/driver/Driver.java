@@ -581,7 +581,7 @@ public class Driver{
           if (!environment.isAtomicImportParsing())
             processImportDec(toplevelDecl);
           else 
-            processImportDecs(toplevelDecl);
+            toplevelDecl = processImportDecs(toplevelDecl);
         }
         else if (ATermCommands.isList(toplevelDecl))
           /* 
@@ -694,7 +694,7 @@ public class Driver{
     driverResult.generateFile(modelOutFile, ATermCommands.atermToString(makeDesugaredSyntaxTree()));
   }
   
-  private void processImportDecs(IStrategoTerm toplevelDecl) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
+  private IStrategoTerm processImportDecs(IStrategoTerm toplevelDecl) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
     List<IStrategoTerm> pendingImports = new ArrayList<IStrategoTerm>();
     pendingImports.add(toplevelDecl);
     
