@@ -19,7 +19,9 @@ rules
   rename-rules-block(|name) :
   	Strategies(ss) -> transformation-elem(Strategies(<map(try(rename-rule(|name)))> ss))
   rename-rules-block(|name) :
-  	Rules(rs) -> transformation-elem(Rules(<map(try(debug; rename-rule(|name)))> rs))
+  	Rules(rs) -> transformation-elem(Rules(<map(try(rename-rule(|name)))> rs))
+  rename-rules-block(|name) :
+    block -> transformation-elem(block)
 
   rename-rule(|name) :
     RDefNoArgs("main", rule) -> RDefNoArgs(<conc-strings> ("main", "-", name), rule)
