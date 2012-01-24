@@ -1,7 +1,18 @@
 package trans;
 
+import org.sugarj.languages.Java;
+import org.sugarj.languages.Model;
+
+import concretesyntax.Java;
+
 public transformation ToJava {
   rules
-    main = foo-to-string
-    foo-to-string = id
+    main = model-to-javaclass(body-trans)
+    body-trans = make-main-method(single-stmt(println-stmt(compile-exp)))
+
+
+  rules
+    model-to-javaclass(s) :
+      ModelDec(ModelDecHead(mods, name), ModelBody(body)) ->
+      ClassDec(ClassDecHead(mods, name, None, None, None), ClassBody(<s> body))
 }
