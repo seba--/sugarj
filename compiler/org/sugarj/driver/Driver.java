@@ -967,10 +967,9 @@ public class Driver{
     } catch (SGLRException e) {
     }
     
-    if (trans == null) {
-      ATermCommands.setErrorMessage(importTerm, "compilation of transformation " + FileCommands.fileName(strPath) + " failed");
-      return null;
-    }
+    if (trans == null)
+      throw new StrategoException("compilation of transformation " + FileCommands.fileName(strPath) + " failed");
+      
     /*  
      * applies each transformation's "main-<transformation name>" rule on the AST of
      * the current import
