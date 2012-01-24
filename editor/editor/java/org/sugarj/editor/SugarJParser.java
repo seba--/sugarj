@@ -130,11 +130,9 @@ public class SugarJParser extends JSGLRI {
         } finally {
           monitor.done();
           SugarJParser.this.result = result;
-          if (result != null) {
-            SugarJParser.putResult(filename, result);
-            getController().scheduleParserUpdate(0, false);
-          }
+          SugarJParser.putResult(filename, result);
           SugarJParser.setPending(filename, false);
+          getController().scheduleParserUpdate(0, false);
         }
         return Status.OK_STATUS;
       }

@@ -158,6 +158,14 @@ public class Result {
     return editorServices;
   }
   
+  public boolean hasSourceFileChanged(Path inputFile) throws IOException {
+    return inputFile == null || hasSourceFileChanged(FileCommands.fileHash(inputFile));
+  }
+  
+  public boolean hasSourceFileChanged(int inputHash) {
+    return sourceFileHash == null || inputHash != sourceFileHash;
+  }
+  
   public boolean isUpToDateShallow(Path inputFile, Environment env) throws IOException {
     return isUpToDateShallow(FileCommands.fileHash(inputFile), env);
   }
@@ -170,7 +178,7 @@ public class Result {
     if (targetBinPath == null || !targetBinPath.equals(env.getBin()))
       return false;
     
-    if (sourceFileHash == null || inputHash != sourceFileHash)
+    if (hasSourceFileChanged(inputHash))
       return false;
     
     for (Entry<Path, Integer> entry : generatedFileHashes.entrySet())
@@ -417,5 +425,4 @@ public class Result {
   public Set<Path> getModelBinPaths() {
     return modelBinPaths; 
   }
-
 }
