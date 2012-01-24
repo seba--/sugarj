@@ -363,14 +363,15 @@ public class Driver{
       stepped();
             
       // check final grammar and transformation for errors
-      if (!environment.isNoChecking()) {
+      if (!environment.isNoChecking() && generateFiles)
         checkCurrentGrammar();
-      }
       
       stepped();
       
       // need to build current transformation program for editor services
-      checkCurrentTransformation();
+      // but: the newest STR code is not written regenerated while parsing
+      if (generateFiles)
+        checkCurrentTransformation();
       
       stepped();
       
