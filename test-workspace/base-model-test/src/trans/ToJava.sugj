@@ -7,7 +7,7 @@ import concretesyntax.Java;
 
 public transformation ToJava {
   rules
-    main = model-to-javaclass(body-trans)
+    main = oncetd(model-to-javaclass(body-trans))
     body-trans = make-main-method(single-stmt(println-stmt(compile-exp)))
   
   rules
@@ -17,8 +17,8 @@ public transformation ToJava {
 
   rules
     make-main-method(s) =
-      s; ?body;
-      !|[ public static void main(String[] args) { ~*body } ]|
+      !Block(<s>); ?block;
+      !|[ public static void main(String[] args) ~block:body ]|
 
     single-stmt(s) = ![<s>]
 
