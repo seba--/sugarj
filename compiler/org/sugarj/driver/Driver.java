@@ -876,11 +876,25 @@ public class Driver{
       IStrategoTerm term = ATermCommands.atermFromFile(model.getAbsolutePath());
       List<RelativePath> resolvedTransformationPaths = resolveTransformationPaths(modulePath, transformationPaths, importTerm);
       
+      List<String> resolvedTransformationStrings = new LinkedList<String>();
+      for (RelativePath p : resolvedTransformationPaths)
+        resolvedTransformationStrings.add(FileCommands.dropExtension(p.getRelativePath()).replace('/', '_'));
+      String resolvedTransformationString = StringCommands.printListSeparated(resolvedTransformationStrings, "$");
+      
       IStrategoTerm transformedTerm = term;
-      for (RelativePath strPath : resolvedTransformationPaths) {
-        transformedTerm = executeTransformation(strPath, importTerm, transformedTerm);
+      Path transformedTermPath = environment.new RelativePathBin(FileCommands.dropExtension(model.getRelativePath()) + "$" + resolvedTransformationString + ".aterm");
+      
+      boolean transformSuccessful = false;
+      try {
+        log.beginTask("", "Transform model " + model.getRelativePath() + " with " + StringCommands.printModuleList(resolvedTransformationPaths, ", "));
+        for (RelativePath strPath : resolvedTransformationPaths)
+          transformedTerm = executeTransformation(strPath, importTerm, transformedTerm);
+        ATermCommands.atermToFile(transformedTerm, transformedTermPath);
+        transformSuccessful = true;
+      } finally {
+        log.endTask(transformSuccessful, "Transformed model to " + transformedTermPath, "Transform model failed");
       }
-    
+      
       Environment modelEnvironment = compileImportedModel(model, modulePath, importedResult, importedResultPath, transformedTerm, importTerm);
       Path modelResultPath = modelEnvironment.new RelativePathBin(modulePath + ".dep");
       success = processImport(modulePath, Result.readDependencyFile(modelResultPath, modelEnvironment), modelResultPath, null, importTerm, true);
@@ -960,11 +974,14 @@ public class Driver{
     
     Path trans = null;
     try {
+      log.beginTask("Compile transformation", "Compile transformation " + strPath.getRelativePath());
       trans = STRCommands.compile(compoundStr, "main-" + FileCommands.fileName(strPath), driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
     } catch (TokenExpectedException e) {
     } catch (BadTokenException e) {
     } catch (InvalidParseTableException e) {
     } catch (SGLRException e) {
+    } finally {
+      log.endTask();
     }
     
     if (trans == null)
