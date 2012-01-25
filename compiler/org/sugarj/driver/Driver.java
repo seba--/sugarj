@@ -777,8 +777,8 @@ public class Driver{
 
         if (importSourceFile != null && (res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment))) {
           if (!generateFiles) {
-            // boolean b = res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment);
-            // System.out.println(b);
+//            boolean b = res == null || !res.isUpToDate(res.getSourceFile(), environment);
+//            System.out.println(b);
             setErrorMessage(toplevelDecl, "module outdated, compile first: " + importModule);
           }
           else {
@@ -935,22 +935,20 @@ public class Driver{
     Path modelResultPath = modelEnvironment.new RelativePathBin(modulePath + ".dep");
     
     boolean recompile = !FileCommands.exists(modelResultPath) || !Result.readDependencyFile(modelResultPath, modelEnvironment).isUpToDate(model, modelEnvironment);
-    
     if (recompile) {
       try {
         log.log("Need to compile the imported model first; processing it now.");
-        compile(transformedTerm, new RelativeSourceLocationPath(new SourceLocation(model.getBasePath(), modelEnvironment), model.getRelativePath()), monitor);
+        Result modelResult = compile(transformedTerm, new RelativeSourceLocationPath(new SourceLocation(model.getBasePath(), modelEnvironment), model.getRelativePath()), monitor);
+        
+        driverResult.addDependency(modelResultPath, modelEnvironment);
+        environment.getIncludePath().add(modelBinPath);
+        environment.getIncludePath().addAll(modelResult.getModelBinPaths());
       } catch (Exception e) {
         setErrorMessage(importTerm, "compilation of imported module failed: " + e.getLocalizedMessage());
       } finally {
         log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
       }
     }
-    
-    environment.getIncludePath().add(modelBinPath);
-    environment.getIncludePath().addAll(importedResult.getModelBinPaths());
-    driverResult.getModelBinPaths().add(modelBinPath);
-    driverResult.getModelBinPaths().addAll(importedResult.getModelBinPaths());
     
     /*
      * returns the Environment used for compiling the import
@@ -1308,7 +1306,7 @@ public class Driver{
     this.sourceFile = new RelativeSourceLocationPath(new SourceLocation(sourceFile.getBasePath(), environment), sourceFile);
     this.generateFiles = generateFiles;
     
-    this.driverResult = new Result(generateFiles, environment.getBin());
+    this.driverResult = new Result(generateFiles);
 
     currentGrammarSDF = new AbsolutePath(StdLib.initGrammar.getPath());
     currentGrammarModule = StdLib.initGrammarModule;

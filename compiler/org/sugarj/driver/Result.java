@@ -46,7 +46,7 @@ public class Result {
   /**
    * The file-generation target location path. 
    */
-  private Path targetBinPath;
+  private Path modelBinPath;
   
   /**
    * Added modelBinPaths for transitive available modelBins.
@@ -61,7 +61,7 @@ public class Result {
    */
   private Map<Path, Map<Path, Map<Path, List<Path>>>> delegatedCompilation = new HashMap<Path, Map<Path, Map<Path, List<Path>>>>();
 
-  public final static Result OUTDATED_RESULT = new Result(true, null) {
+  public final static Result OUTDATED_RESULT = new Result(true) {
     @Override
     public boolean isUpToDate(Path file, Environment env) {
       return false;
@@ -73,9 +73,8 @@ public class Result {
     }
   };
   
-  public Result(boolean generateFiles, Path targetBinPath) {
+  public Result(boolean generateFiles) {
     this.generateFiles = generateFiles;
-    this.targetBinPath = targetBinPath;
   }
   
   void addFileDependency(Path file) throws IOException {
@@ -87,6 +86,8 @@ public class Result {
     dependencies.put(depFile, FileCommands.fileHash(depFile));
     Result other = readDependencyFile(depFile, env);
     allDependentFiles.addAll(other.getFileDependencies(env));
+    modelBinPaths.addAll(other.modelBinPaths);
+    modelBinPaths.add(other.getModelBinPath());
     
     for (Entry<Path, Map<Path, Map<Path, List<Path>>>> e : other.delegatedCompilation.entrySet())
       if (!delegatedCompilation.containsKey(e.getKey()))
@@ -175,9 +176,6 @@ public class Result {
   }
 
   public boolean isUpToDateShallow(int inputHash, Environment env) throws IOException {
-    if (targetBinPath == null || !targetBinPath.equals(env.getBin()))
-      return false;
-    
     if (hasSourceFileChanged(inputHash))
       return false;
     
@@ -328,7 +326,7 @@ public class Result {
 //      oos.writeObject(generationLog);
 //      oos.writeObject(desugaringsFile);
       
-      oos.writeObject(targetBinPath);
+      oos.writeObject(modelBinPath);
       
       oos.writeInt(modelBinPaths.size());
       for (Path transitiveModelBin : modelBinPaths) {
@@ -342,7 +340,7 @@ public class Result {
   }
   
   public static Result readDependencyFile(Path dep, Environment env) throws IOException {
-    Result result = new Result(true, null);
+    Result result = new Result(true);
     result.allDependentFiles = null;
     ObjectInputStream ois = null;
     
@@ -377,7 +375,7 @@ public class Result {
 //      result.generationLog = Path.readPath(ois, env);
 //      result.desugaringsFile = Path.readPath(ois, env);
       
-      result.targetBinPath = Path.readPath(ois, env);
+      result.modelBinPath = Path.readPath(ois, env);
       
       int numTransitiveModelBins = ois.readInt();
       for (int i = 0; i< numTransitiveModelBins; i++) {
@@ -418,11 +416,11 @@ public class Result {
   }
 
   public Path getModelBinPath() {
-    return targetBinPath;
+    return modelBinPath;
   }
   
   public void setModelBinPath(Path modelBinPath) {
-    this.targetBinPath = modelBinPath;
+    this.modelBinPath = modelBinPath;
   }
   
   public Set<Path> getModelBinPaths() {
