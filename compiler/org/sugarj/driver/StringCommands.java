@@ -12,10 +12,10 @@ import org.sugarj.driver.path.RelativePath;
  */
 public class StringCommands {
 
-  public static String printListSeparated(List<String> l, String sep) {
+  public static String printListSeparated(List<? extends Object> l, String sep) {
     StringBuilder b = new StringBuilder();
   
-    for (Iterator<String> it = l.iterator(); it.hasNext();) {
+    for (Iterator<? extends Object> it = l.iterator(); it.hasNext();) {
       b.append(it.next());
       if (it.hasNext())
         b.append(sep);
