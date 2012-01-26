@@ -545,6 +545,9 @@ public class Driver {
           }
         
         fullExtName = relPackageNameSep() + extName + (extension == null ? "" : ("." + extension));
+        for (Renaming ren : environment.getRenamings())
+          fullExtName = StringCommands.rename(fullExtName, ren);
+        // fullExtName = fullExtName.replace("$", "__");
 
         log.log("The name is '" + extName + "'.");
         log.log("The full name is '" + fullExtName + "'.");
