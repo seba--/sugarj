@@ -454,6 +454,9 @@ public class Driver {
           }
         
         fullExtName = relPackageNameSep() + extName;
+        for (Renaming ren : environment.getRenamings())
+          fullExtName = StringCommands.rename(fullExtName, ren);
+        // fullExtName = fullExtName.replace("$", "__");
 
         log.log("The name of the editor services is '" + extName + "'.");
         log.log("The full name of the editor services is '" + fullExtName + "'.");
