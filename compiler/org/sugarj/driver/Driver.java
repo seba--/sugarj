@@ -876,84 +876,62 @@ public class Driver{
       IStrategoTerm term = ATermCommands.atermFromFile(model.getAbsolutePath());
       List<RelativePath> resolvedTransformationPaths = resolveTransformationPaths(modulePath, transformationPaths, importTerm);
       
-      List<String> resolvedTransformationStrings = new LinkedList<String>();
-      for (RelativePath p : resolvedTransformationPaths)
-        resolvedTransformationStrings.add(FileCommands.dropExtension(p.getRelativePath()).replace('/', '_'));
-      String resolvedTransformationString = StringCommands.printListSeparated(resolvedTransformationStrings, "$");
-      
       IStrategoTerm transformedTerm = term;
-      Path transformedTermPath = environment.new RelativePathBin(FileCommands.dropExtension(model.getRelativePath()) + "$" + resolvedTransformationString + ".aterm");
       
       boolean transformSuccessful = false;
       try {
-        log.beginTask("", "Transform model " + model.getRelativePath() + " with " + StringCommands.printModuleList(resolvedTransformationPaths, ", "));
+        log.beginTask("Transform model", "Transform model " + model.getRelativePath() + " with " + StringCommands.printModuleList(resolvedTransformationPaths, ", "));
         for (RelativePath strPath : resolvedTransformationPaths)
           transformedTerm = executeTransformation(strPath, importTerm, transformedTerm);
-        ATermCommands.atermToFile(transformedTerm, transformedTermPath);
         transformSuccessful = true;
       } finally {
-        log.endTask(transformSuccessful, "Transformed model to " + transformedTermPath, "Transform model failed");
+        log.endTask(transformSuccessful);
       }
       
-      Environment modelEnvironment = compileImportedModel(model, modulePath, importedResult, importedResultPath, transformedTerm, importTerm);
-      Path modelResultPath = modelEnvironment.new RelativePathBin(modulePath + ".dep");
-      success = processImport(modulePath, Result.readDependencyFile(modelResultPath, modelEnvironment), modelResultPath, null, importTerm, true);
+      try {
+        Result modelResult = compileImportedModel(model, transformedTerm, resolvedTransformationPaths);
+        Path modelResultPath = environment.new RelativePathBin(modulePath + ".dep");
+        success = processImport(modulePath, modelResult, modelResultPath, null, importTerm, true);
+      } catch (Exception e) {
+        setErrorMessage(importTerm, "compilation of imported module failed: " + e.getLocalizedMessage());
+      } 
     }
 
     return success;
   }
 
 
-  private Environment compileImportedModel(RelativePath model, String modulePath, Result importedResult, 
-      Path importedResultPath, IStrategoTerm transformedTerm, IStrategoTerm importTerm) throws IOException {
-    /*
-     * A new temp directory is created to work as the current model
-     * import's bin directory. If the imported module already has a model bin
-     * it is taken instead.
-     */
-    Path modelBinPath;
-    if (importedResult != null && importedResult.getModelBinPath() != null)
-      modelBinPath = importedResult.getModelBinPath();
-    else {
-      modelBinPath = FileCommands.newTempDir();
-      importedResult.setModelBinPath(modelBinPath);
-      importedResult.writeDependencyFile(importedResultPath);
-    }
+  private Result compileImportedModel(RelativePath model, IStrategoTerm transformedTerm, List<RelativePath> transformationPaths) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    List<String> transformationPathStrings = new LinkedList<String>();
+    for (RelativePath p : transformationPaths)
+      transformationPathStrings.add(FileCommands.dropExtension(p.getRelativePath()).replace('/', '_'));
+    String transformationPathString = StringCommands.printListSeparated(transformationPathStrings, "$");
 
-    /*
-     * modelEnvironment is the environment for compiling imported modules.
-     * The output is stored in a temporary bin which has been created before.
-     */
-    Environment modelEnvironment = new Environment();
-    modelEnvironment.setAtomicImportParsing(environment.isAtomicImportParsing());
-    modelEnvironment.setGenerateJavaFile(environment.isGenerateJavaFile());
-    modelEnvironment.setSourcePath(environment.getSourcePath());
-    modelEnvironment.setRoot(environment.getRoot());
-    modelEnvironment.setBin(modelBinPath);
-    modelEnvironment.getIncludePath().add(environment.getBin());
+    Path modelResultPath = environment.new RelativePathBin(FileCommands.dropExtension(model.getRelativePath()) + ".dep");
     
-    Path modelResultPath = modelEnvironment.new RelativePathBin(modulePath + ".dep");
+    String relativeModelPath = FileCommands.dropExtension(model.getRelativePath()) + (transformationPathString.isEmpty() ? "" : ("$" + transformationPathString)) + ".aterm"; 
+    RelativeSourceLocationPath transformedModelPath = new RelativeSourceLocationPath(new SourceLocation(model.getBasePath(), environment), relativeModelPath);
     
-    boolean recompile = !FileCommands.exists(modelResultPath) || !Result.readDependencyFile(modelResultPath, modelEnvironment).isUpToDate(model, modelEnvironment);
+    ATermCommands.atermToFile(transformedTerm, transformedModelPath);
+    log.log("Stored transformed model in " + transformedModelPath.getAbsolutePath());
+    
+    Result modelResult = null;
+    if (FileCommands.exists(modelResultPath))
+      modelResult = Result.readDependencyFile(modelResultPath, environment);
+    
+    boolean recompile = modelResult == null || !modelResult.isUpToDate(model, environment);
     if (recompile) {
       try {
         log.log("Need to compile the imported model first; processing it now.");
-        Result modelResult = compile(transformedTerm, new RelativeSourceLocationPath(new SourceLocation(model.getBasePath(), modelEnvironment), model.getRelativePath()), monitor);
-        
-        driverResult.addDependency(modelResultPath, modelEnvironment);
-        environment.getIncludePath().add(modelBinPath);
-        environment.getIncludePath().addAll(modelResult.getModelBinPaths());
-      } catch (Exception e) {
-        setErrorMessage(importTerm, "compilation of imported module failed: " + e.getLocalizedMessage());
+
+        modelResult = compile(transformedTerm, transformedModelPath, monitor);
+        driverResult.addDependency(modelResultPath, environment);
       } finally {
         log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
       }
     }
     
-    /*
-     * returns the Environment used for compiling the import
-     */
-    return modelEnvironment;
+    return modelResult;
   }
 
 
