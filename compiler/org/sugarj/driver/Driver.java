@@ -1062,10 +1062,9 @@ public class Driver {
       if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
         sugaredBodyDecls.add(lastSugaredToplevelDecl);
 
-      
+      String fullExtName;
       boolean isNative;
       String extName = null;
-      String fullExtName = null;
       boolean isPublic = false;
 
       IStrategoTerm head = getApplicationSubterm(toplevelDecl, "SugarDec", 0);
@@ -1107,6 +1106,9 @@ public class Driver {
         
         
         fullExtName = relPackageNameSep() + extName;
+        for (Renaming ren : environment.getRenamings())
+          fullExtName = StringCommands.rename(fullExtName, ren);
+        fullExtName.replace("$", "__");
 
         log.log("The name of the sugar is '" + extName + "'.");
         log.log("The full name of the sugar is '" + fullExtName + "'.");
