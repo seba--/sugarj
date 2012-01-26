@@ -44,16 +44,6 @@ public class Result {
   private Path generationLog;
   
   /**
-   * The file-generation target location path. 
-   */
-  private Path modelBinPath;
-  
-  /**
-   * Added modelBinPaths for transitive available modelBins.
-   */
-  private HashSet<Path> modelBinPaths = new HashSet<Path>();
-  
-  /**
    * deferred to (*.sugj) -> 
    * deferred source files (*.sugj) -> 
    * to-be-compiled files (e.g., *.java) -> 
@@ -86,8 +76,6 @@ public class Result {
     dependencies.put(depFile, FileCommands.fileHash(depFile));
     Result other = readDependencyFile(depFile, env);
     allDependentFiles.addAll(other.getFileDependencies(env));
-    modelBinPaths.addAll(other.modelBinPaths);
-    modelBinPaths.add(other.getModelBinPath());
     
     for (Entry<Path, Map<Path, Map<Path, List<Path>>>> e : other.delegatedCompilation.entrySet())
       if (!delegatedCompilation.containsKey(e.getKey()))
@@ -326,13 +314,6 @@ public class Result {
 //      oos.writeObject(generationLog);
 //      oos.writeObject(desugaringsFile);
       
-      oos.writeObject(modelBinPath);
-      
-      oos.writeInt(modelBinPaths.size());
-      for (Path transitiveModelBin : modelBinPaths) {
-        oos.writeObject(transitiveModelBin);
-      }
-      
     } finally {
       if (oos != null)
         oos.close();
@@ -375,14 +356,6 @@ public class Result {
 //      result.generationLog = Path.readPath(ois, env);
 //      result.desugaringsFile = Path.readPath(ois, env);
       
-      result.modelBinPath = Path.readPath(ois, env);
-      
-      int numTransitiveModelBins = ois.readInt();
-      for (int i = 0; i< numTransitiveModelBins; i++) {
-        result.modelBinPaths.add(Path.readPath(ois, env, reallocate));
-      }
-      
-      
     } catch (FileNotFoundException e) {
       return OUTDATED_RESULT;
     } catch (ClassNotFoundException e) {
@@ -413,17 +386,5 @@ public class Result {
   
   public void setFailed(boolean hasFailed) {
     this.failed = hasFailed;
-  }
-
-  public Path getModelBinPath() {
-    return modelBinPath;
-  }
-  
-  public void setModelBinPath(Path modelBinPath) {
-    this.modelBinPath = modelBinPath;
-  }
-  
-  public Set<Path> getModelBinPaths() {
-    return modelBinPaths; 
   }
 }
