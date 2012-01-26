@@ -60,7 +60,7 @@ import org.sugarj.util.ToplevelDeclarationProvider;
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
-public class Driver{
+public class Driver {
   
   public final static String CACHE_VERSION = "model-0.1d";
   
