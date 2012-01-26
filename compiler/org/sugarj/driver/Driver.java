@@ -53,8 +53,10 @@ import org.sugarj.driver.path.RelativePath;
 import org.sugarj.driver.path.RelativeSourceLocationPath;
 import org.sugarj.driver.path.SourceLocation;
 import org.sugarj.driver.transformations.extraction.extraction;
+import org.sugarj.driver.transformations.renaming.renaming;
 import org.sugarj.stdlib.StdLib;
 import org.sugarj.util.ProcessingListener;
+import org.sugarj.util.Renaming;
 import org.sugarj.util.ToplevelDeclarationProvider;
 
 /**
@@ -111,6 +113,7 @@ public class Driver {
   private Context sdfContext;
   private Context makePermissiveContext;
   private Context extractionContext;
+  private Context renamingContext;
   private Context strjContext;
   
   private ModuleKeyCache<Path> sdfCache = null;
@@ -889,7 +892,7 @@ public class Driver {
       }
       
       try {
-        Result modelResult = compileImportedTransformedModel(model, transformedTerm, resolvedTransformationPaths);
+        Result modelResult = compileTransformedModel(model, transformedTerm, resolvedTransformationPaths);
         Path modelResultPath = environment.new RelativePathBin(modulePath + ".dep");
         success = processImport(modulePath, modelResult, modelResultPath, null, importTerm, true);
       } catch (Exception e) {
@@ -901,13 +904,13 @@ public class Driver {
   }
 
 
-  private Result compileImportedTransformedModel(RelativePath model, IStrategoTerm transformedTerm, List<RelativePath> transformationPaths) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private Result compileTransformedModel(RelativePath model, IStrategoTerm transformedTerm, List<RelativePath> transformationPaths) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     List<String> transformationPathStrings = new LinkedList<String>();
     for (RelativePath p : transformationPaths)
       transformationPathStrings.add(FileCommands.dropExtension(p.getRelativePath()).replace('/', '_'));
     String transformationPathString = StringCommands.printListSeparated(transformationPathStrings, "$");
 
-    String relativeModelPath = FileCommands.dropExtension(model.getRelativePath()) + (transformationPathString.isEmpty() ? "" : ("$" + transformationPathString)) + ".aterm"; 
+    String relativeModelPath = FileCommands.dropExtension(model.getRelativePath()) + (transformationPathString.isEmpty() ? "" : ("$" + transformationPathString)) + ".aterm";
     RelativeSourceLocationPath transformedModelPath = new RelativeSourceLocationPath(new SourceLocation(model.getBasePath(), environment), relativeModelPath);
     
     ATermCommands.atermToFile(transformedTerm, transformedModelPath);
@@ -924,9 +927,13 @@ public class Driver {
       try {
         log.log("Need to compile the imported model first; processing it now.");
 
+        Renaming ren = new Renaming(model, transformedModelPath);
+        environment.getRenamings().add(ren);
         transformedModelResult = compile(transformedTerm, transformedModelPath, monitor);
         driverResult.addDependency(transformedModelResultPath, environment);
       } finally {
+        if (!environment.getRenamings().isEmpty())
+        environment.getRenamings().remove(environment.getRenamings().size() - 1);
         log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
       }
     }
@@ -1015,7 +1022,7 @@ public class Driver {
     return resolvedTransformationPaths;
   }
 
-  private void processJavaTypeDec(IStrategoTerm toplevelDecl) throws IOException {
+  private void processJavaTypeDec(IStrategoTerm toplevelDecl) throws IOException, InvalidParseTableException {
     log.beginTask(
         "processing",
         "PROCESS the desugared Java type declaration.");
@@ -1028,6 +1035,9 @@ public class Driver {
       log.beginTask("Generate Java code.");
       try {
         IStrategoTerm dec =  isApplication(toplevelDecl, "JavaTypeDec") ? getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0) : toplevelDecl;
+        
+        for (Renaming ren : environment.getRenamings())
+          dec = ATermCommands.renameJava(dec, ren, renamingContext);
         
         String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
         
@@ -1310,6 +1320,7 @@ public class Driver {
     sdfContext = tools.init();
     makePermissiveContext = make_permissive.init();
     extractionContext = extraction.init();
+    renamingContext = renaming.init();
     strjContext = org.strategoxt.strj.strj.init();
   }
   
