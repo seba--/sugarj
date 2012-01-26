@@ -889,7 +889,7 @@ public class Driver{
       }
       
       try {
-        Result modelResult = compileImportedModel(model, transformedTerm, resolvedTransformationPaths);
+        Result modelResult = compileImportedTransformedModel(model, transformedTerm, resolvedTransformationPaths);
         Path modelResultPath = environment.new RelativePathBin(modulePath + ".dep");
         success = processImport(modulePath, modelResult, modelResultPath, null, importTerm, true);
       } catch (Exception e) {
@@ -901,37 +901,37 @@ public class Driver{
   }
 
 
-  private Result compileImportedModel(RelativePath model, IStrategoTerm transformedTerm, List<RelativePath> transformationPaths) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private Result compileImportedTransformedModel(RelativePath model, IStrategoTerm transformedTerm, List<RelativePath> transformationPaths) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     List<String> transformationPathStrings = new LinkedList<String>();
     for (RelativePath p : transformationPaths)
       transformationPathStrings.add(FileCommands.dropExtension(p.getRelativePath()).replace('/', '_'));
     String transformationPathString = StringCommands.printListSeparated(transformationPathStrings, "$");
 
-    Path modelResultPath = environment.new RelativePathBin(FileCommands.dropExtension(model.getRelativePath()) + ".dep");
-    
     String relativeModelPath = FileCommands.dropExtension(model.getRelativePath()) + (transformationPathString.isEmpty() ? "" : ("$" + transformationPathString)) + ".aterm"; 
     RelativeSourceLocationPath transformedModelPath = new RelativeSourceLocationPath(new SourceLocation(model.getBasePath(), environment), relativeModelPath);
     
     ATermCommands.atermToFile(transformedTerm, transformedModelPath);
     log.log("Stored transformed model in " + transformedModelPath.getAbsolutePath());
     
-    Result modelResult = null;
-    if (FileCommands.exists(modelResultPath))
-      modelResult = Result.readDependencyFile(modelResultPath, environment);
+    Path transformedModelResultPath = environment.new RelativePathBin(FileCommands.dropExtension(relativeModelPath) + ".dep");
     
-    boolean recompile = modelResult == null || !modelResult.isUpToDate(model, environment);
+    Result transformedModelResult = null;
+    if (FileCommands.exists(transformedModelResultPath))
+      transformedModelResult = Result.readDependencyFile(transformedModelResultPath, environment);
+    
+    boolean recompile = transformedModelResult == null || !transformedModelResult.isUpToDate(model, environment);
     if (recompile) {
       try {
         log.log("Need to compile the imported model first; processing it now.");
 
-        modelResult = compile(transformedTerm, transformedModelPath, monitor);
-        driverResult.addDependency(modelResultPath, environment);
+        transformedModelResult = compile(transformedTerm, transformedModelPath, monitor);
+        driverResult.addDependency(transformedModelResultPath, environment);
       } finally {
         log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
       }
     }
     
-    return modelResult;
+    return transformedModelResult;
   }
 
 
