@@ -332,12 +332,11 @@ public class Driver {
       driverResult.setSourceFile(this.sourceFile, declProvider.getSourceHashCode());
       
       if (sourceFile != null) {
-        // QST: delete this java File?
         javaOutFile = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".java");
         depOutFile = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".dep");
         Path genLog = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".gen");
         driverResult.setGenerationLog(genLog);
-// clearGeneratedStuff();
+        // clearGeneratedStuff();
       }
 
       initEditorServices();
@@ -834,7 +833,7 @@ public class Driver {
         }
       }
       
-      boolean success = skipProcessImport || processImport(modulePath, res, dep, resolvedTransformationPaths, importTerm, false);
+      boolean success = skipProcessImport || processImport(modulePath, resolvedTransformationPaths, importTerm, false);
       
       if (!success)
         setErrorMessage(toplevelDecl, "module not found: " + importModule);
@@ -846,7 +845,7 @@ public class Driver {
     }
   }
   
-  private boolean processImport(String modulePath, Result importedResult, Path importedResultPath, List<RelativePath> transformationPaths, IStrategoTerm importTerm, boolean modelRecursive) throws IOException {
+  private boolean processImport(String modulePath, List<RelativePath> transformationPaths, IStrategoTerm importTerm, boolean modelRecursive) throws IOException {
     boolean success = false;
     
     boolean classImport = ModuleSystemCommands.importClass(
@@ -901,9 +900,10 @@ public class Driver {
         log.endTask(transformSuccessful);
       }
       try {
-        Result modelResult = compileTransformedModel(model, transformedTerm, makeTransformationPathString(transformationPaths));
-        Path modelResultPath = environment.new RelativePathBin(modulePath + ".dep");
-        success = processImport(modulePath, modelResult, modelResultPath, null, importTerm, true);
+        String transformationPathString = makeTransformationPathString(transformationPaths);
+        compileTransformedModel(model, transformedTerm, transformationPathString);
+        if (!transformationPathString.isEmpty()) modulePath = modulePath+"$"+transformationPathString;
+        success = processImport(modulePath, null, importTerm, true);
       } catch (Exception e) {
         setErrorMessage(importTerm, "compilation of imported module failed: " + e.getLocalizedMessage());
       }
@@ -914,8 +914,6 @@ public class Driver {
 
 
   private Result compileTransformedModel(RelativePath model, IStrategoTerm transformedTerm, String transformationPathString) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-
-
     String relativeModelPath = FileCommands.dropExtension(model.getRelativePath()) + (transformationPathString.isEmpty() ? "" : ("$" + transformationPathString)) + ".aterm";
     RelativeSourceLocationPath transformedModelPath = new RelativeSourceLocationPath(new SourceLocation(model.getBasePath(), environment), relativeModelPath);
     
