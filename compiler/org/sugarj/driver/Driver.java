@@ -22,10 +22,12 @@ import java.text.ParseException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -52,6 +54,7 @@ import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
 import org.sugarj.driver.path.RelativeSourceLocationPath;
 import org.sugarj.driver.path.SourceLocation;
+import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
 import org.sugarj.driver.transformations.extraction.extraction;
 import org.sugarj.stdlib.StdLib;
 import org.sugarj.util.ProcessingListener;
@@ -83,6 +86,7 @@ public class Driver{
   private Result driverResult;
   
   private Path javaOutFile;
+  private JavaSourceFileContent javaSource;
   private Path depOutFile;
   private String relPackageName;
   private RelativeSourceLocationPath sourceFile;
@@ -126,7 +130,7 @@ public class Driver{
   private boolean generateFiles;
   private Path delegateCompilation = null;
   
-  private List<Path> generatedJavaClasses = new ArrayList<Path>();
+  private Set<RelativePath> generatedJavaClasses = new HashSet<RelativePath>();
   
   public Driver(Environment env) {
     this.environment=env;
@@ -355,7 +359,7 @@ public class Driver{
       if (delegateCompilation == null)
         compileGeneratedJavaFiles();
       else
-        driverResult.delegateCompilation(delegateCompilation, javaOutFile, generatedJavaClasses);
+        driverResult.delegateCompilation(delegateCompilation, javaOutFile, javaSource, generatedJavaClasses);
       
       driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
       
@@ -388,7 +392,12 @@ public class Driver{
     boolean good = false;
     log.beginTask("compilation", "COMPILE the generated java file");
     try {
-      driverResult.compileJava(javaOutFile, environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), generatedJavaClasses);
+      try {
+        driverResult.compileJava(javaOutFile, environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), generatedJavaClasses);
+      } catch (ClassNotFoundException e) {
+        setErrorMessage(lastSugaredToplevelDecl, e.getMessage());
+        throw new RuntimeException(e);
+      }
       good = true;
     } finally {
       log.endTask(good, "compilation succeeded", "compilation failed");
@@ -951,7 +960,7 @@ public class Driver{
         
         String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
         
-        Path clazz = environment.new RelativePathBin(relPackageNameSep() + decName + ".class");
+        RelativePath clazz = environment.new RelativePathBin(relPackageNameSep() + decName + ".class");
         
         generatedJavaClasses.add(clazz);
         driverResult.appendToFile(javaOutFile, SDFCommands.prettyPrintJava(dec, interp) + "\n");

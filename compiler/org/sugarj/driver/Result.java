@@ -19,7 +19,10 @@ import java.util.Set;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.sugarj.driver.path.Path;
+import org.sugarj.driver.path.RelativePath;
 import org.sugarj.driver.path.RelativeSourceLocationPath;
+import org.sugarj.driver.sourcefilecontent.ISourceFileContent;
+import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
 import org.sugarj.util.AppendableObjectOutputStream;
 
 /**
@@ -46,11 +49,17 @@ public class Result {
   /**
    * deferred to (*.sugj) -> 
    * deferred source files (*.sugj) -> 
-   * to-be-compiled files (e.g., *.java) -> 
    * to-be-generated files (e.g., *.class) 
    */
-  private Map<Path, Map<Path, Map<Path, List<Path>>>> delegatedCompilation = new HashMap<Path, Map<Path, Map<Path, List<Path>>>>();
-
+  private Map<Path, Map<Path, Set<RelativePath>>> deferredGeneratedFiles = new HashMap<Path, Map<Path, Set<RelativePath>>>();
+  
+  /**
+   * deferred to (*.sugj) -> 
+   * deferred source files (*.sugj) -> 
+   * to-be-compiled source files (e.g., *.java + JavaSourceFileContent) 
+   */
+  private Map<Path, Map<Path, Map<Path, ISourceFileContent>>> deferredSourceFiles = new HashMap<Path, Map<Path, Map<Path, ISourceFileContent>>>();
+  
   private final static Result OUTDATED_RESULT = new Result(true) {
     @Override
     public boolean isUpToDate(Path file, Environment env) {
@@ -77,16 +86,28 @@ public class Result {
     Result other = readDependencyFile(depFile, env);
     allDependentFiles.addAll(other.getFileDependencies(env));
     
-    for (Entry<Path, Map<Path, Map<Path, List<Path>>>> e : other.delegatedCompilation.entrySet())
-      if (!delegatedCompilation.containsKey(e.getKey()))
-        delegatedCompilation.put(e.getKey(), e.getValue());
+    for (Entry<Path, Map<Path, Set<RelativePath>>> e : other.deferredGeneratedFiles.entrySet())
+      if (!deferredGeneratedFiles.containsKey(e.getKey()))
+        deferredGeneratedFiles.put(e.getKey(), e.getValue());
       else {
-        Map<Path, Map<Path, List<Path>>> delegated = delegatedCompilation.get(e.getKey());
-        for (Entry<Path, Map<Path, List<Path>>> e2 : e.getValue().entrySet())
-          if (delegated.containsKey(e2.getKey()) && !delegated.get(e2.getKey()).equals(e2.getValue()))
-            throw new IllegalStateException("Compile delegations differ");
+        Map<Path, Set<RelativePath>> deferred = deferredGeneratedFiles.get(e.getKey());
+        for (Entry<Path, Set<RelativePath>> e2 : e.getValue().entrySet())
+          if (deferred.containsKey(e2.getKey()) && !deferred.get(e2.getKey()).equals(e2.getValue()))
+            throw new IllegalStateException("Deferred generated files differ.");
           else
-            delegated.put(e2.getKey(), e2.getValue());
+            deferred.put(e2.getKey(), e2.getValue());
+      }
+    
+    for (Entry<Path, Map<Path, Map<Path, ISourceFileContent>>> e : other.deferredSourceFiles.entrySet())
+      if (!deferredSourceFiles.containsKey(e.getKey()))
+        deferredSourceFiles.put(e.getKey(), e.getValue());
+      else {
+        Map<Path, Map<Path, ISourceFileContent>> deferred = deferredSourceFiles.get(e.getKey());
+        for (Entry<Path, Map<Path, ISourceFileContent>> e2 : e.getValue().entrySet())
+          if (deferred.containsKey(e2.getKey()) && !deferred.get(e2.getKey()).equals(e2.getValue()))
+            throw new IllegalStateException("Deferred source files differ.");
+          else
+            deferred.put(e2.getKey(), e2.getValue());
       }
   }
   
@@ -129,6 +150,13 @@ public class Result {
       } finally {
         oos.close();
       }
+    }
+  }
+  
+  void writeToFile(Path file, String content) throws IOException {
+    if (generateFiles) {
+      FileCommands.writeToFile(file, content);
+      generatedFileHashes.put(file, FileCommands.fileHash(file));
     }
   }
   
@@ -219,22 +247,36 @@ public class Result {
     return sugaredSyntaxTree;
   }
 
-  void compileJava(Path javaOutFile, Path bin, List<Path> path, List<Path> generatedJavaClasses) throws IOException {
-    Map<Path, Map<Path, List<Path>>> dependants = delegatedCompilation.get(sourceFile);
+  void compileJava(Path javaOutFile, Path bin, List<Path> path, Set<RelativePath> generatedJavaClasses) throws IOException, ClassNotFoundException {
+    Map<Path, Set<RelativePath>> generatedFiles = deferredGeneratedFiles.get(sourceFile);
+    List<RelativePath> generatedClasses = new ArrayList<RelativePath>(generatedJavaClasses);
+    
+    if (generatedFiles != null)
+      for (Set<RelativePath> files: generatedFiles.values())
+        for (RelativePath file : files)
+          if ("class".equals(FileCommands.getExtension(file)))
+            generatedClasses.add(file);
+
+    Map<Path, Map<Path, ISourceFileContent>> sourceFiles = deferredSourceFiles.get(sourceFile);
     List<Path> javaOutFiles = new ArrayList<Path>();
     javaOutFiles.add(javaOutFile);
-    List<Path> generatedClasses = new ArrayList<Path>(generatedJavaClasses);
-    if (dependants != null) {
-      for (Map<Path, List<Path>> deps : dependants.values()) { 
-        javaOutFiles.addAll(deps.keySet());
-        for (List<Path> classes : deps.values())
-          generatedClasses.addAll(classes);
-      }
-    }
+
+    if (sourceFiles != null)
+      for (Entry<Path, Map<Path, ISourceFileContent>> sources : sourceFiles.entrySet())
+        for (Entry<Path, ISourceFileContent> source : sources.getValue().entrySet())
+          if (source.getValue() instanceof JavaSourceFileContent) {
+            JavaSourceFileContent javaSource = (JavaSourceFileContent) source.getValue();
+            try {
+              writeToFile(source.getKey(), javaSource.getCode(generatedClasses));
+            } catch (ClassNotFoundException e) {
+              throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + source.getKey());
+            }
+          }
+    
     compileJava(javaOutFiles, bin, path, generatedJavaClasses);
   }
   
-  private void compileJava(List<Path> javaOutFiles, Path bin, List<Path> path, List<Path> generatedJavaClasses) throws IOException {
+  private void compileJava(List<Path> javaOutFiles, Path bin, List<Path> path, Set<? extends Path> generatedJavaClasses) throws IOException {
     if (generateFiles) {
       JavaCommands.javac(javaOutFiles, bin, path);
       for (Path cl : generatedJavaClasses)
@@ -242,23 +284,34 @@ public class Result {
     }
   }
   
-  void delegateCompilation(Path delegate, Path compileFile, List<Path> generatedFiles) {
-    Map<Path, List<Path>> deferred = new HashMap<Path, List<Path>>();
-    deferred.put(compileFile, generatedFiles);
+  void delegateCompilation(Path delegate, Path compileFile, ISourceFileContent fileContent, Set<RelativePath> generatedFiles) {
+    Map<Path, Set<RelativePath>> myGeneratedFiles = deferredGeneratedFiles.get(delegate);
+    if (myGeneratedFiles == null)
+      myGeneratedFiles = new HashMap<Path, Set<RelativePath>>();
+    myGeneratedFiles.put(sourceFile, generatedFiles);
     
-    Map<Path, Map<Path, List<Path>>> delegated = delegatedCompilation.get(delegate);
-    if (delegated == null)
-      delegated = new HashMap<Path, Map<Path,List<Path>>>();
-    delegated.put(sourceFile, deferred);
+//    if (deferredGeneratedFiles.containsKey(sourceFile))
+//      myGeneratedFiles.putAll(deferredGeneratedFiles.get(sourceFile));
+
+    deferredGeneratedFiles.put(delegate, myGeneratedFiles);
     
-    if (delegatedCompilation.containsKey(sourceFile))
-      delegated.putAll(delegatedCompilation.get(sourceFile));
+    Map<Path, Map<Path, ISourceFileContent>> sourceFiles = deferredSourceFiles.get(delegate);
+    if (sourceFiles == null)
+      sourceFiles = new HashMap<Path, Map<Path,ISourceFileContent>>();
+    Map<Path, ISourceFileContent> sources = sourceFiles.get(sourceFile);
+    if (sources == null)
+      sources = new HashMap<Path, ISourceFileContent>();
+    sources.put(compileFile, fileContent);
+    sourceFiles.put(sourceFile, sources);
     
-    delegatedCompilation.put(delegate, delegated);
+//    if (deferredSourceFiles.containsKey(sourceFile))
+//      sourceFiles.putAll(deferredSourceFiles.get(sourceFile));
+    
+    deferredSourceFiles.put(delegate, sourceFiles);
   }
   
   boolean hasDelegatedCompilation(Path compileFile) {
-    return delegatedCompilation.containsKey(sourceFile) && delegatedCompilation.get(sourceFile).containsKey(compileFile);
+    return deferredSourceFiles.containsKey(sourceFile) && deferredSourceFiles.get(sourceFile).containsKey(compileFile);
   }
   
   void registerParseTable(Path tbl) {
@@ -305,7 +358,8 @@ public class Result {
         oos.writeInt(e.getValue());
       }
       
-      oos.writeObject(delegatedCompilation);
+      oos.writeObject(deferredGeneratedFiles);
+      oos.writeObject(deferredSourceFiles);
       
 //      new TermReader(ATermCommands.factory).unparseToFile(sugaredSyntaxTree, oos);
 //      oos.writeBoolean(failed);
@@ -319,6 +373,7 @@ public class Result {
     }
   }
   
+  @SuppressWarnings("unchecked")
   public static Result readDependencyFile(Path dep, Environment env) throws IOException {
     Result result = new Result(true);
     result.allDependentFiles = null;
@@ -346,7 +401,8 @@ public class Result {
         result.generatedFileHashes.put(file, hash);
       }
       
-      result.delegatedCompilation = (Map<Path, Map<Path, Map<Path, List<Path>>>>) ois.readObject(); 
+      result.deferredGeneratedFiles = (Map<Path, Map<Path, Set<RelativePath>>>) ois.readObject();
+      result.deferredSourceFiles = (Map<Path, Map<Path, Map<Path, ISourceFileContent>>>) ois.readObject();
       
 //      result.sugaredSyntaxTree = new TermReader(ATermCommands.factory).parseFromStream(ois);
 //      result.failed = ois.readBoolean();
