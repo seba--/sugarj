@@ -1,0 +1,5 @@
+package javaclosure;
+public interface Closure<Res, Arg> 
+{ 
+  public Res invoke(Arg arg);
+}

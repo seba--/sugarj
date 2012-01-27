@@ -1,0 +1,40 @@
+package trans;
+
+import org.sugarj.languages.Java;
+import org.sugarj.languages.Model;
+
+import concretesyntax.Java;
+
+public transformation ToJava {
+  rules
+    main = oncetd(model-to-javaclass(body-trans))
+    body-trans = single-method(make-main-method(single-stmt(println-stmt(compile-exp))))
+  
+  rules
+    model-to-javaclass(s) :
+      ModelDec(ModelDecHead(mods, name), ModelBody(body)) ->
+      ClassDec(ClassDecHead(mods, name, None, None, None), ClassBody(<s> body))
+
+  rules
+    single-method(s) = ![<s>]
+
+    make-main-method(s) =
+      !Block(<s>); ?block;
+      !|[ public static void main(String[] args) ~block:block ]|
+
+    single-stmt(s) = ![<s>]
+
+    println-stmt(s) = 
+      s; ?exp;
+      !|[ System.out.println(~exp); ]|
+
+  signature constructors
+    Add : Exp * Exp -> Exp
+    Sub : Exp * Exp -> Exp
+
+  rules
+    compile-exp = is-int; !Lit(Deci(<int-to-string>))
+    compile-exp : Add(e1, e2) -> |[ ~e1' + ~e2' ]|
+      where <compile-exp> e1 => e1';
+            <compile-exp> e2 => e2'
+}

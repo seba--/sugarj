@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -28,11 +29,13 @@ import org.spoofax.terms.io.TAFTermReader;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
+import org.strategoxt.stratego_aterm.implode_aterm_0_0;
 import org.strategoxt.tools.sdf_desugar_0_0;
 import org.sugarj.driver.path.Path;
-import org.sugarj.driver.path.RelativeSourceLocationPath;
 import org.sugarj.driver.transformations.extraction.extract_sdf_0_0;
 import org.sugarj.driver.transformations.extraction.extract_str_0_0;
+import org.sugarj.driver.transformations.renaming.rename_java_0_3;
+import org.sugarj.util.Renaming;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -386,10 +389,8 @@ public class ATermCommands {
    * @return the transformed TypeImportDec
    * @throws IOException
    */
-  public static IStrategoTerm makeStdImport(IStrategoTerm term, RelativeSourceLocationPath sourceFile) throws IOException {
+  public static IStrategoTerm makeStdImport(IStrategoTerm term, String transPostfix) throws IOException {
     if (isApplication(term, "TransImportDec")) {
-       String sourceLocation = sourceFile.getSourceLocation().toString();
-       String transPostfix = sourceLocation.contains("$") ? sourceLocation.substring(sourceLocation.indexOf("$")) : "" ;
        IStrategoTerm transTypeName = getTransformationTypename(term, transPostfix);
      return makeAppl("TypeImportDec", "ImportDec", 1, transTypeName);
     }
@@ -411,5 +412,29 @@ public class ATermCommands {
                                                         atermFromString("Id(\""+moduleName+transPostfix+"\")"));
     }
     return null;
+  }
+
+    
+  public static IStrategoTerm implodeAterm(IStrategoTerm term, HybridInterpreter interp) {
+    return implode_aterm_0_0.instance.invoke(interp.getCompiledContext(), term);
+  }
+  
+  /**
+   * Renames names in the given Java term. 
+   */
+  public static IStrategoTerm renameJava(IStrategoTerm term, Renaming ren, Context context) throws IOException, InvalidParseTableException {
+    IStrategoTerm result = null;
+    try {
+      List<IStrategoTerm> pkgs = new LinkedList<IStrategoTerm>();
+      for (String pkg : ren.pkgs)
+        pkgs.add(makeString(pkg, null));
+      
+      result = rename_java_0_3.instance.invoke(context, term, makeList("Packages", pkgs), makeString(ren.from, null), makeString(ren.to, null));
+    }
+    catch (StrategoExit e) {
+      if (e.getValue() != 0 || result == null)
+        throw new RuntimeException("Stratego extraction failed", e);
+    }
+    return result;
   }
 }

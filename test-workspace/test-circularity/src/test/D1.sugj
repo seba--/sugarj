@@ -1,0 +1,11 @@
+package test;
+
+import test.D2;
+
+public class D1 {
+  public D2 d2 = new D2();
+
+  public D1() {
+    d2.d1 = this;
+  }
+}

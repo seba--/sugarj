@@ -1,0 +1,5 @@
+package model;
+
+public model ModelDec {
+  Add(4, 2)
+}

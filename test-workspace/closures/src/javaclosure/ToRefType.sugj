@@ -1,0 +1,17 @@
+package javaclosure;
+
+import org.sugarj.languages.Java;
+
+public sugar ToRefType {
+  strategies
+    toRefType = prim2refType <+ id
+  
+  rules
+    prim2refType : Byte   -> ClassType(TypeName(Id("Byte")), None)
+    prim2refType : Short  -> ClassType(TypeName(Id("Short")), None)
+    prim2refType : Int    -> ClassType(TypeName(Id("Integer")), None)
+    prim2refType : Long   -> ClassType(TypeName(Id("Long")), None)
+    prim2refType : Char   -> ClassType(TypeName(Id("Char")), None)
+    prim2refType : Float  -> ClassType(TypeName(Id("Float")), None)
+    prim2refType : Double -> ClassType(TypeName(Id("Double")), None)
+}

@@ -62,10 +62,13 @@ public class Log {
     if (lightweight.pop()) {
       out.println(" ... " + error + " - " + duration + "ms");
     } else if (doneMessage) {
-      log.log(shortText + " " + error + " - " + duration + "ms");
+      String s = shortText.isEmpty() ? "" : (shortText + " ");
+      log.log(s + error + " - " + duration + "ms");
     }
-    else 
-      log.log(shortText + " " + error + " - " + duration + "ms");
+    else {
+      String s = shortText.isEmpty() ? "" : (shortText + " ");
+      log.log(s + error + " - " + duration + "ms");
+    }
   }
   
   public void endTask() {

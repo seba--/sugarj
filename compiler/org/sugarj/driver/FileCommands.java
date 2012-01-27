@@ -80,6 +80,10 @@ public class FileCommands {
     fos.close();
   }
   
+  public static void moveFile(Path from, Path to) throws IOException {
+    from.getFile().renameTo(to.getFile());
+  }
+  
   public static void copyFile(InputStream in, OutputStream out) throws IOException {
     int len;
     byte[] b = new byte[1024];

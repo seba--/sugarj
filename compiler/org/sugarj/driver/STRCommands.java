@@ -37,7 +37,6 @@ import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
 import org.sugarj.stdlib.StdLib;
-import org.sugarj.util.LoggingOutputStream;
 
 /**
  * This class provides methods for various SDF commands. Each
@@ -122,7 +121,7 @@ public class STRCommands {
     
     if (prog == null) {
       prog = generateAssimilator(key, str, main, strjContext, environment.getIncludePath());
-      cacheAssimilator(strCache, key, prog, environment);
+      prog = cacheAssimilator(strCache, key, prog, environment);
     }
     return prog;
   }
@@ -158,15 +157,15 @@ public class STRCommands {
     }
   }
     
-  private static void cacheAssimilator(ModuleKeyCache<Path> strCache, ModuleKey key, Path prog, Environment environment) throws IOException {
+  private static Path cacheAssimilator(ModuleKeyCache<Path> strCache, ModuleKey key, Path prog, Environment environment) throws IOException {
     if (strCache == null)
-      return;
+      return prog;
     
 
     log.beginTask("Caching", "Cache assimilator");
     try {
       Path cacheProg = environment.new RelativePathCache(prog.getFile().getName());
-      FileCommands.copyFile(prog, cacheProg);
+      FileCommands.moveFile(prog, cacheProg);
       
       if (!Environment.rocache) {
         Path oldProg = strCache.putGet(key, cacheProg);
@@ -175,6 +174,8 @@ public class STRCommands {
 
       if (CommandExecution.CACHE_INFO)
         log.log("Cache Location: " + cacheProg);
+      
+      return cacheProg;
     } finally {
       log.endTask();
     }

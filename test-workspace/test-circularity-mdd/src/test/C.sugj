@@ -1,0 +1,9 @@
+package test;
+
+import test.B;
+import test.D1;
+
+public class C {
+  public B b = null;
+  public D1 d1 = new D1();
+}
