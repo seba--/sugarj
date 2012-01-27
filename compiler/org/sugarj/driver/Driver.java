@@ -308,6 +308,8 @@ public class Driver{
       
       if (sourceFile != null) {
         javaOutFile = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".java");
+        javaSource = new JavaSourceFileContent();
+        javaSource.setOptionalImport(false);
         depOutFile = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".dep");
         Path genLog = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".gen");
         driverResult.setGenerationLog(genLog);
@@ -393,7 +395,7 @@ public class Driver{
     log.beginTask("compilation", "COMPILE the generated java file");
     try {
       try {
-        driverResult.compileJava(javaOutFile, environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), generatedJavaClasses);
+        driverResult.compileJava(javaOutFile, javaSource, environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), generatedJavaClasses);
       } catch (ClassNotFoundException e) {
         setErrorMessage(lastSugaredToplevelDecl, e.getMessage());
         throw new RuntimeException(e);
@@ -758,8 +760,8 @@ public class Driver{
         javaOutFile = environment.new RelativePathBin(relPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".java");
       if (depOutFile == null)
         depOutFile = environment.new RelativePathBin(relPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
-        
-      driverResult.generateFile(javaOutFile, SDFCommands.prettyPrintJava(toplevelDecl, interp) + "\n");
+      
+      javaSource.setPackageDecl(SDFCommands.prettyPrintJava(toplevelDecl, interp));
     } finally {
       log.endTask();
     }
@@ -868,7 +870,7 @@ public class Driver{
    
               if (currentlyProcessing.contains(importSourceFile)) {
                 // assume source file does not provide syntactic sugar
-                driverResult.appendToFile(javaOutFile, "import " + importModule + ";\n");
+                javaSource.addImport(importModule.replace('/', '.'));
                 skipProcessImport = true;
                 delegateCompilation = importSourceFile;
               }
@@ -893,7 +895,7 @@ public class Driver{
           driverResult.addDependency(dep, environment);
 
         if (driverResult.hasDelegatedCompilation(importSourceFile)) {
-          driverResult.appendToFile(javaOutFile, "import " + importModule + ";\n");
+          javaSource.addImport(importModule.replace('/', '.'));
           skipProcessImport = true;
         }
       }
@@ -913,13 +915,7 @@ public class Driver{
   private boolean processImport(String modulePath, IStrategoTerm importTerm) throws IOException {
     boolean success = false;
     
-    success |= ModuleSystemCommands.importClass(
-        modulePath, 
-        importTerm, 
-        javaOutFile,
-        interp, 
-        driverResult,
-        environment);
+    success |= ModuleSystemCommands.importClass(modulePath, javaSource, environment);
     ModuleSystemCommands.registerSearchedClassFiles(modulePath, driverResult, environment);
 
     Path sdf = ModuleSystemCommands.importSdf(modulePath, environment);
@@ -963,7 +959,7 @@ public class Driver{
         RelativePath clazz = environment.new RelativePathBin(relPackageNameSep() + decName + ".class");
         
         generatedJavaClasses.add(clazz);
-        driverResult.appendToFile(javaOutFile, SDFCommands.prettyPrintJava(dec, interp) + "\n");
+        javaSource.addBodyDecl(SDFCommands.prettyPrintJava(dec, interp));
       } finally {
         log.endTask();
       }
@@ -1206,6 +1202,7 @@ public class Driver{
   
   private void init(RelativePath sourceFile, boolean generateFiles) throws FileNotFoundException, IOException, InvalidParseTableException {
     javaOutFile = null;
+    javaSource = null;
     depOutFile = null;
     // FileCommands.createFile(tmpOutdir, relModulePath + ".java");
 

@@ -31,7 +31,7 @@ public class JavaSourceFileContent implements ISourceFileContent {
     imports.add(imp);
   }
   
-  public void setOptionImport(boolean isOptional) {
+  public void setOptionalImport(boolean isOptional) {
     this.importsOptional = isOptional;
   }
   
@@ -54,7 +54,7 @@ public class JavaSourceFileContent implements ISourceFileContent {
       if (classes.contains(imp))
         code.append("import ").append(imp).append(";\n");
       else if (!importsOptional)
-        throw new ClassNotFoundException("imp");
+        throw new ClassNotFoundException(imp);
     
     for (String bodyDecl : bodyDecls)
       code.append(bodyDecl);

@@ -247,7 +247,7 @@ public class Result {
     return sugaredSyntaxTree;
   }
 
-  void compileJava(Path javaOutFile, Path bin, List<Path> path, Set<RelativePath> generatedJavaClasses) throws IOException, ClassNotFoundException {
+  void compileJava(Path javaOutFile, JavaSourceFileContent javaSource, Path bin, List<Path> path, Set<RelativePath> generatedJavaClasses) throws IOException, ClassNotFoundException {
     Map<Path, Set<RelativePath>> generatedFiles = deferredGeneratedFiles.get(sourceFile);
     List<RelativePath> generatedClasses = new ArrayList<RelativePath>(generatedJavaClasses);
     
@@ -265,13 +265,15 @@ public class Result {
       for (Entry<Path, Map<Path, ISourceFileContent>> sources : sourceFiles.entrySet())
         for (Entry<Path, ISourceFileContent> source : sources.getValue().entrySet())
           if (source.getValue() instanceof JavaSourceFileContent) {
-            JavaSourceFileContent javaSource = (JavaSourceFileContent) source.getValue();
+            JavaSourceFileContent otherJavaSource = (JavaSourceFileContent) source.getValue();
             try {
-              writeToFile(source.getKey(), javaSource.getCode(generatedClasses));
+              writeToFile(source.getKey(), otherJavaSource.getCode(generatedClasses));
             } catch (ClassNotFoundException e) {
               throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + source.getKey());
             }
           }
+    
+    writeToFile(javaOutFile, javaSource.getCode(generatedClasses));
     
     compileJava(javaOutFiles, bin, path, generatedJavaClasses);
   }
