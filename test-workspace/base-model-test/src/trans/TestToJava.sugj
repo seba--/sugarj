@@ -5,6 +5,6 @@ import model.ModelDec(ToJava);
 
 public class TestToJava {
   public static void main(String[] args) {
-    
+    ModelDec.main(args);
   }
 }

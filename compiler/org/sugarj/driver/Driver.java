@@ -938,8 +938,6 @@ public class Driver {
         transformedModelResult = compile(transformedTerm, transformedModelPath, monitor);
         driverResult.addDependency(transformedModelResultPath, environment);
       } finally {
-        if (!environment.getRenamings().isEmpty())
-        environment.getRenamings().remove(environment.getRenamings().size() - 1);
         log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
       }
     }
