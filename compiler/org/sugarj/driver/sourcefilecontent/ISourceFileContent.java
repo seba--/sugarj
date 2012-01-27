@@ -1,8 +1,10 @@
 package org.sugarj.driver.sourcefilecontent;
 
+import java.io.Serializable;
+
 /**
  * 
  * @author seba
  */
-public interface ISourceFileContent {
+public interface ISourceFileContent extends Serializable {
 }

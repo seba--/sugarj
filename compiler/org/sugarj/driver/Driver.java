@@ -277,7 +277,8 @@ public class Driver{
         for (ProcessingListener listener : processingListener)
           listener.processingDone(driver.driverResult);
       }
-
+    } catch (Exception e) {
+      org.strategoxt.imp.runtime.Environment.logException(e);
     } finally {
       pendingRuns.remove(sourceFile);
       if (generateFiles)

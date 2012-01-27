@@ -12,6 +12,7 @@ import org.sugarj.driver.path.RelativePath;
  *
  */
 public class JavaSourceFileContent implements ISourceFileContent {
+  private static final long serialVersionUID = 1164576595940328804L;
 
   String packageDecl;
   List<String> imports = new LinkedList<String>();
