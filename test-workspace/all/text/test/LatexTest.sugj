@@ -1,0 +1,27 @@
+package text.test;
+
+import text.Latex;  
+import text.LatexLib;
+
+import text.test.Bibtex;
+
+public latex LatexTest {
+\part{a} text1
+\part{b} text2
+\section{b.1} text3
+\part{c} \emph{text4}
+\section{c.1}
+\subsection{c.1.1} text5
+ 
+ \latex{$\pi * 4$}
+ 
+ \cite{Parnas72,BravenboerV08} 
+   
+ \begin{abstract}
+   This is an abstract
+   
+ \end{abstract}  
+
+ \begin{test}
+ \end{test}
+} 

@@ -1,0 +1,93 @@
+package regex;
+
+import org.sugarj.languages.Java;
+import regex.Regex;
+
+import util.Strategies;
+
+public sugar RegexAsString {
+  sorts Regex
+  
+   desugarings
+     regexAsString : Regex -> JavaExpr
+   
+   rules
+     regexAsString :
+       delimited-regex(e) -> Lit(String([Chars(<r2str> e)]))
+   
+   rules
+     r2str : 
+       regex-lit(lit)
+       -> lit
+       where <elem> (lit, ["\\\\", "\\t", "\\n", "\\r", "\\f", "\\a", "\\e"])
+     
+     r2str : 
+       regex-lit(lit)
+       -> <string-replace(|"\\", "\\\\")> lit
+       where <not(elem)> (lit, ["\\\\", "\\t", "\\n", "\\r", "\\f", "\\a", "\\e"])
+     
+     r2str : 
+       regex-ccexp(ce) 
+       -> <conc-strings> ("[", <ce2str> ce, "]")
+     
+     r2str :
+       regex-option(e) 
+       -> <conc-strings> ("?", <r2str> e)
+     
+     r2str :
+       regex-many(e) 
+       -> <conc-strings> (<r2str> e, "*")
+     
+     r2str :
+       regex-many1(e) 
+       -> <conc-strings> (<r2str> e, "+")
+     
+     r2str :
+       regex-sequence(e1, e2) 
+       -> <conc-strings> (<r2str> e1, <r2str> e2)
+     
+     r2str :
+       regex-alternative(e1, e2) 
+       -> <conc-strings> (<r2str> e1, "|", <r2str> e2)
+     
+     r2str :
+       regex-group(e)
+       -> <conc-strings> ("(", <r2str> e, ")")
+
+     r2str :
+       regex-ccexp-predefined(e)
+       -> <conc-strings> ("\\", e)
+   
+   rules
+     ce2str :
+       ccexp-lit(lit)
+       -> lit
+     
+     ce2str :
+       ccexp-range(from, to)
+       -> <conc-strings; bracket> (from, "-", to)
+     
+     ce2str :
+       ccexp-negation(ce)
+       -> <ce2str; bracket> ce
+     
+     ce2str :
+       ccexp-union(ce1, ce2)
+       -> <conc-strings; bracket> (<ce2str> ce1, <ce2str> ce2)
+     
+     ce2str :
+       ccexp-intersection(ce1, ce2)
+       -> <conc-strings; bracket> (<ce2str> ce1, <ce2str> ce2) 
+
+     ce2str :
+       ccexp-predefined(".")
+       -> "."
+    
+     ce2str :
+       ccexp-predefined(e)
+       -> <conc-strings> ("\\", e)
+     
+   rules
+     bracket : 
+       s -> <conc-strings> ("[", s, "]")
+}

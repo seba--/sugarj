@@ -1,0 +1,64 @@
+package javaclosure.concrete;
+
+import concretesyntax.Java;
+
+import javaclosure.Closure;
+import javaclosure.ToRefType;
+
+import org.sugarj.languages.Java;
+
+/*
+ * see http://javac.info/closures-v06a.html
+ */
+public sugar Syntax {
+  context-free syntax
+    "#" JavaType "(" JavaType ")" -> JavaType {cons("ClosureType")}
+    "#" JavaType "(" JavaFormalParam ")" JavaBlock -> JavaExpr {cons("Closure")}
+  
+  %% The remaining priorities follow by transitivity.
+  context-free priorities
+      {right:
+      JavaLHS "="    JavaExpr -> JavaExpr
+      JavaLHS "*="   JavaExpr -> JavaExpr
+      JavaLHS "/="   JavaExpr -> JavaExpr
+      JavaLHS "%="   JavaExpr -> JavaExpr
+      JavaLHS "+="   JavaExpr -> JavaExpr
+      JavaLHS "-="   JavaExpr -> JavaExpr
+      JavaLHS "<<="  JavaExpr -> JavaExpr
+      JavaLHS ">>="  JavaExpr -> JavaExpr
+      JavaLHS ">>>=" JavaExpr -> JavaExpr
+      JavaLHS "&="   JavaExpr -> JavaExpr
+      JavaLHS "^="   JavaExpr -> JavaExpr
+      JavaLHS "|="   JavaExpr -> JavaExpr
+    }
+    > "#" JavaType "(" JavaFormalParam ")" JavaExpr -> JavaExpr
+}
+
+  
+/*
+ * see http://javac.info/closures-v06a.html
+ */
+public sugar Transformation {
+  desugarings
+    desugar-closure-type
+    desugar-closure
+  
+  
+  rules
+    desugar-closure-type :
+         |[ #~result(~argument) ]|
+      -> |[ javaclosure.Closure<? extends ~result', ? super ~argument'> ]|
+    with
+      result'   := <toRefType> result;
+      argument' := <toRefType> argument
+
+    desugar-closure :
+         |[ #~result(~argument ~id:x) ~block:body ]|
+      -> |[ new javaclosure.Closure<~result', ~argument'>() {
+        	    public ~result' invoke(~argument' ~id:x)
+        	      ~block:body
+            } ]|
+      with
+        result' := <toRefType> result;
+        argument' := <toRefType> argument
+}  

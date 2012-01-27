@@ -1,0 +1,672 @@
+package text.test;
+
+import text.Bibtex;
+
+public bibtex Bibtex {
+ 
+  @String{OOPSLA = {Proceedings of Conference on Object-Oriented Programming, Systems, Languages, and Applications (OOPSLA)}}
+  @String{POPL = {Proceedings of Symposium on Principles of Programming Languages (POPL)}}
+  @String{GPCE = {Proceedings of Conference on Generative Programming and Component Engineering (GPCE)}}
+  @String{SLE = {Proceedings of Conference on Software Language Engineering (SLE)}}
+  @String{PEPM = {Proceedings of Workshop on Partial Evaluation and Program Manipulation (PEPM)}}
+  @String{PLDI = {Proceedings of Conference on Programming Language Design and Implementation (PLDI)}}
+  @String{ECOOP = {Proceedings of European Conference on Object-Oriented Programming (ECOOP)}}
+  @String{ICALP = {Proceedings of International Colloquium on Automata, Languages and Programming (ICALP)}}
+  @String{RTA = {Proceedings of Conference on Rewriting Techniques and Applications (RTA)}}
+  @String{ICSR = {Proceedings of International Conference on Software Reuse (ICSR)}}
+  @String{CC = {Proceedings of Conference on Compiler Construction (CC)}}
+  @String{SAIG = {Proceedings of Workshop on Semantics, Applications, and Implementation of Program Generation (SAIG)}}
+  @String{ICFP = {Proceedings of International Conference on Functional Programming (ICFP)}}
+  @String{LFP = {Proceedings of Conference on LISP and Functional Programming (LFP)}}
+  @String{ILC = {Proceedings of International Lisp Conference (ILC)}}
+  @String{RSE = {Proceedings of Workshop on Reflection and Software Engineering}}
+    
+  @article{Parnas72,
+   author = {Parnas, D. L.},
+   title = {On the criteria to be used in decomposing systems into modules},
+   journal = {Communication of the ACM},
+   volume = {15},
+   number = {12},
+   year = {1972},
+   pages = {1053--1058},
+   publisher = {ACM},
+   }
+   
+  @inproceedings{BravenboerV04,
+   author = {Bravenboer, Martin and Visser, Eelco},
+   title = {Concrete syntax for objects: domain-specific language embedding and assimilation without restrictions},
+   booktitle = OOPSLA,
+   year = {2004},
+   pages = {365--383},
+   publisher = {ACM}
+   }
+
+  @inproceedings{Cardelli97,
+   author = {Cardelli, Luca},
+   title = {Program fragments, linking, and modularization},
+   booktitle = POPL,
+   year = {1997},
+   pages = {266--277},
+   publisher = {ACM}
+   }
+  
+  
+  @TechReport{Cardelli1994,
+    author =       {Cardelli, Luca and Matthes, Florian and Abadi, Mart\'{i}n},
+    title =        {Extensible Syntax with Lexical Scoping},
+    institution =  {DEC SRC},
+    year =         {1994},
+    number =       {121},
+  }
+  
+  
+  @inproceedings{Porkolab2010,
+   author = {Porkol\'{a}b, Zolt\'{a}n and Sinkovics, \'{A}bel},
+   title = {Domain-specific Language Integration with Compile-time Parser Generator Library},
+   booktitle = GPCE,
+   year = 2010,
+   publisher = {ACM},
+  }
+  
+  @inproceedings{BravenboerV08,
+    author    = {Martin Bravenboer and
+                 Eelco Visser},
+    title     = {Parse Table Composition},
+    booktitle = SLE,
+    year      = {2008},
+    pages     = {74--94},
+    publisher = {Springer}
+  }
+  
+  @inproceedings{BrabrandS02,
+    author    = {Claus Brabrand and
+                 Michael I. Schwartzbach},
+    title     = {Growing languages with metamorphic syntax macros},
+    booktitle = PEPM,
+    year      = {2002},
+    pages     = {31--40},
+    publisher = {ACM},
+  }
+  
+  
+  @TechReport{Maddox89,
+    author =       {William Maddox},
+    title =        {Semantically-Sensitive Macroprocessing},
+    institution =  {University of California, Berkeley},
+    year =         {1989},
+    number =    {UCB/CSD 89/545},
+  }
+  
+  @inproceedings{WeiseC93,
+    author    = {Daniel Weise and
+                 Roger F. Crew},
+    title     = {Programmable Syntax Macros},
+    booktitle = PLDI,
+    year      = {1993},
+    pages     = {156--165},
+    publisher = {ACM},
+  }
+  
+  @Book{Shalit96,
+    author =    {Andrew Shalit},
+    title =        {The {Dylan} Reference Manual},
+    publisher =    {Addison-Wesley-Longman},
+    year =         {1996},
+  }
+
+  @TechReport{scala-overview-tech-report,
+    author =       {Martin Odersky and 
+                    Philippe Altherr and
+                    Vincent Cremet and 
+                    Burak Emir and
+                    Sebastian Maneth and
+                    St\'{e}hane Micheloud and
+                    Nikolay Mihaylov and
+                    Michel Schinz and
+                    Erik Stenman and 
+                    Matthias Zenger},
+    title =        {An Overview of the {Scala} Programming Language},
+    institution =  {EPFL},
+    year =         2004,
+    number =       {IC/2004/64}
+  }
+  
+  
+  @misc{scalaspec,
+    author =       {Martin Odersky},
+    title =        {The {Scala} language specication, Version 2.8},
+    url   = {http://www.scala-lang.org/docu/files/ScalaReference.pdf},
+    howpublished = {Available at \url{http://www.scala-lang.org/docu/files/ScalaReference.pdf}.},
+    year = {2010},
+  }
+  
+  @inproceedings{NystromCM03,
+    author    = {Nathaniel Nystrom and
+                 Michael R. Clarkson and
+                 Andrew C. Myers},
+    title     = {{Polyglot}: An Extensible Compiler Framework for {Java}},
+    booktitle = CC,
+    year      = {2003},
+    pages     = {138--152},
+    publisher = {Springer},
+  }
+  
+  @inproceedings{EkmanH07,
+    author    = {Torbj{\"o}rn Ekman and
+                 G{\"o}rel Hedin},
+    title     = {The {JastAdd} extensible {Java} compiler},
+    booktitle = OOPSLA,
+    year      = {2007},
+    pages     = {1--18},
+    publisher = {ACM},
+  }
+  
+  @inproceedings{Steele94,
+    author    = {Steele, Jr., Guy L.},
+    title     = {Building Interpreters by Composing Monads},
+    booktitle = POPL,
+    year      = {1994},
+    pages     = {472--492},
+    publisher = {ACM},
+  }
+  
+  
+  @inproceedings{LiangHJ95,
+    author    = {Sheng Liang and
+                 Paul Hudak and
+                 Mark P. Jones},
+    title     = {Monad Transformers and Modular Interpreters},
+    booktitle = POPL,
+    year      = {1995},
+    pages     = {333--343},
+    publisher = {ACM},
+  }
+
+
+  
+  
+  @misc{closure-extensions,
+    author    = {Neal Gafter and 
+                 Peter von der Ah\'e},
+    title     = {Closures for Java},
+    url       = {http://javac.info/closures-v06a.html},
+    howpublished = {Available at \url{http://javac.info/closures-v06a.html}. Accessed April 5, 2011.},
+  }
+  
+  @inproceedings{KatsV10,
+    author    = {Lennart C. L. Kats and
+                 Eelco Visser},
+    title     = {The {Spoofax} language workbench: Rules for declarative specification
+                 of languages and {IDEs}},
+    booktitle = OOPSLA,
+    year      = {2010},
+    pages     = {444--463},
+    publisher = {ACM},
+  }
+  
+  @article{HeeringHKR89,
+    author    = {Jan Heering and
+                 P. R. H. Hendriks and
+                 Paul Klint and
+                 J. Rekers},
+    title     = {The syntax definition formalism {SDF} - reference manual},
+    journal   = {SIGPLAN Notices},
+    volume    = {24},
+    number    = {11},
+    year      = {1989},
+    pages     = {43--75},
+    publisher = {ACM},
+  }
+  
+  
+  @inproceedings{Visser01,
+    author    = {Eelco Visser},
+    title     = {Stratego: A Language for Program Transformation Based on
+                 Rewriting Strategies},
+    booktitle = RTA,
+    year      = {2001},
+    pages     = {357--362},
+    publisher = {Springer},
+    series    = {LNCS},
+  }
+  
+  
+  @inproceedings{Hudak98,
+    author    = {Paul Hudak},
+    title     = {Modular domain specific languages and tools},
+    booktitle = ICSR,
+    year      = {1998},
+    pages     = {134--142},
+    publisher = {IEEE},
+  }
+  
+  
+  @inproceedings{RenggliGN10,
+    author    = {Lukas Renggli and
+                 Tudor G\^{\i}rba and
+                 Oscar Nierstrasz},
+    title     = {Embedding Languages without Breaking Tools},
+    booktitle = ECOOP,
+    year      = 2010,
+    pages     = {380--404},
+    publisher = {Springer},
+    series    = {LNCS},
+  }
+  
+  @inproceedings{Visser02,
+    author    = {Eelco Visser},
+    title     = {Meta-programming with Concrete Object Syntax},
+    booktitle = GPCE,
+    year      = {2002},
+    pages     = {299--315},
+    publisher = {Springer},
+    series    = {LNCS},
+  }
+  
+  
+  @article{VanDeursenKT93,
+   author = {Arie van Deursen and
+             Paul Klint and
+             Frank Tip},
+   title = {Origin tracking},
+   journal = {Journal of Symbolic Computation},
+   volume = {15},
+   issue = {5/6},
+   year = {1993},
+   pages = {523--545},
+  } 
+  
+  @inproceedings{BachrachP01,
+    author    = {Jonathan Bachrach and
+                 Keith Playford},
+    title     = {The {Java} Syntactic Extender ({JSE})},
+    booktitle = OOPSLA,
+    year      = {2001},
+    pages     = {31--42},
+    publisher = {ACM},
+  }
+  
+  @InProceedings{ErdwegO10,
+          author =       {Sebastian Erdweg and Klaus Ostermann},
+          title =        {Featherweight {TeX} and Parser Correctness},
+          booktitle =    SLE,
+          year =         {2010},
+          series =       {LNCS},
+          volume =       {6563},
+          publisher =    {Springer},
+        }
+  
+  @inproceedings{VanWykKBS07,
+    author    = {Eric {Van Wyk} and
+                 Lijesh Krishnan and
+                 Derek Bodin and
+                 August Schwerdfeger},
+    title     = {Attribute Grammar-Based Language Extensions for {Java}},
+    booktitle = ECOOP,
+    year      = {2007},
+    pages     = {575--599},
+    publisher = {Springer},
+    series    = {LNCS},
+   }
+  
+  @article{Tratt08,
+    author    = {Laurence Tratt},
+    title     = {Domain Specific Language Implementation via Compile-Time
+                 Meta-Programming},
+    Journal   = {Transactions on Programming Languages and Systems},
+    volume    = {30},
+    number    = {6},
+    publisher = {ACM},
+    year      = {2008},
+    pages     = {1--40},
+  }
+  
+  @article{Krishnamurthi06,
+    author    = {Shriram Krishnamurthi},
+    title     = {Educational Pearl: Automata via Macros},
+    journal   = {Journal of Functional Programming},
+    volume    = {16},
+    number    = {3},
+    year      = {2006},
+    pages     = {253--267},
+    publisher = {Cambridge University Press},
+  }
+  
+  @article{VanWykBGK10,
+    author    = {Eric {Van Wyk} and
+                 Derek Bodin and
+                 Jimin Gao and
+                 Lijesh Krishnan},
+    title     = {Silver: An extensible attribute grammar system},
+    journal   = {Science of Computer Programming},
+    volume    = {75},
+    number    = {1-2},
+    year      = {2010},
+    pages     = {39--54},
+  }
+  
+  
+  @inproceedings{Sheard01,
+    author    = {Tim Sheard},
+    title     = {Accomplishments and Research Challenges in Meta-programming},
+    booktitle = SAIG,
+    year      = {2001},
+    pages     = {2--44},
+    publisher = {Springer},
+  }
+  
+  
+  @article{Mernik05,
+   author = {Mernik, Marjan and Heering, Jan and Sloane, Anthony M.},
+   title = {When and how to develop domain-specific languages},
+   journal = {ACM Computing Surveys},
+   volume = {37},
+   issue = {4},
+   year = {2005},
+   pages = {316--344},
+   numpages = {29},
+   publisher = {ACM},
+  } 
+  
+
+  
+  @article{Leavenworth,
+   author = {Leavenworth, B. M.},
+   title = {Syntax macros and extended translation},
+   journal = {Communications of the ACM},
+   volume = {9},
+   issue = {11},
+   year = {1966},
+   pages = {790--793},
+   publisher = {ACM},
+  } 
+  
+  @inproceedings{Batory:1998:JTI:551789.853531,
+   author = {Batory, D. and Lofaso, B. and Smaragdakis, Y.},
+   title = {{JTS}: Tools for Implementing Domain-Specific Languages},
+   booktitle = ICSR,
+   year = {1998},
+   pages = {143--153},
+   publisher = {IEEE Computer Society},
+  } 
+  
+  
+  @inproceedings{SchwerdfegerW09,
+    author    = {August Schwerdfeger and
+                 Eric {Van Wyk}},
+    title     = {Verifiable composition of deterministic grammars},
+    booktitle = PLDI,
+    year      = {2009},
+    pages     = {199--210},
+    publisher = {ACM},
+  }
+  
+  @misc{Fowler05,
+    author    = {Martin Fowler},
+    title     = {Language Workbenches: The Killer-App for Domain Specific Languages?},
+    year      = {2005},
+    url       = {http://martinfowler.com/articles/languageWorkbench.html},
+    howpublished = {Available at \url{http://martinfowler.com/articles/languageWorkbench.html}},
+  }
+  
+  
+  @INPROCEEDINGS{HO:GPCE10,
+    AUTHOR = {Christian Hofer and Klaus Ostermann},
+    TITLE = {Modular Domain-Specific Language Components in {Scala}},
+    BOOKTITLE = GPCE,
+    YEAR = 2010,
+    PUBLISHER = {ACM}
+  }
+  
+  @INPROCEEDINGS{HORM08,
+    TITLE = {Polymorphic Embedding of {DSLs}},
+    AUTHOR = {Christian Hofer and Klaus Ostermann and Tillmann Rendel and Adriaan Moors},
+    BOOKTITLE = GPCE,
+    YEAR = {2008},
+    URL = {http://www.daimi.au.dk/~ko/papers/gpce50_hofer.pdf},
+    PUBLISHER = {ACM}
+  }
+  
+  @inproceedings{Oliveira:2009:MVC:1615184.1615202,
+   author = {Oliveira, Bruno C.},
+   title = {Modular Visitor Components},
+   booktitle = ECOOP,
+   year = {2009},
+   pages = {269--293},
+   publisher = {Springer},
+  } 
+  
+  
+  @Misc{XHTML,
+    author =    {{W3C HTML Working Group}},
+    title =     {{XHTML} 1.0 The Extensible HyperText Markup Language (Second Edition)},
+    howpublished = {Available at \url{http://www.w3.org/TR/xhtml1}},
+    year =      {2002},
+  }
+  
+  @Misc{XML,
+    author =    {{W3C XML Working Group}},
+    title =     {Extensible Markup Language ({XML}) 1.0 (Fifth Edition)},
+    howpublished = {Available at \url{http://www.w3.org/TR/xml}},
+    year =      {2008},
+  }
+  
+  @Misc{XMLSchema,
+    author =    {{W3C XML Schema Working Group}},
+    title =     {{XML} Schema Part 0: {Primer} Second Edition},
+    howpublished = {Available at \url{http://www.w3.org/TR/xmlschema-0}},
+    year =      {2004},
+  }
+  
+  @Book{MoellerS06,
+    author =    {Anders M\o{}ller and Michael I. Schwartzbach},
+    title =        {An Introduction to XML and Web Technologies},
+    publisher =    {Addison-Wesley},
+    year =         {2006},
+  }
+  
+  @inproceedings{Reng09c,
+    title = {Language Boxes: Bending the Host Language with Modular Language Changes},
+    author = {Lukas Renggli and Marcus Denker and Oscar Nierstrasz},
+    year = {2009},
+    booktitle = SLE,
+    publisher = {Springer},
+  }
+  
+  
+  @article{CKMR:JCTN03,
+   author = {Muffy Calder and Mario Kolberg and Evan H. Magill and Stephan Reiff-Marganiec},
+   title = {Feature Interaction: A Critical Review and Considered Forecast},
+   journal = {Computer Networks},
+   volume = {41},
+   number = {1},
+   year = {2003},
+   pages = {115--141},
+   publisher = {Elsevier},
+   }
+  
+  @InProceedings{Bracha04,
+    author =       {Gilad Bracha},
+    title =        {Pluggable Type Sysmtes},
+    booktitle = {OOPSLA Workshop on Revival of Dynamic  Languages},
+    year =      {2004},
+  }
+  
+  @article{BravenboerDV10,
+    author    = {Martin Bravenboer and
+                 Eelco Dolstra and
+                 Eelco Visser},
+    title     = {Preventing injection attacks with syntax embeddings},
+    journal   = {Science of Computer Programming},
+    volume    = {75},
+    number    = {7},
+    year      = {2010},
+    pages     = {473--495},
+  }
+  
+  @incollection {AxelssonHL08,
+     author = {Axelsson, Roland and Heljanko, Keijo and Lange, Martin},
+     title = {Analyzing Context-Free Grammars Using an Incremental {SAT} Solver},
+     booktitle = ICALP,
+     series = {LNCS},
+     publisher = {Springer},
+     pages = {410--422},
+     year = {2008}
+  }
+  
+  @incollection {Schmitz07,
+     author = {Schmitz, Sylvain},
+     title = {Conservative Ambiguity Detection in Context-Free Grammars},
+     booktitle = ICALP,
+     series = {LNCS},
+     publisher = {Springer},
+     pages = {692--703},
+     year = {2007}
+  }
+  
+  @article{MensTR05,
+    author = {Tom Mens and Gabriele Taentzer and Olga Runge},
+    title = {Detecting Structural Refactoring Conflicts Using Critical Pair Analysis},
+    journal = {Electronic Notes in Theoretical Computer Science},
+    volume = {127},
+    number = {3},
+    pages = {113--128},
+    year = {2005},
+  }
+  
+  
+  @inproceedings{AotoYT09,
+    author    = {Takahito Aoto and
+                 Junichi Yoshida and
+                 Yoshihito Toyama},
+    title     = {Proving Confluence of Term Rewriting Systems Automatically},
+    booktitle = RTA,
+    year      = {2009},
+    pages     = {93--102},
+    publisher = {Springer},
+    series    = {LNCS},
+  }
+  
+  @inproceedings{ClingerR91,
+   author = {Clinger, William and Rees, Jonathan},
+   title = {Macros that work},
+   booktitle = POPL,
+   year = {1991},
+   pages = {155--162},
+   publisher = {ACM},
+  } 
+  
+  @inproceedings{Flatt02,
+   author = {Flatt, Matthew},
+   title = {Composable and compilable macros: you want it when?},
+   booktitle = ICFP,
+   year = {2002},
+   pages = {72--83},
+   publisher = {ACM},
+  } 
+  
+  @inproceedings{KohlbeckerFFD86,
+   author = {Kohlbecker, Eugene and Friedman, Daniel P. and Felleisen, Matthias and Duba, Bruce},
+   title = {Hygienic macro expansion},
+   booktitle = LFP,
+   year = {1986},
+   pages = {151--161},
+   publisher = {ACM},
+  } 
+  
+  
+  
+  @inproceedings{Kiselyov02,
+   author = {Kiselyov, Oleg},
+   title = {Macros That Compose: Systematic Macro Programming},
+   booktitle = GPCE,
+   year = {2002},
+   pages = {202--217},
+   publisher = {Springer},
+   volume = {2487},
+   series = {LNCS},
+  } 
+  
+  
+  @inproceedings{TobinHochstadtSCFF11,
+    title = {Languages as Libraries},
+    author = {Sam Tobin-Hochstadt and Vincent St-Amour and Ryan Culpepper and Matthew Flatt and Matthias Felleisen},
+    booktitle = PLDI,
+    year = {2011},
+    publisher = {ACM},
+    note = {to appear},
+  }
+  
+  
+  @inproceedings{RepenningI07,
+   author = {Repenning, Alexander and Ioannidou, Andri},
+   title = {{X}-expressions in {XMLisp}: {S}-expressions and extensible markup language unite},
+   booktitle = ILC,
+   year = {2007},
+   pages = {1--11},
+   publisher = {ACM},
+  } 
+  
+  
+  @ARTICLE{Kastens92modularityand,
+      author = {U. Kastens and W. M. Waite},
+      title = {Modularity and Reusability in Attribute Grammars},
+      journal = {Acta Informatica},
+      year = {1992},
+      volume = {31},
+      pages = {601--627}
+  }
+  
+  @inproceedings{NystromQM06,
+   author = {Nystrom, Nathaniel and Qi, Xin and Myers, Andrew C.},
+   title = {J\&: Nested intersection for scalable software composition},
+   booktitle = OOPSLA,
+   year = {2006},
+   pages = {21--36},
+   publisher = {ACM},
+  }
+  
+  @incollection {TatsuboriCKI00,
+     author = {Tatsubori, Michiaki and Chiba, Shigeru and Killijian, Marc-Olivier and Itano, Kozo},
+     title = {OpenJava: A Class-Based Macro System for {Java}},
+     booktitle = RSE,
+     series = {LNCS},
+     publisher = {Springer},
+     pages = {117--133},
+     volume = {1826},
+     year = {2000}
+  }
+  
+  @mastersthesis{Seaton07,
+    Author = {Chris Seaton},
+    School = {University of Bristol},
+    Title = {A Programming Language Where the Syntax and Semantics Are Mutable at Runtime},
+    Year = {2007}}
+  
+  
+  @misc{Dmitriev,
+    author =       {Sergey Dmitriev},
+    title =        {Language oriented programming: The next programming paradigm},
+    url   = {http://www.jetbrains.com/mps/docs/Language_Oriented_Programming.pdf},
+    howpublished = {Available at \url{http://www.jetbrains.com/mps/docs/Language_Oriented_Programming.pdf}.},
+    year = {2004},
+  }
+  
+  
+  @Inproceedings{Simonyi95,
+  author = {Charles Simonyi},
+  title  = {The Death of Computer Languages, the Birth of Intentional Programming},
+  year = 1995,
+  booktitle = {NATO Science Committee Conference}
+  }
+  
+  @ARTICLE{Ward95languageoriented,
+      author = {M. P. Ward},
+      title = {Language-Oriented Programming},
+      journal = {Software -- Concepts and Tools},
+      year = {1995},
+      volume = {15},
+      pages = {147--161}
+  }
+
+}

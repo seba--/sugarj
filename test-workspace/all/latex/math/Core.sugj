@@ -1,0 +1,79 @@
+package latex.math;
+
+import latex.Core;
+
+public sugar Core {
+  syntax
+    "$" LatexMathContent "$" -> LatexTextContentPart {cons("InTextMath")}
+    
+    <MathContent-LEX> -> LatexMathContentPart {cons("Text")}
+    "\n" -> LatexMathContentPart {cons("TextNewline")}
+    "{" LatexMathContentPart? "}" -> LatexMathContentPart {cons("TextBlock")}
+    InMathCommand -> LatexMathContentPart {cons("TextCommand")}
+    InMathEnvironment -> LatexMathContentPart {cons("TextEnvironment")}
+    "%" <LatexLineCommentText-LEX> -> LatexMathContentPart {cons("TextComment")}
+    LatexMathContentPart "^" LatexMathContentPart -> LatexMathContentPart {cons("Superscript")}
+    LatexMathContentPart "_" LatexMathContentPart -> LatexMathContentPart {cons("Subscript")}
+    
+    LatexMathContentPart+ -> LatexMathContent
+  
+  
+  syntax
+    "\\latex" "{" <PlainContent-LEX> "}" -> InMathCommand {cons("LatexEscape")}
+    
+    <NullaryMathCommand-LEX> -> InMathCommand {cons("InTextCommand")}
+    <UnaryMathCommand-LEX> <LAYOUT?-CF> "{" LatexMathContent? "}" -> InMathCommand {cons("InTextCommand")}
+    <BinaryMathCommand-LEX> <LAYOUT?-CF> "{" LatexMathContent? "}" <LAYOUT?-CF> "{" LatexMathContent? "}" -> InMathCommand {cons("InTextCommand")}
+    <TrenaryMathCommand-LEX> <LAYOUT?-CF> "{" LatexMathContent? "}" <LAYOUT?-CF> "{" LatexMathContent? "}" <LAYOUT?-CF> "{" LatexMathContent? "}" -> InMathCommand {cons("InTextCommand")}
+    
+  lexical syntax
+    [a-zA-Z]+ -> LatexMathEnvironmentName
+  
+  syntax
+    <LatexMathEnvironmentName-LEX> -> LatexMathEnvironmentName {cons("LatexMathEnvironmentName")}
+    
+    "\\begin" "{" LatexMathEnvironmentName "}"
+      LatexMathContent
+    "\\end" "{" LatexMathEnvironmentName "}" 
+    ->
+    InMathEnvironment {cons("StandardEnvironment")}
+
+
+  rules
+    pp-latex :
+      InTextMath(m) -> <conc-strings> ("$", <pp-latex> m, "$")
+      
+    pp-latex :
+      LatexMathEnvironmentName(s) -> s
+    
+    pp-latex :
+      Superscript(b,e) -> <conc-strings> (<pp-latex> b, "^", <pp-latex> e)
+
+    pp-latex :
+      Subscript(b,e) -> <conc-strings> (<pp-latex> b, "_", <pp-latex> e)
+
+  rules
+    latex-math-environment = fail
+    
+    constraint-error :
+      e@LatexMathEnvironmentName(name) -> (<id>, <conc-strings> ("undefined environment: ", name))
+      where <not(latex-math-environment)> name
+    
+  
+  lexical syntax
+    ~[\\\{\}\%\~\n\$\^\_]+ -> MathContent
+  
+  lexical restrictions
+    MathContent -/- ~[\\\{\}\%\~\n\$\^\_]
+}
+
+public editor services Core {
+  colorer
+    MathContent : blue
+    LatexMathEnvironmentName : black
+    
+    NullaryMathCommand : keyword
+    UnaryMathCommand : keyword
+    BinaryMathCommand : keyword
+    TrenaryMathCommand : keyword
+}

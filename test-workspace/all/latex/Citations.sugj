@@ -1,0 +1,54 @@
+package latex;
+
+import latex.Bibtex;
+import latex.Core;
+
+public sugar Citations {
+  syntax
+    "\\cite" "{" <CitationNames-CF> "}" -> InTextCommand {cons("CiteCommand")}
+  
+  rules
+    pp-latex-command :
+      CiteCommand([])
+      -> "\\cite{?}"
+
+    pp-latex-command :
+      CiteCommand(cites)
+      ->
+      <conc-strings> ("\\cite{", s , "}")
+      where
+        <map(?CitationName(<id>))> cites => names;
+        <intersperse(|","); concat-strings> names => s
+
+  context-free syntax
+    {CitationName ","}* -> CitationNames
+
+  rules
+    constraint-warning :
+      c@CiteCommand([])
+      -> [(c, "empty citation")]
+  
+    constraint-warning :
+      CiteCommand(cites)
+      -> <filter(citations-error)> cites
+    
+    bibtex-entry = fail
+    
+    citations-error :
+      t@CitationName(n) -> (t, <conc-strings> ("undefined citation: ", n))
+      where
+        <not(bibtex-entry)> n
+
+  rules
+    citations-hover :
+      (CitationName(t),pos,ast,file,project) -> r
+      where <bibtex-entry; tooltip-bibtex> t => r
+}
+
+public editor services Citations {
+  completions
+    completion template : LatexTextContentPart = "\cite{" <citations> "}"
+
+  references
+    hover _ : citations-hover
+}

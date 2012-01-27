@@ -1,0 +1,11 @@
+package check;
+
+import org.sugarj.languages.Java;
+import util.Strategies;
+
+public checks Naming {
+  warnings
+    ClassDecHead(mods, Id(name), params, super, interfaces) =
+    [(name, "class name should start with upper-case character")]
+    where <first-char; not(is-upper)> name
+}

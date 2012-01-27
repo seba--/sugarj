@@ -1,0 +1,18 @@
+*~
+*.bak
+# .gitignore
+
+# Eclipse project
+.metadata/
+
+# Eclipse-generated files
+bin/
+.cache
+
+# SugarJ cache
+.sugarjcache/
+
+# Spoofax stuff
+/editor/editor/*.generated.esv
+/editor/include/
+/editor/syntax/*generated.pp

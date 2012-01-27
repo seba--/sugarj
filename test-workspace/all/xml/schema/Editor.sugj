@@ -1,0 +1,12 @@
+package xml.schema;
+
+import xml.Editor;
+import xml.schema.XmlSchemaJavaSyntax;
+
+public editor services Editor {
+  outliner
+    XsdSugarDec
+  
+  folding
+    XsdSugarDec
+}

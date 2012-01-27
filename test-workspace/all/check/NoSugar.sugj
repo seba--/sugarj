@@ -1,0 +1,7 @@
+package check;
+
+public checks NoSugar {
+  errors
+    s@SugarDec(_, _) =
+    [(s, "Sugar declarations not allowed.")]
+}

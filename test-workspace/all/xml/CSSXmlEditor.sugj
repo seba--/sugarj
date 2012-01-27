@@ -1,0 +1,13 @@
+package xml;
+
+import editor.Colors;
+
+import xml.CSS;
+
+public css CSSXmlEditor {
+  Element  { folding; outlining }
+  ElemName { rec-color : blue }
+  AttrName { rec-color : darkorange }
+  AttValue { rec-color : darkred }
+  CharData { rec-color : black }
+}

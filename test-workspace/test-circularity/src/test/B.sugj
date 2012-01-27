@@ -1,0 +1,13 @@
+package test;
+
+import test.A;
+import test.C;
+
+public class B {
+  public A a = null;
+  public C c = new C();
+
+  public B() {
+    c.b = this;
+  }
+}

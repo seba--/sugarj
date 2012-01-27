@@ -1,0 +1,23 @@
+package foo;
+
+import foo.EditorServiceHelper;
+
+import foo.FooSugar;
+
+public editor services FooEditorServices {
+  colorer
+    _.MyId     : BLUE
+    _.Foo      : green
+ 
+  completions
+    completion keyword : "nil"
+    completion template : "TYPE " <JavaId> " = nil;"
+    completion template : JavaId = "SugarJ" 
+}
+
+class Test2 {
+  TYPE v = nil;
+  String x = nil;
+  String y = null;
+  String z = "abc";
+}

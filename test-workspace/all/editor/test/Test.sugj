@@ -1,0 +1,31 @@
+package editor.test;
+
+import editor.test.Sugar;
+
+public editor services Test {
+  colorer
+     // would like to color the "test" keyword only
+     //   _.TestDec."test" : blue bold
+     // best approximation
+     _.TestDec : bluebold
+     bluebold = 0 0 255 bold
+     
+     // would like to color the "is" keyword only
+     //   _.TestDec."test" : darkorange bold italic
+     // best approximation
+     TestStm : darkorangebolditalic
+     darkorangebolditalic = 200 100 0 bold italic
+     
+     // would like to highlight failing test cases
+     // by setting a red background color
+}
+
+public test Test {
+  1 + 3 is 4;
+  
+  new String("abc") is "abc";
+  
+  this.getCurrent() is null;
+  
+  null is null;
+}
