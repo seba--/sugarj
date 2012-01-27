@@ -902,6 +902,7 @@ public class Driver {
       try {
         Result modelResult = compileTransformedModel(model, transformedTerm, makeTransformationPathString(transformationPaths));
         Path modelResultPath = environment.new RelativePathBin(modulePath + ".dep");
+        modulePath = FileCommands.dropExtension(modelResult.getSourceFile().getRelativePath());
         success = processImport(modulePath, modelResult, modelResultPath, null, importTerm, true);
       } catch (Exception e) {
         setErrorMessage(importTerm, "compilation of imported module failed: " + e.getLocalizedMessage());
