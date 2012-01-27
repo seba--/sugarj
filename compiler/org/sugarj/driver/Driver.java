@@ -332,12 +332,11 @@ public class Driver {
       driverResult.setSourceFile(this.sourceFile, declProvider.getSourceHashCode());
       
       if (sourceFile != null) {
-        // QST: delete this java File?
         javaOutFile = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".java");
         depOutFile = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".dep");
         Path genLog = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".gen");
         driverResult.setGenerationLog(genLog);
-// clearGeneratedStuff();
+        // clearGeneratedStuff();
       }
 
       initEditorServices();
