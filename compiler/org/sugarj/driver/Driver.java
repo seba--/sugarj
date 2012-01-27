@@ -946,9 +946,9 @@ public class Driver {
 
   private IStrategoTerm executeTransformation(RelativePath strPath, IStrategoTerm importTerm, IStrategoTerm currentTerm) throws IOException {
     /*
-* create a temporary stratego file that connects already available imports
-* with the currently processed transformation
-*/
+     * create a temporary stratego file that connects already available imports
+     * with the currently processed transformation
+     */
     Path compoundStr = FileCommands.newTempFile("str");
     StringBuilder builder = new StringBuilder();
     builder.append("module ").append(FileCommands.fileName(compoundStr)).append("\n");
