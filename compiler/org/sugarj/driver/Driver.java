@@ -593,9 +593,9 @@ public class Driver {
         }
         else if (ATermCommands.isList(toplevelDecl))
           /*
-* Desugarings may generate lists of toplevel declarations. These declarations,
-* however, may not depend on one another.
-*/
+           * Desugarings may generate lists of toplevel declarations. These declarations,
+           * however, may not depend on one another.
+           */
           for (IStrategoTerm term : ATermCommands.getList(toplevelDecl))
             processToplevelDeclaration(term);
         else if (isApplication(toplevelDecl, "JavaTypeDec") || //XXX remove this branch
