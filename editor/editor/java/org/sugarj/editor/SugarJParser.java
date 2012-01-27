@@ -121,8 +121,10 @@ public class SugarJParser extends JSGLRI {
       protected IStatus run(IProgressMonitor monitor) {
         monitor.beginTask("parse " + sourceFile.getRelativePath(), IProgressMonitor.UNKNOWN);
         Result result = null;
+        boolean ok = false;
         try {
           result = runParser(input, sourceFile, monitor);
+          ok = true;
         } catch (InterruptedException e) {
           result = null;
         } catch (Exception e) {
@@ -132,7 +134,8 @@ public class SugarJParser extends JSGLRI {
           SugarJParser.this.result = result;
           SugarJParser.putResult(filename, result);
           SugarJParser.setPending(filename, false);
-          getController().scheduleParserUpdate(0, false);
+          if (ok)
+            getController().scheduleParserUpdate(0, false);
         }
         return Status.OK_STATUS;
       }

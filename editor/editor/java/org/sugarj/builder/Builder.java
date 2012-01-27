@@ -139,8 +139,10 @@ public class Builder extends IncrementalProjectBuilder {
                     FileCommands.dropExtension(path.toString()),
                     environment.getSourcePath());
             
-            if (sourceFile == null)
-              throw new IllegalStateException("cannot locate source file for ressource " + resource.getFullPath());
+            if (sourceFile == null) {
+              org.strategoxt.imp.runtime.Environment.logWarning("cannot locate source file for ressource " + resource.getFullPath());
+              return false;
+            }
               
             resources.addFirst(new BuildInput(resource, sourceFile));
           }
