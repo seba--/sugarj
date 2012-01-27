@@ -30,6 +30,7 @@ import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.tools.sdf_desugar_0_0;
 import org.sugarj.driver.path.Path;
+import org.sugarj.driver.path.RelativeSourceLocationPath;
 import org.sugarj.driver.transformations.extraction.extract_sdf_0_0;
 import org.sugarj.driver.transformations.extraction.extract_str_0_0;
 
@@ -377,10 +378,38 @@ public class ATermCommands {
     }
   }
 
-  public static IStrategoTerm makeStdImport(IStrategoTerm term) {
-    if (isApplication(term, "TransImportDec"))
-      return makeAppl("TypeImportDec", "ImportDec", 1, term.getSubterm(0));
-    
+  /**
+   * If term is a TransImportDec it is transformed into a normal TypeImportDec and
+   * the transformation postfix is attached to the imported module name
+   * @param term the input IStrategoTerm which is transformed if it is a TransImportDec
+   * @param sourceFile the source file of the imported module
+   * @return the transformed TypeImportDec
+   * @throws IOException
+   */
+  public static IStrategoTerm makeStdImport(IStrategoTerm term, RelativeSourceLocationPath sourceFile) throws IOException {
+    if (isApplication(term, "TransImportDec")) {
+       String sourceLocation = sourceFile.getSourceLocation().toString();
+       String transPostfix = sourceLocation.contains("$") ? sourceLocation.substring(sourceLocation.indexOf("$")) : "" ;
+       IStrategoTerm transTypeName = getTransformationTypename(term, transPostfix);
+     return makeAppl("TypeImportDec", "ImportDec", 1, transTypeName);
+    }
     return term;
+  }
+  
+  private static IStrategoTerm getTransformationTypename(IStrategoTerm term, String transPostfix) throws IOException {
+    IStrategoTerm typeName = term.getSubterm(0);
+    String moduleName;
+    //  TypeName(Id(x))
+    if (typeName.getSubtermCount()==1) {
+      moduleName = typeName.getSubterm(0).getSubterm(0).toString().replace("\"", "");
+      return makeAppl("TypeName", "TypeName", 1, atermFromString("Id(\""+moduleName+transPostfix+"\")"));
+    }
+    //  TypeName(PackageOrTypeName(...), Id(x)) 
+    if (typeName.getSubtermCount()==2) {
+      moduleName = typeName.getSubterm(1).getSubterm(0).toString().replace("\"", "");
+      return makeAppl("TypeName", "TypeName", 2, typeName.getSubterm(0), 
+                                                        atermFromString("Id(\""+moduleName+transPostfix+"\")"));
+    }
+    return null;
   }
 }
