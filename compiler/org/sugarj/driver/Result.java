@@ -83,10 +83,14 @@ public class Result {
   
   void addDependency(Path depFile, Environment env) throws IOException {
     dependencies.put(depFile, FileCommands.fileHash(depFile));
-    Result other = readDependencyFile(depFile, env);
-    allDependentFiles.addAll(other.getFileDependencies(env));
+    Result result = readDependencyFile(depFile, env);
+    addDependency(result, env);
+  }
+  
+  void addDependency(Result result, Environment env) throws IOException {
+    allDependentFiles.addAll(result.getFileDependencies(env));
     
-    for (Entry<Path, Map<Path, Set<RelativePath>>> e : other.deferredGeneratedFiles.entrySet())
+    for (Entry<Path, Map<Path, Set<RelativePath>>> e : result.deferredGeneratedFiles.entrySet())
       if (!deferredGeneratedFiles.containsKey(e.getKey()))
         deferredGeneratedFiles.put(e.getKey(), e.getValue());
       else {
@@ -98,7 +102,7 @@ public class Result {
             deferred.put(e2.getKey(), e2.getValue());
       }
     
-    for (Entry<Path, Map<Path, Map<Path, ISourceFileContent>>> e : other.deferredSourceFiles.entrySet())
+    for (Entry<Path, Map<Path, Map<Path, ISourceFileContent>>> e : result.deferredSourceFiles.entrySet())
       if (!deferredSourceFiles.containsKey(e.getKey()))
         deferredSourceFiles.put(e.getKey(), e.getValue());
       else {
@@ -444,4 +448,4 @@ public class Result {
   public void setFailed(boolean hasFailed) {
     this.failed = hasFailed;
   }
-  }
+}

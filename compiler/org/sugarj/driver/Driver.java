@@ -398,7 +398,7 @@ public class Driver{
       try {
         driverResult.compileJava(javaOutFile, javaSource, environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), generatedJavaClasses);
       } catch (ClassNotFoundException e) {
-        setErrorMessage(lastSugaredToplevelDecl, e.getMessage());
+        setErrorMessage(lastSugaredToplevelDecl, "Could not resolve imported class " + e.getMessage());
         // throw new RuntimeException(e);
       }
       good = true;
@@ -876,12 +876,9 @@ public class Driver{
                 delegateCompilation = importSourceFile;
               }
               else {
-                Result importResult = compile(importSourceFile, monitor);
-                dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
-                if (dep != null)
-                  driverResult.addDependency(dep, environment);
+                res = compile(importSourceFile, monitor);
                 initializeCaches(environment, true);
-                if (importResult.hasFailed())
+                if (res.hasFailed())
                   setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
               }
             } catch (Exception e) {
@@ -895,10 +892,18 @@ public class Driver{
         if (dep == null)
           dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
         
-        if (dep != null && !skipProcessImport)
-          driverResult.addDependency(dep, environment);
-
-        if (driverResult.hasDelegatedCompilation(importSourceFile)) {
+        if (res == null && dep != null)
+          res = Result.readDependencyFile(dep, environment);
+        
+        if (res != null && !skipProcessImport)
+          driverResult.addDependency(res, environment);
+        
+        if (res != null && res.hasDelegatedCompilation(sourceFile)) {
+          delegateCompilation = res.getSourceFile();
+          javaSource.addImport(importModule.replace('/', '.'));
+          skipProcessImport = true;
+        }
+        else if (driverResult.hasDelegatedCompilation(importSourceFile)) {
           javaSource.addImport(importModule.replace('/', '.'));
           skipProcessImport = true;
         }
