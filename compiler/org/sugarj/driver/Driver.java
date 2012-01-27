@@ -834,8 +834,8 @@ public class Driver {
       }
       
       boolean success = skipProcessImport || (transformationPaths==null ? 
-          processImport(modulePath, resolvedTransformationPaths, importTerm, false) : 
-          processTransformationImport(modulePath, resolvedTransformationPaths, importTerm, false));
+          processImport(modulePath, resolvedTransformationPaths, importTerm) : 
+          processTransformationImport(modulePath, resolvedTransformationPaths, importTerm));
       
       if (!success)
         setErrorMessage(toplevelDecl, "module not found: " + importModule);
@@ -847,7 +847,7 @@ public class Driver {
     }
   }
   
-  private boolean processImport(String modulePath, List<RelativePath> transformationPaths, IStrategoTerm importTerm, boolean modelRecursive) throws IOException {
+  private boolean processImport(String modulePath, List<RelativePath> transformationPaths, IStrategoTerm importTerm) throws IOException {
     boolean success = false;
     
     RelativePath clazz = ModuleSystemCommands.importClass(modulePath, environment);
@@ -886,7 +886,7 @@ public class Driver {
   }
 
 
-  private boolean processTransformationImport(String modulePath, List<RelativePath> transformationPaths, IStrategoTerm importTerm, boolean modelRecursive) throws IOException {
+  private boolean processTransformationImport(String modulePath, List<RelativePath> transformationPaths, IStrategoTerm importTerm) throws IOException {
     RelativePath model = ModuleSystemCommands.importModel(modulePath, environment);
     IStrategoTerm term = ATermCommands.atermFromFile(model.getAbsolutePath());
     IStrategoTerm transformedTerm = term;
@@ -904,7 +904,7 @@ public class Driver {
       String transformationPathString = makeTransformationPathString(transformationPaths);
       compileTransformedModel(model, transformedTerm, transformationPathString);
       if (!transformationPathString.isEmpty()) modulePath = modulePath+"$"+transformationPathString;
-      return processImport(modulePath, null, importTerm, true);
+      return processImport(modulePath, null, importTerm);
     } catch (Exception e) {
       setErrorMessage(importTerm, "compilation of imported module failed: " + e.getLocalizedMessage());
     }
