@@ -41,16 +41,7 @@ public class Result {
   private Set<Path> allDependentFiles = new HashSet<Path>();
   private boolean failed = false;
   private Path generationLog;
-  
-  /**
-   * The file-generation target location path. 
-   */
-  private Path targetBinPath;
-  
-  /**
-   * Added modelBinPaths for transitive available modelBins.
-   */
-  private HashSet<Path> modelBinPaths = new HashSet<Path>();
+
 
   public final static Result OUTDATED_RESULT = new Result(true, null) {
     @Override
@@ -66,7 +57,6 @@ public class Result {
   
   public Result(boolean generateFiles, Path targetBinPath) {
     this.generateFiles = generateFiles;
-    this.targetBinPath = targetBinPath;
   }
   
   void addFileDependency(Path file) throws IOException {
@@ -145,9 +135,6 @@ public class Result {
   }
 
   public boolean isUpToDateShallow(int inputHash, Environment env) throws IOException {
-    if (targetBinPath == null || !targetBinPath.equals(env.getBin()))
-      return false;
-    
     if (sourceFileHash == null || inputHash != sourceFileHash)
       return false;
     
@@ -172,7 +159,6 @@ public class Result {
       if (r == null || !r.isUpToDate(r.getSourceFile(), env))
         return false;
     }
-
     return true;
   }
   
@@ -259,13 +245,6 @@ public class Result {
 //      oos.writeObject(generationLog);
 //      oos.writeObject(desugaringsFile);
       
-      oos.writeObject(targetBinPath);
-      
-      oos.writeInt(modelBinPaths.size());
-      for (Path transitiveModelBin : modelBinPaths) {
-        oos.writeObject(transitiveModelBin);
-      }
-      
     } finally {
       if (oos != null)
         oos.close();
@@ -306,13 +285,6 @@ public class Result {
 //      result.generationLog = Path.readPath(ois, env);
 //      result.desugaringsFile = Path.readPath(ois, env);
       
-      result.targetBinPath = Path.readPath(ois, env);
-      
-      int numTransitiveModelBins = ois.readInt();
-      for (int i = 0; i< numTransitiveModelBins; i++) {
-        result.modelBinPaths.add(Path.readPath(ois, env, reallocate));
-      }
-      
       
     } catch (FileNotFoundException e) {
       return OUTDATED_RESULT;
@@ -344,18 +316,6 @@ public class Result {
   
   public void setFailed(boolean hasFailed) {
     this.failed = hasFailed;
-  }
-
-  public Path getModelBinPath() {
-    return targetBinPath;
-  }
-  
-  public void setModelBinPath(Path modelBinPath) {
-    this.targetBinPath = modelBinPath;
-  }
-  
-  public Set<Path> getModelBinPaths() {
-    return modelBinPaths; 
   }
 
 }
