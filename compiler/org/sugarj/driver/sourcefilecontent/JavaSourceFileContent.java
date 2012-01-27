@@ -58,4 +58,19 @@ public class JavaSourceFileContent implements ISourceFileContent {
     
     return code.toString();
   }
+  
+  public int hashCode() {
+    return packageDecl.hashCode() + imports.hashCode() + bodyDecls.hashCode();
+  }
+  
+  public boolean equals(Object o) {
+    if (!(o instanceof JavaSourceFileContent))
+      return false;
+    
+    JavaSourceFileContent other = (JavaSourceFileContent) o;
+    return other.packageDecl.equals(packageDecl) &&
+           other.imports.equals(imports) &&
+           other.importsOptional == importsOptional &&
+           other.bodyDecls.equals(bodyDecls);
+  }
 }
