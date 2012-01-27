@@ -1,0 +1,18 @@
+package metamodel;
+
+import metamodel.util.MetaExplode;
+
+public sugar Java {
+  desugarings
+    desugar-class-model
+
+  rules
+    desugar-class-model :
+      ClassModelDec(mods, name, body) -> 
+      ModelDec(ModelDecHead(mods, name), ModelBody(<meta-explode> body)) 
+
+  context-free syntax
+    ClassModel -> ToplevelDeclaration
+    AnnoOrSugarMod* "class-model" JavaId JavaClassBody -> ClassModel {cons("ClassModelDec")}
+
+}
