@@ -14,9 +14,9 @@ import org.sugarj.driver.path.RelativePath;
 public class JavaSourceFileContent implements ISourceFileContent {
 
   String packageDecl;
-  List<String> imports;
+  List<String> imports = new LinkedList<String>();
   boolean importsOptional;
-  List<String> bodyDecls;
+  List<String> bodyDecls = new LinkedList<String>();
   
   public JavaSourceFileContent() {
   }
@@ -26,8 +26,6 @@ public class JavaSourceFileContent implements ISourceFileContent {
   }
   
   public void addImport(String imp) {
-    if (imports == null)
-      imports = new LinkedList<String>();
     imports.add(imp);
   }
   
@@ -36,8 +34,6 @@ public class JavaSourceFileContent implements ISourceFileContent {
   }
   
   public void addBodyDecl(String bodyDecl) {
-    if (bodyDecls == null)
-      bodyDecls = new LinkedList<String>();
     bodyDecls.add(bodyDecl);
   }
   

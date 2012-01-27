@@ -398,7 +398,7 @@ public class Driver{
         driverResult.compileJava(javaOutFile, javaSource, environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), generatedJavaClasses);
       } catch (ClassNotFoundException e) {
         setErrorMessage(lastSugaredToplevelDecl, e.getMessage());
-        throw new RuntimeException(e);
+        // throw new RuntimeException(e);
       }
       good = true;
     } finally {
@@ -876,6 +876,9 @@ public class Driver{
               }
               else {
                 Result importResult = compile(importSourceFile, monitor);
+                dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
+                if (dep != null)
+                  driverResult.addDependency(dep, environment);
                 initializeCaches(environment, true);
                 if (importResult.hasFailed())
                   setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
