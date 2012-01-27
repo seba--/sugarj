@@ -593,9 +593,9 @@ public class Driver {
         }
         else if (ATermCommands.isList(toplevelDecl))
           /*
-* Desugarings may generate lists of toplevel declarations. These declarations,
-* however, may not depend on one another.
-*/
+           * Desugarings may generate lists of toplevel declarations. These declarations,
+           * however, may not depend on one another.
+           */
           for (IStrategoTerm term : ATermCommands.getList(toplevelDecl))
             processToplevelDeclaration(term);
         else if (isApplication(toplevelDecl, "JavaTypeDec") || //XXX remove this branch
@@ -935,8 +935,6 @@ public class Driver {
         transformedModelResult = compile(transformedTerm, transformedModelPath, monitor);
         driverResult.addDependency(transformedModelResultPath, environment);
       } finally {
-        if (!environment.getRenamings().isEmpty())
-        environment.getRenamings().remove(environment.getRenamings().size() - 1);
         log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
       }
     }
@@ -947,9 +945,9 @@ public class Driver {
 
   private IStrategoTerm executeTransformation(RelativePath strPath, IStrategoTerm importTerm, IStrategoTerm currentTerm) throws IOException {
     /*
-* create a temporary stratego file that connects already available imports
-* with the currently processed transformation
-*/
+     * create a temporary stratego file that connects already available imports
+     * with the currently processed transformation
+     */
     Path compoundStr = FileCommands.newTempFile("str");
     StringBuilder builder = new StringBuilder();
     builder.append("module ").append(FileCommands.fileName(compoundStr)).append("\n");
