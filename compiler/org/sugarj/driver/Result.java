@@ -30,6 +30,13 @@ import org.sugarj.util.AppendableObjectOutputStream;
  */
 public class Result {
   
+  /**
+   * Path and hash of the disk-stored version of this result.
+   * If the result was not stored yet, both variables are null.
+   */
+  private Path persistentPath;
+  private Integer persistentHash = null;
+  
   private final boolean generateFiles;
   
   private Map<Path, Integer> dependencies = new HashMap<Path, Integer>();
@@ -179,11 +186,17 @@ public class Result {
     return editorServices;
   }
   
+  private boolean hasPersistentVersionChanged() throws IOException {
+    return persistentPath != null && 
+           persistentHash != null && 
+           FileCommands.fileHash(persistentPath) != persistentHash;
+  }
+  
   public boolean hasSourceFileChanged(Path inputFile) throws IOException {
     return inputFile == null || hasSourceFileChanged(FileCommands.fileHash(inputFile));
   }
   
-  public boolean hasSourceFileChanged(int inputHash) {
+  private boolean hasSourceFileChanged(int inputHash) {
     return sourceFileHash == null || inputHash != sourceFileHash;
   }
   
@@ -196,6 +209,9 @@ public class Result {
   }
 
   public boolean isUpToDateShallow(int inputHash, Environment env) throws IOException {
+    if (hasPersistentVersionChanged())
+      return false;
+    
     if (hasSourceFileChanged(inputHash))
       return false;
     
@@ -338,45 +354,46 @@ public class Result {
   }
   
   public void writeDependencyFile(Path dep) throws IOException {
-    if (!generateFiles)
-      return;
-    
-    logGeneration(dep);
-
-    ObjectOutputStream oos = null;
-    
-    try {
-      FileCommands.createFile(dep);
-      oos = new ObjectOutputStream(new FileOutputStream(dep.getFile()));
-
-      oos.writeObject(sourceFile);
-      oos.writeInt(sourceFileHash);
+    if (generateFiles) {
+      logGeneration(dep);
+  
+      ObjectOutputStream oos = null;
       
-      oos.writeInt(dependencies.size());
-      for (Entry<Path, Integer> e : dependencies.entrySet()) {
-        oos.writeObject(e.getKey());
-        oos.writeInt(e.getValue());
+      try {
+        FileCommands.createFile(dep);
+        oos = new ObjectOutputStream(new FileOutputStream(dep.getFile()));
+  
+        oos.writeObject(sourceFile);
+        oos.writeInt(sourceFileHash);
+        
+        oos.writeInt(dependencies.size());
+        for (Entry<Path, Integer> e : dependencies.entrySet()) {
+          oos.writeObject(e.getKey());
+          oos.writeInt(e.getValue());
+        }
+        
+        oos.writeInt(generatedFileHashes.size());
+        for (Entry<Path, Integer> e : generatedFileHashes.entrySet()) {
+          oos.writeObject(e.getKey());
+          oos.writeInt(e.getValue());
+        }
+        
+        oos.writeObject(deferredGeneratedFiles);
+        oos.writeObject(deferredSourceFiles);
+        
+  //      new TermReader(ATermCommands.factory).unparseToFile(sugaredSyntaxTree, oos);
+  //      oos.writeBoolean(failed);
+  //      oos.writeObject(collectedErrors);
+  //      oos.writeObject(parseErrors);
+  //      oos.writeObject(generationLog);
+  //      oos.writeObject(desugaringsFile);
+      } finally {
+        if (oos != null)
+          oos.close();
       }
-      
-      oos.writeInt(generatedFileHashes.size());
-      for (Entry<Path, Integer> e : generatedFileHashes.entrySet()) {
-        oos.writeObject(e.getKey());
-        oos.writeInt(e.getValue());
-      }
-      
-      oos.writeObject(deferredGeneratedFiles);
-      oos.writeObject(deferredSourceFiles);
-      
-//      new TermReader(ATermCommands.factory).unparseToFile(sugaredSyntaxTree, oos);
-//      oos.writeBoolean(failed);
-//      oos.writeObject(collectedErrors);
-//      oos.writeObject(parseErrors);
-//      oos.writeObject(generationLog);
-//      oos.writeObject(desugaringsFile);
-    } finally {
-      if (oos != null)
-        oos.close();
     }
+    
+    setPersistentPath(dep);
   }
   
   @SuppressWarnings("unchecked")
@@ -429,7 +446,13 @@ public class Result {
         ois.close();
     }
     
+    result.setPersistentPath(dep);
     return result;
+  }
+  
+  public void setPersistentPath(Path dep) throws IOException {
+    persistentPath = dep;
+    persistentHash = FileCommands.fileHash(dep);
   }
   
   void setSourceFile(RelativeSourceLocationPath sourceFile, int sourceFileHash) {
