@@ -403,13 +403,13 @@ public class ATermCommands {
     //  TypeName(Id(x))
     if (typeName.getSubtermCount()==1) {
       moduleName = typeName.getSubterm(0).getSubterm(0).toString().replace("\"", "");
-      return makeAppl("TypeName", "TypeName", 1, atermFromString("Id(\""+moduleName+transPostfix+"\")"));
+      return makeAppl("TypeName", "TypeName", 1, atermFromString("Id(\""+moduleName+"$"+transPostfix+"\")"));
     }
     //  TypeName(PackageOrTypeName(...), Id(x)) 
     if (typeName.getSubtermCount()==2) {
       moduleName = typeName.getSubterm(1).getSubterm(0).toString().replace("\"", "");
       return makeAppl("TypeName", "TypeName", 2, typeName.getSubterm(0), 
-                                                        atermFromString("Id(\""+moduleName+transPostfix+"\")"));
+                                                        atermFromString("Id(\""+moduleName+"$"+transPostfix+"\")"));
     }
     return null;
   }
