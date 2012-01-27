@@ -35,19 +35,14 @@ public class ModuleSystemCommands {
    * @return true iff a class file existed.
    * @throws IOException
    */
-  public static boolean importClass(String modulePath, IStrategoTerm importTerm, Path javaOutFile, HybridInterpreter interp, Result driverResult, Environment environment) throws IOException {
+  public static RelativePath importClass(String modulePath, Environment environment) throws IOException {
     RelativePath clazz = searchFile(modulePath, ".class", environment);
+    
     if (clazz == null)
-      return false;
+      return null;
     
-    log.beginTask("Generate Java code");
-    try {
-      driverResult.appendToFile(javaOutFile, SDFCommands.prettyPrintJava(importTerm, interp) + "\n");
-    } finally {
-      log.endTask();
-    }
-    
-    return true;
+    log.log("Found class file for " + modulePath);
+    return clazz;
   }
   
   public static void registerSearchedClassFiles(String modulePath, Result driverResult, Environment environment) throws IOException {
