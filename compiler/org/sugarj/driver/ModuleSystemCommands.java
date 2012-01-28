@@ -41,7 +41,7 @@ public class ModuleSystemCommands {
     
     log.beginTask("Generate Java code");
     try {
-      javaSource.addImport(modulePath.replace('/', '.'));
+      javaSource.addCheckedImport(modulePath.replace('/', '.'));
     } finally {
       log.endTask();
     }

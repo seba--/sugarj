@@ -58,7 +58,7 @@ public class Result {
    * deferred source files (*.sugj) -> 
    * to-be-generated files (e.g., *.class) 
    */
-  private Map<Path, Map<Path, Set<RelativePath>>> deferredGeneratedFiles = new HashMap<Path, Map<Path, Set<RelativePath>>>();
+  private Map<Path, Map<Path, Set<RelativePath>>> availableGeneratedFiles = new HashMap<Path, Map<Path, Set<RelativePath>>>();
   
   /**
    * deferred to (*.sugj) -> 
@@ -97,17 +97,32 @@ public class Result {
   void addDependency(Result result, Environment env) throws IOException {
     allDependentFiles.addAll(result.getFileDependencies(env));
     
-    for (Entry<Path, Map<Path, Set<RelativePath>>> e : result.deferredGeneratedFiles.entrySet())
-      if (!deferredGeneratedFiles.containsKey(e.getKey()))
-        deferredGeneratedFiles.put(e.getKey(), e.getValue());
+    for (Entry<Path, Map<Path, Set<RelativePath>>> e : result.availableGeneratedFiles.entrySet())
+      if (!availableGeneratedFiles.containsKey(e.getKey()))
+        availableGeneratedFiles.put(e.getKey(), e.getValue());
       else {
-        Map<Path, Set<RelativePath>> deferred = deferredGeneratedFiles.get(e.getKey());
+        Map<Path, Set<RelativePath>> deferred = availableGeneratedFiles.get(e.getKey());
         for (Entry<Path, Set<RelativePath>> e2 : e.getValue().entrySet())
           if (deferred.containsKey(e2.getKey()) && !deferred.get(e2.getKey()).equals(e2.getValue()))
             throw new IllegalStateException("Deferred generated files differ.");
           else
             deferred.put(e2.getKey(), e2.getValue());
       }
+    
+//    Map<Path, Set<RelativePath>> map = availableGeneratedFiles.get(sourceFile);
+//    if (map == null) {
+//      map = new HashMap<Path, Set<RelativePath>>();
+//      availableGeneratedFiles.put(sourceFile, map);
+//    }
+//    Set<RelativePath> set = map.get(result.sourceFile);
+//    if (set == null) {
+//      set = new HashSet<RelativePath>();
+//      map.put(result.sourceFile, set);
+//    }
+//    for (Entry<Path, Integer> e : result.generatedFileHashes.entrySet())
+//      if (e.getValue() != 0 && e.getKey() instanceof RelativePath)
+//        set.add((RelativePath) e.getKey());
+    
     
     for (Entry<Path, Map<Path, Map<Path, ISourceFileContent>>> e : result.deferredSourceFiles.entrySet())
       if (!deferredSourceFiles.containsKey(e.getKey()))
@@ -268,14 +283,15 @@ public class Result {
   }
 
   void compileJava(Path javaOutFile, JavaSourceFileContent javaSource, Path bin, List<Path> path, Set<RelativePath> generatedJavaClasses) throws IOException, ClassNotFoundException {
-    Map<Path, Set<RelativePath>> generatedFiles = deferredGeneratedFiles.get(sourceFile);
-    List<RelativePath> generatedClasses = new ArrayList<RelativePath>(generatedJavaClasses);
+    Map<Path, Set<RelativePath>> generatedFiles = availableGeneratedFiles.get(sourceFile);
+    Set<RelativePath> generatedClasses = new HashSet<RelativePath>(generatedJavaClasses);
     
-    if (generatedFiles != null)
+    if (generatedFiles != null) {
       for (Set<RelativePath> files: generatedFiles.values())
         for (RelativePath file : files)
           if ("class".equals(FileCommands.getExtension(file)))
             generatedClasses.add(file);
+    }
 
     Map<Path, Map<Path, ISourceFileContent>> sourceFiles = deferredSourceFiles.get(sourceFile);
     List<Path> javaOutFiles = new ArrayList<Path>();
@@ -295,7 +311,7 @@ public class Result {
     
     writeToFile(javaOutFile, javaSource.getCode(generatedClasses));
     
-    compileJava(javaOutFiles, bin, path, generatedJavaClasses);
+    compileJava(javaOutFiles, bin, path, generatedClasses);
   }
   
   private void compileJava(List<Path> javaOutFiles, Path bin, List<Path> path, Set<? extends Path> generatedJavaClasses) throws IOException {
@@ -307,15 +323,15 @@ public class Result {
   }
   
   void delegateCompilation(Path delegate, Path compileFile, ISourceFileContent fileContent, Set<RelativePath> generatedFiles) {
-    Map<Path, Set<RelativePath>> myGeneratedFiles = deferredGeneratedFiles.get(delegate);
+    Map<Path, Set<RelativePath>> myGeneratedFiles = availableGeneratedFiles.get(delegate);
     if (myGeneratedFiles == null)
       myGeneratedFiles = new HashMap<Path, Set<RelativePath>>();
     myGeneratedFiles.put(sourceFile, generatedFiles);
     
-//    if (deferredGeneratedFiles.containsKey(sourceFile))
-//      myGeneratedFiles.putAll(deferredGeneratedFiles.get(sourceFile));
+    if (availableGeneratedFiles.containsKey(sourceFile))
+      myGeneratedFiles.putAll(availableGeneratedFiles.get(sourceFile));
 
-    deferredGeneratedFiles.put(delegate, myGeneratedFiles);
+    availableGeneratedFiles.put(delegate, myGeneratedFiles);
     
     Map<Path, Map<Path, ISourceFileContent>> sourceFiles = deferredSourceFiles.get(delegate);
     if (sourceFiles == null)
@@ -326,8 +342,8 @@ public class Result {
     sources.put(compileFile, fileContent);
     sourceFiles.put(sourceFile, sources);
     
-//    if (deferredSourceFiles.containsKey(sourceFile))
-//      sourceFiles.putAll(deferredSourceFiles.get(sourceFile));
+    if (deferredSourceFiles.containsKey(sourceFile))
+      sourceFiles.putAll(deferredSourceFiles.get(sourceFile));
     
     deferredSourceFiles.put(delegate, sourceFiles);
   }
@@ -378,7 +394,7 @@ public class Result {
           oos.writeInt(e.getValue());
         }
         
-        oos.writeObject(deferredGeneratedFiles);
+        oos.writeObject(availableGeneratedFiles);
         oos.writeObject(deferredSourceFiles);
         
   //      new TermReader(ATermCommands.factory).unparseToFile(sugaredSyntaxTree, oos);
@@ -424,7 +440,7 @@ public class Result {
         result.generatedFileHashes.put(file, hash);
       }
       
-      result.deferredGeneratedFiles = (Map<Path, Map<Path, Set<RelativePath>>>) ois.readObject();
+      result.availableGeneratedFiles = (Map<Path, Map<Path, Set<RelativePath>>>) ois.readObject();
       result.deferredSourceFiles = (Map<Path, Map<Path, Map<Path, ISourceFileContent>>>) ois.readObject();
       
 //      result.sugaredSyntaxTree = new TermReader(ATermCommands.factory).parseFromStream(ois);

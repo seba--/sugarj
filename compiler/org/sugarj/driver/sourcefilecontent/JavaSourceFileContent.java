@@ -2,6 +2,7 @@ package org.sugarj.driver.sourcefilecontent;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.sugarj.driver.Environment;
 import org.sugarj.driver.FileCommands;
@@ -16,6 +17,7 @@ public class JavaSourceFileContent implements ISourceFileContent {
 
   String packageDecl;
   List<String> imports = new LinkedList<String>();
+  List<String> checkedImports = new LinkedList<String>();
   boolean importsOptional;
   List<String> bodyDecls = new LinkedList<String>();
   
@@ -30,6 +32,10 @@ public class JavaSourceFileContent implements ISourceFileContent {
     imports.add(imp);
   }
   
+  public void addCheckedImport(String imp) {
+    checkedImports.add(imp);
+  }
+  
   public void setOptionalImport(boolean isOptional) {
     this.importsOptional = isOptional;
   }
@@ -38,7 +44,7 @@ public class JavaSourceFileContent implements ISourceFileContent {
     bodyDecls.add(bodyDecl);
   }
   
-  public String getCode(List<RelativePath> generatedClasses) throws ClassNotFoundException {
+  public String getCode(Set<RelativePath> generatedClasses) throws ClassNotFoundException {
     List<String> classes = new LinkedList<String>();
     for (RelativePath p : generatedClasses)
       classes.add(FileCommands.dropExtension(p.getRelativePath()).replace(Environment.sep, "."));
@@ -46,6 +52,9 @@ public class JavaSourceFileContent implements ISourceFileContent {
     StringBuilder code = new StringBuilder();
     code.append(packageDecl);
     code.append('\n');
+    
+    for (String imp : checkedImports)
+      code.append("import ").append(imp).append(";\n");
     
     for (String imp : imports)
       if (classes.contains(imp))
