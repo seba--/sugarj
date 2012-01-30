@@ -751,11 +751,9 @@ public class Driver {
     
     log.beginTask("processing", "PROCESS the desugared import declaration.");
     try {
-      String importModule = ModuleSystemCommands.extractImportedModuleName(toplevelDecl, interp);
+      String modulePath = FileCommands.getRelativeModulePath(ModuleSystemCommands.extractImportedModuleName(toplevelDecl, interp));
       List<String> importTransformations = ModuleSystemCommands.extractImportedTransformationNames(toplevelDecl, interp);
-          
-      String modulePath = FileCommands.getRelativeModulePath(importModule);
-
+      
       List<String> transformationPaths;
       if (importTransformations == null)
         transformationPaths = null;
@@ -814,7 +812,7 @@ public class Driver {
           if (!generateFiles) {
             // boolean b = res == null || !res.isUpToDate(res.getSourceFile(), environment);
             // System.out.println(b);
-            setErrorMessage(toplevelDecl, "module outdated, compile first: " + importModule);
+            setErrorMessage(toplevelDecl, "module outdated, compile first: " + modulePath);
           }
           else {
               if (currentlyProcessing.contains(importSourceFile)) {
@@ -840,9 +838,9 @@ public class Driver {
                   
                   initializeCaches(environment, true);
                   if (res.hasFailed())
-                    setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
+                    setErrorMessage(toplevelDecl, "problems while compiling " + modulePath);
                 } catch (Exception e) {
-                  setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
+                  setErrorMessage(toplevelDecl, "problems while compiling " + modulePath);
                 }
                   
                 log.log("CONTINUE PROCESSING'" + importSourceFile + "'.");
@@ -861,11 +859,11 @@ public class Driver {
 
         if (res != null && res.hasDelegatedCompilation(sourceFile)) {
           delegateCompilation = res.getSourceFile();
-          javaSource.addImport(importModule.replace('/', '.'));
+          javaSource.addImport(modulePath.replace('/', '.'));
           skipProcessImport = true;
         }
         else if (driverResult.hasDelegatedCompilation(importSourceFile)) {
-          javaSource.addImport(importModule.replace('/', '.'));
+          javaSource.addImport(modulePath.replace('/', '.'));
           skipProcessImport = true;
         }
       }
@@ -877,7 +875,7 @@ public class Driver {
         success = processImport(modulePath);
       
       if (!success)
-        setErrorMessage(toplevelDecl, "module not found: " + importModule);
+        setErrorMessage(toplevelDecl, "module not found: " + modulePath);
       
     } catch (Exception e) {
       throw new RuntimeException(e);
