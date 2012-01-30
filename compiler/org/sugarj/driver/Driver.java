@@ -73,9 +73,6 @@ public class Driver {
 
   private static Map<Path, Result> resultCache = new HashMap<Path, Result>(); // new LRUMap(50);
   private static Map<Path, Entry<ToplevelDeclarationProvider, Driver>> pendingRuns = new HashMap<Path, Map.Entry<ToplevelDeclarationProvider,Driver>>();
-
-  private static List<RelativeSourceLocationPath> allInputFiles = new ArrayList<RelativeSourceLocationPath>();
-  private static List<Path> pendingInputFiles = new ArrayList<Path>();
   
   private static List<Path> currentlyProcessing = new ArrayList<Path>();
 
@@ -229,31 +226,12 @@ public class Driver {
     return run(source, sourceFile, monitor, false);
   }
 
-  private static Result run(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    if (generateFiles)
-      synchronized (currentlyProcessing) {
-        // TODO we need better circular dependency handling
-        if (currentlyProcessing.contains(sourceFile))
-          ;
-          // throw new IllegalStateException("circular processing");
-        currentlyProcessing.add(sourceFile);
-      }
-
-    Result res;
-    
-    try {
-      String source = FileCommands.readFileAsString(sourceFile);
-      res = run(source, sourceFile, monitor, generateFiles);
-    } finally {
-      if (generateFiles)
-        synchronized (currentlyProcessing) {
-          currentlyProcessing.remove(sourceFile);
-        }
-      pendingInputFiles.remove(sourceFile);
-    }
-    return res;
-  }
   
+  
+  public static Result run(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    return run(FileCommands.readFileAsString(sourceFile), sourceFile, monitor, false);
+  }
+
   private static Result run(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     Driver driver = new Driver(sourceFile.getSourceLocation().getEnvironment());
     ToplevelDeclarationProvider declProvider = driver.new SourceCodeToplevelDeclarationProvider(source);
@@ -265,9 +243,17 @@ public class Driver {
     ToplevelDeclarationProvider declProvider = driver.new TermToplevelDeclarationProvider(source);
     return run(driver, declProvider, sourceFile, monitor, generateFiles);
   }
-  
-  
+
+
   private static Result run(Driver driver, ToplevelDeclarationProvider declProvider, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    if (generateFiles)
+      synchronized (currentlyProcessing) {
+        // TODO we need better circular dependency handling
+        if (currentlyProcessing.contains(sourceFile))
+           throw new IllegalStateException("Uncaptured circular processing");
+        currentlyProcessing.add(sourceFile);
+      }
+
     Entry<ToplevelDeclarationProvider, Driver> pending = null;
     
     synchronized (Driver.class) {
@@ -310,8 +296,13 @@ public class Driver {
       org.strategoxt.imp.runtime.Environment.logException(e);
     } finally {
       pendingRuns.remove(sourceFile);
-      if (generateFiles)
+      if (generateFiles) {
         putResult(sourceFile, driver.driverResult != null && driver.driverResult.getSugaredSyntaxTree() == null ? null : driver.driverResult);
+        synchronized (currentlyProcessing) {
+          currentlyProcessing.remove(sourceFile);
+        }
+      }
+
     }
 
     return driver.driverResult;
@@ -779,11 +770,8 @@ public class Driver {
       }
       
       List<RelativePath> resolvedTransformationPaths = null;
-      IStrategoTerm importTerm = toplevelDecl;
-      if (transformationPaths != null) {
+      if (transformationPaths != null)
         resolvedTransformationPaths = resolveTransformationPaths(modulePath, transformationPaths, toplevelDecl);
-        importTerm = ATermCommands.makeStdImport(toplevelDecl, makeTransformationPathString(resolvedTransformationPaths));
-      }
       
       Result res = null;
       Path dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
@@ -807,7 +795,7 @@ public class Driver {
         if (importSourceFile == null)
           importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
 
-        if (importSourceFile != null && (res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment))) {
+        if (importSourceFile != null && (res == null || !res.isUpToDate(res.getSourceFile(), environment))) {
           if (!generateFiles) {
             // boolean b = res == null || !res.isUpToDate(res.getSourceFile(), environment);
             // System.out.println(b);
@@ -863,7 +851,7 @@ public class Driver {
       if (skipProcessImport)
         success = true;
       else if (transformationPaths != null || !environment.getTransformationPaths().isEmpty())
-        success = processTransformationImport(modulePath, resolvedTransformationPaths, importTerm);
+        success = processTransformationImport(modulePath, resolvedTransformationPaths, toplevelDecl);
       else 
         success = processImport(modulePath);
       
@@ -917,7 +905,20 @@ public class Driver {
 
 
   private boolean processTransformationImport(String modulePath, List<RelativePath> transformationPaths, IStrategoTerm importTerm) throws IOException {
+    List<RelativePath> envTransformationPaths = environment.getTransformationPaths();
+    List<RelativePath> joinedTransformationPaths = new LinkedList<RelativePath>(envTransformationPaths);
+    if (transformationPaths != null)
+      joinedTransformationPaths.addAll(transformationPaths);
+    String transformationPathString = makeTransformationPathString(joinedTransformationPaths);
+    String transformedModelPath = modulePath;
+    if (!transformationPathString.isEmpty()) 
+      transformedModelPath = modulePath + "$" + transformationPathString;
+    
     RelativePath model = ModuleSystemCommands.importModel(modulePath, environment);
+    
+    if (model == null)
+      model = ModuleSystemCommands.importModel(transformedModelPath, environment);
+    
     if (model == null && transformationPaths != null)
       return false;
     if (model == null && transformationPaths == null)
@@ -925,11 +926,6 @@ public class Driver {
     
     IStrategoTerm term = ATermCommands.atermFromFile(model.getAbsolutePath());
     IStrategoTerm transformedTerm = term;
-    
-    List<RelativePath> envTransformationPaths = environment.getTransformationPaths();
-    List<RelativePath> joinedTransformationPaths = new LinkedList<RelativePath>(envTransformationPaths);
-    if (transformationPaths != null)
-      joinedTransformationPaths.addAll(transformationPaths);
     
     boolean transformSuccessful = false;
     try {
@@ -942,16 +938,12 @@ public class Driver {
     }
     
     try {
-      String transformationPathString = makeTransformationPathString(joinedTransformationPaths);
-      String transformedModelRelativePath = modulePath;
-      if (!transformationPathString.isEmpty()) 
-        transformedModelRelativePath = modulePath + "$" + transformationPathString;
-      RelativeSourceLocationPath transformedModel = new RelativeSourceLocationPath(new SourceLocation(model.getBasePath(), environment), transformedModelRelativePath + ".aterm");
+      RelativeSourceLocationPath transformedModel = new RelativeSourceLocationPath(new SourceLocation(model.getBasePath(), environment), transformedModelPath + ".aterm");
       
       environment.setTransformationPaths(joinedTransformationPaths);
       compileTransformedModel(model, transformedModel, transformedTerm);
       
-      return processImport(transformedModelRelativePath);
+      return processImport(transformedModelPath);
     } catch (Exception e) {
       setErrorMessage(importTerm, "compilation of imported module failed: " + e.getLocalizedMessage());
     } finally {
@@ -1395,17 +1387,12 @@ public class Driver {
       if (environment.getSourcePath().isEmpty())
         environment.getSourcePath().add(new SourceLocation(new AbsolutePath("."), environment));
       
+      IProgressMonitor monitor = new PrintProgressMonitor(System.out);
+
       for (String source : sources)
       {
-        RelativeSourceLocationPath p = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(source), environment.getSourcePath());
+        RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(source), environment.getSourcePath());
         
-        allInputFiles.add(p);
-        pendingInputFiles.add(p);
-      }
-      
-      IProgressMonitor monitor = new PrintProgressMonitor(System.out);
-      
-      for (final RelativeSourceLocationPath sourceFile : allInputFiles) {
         monitor.beginTask("compile " + sourceFile, IProgressMonitor.UNKNOWN);
         Result res = compile(sourceFile, monitor);
         if (!DriverCLI.processResultCLI(res, sourceFile, new File(".").getAbsolutePath()))
