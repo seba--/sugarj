@@ -35,40 +35,6 @@ public class Environment implements Serializable {
   public static String sep = "/";
   public static String classpathsep = File.pathSeparator;
 
-  
-  /**
-   * @author Sebastian Erdweg <seba at informatik uni-marburg de>
-   */
-  public class RelativePathBin extends RelativePath {
-    private static final long serialVersionUID = -4418944917032203709L;
-
-    public RelativePathBin(String relativePath) {
-      super(relativePath);
-    }
-    
-    @Override
-    public Path getBasePath() {
-      return bin;
-    }
-  }
-  
-  /**
-   * @author Sebastian Erdweg <seba at informatik uni-marburg de>
-   */
-  public class RelativePathCache extends RelativePath {
-    private static final long serialVersionUID = -6347244639940662095L;
-
-    public RelativePathCache(String relativePath) {
-      super(relativePath);
-    }
-    
-    @Override
-    public Path getBasePath() {
-      return cacheDir;
-    }
-  }
-
-  
   /*
    * read-only/write-only cache flags.
    */
@@ -106,6 +72,45 @@ public class Environment implements Serializable {
    * List of renamings that need to be applied during compilation.
    */
   private List<Renaming> renamings = new LinkedList<Renaming>();
+
+  private List<RelativePath> transformationPaths = new LinkedList<RelativePath>();
+  
+  
+  
+  /**
+   * @author Sebastian Erdweg <seba at informatik uni-marburg de>
+   */
+  public class RelativePathBin extends RelativePath {
+    private static final long serialVersionUID = -4418944917032203709L;
+
+    public RelativePathBin(String relativePath) {
+      super(relativePath);
+    }
+    
+    @Override
+    public Path getBasePath() {
+      return bin;
+    }
+  }
+  
+  /**
+   * @author Sebastian Erdweg <seba at informatik uni-marburg de>
+   */
+  public class RelativePathCache extends RelativePath {
+    private static final long serialVersionUID = -6347244639940662095L;
+
+    public RelativePathCache(String relativePath) {
+      super(relativePath);
+    }
+    
+    @Override
+    public Path getBasePath() {
+      return cacheDir;
+    }
+  }
+
+
+  
   
   
   public Environment() {
@@ -219,5 +224,14 @@ public class Environment implements Serializable {
   public void setRenamings(List<Renaming> renamings) {
     this.renamings = renamings;
   }
+
+  public List<RelativePath> getTransformationPaths() {
+    return transformationPaths;
+  }
+  
+  public void setTransformationPaths(List<RelativePath> paths) {
+    transformationPaths = paths;
+  }
+  
 
 }
