@@ -1,0 +1,14 @@
+package trans;
+
+import org.sugarj.languages.Model;
+import org.sugarj.languages.Java;
+
+public transformation CompJavaModel {
+  rules
+    main = oncetd(model-to-java)
+
+  rules
+    model-to-java : 
+         ModelDec(ModelDecHead(mods, name), ModelBody(body))
+      -> ClassDec(ClassDecHead(mods, name, None, None, None), body)
+}
