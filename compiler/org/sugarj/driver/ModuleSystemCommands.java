@@ -10,6 +10,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -285,5 +286,26 @@ public class ModuleSystemCommands {
       RelativePath p = new RelativePath(searchPath, relPath + extension);
       driverResult.addFileDependency(p);
     }
+  }
+
+  public static RelativeSourceLocationPath getTransformedModelSourceFilePath(String modulePath, List<RelativePath> transformationPaths, Environment environment) {
+    List<RelativePath> envTransformationPaths = environment.getTransformationPaths();
+    List<RelativePath> joinedTransformationPaths = new LinkedList<RelativePath>(envTransformationPaths);
+    if (transformationPaths != null)
+      joinedTransformationPaths.addAll(transformationPaths);
+    String transformationPathString = StringCommands.makeTransformationPathString(joinedTransformationPaths);
+    String transformedModelPath = modulePath;
+    if (!transformationPathString.isEmpty()) 
+      transformedModelPath = modulePath + "$" + transformationPathString;
+    return new RelativeSourceLocationPath(new SourceLocation(environment.bin, environment), transformedModelPath + ".aterm");
+  }
+  
+  public static RelativeSourceLocationPath locateTransformedModelSourceFile(String modulePath, List<RelativePath> transformationPaths, Environment environment) {
+    RelativeSourceLocationPath p = getTransformedModelSourceFilePath(modulePath, transformationPaths, environment);
+    
+    if (FileCommands.exists(p))
+      return p;
+    
+    return null;
   }
 }

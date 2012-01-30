@@ -47,7 +47,7 @@ public class Environment implements Serializable {
   
   private Path root = new AbsolutePath(".");
   
-  private Path bin = new AbsolutePath(".");
+  public Path bin = new AbsolutePath(".");
   
   
   /* 

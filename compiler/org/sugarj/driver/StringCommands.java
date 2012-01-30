@@ -59,4 +59,12 @@ public class StringCommands {
     }
     return res;
   }
+  
+  public static String makeTransformationPathString(List<RelativePath> paths) {
+    List<String> transformationPathStrings = new LinkedList<String>();
+    for (RelativePath p : paths)
+      transformationPathStrings.add(FileCommands.dropExtension(p.getRelativePath()).replace('/', '_'));
+    return StringCommands.printListSeparated(transformationPathStrings, "$");
+  }
+
 }
