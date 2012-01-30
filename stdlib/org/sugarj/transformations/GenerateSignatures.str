@@ -48,6 +48,10 @@ rules
     context-free-syntax(productions) -> Signature([Constructors(opdecls)])
     where <(map(ensure-list(gen-opdecl-from-prod)) ; concat)> productions => opdecls
 
+  gen-signature-from-grammar :
+    context-free-priorities(productions) -> Signature([Constructors(opdecls)])
+    where <(map(ensure-list(gen-opdecl-from-prod)) ; concat)> productions => opdecls
+
 
 rules
 

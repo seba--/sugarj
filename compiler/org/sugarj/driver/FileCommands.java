@@ -313,6 +313,10 @@ public class FileCommands {
     return hashFileName(prefix, o.hashCode());
   }
 
+  public static String getExtension(Path infile) {
+    return getExtension(infile.getFile());
+  }
+
   public static String getExtension(File infile) {
     int i = infile.getName().lastIndexOf('.');
     
