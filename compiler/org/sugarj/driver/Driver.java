@@ -400,7 +400,7 @@ public class Driver {
         driverResult.addEditorService(
             ATermCommands.atermFromString(
               "Builders(\"sugarj checking\", [SemanticObserver(Strategy(\"sugarj-analyze\"))])"));
-        driverResult.registerEditorDesugarings(currentTransProg);
+        driverResult.setDesugaring(currentTransProg);
       }
       
       driverResult.writeDependencyFile(depOutFile);
@@ -425,7 +425,7 @@ public class Driver {
       try {
         driverResult.compileJava(javaOutFile, javaSource, environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), generatedJavaClasses);
       } catch (ClassNotFoundException e) {
-        setErrorMessage(lastSugaredToplevelDecl, "Could not resolve imported class " + e.getMessage());
+        setErrorMessage(lastSugaredToplevelDecl, e.getMessage());
         // throw new RuntimeException(e);
       }
       good = true;
@@ -705,6 +705,9 @@ public class Driver {
     RelativePath modelOutFile = environment.new RelativePathBin(relPackageNameSep() + modelName + ".model");
 
     driverResult.generateFile(modelOutFile, ATermCommands.atermToString(makeDesugaredSyntaxTree()));
+    
+    // imports in generated Java code are optional because the model contains the imports
+    javaSource.setOptionalImport(true);
   }
   
   private IStrategoTerm processImportDecs(IStrategoTerm toplevelDecl) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
@@ -1455,7 +1458,7 @@ public class Driver {
   }
 
   
-  private static ModuleKeyCache<Path> reallocate(ModuleKeyCache<Path> cache, Environment env) {
+  public static ModuleKeyCache<Path> reallocate(ModuleKeyCache<Path> cache, Environment env) {
     ModuleKeyCache<Path> res = new ModuleKeyCache<Path>();
     
     for (Entry<ModuleKey, Path> e : cache.entrySet()) {

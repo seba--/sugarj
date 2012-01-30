@@ -359,7 +359,7 @@ public class Result {
     return parseTableFile;
   }
   
-  void registerEditorDesugarings(Path jarfile) throws IOException {
+  public void setDesugaring(Path jarfile) throws IOException {
     desugaringsFile = jarfile;
     editorServices = new HashSet<IStrategoTerm>(ATermCommands.registerSemanticProvider(editorServices, jarfile));
   }

@@ -1,6 +1,12 @@
 package org.sugarj.editor;
 
+import static org.sugarj.driver.Log.log;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,7 +43,12 @@ import org.sugarj.driver.Log;
 import org.sugarj.driver.ModuleSystemCommands;
 import org.sugarj.driver.Result;
 import org.sugarj.driver.RetractableTreeBuilder;
+import org.sugarj.driver.STRCommands;
+import org.sugarj.driver.caching.ModuleKeyCache;
+import org.sugarj.driver.path.AbsolutePath;
+import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativeSourceLocationPath;
+import org.sugarj.stdlib.StdLib;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -206,13 +217,14 @@ public class SugarJParser extends JSGLRI {
     }
   }
   
-  private Result parseFailureResult() {
+  private Result parseFailureResult() throws TokenExpectedException, BadTokenException, FileNotFoundException, IOException, SGLRException {
     Tokenizer tokenizer = new Tokenizer(" ", " ", new KeywordRecognizer(null) {});
     Token tok = tokenizer.makeToken(0, IToken.TK_UNKNOWN, true);
     IStrategoTerm term = ATermCommands.makeList("SugarCompilationUnit", tok);
     
     Result r = Result.OUTDATED_RESULT;
     r.setSugaredSyntaxTree(term);
+    r.setDesugaring(getInitialTrans());
     return r;
   }
   
@@ -262,5 +274,42 @@ public class SugarJParser extends JSGLRI {
       treeBuilder.retract(remainingInputTerm);
       remainingInput = ((IStrategoString) remainingInputTerm).stringValue();
     }
+  }
+  
+  
+  private Path initialTrans = null;
+  private Path getInitialTrans() throws TokenExpectedException, BadTokenException, FileNotFoundException, IOException, SGLRException {
+    if (initialTrans != null && FileCommands.exists(initialTrans))
+      return initialTrans;
+    
+    Path strCachePath = environment.new RelativePathCache("strCache");
+    ModuleKeyCache<Path> strCache = null;
+    try {
+      // log.log("load str cache from " + strCachePath);
+      strCache = Driver.reallocate(
+          (ModuleKeyCache<Path>) new ObjectInputStream(new FileInputStream(strCachePath.getFile())).readObject(),
+          environment);
+    }
+    catch (Exception e) {
+      log.logErr("Could read str cache, generating new one.");
+      strCache = new ModuleKeyCache<Path>();
+      for (File f : environment.getCacheDir().getFile().listFiles())
+        if (f.getPath().endsWith(".jar"))
+          f.delete();
+    }
+    
+    try {
+      initialTrans = STRCommands.compile(
+          new AbsolutePath(StdLib.initTrans.getPath()), 
+          StdLib.initTransModule, 
+          new LinkedList<Path>(),
+          new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.strategoTbl.getPath()), "StrategoModule"),
+          org.strategoxt.strj.strj.init(),
+          strCache, 
+          environment);
+    } catch (InvalidParseTableException e) {
+      throw new RuntimeException(e);
+    }
+    return initialTrans;
   }
 }
