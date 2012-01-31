@@ -767,103 +767,9 @@ public class Driver {
       if (transformationPaths != null)
         resolvedTransformationPaths = resolveTransformationPaths(modulePath, transformationPaths, toplevelDecl);
       
-      Result res = null;
-      Path dep = null;
+      boolean skipProcessImport = prepareImport(modulePath, resolvedTransformationPaths, toplevelDecl, false);
+              skipProcessImport |= prepareImport(modulePath, resolvedTransformationPaths, toplevelDecl, true);
 
-      boolean skipProcessImport = false;
-
-      if (!modulePath.startsWith("org/sugarj")) {
-
-        RelativeSourceLocationPath importSourceFile = null;
-        RelativePath model = null;
-
-        // generate and import transformed model
-        boolean transformedModelImport =
-            resolvedTransformationPaths != null ||
-            !environment.getTransformationPaths().isEmpty() && ModuleSystemCommands.importModel(modulePath, environment) != null; 
-        
-        if (transformedModelImport) {
-          model = ModuleSystemCommands.importModel(modulePath, environment);
-          importSourceFile = ModuleSystemCommands.getTransformedModelSourceFilePath(modulePath, resolvedTransformationPaths, environment);
-          modulePath = FileCommands.dropExtension(importSourceFile.getRelativePath());
-        }
-        else {
-          importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
-        }
-
-        dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
-
-        if (dep != null) {
-          try {
-            res = Result.readDependencyFile(dep, environment);
-          } catch (IOException e) {
-            log.logErr("could not read dependency file " + dep);
-          }
-          
-          if (res != null && res.getSourceFile() != null && res.getSourceFile().getBasePath().equals(environment.getRoot()))
-            importSourceFile = res.getSourceFile();
-        }
-        
-        if (importSourceFile != null && (res == null || !res.isUpToDate(res.getSourceFile(), environment))) {
-          if (!generateFiles) {
-            // boolean b = res == null || !res.isUpToDate(res.getSourceFile(), environment);
-            // System.out.println(b);
-            setErrorMessage(toplevelDecl, "module outdated, compile first: " + modulePath);
-          }
-          else {
-              if (currentlyProcessing.contains(importSourceFile)) {
-                // assume source file does not provide syntactic sugar
-                javaSource.addImport(modulePath.replace('/', '.'));
-                skipProcessImport = true;
-                delegateCompilation = importSourceFile;
-              }
-              else {
-                
-                
-                log.log("Need to compile the imported module first; processing it now.");
-
-                try {
-                  storeCaches(environment);
-       
-                  if (transformedModelImport) {
-                    IStrategoTerm transformedTerm = transformModel(model, importSourceFile, resolvedTransformationPaths);
-                    res = compileTransformedModel(transformedTerm, model, importSourceFile, resolvedTransformationPaths);
-                  }
-                  else 
-                    res = compile(importSourceFile, monitor);
-                  
-                  initializeCaches(environment, true);
-                  if (res.hasFailed())
-                    setErrorMessage(toplevelDecl, "problems while compiling " + modulePath);
-                } catch (Exception e) {
-                  setErrorMessage(toplevelDecl, "problems while compiling " + modulePath);
-                }
-                  
-                log.log("CONTINUE PROCESSING'" + importSourceFile + "'.");
-              }
-          }
-        }
-        
-        if (dep == null)
-          dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
-
-        if (res == null && dep != null)
-          res = Result.readDependencyFile(dep, environment);
-
-        if (dep != null && !skipProcessImport)
-          driverResult.addDependency(dep, environment);
-
-        if (res != null && res.hasDelegatedCompilation(sourceFile)) {
-          delegateCompilation = res.getSourceFile();
-          javaSource.addImport(modulePath.replace('/', '.'));
-          skipProcessImport = true;
-        }
-        else if (driverResult.hasDelegatedCompilation(importSourceFile)) {
-          javaSource.addImport(modulePath.replace('/', '.'));
-          skipProcessImport = true;
-        }
-      }
-      
       boolean success;
       if (skipProcessImport)
         success = true;
@@ -878,6 +784,115 @@ public class Driver {
     } finally {
       log.endTask();
     }
+  }
+  
+  private boolean prepareImport(String modulePath, List<RelativePath> transformationPaths, IStrategoTerm toplevelDecl, boolean transformModel) throws IOException {
+    if (modulePath.startsWith("org/sugarj"))
+      return false;
+    
+    boolean skipProcessImport = false;
+    
+    Result res = null;
+    Path dep = null;
+
+    RelativeSourceLocationPath importSourceFile = null;
+    RelativePath model = null;
+
+    // generate and import transformed model
+    boolean transformedModelImport =
+        (transformationPaths != null || !environment.getTransformationPaths().isEmpty()) 
+        && ModuleSystemCommands.importModel(modulePath, environment) != null;
+    
+    if (transformModel && !transformedModelImport)
+      return false;
+    
+    if (transformedModelImport) {
+      model = ModuleSystemCommands.importModel(modulePath, environment);
+      importSourceFile = ModuleSystemCommands.getTransformedModelSourceFilePath(modulePath, transformationPaths, environment);
+      modulePath = FileCommands.dropExtension(importSourceFile.getRelativePath());
+      
+      if (model == null) {
+        setErrorMessage(toplevelDecl, "model not found " + modulePath);
+        return false;
+      }
+    }
+    else {
+      importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
+    }
+
+    dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
+
+    if (dep != null) {
+      try {
+        res = Result.readDependencyFile(dep, environment);
+      } catch (IOException e) {
+        log.logErr("could not read dependency file " + dep);
+      }
+      
+      if (res != null && res.getSourceFile() != null && res.getSourceFile().getBasePath().equals(environment.getRoot()))
+        importSourceFile = res.getSourceFile();
+    }
+    
+    if (importSourceFile != null && (res == null || !res.isUpToDate(res.getSourceFile(), environment))) {
+      if (!generateFiles) {
+        // boolean b = res == null || !res.isUpToDate(res.getSourceFile(), environment);
+        // System.out.println(b);
+        setErrorMessage(toplevelDecl, "module outdated, compile first: " + modulePath);
+      }
+      else {
+          if (currentlyProcessing.contains(importSourceFile)) {
+            // assume source file does not provide syntactic sugar
+            javaSource.addImport(modulePath.replace('/', '.'));
+            skipProcessImport = true;
+            delegateCompilation = importSourceFile;
+          }
+          else {
+            
+            
+            log.log("Need to compile the imported module first; processing it now.");
+
+            try {
+              storeCaches(environment);
+   
+              if (transformedModelImport) {
+                IStrategoTerm transformedTerm = transformModel(model, importSourceFile, transformationPaths);
+                res = compileTransformedModel(transformedTerm, model, importSourceFile, transformationPaths);
+              }
+              else 
+                res = compile(importSourceFile, monitor);
+              
+              initializeCaches(environment, true);
+              if (res.hasFailed())
+                setErrorMessage(toplevelDecl, "problems while compiling " + modulePath);
+            } catch (Exception e) {
+              setErrorMessage(toplevelDecl, "problems while compiling " + modulePath);
+            }
+              
+            log.log("CONTINUE PROCESSING'" + importSourceFile + "'.");
+          }
+      }
+    }
+    
+    if (dep == null)
+      dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
+
+    if (res == null && dep != null)
+      res = Result.readDependencyFile(dep, environment);
+
+    if (dep != null && !skipProcessImport)
+      driverResult.addDependency(dep, environment);
+
+    if (res != null && res.hasDelegatedCompilation(sourceFile)) {
+      delegateCompilation = res.getSourceFile();
+      javaSource.addImport(modulePath.replace('/', '.'));
+      skipProcessImport = true;
+    }
+    else if (driverResult.hasDelegatedCompilation(importSourceFile)) {
+      javaSource.addImport(modulePath.replace('/', '.'));
+      skipProcessImport = true;
+    }
+    
+    return skipProcessImport;
   }
   
   private boolean processImport(String modulePath) throws IOException {
@@ -925,7 +940,8 @@ public class Driver {
     
     boolean transformSuccessful = false;
     try {
-      log.beginTask("Transform model", "Transform model " + model.getRelativePath() + " with " + StringCommands.printModuleList(transformationPaths, ", ") + " and " + StringCommands.printModuleList(environment.getTransformationPaths(), ", "));
+      String trans = " with " + (transformationPaths != null ? StringCommands.printModuleList(transformationPaths, ", ") + " and " : "") + StringCommands.printModuleList(environment.getTransformationPaths(), ", "); 
+      log.beginTask("Transform model", "Transform model " + model.getRelativePath() + trans);
       
       if (transformationPaths != null)
         for (RelativePath strPath : transformationPaths)
