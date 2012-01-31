@@ -767,9 +767,26 @@ public class Driver {
       if (transformationPaths != null)
         resolvedTransformationPaths = resolveTransformationPaths(modulePath, transformationPaths, toplevelDecl);
       
-      boolean skipProcessImport = prepareImport(modulePath, resolvedTransformationPaths, toplevelDecl, false);
-              skipProcessImport |= prepareImport(modulePath, resolvedTransformationPaths, toplevelDecl, true);
+      
+      RelativeSourceLocationPath importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
+      boolean skipProcessImport = prepareImport(modulePath, importSourceFile, null, null, toplevelDecl, false);
+      
+      
+      // generate and import transformed model?
+      boolean transformedModelImport = (transformationPaths != null || !environment.getTransformationPaths().isEmpty());
 
+      if (transformedModelImport) {
+        RelativePath model = ModuleSystemCommands.importModel(modulePath, environment);
+        RelativeSourceLocationPath transformedModelSourceFile = ModuleSystemCommands.getTransformedModelSourceFilePath(modulePath, resolvedTransformationPaths, environment);
+        String transformedModelPath = FileCommands.dropExtension(importSourceFile.getRelativePath());
+        
+        if (model == null && transformationPaths != null)
+          setErrorMessage(toplevelDecl, "model not found " + modulePath);
+        else if (model != null)
+          skipProcessImport |= prepareImport(transformedModelPath, transformedModelSourceFile, model, resolvedTransformationPaths, toplevelDecl, true);
+      }
+      
+      // first ignore any transformations, second apply the transformations (if any)
       boolean success;
       if (skipProcessImport)
         success = true;
@@ -786,7 +803,7 @@ public class Driver {
     }
   }
   
-  private boolean prepareImport(String modulePath, List<RelativePath> transformationPaths, IStrategoTerm toplevelDecl, boolean transformModel) throws IOException {
+  private boolean prepareImport(String modulePath, RelativeSourceLocationPath importSourceFile, RelativePath model, List<RelativePath> transformationPaths, IStrategoTerm toplevelDecl, boolean transformModel) throws IOException {
     if (modulePath.startsWith("org/sugarj"))
       return false;
     
@@ -794,31 +811,6 @@ public class Driver {
     
     Result res = null;
     Path dep = null;
-
-    RelativeSourceLocationPath importSourceFile = null;
-    RelativePath model = null;
-
-    // generate and import transformed model
-    boolean transformedModelImport =
-        (transformationPaths != null || !environment.getTransformationPaths().isEmpty()) 
-        && ModuleSystemCommands.importModel(modulePath, environment) != null;
-    
-    if (transformModel && !transformedModelImport)
-      return false;
-    
-    if (transformedModelImport) {
-      model = ModuleSystemCommands.importModel(modulePath, environment);
-      importSourceFile = ModuleSystemCommands.getTransformedModelSourceFilePath(modulePath, transformationPaths, environment);
-      modulePath = FileCommands.dropExtension(importSourceFile.getRelativePath());
-      
-      if (model == null) {
-        setErrorMessage(toplevelDecl, "model not found " + modulePath);
-        return false;
-      }
-    }
-    else {
-      importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
-    }
 
     dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
 
@@ -854,7 +846,7 @@ public class Driver {
             try {
               storeCaches(environment);
    
-              if (transformedModelImport) {
+              if (transformModel) {
                 IStrategoTerm transformedTerm = transformModel(model, importSourceFile, transformationPaths);
                 res = compileTransformedModel(transformedTerm, model, importSourceFile, transformationPaths);
               }
