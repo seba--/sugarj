@@ -778,12 +778,14 @@ public class Driver {
       if (transformedModelImport) {
         RelativePath model = ModuleSystemCommands.importModel(modulePath, environment);
         RelativeSourceLocationPath transformedModelSourceFile = ModuleSystemCommands.getTransformedModelSourceFilePath(modulePath, resolvedTransformationPaths, environment);
-        String transformedModelPath = FileCommands.dropExtension(importSourceFile.getRelativePath());
+        String transformedModelPath = FileCommands.dropExtension(transformedModelSourceFile.getRelativePath());
         
         if (model == null && transformationPaths != null)
           setErrorMessage(toplevelDecl, "model not found " + modulePath);
-        else if (model != null)
+        else if (model != null) {
           skipProcessImport |= prepareImport(transformedModelPath, transformedModelSourceFile, model, resolvedTransformationPaths, toplevelDecl, true);
+          modulePath = transformedModelPath;
+        }
       }
       
       // first ignore any transformations, second apply the transformations (if any)
