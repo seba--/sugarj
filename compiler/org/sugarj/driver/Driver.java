@@ -827,7 +827,7 @@ public class Driver {
         importSourceFile = res.getSourceFile();
     }
     
-    if (!res.isUpToDate(res.getSourceFile(), environment))
+    if (res != null && !res.isUpToDate(res.getSourceFile(), environment))
       res = null;
     
     if (importSourceFile != null && res == null) {
