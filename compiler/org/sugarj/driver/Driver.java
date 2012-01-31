@@ -849,16 +849,17 @@ public class Driver {
             log.log("Need to compile the imported module first; processing it now.");
 
             try {
-              storeCaches(environment);
-   
+              
               if (transformModel) {
                 IStrategoTerm transformedTerm = transformModel(model, importSourceFile, transformationPaths);
                 res = compileTransformedModel(transformedTerm, model, importSourceFile, transformationPaths);
               }
-              else 
+              else {
+                storeCaches(environment);
                 res = compile(importSourceFile, monitor);
+                initializeCaches(environment, true);
+              }
               
-              initializeCaches(environment, true);
               if (res.hasFailed())
                 setErrorMessage(toplevelDecl, "problems while compiling " + modulePath);
             } catch (Exception e) {
@@ -971,9 +972,11 @@ public class Driver {
       paths.addAll(envTransformationPaths);
       environment.setTransformationPaths(paths);
       
+      storeCaches(environment);
       return compile(transformedTerm, transformedModel, monitor);
     } finally {
       environment.setTransformationPaths(envTransformationPaths);
+      initializeCaches(environment, true);
       log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
     }
   }
