@@ -827,7 +827,10 @@ public class Driver {
         importSourceFile = res.getSourceFile();
     }
     
-    if (importSourceFile != null && (res == null || !res.isUpToDate(res.getSourceFile(), environment))) {
+    if (!res.isUpToDate(res.getSourceFile(), environment))
+      res = null;
+    
+    if (importSourceFile != null && res == null) {
       if (!generateFiles) {
         // boolean b = res == null || !res.isUpToDate(res.getSourceFile(), environment);
         // System.out.println(b);
@@ -869,9 +872,6 @@ public class Driver {
     
     if (dep == null)
       dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
-
-    if (res == null && dep != null)
-      res = Result.readDependencyFile(dep, environment);
 
     if (dep != null && !skipProcessImport)
       driverResult.addDependency(dep, environment);
