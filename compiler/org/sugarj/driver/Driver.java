@@ -780,17 +780,19 @@ public class Driver {
         // generate and import transformed model
         boolean transformedModelImport =
             resolvedTransformationPaths != null ||
-            (resolvedTransformationPaths != null || environment.getTransformationPaths().isEmpty()) && ModuleSystemCommands.importModel(modulePath, environment) != null; 
+            !environment.getTransformationPaths().isEmpty() && ModuleSystemCommands.importModel(modulePath, environment) != null; 
         
         if (transformedModelImport) {
           model = ModuleSystemCommands.importModel(modulePath, environment);
-          modulePath = FileCommands.dropExtension(ModuleSystemCommands.getTransformedModelSourceFilePath(modulePath, resolvedTransformationPaths, environment).getRelativePath());
-          dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
+          importSourceFile = ModuleSystemCommands.getTransformedModelSourceFilePath(modulePath, resolvedTransformationPaths, environment);
+          modulePath = FileCommands.dropExtension(importSourceFile.getRelativePath());
         }
         else {
-          dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
+          importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
         }
-            
+
+        dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
+
         if (dep != null) {
           try {
             res = Result.readDependencyFile(dep, environment);
@@ -801,12 +803,6 @@ public class Driver {
           if (res != null && res.getSourceFile() != null && res.getSourceFile().getBasePath().equals(environment.getRoot()))
             importSourceFile = res.getSourceFile();
         }
-        
-        if (importSourceFile == null)
-          if (transformedModelImport)
-            importSourceFile = ModuleSystemCommands.getTransformedModelSourceFilePath(modulePath, resolvedTransformationPaths, environment);
-          else
-            importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
         
         if (importSourceFile != null && (res == null || !res.isUpToDate(res.getSourceFile(), environment))) {
           if (!generateFiles) {
@@ -1804,6 +1800,7 @@ public class Driver {
 
     private List<IStrategoTerm> terms;
     int index;
+    private final int hash;
     
     public TermToplevelDeclarationProvider(IStrategoTerm source) {
       IStrategoTerm packageDecOption = ATermCommands.getApplicationSubterm(source, "SugarCompilationUnit", 0);
@@ -1817,6 +1814,8 @@ public class Driver {
         terms.add(ATermCommands.getApplicationSubterm(packageDecOption, "Some", 0));
       terms.addAll(ATermCommands.getList(importDecs));
       terms.addAll(ATermCommands.getList(bodyDecs));
+      
+      hash = ATermCommands.atermToString(source).hashCode();
     }
     
     @Override
@@ -1835,11 +1834,6 @@ public class Driver {
     }
 
     @Override
-    public int getSourceHashCode() {
-      return terms.hashCode();
-    }
-
-    @Override
     public void retract(IStrategoTerm term) {
       if (index <= 0)
         throw new IllegalStateException();
@@ -1848,6 +1842,11 @@ public class Driver {
         index--;
       else
         throw new IllegalArgumentException();
+    }
+
+    @Override
+    public int getSourceHashCode() {
+      return hash;
     }
     
   }

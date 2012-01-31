@@ -470,6 +470,11 @@ public class Result {
     persistentHash = FileCommands.fileHash(dep);
   }
   
+  void setSourceFile(RelativeSourceLocationPath sourceFile) throws IOException {
+    this.sourceFile = sourceFile;
+    this.sourceFileHash = FileCommands.fileHash(sourceFile);
+  }
+  
   void setSourceFile(RelativeSourceLocationPath sourceFile, int sourceFileHash) {
     this.sourceFile = sourceFile;
     this.sourceFileHash = sourceFileHash;
