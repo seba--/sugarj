@@ -301,7 +301,7 @@ public class SugarJParser extends JSGLRI {
     try {
       initialTrans = STRCommands.compile(
           new AbsolutePath(StdLib.initTrans.getPath()), 
-          StdLib.initTransModule, 
+          "main", 
           new LinkedList<Path>(),
           new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.strategoTbl.getPath()), "StrategoModule"),
           org.strategoxt.strj.strj.init(),
