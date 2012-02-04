@@ -1,0 +1,71 @@
+package jsp;
+
+import editor.Editor;
+import org.sugarj.languages.Plain;
+import editor.Origin;
+import html.HtmlSyntax;
+import javascript.JsSyntax;
+
+public sugar JspSyntax { 
+  context-free syntax
+    AnnoOrSugarMod* "jsp" JavaId JSPBody -> ToplevelDeclaration {cons("JSPDec")}
+    "{" JSPDoc "}" 			-> JSPBody {cons("JSPBody")}
+    Content* 	-> JSPDoc {cons("JSPDoc")}    
+
+  desugarings
+    jsp-to-plain
+ 
+  rules
+    jsp-to-plain :
+      JSPDec(mods, n, JSPBody(content))
+      ->
+      PlainDec(PlainDecHead(mods, n, Some("jsp")), PlainBody(<origin-text> content)) 
+      
+%% module jsp-document
+  sorts Document Element Content
+  context-free syntax
+    JSPBlock -> Content
+
+  context-free syntax
+    "%>" Content* "<%" 					-> JavaBlockStm {cons("JSPUnquote")}
+    "%>" Content* "<%" 					-> JavaBlockStmNotUnquote {reject}
+    JavaBlockStm 						-> JavaBlockStmNotUnquote
+    "<%" JavaBlockStmNotUnquote* "%>"	-> JSPBlock {cons("Block")} 
+
+  context-free syntax
+    "<%=" JavaExpr "%>"							-> JSPBlock {cons("Expression")} 
+    "<%@" "page" Attribute* "%>"				-> JSPBlock {cons("Page")}
+    "<%@" "include" "file" "=" AttValue "%>"	-> JSPBlock {cons("Include")}
+	"<%!" Dec* "%>"								-> JSPBlock {cons("Declaration")}  
+	JavaMethodDec 			-> Dec {cons("MethodDec")}  
+	JavaLocalVarDecStm 		-> Dec {cons("VarDec")}  
+ 
+ rules
+   constraint-error :
+     Page(attrs) -> errors
+     where
+       <map(?Attribute(AttrName(<id>),_))> attrs => names; 
+       <filter(not(page-attribute))> names => illegal-names;
+       <map(!(<id>, "illegal attribute"))> illegal-names => errors  
+
+   page-attribute = ?"import"
+   page-attribute = ?"contentType" 
+   page-attribute = ?"isThreadSafe"
+   page-attribute = ?"session" 
+   page-attribute = ?"buffer"
+   page-attribute = ?"autoflush" 
+   page-attribute = ?"extends"
+   page-attribute = ?"info" 
+   page-attribute = ?"errorPage" 
+   page-attribute = ?"isErrorPage" 
+   page-attribute = ?"language" 
+
+%% module html-whitespace
+  lexical syntax
+    [\ \t\n\13] -> LAYOUT
+	
+  context-free restrictions
+    LAYOUT? -/- [\ \t\n\13]
+
+
+}
