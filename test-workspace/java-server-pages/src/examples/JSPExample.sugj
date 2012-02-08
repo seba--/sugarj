@@ -1,0 +1,189 @@
+package examples; 
+import jsp.JspSyntax; 
+import html.Editor;
+ 
+public jsp SimpleJSPExample {   
+<%@ include file = "http://url here" %>   
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">    
+<html>  
+<%= Math.sqrt(2) %>
+<%@ page import = "java.util.*" contentType = "" import = "ssd" %>  
+<%!
+	int a; 
+	float b = 5;
+	void add2Cart(Map cart, String item, int amount){
+		Integer a = (Integer)cart.get(item);
+		if(a == null)
+			a = new Integer(0);
+		
+		cart.put(item, new Integer(a.intValue() + amount));
+	}
+	 
+	void add2secCart(Map cart, String item, int amount){
+		Integer a = (Integer)cart.get(item);
+		if(a == null)
+			a = new Integer(0);
+		
+		cart.put(item, new Integer(a.intValue() + amount));
+	}
+	
+	Integer a = new Integer(5);
+%>  
+<!-- comment   here -->
+	<head>
+		<title>First JsSP Ex</title>
+		<script language="javascript" src="" type="text/javascript" runat="server" defer="defer">
+			try{
+			 undefinedfunction();
+			 alert('I guess you do exist');
+			 for (var i=0; i<10; i++){ 
+			  if (i==5);
+			  break;
+			 x = i;
+			 }
+ 
+			}  
+			catch(e){
+			 	alert('An error has occurred: '+e.message)
+			}  
+			finally{ 
+			 	alert('I am alerted regardless of the outcome above')
+			}
+
+			function hoverSth(swt){     
+				if(swt == "blog")
+				document.getElementById("content").innerHTML = "goto: selmanh.com/blog";
+				else if(swt == "mail")
+				document.getElementById("content").innerHTML = "mailto: hey@selmanh.com";
+				else if(swt == "twitter")
+				document.getElementById("content").innerHTML = "goto: facebook.com/selmanhalid"; 
+			}          
+     
+			function outSth(){
+				document.getElementById("content").innerHTML = "";
+				i = 0;
+				while (i<=5){
+					document.write("The number is " + i);
+					document.write("<br />"); 
+					i++;
+				} 
+
+				do{ 
+					document.write("The number is " + i);
+					document.write("<br />");
+					i++; 
+				} 
+				while (i <= 5)
+			}
+   
+			function getCookie(c_name)
+			{
+				var i,x,y,ARRcookies=document.cookie.split(";");
+				for (i=0;i<ARRcookies.length;i++)
+				{
+				  if (i==3){
+				  	continue;
+				  }
+				  else if (i==4){
+				  	break;
+				  }
+				  
+				  x = ARRcookies[i].substr(0,ARRcookies[i].indexOf("="));
+				  y = ARRcookies[i].substr(ARRcookies[i].indexOf("=")+1);
+				  x = x.replace("/^\s+|\s+$/g");
+				}
+			}
+			
+			function timeMsg(){
+				var t=setTimeout("alertMsg()",3000);
+			}
+
+			function alertMsg(){
+				alert("Hello");
+			}
+
+			function setCookie(c_name,value,exdays)
+			{
+				var exdate = new Date();
+				exdate.setDate(exdate.getDate() + exdays);  
+				var c_value=escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
+				
+			}      
+			
+			function checkCookie()
+			{
+				var username=getCookie("username");
+				if (username!=null && username!=""){
+				  alert("Welcome again " + username);
+				}
+				else{
+				  username=prompt("Please enter your name:","");
+				}
+			}
+		</script>  
+	</head>
+	<body> 
+		<h1>Shopping Cart Ex.</h1>
+		<%	
+			Map cart;
+			if(session.getAttribute("cart") == null){
+				cart = new TreeMap();
+				session.setAttribute("cart", cart);	
+			}
+			else{
+				cart = (Map) session.getAttribute("cart");
+			}
+			
+			if(request.getMethod().equals("POST")){
+				String item 	= request.getParameter("item");
+				String amount 	= request.getParameter("amount");
+				if(item != null && amount != null){
+					try{
+						add2Cart(cart, item, Integer.parseInt(amount));
+					} catch(Exception e){
+						response.sendError(response.SC_BAD_REQUEST, "malformed request");
+					}
+				}
+			}
+		%>
+		<form action="" method="post">
+			<table>
+				<tr>
+					<td>Item:</td>
+					<td><input type="text" name="item" /></td>
+				</tr>
+				<tr>
+					<td>Amount:</td>
+					<td><input type="text" name="amount" /></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><input type="Submit" value="Submit" /></td>
+				</tr>
+			 </table>
+		</form>
+		
+		Card: <br/>
+		<%	if(cart.isEmpty())
+			out.println("Shopping cart is empty");
+			
+			else{ %>
+			<table border="1"> 
+			<%	Iterator i = cart.entrySet().iterator();
+				while(i.hasNext()){
+					Map.Entry me = (Map.Entry)i.next(); %>
+					<tr>
+						<td>me.getKey()</td>
+						<td>me.getValue()</td>
+					</tr>
+			<%	} %>
+			</table>
+		<%	}	%>
+			
+		<br/><a href="ex1.jsp">Logout</a>
+		<FORM>       //! case in sensitive
+			<INPUT TYPE = "button" VALUE = "BACK" onclick = "history.go(1);" />    
+		</FORM> 
+	</body>
+</html>
+}

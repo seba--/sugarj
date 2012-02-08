@@ -1,0 +1,12 @@
+package examples; 
+import jsp.JspSyntax; 
+import html.Editor;
+     
+public jsp SimpleJSPExample {   
+<html>  
+  <% int a; 
+  	float e;
+  %> 
+</html>  
+}
+          

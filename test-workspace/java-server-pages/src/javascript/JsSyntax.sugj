@@ -1,0 +1,17 @@
+package javascript;
+
+import editor.Editor;
+import editor.Origin;
+import org.sugarj.languages.Plain;
+import javascript.JavaScriptSyntax;
+import html.HtmlSyntax; 
+  
+public sugar JsSyntax { 
+
+  context-free syntax
+	JavaScriptBlock -> Content {cons("JavaScript")}
+    "<" "script" "language" "=" "\"" "javascript" "\"" Attribute* ">" Program?  "</" "script" ">" 	-> JavaScriptBlock
+  	
+  lexical syntax
+  	"script" -> QName {reject}   
+}
