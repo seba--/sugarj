@@ -1,0 +1,23 @@
+package examples; 
+import html.Sugar;
+import html.Editor;
+
+public class HtmlExample {
+   
+public void htmlPage(ContentHandler ch) throws SAXException {
+	
+   String title = "Sweetness and Power: The Place of Sugar in Modern History";
+   ch.  <html>  
+			<head> 
+				<title>Selmanh.com</title> 
+			</head> 
+			<body> 
+				<h1>Shopping Cart Ex.</h1>
+				<FORM>        //! case in sensitive   
+					<INPUT TYPE = "button" VALUE = "FORWARD" />
+				</FORM>  
+			</body> <!-- comment here --> 
+		</html>;            
+  }               
+}         
+                                                 
