@@ -1,0 +1,20 @@
+package variability;
+  
+import concretesyntax.MetaExplode;
+
+public sugar Java {
+  desugarings
+    desugar-variable-class
+
+  rules
+    desugar-variable-class :
+      VariableClassDec(mods, name, body) -> 
+      ModelDec(ModelDecHead(mods, name), ModelBody(<meta-explode> body)) 
+      
+    
+
+  context-free syntax
+    VariableClass -> ToplevelDeclaration
+    AnnoOrSugarMod* "variable" "class" JavaId JavaClassBody -> VariableClass {cons("VariableClassDec")}
+
+}
