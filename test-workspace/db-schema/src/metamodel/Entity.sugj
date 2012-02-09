@@ -15,20 +15,21 @@ public sugar Entity {
 
   rules
     entity-model :
-      EntityDec(mods, name, body) -> 
-      ModelDec(ModelDecHead(mods, name), ModelBody(<meta-explode> body)) 
+      entity@EntityDec(mods, name, super, body) -> 
+      ModelDec(ModelDecHead(mods, name), ModelBody(<meta-explode> (super, body)))
 
   context-free syntax
     Entity -> ToplevelDeclaration
-    AnnoOrSugarMod* "entity" JavaId "{" EntityBodyDeclaration* "}" -> Entity {cons("EntityDec")}
+    AnnoOrSugarMod* "entity" JavaId SuperEntity? "{" EntityBodyDeclaration* "}" -> Entity {cons("EntityDec")}
     Property -> EntityBodyDeclaration
+    "extends" JavaId -> SuperEntity {cons("SuperDec")}
 
   context-free syntax
-    Id PropKind Sort "(" {Annotation ","}* ")" -> Property {cons("Property")}
-    Id PropKind Sort                           -> Property {cons("PropertyNoAnno")}
+    JavaID PropKind Sort "(" {Annotation ","}* ")" -> Property {cons("Property")}
+    JavaID PropKind Sort                           -> Property {cons("PropertyNoAnno")}
 
-    Id PropKind Sort "(" {Annotation ","}* ")" ":=" Exp -> Property {cons("DerivedProperty")}
-    Id PropKind Sort ":=" Exp                           -> Property {cons("DerivedPropertyNoAnno")}
+    JavaID PropKind Sort "(" {Annotation ","}* ")" ":=" Exp -> Property {cons("DerivedProperty")}
+    JavaID PropKind Sort ":=" Exp                           -> Property {cons("DerivedPropertyNoAnno")}
 
 
     "::" -> PropKind {cons("Simple")}
@@ -37,23 +38,23 @@ public sugar Entity {
 
 
   context-free syntax
-    Id                           -> Annotation {cons("SimpleAnno")}
-    "inverse" "=" Id "." Id      -> Annotation {cons("InverseAnno")}
+    JavaID                               -> Annotation {cons("SimpleAnno")}
+    "inverse" "=" JavaID "." JavaID      -> Annotation {cons("InverseAnno")}
     %%fallback for code completion:
-    "inverse" "=" Id             -> Annotation {cons("IncompleteInverseAnno")}
-    "inverseSlave" "=" Id "." Id -> Annotation {cons("InverseSlaveAnno")}
-    "inline" "(" {Id ","}* ")"   -> Annotation {cons("InlineAnno")}
-    "select" "=" Id              -> Annotation {cons("SelectAnno")}
-    "not null"                   -> Annotation {cons("NotNullAnno")}
-    "not empty"                  -> Annotation {cons("NotEmptyAnno")}
-    "allowed" "=" Exp            -> Annotation {cons("AllowedAnno")}
-    "default" "=" Exp            -> Annotation {cons("DefaultAnno")}
-    "length" "=" Int             -> Annotation {cons("LengthAnno")}
-    "format" "=" String          -> Annotation {cons("FormatAnno")}
-    "index" "(" ")"              -> Annotation {cons("IndexAnno")}
-    "index" "(" Int ")"          -> Annotation {cons("IndexAnno")}
-    "collation" "(" Id ")"       -> Annotation {cons("CollationAnno")}
-    "iderror" "=" String         -> Annotation {cons("IdErrorAnno")}
-    "idemptyerror" "=" String    -> Annotation {cons("IdEmptyErrorAnno")}
+    "inverse" "=" JavaID                 -> Annotation {cons("IncompleteInverseAnno")}
+    "inverseSlave" "=" JavaID "." JavaID -> Annotation {cons("InverseSlaveAnno")}
+    "inline" "(" {JavaID ","}* ")"       -> Annotation {cons("InlineAnno")}
+    "select" "=" JavaID                  -> Annotation {cons("SelectAnno")}
+    "not null"                           -> Annotation {cons("NotNullAnno")}
+    "not empty"                          -> Annotation {cons("NotEmptyAnno")}
+    "allowed" "=" Exp                    -> Annotation {cons("AllowedAnno")}
+    "default" "=" Exp                    -> Annotation {cons("DefaultAnno")}
+    "length" "=" Int                     -> Annotation {cons("LengthAnno")}
+    "format" "=" String                  -> Annotation {cons("FormatAnno")}
+    "index" "(" ")"                      -> Annotation {cons("IndexAnno")}
+    "index" "(" Int ")"                  -> Annotation {cons("IndexAnno")}
+    "collation" "(" JavaID ")"           -> Annotation {cons("CollationAnno")}
+    "iderror" "=" String                 -> Annotation {cons("IdErrorAnno")}
+    "idemptyerror" "=" String            -> Annotation {cons("IdEmptyErrorAnno")}
     
 }

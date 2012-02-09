@@ -1,0 +1,10 @@
+package entities.accounts;
+
+import metamodel.Entity;
+
+import entities.people.Customer;
+
+public entity Account {
+  uid -> Int
+  owner -> Customer
+}  

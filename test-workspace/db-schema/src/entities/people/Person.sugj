@@ -1,0 +1,8 @@
+package entities.people;
+
+import metamodel.Entity;
+
+public entity Person {
+  name     :: String
+  address  :: Email
+}

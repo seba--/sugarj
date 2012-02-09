@@ -1,10 +1,10 @@
 package main;
 
-import trans.ToSql;
-import entities.Author(ToSql);
-// ->
-// delete import trans.ToSql
-import entities.Author$trans_ToSql;
+// import trans.ToSql;
+// import entities.Author(ToSql);
+// // ->
+// // delete import trans.ToSql
+// import entities.Author$trans_ToSql;
 
 public class Main {
 
