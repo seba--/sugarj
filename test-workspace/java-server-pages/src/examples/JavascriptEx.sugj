@@ -1,0 +1,108 @@
+package examples; 
+import javascript.JsSyntax; 
+import jsp.JspSyntax;  
+import html.Editor;
+ 
+public jsp JavascriptEx {    
+<html>  
+	<head>   
+		<title>First JsSP Ex</title>
+		<script language="javascript" src="" type="text/javascript" runat="server" defer="defer">
+			try{
+			 undefinedfunction();
+			 alert('I guess you do exist');
+			 for (var i=0; i<10; i++){ 
+			  if (i==5);
+			  break;
+			 x = i;
+			 }
+ 
+			}  
+			catch(e){
+			 	alert('An error has occurred: '+e.message)
+			}  
+			finally{ 
+			 	alert('I am alerted regardless of the outcome above')
+			}
+
+			function hoverSth(swt){     
+				if(swt == "blog")
+				document.getElementById("content").innerHTML = "goto: selmanh.com/blog";
+				else if(swt == "mail")
+				document.getElementById("content").innerHTML = "mailto: hey@selmanh.com";
+				else if(swt == "twitter")
+				document.getElementById("content").innerHTML = "goto: facebook.com/selmanhalid"; 
+			}          
+     
+			function outSth(){
+				document.getElementById("content").innerHTML = "";
+				i = 0;
+				while (i<=5){
+					document.write("The number is " + i);
+					document.write("<br />"); 
+					i++;
+				} 
+
+				do{ 
+					document.write("The number is " + i);
+					document.write("<br />");
+					i++; 
+				} 
+				while (i <= 5)
+			}
+   
+			function getCookie(c_name)
+			{
+				var i,x,y,ARRcookies=document.cookie.split(";");
+				for (i=0;i<ARRcookies.length;i++)
+				{
+				  if (i==3){
+				  	continue;
+				  }
+				  else if (i==4){
+				  	break;
+				  }
+				  
+				  x = ARRcookies[i].substr(0,ARRcookies[i].indexOf("="));
+				  y = ARRcookies[i].substr(ARRcookies[i].indexOf("=")+1);
+				  x = x.replace("/^\s+|\s+$/g");
+				}
+			}
+			
+			function timeMsg(){
+				var t=setTimeout("alertMsg()",3000);
+			}
+
+			function alertMsg(){
+				alert("Hello");
+			}
+
+			function setCookie(c_name,value,exdays)
+			{
+				var exdate = new Date();
+				exdate.setDate(exdate.getDate() + exdays);  
+				var c_value=escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
+				
+			}      
+			
+			function checkCookie()
+			{
+				var username=getCookie("username");
+				if (username!=null && username!=""){
+				  alert("Welcome again " + username);
+				}
+				else{
+				  username=prompt("Please enter your name:","");
+				}
+			}
+		</script>   
+	</head>
+	<body> 
+		<h1>Shopping Cart Ex.</h1>
+		<br/><a href="ex1.jsp">Logout</a>
+		<FORM>       //! case in sensitive 
+			<INPUT TYPE = "button" VALUE = "BACK" onclick = "history.go(1);" />    
+		</FORM>  
+	</body>
+</html>
+}

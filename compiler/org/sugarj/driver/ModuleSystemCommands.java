@@ -17,6 +17,7 @@ import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
 import org.sugarj.driver.path.RelativeSourceLocationPath;
 import org.sugarj.driver.path.SourceLocation;
+import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -33,14 +34,14 @@ public class ModuleSystemCommands {
    * @return true iff a class file existed.
    * @throws IOException
    */
-  public static boolean importClass(String modulePath, IStrategoTerm importTerm, Path javaOutFile, HybridInterpreter interp, Result driverResult, Environment environment) throws IOException {
+  public static boolean importClass(String modulePath, JavaSourceFileContent javaSource, Environment environment) throws IOException {
     RelativePath clazz = searchFile(modulePath, ".class", environment);
     if (clazz == null)
       return false;
     
     log.beginTask("Generate Java code");
     try {
-      driverResult.appendToFile(javaOutFile, SDFCommands.prettyPrintJava(importTerm, interp) + "\n");
+      javaSource.addCheckedImport(modulePath.replace('/', '.'));
     } finally {
       log.endTask();
     }

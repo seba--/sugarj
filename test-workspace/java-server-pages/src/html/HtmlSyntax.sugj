@@ -1,0 +1,136 @@
+package html;
+ 
+import editor.Origin;
+import editor.Editor;
+import org.sugarj.languages.Plain;
+  
+public sugar HtmlSyntax { 
+
+sorts Document Element Content
+  context-free syntax
+    Prologue Element Epilogue -> Document {cons("Document")}
+    Element -> Content
+    Doctype -> Content {cons("DocTypeDec")}
+    Comment -> Content {cons("Comment")}    
+    
+%% module html-prolog
+  context-free syntax
+    HTMLDecl? Misc* DocTypePrologue? -> Prologue {cons("Prologue")}
+    Misc* -> Epilogue {cons("Epilogue")}
+    Comment -> Misc {cons("Comment")}
+
+  context-free syntax
+    "<!DOCTYPE"		-> DocTypeLeft
+    ">"				-> DocTypeRight
+	"html"			-> RootElement
+	"PUBLIC"		-> OtherInfo
+	"SYSTEM"		-> OtherInfo
+	DocTypeLeft RootElement OtherInfo  URI* DocTypeRight	-> DocTypeDecl {cons("DocTypeDecl")}
+    DocTypeDecl Misc* -> DocTypePrologue {cons("DocTypePrologue")}
+
+  syntax
+    CharData      -> <Content-CF>
+    CDataSection  -> <Content-CF>
+
+  context-free syntax
+  	"<" ElemName Attribute* "/>" 	-> Element {cons("EmptyElement")}
+   	"<" ElemName Attribute* ">" 		-> Element {cons("EmptyElement")}
+    "<" ElemName Attribute* ">" Content* "</" ElemName ">"    	-> Element {cons("Element")}
+	QName -> ElemName {cons("ElemName")}
+      
+  //context-free syntax
+    //HTMLTagStart ElemName Attribute* HTMLSlashTagEnd 	-> Element {cons("EmptyElement")}
+    //HTMLTagStart ElemName Attribute* HTMLTagEnd 		-> Element {cons("EmptyElement")}
+    //HTMLTagStart ElemName Attribute* HTMLTagEnd Content* HTMLSlashTagStart ElemName HTMLTagEnd    	-> Element {cons("Element")}
+	//QName -> ElemName {cons("ElemName")}
+     
+  lexical syntax
+    [A-Za-z\_] [A-Za-z0-9\.\-\_]* 		-> EName
+    "<"			-> HTMLTagStart
+    ">"			-> HTMLTagEnd
+	"</"		-> HTMLSlashTagStart
+	"/>"		-> HTMLSlashTagEnd
+	
+  lexical restrictions
+    EName -/- [A-Za-z0-9\.\-\_]
+    HTMLTagStart -/- [\%\!]
+    
+  context-free syntax
+    AttrName "=" AttValue 	-> Attribute {cons("Attribute")}
+    QName -> AttrName {cons("AttrName")}
+
+  syntax
+    DoubleQuotedStm -> <URI-CF> {cons("URI")}
+
+  syntax
+    "\"" DoubleQuotedPart* "\"" -> DoubleQuotedStm
+    "\"" DoubleQuotedPart* "\"" -> <AttValue-CF> {cons("DoubleQuoted")}
+    "'"  SingleQuotedPart* "'" -> <AttValue-CF> {cons("SingleQuoted")}
+    <DoubleQuotedText-LEX> -> DoubleQuotedPart {cons("CharDataPart")}
+    <SingleQuotedText-LEX> -> SingleQuotedPart {cons("CharDataPart")} 
+    Ref -> DoubleQuotedPart
+    Ref -> SingleQuotedPart
+    
+  lexical syntax
+    ~[\&\<\"]+ -> DoubleQuotedText
+    ~[\&\<\']+ -> SingleQuotedText
+    [A-Za-z\_] [A-Za-z0-9\.\-\_]* -> AName
+    
+  lexical restrictions
+    DoubleQuotedText -/- ~[\&\<\"]
+    SingleQuotedText -/- ~[\&\<\']
+    AName -/- [A-Za-z0-9\.\-\_]
+
+%% module hmtl-text
+  lexical syntax
+    [\ \t\n\13] -> WhiteSpaceChar
+
+  syntax
+    CharDataPart+ 					-> CharData {cons("Text")}
+    FooCharDataText 				-> CharDataPart {cons("CharDataPart")}
+    Ref 							-> CharDataPart
+    <CharDataText-LEX> 				-> FooCharDataText
+    "&"   <NCName-LEX>   ";" -> EntityRef  {cons("EntityRef")}
+    CharRef    -> Ref
+    EntityRef  -> Ref
+
+  syntax restrictions
+    CharData -/- [\&] | ~[\<\&]
+
+  lexical syntax
+    ~[\<\&]+ -> CharDataText
+
+  lexical restrictions
+    CharDataToken    -/- ~[\<\]\ \t\n\13]
+    CharDataText -/- ~[\<\&]
+
+%% module html-names
+  context-free syntax
+    NCName -> QName     {cons("QName")}
+
+  lexical syntax
+    [A-Za-z\_] [A-Za-z0-9\.\-\_]* -> NCName
+
+  lexical restrictions
+    NCName -/- [A-Za-z0-9\.\-\_]
+
+%% module html-comments
+  lexical syntax
+    "<!--" -> CommentLeft
+    "-->" -> CommentRight
+    CommentLeft CommentContent* CommentRight -> Comment
+    Dash -> CommentContent
+    ~[\-] -> CommentContent
+    "-" -> Dash
+
+  lexical restrictions
+    Dash -/- [\-]
+    
+%% module html-whitespace
+  lexical syntax
+    [\ \t\n\13] -> LAYOUT
+
+  context-free restrictions
+    LAYOUT? -/- [\ \t\n\13]
+
+}

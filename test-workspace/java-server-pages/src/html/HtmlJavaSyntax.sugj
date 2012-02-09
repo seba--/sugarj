@@ -1,0 +1,22 @@
+package html; 
+import org.sugarj.languages.Java;
+import html.HtmlSyntax;
+
+public sugar HtmlJavaSyntax {
+
+%% module Java-HTML
+  sorts ObjectStm
+  context-free syntax
+    ObjectStm -> JavaStm {cons("ToMetaStm")}
+    JavaId "." Document ";" -> ObjectStm {cons("WriteDoc")}
+    %% Document -> ObjectStm {cons("WriteDoc")}
+  
+  context-free syntax
+    "<{" JavaStm  "}/>" -> Content {cons("FromMetaStm")}
+    AttrName "=" JavaAttValue -> Attribute {cons("Attribute"), prefer}
+
+  syntax
+    "\"{" <LAYOUT?-CF> <JavaExpr-CF> <LAYOUT?-CF> "}\"" -> <JavaAttValue-CF> {cons("FromMetaExpr")}
+    "{" <LAYOUT?-CF> <JavaExpr-CF> <LAYOUT?-CF> "::" <LAYOUT?-CF> "cdata" <LAYOUT?-CF> "}" -> <Content-CF> {cons("TextFromMetaExpr")}
+
+}

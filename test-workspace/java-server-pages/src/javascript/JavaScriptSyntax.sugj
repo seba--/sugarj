@@ -1,0 +1,492 @@
+package javascript;
+import editor.Editor;
+import org.sugarj.languages.Plain;
+import editor.Origin;
+ 
+public sugar JavaScriptSyntax {  
+   
+  %%context-free start-symbols Program
+  %%%
+   %% Programs 
+   %%%
+  context-free syntax
+    HTMLEventAttr "=" "\"" Program "\"" 	-> Attribute {cons("JSAttribute")}
+    HTMLEvent 								-> HTMLEventAttr {cons("HTMLEventAttr")}
+	
+	SourceElements 		-> Program {cons("Program")} 
+    Stm 				-> SourceElement  
+    FunctionDec 		-> SourceElement
+    
+  lexical syntax
+    HTMLEvent   	-> NCName {reject} 
+      "onload" 		| "onunload"    | "onblur"      | "onchange"
+    | "onfocus"  	| "onreset"     | "onselect" 	| "onsubmit"
+    | "onabort"     | "onkeydown"   | "onkeypress"  | "onkeyup"
+    | "onclick"     | "ondblclick"  | "onmousedown" | "onmousemove"
+    | "onmouseout"  | "onmouseover" | "onmouseup"
+    -> HTMLEvent
+    
+  context-free syntax
+    SourceElement* 		-> SourceElementsPrefix
+    
+  syntax
+    <NotTerminatedStm-CF> (<WhiteSpace-CF>* ";")? -> FinalSourceElement {ast("<1>")}
+    <FunctionDec-CF> (<WhiteSpace-CF>* ";")? -> FinalSourceElement {ast("<1>")}
+    <SourceElementsPrefix-CF> <LAYOUT?-CF> FinalSourceElement -> <SourceElements-CF> {ast("<conc(<1>, [<2>])>")}
+    %%<SourceElementsPrefix-CF> -> <SourceElements-CF> {ast("<conc(<1>, [<2>])>"), avoid}
+
+  context-free syntax
+    "function" Id  "(" {FormalParam ","}* ")" "{" FunctionBody "}" -> FunctionDec {cons("FunctionDec")}
+    Id 				-> FormalParam
+    SourceElements 	-> FunctionBody
+
+ %%%
+   %% 11.1: Primary Expression
+   %%%
+  context-free syntax
+    "this"        -> PrimaryExpr {cons("This")}
+    Id            -> PrimaryExpr {cons("Id")}
+    Literal       -> PrimaryExpr {cons("Literal")}
+    ArrayLiteral  -> PrimaryExpr {cons("ArrayLiteral")}
+    ObjectLiteral -> PrimaryExpr {cons("ObjectLiteral")}
+    "(" Expr ")"  -> PrimaryExpr {cons("ExpInBrackets")}
+
+  %%%
+   %% 11.1.4: Array Initialiser
+   %%%
+  context-free syntax
+    "[" Elision?"]" 					-> ArrayLiteral {cons("ArrayLiteral1")}
+    "[" ElementList "]" 				-> ArrayLiteral {cons("ArrayLiteral2")}
+    "[" ElementList "," Elision? "]" 	-> ArrayLiteral {cons("ArrayLiteral3")}
+
+    Elision? LiteralElement -> ElementList {cons("ElementList1")}
+    ElementList "," Elision? LiteralElement -> ElementList {cons("ElementList2")}
+
+    AssignmentExpr -> LiteralElement {cons("LiteralElement")}
+    ","+ -> Elision
+
+  %%%
+   %% 11.1.5: Object Initialiser
+   %%%
+  context-free syntax
+    "{" {ProperyNameAndValue ","}* "}"  -> ObjectLiteral {cons("ObjectLiteral")}
+    PropertyName ":" AssignmentExpr 	-> ProperyNameAndValue
+    Identifier     -> PropertyName {cons("PropertyId")}
+    StringLiteral  -> PropertyName {cons("PropertyString")}
+    NumericLiteral -> PropertyName {cons("PropertyNum")}
+  
+  %%%
+   %% 11.2: Left-Hand-Side Expressions
+   %%%
+  context-free syntax
+    PrimaryExpr                        -> MemberExpr {cons("PrimaryExpr")}
+    FunctionExpr                       -> MemberExpr {cons("FunctionExpr")}
+    MemberExpr "[" Expr "]" 		   -> MemberExpr {cons("MemberExprExpr")}
+    MemberExpr "." Identifier          -> MemberExpr {cons("MemberExprId")}
+    "new" MemberExpr Arguments         -> MemberExpr {cons("newMemberExpr")}
+
+    MemberExpr    -> NewExpr
+    "new" NewExpr -> NewExpr
+
+    MemberExpr Arguments             -> CallExpr {cons("MemberCall")}
+    CallExpr   Arguments             -> CallExpr {cons("CallCall")}
+    CallExpr "[" Expr "]" 			 -> CallExpr {cons("ExpCall")}
+    CallExpr "." Identifier          -> CallExpr {cons("IDCall")}
+
+    "(" {AssignmentExpr ","}+ ")" -> Arguments {cons("Arguments")}
+    NewExpr  -> LeftHandSideExpr
+    CallExpr -> LeftHandSideExpr
+
+  %%%
+   %% 11.3: Postfix Expressions
+   %%
+   %% @todo Layout: non line terminator
+   %%%
+  context-free syntax
+    LeftHandSideExpr 		-> PostfixExpr
+    LeftHandSideExpr "++" 	-> PostfixExpr
+    LeftHandSideExpr "--" 	-> PostfixExpr
+
+  %%%
+   %% 11.4: Unary Expressions
+   %%%
+  context-free syntax
+    PostfixExpr -> UnaryExpr
+
+    "delete" UnaryExpr -> UnaryExpr
+    "void" UnaryExpr   -> UnaryExpr
+    "typeof" UnaryExpr -> UnaryExpr
+    "++" UnaryExpr     -> UnaryExpr
+    "--" UnaryExpr     -> UnaryExpr
+    "+" UnaryExpr      -> UnaryExpr
+    "-" UnaryExpr      -> UnaryExpr
+    "~" UnaryExpr      -> UnaryExpr
+    "!" UnaryExpr      -> UnaryExpr
+
+  %%%
+   %% 11.5: Multiplicative Expressions
+   %%%
+  context-free syntax
+    UnaryExpr -> MulExpr
+    MulExpr "*" UnaryExpr -> MulExpr {cons("Mul")}
+    MulExpr "/" UnaryExpr -> MulExpr {cons("Div")}
+    MulExpr "%" UnaryExpr -> MulExpr {cons("Remainder")}
+    
+   context-free syntax
+    MulExpr -> AddExpr
+    AddExpr "+" MulExpr -> MulExpr {cons("Plus")}
+    AddExpr "-" MulExpr -> MulExpr {cons("Minus")}
+        
+
+  context-free syntax
+    AddExpr -> ShiftExpr
+    ShiftExpr "<<"  AddExpr -> ShiftExpr
+    ShiftExpr ">>"  AddExpr -> ShiftExpr
+    ShiftExpr ">>>" AddExpr -> ShiftExpr
+
+  context-free syntax
+    ShiftExpr -> RelExpr
+    RelExpr "<"   ShiftExpr -> RelExpr
+    RelExpr ">"   ShiftExpr -> RelExpr
+    RelExpr "<="  ShiftExpr -> RelExpr
+    RelExpr ">="  ShiftExpr -> RelExpr
+    RelExpr "instanceof" ShiftExpr -> RelExpr
+    RelExpr "in" ShiftExpr -> RelExpr
+
+  context-free syntax
+    RelExpr -> EqExpr
+    EqExpr "=="  RelExpr -> EqExpr
+    EqExpr "!="  RelExpr -> EqExpr
+    EqExpr "===" RelExpr -> EqExpr
+    EqExpr "!==" RelExpr -> EqExpr
+
+  context-free syntax
+    EqExpr -> BitwiseAndExpr
+    BitwiseAndExpr "&" EqExpr -> BitwiseAndExpr
+    BitwiseAndExpr -> BitwiseXorExpr
+    BitwiseXorExpr "^" BitwiseAndExpr -> BitwiseXorExpr
+    BitwiseXorExpr -> BitwiseOrExpr
+    BitwiseOrExpr "|" BitwiseXorExpr -> BitwiseOrExpr
+
+  context-free syntax
+    BitwiseOrExpr -> LogicalAndExpr
+    LogicalAndExpr "&&" BitwiseOrExpr -> LogicalAndExpr
+    LogicalAndExpr -> LogicalOrExpr
+    LogicalOrExpr "||" LogicalAndExpr -> LogicalOrExpr
+    LogicalOrExpr -> ConditionalExpr
+    LogicalOrExpr "?" AssignmentExpr ":" AssignmentExpr -> ConditionalExpr
+
+  context-free syntax
+    ConditionalExpr -> AssignmentExpr
+    LeftHandSideExpr "=" AssignmentExpr 				-> Expr {cons("Assigment")} 
+    LeftHandSideExpr CompoundAssignment AssignmentExpr 	-> Expr 
+    "*=" 	-> CompoundAssignment
+    "/=" 	-> CompoundAssignment
+    "%=" 	-> CompoundAssignment
+    "+=" 	-> CompoundAssignment
+    "-=" 	-> CompoundAssignment
+    "<<=" 	-> CompoundAssignment
+    ">>=" 	-> CompoundAssignment
+    ">>>=" 	-> CompoundAssignment
+    "&=" 	-> CompoundAssignment
+    "^="	-> CompoundAssignment
+    "|=" 	-> CompoundAssignment
+
+  context-free syntax
+    AssignmentExpr              -> Expr
+    Expr "," AssignmentExpr 	-> Expr
+
+  %%%
+   %% Default expression context
+   %%%
+  context-free syntax
+    Expr -> OptionalExpr
+                    -> OptionalExpr
+                    
+                    
+  syntax
+    <Block-CF>               -> <Stm-CF>
+    <EmptyStm-CF>            -> <Stm-CF>
+    <IfStm-CF>               -> <Stm-CF>
+    <IterationStm-CF>        -> <Stm-CF>
+    <WithStm-CF>             -> <Stm-CF>
+    <LabelledStm-CF>         -> <Stm-CF>
+    <SwitchStm-CF>           -> <Stm-CF>
+    <TryStm-CF>              -> <Stm-CF>
+
+    <ExprStm-CF>      <WhiteSpace-CF>* StmTerminator -> <Stm-CF> {ast("<1>")}
+    <ContinueStm-CF>  <WhiteSpace-CF>* StmTerminator -> <Stm-CF> {ast("<1>")}
+    <BreakStm-CF>     <WhiteSpace-CF>* StmTerminator -> <Stm-CF> {ast("<1>")}
+    <ReturnStm-CF>    <WhiteSpace-CF>* StmTerminator -> <Stm-CF> {ast("<1>")}
+    <ThrowStm-CF>     <WhiteSpace-CF>* StmTerminator -> <Stm-CF> {ast("<1>")}
+    <VarStm-CF>       <WhiteSpace-CF>* StmTerminator -> <Stm-CF> {ast("<1>")}
+
+
+    <ExprStm-CF>      -> <NotTerminatedStm-CF>
+    <ContinueStm-CF>  -> <NotTerminatedStm-CF>
+    <BreakStm-CF>     -> <NotTerminatedStm-CF>
+    <ReturnStm-CF>    -> <NotTerminatedStm-CF>
+    <ThrowStm-CF>     -> <NotTerminatedStm-CF>
+    <VarStm-CF>       -> <NotTerminatedStm-CF>
+
+    %% @todo Avoid this duplication.    
+    <Block-CF>               -> <NotTerminatedStm-CF>
+    <EmptyStm-CF>            -> <NotTerminatedStm-CF>
+    <IfStm-CF>               -> <NotTerminatedStm-CF>
+    <IterationStm-CF>        -> <NotTerminatedStm-CF>
+    <WithStm-CF>             -> <NotTerminatedStm-CF>
+    <LabelledStm-CF>         -> <NotTerminatedStm-CF>
+    <SwitchStm-CF>           -> <NotTerminatedStm-CF>
+    <TryStm-CF>              -> <NotTerminatedStm-CF>
+
+    %% @todo: in some cases the semicolon is optimal
+    %% @todo: this definition does not support the curly brace ...
+    ";"                 -> StmTerminator {cons("Semicolon")}
+    <LineTerminator-CF> -> StmTerminator {cons("LineTerminator")}
+
+  %%%
+   %% 12.1: Block
+   %%%
+  context-free syntax
+    "{" StmList? "}" -> Block {cons("Block")}
+    
+  context-free syntax
+    Stm* -> StmListPrefix
+    
+  syntax
+     <StmListPrefix-CF> <LAYOUT?-CF> <NotTerminatedStm-CF> (<WhiteSpace-CF>* ";")?
+      -> <StmList-CF> {ast("<conc(<1>, [<2>])>")}
+  
+
+%%%
+   %% 12.2: Variable Statement
+   %%%
+  context-free syntax
+    "var" {VarDec ","}+ 	-> VarStm {cons("VarStm")}
+    Id Initialiser?    		-> VarDec {cons("VarDec")}
+    "=" AssignmentExpr 		-> Initialiser {cons("Init")}
+ 
+  %%%
+   %% 12.3: Empty Statement
+   %%%
+  context-free syntax
+    ";" -> EmptyStm {cons("EmptyStm")}
+
+  %%%
+   %% 12.4: Expression Statement
+   %%
+   %% @todo Check the lookahead.
+   %%%
+  context-free syntax
+    Expr -> ExprStm {cons("ExprStm")}
+
+  %%%
+   %% 12.5: The if Statement
+   %%%
+  context-free syntax	
+    "if" "(" Expr ")" Stm            -> IfStm {cons("If")}
+    "if" "(" Expr ")" Stm "else" Stm -> IfStm {cons("IfElse")}
+    
+  %%%
+   %% 12.6: Iteration Statements
+   %%%
+  context-free syntax
+    DoStm StmTerminator  -> IterationStm {cons("DoStmWithTerminator")}
+    DoStm   			 -> IterationStm {cons("DoStm")}
+    WhileStm             -> IterationStm
+    ForStm               -> IterationStm
+
+    "do" Stm "while" "(" Expr ")"   -> DoStm {cons("DoStm")}
+    "while" "(" Expr ")" Stm 		-> WhileStm {cons("WhileStm")}
+
+    "for" "(" ForInit? ";" Expr? ";" Expr? ")" Stm -> ForStm
+    Expr             	-> ForInit
+    "var" VarDec* 		-> ForInit
+
+    "for" "(" ForInBinding "in" Expr       ")" Stm -> ForStm
+    LeftHandSideExpr -> ForInBinding
+    "var" VarDec 	 -> ForInBinding
+
+  syntax
+    "continue" <WhiteSpace-CF>* <Id-CF>? -> <ContinueStm-CF> {ast("Continue(<2>)")}
+
+  syntax
+    "break" <WhiteSpace-CF>* <Id-CF>? -> <BreakStm-CF> {ast("Break(<2>)")}
+
+  syntax
+    "return" <WhiteSpace-CF>* <Expr-CF>? -> <ReturnStm-CF> {ast("Return(<2>)")}
+
+  context-free syntax
+    "with" "(" Expr ")" Stm -> WithStm
+
+  context-free syntax
+    "switch" "(" Expr ")" "{" CaseClause* "}" -> SwitchStm
+    "case" Expr ":" StmList? -> CaseClause
+    "default"   ":" StmList? -> CaseClause
+
+  context-free syntax
+    Id ":" Stm -> LabelledStm
+
+  context-free syntax
+    "throw" Expr -> ThrowStm
+
+  context-free syntax
+    "try" Block Catch         -> TryStm
+    "try" Block Finally       -> TryStm
+    "try" Block Catch Finally -> TryStm
+
+    "catch" "(" Id ")" Block -> Catch
+    "finally" Block -> Finally
+
+
+  lexical syntax
+    IdentifierName 	-> Id
+    Id 				-> Identifier
+    ReservedWord   	-> Id {reject}
+    
+    IdentifierStart IdentifierPart* ("(" ")")? -> IdentifierName
+    
+    UnicodeLetter 				-> IdentifierStart
+    [\$\_]        				-> IdentifierStart
+    "\\" UnicodeEscapeSequence 	-> IdentifierStart
+        
+    UnicodeLetter               -> IdentifierPart 
+    "$"                         -> IdentifierStart    
+    %% UnicodeCombiningMark     -> IdentifierPart 
+    UnicodeDigit                -> IdentifierPart    
+    UnicodeConnectorPunctuation -> IdentifierPart
+    "\\" UnicodeEscapeSequence  -> IdentifierPart
+
+    [A-Za-z] -> UnicodeLetter
+    %%       -> UnicodeCombiningMark
+    [0-9]    -> UnicodeDigit
+    [\_]     -> UnicodeConnectorPunctuation
+
+  lexical restrictions
+    Id -/- [A-Za-z0-9\$\_]
+
+  lexical syntax
+    [\10\13] -> LineTerminator
+
+  context-free restrictions
+    LAYOUT? -/- [\10\13]
+    
+
+  %%%
+   %% 7.8: Literals
+   %%%
+  context-free syntax 
+    %% NullLiteral -> Literal {cons("Null()")}
+    NullLiteral    -> Literal {cons("Null")}
+    BooleanLiteral -> Literal {cons("Bool")}
+    NumericLiteral -> Literal {cons("Num")}
+    StringLiteral  -> Literal {cons("String")}
+ 
+  lexical syntax
+    "null"  -> NullLiteral    
+    "true"  -> BooleanLiteral
+    "false" -> BooleanLiteral
+    
+  %%%
+   %% 7.8.3: Numeric Literals
+   %%%
+  context-free syntax
+    DecimalLiteral    -> NumericLiteral {cons("Decimal")}
+    HexIntegerLiteral -> NumericLiteral {cons("HexInt")}
+   
+  lexical syntax
+    DecimalIntLiteral "." [0-9]* ExponentPart? -> DecimalLiteral
+                      "." [0-9]+ ExponentPart? -> DecimalLiteral
+    DecimalIntLiteral            ExponentPart? -> DecimalLiteral
+
+    [0]         -> DecimalIntLiteral
+    [1-9][0-9]* -> DecimalIntLiteral
+
+    [eE] SignedInteger -> ExponentPart
+        [0-9]+ -> SignedInteger
+    "+" [0-9]+ -> SignedInteger
+    "-" [0-9]+ -> SignedInteger
+
+    "0x" HexDigit+ -> HexIntegerLiteral
+    [0-9a-fA-F] -> HexDigit
+
+  lexical restrictions
+    DecimalLiteral -/- [0-9]
+
+  %%%
+   %% 7.8.4: String Literals
+   %%%
+  lexical syntax
+    "\"" DoubleStringCharacters* "\"" -> StringLiteral
+    "'"  SingleStringCharacters* "'"  -> StringLiteral
+    
+  lexical syntax
+    ~[\"]+ -> DoubleStringCharacters
+    ~[\']+ -> SingleStringCharacters
+
+  lexical restrictions
+    DoubleStringCharacters -/- ~[\"]
+    SingleStringCharacters -/- ~[\']
+
+  %%%
+   %% 7.8.5: Regular Expression Literals
+   %%%
+  context-free syntax
+    "/" RegularExpressionBody "/" RegularExpressionFlags -> RegularExpressionLiteral
+
+  %% @todo check: ad-hoc
+  lexical syntax
+    WhiteSpace     -> LAYOUT
+    LineTerminator -> LAYOUT
+    
+    
+  %%%
+   %% 7.5.1: Reserved Words
+   %%%
+  lexical syntax
+    Keyword        -> ReservedWord
+    NullLiteral    -> ReservedWord
+    BooleanLiteral -> ReservedWord
+    FutureReservedWord -> ReservedWord
+    
+  %%%
+   %% 7.5.2: Keywords
+   %%%
+  lexical syntax
+      "break"    | "else"       | "new"    | "var"
+    | "case"     | "finally"    | "return" | "void"
+    | "catch"    | "for"        | "switch" | "while"
+    | "continue" | "function"   | "this"   | "with"
+    | "default"  | "if"         | "throw"
+    | "delete"   | "in"         | "try"
+    | "do"       | "instanceof" | "typeof"
+    -> Keyword
+
+  lexical syntax
+      "abstract" | "enum"       | "int"       | "short"
+    | "boolean"  | "export"     | "interface" | "static"
+    | "byte"     | "extends"    | "long"      | "super"
+    | "char"     | "final"      | "native"    | "synchronized"
+    | "class"    | "float"      | "package"   | "throws"
+    | "const"    | "goto"       | "private"   | "transient"
+    | "debugger" | "implements" | "protected" | "volatile"
+    | "double"   | "import"     | "public"
+    -> FutureReservedKeyword
+      
+  lexical restrictions
+    "break"    "else"       "new"    "var"
+    "case"     "finally"    "return" "void"
+    "catch"    "for"        "switch" "while"
+    "continue" "function"   "this"   "with"
+    "default"  "if"         "throw"
+    "delete"   "in"         "try"
+    "do"       "instanceof" "typeof" 
+    -/- [A-Za-z0-9]     
+    
+  lexical syntax
+    [\9\11\12\32\160] -> WhiteSpace
+
+  context-free restrictions
+    LAYOUT? -/- [\9\11\12\32\160]
+    
+}
