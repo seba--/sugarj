@@ -260,7 +260,7 @@ public class ATermCommands {
     }
     catch (StrategoExit e) {
       if (e.getValue() != 0 || result == null)
-        throw new RuntimeException("Stratego extraction failed", e);
+        throw new RuntimeException("SDF extraction failed", e);
     }
     return result;
   }
