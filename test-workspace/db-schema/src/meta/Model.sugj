@@ -8,8 +8,8 @@ public sugar Model {
 
   rules
     meta-model :
-      model@MetamodelDec(mods, name, super, body) -> 
-      ModelDec(ModelDecHead(mods, name), ModelBody(<meta-explode> model))
+      model@MetamodelDec(mods, name, body) -> 
+      ModelDec(ModelDecHead(mods, name), ModelBody(<meta-explode> body))
 
   context-free syntax
     Metamodel -> ToplevelDeclaration
