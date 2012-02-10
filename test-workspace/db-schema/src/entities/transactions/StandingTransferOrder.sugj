@@ -1,0 +1,10 @@
+package entities.transactions;
+
+import java.util.Date;
+
+import entities.meta.Entity;
+
+public entity StandingTransferOrder extends CreditTransfer {
+  cycle :: Cycle
+  starting_date :: Date
+}

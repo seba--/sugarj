@@ -1,6 +1,7 @@
 package entities.accounts;
 
-import metamodel.Entity;
+import entities.meta.Entity;
+import entities.meta.Function;
 
 public entity CheckingAccount extends Account {
   balance :: Integer
@@ -11,4 +12,12 @@ public entity CheckingAccount extends Account {
    * will bring no new insight. 
    */
   pin :: Integer
+
+  function withdraw(amount :: Integer) {
+    balance := balance - amount;
+  }
+
+  function deposit(amount :: Integer) {
+    balance := balance + amount;
+  }
 }

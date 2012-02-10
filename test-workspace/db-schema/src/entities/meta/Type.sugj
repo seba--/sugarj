@@ -1,11 +1,11 @@
-package metamodel;
+package entities.meta;
 
-import metamodel.util.Lexical;
+import entities.meta.util.Lexical;
 
 /**
   * copied from https://svn.strategoxt.org/repos/WebDSL/webdsls/trunk/src/org/webdsl/dsl/syntax/WebDSL.sdf
   **/
-public sugar Types {
+public sugar Type {
   context-free syntax %% Types
     SimpleSort -> Sort
     GenericSort -> Sort

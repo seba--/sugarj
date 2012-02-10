@@ -1,10 +1,10 @@
 package entities.people;
 
-import metamodel.Entity;
+import entities.meta.Entity;
 
 import entities.people.Person;
 
 public entity Employee extends Person {
   position :: String
-  boss -> Option<Person>
+  boss     :: Option<Person>
 }

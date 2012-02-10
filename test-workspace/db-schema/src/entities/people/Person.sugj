@@ -1,6 +1,6 @@
 package entities.people;
 
-import metamodel.Entity;
+import entities.meta.Entity;
 
 public entity Person {
   name     :: String

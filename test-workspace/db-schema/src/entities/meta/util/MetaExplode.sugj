@@ -1,4 +1,4 @@
-package metamodel.util;
+package entities.meta.util;
 
 import org.sugarj.languages.Stratego;
 

@@ -1,10 +1,11 @@
 package entities.people;
 
-import metamodel.Entity;
+import entities.meta.Entity;
 
 import entities.accounts.Account;
 import entities.people.Person;
 
 public entity Customer extends Person {
-  accounts -> Set<Account> (inverse=Account.owner)
+  signature :: Integer
+  accounts  :: Set<Account> (inverse=Account.owner)
 }

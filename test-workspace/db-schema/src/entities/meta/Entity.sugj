@@ -1,10 +1,11 @@
-package metamodel;
+package entities.meta;
 
 import org.sugarj.languages.Model;
 
-import metamodel.Types;
-import metamodel.util.Lexical;
-import metamodel.util.MetaExplode;
+import entities.meta.Function;
+import entities.meta.Type;
+import entities.meta.util.Lexical;
+import entities.meta.util.MetaExplode;
 
 /**
  * copied from https://svn.strategoxt.org/repos/WebDSL/webdsls/trunk/src/org/webdsl/dsl/syntax/WebDSL-DataModel.sdf
@@ -21,8 +22,9 @@ public sugar Entity {
   context-free syntax
     Entity -> ToplevelDeclaration
     AnnoOrSugarMod* "entity" JavaId SuperEntity? "{" EntityBodyDeclaration* "}" -> Entity {cons("EntityDec")}
-    Property -> EntityBodyDeclaration
     "extends" JavaId -> SuperEntity {cons("SuperDec")}
+    
+    Property -> EntityBodyDeclaration
 
   context-free syntax
     JavaID PropKind Sort "(" {Annotation ","}* ")" -> Property {cons("Property")}
@@ -33,8 +35,8 @@ public sugar Entity {
 
 
     "::" -> PropKind {cons("Simple")}
-    "->" -> PropKind {cons("Ref")}
-    "<>" -> PropKind {cons("Comp")}
+//    "->" -> PropKind {cons("Ref")}
+//    "<>" -> PropKind {cons("Comp")}
 
 
   context-free syntax

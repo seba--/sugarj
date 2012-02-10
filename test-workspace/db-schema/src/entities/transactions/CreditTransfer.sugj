@@ -1,0 +1,13 @@
+package entities.transactions;
+
+import entities.meta.Entity;
+
+import entities.accounts.CheckingAccount;
+import entities.people.Customer;
+
+public entity CreditTransfer {
+  source         -> Customer
+  source_account -> CheckingAccount
+  target         -> Customer
+  target_account -> CheckingAccount
+}
