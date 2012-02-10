@@ -2,7 +2,6 @@ package entities.meta;
 
 import org.sugarj.languages.Model;
 
-import entities.meta.Function;
 import entities.meta.Type;
 import entities.meta.util.Lexical;
 import entities.meta.util.MetaExplode;

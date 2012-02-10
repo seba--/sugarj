@@ -6,8 +6,8 @@ import entities.accounts.CheckingAccount;
 import entities.people.Customer;
 
 public entity CreditTransfer {
-  source         -> Customer
-  source_account -> CheckingAccount
-  target         -> Customer
-  target_account -> CheckingAccount
+  source         :: Customer
+  source_account :: CheckingAccount
+  target         :: Customer
+  target_account :: CheckingAccount
 }
