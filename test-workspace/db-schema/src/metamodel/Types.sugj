@@ -12,8 +12,8 @@ public sugar Types {
     RefSort -> Sort
     FunctionSort -> Sort
     
-    Id                     -> SimpleSort {cons("SimpleSort")}
-    Id "<" {Sort ","}+ ">" -> GenericSort {cons("GenericSort")}
+    JavaID                     -> SimpleSort {cons("SimpleSort")}
+    JavaID "<" {Sort ","}+ ">" -> GenericSort {cons("GenericSort")}
     "Ref" "<" Sort ">" -> RefSort {cons("RefSort")}
     "Ref" "<" Sort ">" -> GenericSort {reject}
 }

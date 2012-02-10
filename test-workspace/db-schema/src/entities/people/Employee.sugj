@@ -1,0 +1,10 @@
+package entities.people;
+
+import metamodel.Entity;
+
+import entities.people.Person;
+
+public entity Employee extends Person {
+  position :: String
+  boss -> Option<Person>
+}
