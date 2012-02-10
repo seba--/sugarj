@@ -291,7 +291,7 @@ public class SugarJParser extends JSGLRI {
           environment);
     }
     catch (Exception e) {
-      log.logErr("Could read str cache, generating new one.");
+      log.logErr("Could not read str cache, generating new one.");
       strCache = new ModuleKeyCache<Path>();
       for (File f : environment.getCacheDir().getFile().listFiles())
         if (f.getPath().endsWith(".jar"))
