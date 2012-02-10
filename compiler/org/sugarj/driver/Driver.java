@@ -693,9 +693,14 @@ public class Driver {
       log.endTask();
     }
     
-    RelativePath modelOutFile = environment.new RelativePathBin(relPackageNameSep() + modelName + ".model");
-
-    driverResult.generateFile(modelOutFile, ATermCommands.atermToString(makeDesugaredSyntaxTree()));
+    log.beginTask("Generate model.");
+    try {
+      RelativePath modelOutFile = environment.new RelativePathBin(relPackageNameSep() + modelName + ".model");
+      
+      driverResult.generateFile(modelOutFile, ATermCommands.atermToString(makeDesugaredSyntaxTree()));
+    } finally {
+      log.endTask();
+    }
     
     // imports in generated Java code are optional because the model contains the imports
     javaSource.setOptionalImport(true);
