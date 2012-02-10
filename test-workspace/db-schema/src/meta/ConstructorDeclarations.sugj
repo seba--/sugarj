@@ -1,0 +1,22 @@
+package meta;
+
+import meta.Model;
+
+public transformation ConstructorDeclarations {
+  rules 
+    main = oncetd(metamodel-to-consdecls)
+
+    metamodel-to-consdecls :
+      ModelDec(ModelDecHead(mods, name), ModelBody(body))
+      -> SugarDec(SugarDecHead(mods, name), SugarBody([transformation-elem(Signature([Constructors(decls)]))]))
+      where <map(get-decl)> body => decls
+
+    get-decl : Structure(name, super, attrs) -> OpDecl(name, FunType(argtypes, ConstType(Sort(name, []))))
+      where <map(get-attr-type)> attrs => argtypes
+
+    get-attr-type : Attribute(_, attr-type) -> <get-attr-type>  attr-type
+    
+    get-attr-type : AttrReferenceType(name) -> ConstType(Sort(name, []))
+    get-attr-type : AttrCompoundType(cons, args) -> ConstType(Sort(cons, <map(get-attr-type)> args))
+    get-attr-type : AttrTupleType(args) -> ConstType(Sort("tuple", <map(get-attr-type)> args))
+} 

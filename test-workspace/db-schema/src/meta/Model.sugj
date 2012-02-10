@@ -23,8 +23,9 @@ public sugar Model {
     StructureName SuperStructure? "{" StructureAttr* "}" -> StructureDeclaration {cons("Structure")}
     "is" StructureName -> SuperStructure
 
-    AttributeName "::" AttributeType -> StrcutreAttr {cons("Attribute")}
+    AttributeName "::" AttributeType -> StructureAttr {cons("Attribute")}
     
     StructureName -> AttributeType {cons("AttrReferenceType")}
     StructureName "<" {AttributeType ","}* ">" -> AttributeType {cons("AttrCompoundType")}
+    "(" {AttributeType ","}+ ")" -> AttributeType {cons("AttrTupleType")}
 }

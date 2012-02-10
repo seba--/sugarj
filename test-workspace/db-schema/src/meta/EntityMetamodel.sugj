@@ -3,5 +3,29 @@ package meta;
 import meta.Model;
 
 public metamodel EntityMetamodel {
+  Entity is root {
+    mods :: List<Modifier>
+    name :: Identifier
+    superentity :: Option<Identity>
+    props :: List<Property>
+  }
 
+  Identifier {
+    id :: String
+  }
+
+  Property {
+    name :: String
+    sort :: Sort
+    inverse :: Option<(Identifier, String)>
+  }
+
+  SimpleSort is Sort {
+    name :: String
+  }
+
+  CompoundSort is Sort {
+    sortcons :: String
+    sortargs :: List<Sort>
+  }
 }

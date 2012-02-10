@@ -1,0 +1,15 @@
+package meta;
+
+import meta.ConstructorDeclarations;
+import meta.EntityMetamodel(ConstructorDeclarations);
+
+public sugar EntityDesugaring {
+  desugarings
+    entity-model
+
+  rules
+    entity-model :
+      entity@Entity(mods, name, super, body) -> 
+      ModelDec(ModelDecHead(mods, name), ModelBody(<meta-explode> (super, body)))
+
+}
