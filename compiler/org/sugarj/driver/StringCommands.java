@@ -43,8 +43,8 @@ public class StringCommands {
       return ren.to;
     
     String prefix = printListSeparated(ren.pkgs, Environment.sep);
-    if (in.equals(prefix + ren.from))
-      return prefix + ren.to;
+    if (in.equals(prefix + Environment.sep + ren.from))
+      return prefix + Environment.sep + ren.to;
     
     return in;
   }
