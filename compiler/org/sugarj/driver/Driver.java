@@ -1150,9 +1150,11 @@ public class Driver {
         
         
         
-        fullExtName = relPackageNameSep() + extName;
-        for (Renaming ren : environment.getRenamings())
+        fullExtName = relPackageNameSep() + extName; 
+        for (Renaming ren : environment.getRenamings()) {
+          extName = StringCommands.rename(extName, ren);
           fullExtName = StringCommands.rename(fullExtName, ren);
+        }
         fullExtName.replace("$", "__");
 
         log.log("The name of the sugar is '" + extName + "'.");
@@ -1439,7 +1441,7 @@ public class Driver {
               environment);
       }
       catch (Exception e) {
-        log.logErr("Could read sdf cache, generating new one.");
+        log.logErr("Could not read sdf cache, generating new one.");
         sdfCache = new ModuleKeyCache<Path>();
         for (File f : environment.getCacheDir().getFile().listFiles())
           if (f.getPath().endsWith(".tbl"))
@@ -1456,7 +1458,7 @@ public class Driver {
             environment);
       }
       catch (Exception e) {
-        log.logErr("Could read str cache, generating new one.");
+        log.logErr("Could not read str cache, generating new one.");
         strCache = new ModuleKeyCache<Path>();
         for (File f : environment.getCacheDir().getFile().listFiles())
           if (f.getPath().endsWith(".jar"))
