@@ -246,14 +246,6 @@ public class Driver {
 
 
   private static Result run(Driver driver, ToplevelDeclarationProvider declProvider, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    if (generateFiles)
-      synchronized (currentlyProcessing) {
-        // TODO we need better circular dependency handling
-        if (currentlyProcessing.contains(sourceFile))
-           throw new IllegalStateException("Uncaptured circular processing");
-        currentlyProcessing.add(sourceFile);
-      }
-
     Entry<ToplevelDeclarationProvider, Driver> pending = null;
     
     synchronized (Driver.class) {
@@ -278,6 +270,14 @@ public class Driver {
       return run(driver, declProvider, sourceFile, monitor, generateFiles);
     }
     
+    if (generateFiles)
+      synchronized (currentlyProcessing) {
+        // TODO we need better circular dependency handling
+        if (currentlyProcessing.contains(sourceFile))
+           throw new IllegalStateException("Uncaptured circular processing");
+        currentlyProcessing.add(sourceFile);
+      }
+
     try {
       synchronized (processingListener) {
         for (ProcessingListener listener : processingListener)
