@@ -1,5 +1,6 @@
 package entities.meta;
 
+import entities.meta.Lexical;
 import entities.meta.Type;
 
 /**

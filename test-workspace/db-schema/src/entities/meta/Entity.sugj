@@ -3,8 +3,8 @@ package entities.meta;
 import org.sugarj.languages.Model;
 
 import entities.meta.Type;
-import entities.meta.util.Lexical;
-import entities.meta.util.MetaExplode;
+import entities.meta.Lexical;
+import meta.Explode;
 
 /**
  * copied from https://svn.strategoxt.org/repos/WebDSL/webdsls/trunk/src/org/webdsl/dsl/syntax/WebDSL-DataModel.sdf

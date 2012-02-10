@@ -1,4 +1,4 @@
-package entities.meta.util;
+package entities.meta;
 
 /**
  * copied from https://svn.strategoxt.org/repos/WebDSL/webdsls/trunk/src/org/webdsl/dsl/syntax/WebDSL-Lexical.sdf

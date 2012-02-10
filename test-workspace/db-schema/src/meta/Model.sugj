@@ -1,0 +1,30 @@
+package meta;
+
+import meta.Explode;
+
+public sugar Model {
+  desugarings
+    meta-model
+
+  rules
+    meta-model :
+      model@MetamodelDec(mods, name, super, body) -> 
+      ModelDec(ModelDecHead(mods, name), ModelBody(<meta-explode> model))
+
+  context-free syntax
+    Metamodel -> ToplevelDeclaration
+    AnnoOrSugarMod* "metamodel" JavaId "{" StructureDeclaration* "}" -> Metamodel {cons("MetamodelDec")}
+    
+  lexical syntax
+    JavaID -> StructureName
+    JavaID -> AttributeName
+
+  context-free syntax
+    StructureName SuperStructure? "{" StructureAttr* "}" -> StructureDeclaration {cons("Structure")}
+    "is" StructureName -> SuperStructure
+
+    AttributeName "::" AttributeType -> StrcutreAttr {cons("Attribute")}
+    
+    StructureName -> AttributeType {cons("AttrReferenceType")}
+    StructureName "<" {AttributeType ","}* ">" -> AttributeType {cons("AttrCompoundType")}
+}

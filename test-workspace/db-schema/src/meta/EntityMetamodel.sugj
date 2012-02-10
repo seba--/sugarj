@@ -1,0 +1,7 @@
+package meta;
+
+import meta.Model;
+
+public metamodel EntityMetamodel {
+
+}
