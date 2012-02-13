@@ -1155,7 +1155,9 @@ public class Driver {
           extName = StringCommands.rename(extName, ren);
           fullExtName = StringCommands.rename(fullExtName, ren);
         }
-        fullExtName.replace("$", "__");
+        
+        extName = extName.replace("$", "__");
+        fullExtName = fullExtName.replace("$", "__");
 
         log.log("The name of the sugar is '" + extName + "'.");
         log.log("The full name of the sugar is '" + fullExtName + "'.");
