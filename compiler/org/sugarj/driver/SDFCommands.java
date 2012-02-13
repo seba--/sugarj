@@ -213,7 +213,10 @@ public class SDFCommands {
       if (!Environment.wocache)
         result = sdfCache.get(key);
       
-      if (result == null || !result.getFile().exists())
+      if (result != null && !result.getFile().exists())
+        result = null;
+      
+      if (result == null)
         return null;
 
       if (CommandExecution.CACHE_INFO)

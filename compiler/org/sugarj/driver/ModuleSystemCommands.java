@@ -60,7 +60,7 @@ public class ModuleSystemCommands {
    * @throws IOException 
    */
   public static RelativePath importSdf(String modulePath, Environment environment) throws IOException {
-    RelativePath sdf = searchFile(modulePath, ".sdf", environment);
+    RelativePath sdf = searchFile(modulePath.replace("$", "__"), ".sdf", environment);
     
     if (sdf == null)
       return null;
@@ -84,7 +84,7 @@ public class ModuleSystemCommands {
    * @throws IOException 
    */
   public static RelativePath importStratego(String modulePath, Environment environment) throws IOException {
-    RelativePath str = searchFile(modulePath, ".str", environment);
+    RelativePath str = searchFile(modulePath.replace("$", "__"), ".str", environment);
     
     if (str == null)
       return null;
