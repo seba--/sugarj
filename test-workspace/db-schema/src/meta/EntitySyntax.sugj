@@ -1,24 +1,18 @@
 package meta;
 
-import meta.EntityMetamodel;
+import meta.Syntax;
 
-public sugar EntitySyntax { //  for EntityMetamodel
-  context-free syntax
-    root:Entity -> ToplevelDeclaration
-    AnnoOrSugarMod* "entity" JavaId SuperEntity? "{" EntityBodyDeclaration* "}" -> Entity
-    "extends" JavaId -> SuperEntity
-    
-    Property -> EntityBodyDeclaration
+public metasyntax EntitySyntax { //  for EntityMetamodel
+  ToplevelDeclaration ::= root:Entity
+  Entity ::= mods:AnnoOrSugarMod* "entity" name:JavaId superentity:SuperEntity? "{" props:Property* "}"
+  SuperEntity ::= "extends" JavaId
 
-  context-free syntax
-    JavaID "::" Sort InverseAnno? -> Property
+  Property ::= name:JavaID "::" Sort InverseAnno?
+  InverseAnno ::= "inverse" "=" JavaId "." JavaID
 
-    "inverse" "=" JavaId "." JavaID      -> InverseAnno
+  Sort ::= JavaID
+  Sort ::= JavaID "<" Sorts ">"
 
-    SimpleSort -> Sort
-    CompoundSort -> Sort
-    
-    JavaID                     -> SimpleSort
-    JavaID "<" {Sort ","}+ ">" -> CompoundSort
-
+  Sorts ::= Sort
+  Sorts ::= Sort "," Sorts
 }

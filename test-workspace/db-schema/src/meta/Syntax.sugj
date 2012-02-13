@@ -1,0 +1,45 @@
+package meta;
+
+import meta.Explode;
+
+public sugar Syntax {
+  desugarings
+    meta-syntax
+
+  rules
+    meta-syntax :
+      model@MetasyntaxDec(mods, name, body) -> 
+      ModelDec(ModelDecHead(mods, name), ModelBody(<meta-explode> body))
+
+  context-free syntax
+    Metasyntax -> ToplevelDeclaration
+    AnnoOrSugarMod* "metasyntax" JavaId "{" SyntaxDeclaration "}" -> Metasyntax {cons("MetasyntaxDec")}
+    
+  lexical syntax
+    JavaID -> Nonterminal
+    Sdf2StrCon -> Terminal
+    JavaID -> Label
+
+  context-free syntax
+    Terminal -> Symbol {cons("Terminal")}
+    Nonterminal -> Symbol {cons("Nonterminal")}
+    
+  context-free priorities
+    {
+      SyntaxExp "*" -> SyntaxExp {cons("Many")}
+      SyntaxExp "+" -> SyntaxExp {cons("Many1")}
+    }
+    > 
+    SyntaxExp "?" -> SyntaxExp {cons("Optional")}
+    >
+    Label ":" SyntaxExp -> SyntaxExp {cons("Labeled")}
+
+  context-free syntax
+    Symbol -> SyntaxExp
+    "(" SyntaxExp+ ")" -> SyntaxExp {cons("Group")}
+
+    "start" Nonterminal -> StartProduction {cons("Start")}
+    Nonterminal "::=" SyntaxExp* -> Production {cons("Production")}
+
+    StartProduction? Production* -> SyntaxDeclaration {cons("SyntaxDec")}
+}
