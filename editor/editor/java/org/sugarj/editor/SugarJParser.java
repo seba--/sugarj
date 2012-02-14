@@ -130,7 +130,7 @@ public class SugarJParser extends JSGLRI {
     Job parseJob = new Job("SugarJ parser: " + sourceFile.getRelativePath()) {
       @Override
       protected IStatus run(IProgressMonitor monitor) {
-        monitor.beginTask("parse " + sourceFile.getRelativePath(), IProgressMonitor.UNKNOWN);
+        monitor.beginTask("parse " + sourceFile == null ? null : sourceFile.getRelativePath(), IProgressMonitor.UNKNOWN);
         Result result = null;
         boolean ok = false;
         try {
