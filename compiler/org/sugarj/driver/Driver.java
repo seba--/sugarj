@@ -871,7 +871,7 @@ public class Driver {
               setErrorMessage(toplevelDecl, "problems while compiling " + modulePath);
             }
               
-            log.log("CONTINUE PROCESSING'" + importSourceFile + "'.");
+            log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
           }
       }
     }
