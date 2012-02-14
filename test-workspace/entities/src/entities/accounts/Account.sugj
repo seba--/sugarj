@@ -1,6 +1,6 @@
 package entities.accounts;
 
-import entities.meta.Entity;
+import entities.meta.Model;
 
 import entities.people.Customer;
 

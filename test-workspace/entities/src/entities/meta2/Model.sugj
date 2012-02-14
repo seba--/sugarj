@@ -1,8 +1,8 @@
-package meta;
+package entities.meta2;
 
 import meta.Model;
 
-public metamodel EntityMetamodel {
+public metamodel Model {
   Entity is root {
     mods :: List<Modifier>
     name :: Identifier

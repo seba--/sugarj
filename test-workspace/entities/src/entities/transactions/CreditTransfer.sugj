@@ -1,6 +1,6 @@
 package entities.transactions;
 
-import entities.meta.Entity;
+import entities.meta.Model;
 
 import entities.accounts.CheckingAccount;
 import entities.people.Customer;

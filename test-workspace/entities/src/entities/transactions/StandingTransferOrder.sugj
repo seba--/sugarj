@@ -2,7 +2,7 @@ package entities.transactions;
 
 import java.util.Date;
 
-import entities.meta.Entity;
+import entities.meta.Model;
 
 public entity StandingTransferOrder extends CreditTransfer {
   cycle :: Cycle

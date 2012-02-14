@@ -9,7 +9,7 @@ import meta.Explode;
 /**
  * copied from https://svn.strategoxt.org/repos/WebDSL/webdsls/trunk/src/org/webdsl/dsl/syntax/WebDSL-DataModel.sdf
  **/
-public sugar Entity {
+public sugar Model {
   desugarings
     entity-model
 

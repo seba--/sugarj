@@ -1,8 +1,8 @@
-package meta;
+package entities.meta2;
 
 import meta.Syntax;
 
-public syntax EntitySyntax {
+public syntax Syntax {
   ToplevelDeclaration ::= root:Entity
   Entity ::= mods:AnnoOrSugarMod* "entity" name:JavaId superentity:SuperEntity? "{" props:Property* "}"
   SuperEntity ::= "extends" JavaId

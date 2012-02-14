@@ -2,7 +2,7 @@ package meta;
 
 import meta.Model;
 
-public transformation ConstructorDeclarations {
+public transformation SignatureTrans {
   rules 
     main = oncetd(metamodel-to-consdecls)
 

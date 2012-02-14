@@ -1,11 +1,11 @@
-package meta;
+package entities.meta2;
 
 import meta.Explode;
 
-import meta.ConstructorDeclarations;
-import meta.EntityMetamodel(ConstructorDeclarations);
+import meta.SignatureTrans;
+import entities.meta2.Model(SignatureTrans);
 
-public sugar EntityDesugaring {
+public sugar Desugaring {
   desugarings
     entity-model
 
