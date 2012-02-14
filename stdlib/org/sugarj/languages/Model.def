@@ -1,6 +1,7 @@
 definition
 module org/sugarj/languages/Model
 imports org/sugarj/languages/Transformation
+        org/sugarj/languages/TransformationImport
 
 %% transformations
 module org/sugarj/languages/Transformation
@@ -17,5 +18,8 @@ exports
     "rules" StrategoDef*        -> Transformation {cons("Rules")}
     "overlays" StrategoOverlay* -> Transformation {cons("Overlays")}
 
-    "import" JavaTypeName "(" {JavaTypeName ","}* ")" ";" -> JavaImportDec {cons("TransImportDec")}
-    
+
+module org/sugarj/languages/TransformationImport
+exports
+  context-free syntax
+      "import" JavaTypeName "<-" {JavaTypeName ","}+ "as" JavaTypeName ";" -> JavaImportDec {cons("TransImportDec")}

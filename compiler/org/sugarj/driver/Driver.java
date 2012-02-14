@@ -21,6 +21,7 @@ import java.io.ObjectOutputStream;
 import java.text.ParseException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -67,7 +68,7 @@ import org.sugarj.util.ToplevelDeclarationProvider;
 */
 public class Driver {
   
-  public final static String CACHE_VERSION = "model-0.1d";
+  public final static String CACHE_VERSION = "model-0.1e";
   
   private final static int PENDING_TIMEOUT = 30000;
 
@@ -757,38 +758,30 @@ public class Driver {
     log.beginTask("processing", "PROCESS the desugared import declaration.");
     try {
       String modulePath = FileCommands.getRelativeModulePath(ModuleSystemCommands.extractImportedModuleName(toplevelDecl, interp));
-      List<String> importTransformations = ModuleSystemCommands.extractImportedTransformationNames(toplevelDecl, interp);
-      
-      List<String> transformationPaths;
-      if (importTransformations == null)
-        transformationPaths = null;
-      else {
-        transformationPaths= new ArrayList<String>();
-        for (String importTransformation : importTransformations)
-          transformationPaths.add(FileCommands.getRelativeModulePath(importTransformation));
-      }
-      
-      List<RelativePath> resolvedTransformationPaths = null;
-      if (transformationPaths != null)
-        resolvedTransformationPaths = resolveTransformationPaths(modulePath, transformationPaths, toplevelDecl);
-      
-      
       RelativeSourceLocationPath importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
-      boolean skipProcessImport = prepareImport(modulePath, importSourceFile, null, null, toplevelDecl, false);
+      boolean skipProcessImport = prepareImport(modulePath, importSourceFile, null, null, null, toplevelDecl, false);
       
       
       // generate and import transformed model?
-      boolean transformedModelImport = (transformationPaths != null || !environment.getTransformationPaths().isEmpty());
+      boolean transformedModelImport = (isApplication(toplevelDecl, "TransImportDec") || !environment.getTransformationPaths().isEmpty());
 
       if (transformedModelImport) {
+        List<String> importTransformations = ModuleSystemCommands.extractImportedTransformationNames(toplevelDecl, interp);
+        List<String> transformationPaths = new ArrayList<String>();
+        for (String importTransformation : importTransformations)
+          transformationPaths.add(FileCommands.getRelativeModulePath(importTransformation));
+        List<RelativePath> resolvedTransformationPaths = resolveTransformationPaths(modulePath, transformationPaths, toplevelDecl);
+        
         RelativePath model = ModuleSystemCommands.importModel(modulePath, environment);
         RelativeSourceLocationPath transformedModelSourceFile = ModuleSystemCommands.getTransformedModelSourceFilePath(modulePath, resolvedTransformationPaths, environment);
         String transformedModelPath = FileCommands.dropExtension(transformedModelSourceFile.getRelativePath());
         
+        String localModelName = ATermCommands.getString(ATermCommands.getApplicationSubterm(toplevelDecl, "TransImportDec", 2));
+        
         if (model == null && transformationPaths != null)
           setErrorMessage(toplevelDecl, "model not found " + modulePath);
         else if (model != null) {
-          skipProcessImport |= prepareImport(transformedModelPath, transformedModelSourceFile, model, resolvedTransformationPaths, toplevelDecl, true);
+          skipProcessImport |= prepareImport(transformedModelPath, transformedModelSourceFile, model, resolvedTransformationPaths, localModelName, toplevelDecl, true);
           modulePath = transformedModelPath;
         }
       }
@@ -810,7 +803,7 @@ public class Driver {
     }
   }
   
-  private boolean prepareImport(String modulePath, RelativeSourceLocationPath importSourceFile, RelativePath model, List<RelativePath> transformationPaths, IStrategoTerm toplevelDecl, boolean transformModel) throws IOException {
+  private boolean prepareImport(String modulePath, RelativeSourceLocationPath importSourceFile, RelativePath model, List<RelativePath> transformationPaths, String localModelName, IStrategoTerm toplevelDecl, boolean transformModel) throws IOException {
     if (modulePath.startsWith("org/sugarj"))
       return false;
     
@@ -857,7 +850,7 @@ public class Driver {
               
               if (transformModel) {
                 IStrategoTerm transformedTerm = transformModel(model, importSourceFile, transformationPaths);
-                res = compileTransformedModel(transformedTerm, model, importSourceFile, transformationPaths);
+                res = compileTransformedModel(transformedTerm, localModelName, importSourceFile, transformationPaths);
               }
               else {
                 storeCaches(environment);
@@ -962,13 +955,13 @@ public class Driver {
   }
 
 
-  private Result compileTransformedModel(IStrategoTerm transformedTerm, RelativePath model, RelativeSourceLocationPath transformedModel, List<RelativePath> transformationPaths) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private Result compileTransformedModel(IStrategoTerm transformedTerm, String localModelName, RelativeSourceLocationPath transformedModel, List<RelativePath> transformationPaths) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     List<RelativePath> envTransformationPaths = environment.getTransformationPaths(); 
     
     try {
       log.log("Need to compile the imported model first; processing it now.");
 
-      Renaming ren = new Renaming(model, transformedModel);
+      Renaming ren = new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(transformedModel));
       environment.getRenamings().add(ren);
       
       List<RelativePath> paths = new LinkedList<RelativePath>();

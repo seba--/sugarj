@@ -222,6 +222,9 @@ public class ModuleSystemCommands {
   
   private static RelativePath searchFileInSearchPath(String relativePath, String extension, Set<Path> searchPath) {
     for (Path base : searchPath) {
+      if (!base.getFile().exists() || !base.getFile().isDirectory())
+        continue;
+      
       RelativePath p = searchFile(base, relativePath, extension);
       if (p != null)
         return p;
@@ -277,6 +280,9 @@ public class ModuleSystemCommands {
     driverResult.addFileDependency(binFile);
     
     for (Path searchPath : environment.getIncludePath()) {
+      if (!searchPath.getFile().exists() || !searchPath.getFile().isDirectory())
+        continue;
+      
       String relPath = relativePath;
       if (relPath.startsWith(searchPath.getAbsolutePath())) {
         int sepOffset = relativePath.endsWith(Environment.sep) ? 0 : 1;
