@@ -4,16 +4,16 @@ import meta.Explode;
 
 public sugar Syntax {
   desugarings
-    meta-syntax
+    syntax-model
 
   rules
-    meta-syntax :
-      model@MetasyntaxDec(mods, name, body) -> 
+    syntax-model :
+      model@SyntaxmodelDec(mods, name, body) -> 
       ModelDec(ModelDecHead(mods, name), ModelBody(<meta-explode> body))
 
   context-free syntax
-    Metasyntax -> ToplevelDeclaration
-    AnnoOrSugarMod* "metasyntax" JavaId "{" SyntaxDeclaration "}" -> Metasyntax {cons("MetasyntaxDec")}
+    Syntaxmodel -> ToplevelDeclaration
+    AnnoOrSugarMod* "syntax" JavaId "{" SyntaxDeclaration "}" -> Syntaxmodel {cons("SyntaxmodelDec")}
     
   lexical syntax
     JavaID -> Nonterminal
