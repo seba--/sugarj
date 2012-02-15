@@ -456,11 +456,16 @@ public class Driver {
             break;
           }
         
-        fullExtName = relPackageNameSep() + extName;
         for (Renaming ren : environment.getRenamings())
-          fullExtName = StringCommands.rename(fullExtName, ren);
-        // fullExtName = fullExtName.replace("$", "__");
+          extName = StringCommands.rename(extName, ren);
 
+        if (isPublic)
+          checkToplevelDeclarationName(extName, "editor service declaration", toplevelDecl);
+        
+        extName = extName.replace("$", "__");
+        
+        fullExtName = relPackageNameSep() + extName;
+        
         log.log("The name of the editor services is '" + extName + "'.");
         log.log("The full name of the editor services is '" + fullExtName + "'.");
 
@@ -547,10 +552,15 @@ public class Driver {
             break;
           }
         
-        fullExtName = relPackageNameSep() + extName + (extension == null ? "" : ("." + extension));
         for (Renaming ren : environment.getRenamings())
-          fullExtName = StringCommands.rename(fullExtName, ren);
-        // fullExtName = fullExtName.replace("$", "__");
+          extName = StringCommands.rename(extName, ren);
+
+        if (isPublic)
+          checkToplevelDeclarationName(extName, "plain declaration", toplevelDecl);
+        
+        extName = extName.replace("$", "__");
+        
+        fullExtName = relPackageNameSep() + extName + (extension == null ? "" : ("." + extension));
 
         log.log("The name is '" + extName + "'.");
         log.log("The full name is '" + fullExtName + "'.");
@@ -1087,6 +1097,8 @@ public class Driver {
         
         String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
         
+        checkToplevelDeclarationName(decName, "java declaration", toplevelDecl);
+        
         RelativePath clazz = environment.new RelativePathBin(relPackageNameSep() + decName + ".class");
         
         generatedJavaClasses.add(clazz);
@@ -1153,6 +1165,10 @@ public class Driver {
         
         for (Renaming ren : environment.getRenamings())
           extName = StringCommands.rename(extName, ren);
+        
+        if (isPublic)
+          checkToplevelDeclarationName(extName, "sugar declaration", toplevelDecl);
+        
         extName = extName.replace("$", "__");
 
         fullExtName = relPackageNameSep() + extName; 
@@ -1880,5 +1896,10 @@ public class Driver {
       log.logErr(msg);
 
     setErrorMessage(trm, msg);
+  }
+  
+  private void checkToplevelDeclarationName(String name, String what, IStrategoTerm toplevelDecl) {
+    if (!name.equals(FileCommands.fileName(sourceFile)))
+      setErrorMessage(toplevelDecl, "File name differs from " + what + " name.");
   }
 }
