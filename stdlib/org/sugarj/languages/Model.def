@@ -22,4 +22,5 @@ exports
 module org/sugarj/languages/TransformationImport
 exports
   context-free syntax
-      "import" JavaTypeName "<-" {JavaTypeName ","}+ "as" JavaTypeName ";" -> JavaImportDec {cons("TransImportDec")}
+    "import" JavaTypeName "<-" {JavaTypeName ","}+ ImportAs? ";" -> JavaImportDec {cons("TransImportDec")}
+    "as" JavaTypeName -> ImportAs {cons("ImportAs")}

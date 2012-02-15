@@ -19,4 +19,4 @@ public transformation SignatureTrans {
     get-attr-type : AttrReferenceType(name) -> ConstType(Sort(name, []))
     get-attr-type : AttrCompoundType(cons, args) -> ConstType(Sort(cons, <map(get-attr-type)> args))
     get-attr-type : AttrTupleType(args) -> ConstType(Sort("tuple", <map(get-attr-type)> args))
-} 
+}

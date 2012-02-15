@@ -3,7 +3,7 @@ package entities.meta2;
 import meta.Explode;
 
 import meta.SignatureTrans;
-import entities.meta2.Model(SignatureTrans);
+import entities.meta2.Model <- SignatureTrans;
 
 public sugar Desugaring {
   desugarings
