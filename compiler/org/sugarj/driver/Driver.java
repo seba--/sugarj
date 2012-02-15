@@ -768,17 +768,22 @@ public class Driver {
       if (transformedModelImport) {
         List<String> importTransformations = ModuleSystemCommands.extractImportedTransformationNames(toplevelDecl, interp);
         List<String> transformationPaths = new ArrayList<String>();
-        for (String importTransformation : importTransformations)
-          transformationPaths.add(FileCommands.getRelativeModulePath(importTransformation));
+        if (importTransformations != null)
+          for (String importTransformation : importTransformations)
+            transformationPaths.add(FileCommands.getRelativeModulePath(importTransformation));
         List<RelativePath> resolvedTransformationPaths = resolveTransformationPaths(modulePath, transformationPaths, toplevelDecl);
         
         RelativePath model = ModuleSystemCommands.importModel(modulePath, environment);
         RelativeSourceLocationPath transformedModelSourceFile = ModuleSystemCommands.getTransformedModelSourceFilePath(modulePath, resolvedTransformationPaths, environment);
         String transformedModelPath = FileCommands.dropExtension(transformedModelSourceFile.getRelativePath());
         
-        String localModelName = ATermCommands.getString(ATermCommands.getApplicationSubterm(toplevelDecl, "TransImportDec", 2));
+        String localModelName = null;
+        if (isApplication(toplevelDecl, "TransImportDec"))
+          localModelName = SDFCommands.prettyPrintJava(ATermCommands.getApplicationSubterm(toplevelDecl, "TransImportDec", 2), interp);
+        else if (model != null)
+          localModelName = FileCommands.fileName(model);
         
-        if (model == null && transformationPaths != null)
+        if (model == null && isApplication(toplevelDecl, "TransImportDec"))
           setErrorMessage(toplevelDecl, "model not found " + modulePath);
         else if (model != null) {
           skipProcessImport |= prepareImport(transformedModelPath, transformedModelSourceFile, model, resolvedTransformationPaths, localModelName, toplevelDecl, true);
@@ -961,8 +966,10 @@ public class Driver {
     try {
       log.log("Need to compile the imported model first; processing it now.");
 
-      Renaming ren = new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(transformedModel));
-      environment.getRenamings().add(ren);
+      if (localModelName != null) {
+        Renaming ren = new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(transformedModel));
+        environment.getRenamings().add(ren);
+      }
       
       List<RelativePath> paths = new LinkedList<RelativePath>();
       if (transformationPaths != null)
