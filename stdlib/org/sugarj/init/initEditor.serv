@@ -37,6 +37,9 @@ language
   
   line comment                           : "//"
   block comment                          : "/*" * "*/"
+  block comment                          : "/**" * "**/"
+  
+  identifier lexical                     : "[A-Za-z0-9_]+"
 
 folding
   ToplevelDeclaration
