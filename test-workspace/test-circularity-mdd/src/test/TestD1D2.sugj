@@ -1,7 +1,7 @@
 package test;
 
 import trans.CompJavaModel;
-import test.D1(CompJavaModel);
+import test.D1 <- CompJavaModel as D1;
 
 public class TestD1D2 {
   public static void main(String[] args) {
