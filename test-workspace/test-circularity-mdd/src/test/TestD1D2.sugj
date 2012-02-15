@@ -1,11 +1,11 @@
 package test;
 
 import trans.CompJavaModel;
-import test.D1 <- CompJavaModel as D1;
+import test.D1<CompJavaModel> as Dxx;
 
 public class TestD1D2 {
   public static void main(String[] args) {
-    D1 d1 = new D1();
+    Dxx d1 = new Dxx();
     System.out.println(d1);
     System.out.println(d1.d2);
   }
