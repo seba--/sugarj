@@ -68,7 +68,7 @@ import org.sugarj.util.ToplevelDeclarationProvider;
 */
 public class Driver {
   
-  public final static String CACHE_VERSION = "model-0.1e";
+  public final static String CACHE_VERSION = "model-0.1g";
   
   private final static int PENDING_TIMEOUT = 30000;
 
@@ -777,16 +777,18 @@ public class Driver {
         RelativeSourceLocationPath transformedModelSourceFile = ModuleSystemCommands.getTransformedModelSourceFilePath(modulePath, resolvedTransformationPaths, environment);
         String transformedModelPath = FileCommands.dropExtension(transformedModelSourceFile.getRelativePath());
         
-        String localModelName = null;
-        if (isApplication(toplevelDecl, "TransImportDec"))
-          localModelName = SDFCommands.prettyPrintJava(ATermCommands.getApplicationSubterm(toplevelDecl, "TransImportDec", 2), interp);
+        String localModelName = ATermCommands.getLocalImportName(toplevelDecl, interp);
+        
+        Renaming localRenaming = null;
+        if (localModelName != null)
+          localRenaming = new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(transformedModelSourceFile));
         else if (model != null)
-          localModelName = FileCommands.fileName(model);
+          localRenaming = new Renaming(model, transformedModelSourceFile);
         
         if (model == null && isApplication(toplevelDecl, "TransImportDec"))
           setErrorMessage(toplevelDecl, "model not found " + modulePath);
         else if (model != null) {
-          skipProcessImport |= prepareImport(transformedModelPath, transformedModelSourceFile, model, resolvedTransformationPaths, localModelName, toplevelDecl, true);
+          skipProcessImport |= prepareImport(transformedModelPath, transformedModelSourceFile, model, resolvedTransformationPaths, localRenaming, toplevelDecl, true);
           modulePath = transformedModelPath;
         }
       }
@@ -808,7 +810,7 @@ public class Driver {
     }
   }
   
-  private boolean prepareImport(String modulePath, RelativeSourceLocationPath importSourceFile, RelativePath model, List<RelativePath> transformationPaths, String localModelName, IStrategoTerm toplevelDecl, boolean transformModel) throws IOException {
+  private boolean prepareImport(String modulePath, RelativeSourceLocationPath importSourceFile, RelativePath model, List<RelativePath> transformationPaths, Renaming localRenaming, IStrategoTerm toplevelDecl, boolean transformModel) throws IOException {
     if (modulePath.startsWith("org/sugarj"))
       return false;
     
@@ -855,7 +857,7 @@ public class Driver {
               
               if (transformModel) {
                 IStrategoTerm transformedTerm = transformModel(model, importSourceFile, transformationPaths);
-                res = compileTransformedModel(transformedTerm, localModelName, importSourceFile, transformationPaths);
+                res = compileTransformedModel(transformedTerm, localRenaming, importSourceFile, transformationPaths);
               }
               else {
                 storeCaches(environment);
@@ -960,16 +962,14 @@ public class Driver {
   }
 
 
-  private Result compileTransformedModel(IStrategoTerm transformedTerm, String localModelName, RelativeSourceLocationPath transformedModel, List<RelativePath> transformationPaths) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private Result compileTransformedModel(IStrategoTerm transformedTerm, Renaming localRenaming, RelativeSourceLocationPath transformedModel, List<RelativePath> transformationPaths) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     List<RelativePath> envTransformationPaths = environment.getTransformationPaths(); 
     
     try {
       log.log("Need to compile the imported model first; processing it now.");
 
-      if (localModelName != null) {
-        Renaming ren = new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(transformedModel));
-        environment.getRenamings().add(ren);
-      }
+      if (localRenaming != null)
+        environment.getRenamings().add(localRenaming);
       
       List<RelativePath> paths = new LinkedList<RelativePath>();
       if (transformationPaths != null)
@@ -1032,39 +1032,40 @@ public class Driver {
   }
 
 
-  private List<RelativePath> resolveTransformationPaths(String modulePath,
-      List<String> transformationPaths,
-      IStrategoTerm importTerm) {
-    log.beginTask("Resolving transformation paths for '"+modulePath+"'.");
+  private List<RelativePath> resolveTransformationPaths(String modulePath, List<String> transformationPaths, IStrategoTerm importTerm) {
+    log.beginTask("Resolving transformation paths for '" + StringCommands.printListSeparated(transformationPaths, ",") + "'.");
     List<RelativePath> resolvedTransformationPaths = new ArrayList<RelativePath>();
-    for (String transformationPath : transformationPaths) {
-      if (!transformationPath.contains("/")) { // this branch searches for relative imports
-        
-        boolean moduleFound = false;
-        for (RelativePath importPath : availableSTRImports) {
-          if (FileCommands.dropExtension(importPath.getAbsolutePath()).endsWith(transformationPath)) {
-            // QST: Adding only transformationPath correct?
-            resolvedTransformationPaths.add(importPath);
-            moduleFound = true;
-            break;
+    try {
+      for (String transformationPath : transformationPaths) {
+        if (!transformationPath.contains("/")) { // this branch searches for relative imports
+          
+          boolean moduleFound = false;
+          for (RelativePath importPath : availableSTRImports) {
+            if (FileCommands.dropExtension(importPath.getAbsolutePath()).endsWith(transformationPath)) {
+              // QST: Adding only transformationPath correct?
+              resolvedTransformationPaths.add(importPath);
+              moduleFound = true;
+              break;
+            }
           }
+          if (!moduleFound) {
+            log.logErr("module '"+ transformationPath +"' not found in available imports");
+            // QST: Which Path should be added? (to produce an error) Which absolute path should it be?
+            resolvedTransformationPaths.add(environment.new RelativePathBin(transformationPath+".str"));
+          }
+        } else { // this branch searches for FQN imports
+          // QST: Use of searchFile correct here?
+          RelativePath p = ModuleSystemCommands.searchFile(transformationPath, ".str", environment);
+          if (p==null)
+            ATermCommands.setErrorMessage(importTerm, "cannot resolve module '"+ transformationPath.replace("/", ".") + "'");
+          else
+            resolvedTransformationPaths.add(p);
         }
-        if (!moduleFound) {
-          log.logErr("module '"+ transformationPath +"' not found in available imports");
-          // QST: Which Path should be added? (to produce an error) Which absolute path should it be?
-          resolvedTransformationPaths.add(environment.new RelativePathBin(transformationPath+".str"));
-        }
-      } else { // this branch searches for FQN imports
-        // QST: Use of searchFile correct here?
-        RelativePath p = ModuleSystemCommands.searchFile(transformationPath, ".str", environment);
-        if (p==null)
-          ATermCommands.setErrorMessage(importTerm, "cannot resolve module '"+ transformationPath.replace("/", ".") + "'");
-        else
-          resolvedTransformationPaths.add(p);
       }
+      return resolvedTransformationPaths;
+    } finally {
+      log.endTask();
     }
-    log.endTask();
-    return resolvedTransformationPaths;
   }
   
   private void processJavaTypeDec(IStrategoTerm toplevelDecl) throws IOException, InvalidParseTableException {
@@ -1150,14 +1151,11 @@ public class Driver {
         
         
         
-        fullExtName = relPackageNameSep() + extName; 
-        for (Renaming ren : environment.getRenamings()) {
+        for (Renaming ren : environment.getRenamings())
           extName = StringCommands.rename(extName, ren);
-          fullExtName = StringCommands.rename(fullExtName, ren);
-        }
-        
         extName = extName.replace("$", "__");
-        fullExtName = fullExtName.replace("$", "__");
+
+        fullExtName = relPackageNameSep() + extName; 
 
         log.log("The name of the sugar is '" + extName + "'.");
         log.log("The full name of the sugar is '" + fullExtName + "'.");
@@ -1346,7 +1344,7 @@ public class Driver {
     this.sourceFile = new RelativeSourceLocationPath(new SourceLocation(sourceFile.getBasePath(), environment), sourceFile);
     this.generateFiles = generateFiles;
     
-    this.driverResult = new Result(generateFiles);
+    this.driverResult = new Result(generateFiles, CACHE_VERSION);
 
     currentGrammarSDF = new AbsolutePath(StdLib.initGrammar.getPath());
     currentGrammarModule = StdLib.initGrammarModule;
