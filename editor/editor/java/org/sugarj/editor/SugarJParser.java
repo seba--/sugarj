@@ -127,7 +127,7 @@ public class SugarJParser extends JSGLRI {
     final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(filename), environment.getSourcePath());
 
     
-    Job parseJob = new Job("SugarJ parser: " + sourceFile.getRelativePath()) {
+    Job parseJob = new Job("SugarJ parser: " + sourceFile == null ? null : sourceFile.getRelativePath()) {
       @Override
       protected IStatus run(IProgressMonitor monitor) {
         monitor.beginTask("parse " + sourceFile == null ? null : sourceFile.getRelativePath(), IProgressMonitor.UNKNOWN);
