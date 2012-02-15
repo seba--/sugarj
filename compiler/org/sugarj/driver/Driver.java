@@ -68,7 +68,7 @@ import org.sugarj.util.ToplevelDeclarationProvider;
 */
 public class Driver {
   
-  public final static String CACHE_VERSION = "model-0.1g";
+  public final static String CACHE_VERSION = "model-0.1h";
   
   private final static int PENDING_TIMEOUT = 30000;
 
@@ -769,7 +769,7 @@ public class Driver {
     try {
       String modulePath = FileCommands.getRelativeModulePath(ModuleSystemCommands.extractImportedModuleName(toplevelDecl, interp));
       RelativeSourceLocationPath importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
-      boolean skipProcessImport = prepareImport(modulePath, importSourceFile, null, null, null, toplevelDecl, false);
+      boolean skipProcessImport = prepareImport(modulePath, importSourceFile, null, null, toplevelDecl, false);
       
       
       // generate and import transformed model?
@@ -789,17 +789,16 @@ public class Driver {
         
         String localModelName = ATermCommands.getLocalImportName(toplevelDecl, interp);
         
-        Renaming localRenaming = null;
-        if (localModelName != null)
-          localRenaming = new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(transformedModelSourceFile));
-        else if (model != null)
-          localRenaming = new Renaming(model, transformedModelSourceFile);
-        
         if (model == null && isApplication(toplevelDecl, "TransImportDec"))
           setErrorMessage(toplevelDecl, "model not found " + modulePath);
         else if (model != null) {
-          skipProcessImport |= prepareImport(transformedModelPath, transformedModelSourceFile, model, resolvedTransformationPaths, localRenaming, toplevelDecl, true);
+          skipProcessImport |= prepareImport(transformedModelPath, transformedModelSourceFile, model, resolvedTransformationPaths, toplevelDecl, true);
           modulePath = transformedModelPath;
+          
+          if (localModelName != null)
+            environment.getRenamings().add(new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(transformedModelSourceFile)));
+          else if (model != null)
+            environment.getRenamings().add(new Renaming(model, transformedModelSourceFile));
         }
       }
       
@@ -820,7 +819,7 @@ public class Driver {
     }
   }
   
-  private boolean prepareImport(String modulePath, RelativeSourceLocationPath importSourceFile, RelativePath model, List<RelativePath> transformationPaths, Renaming localRenaming, IStrategoTerm toplevelDecl, boolean transformModel) throws IOException {
+  private boolean prepareImport(String modulePath, RelativeSourceLocationPath importSourceFile, RelativePath model, List<RelativePath> transformationPaths, IStrategoTerm toplevelDecl, boolean transformModel) throws IOException {
     if (modulePath.startsWith("org/sugarj"))
       return false;
     
@@ -867,7 +866,7 @@ public class Driver {
               
               if (transformModel) {
                 IStrategoTerm transformedTerm = transformModel(model, importSourceFile, transformationPaths);
-                res = compileTransformedModel(transformedTerm, localRenaming, importSourceFile, transformationPaths);
+                res = compileTransformedModel(transformedTerm, importSourceFile, model, transformationPaths);
               }
               else {
                 storeCaches(environment);
@@ -972,14 +971,13 @@ public class Driver {
   }
 
 
-  private Result compileTransformedModel(IStrategoTerm transformedTerm, Renaming localRenaming, RelativeSourceLocationPath transformedModel, List<RelativePath> transformationPaths) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private Result compileTransformedModel(IStrategoTerm transformedTerm, RelativeSourceLocationPath transformedModel, RelativePath model, List<RelativePath> transformationPaths) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     List<RelativePath> envTransformationPaths = environment.getTransformationPaths(); 
-    
+    List<Renaming> envRenamings = new LinkedList<Renaming>(environment.getRenamings());
     try {
       log.log("Need to compile the imported model first; processing it now.");
 
-      if (localRenaming != null)
-        environment.getRenamings().add(localRenaming);
+      environment.getRenamings().add(new Renaming(model, transformedModel));
       
       List<RelativePath> paths = new LinkedList<RelativePath>();
       if (transformationPaths != null)
@@ -991,6 +989,7 @@ public class Driver {
       return compile(transformedTerm, transformedModel, monitor);
     } finally {
       environment.setTransformationPaths(envTransformationPaths);
+      environment.setRenamings(envRenamings);
       initializeCaches(environment, true);
       log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
     }
