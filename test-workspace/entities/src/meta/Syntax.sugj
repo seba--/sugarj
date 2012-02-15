@@ -33,6 +33,8 @@ public sugar Syntax {
     SyntaxExp "?" -> SyntaxExp {cons("Optional")}
     >
     Label ":" SyntaxExp -> SyntaxExp {cons("Labeled")}
+    >
+    SyntaxExp "|" SyntaxExp -> SyntaxExp {cons("Alt")}
 
   context-free syntax
     Symbol -> SyntaxExp

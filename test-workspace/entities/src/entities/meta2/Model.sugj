@@ -3,9 +3,9 @@ package entities.meta2;
 import meta.Model;
 
 public metamodel Model {
-  Entity is root {
-    mods :: List<Modifier>
+  Entity {
     name :: Identifier
+    mods :: List<Modifier>
     superentity :: Option<Identity>
     props :: List<Property>
   }

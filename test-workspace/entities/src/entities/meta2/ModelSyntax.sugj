@@ -1,0 +1,65 @@
+package entities.meta2;
+
+import meta.SignatureTrans;
+import entities.meta2.Model <- SignatureTrans;
+
+public sugar ModelSyntax {
+  context-free syntax
+    Entity -> ToplevelDeclaration
+
+    AnnoOrSugarMod* "entity" JavaId SuperEntity? "{" Property* "}" -> Entity {cons("Entity_")}
+    "extends" JavaId -> SuperEntity
+
+    JavaId "::" Sort InverseAnno? -> Property {cons("Property_")}
+    "(" "inverse" "=" JavaId "." JavaID ")" -> InverseAnno
+
+    SimpleSort | CompoundSort -> Sort
+    JavaID -> SimpleSort {cons("SimpleSort_")}
+    JavaID "<" Sorts ">" -> CompoundSort {cons("CompoundSort_")} 
+
+    Sort -> Sorts
+    Sort "," Sorts -> Sorts
+
+  desugarings
+    ast-for-metamodel
+
+  rules
+    ast-for-metamodel :
+      e_ -> Entity(mods, name, superentity, props)
+      where
+        <?Entity_(_,<id>,_,_); id> e_ => name;
+        <?Entity_(<id>,_,_,_); list-of(id)> e_ => mods;
+        <?Entity_(_,_,<id>,_); option-of(id)> e_ => superentity;
+        <?Entity_(_,_,_,<id>); list-of(id)> e_ => props
+
+    ast-to-metamode :
+      e_ -> Property(name, sort, inverse)
+      where
+        <?Property_(<id>,_,_); id> e_ => name;
+        <?Property_(_,<id>,_); id> e_ => sort;
+        <?Property_(_,_,<id>); option-of(pair-of(id,id))> e_ => inverse
+
+    ast-to-metamode :
+      e_ -> SimpleSort(name)
+      where
+        <?SimpleSort_(<id>); id> e_ => name
+
+    ast-to-metamode :
+      e_ -> CompoundSort(sortcons, sortargs)
+      where
+        <?CompoundSort_(<id>,_); id> e_ => sortcons;
+        <?CompoundSort_(<id>,_); list-of(id)> e_ => sortargs
+
+
+  list-of(s) : [] -> []
+  list-of(s) : [x|xs] -> [<s> x|<list-of(s)> xs]
+  list-of(s) : x -> [<s> x]
+
+  option-of(s) : None -> None
+  option-of(s) : Some(x) -> Some(<s> x)
+  option-of(s) : x -> Some(<s> x)
+
+  pair-of(s1,s2) : (x,y) -> (<s1> x, <s2> y)
+  pair-of(s1, s2) : _#([x,y]) -> (<s1> x, <s2> y)
+
+}

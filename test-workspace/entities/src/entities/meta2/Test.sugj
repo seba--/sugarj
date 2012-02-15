@@ -1,0 +1,8 @@
+package entities.meta2;
+
+import entities.meta2.ModelSyntax;
+import entities.meta2.Desugaring;
+
+public entity Test {
+  foo :: String
+}
