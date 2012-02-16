@@ -6,12 +6,12 @@ public sugar Syntax {
 
   rules
     syntax-model :
-      model@SyntaxmodelDec(mods, name, body) -> 
-      ModelDec(ModelDecHead(mods, name), ModelBody(("Syntax", body)))
+      SyntaxmodelDec(mods, name, model, body) -> 
+      ModelDec(ModelDecHead(mods, name), ModelBody(("Syntax", model, body)))
 
   context-free syntax
     Syntaxmodel -> ToplevelDeclaration
-    AnnoOrSugarMod* "syntax" JavaId "{" SyntaxDeclaration "}" -> Syntaxmodel {cons("SyntaxmodelDec")}
+    AnnoOrSugarMod* "syntax" JavaId "for" JavaId "{" SyntaxDeclaration "}" -> Syntaxmodel {cons("SyntaxmodelDec")}
     
   lexical syntax
     JavaID -> Nonterminal
