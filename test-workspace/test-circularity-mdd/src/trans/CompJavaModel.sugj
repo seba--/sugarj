@@ -9,6 +9,6 @@ public transformation CompJavaModel {
 
   rules
     model-to-java : 
-         ModelDec(ModelDecHead(mods, name), ModelBody(body))
+         ModelDec(ModelDecHead(mods, name), ModelBody(("Java", body)))
       -> ClassDec(ClassDecHead(mods, name, None, None, None), body)
 }

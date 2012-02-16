@@ -7,7 +7,7 @@ public transformation SignatureTrans {
     main = oncetd(metamodel-to-consdecls)
 
     metamodel-to-consdecls :
-      ModelDec(ModelDecHead(mods, name), ModelBody(body))
+      ModelDec(ModelDecHead(mods, name), ModelBody(("Metamodel", body)))
       -> SugarDec(SugarDecHead(mods, name), SugarBody([transformation-elem(Signature([Constructors(decls)]))]))
       where <map(get-decl)> body => decls
 

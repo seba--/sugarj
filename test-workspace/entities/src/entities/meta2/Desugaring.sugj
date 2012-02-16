@@ -1,7 +1,5 @@
 package entities.meta2;
 
-import meta.Explode;
-
 import meta.SignatureTrans;
 import entities.meta2.Model<SignatureTrans>;
 
@@ -12,5 +10,5 @@ public sugar Desugaring {
   rules
     entity-model :
       entity@Entity(mods, name, super, body) -> 
-      ModelDec(ModelDecHead(mods, name), ModelBody(<meta-explode> (super, body)))
+      ModelDec(ModelDecHead(mods, name), ModelBody(("Entity", super, body)))
 }

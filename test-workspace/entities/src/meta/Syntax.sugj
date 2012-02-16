@@ -1,7 +1,5 @@
 package meta;
 
-import meta.Explode;
-
 public sugar Syntax {
   desugarings
     syntax-model
@@ -9,7 +7,7 @@ public sugar Syntax {
   rules
     syntax-model :
       model@SyntaxmodelDec(mods, name, body) -> 
-      ModelDec(ModelDecHead(mods, name), ModelBody(<meta-explode> body))
+      ModelDec(ModelDecHead(mods, name), ModelBody(("Syntax", body)))
 
   context-free syntax
     Syntaxmodel -> ToplevelDeclaration

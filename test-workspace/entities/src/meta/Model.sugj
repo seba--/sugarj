@@ -1,7 +1,5 @@
 package meta;
 
-import meta.Explode;
-
 public sugar Model {
   desugarings
     meta-model
@@ -9,7 +7,7 @@ public sugar Model {
   rules
     meta-model :
       model@MetamodelDec(mods, name, body) -> 
-      ModelDec(ModelDecHead(mods, name), ModelBody(<meta-explode> body))
+      ModelDec(ModelDecHead(mods, name), ModelBody(("Metamodel", body)))
 
   context-free syntax
     Metamodel -> ToplevelDeclaration

@@ -4,7 +4,6 @@ import org.sugarj.languages.Model;
 
 import entities.meta.Type;
 import entities.meta.Lexical;
-import meta.Explode;
 
 /**
  * copied from https://svn.strategoxt.org/repos/WebDSL/webdsls/trunk/src/org/webdsl/dsl/syntax/WebDSL-DataModel.sdf
@@ -16,7 +15,7 @@ public sugar Model {
   rules
     entity-model :
       entity@EntityDec(mods, name, super, body) -> 
-      ModelDec(ModelDecHead(mods, name), ModelBody(<meta-explode> (super, body)))
+      ModelDec(ModelDecHead(mods, name), ModelBody(("Entity", super, body)))
 
   context-free syntax
     Entity -> ToplevelDeclaration
