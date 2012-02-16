@@ -5,4 +5,5 @@ import entities.meta2.Desugaring;
 
 public entity Test {
   foo :: String
+  bar :: Test
 }

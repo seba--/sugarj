@@ -32,19 +32,19 @@ public sugar ModelSyntax {
         <?Entity_(_,_,<id>,_); option-of(id)> e_ => superentity;
         <?Entity_(_,_,_,<id>); list-of(id)> e_ => props
 
-    ast-to-metamode :
+    ast-for-metamodel :
       e_ -> Property(name, sort, inverse)
       where
         <?Property_(<id>,_,_); id> e_ => name;
         <?Property_(_,<id>,_); id> e_ => sort;
         <?Property_(_,_,<id>); option-of(pair-of(id,id))> e_ => inverse
 
-    ast-to-metamode :
+    ast-for-metamodel :
       e_ -> SimpleSort(name)
       where
         <?SimpleSort_(<id>); id> e_ => name
 
-    ast-to-metamode :
+    ast-for-metamodel :
       e_ -> CompoundSort(sortcons, sortargs)
       where
         <?CompoundSort_(<id>,_); id> e_ => sortcons;
