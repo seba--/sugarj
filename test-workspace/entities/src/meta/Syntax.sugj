@@ -6,8 +6,8 @@ public sugar Syntax {
 
   rules
     syntax-model :
-      SyntaxmodelDec(mods, name, model, body) -> 
-      ModelDec(ModelDecHead(mods, name), ModelBody(("Syntax", model, body)))
+      SyntaxmodelDec(mods, name, metamodel, body) -> 
+      ModelDec(ModelDecHead(mods, name), ModelBody(("Syntax", metamodel, body)))
 
   context-free syntax
     Syntaxmodel -> ToplevelDeclaration
@@ -38,8 +38,7 @@ public sugar Syntax {
     Symbol -> SyntaxExp
     "(" SyntaxExp+ ")" -> SyntaxExp {cons("Group")}
 
-    "start" Nonterminal -> StartProduction {cons("Start")}
     Nonterminal "::=" SyntaxExp* -> Production {cons("Production")}
 
-    StartProduction? Production* -> SyntaxDeclaration {cons("SyntaxDec")}
+    Production* -> SyntaxDeclaration {cons("SyntaxDec")}
 }
