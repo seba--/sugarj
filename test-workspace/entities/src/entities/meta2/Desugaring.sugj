@@ -1,7 +1,7 @@
 package entities.meta2;
 
-import meta.SignatureTrans;
-import entities.meta2.Model<SignatureTrans>;
+import meta.Signatures;
+import entities.meta2.Model<Signatures>;
 
 public sugar Desugaring {
   desugarings
