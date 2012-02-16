@@ -42,23 +42,38 @@ rules
 
   gen-signature-from-grammar :
     syntax(productions) -> Signature([Constructors(opdecls)])
-    where <(map(ensure-list(gen-opdecl-from-prod)) ; concat)> productions => opdecls
+    where <mapconcat(ensure-list(gen-opdecl-from-prod))> productions => opdecls
 
   gen-signature-from-grammar :
     context-free-syntax(productions) -> Signature([Constructors(opdecls)])
-    where <(map(ensure-list(gen-opdecl-from-prod)) ; concat)> productions => opdecls
+    where <mapconcat(ensure-list(gen-opdecl-from-prod))> productions => opdecls
 
   gen-signature-from-grammar :
-    context-free-priorities(productions) -> Signature([Constructors(opdecls)])
-    where <(map(ensure-list(gen-opdecl-from-prod)) ; concat)> productions => opdecls
+    context-free-priorities(priorities) -> Signature([Constructors(opdecls)])
+    where <mapconcat(ensure-list(gen-opdecl-from-priority))> priorities => opdecls
 
 
 rules
 
   gen-opdecl-from-prod :
     prod(arg-symbols, res-symbol, attributes) -> OpDecl(cons, type)
-    where <get-cons-attribute> attributes => cons
-          ; <get-prod-type> (arg-symbols, res-symbol) => type
+    where <get-cons-attribute> attributes => cons;
+          <get-prod-type> (arg-symbols, res-symbol) => type
+
+  gen-opdecl-from-priority :
+    chain(groups) -> <mapconcat(ensure-list(gen-opdecl-from-group))> groups
+
+  gen-opdecl-from-group :
+    with-arguments(g, _) -> <gen-opdecl-from-group> g
+  gen-opdecl-from-group :
+    non-transitive(g) -> <gen-opdecl-from-group> g
+  gen-opdecl-from-group :
+    simple-group(p) -> <gen-opdecl-from-prod> p
+  gen-opdecl-from-group :
+    prods-group(prods) -> <mapconcat(ensure-list(gen-opdecl-from-prod))> prods
+  gen-opdecl-from-group :
+    assoc-group(_, prods) -> <mapconcat(ensure-list(gen-opdecl-from-prod))> prods 
+
 
   get-cons-attribute :
     attrs(attributes) -> cons
