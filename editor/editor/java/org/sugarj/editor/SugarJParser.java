@@ -1,7 +1,5 @@
 package org.sugarj.editor;
 
-import static org.sugarj.driver.Log.log;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -285,13 +283,11 @@ public class SugarJParser extends JSGLRI {
     Path strCachePath = environment.new RelativePathCache("strCache");
     ModuleKeyCache<Path> strCache = null;
     try {
-      // log.log("load str cache from " + strCachePath);
       strCache = Driver.reallocate(
           (ModuleKeyCache<Path>) new ObjectInputStream(new FileInputStream(strCachePath.getFile())).readObject(),
           environment);
     }
     catch (Exception e) {
-      log.logErr("Could not read str cache, generating new one.");
       strCache = new ModuleKeyCache<Path>();
       for (File f : environment.getCacheDir().getFile().listFiles())
         if (f.getPath().endsWith(".jar"))
