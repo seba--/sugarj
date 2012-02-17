@@ -5,7 +5,7 @@ import org.spoofax.interpreter.library.AbstractStrategoOperatorRegistry;
 import org.sugarj.driver.Environment;
 
 /**
- * Provides primitives for looking up modules. See also org.sugarj.driver.ModuleSystemCommands.
+ * Provides Stratego primitives for SugarJ.
  * 
  * @author seba
  */

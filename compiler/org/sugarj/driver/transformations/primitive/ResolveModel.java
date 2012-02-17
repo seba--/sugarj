@@ -12,6 +12,12 @@ import org.sugarj.driver.Environment;
 import org.sugarj.driver.ModuleSystemCommands;
 import org.sugarj.driver.path.Path;
 
+/**
+ * Primitive for looking up and loading a model according to the current environment.
+ * If successful, this primitive returns the loaded model as a term.
+ * 
+ * @author seba
+ */
 class ResolveModel extends AbstractPrimitive {
 
   private Environment env;

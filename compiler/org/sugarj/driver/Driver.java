@@ -1044,14 +1044,14 @@ public class Driver {
       IStrategoTerm newTransformedTerm = STRCommands.assimilate("main-" + FileCommands.fileName(strPath), trans, currentTerm, interp);
       
       if (newTransformedTerm == null) {
-        String msg = "model transformation failed " + FileCommands.dropExtension(strPath.getRelativePath()) + " applied to " + currentTerm;
+        String msg = "model transformation failed " + FileCommands.dropExtension(strPath.getRelativePath()) + " applied to " + ATermCommands.atermToFile(currentTerm).getAbsolutePath();
         setErrorMessage(lastSugaredToplevelDecl, msg);
         throw new RuntimeException(msg);
       }
       
       return newTransformedTerm;
     } catch (Exception e) {
-      String msg = "model transformation failed " + FileCommands.dropExtension(strPath.getRelativePath()) + " applied to " + currentTerm;
+      String msg = "model transformation failed " + FileCommands.dropExtension(strPath.getRelativePath()) + " applied to " + ATermCommands.atermToFile(currentTerm).getAbsolutePath();
       setErrorMessage(lastSugaredToplevelDecl, msg + ":\n" + e.getMessage());
       throw new RuntimeException(msg, e);
     }
