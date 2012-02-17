@@ -1,7 +1,9 @@
 package meta;
 
+import org.sugarj.languages.Model;
 import org.sugarj.languages.Sdf2;
 import org.sugarj.languages.SugarJ;
+
 import meta.Syntax;
 
 public transformation ModelSyntax {
@@ -65,5 +67,5 @@ public transformation ModelSyntax {
     import-model-pkg : PackageOrTypeName(pkg, Id(name)) -> <conc-strings> (<import-model-pkg> pkg, ".", name)
 
     import-model-path-trans : (name, []) -> name
-    import-model-path-trans = log(|"resolution of transformation-generated models not yet implemented"); fail
+    import-model-path-trans = !"resolution of transformation-generated models not yet implemented"; error; fail
 }
