@@ -481,13 +481,16 @@ public class Driver {
         List<IStrategoTerm> editorServices = ATermCommands.getList(services);
         
         if (currentTransProg == null)
+          log.beginInlineTask("Compile transformation for semantic editor services");
           try {
             currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
-          } catch (SGLRException e) {
-            log.logErr(e.toString());
-          } catch (InvalidParseTableException e) {
-            log.logErr(e.toString());
-          }
+            log.endTask(true);
+          } catch (Exception e) {
+            String msg = "compiling transformation " + currentTransSTR + "failed";
+            setErrorMessage(lastSugaredToplevelDecl, msg + ": " + e.getMessage());
+            log.endTask(false);
+            throw new RuntimeException(msg, e);
+          } 
         editorServices = ATermCommands.registerSemanticProvider(editorServices, currentTransProg);
   
         Path editorServicesFile = environment.new RelativePathBin(relPackageNameSep() + extName + ".serv");
@@ -1023,7 +1026,7 @@ public class Driver {
     try {
       log.beginTask("Compile transformation", "Compile transformation " + strPath.getRelativePath());
       trans = STRCommands.compile(compoundStr, "main-" + FileCommands.fileName(strPath), driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
-    } catch (Exception e ) {
+    } catch (Exception e) {
       String msg = "problems while compiling transformation " + FileCommands.dropExtension(strPath.getRelativePath());
       setErrorMessage(lastSugaredToplevelDecl, msg + ": " + e.getMessage());
       throw new RuntimeException(msg, e);
@@ -1340,10 +1343,10 @@ public class Driver {
     try {
       FileCommands.deleteTempFiles(currentTransProg);
       currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
-    } catch (StrategoException e) {
-      String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
-      log.logErr(msg);
-      setErrorMessage(lastSugaredToplevelDecl, msg);
+    } catch (Exception e) {
+      String msg = "checking transformation " + currentTransSTR + "failed";
+      setErrorMessage(lastSugaredToplevelDecl, msg + ": " + e.getMessage());
+      throw new RuntimeException(msg, e);
     } finally {
       log.endTask();
     }
@@ -1708,7 +1711,7 @@ public class Driver {
         String rest = getString(restTerm);
     
         if (input.equals(rest))
-          throw new SGLRException(parser.getParser(), "empty toplevel declaration parse rule");
+          throw new SGLRException(parser.getParser(), "empty toplevel declaration");
         
         try {
           if (!rest.isEmpty())
@@ -1818,12 +1821,10 @@ public class Driver {
         currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
     
         return STRCommands.assimilate(currentTransProg, term, interp);
-      } catch (StrategoException e) {
-        String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
-        
-        log.logErr(msg);
-    
-        setErrorMessage(term, msg);
+      } catch (Exception e) {
+        String msg = "checking transformation " + currentTransSTR + "failed";
+        setErrorMessage(lastSugaredToplevelDecl, msg + ": " + e.getMessage());
+        // no rethrow
         return term;
       } finally {
         log.endTask();

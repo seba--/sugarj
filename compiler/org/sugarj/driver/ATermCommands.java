@@ -352,7 +352,7 @@ public class ATermCommands {
       else {
         if (lastExisting == null || !lastExisting.equals(tok.getError())) {
           lastExisting = tok.getError();
-          lastNew = tok.getError() + " --- " + msg;
+          lastNew = msg + " --- " + tok.getError();
         } 
         tok.setError(lastNew);
       }
