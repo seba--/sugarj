@@ -6,14 +6,18 @@ import meta.Syntax;
 
 public transformation ModelSyntax {
   rules
-    syntaxmodel-to-sdf :
+    main = register-model-imports; 
+           oncetd(syntaxmodel-to-sugar)
+ 
+    syntaxmodel-to-sugar :
       ModelDec(ModelDecHead(mods, name), ModelBody(("Syntax", metamodel, SyntaxDec(prods)))) ->
-      SugarDec(SugarDecHead(mods, name), SugarBody(grammar-elem(context-free-syntax(<map(prod-to-sdf(|metamodel))> prods))))
+      SugarDec(SugarDecHead(mods, name), SugarBody(grammar-elem(context-free-syntax(<map(prod-to-sdf(|structures))> prods))))
+    where <resolve-model; ?ModelDec(_, ModelBody(("Metamodel", <id>)))> metamodel => structures
 
-    prod-to-sdf(|metamodel) :
-      Production(Nonterminal(n), rhs) ->
-      prod(<map(exp-to-sdf())> rhs, sort(n), annos)
-    where <![<cons-anno>] <+ ![]> (n, metamodel) => annos
+    prod-to-sdf(|structures) :
+      Production(n, rhs) ->
+      prod(<map(exp-to-sdf())> rhs, sort(n), attrs(annos))
+    where <![<cons-anno>] <+ ![]> (n, structures) => annos
 
     exp-to-sdf : Nonterminal(n) -> sort(n)
     exp-to-sdf : Terminal(t) -> lit(<conc-strings> ("\"", t, "\""))
@@ -25,5 +29,41 @@ public transformation ModelSyntax {
     exp-to-sdf : Group([]) -> empty()
     exp-to-sdf : Group([e|es]) -> seq(<exp-to-sdf> e, <map(exp-to-sdf)> es)
 
-    cons-anno = fail
+    cons-anno : (n, structures) -> term(default(appl(unquoted("cons"), [fun(quoted(cons-name))])))
+      where <fetch(?Structure(n))> structures;
+            <conc-strings> ("\"", n, "__\"") => cons-name
+
+  rules
+    register-model-imports =
+      ?t;
+      ?SugarCompilationUnit(_, <id>,_);
+      map(register-model-import);
+      !t
+
+    register-model-import =
+      ?TypeImport(name);
+      path := <import-model-path> name;
+      register-model-import(|path)
+
+    register-model-import =
+      ?TransImportDec(name, trans, _);
+      path := <import-model-path-trans> (<import-model-path> name, trans);
+      register-model-import(|path)
+
+    register-model-import(|path) =
+      unqualifiedname := <unqualified-name-from-path> path;
+      prim("SUGARJ_resolve_model", path) => model;
+      rules(resolve-model :+ unqualifiedname -> model)
+
+    unqualified-name-from-path = 
+      string-as-chars(reverse; take-until(?'/'); reverse)
+
+    import-model-path : TypeName(Id(name)) -> name
+    import-model-path : TypeName(pkg, Id(name)) -> <conc-strings> (<import-model-pkg> pkg, ".", name)
+
+    import-model-pkg : PackageOrTypeName(Id(name)) -> name
+    import-model-pkg : PackageOrTypeName(pkg, Id(name)) -> <conc-strings> (<import-model-pkg> pkg, ".", name)
+
+    import-model-path-trans : (name, []) -> name
+    import-model-path-trans = log(|"resolution of transformation-generated models not yet implemented"); fail
 }
