@@ -5,4 +5,5 @@ signature constructors
   TransDecHead : List(AnnoOrSugarMod) * JavaId -> TransformationDecHead
   TransBody : TransformationDef -> TransformationBody
 
-  TransImportDec : JavaTypeName * List(JavaTypeName) -> JavaImportDec
+  TransImportDec : JavaTypeName * List(JavaTypeName) * ImportAs -> JavaImportDec
+  ImportAs : JavaTypeName -> ImportAs
