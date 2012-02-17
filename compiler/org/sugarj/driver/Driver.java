@@ -31,6 +31,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.omg.CosNaming.IstringHelper;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.InvalidParseTableException;
 import org.spoofax.jsglr.client.ParseTable;
@@ -57,6 +58,7 @@ import org.sugarj.driver.path.RelativeSourceLocationPath;
 import org.sugarj.driver.path.SourceLocation;
 import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
 import org.sugarj.driver.transformations.extraction.extraction;
+import org.sugarj.driver.transformations.primitive.SugarJPrimitivesLibrary;
 import org.sugarj.driver.transformations.renaming.renaming;
 import org.sugarj.stdlib.StdLib;
 import org.sugarj.util.ProcessingListener;
@@ -710,7 +712,8 @@ public class Driver {
     try {
       RelativePath modelOutFile = environment.new RelativePathBin(relPackageNameSep() + modelName + ".model");
       
-      driverResult.generateFile(modelOutFile, ATermCommands.atermToString(makeDesugaredSyntaxTree()));
+      IStrategoTerm modelTerm = makeDesugaredSyntaxTree();
+      driverResult.generateFile(modelOutFile, ATermCommands.atermToString(modelTerm));
     } finally {
       log.endTask();
     }
@@ -1397,6 +1400,8 @@ public class Driver {
     editorServicesParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.editorServicesTbl.getPath()), "Module");
 
     interp = new HybridInterpreter(); //TODO (ATermCommands.factory);
+    interp.addOperatorRegistry(new SugarJPrimitivesLibrary(environment));
+    
     sdfContext = tools.init();
     makePermissiveContext = make_permissive.init();
     extractionContext = extraction.init();

@@ -235,8 +235,7 @@ public class STRCommands {
   
   public static IStrategoTerm assimilate(String strategy, Path jarfile, IStrategoTerm in, HybridInterpreter interp) throws IOException {
     try {
-      // XXX try release loaded classes by creating a completely new interpreter
-      HybridInterpreter newInterp = new HybridInterpreter(interp.getFactory(), interp.getProgramFactory());
+      HybridInterpreter newInterp = new HybridInterpreter(interp);
       newInterp.loadJars(jarfile.getFile().toURI().toURL());
       newInterp.setCurrent(in);
       
