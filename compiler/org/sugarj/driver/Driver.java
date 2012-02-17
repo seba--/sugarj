@@ -486,8 +486,8 @@ public class Driver {
             currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
             log.endTask(true);
           } catch (Exception e) {
-            String msg = "compiling transformation " + currentTransSTR + "failed";
-            setErrorMessage(lastSugaredToplevelDecl, msg + ": " + e.getMessage());
+            String msg = "compiling transformation " + currentTransSTR + " failed";
+            setErrorMessage(lastSugaredToplevelDecl, msg + ":\n" + e.getMessage());
             log.endTask(false);
             throw new RuntimeException(msg, e);
           } 
@@ -1028,7 +1028,7 @@ public class Driver {
       trans = STRCommands.compile(compoundStr, "main-" + FileCommands.fileName(strPath), driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
     } catch (Exception e) {
       String msg = "problems while compiling transformation " + FileCommands.dropExtension(strPath.getRelativePath());
-      setErrorMessage(lastSugaredToplevelDecl, msg + ": " + e.getMessage());
+      setErrorMessage(lastSugaredToplevelDecl, msg + ":\n" + e.getMessage());
       throw new RuntimeException(msg, e);
     } finally {
       log.endTask();
@@ -1050,7 +1050,7 @@ public class Driver {
       return newTransformedTerm;
     } catch (Exception e) {
       String msg = "model transformation failed " + FileCommands.dropExtension(strPath.getRelativePath()) + " applied to " + currentTerm;
-      setErrorMessage(lastSugaredToplevelDecl, msg + ": " + e.getMessage());
+      setErrorMessage(lastSugaredToplevelDecl, msg + ":\n" + e.getMessage());
       throw new RuntimeException(msg, e);
     }
   }
@@ -1344,9 +1344,9 @@ public class Driver {
       FileCommands.deleteTempFiles(currentTransProg);
       currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
     } catch (Exception e) {
-      String msg = "checking transformation " + currentTransSTR + "failed";
-      setErrorMessage(lastSugaredToplevelDecl, msg + ": " + e.getMessage());
-      throw new RuntimeException(msg, e);
+      String msg = "checking transformation " + currentTransSTR + " failed";
+      setErrorMessage(lastSugaredToplevelDecl, msg + ":\n" + e.getMessage());
+      // no rethrow
     } finally {
       log.endTask();
     }
@@ -1822,8 +1822,8 @@ public class Driver {
     
         return STRCommands.assimilate(currentTransProg, term, interp);
       } catch (Exception e) {
-        String msg = "checking transformation " + currentTransSTR + "failed";
-        setErrorMessage(lastSugaredToplevelDecl, msg + ": " + e.getMessage());
+        String msg = "compilation of desugaring " + currentTransSTR + " failed";
+        setErrorMessage(lastSugaredToplevelDecl, msg + ":\n" + e.getMessage());
         // no rethrow
         return term;
       } finally {
