@@ -1256,7 +1256,10 @@ public class Driver {
 
         String sdfExtensionContent = SDFCommands.prettyPrintSDF(sdfExtract, interp);
 
-        String sdfSource = SDFCommands.makePermissiveSdf(sdfExtensionHead + sdfExtensionContent, makePermissiveContext);
+        String sdfSource = sdfExtensionHead + sdfExtensionContent;
+        if (!sdfExtract.isList() || sdfExtract.getSubtermCount() == 0)
+          sdfSource = SDFCommands.makePermissiveSdf(sdfSource, makePermissiveContext);
+        
         driverResult.generateFile(sdfExtension, sdfSource);
         availableSDFImports.add(sdfExtension);
         
