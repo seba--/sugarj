@@ -808,7 +808,7 @@ public class Driver {
       else 
         success = processImport(modulePath);
       
-      if (!success)
+      if (!success && !ATermCommands.hasError(toplevelDecl))
         setErrorMessage(toplevelDecl, "module not found: " + modulePath);
       
     } catch (Exception e) {
@@ -873,7 +873,7 @@ public class Driver {
               }
             } catch (Exception e) {
               res = null;
-              setErrorMessage(toplevelDecl, "compilation of imported module " + modulePath + " failed: " + e.getMessage());
+              setErrorMessage(toplevelDecl, "compilation of imported module " + modulePath + " failed");
               // no rethrow of exception, so that compilation of this file continues as far as possible
             } finally {
               initializeCaches(environment, true);

@@ -337,17 +337,10 @@ public class ATermCommands {
     IToken left = ImploderAttachment.getLeftToken(toplevelDecl);
     IToken right = ImploderAttachment.getRightToken(toplevelDecl);
     
-    msg = msg.replace("\n", "<br/>");
+    msg = msg.replace("\n", " --- ");
     
-//    Path file = null;
-//    try {
-//      file = atermToFile(toplevelDecl);
-//    } catch (IOException e) {
-//      e.printStackTrace();
-//    }
-
     if (left == null || right == null)
-      return; // throw new IllegalStateException(msg + ": " + file);
+      Log.log.logErr(msg);
     
     String lastExisting = null;
     String lastNew = null;
@@ -359,7 +352,7 @@ public class ATermCommands {
       else {
         if (lastExisting == null || !lastExisting.equals(tok.getError())) {
           lastExisting = tok.getError();
-          lastNew = msg + "<br/>" + tok.getError();
+          lastNew = tok.getError() + " --- " + msg;
         } 
         tok.setError(lastNew);
       }
@@ -368,7 +361,12 @@ public class ATermCommands {
         break;
     }
   }
-
+  
+  public static boolean hasError(IStrategoTerm toplevelDecl) {
+    IToken left = ImploderAttachment.getLeftToken(toplevelDecl);
+    return left != null && left.getError() != null && !left.getError().isEmpty();
+  }
+  
   public static IStrategoTerm makeMutable(IStrategoTerm term) {
     if (term.getStorageType() == IStrategoTerm.MUTABLE)
       return term;
