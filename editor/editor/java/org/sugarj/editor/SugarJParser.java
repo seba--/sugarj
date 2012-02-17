@@ -289,9 +289,10 @@ public class SugarJParser extends JSGLRI {
     }
     catch (Exception e) {
       strCache = new ModuleKeyCache<Path>();
-      for (File f : environment.getCacheDir().getFile().listFiles())
-        if (f.getPath().endsWith(".jar"))
-          f.delete();
+      if (environment.getCacheDir().getFile() != null && environment.getCacheDir().getFile().exists()) 
+        for (File f : environment.getCacheDir().getFile().listFiles())
+          if (f.getPath().endsWith(".jar"))
+            f.delete();
     }
     
     try {
