@@ -337,6 +337,8 @@ public class ATermCommands {
     IToken left = ImploderAttachment.getLeftToken(toplevelDecl);
     IToken right = ImploderAttachment.getRightToken(toplevelDecl);
     
+    msg = msg.replace("\n", "<br/>");
+    
 //    Path file = null;
 //    try {
 //      file = atermToFile(toplevelDecl);
@@ -347,10 +349,20 @@ public class ATermCommands {
     if (left == null || right == null)
       return; // throw new IllegalStateException(msg + ": " + file);
     
+    String lastExisting = null;
+    String lastNew = null;
+    
     for (int i = left.getIndex(), max = right.getIndex(); i <= max; i++) {
       Token tok = ((Token) left.getTokenizer().getTokenAt(i));
       if (tok.getError() == null || tok.getError().isEmpty())
         tok.setError(msg);
+      else {
+        if (lastExisting == null || !lastExisting.equals(tok.getError())) {
+          lastExisting = tok.getError();
+          lastNew = msg + "<br/>" + tok.getError();
+        } 
+        tok.setError(lastNew);
+      }
       
       if (tok.getTokenizer().getInput().length() <= tok.getStartOffset() || tok.getTokenizer().getInput().charAt(tok.getStartOffset()) == '\n')
         break;

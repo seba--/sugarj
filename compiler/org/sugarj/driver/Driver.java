@@ -862,36 +862,34 @@ public class Driver {
             log.log("Need to compile the imported module first; processing it now.");
 
             try {
-              
               if (transformModel) {
                 IStrategoTerm transformedTerm = transformModel(model, importSourceFile, transformationPaths);
+                storeCaches(environment);
                 res = compileTransformedModel(transformedTerm, importSourceFile, model, transformationPaths);
               }
               else {
                 storeCaches(environment);
-                try {
-                  res = compile(importSourceFile, monitor);
-                } catch (Exception e) {
-                  res.getCollectedErrors().add(e.getMessage());
-                } finally {
-                  initializeCaches(environment, true);
-                }
-              }
-              
-              if (res.hasFailed()) {
-                StringBuilder errorMsg = new StringBuilder();
-                if (!res.getParseErrors().isEmpty()) {
-                  errorMsg.append("  parse errors:\n");
-                  for (BadTokenException err : res.getParseErrors())
-                    errorMsg.append("  ").append(err.getMessage()).append(" (").append(err.getLineNumber()).append(",").append(err.getColumnNumber()).append(")\n");
-                }
-                for (String err : res.getCollectedErrors())
-                  errorMsg.append("  ").append(err.replace("\n", "\n  ")).append("\n");
-                
-                setErrorMessage(toplevelDecl, "problems while compiling " + modulePath + ":\n" + errorMsg.toString());
+                res = compile(importSourceFile, monitor);
               }
             } catch (Exception e) {
-              setErrorMessage(toplevelDecl, "problems while compiling " + modulePath);
+              res = null;
+              setErrorMessage(toplevelDecl, "compilation of imported module " + modulePath + " failed: " + e.getMessage());
+              // no rethrow of exception, so that compilation of this file continues as far as possible
+            } finally {
+              initializeCaches(environment, true);
+            }
+            
+            if (res != null && res.hasFailed()) {
+              StringBuilder errorMsg = new StringBuilder();
+              if (!res.getParseErrors().isEmpty()) {
+                errorMsg.append("  parse errors:\n");
+                for (BadTokenException err : res.getParseErrors())
+                  errorMsg.append("  ").append(err.getMessage()).append(" (").append(err.getLineNumber()).append(",").append(err.getColumnNumber()).append(")\n");
+              }
+              for (String err : res.getCollectedErrors())
+                errorMsg.append("  ").append(err.replace("\n", "\n  ")).append("\n");
+              
+              setErrorMessage(toplevelDecl, "problems while compiling " + modulePath + ":\n" + errorMsg.toString());
             }
               
             log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
@@ -999,12 +997,10 @@ public class Driver {
       paths.addAll(envTransformationPaths);
       environment.setTransformationPaths(paths);
       
-      storeCaches(environment);
       return compile(transformedTerm, transformedModel, monitor);
     } finally {
       environment.setTransformationPaths(envTransformationPaths);
       environment.setRenamings(envRenamings);
-      initializeCaches(environment, true);
       log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
     }
   }
@@ -1027,30 +1023,32 @@ public class Driver {
     try {
       log.beginTask("Compile transformation", "Compile transformation " + strPath.getRelativePath());
       trans = STRCommands.compile(compoundStr, "main-" + FileCommands.fileName(strPath), driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
-    } catch (TokenExpectedException e) {
-    } catch (BadTokenException e) {
-    } catch (InvalidParseTableException e) {
-    } catch (SGLRException e) {
+    } catch (Exception e ) {
+      String msg = "problems while compiling transformation " + FileCommands.dropExtension(strPath.getRelativePath());
+      setErrorMessage(lastSugaredToplevelDecl, msg + ": " + e.getMessage());
+      throw new RuntimeException(msg, e);
     } finally {
       log.endTask();
     }
-    
-    if (trans == null)
-      throw new StrategoException("compilation of transformation " + FileCommands.fileName(strPath) + " failed");
       
     /*
-* applies each transformation's "main-<transformation name>" rule on the AST of
-* the current import
-*/
+     * applies each transformation's "main-<transformation name>" rule on the AST of
+     * the current import
+     */
     try {
       IStrategoTerm newTransformedTerm = STRCommands.assimilate("main-" + FileCommands.fileName(strPath), trans, currentTerm, interp);
       
-      if (newTransformedTerm == null)
-        throw new StrategoException("transformation failed: " + currentTerm);
+      if (newTransformedTerm == null) {
+        String msg = "model transformation failed " + FileCommands.dropExtension(strPath.getRelativePath()) + " applied to " + currentTerm;
+        setErrorMessage(lastSugaredToplevelDecl, msg);
+        throw new RuntimeException(msg);
+      }
       
       return newTransformedTerm;
     } catch (Exception e) {
-      throw new RuntimeException("model transformation failed; " + strPath.getRelativePath() + " applied to " + currentTerm, e);
+      String msg = "model transformation failed " + FileCommands.dropExtension(strPath.getRelativePath()) + " applied to " + currentTerm;
+      setErrorMessage(lastSugaredToplevelDecl, msg + ": " + e.getMessage());
+      throw new RuntimeException(msg, e);
     }
   }
 
