@@ -494,10 +494,6 @@ public class Result {
   }
   
   public boolean hasFailed() {
-    return failed;
-  }
-  
-  public void setFailed(boolean hasFailed) {
-    this.failed = hasFailed;
+    return !getParseErrors().isEmpty() || !getCollectedErrors().isEmpty();
   }
 }

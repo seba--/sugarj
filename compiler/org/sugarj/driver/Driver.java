@@ -397,7 +397,7 @@ public class Driver {
       
       driverResult.writeDependencyFile(depOutFile);
 
-      success = true;
+      success = driverResult.getCollectedErrors().isEmpty() && driverResult.getParseErrors().isEmpty();
     }
     catch (CommandExecution.ExecutionError e) {
       // TODO do something more sensible
@@ -406,7 +406,6 @@ public class Driver {
     }
     finally {
       log.endTask(success, "done processing " + sourceFile, "failed processing " + sourceFile);
-      driverResult.setFailed(!success);
     }
   }
 
@@ -870,12 +869,27 @@ public class Driver {
               }
               else {
                 storeCaches(environment);
-                res = compile(importSourceFile, monitor);
-                initializeCaches(environment, true);
+                try {
+                  res = compile(importSourceFile, monitor);
+                } catch (Exception e) {
+                  res.getCollectedErrors().add(e.getMessage());
+                } finally {
+                  initializeCaches(environment, true);
+                }
               }
               
-              if (res.hasFailed())
-                setErrorMessage(toplevelDecl, "problems while compiling " + modulePath);
+              if (res.hasFailed()) {
+                StringBuilder errorMsg = new StringBuilder();
+                if (!res.getParseErrors().isEmpty()) {
+                  errorMsg.append("  parse errors:\n");
+                  for (BadTokenException err : res.getParseErrors())
+                    errorMsg.append("  ").append(err.getMessage()).append(" (").append(err.getLineNumber()).append(",").append(err.getColumnNumber()).append(")\n");
+                }
+                for (String err : res.getCollectedErrors())
+                  errorMsg.append("  ").append(err.replace("\n", "\n  ")).append("\n");
+                
+                setErrorMessage(toplevelDecl, "problems while compiling " + modulePath + ":\n" + errorMsg.toString());
+              }
             } catch (Exception e) {
               setErrorMessage(toplevelDecl, "problems while compiling " + modulePath);
             }

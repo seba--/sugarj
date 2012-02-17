@@ -337,15 +337,15 @@ public class ATermCommands {
     IToken left = ImploderAttachment.getLeftToken(toplevelDecl);
     IToken right = ImploderAttachment.getRightToken(toplevelDecl);
     
-    Path file = null;
-    try {
-      file = atermToFile(toplevelDecl);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    
+//    Path file = null;
+//    try {
+//      file = atermToFile(toplevelDecl);
+//    } catch (IOException e) {
+//      e.printStackTrace();
+//    }
+
     if (left == null || right == null)
-      throw new IllegalStateException(msg + ": " + file);
+      return; // throw new IllegalStateException(msg + ": " + file);
     
     for (int i = left.getIndex(), max = right.getIndex(); i <= max; i++) {
       Token tok = ((Token) left.getTokenizer().getTokenAt(i));
