@@ -140,8 +140,7 @@ public class ATermCommands {
   
   public static List<IStrategoTerm> getList(IStrategoTerm term) {
     
-    if (term.getTermType() == IStrategoTerm.LIST)
-    {
+    if (term.getTermType() == IStrategoTerm.LIST) {
       List<IStrategoTerm> l = new ArrayList<IStrategoTerm>();
       
       for (Iterator<IStrategoTerm> it = new StrategoListIterator((IStrategoList) term);
@@ -152,6 +151,14 @@ public class ATermCommands {
     }
     
     throw new MatchError(term, "list");
+  }
+  
+  public static IStrategoTerm getOptionalTerm(IStrategoTerm term) {
+    if (isApplication(term, "Some"))
+      return getApplicationSubterm(term, "Some", 0);
+    if (isApplication(term, "None"))
+      return null;
+    throw new MatchError(term, "option");
   }
   
   public static IStrategoTerm makeTuple(IStrategoTerm... ts) {
@@ -260,7 +267,7 @@ public class ATermCommands {
     }
     catch (StrategoExit e) {
       if (e.getValue() != 0 || result == null)
-        throw new RuntimeException("Stratego extraction failed", e);
+        throw new RuntimeException("SDF extraction failed", e);
     }
     return result;
   }
@@ -436,5 +443,20 @@ public class ATermCommands {
         throw new RuntimeException("Stratego extraction failed", e);
     }
     return result;
+  }
+  
+  public static String getLocalImportName(IStrategoTerm term, HybridInterpreter interp) throws IOException {
+    if (!isApplication(term, "TransImportDec"))
+      return null;
+    
+    term = getApplicationSubterm(term, "TransImportDec", 2);
+    term = getOptionalTerm(term);
+    
+    if (term == null)
+      return null;
+    
+    term = getApplicationSubterm(term, "ImportAs", 0);
+          
+    return SDFCommands.prettyPrintJava(term, interp);
   }
 }

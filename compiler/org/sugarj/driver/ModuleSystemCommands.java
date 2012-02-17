@@ -60,7 +60,7 @@ public class ModuleSystemCommands {
    * @throws IOException 
    */
   public static RelativePath importSdf(String modulePath, Environment environment) throws IOException {
-    RelativePath sdf = searchFile(modulePath, ".sdf", environment);
+    RelativePath sdf = searchFile(modulePath.replace("$", "__"), ".sdf", environment);
     
     if (sdf == null)
       return null;
@@ -84,7 +84,7 @@ public class ModuleSystemCommands {
    * @throws IOException 
    */
   public static RelativePath importStratego(String modulePath, Environment environment) throws IOException {
-    RelativePath str = searchFile(modulePath, ".str", environment);
+    RelativePath str = searchFile(modulePath.replace("$", "__"), ".str", environment);
     
     if (str == null)
       return null;
@@ -222,6 +222,9 @@ public class ModuleSystemCommands {
   
   private static RelativePath searchFileInSearchPath(String relativePath, String extension, Set<Path> searchPath) {
     for (Path base : searchPath) {
+      if (!base.getFile().exists() || !base.getFile().isDirectory())
+        continue;
+      
       RelativePath p = searchFile(base, relativePath, extension);
       if (p != null)
         return p;
@@ -277,6 +280,9 @@ public class ModuleSystemCommands {
     driverResult.addFileDependency(binFile);
     
     for (Path searchPath : environment.getIncludePath()) {
+      if (!searchPath.getFile().exists() || !searchPath.getFile().isDirectory())
+        continue;
+      
       String relPath = relativePath;
       if (relPath.startsWith(searchPath.getAbsolutePath())) {
         int sepOffset = relativePath.endsWith(Environment.sep) ? 0 : 1;

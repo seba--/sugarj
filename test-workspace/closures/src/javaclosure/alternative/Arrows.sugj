@@ -15,8 +15,8 @@ public sugar Arrows {
     "fun" "(" JavaFormalParam ")" "->" JavaType JavaBlock -> JavaExpr {cons("ArrowBlockLambda")}
   
   desugarings
-    \ ArrowFunctionType(arg, res) -> FunctionType(res, arg) \
-    \ ArrowBlockLambda(arg, resType, body) -> BlockLambda(resType, arg, body) \
+    \ ArrowFunctionType(arg, res) -> ClosureType(res, arg) \
+    \ ArrowBlockLambda(arg, resType, body) -> Closure(resType, arg, body) \
   
   %% The remaining priorities follow by transitivity.
   context-free priorities

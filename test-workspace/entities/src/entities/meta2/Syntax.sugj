@@ -1,0 +1,20 @@
+package entities.meta2;
+
+import entities.meta2.Model;
+import meta.Syntax;
+
+public syntax Syntax for Model {
+  ToplevelDeclaration ::= Entity
+  Entity ::= mods:AnnoOrSugarMod* "entity" name:JavaId superentity:SuperEntity? "{" props:Property* "}"
+  SuperEntity ::= "extends" JavaId
+
+  Property ::= name:JavaID "::" Sort InverseAnno?
+  InverseAnno ::= "(" "inverse" "=" JavaId "." JavaID ")"
+
+  Sort ::= SimpleSort | CompoundSort
+  SimpleSort ::= JavaID
+  CompoundSort ::= JavaID "<" Sorts ">"
+
+  Sorts ::= Sort
+  Sorts ::= Sort "," Sorts
+}

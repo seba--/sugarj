@@ -1,0 +1,232 @@
+package entities.meta;
+
+import entities.meta.Lexical;
+import entities.meta.Type;
+
+/**
+ * copied from https://svn.strategoxt.org/repos/WebDSL/webdsls/trunk/src/org/webdsl/dsl/syntax/WebDSL-Action.sdf
+ **/
+public sugar Function {
+  context-free syntax %% Functions
+
+    Function -> EntityBodyDeclaration
+    "function" JavaId "(" {FormalArg ","}* ")" FunctionReturn Block -> Function {cons("Function")}
+        
+    -> FunctionReturn {ast("SimpleSort(\"Void\")")}
+    "::" Sort -> FunctionReturn {ast("<1>")}
+
+  %% static entity function
+
+    "static" "function" JavaID "(" {FormalArg ","}* ")" ReturnType Block -> StaticEntityFunction {cons("StaticEntityFunction")}
+  
+    "::" Sort -> ReturnType{cons("ReturnType")}
+    -> ReturnType {ast("ReturnType(SimpleSort(\"Void\"))")}
+
+    JavaID "::" Sort            -> FormalArg {cons("Arg")}
+  
+  context-free syntax %% inline anonymous functions/closures
+    
+    FunctionExp -> Exp
+    "function" FunctionExpParams FunctionReturn Block -> FunctionExp {cons("FunctionExp")}
+    -> FunctionExpParams {ast("[]")}
+    "(" {FormalArg ","}* ")" -> FunctionExpParams {ast("<1>")}
+    
+    %% reference to a function, something to help desugar lifted function exp
+    FunctionRef -> Exp
+    "function." JavaID "(" {Sort ","}* ")" FunctionReturn -> FunctionRef {cons("FunctionRef")}
+    
+    
+    FunctionRef "(" {Exp ","}* ")" -> Exp {cons("FunctionRefCall")}
+    FunctionRef "(" "*" "," {Exp ","}* ")" -> Exp {cons("FunctionRefCallPartial")}
+   
+  context-free syntax
+    "{" Statements "}"    -> Block {cons("Block")}
+    Statement*                -> Statements
+    Block                 -> Statement
+    %%Assignment ";"      -> Statement {cons("Assign")}
+    Exp ";"             -> Statement {cons("Stat")}
+
+    "return" Exp ";"      -> Statement {cons("Return")}
+    
+    "return" ";"          -> Statement {cons("ReturnEmpty")}
+    
+    "goto" PageCall ";"         -> Statement {cons("GoTo"),prefer}
+    "goto" "(" PageCall ")" ";"         -> Statement {cons("GoTo"),prefer}
+    "goto" -> TemplateCallId {reject}
+
+    "schedule" Exp "for" Exp ";" -> Statement {cons("Schedule")}
+    "schedule" Exp ";"           -> Statement {cons("ScheduleNoFor")}
+
+  context-free syntax
+
+    "var" JavaID ":" Sort ";"   -> VarDeclStat {cons("VarDecl")}
+    "var" JavaID ":" Sort     -> VarDecl {cons("VarDecl")}
+
+    "var" JavaID ":" Sort ":=" Exp ";" -> VarDeclStat {cons("VarDeclInit")}
+    "var" JavaID ":=" Exp ";"          -> VarDeclStat {cons("VarDeclInitInferred")}
+    "var" JavaID ":" Sort ":=" Exp     -> VarDecl {cons("VarDeclInit")}
+    "var" JavaID ":=" Exp              -> VarDecl {cons("VarDeclInitInferred")}
+
+    VarDeclStat -> Statement
+
+  context-free syntax
+
+    "if" "(" Exp ")" Block "else" Block -> Statement {cons("If")}
+
+    "if" "(" Exp ")" Block    -> Statement {cons("IfNoElse")}
+
+    "case" "(" Exp ")" "{" Case* "}"  -> Statement {cons("Case")}
+    ConstValue Block                  -> Case {cons("CaseAlt")}
+    "default"  Block                  -> Case {cons("CaseDefault")}
+
+  context-free syntax %% if in expression:  if(e) e1 else e2
+
+    "if" "(" Exp ")" Exp "else" Exp -> Exp {cons("IfExp")}
+
+  context-free syntax
+
+    "for" "(" JavaID ":" Sort "in" Exp Filter ")"
+      Block         -> Statement {cons("ForStmt")}
+
+    "for" "(" JavaID ":" Sort "in" Exp ")"
+      Block         -> Statement {cons("ForStmtNoFilter")}
+
+    "for" "(" JavaID ":" Sort Filter ")"
+      Block         -> Statement {cons("ForAllStmt")}
+
+    "for" "(" JavaID ":" Sort ")"
+      Block         -> Statement {cons("ForAllStmtNoFilter")}
+
+    "for" "(" JavaID ":" "Int" "from" Exp "to" Exp ")" Block -> Statement {cons("ForCountStmt")}
+
+    "while" "(" Exp ")" Block -> Statement {cons("WhileStmt")}
+
+
+  context-free syntax
+    Int                    -> ConstValue {cons("Int")}
+    Long                   -> ConstValue {cons("Long")}
+    Float                  -> ConstValue {cons("Float")}
+    String                 -> ConstValue {cons("String")}
+
+    ConstValue                  -> Exp
+
+    JavaID         -> Exp {cons("Var")}
+    "in"                   -> Exp {reject}
+        
+    %% to be able to refer to page or template farg/var from actions when names clashing with farg/var in action
+    "externalscope" "." JavaID -> Exp {cons("ExternalScopeVar")}
+    "global" "." JavaID -> Exp {cons("GlobalVar")}
+    "global" -> JavaID {reject}
+
+    Exp "." JavaID             -> Exp {cons("FieldAccess"),prefer}
+    
+    Exp "[" Exp "]"        -> Exp {cons("CollectionIndex"),prefer}
+
+    Sort "{" ObjectPropertyAssignment* "}"         -> ObjectCreation {cons("ObjectCreation")}
+    Sort "{" { ObjectPropertyAssignment "," }* "}" -> ObjectCreation {cons("ObjectCreation"), prefer}
+    ObjectCreation -> Exp
+
+    JavaID ":=" Exp           -> ObjectPropertyAssignment {cons("ObjectPropertyAssignment")}
+    %% fallback for code completion:
+    JavaID -> ObjectPropertyAssignment {cons("IncompleteObjectPropertyAssignment")}
+
+    Exp ":=" Exp             -> Assignment {cons("Assignment")}
+    Assignment        -> Exp
+
+    "[" Mapping* "]"       -> Exp {cons("MapCreation"), avoid} %%avoid to prevent ambiguity between with empty untyped list creation and empty map creation
+    Exp "->" Exp           -> Mapping {cons("Mapping")}
+
+    "[" {Exp ","}* "]"     -> Exp {cons("ListCreation")}
+
+    "{" {Exp ","}* "}"     -> Exp {cons("SetCreation")}
+
+    "List" "<" Sort ">" "(" {Exp ","}* ")" -> Exp {cons("TypedListCreation"), prefer}
+    "Set" "<" Sort ">" "(" {Exp ","}* ")" -> Exp {cons("TypedSetCreation"), prefer}
+
+    JavaID "(" {Exp ","}* ")"  -> Exp {cons("ThisCall")}
+    "!" "(" {Exp ","}* ")"  -> Exp {reject}
+
+    Exp "." JavaID "(" {Exp ","}* ")"  -> Exp {cons("Call")}
+
+    Exp "is" "a" Sort      -> Exp {cons("IsA")}
+    Exp "as" Sort          -> Exp {cons("Cast"), avoid} %% avoid, to give hql query AsAlias more priority, 'from Page as p' should make the 'as p' part of the query
+    "as"   -> Keyword
+  
+  context-free restrictions
+    "as" -/- [a-zA-Z0-9\_] %% prevent ambiguity between as and asc (used in for-filters)
+ 
+  context-free syntax
+    Exp "in" Exp           -> Exp {non-assoc, cons("InColl")}
+  context-free restrictions
+    "in" -/- [a-zA-Z0-9\_] %% there must be whitespace after the 'in' keyword for collection test
+
+  context-free syntax
+    Exp "==" Exp           -> Exp {cons("Eq")}
+    Exp "!=" Exp           -> Exp {cons("NotEq")}
+    Exp ">" Exp           -> Exp {cons("LargerThan")}
+    Exp ">=" Exp           -> Exp {cons("LargerThanOrEqual")}
+    Exp "<" Exp           -> Exp {cons("SmallerThan")}
+    Exp "<=" Exp           -> Exp {cons("SmallerThanOrEqual")}
+
+    "true"                 -> Exp {prefer,cons("True")}
+    "false"                -> Exp {prefer,cons("False")}
+
+    "null"                 -> Exp {prefer,cons("Null")}
+
+    Exp "&&" Exp          -> Exp {cons("And"), assoc}
+    Exp "||" Exp           -> Exp {cons("Or"), assoc}
+    "!" Exp              -> Exp {cons("Not")}
+
+    "(" Exp ")"            -> Exp {bracket}
+
+
+    "[" Exp "for" "(" JavaID ":" Sort "in" Exp Filter ")" "]" -> ForExp {cons("ForExp")}
+    "[" Exp "for" "(" JavaID ":" Sort "in" Exp ")" "]"        -> ForExp {cons("ForExpNoFilter")}
+    "[" Exp "|" JavaID ":" Sort "in" Exp Filter "]"           -> ForExp {cons("ForExp")}
+    "[" Exp "|" JavaID ":" Sort "in" Exp "]"                  -> ForExp {cons("ForExpNoFilter")}
+    ForExp                                                -> Exp
+
+    "And" ForExp                                          -> Exp {cons("AndForExp")}
+    "Or"  ForExp                                          -> Exp {cons("OrForExp")}
+
+
+    Exp "*" Exp  -> Exp {cons("Mul"),assoc}
+    Exp "/" Exp  -> Exp {cons("Div"),assoc}
+    Exp "%" Exp  -> Exp {cons("Mod"),assoc}
+    Exp "+" Exp  -> Exp {cons("Add"),assoc}
+    Exp "-" Exp  -> Exp {cons("Sub"),assoc}
+
+context-free priorities
+  {left:
+    Exp "." JavaID "(" {Exp ","}* ")"  -> Exp
+    Exp "." JavaID  -> Exp
+    Exp "[" Exp "]"  -> Exp }
+  > {non-assoc: 
+       Exp "is" "a" Sort -> Exp 
+       Exp "as" Sort     -> Exp
+    }
+  > "!" Exp -> Exp
+  > {left:
+       Exp "*" Exp -> Exp
+       Exp "%" Exp -> Exp
+       Exp "/" Exp -> Exp }
+  > {left:
+       Exp "+" Exp -> Exp
+       Exp "-" Exp -> Exp }
+  > Exp "in" Exp -> Exp
+  > {left:
+       Exp "==" Exp -> Exp
+       Exp "!=" Exp -> Exp
+       Exp ">" Exp -> Exp
+       Exp ">=" Exp -> Exp
+       Exp "<" Exp -> Exp
+       Exp "<=" Exp -> Exp }
+  > {left:
+       Exp "&&" Exp -> Exp }
+  > {left:
+       Exp "||" Exp -> Exp }
+  > Assignment -> Exp
+  > HqlExp -> Exp
+  > "if" "(" Exp ")" Exp "else" Exp -> Exp
+ 
+}

@@ -1,0 +1,29 @@
+package meta;
+
+import org.sugarj.languages.Sdf2;
+import org.sugarj.languages.SugarJ;
+import meta.Syntax;
+
+public transformation ModelSyntax {
+  rules
+    syntaxmodel-to-sdf :
+      ModelDec(ModelDecHead(mods, name), ModelBody(("Syntax", metamodel, SyntaxDec(prods)))) ->
+      SugarDec(SugarDecHead(mods, name), SugarBody(grammar-elem(context-free-syntax(<map(prod-to-sdf(|metamodel))> prods))))
+
+    prod-to-sdf(|metamodel) :
+      Production(Nonterminal(n), rhs) ->
+      prod(<map(exp-to-sdf())> rhs, sort(n), annos)
+    where <![<cons-anno>] <+ ![]> (n, metamodel) => annos
+
+    exp-to-sdf : Nonterminal(n) -> sort(n)
+    exp-to-sdf : Terminal(t) -> lit(<conc-strings> ("\"", t, "\""))
+    exp-to-sdf : Many(e) -> iter-star(<exp-to-sdf> e)
+    exp-to-sdf : Many1(e) -> iter(<exp-to-sdf> e)
+    exp-to-sdf : Optional(e) -> opt(<exp-to-sdf> e)
+    exp-to-sdf : Labeled(l, e) -> <exp-to-sdf> e
+    exp-to-sdf : Alt(e1, e2) -> alt(<exp-to-sdf> e1, <exp-to-sdf> e2)
+    exp-to-sdf : Group([]) -> empty()
+    exp-to-sdf : Group([e|es]) -> seq(<exp-to-sdf> e, <map(exp-to-sdf)> es)
+
+    cons-anno = fail
+}

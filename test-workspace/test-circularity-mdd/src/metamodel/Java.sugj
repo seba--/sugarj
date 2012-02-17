@@ -1,7 +1,5 @@
 package metamodel;
 
-import metamodel.util.MetaExplode;
-
 public sugar Java {
   desugarings
     desugar-class-model
@@ -9,7 +7,7 @@ public sugar Java {
   rules
     desugar-class-model :
       ClassModelDec(mods, name, body) -> 
-      ModelDec(ModelDecHead(mods, name), ModelBody(<meta-explode> body)) 
+      ModelDec(ModelDecHead(mods, name), ModelBody(("Java", body))) 
 
   context-free syntax
     ClassModel -> ToplevelDeclaration

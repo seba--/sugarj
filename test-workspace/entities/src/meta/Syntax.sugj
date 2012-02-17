@@ -1,0 +1,44 @@
+package meta;
+
+public sugar Syntax {
+  desugarings
+    syntax-model
+
+  rules
+    syntax-model :
+      SyntaxmodelDec(mods, name, metamodel, body) -> 
+      ModelDec(ModelDecHead(mods, name), ModelBody(("Syntax", metamodel, body)))
+
+  context-free syntax
+    Syntaxmodel -> ToplevelDeclaration
+    AnnoOrSugarMod* "syntax" JavaId "for" JavaId "{" SyntaxDeclaration "}" -> Syntaxmodel {cons("SyntaxmodelDec")}
+    
+  lexical syntax
+    JavaID -> Nonterminal
+    Sdf2StrCon -> Terminal
+    JavaID -> Label
+
+  context-free syntax
+    Terminal -> Symbol {cons("Terminal")}
+    Nonterminal -> Symbol {cons("Nonterminal")}
+    
+  context-free priorities
+    {
+      SyntaxExp "*" -> SyntaxExp {cons("Many")}
+      SyntaxExp "+" -> SyntaxExp {cons("Many1")}
+    }
+    > 
+    SyntaxExp "?" -> SyntaxExp {cons("Optional")}
+    >
+    Label ":" SyntaxExp -> SyntaxExp {cons("Labeled")}
+    >
+    SyntaxExp "|" SyntaxExp -> SyntaxExp {cons("Alt")}
+
+  context-free syntax
+    Symbol -> SyntaxExp
+    "(" SyntaxExp+ ")" -> SyntaxExp {cons("Group")}
+
+    Nonterminal "::=" SyntaxExp* -> Production {cons("Production")}
+
+    Production* -> SyntaxDeclaration {cons("SyntaxDec")}
+}

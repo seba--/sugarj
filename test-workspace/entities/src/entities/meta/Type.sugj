@@ -1,0 +1,19 @@
+package entities.meta;
+
+import entities.meta.Lexical;
+
+/**
+  * copied from https://svn.strategoxt.org/repos/WebDSL/webdsls/trunk/src/org/webdsl/dsl/syntax/WebDSL.sdf
+  **/
+public sugar Type {
+  context-free syntax %% Types
+    SimpleSort -> Sort
+    GenericSort -> Sort
+    RefSort -> Sort
+    FunctionSort -> Sort
+    
+    JavaID                     -> SimpleSort {cons("SimpleSort")}
+    JavaID "<" {Sort ","}+ ">" -> GenericSort {cons("GenericSort")}
+    "Ref" "<" Sort ">" -> RefSort {cons("RefSort")}
+    "Ref" "<" Sort ">" -> GenericSort {reject}
+}

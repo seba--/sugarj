@@ -127,10 +127,10 @@ public class SugarJParser extends JSGLRI {
     final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(filename), environment.getSourcePath());
 
     
-    Job parseJob = new Job("SugarJ parser: " + sourceFile.getRelativePath()) {
+    Job parseJob = new Job("SugarJ parser: " + sourceFile == null ? null : sourceFile.getRelativePath()) {
       @Override
       protected IStatus run(IProgressMonitor monitor) {
-        monitor.beginTask("parse " + sourceFile.getRelativePath(), IProgressMonitor.UNKNOWN);
+        monitor.beginTask("parse " + sourceFile == null ? null : sourceFile.getRelativePath(), IProgressMonitor.UNKNOWN);
         Result result = null;
         boolean ok = false;
         try {
@@ -291,7 +291,7 @@ public class SugarJParser extends JSGLRI {
           environment);
     }
     catch (Exception e) {
-      log.logErr("Could read str cache, generating new one.");
+      log.logErr("Could not read str cache, generating new one.");
       strCache = new ModuleKeyCache<Path>();
       for (File f : environment.getCacheDir().getFile().listFiles())
         if (f.getPath().endsWith(".jar"))

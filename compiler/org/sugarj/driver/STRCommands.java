@@ -192,7 +192,10 @@ public class STRCommands {
       if (!Environment.wocache)
         result = strCache.get(key);
       
-      if (result == null || !result.getFile().exists())
+      if (result != null && !result.getFile().exists())
+        result = null;
+      
+      if (result == null)
         return null;
 
       if (CommandExecution.CACHE_INFO)

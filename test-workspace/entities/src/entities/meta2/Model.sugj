@@ -1,0 +1,31 @@
+package entities.meta2;
+
+import meta.Model;
+
+public metamodel Model {
+  Entity {
+    name :: Identifier
+    mods :: List<Modifier>
+    superentity :: Option<Identity>
+    props :: List<Property>
+  }
+
+  Identifier {
+    id :: String
+  }
+
+  Property {
+    name :: String
+    sort :: Sort
+    inverse :: Option<(Identifier, String)>
+  }
+
+  SimpleSort is Sort {
+    name :: String
+  }
+
+  CompoundSort is Sort {
+    sortcons :: String
+    sortargs :: List<Sort>
+  }
+}

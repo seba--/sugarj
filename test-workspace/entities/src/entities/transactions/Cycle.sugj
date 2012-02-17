@@ -1,0 +1,5 @@
+package entities.transactions;
+
+public enum Cycle {
+  DAILY, WEEKLY, MONTHLY, YEARLY
+}

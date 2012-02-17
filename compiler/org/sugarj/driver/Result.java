@@ -52,6 +52,7 @@ public class Result {
   private Set<Path> allDependentFiles = new HashSet<Path>();
   private boolean failed = false;
   private Path generationLog;
+  private String cacheVersion;
 
   /**
    * deferred to (*.sugj) -> 
@@ -67,7 +68,7 @@ public class Result {
    */
   private Map<Path, Map<Path, Map<Path, ISourceFileContent>>> deferredSourceFiles = new HashMap<Path, Map<Path, Map<Path, ISourceFileContent>>>();
   
-  public final static Result OUTDATED_RESULT = new Result(true) {
+  public final static Result OUTDATED_RESULT = new Result(true, null) {
     @Override
     public boolean isUpToDate(Path file, Environment env) {
       return false;
@@ -79,8 +80,9 @@ public class Result {
     }
   };
   
-  public Result(boolean generateFiles) {
+  public Result(boolean generateFiles, String cacheVersion) {
     this.generateFiles = generateFiles;
+    this.cacheVersion = cacheVersion;
   }
   
   void addFileDependency(Path file) throws IOException {
@@ -224,6 +226,9 @@ public class Result {
   }
 
   public boolean isUpToDateShallow(int inputHash, Environment env) throws IOException {
+    if (!Driver.CACHE_VERSION.equals(cacheVersion))
+      return false;
+    
     if (hasPersistentVersionChanged())
       return false;
     
@@ -396,6 +401,8 @@ public class Result {
         oos.writeObject(availableGeneratedFiles);
         oos.writeObject(deferredSourceFiles);
         
+        oos.writeObject(cacheVersion);
+        
   //      new TermReader(ATermCommands.factory).unparseToFile(sugaredSyntaxTree, oos);
   //      oos.writeBoolean(failed);
   //      oos.writeObject(collectedErrors);
@@ -413,7 +420,7 @@ public class Result {
   
   @SuppressWarnings("unchecked")
   public static Result readDependencyFile(Path dep, Environment env) throws IOException {
-    Result result = new Result(true);
+    Result result = new Result(true, null);
     result.allDependentFiles = null;
     ObjectInputStream ois = null;
     
@@ -441,6 +448,8 @@ public class Result {
       
       result.availableGeneratedFiles = (Map<Path, Map<Path, Set<RelativePath>>>) ois.readObject();
       result.deferredSourceFiles = (Map<Path, Map<Path, Map<Path, ISourceFileContent>>>) ois.readObject();
+
+      result.cacheVersion = (String) ois.readObject();
       
 //      result.sugaredSyntaxTree = new TermReader(ATermCommands.factory).parseFromStream(ois);
 //      result.failed = ois.readBoolean();

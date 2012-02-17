@@ -1,0 +1,14 @@
+package entities.meta2;
+
+import meta.Signatures;
+import entities.meta2.Model<Signatures>;
+
+public sugar Desugaring {
+  desugarings
+    entity-model
+
+  rules
+    entity-model :
+      entity@Entity(mods, name, super, body) -> 
+      ModelDec(ModelDecHead(mods, name), ModelBody(("Entity", super, body)))
+}
