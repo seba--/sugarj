@@ -725,7 +725,7 @@ public class Driver {
     List<IStrategoTerm> pendingImports = new ArrayList<IStrategoTerm>();
     pendingImports.add(toplevelDecl);
     
-    while (true) {
+    while (declProvider.hasNextToplevelDecl()) {
       IStrategoTerm term = null;
       
       try {
@@ -871,6 +871,9 @@ public class Driver {
                 IStrategoTerm transformedTerm = transformModel(model, importSourceFile, transformationPaths);
                 storeCaches(environment);
                 res = compileTransformedModel(transformedTerm, importSourceFile, model, transformationPaths);
+                res.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(model.getRelativePath()), ".dep", environment), environment);
+                for (RelativePath p : transformationPaths)
+                  res.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(p.getRelativePath()), ".dep", environment), environment);
               }
               else {
                 storeCaches(environment);
