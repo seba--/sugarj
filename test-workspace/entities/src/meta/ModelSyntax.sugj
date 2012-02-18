@@ -37,8 +37,8 @@ public transformation ModelSyntax {
     exp-to-sdf : Group([e|es]) -> seq(<exp-to-sdf> e, <map(exp-to-sdf)> es)
 
     cons-anno : (n, structures) -> term(default(appl(unquoted("cons"), [fun(quoted(cons-name))])))
-      where <debug(!(<conc-strings>("fetch ", n, " in "))); fetch(?Structure(n,_,_))> structures;
-            <conc-strings> (n) => cons-name
+      where <fetch(?Structure(n,_,_))> structures;
+            <conc-strings> (n,"__") => cons-name
 
   rules
     register-model-imports =
