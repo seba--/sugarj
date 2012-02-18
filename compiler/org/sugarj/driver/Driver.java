@@ -771,6 +771,8 @@ public class Driver {
     
     log.beginTask("processing", "PROCESS the desugared import declaration.");
     try {
+      // first ignore any transformations, second apply the transformations (if any)
+      
       String modulePath = FileCommands.getRelativeModulePath(ModuleSystemCommands.extractImportedModuleName(toplevelDecl, interp));
       RelativeSourceLocationPath importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
       boolean skipProcessImport = prepareImport(modulePath, importSourceFile, null, null, toplevelDecl, false);
@@ -806,14 +808,13 @@ public class Driver {
         }
       }
       
-      // first ignore any transformations, second apply the transformations (if any)
       boolean success;
       if (skipProcessImport)
         success = true;
       else 
         success = processImport(modulePath);
       
-      if (!success && !ATermCommands.hasError(toplevelDecl))
+      if (!success && !transformedModelImport && !ATermCommands.hasError(toplevelDecl))
         setErrorMessage(toplevelDecl, "module not found: " + modulePath);
       
     } catch (Exception e) {
