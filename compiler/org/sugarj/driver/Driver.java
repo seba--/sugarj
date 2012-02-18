@@ -252,7 +252,7 @@ public class Driver {
     
     synchronized (Driver.class) {
       pending = getPendingRun(sourceFile);
-      if (pending != null && !pending.getKey().equals(declProvider)) {
+      if (pending != null && !pending.getKey().equals(declProvider) && pending.getValue().generateFiles == generateFiles) {
         log.log("interrupting " + sourceFile);
         pending.getValue().interrupt();
       }
@@ -1290,15 +1290,15 @@ public class Driver {
       }
       
       /*
-* adapt current grammar
-*/
+       * adapt current grammar
+       */
       if (FileCommands.exists(sdfExtension)) {
         buildCompoundSdfModule();
       }
 
       /*
-* adapt current transformation
-*/
+       * adapt current transformation
+       */
       if (FileCommands.exists(strExtension))
         buildCompoundStrModule();
 

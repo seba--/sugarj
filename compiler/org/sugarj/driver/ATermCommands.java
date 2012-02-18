@@ -339,8 +339,10 @@ public class ATermCommands {
     
     msg = msg.replace("\n", " --- ");
     
-    if (left == null || right == null)
+    if (left == null || right == null) {
       Log.log.logErr(msg);
+      return;
+    }
     
     String lastExisting = null;
     String lastNew = null;
