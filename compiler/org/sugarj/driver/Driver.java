@@ -872,9 +872,6 @@ public class Driver {
                 IStrategoTerm transformedTerm = transformModel(model, importSourceFile, transformationPaths);
                 storeCaches(environment);
                 res = compileTransformedModel(transformedTerm, importSourceFile, model, transformationPaths);
-                res.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(model.getRelativePath()), ".dep", environment), environment);
-                for (RelativePath p : transformationPaths)
-                  res.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(p.getRelativePath()), ".dep", environment), environment);
               }
               else {
                 storeCaches(environment);
@@ -1006,7 +1003,14 @@ public class Driver {
       paths.addAll(envTransformationPaths);
       environment.setTransformationPaths(paths);
       
-      return compile(transformedTerm, transformedModel, monitor);
+      Result res = compile(transformedTerm, transformedModel, monitor);
+      
+      res.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(model.getRelativePath()), ".dep", environment), environment);
+      for (RelativePath p : paths)
+        res.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(p.getRelativePath()), ".dep", environment), environment);
+      res.rewriteDependencyFile();
+
+      return res;
     } finally {
       environment.setTransformationPaths(envTransformationPaths);
       environment.setRenamings(envRenamings);
@@ -1261,7 +1265,7 @@ public class Driver {
         String sdfExtensionContent = SDFCommands.prettyPrintSDF(sdfExtract, interp);
 
         String sdfSource = sdfExtensionHead + sdfExtensionContent;
-        if (!sdfExtract.isList() || sdfExtract.getSubtermCount() == 0)
+        if (!sdfExtract.isList() || sdfExtract.getSubtermCount() > 0)
           sdfSource = SDFCommands.makePermissiveSdf(sdfSource, makePermissiveContext);
         
         driverResult.generateFile(sdfExtension, sdfSource);

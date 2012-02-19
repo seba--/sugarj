@@ -50,7 +50,6 @@ public class Result {
   private RelativeSourceLocationPath sourceFile;
   private Integer sourceFileHash;
   private Set<Path> allDependentFiles = new HashSet<Path>();
-  private boolean failed = false;
   private Path generationLog;
   private String cacheVersion;
 
@@ -371,6 +370,12 @@ public class Result {
   
   public Path getDesugaringsFile() {
     return desugaringsFile;
+  }
+  
+  public void rewriteDependencyFile() throws IOException {
+    if (persistentPath == null)
+      throw new IllegalStateException("Result not previously written to file.");
+    writeDependencyFile(persistentPath);
   }
   
   public void writeDependencyFile(Path dep) throws IOException {
