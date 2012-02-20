@@ -14,7 +14,7 @@ signature constructors
     SugarDec               : SugarDecHead * SugarBody -> SugarDec
                                : SugarDec -> TypeOrSugarDec
     JavaTypeDec                : JavaTypeDec -> TypeOrSugarDec
-    CompilationUnit            : Option(JavaPackageDec) * List(JavaImportDec) * List(TypeOrSugarDec) -> SugarCompilationUnit
+    SugarCompilationUnit            : Option(JavaPackageDec) * List(JavaImportDec) * List(TypeOrSugarDec) -> SugarCompilationUnit
     InjectDesugaring           : StrategoId * Sdf2Symbol * Sdf2Symbol * Sdf2Attributes -> Desugaring
     PureDesugaring             : StrategoId -> Desugaring
     Desugarings                : List(Desugaring) -> Transformation
@@ -50,3 +50,5 @@ signature constructors
     ModelDecHead      : List(Annos) * JavaId -> EditorServicesDecHead
     ModelBody         : List(EditorServicesSection) -> EditorServiceBody
     ToModelTerm       : ATerm -> ModelTerm
+    
+    ModelImport : JavaId * Model -> JavaImportDec

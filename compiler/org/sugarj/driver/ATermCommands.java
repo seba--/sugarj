@@ -337,26 +337,38 @@ public class ATermCommands {
     IToken left = ImploderAttachment.getLeftToken(toplevelDecl);
     IToken right = ImploderAttachment.getRightToken(toplevelDecl);
     
-    Path file = null;
-    try {
-      file = atermToFile(toplevelDecl);
-    } catch (IOException e) {
-      e.printStackTrace();
+    msg = msg.replace("\n", " --- ");
+    
+    if (left == null || right == null) {
+      Log.log.logErr(msg);
+      return;
     }
     
-    if (left == null || right == null)
-      throw new IllegalStateException(msg + ": " + file);
+    String lastExisting = null;
+    String lastNew = null;
     
     for (int i = left.getIndex(), max = right.getIndex(); i <= max; i++) {
       Token tok = ((Token) left.getTokenizer().getTokenAt(i));
       if (tok.getError() == null || tok.getError().isEmpty())
         tok.setError(msg);
+      else {
+        if (lastExisting == null || !lastExisting.equals(tok.getError())) {
+          lastExisting = tok.getError();
+          lastNew = msg + " --- " + tok.getError();
+        } 
+        tok.setError(lastNew);
+      }
       
       if (tok.getTokenizer().getInput().length() <= tok.getStartOffset() || tok.getTokenizer().getInput().charAt(tok.getStartOffset()) == '\n')
         break;
     }
   }
-
+  
+  public static boolean hasError(IStrategoTerm toplevelDecl) {
+    IToken left = ImploderAttachment.getLeftToken(toplevelDecl);
+    return left != null && left.getError() != null && !left.getError().isEmpty();
+  }
+  
   public static IStrategoTerm makeMutable(IStrategoTerm term) {
     if (term.getStorageType() == IStrategoTerm.MUTABLE)
       return term;

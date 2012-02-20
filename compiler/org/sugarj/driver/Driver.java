@@ -57,6 +57,7 @@ import org.sugarj.driver.path.RelativeSourceLocationPath;
 import org.sugarj.driver.path.SourceLocation;
 import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
 import org.sugarj.driver.transformations.extraction.extraction;
+import org.sugarj.driver.transformations.primitive.SugarJPrimitivesLibrary;
 import org.sugarj.driver.transformations.renaming.renaming;
 import org.sugarj.stdlib.StdLib;
 import org.sugarj.util.ProcessingListener;
@@ -68,7 +69,7 @@ import org.sugarj.util.ToplevelDeclarationProvider;
 */
 public class Driver {
   
-  public final static String CACHE_VERSION = "model-0.1i";
+  public final static String CACHE_VERSION = "model-0.2";
   
   private final static int PENDING_TIMEOUT = 30000;
 
@@ -251,7 +252,7 @@ public class Driver {
     
     synchronized (Driver.class) {
       pending = getPendingRun(sourceFile);
-      if (pending != null && !pending.getKey().equals(declProvider)) {
+      if (pending != null && !pending.getKey().equals(declProvider) && pending.getValue().generateFiles == generateFiles) {
         log.log("interrupting " + sourceFile);
         pending.getValue().interrupt();
       }
@@ -397,7 +398,7 @@ public class Driver {
       
       driverResult.writeDependencyFile(depOutFile);
 
-      success = true;
+      success = driverResult.getCollectedErrors().isEmpty() && driverResult.getParseErrors().isEmpty();
     }
     catch (CommandExecution.ExecutionError e) {
       // TODO do something more sensible
@@ -406,7 +407,6 @@ public class Driver {
     }
     finally {
       log.endTask(success, "done processing " + sourceFile, "failed processing " + sourceFile);
-      driverResult.setFailed(!success);
     }
   }
 
@@ -482,13 +482,16 @@ public class Driver {
         List<IStrategoTerm> editorServices = ATermCommands.getList(services);
         
         if (currentTransProg == null)
+          log.beginInlineTask("Compile transformation for semantic editor services");
           try {
             currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
-          } catch (SGLRException e) {
-            log.logErr(e.toString());
-          } catch (InvalidParseTableException e) {
-            log.logErr(e.toString());
-          }
+            log.endTask(true);
+          } catch (Exception e) {
+            String msg = "compiling transformation " + currentTransSTR + " failed";
+            setErrorMessage(lastSugaredToplevelDecl, msg + ":\n" + e.getMessage());
+            log.endTask(false);
+            throw new RuntimeException(msg, e);
+          } 
         editorServices = ATermCommands.registerSemanticProvider(editorServices, currentTransProg);
   
         Path editorServicesFile = environment.new RelativePathBin(relPackageNameSep() + extName + ".serv");
@@ -708,7 +711,8 @@ public class Driver {
     try {
       RelativePath modelOutFile = environment.new RelativePathBin(relPackageNameSep() + modelName + ".model");
       
-      driverResult.generateFile(modelOutFile, ATermCommands.atermToString(makeDesugaredSyntaxTree()));
+      IStrategoTerm modelTerm = makeDesugaredSyntaxTree();
+      driverResult.generateFile(modelOutFile, ATermCommands.atermToString(modelTerm));
     } finally {
       log.endTask();
     }
@@ -721,7 +725,7 @@ public class Driver {
     List<IStrategoTerm> pendingImports = new ArrayList<IStrategoTerm>();
     pendingImports.add(toplevelDecl);
     
-    while (true) {
+    while (declProvider.hasNextToplevelDecl()) {
       IStrategoTerm term = null;
       
       try {
@@ -767,6 +771,8 @@ public class Driver {
     
     log.beginTask("processing", "PROCESS the desugared import declaration.");
     try {
+      // first ignore any transformations, second apply the transformations (if any)
+      
       String modulePath = FileCommands.getRelativeModulePath(ModuleSystemCommands.extractImportedModuleName(toplevelDecl, interp));
       RelativeSourceLocationPath importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
       boolean skipProcessImport = prepareImport(modulePath, importSourceFile, null, null, toplevelDecl, false);
@@ -802,14 +808,13 @@ public class Driver {
         }
       }
       
-      // first ignore any transformations, second apply the transformations (if any)
       boolean success;
       if (skipProcessImport)
         success = true;
       else 
         success = processImport(modulePath);
       
-      if (!success)
+      if (!success && !transformedModelImport && !ATermCommands.hasError(toplevelDecl))
         setErrorMessage(toplevelDecl, "module not found: " + modulePath);
       
     } catch (Exception e) {
@@ -863,21 +868,37 @@ public class Driver {
             log.log("Need to compile the imported module first; processing it now.");
 
             try {
-              
               if (transformModel) {
                 IStrategoTerm transformedTerm = transformModel(model, importSourceFile, transformationPaths);
+                storeCaches(environment);
                 res = compileTransformedModel(transformedTerm, importSourceFile, model, transformationPaths);
+                res.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(model.getRelativePath()), ".dep", environment), environment);
+                for (RelativePath p : transformationPaths)
+                  res.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(p.getRelativePath()), ".dep", environment), environment);
               }
               else {
                 storeCaches(environment);
                 res = compile(importSourceFile, monitor);
-                initializeCaches(environment, true);
               }
-              
-              if (res.hasFailed())
-                setErrorMessage(toplevelDecl, "problems while compiling " + modulePath);
             } catch (Exception e) {
-              setErrorMessage(toplevelDecl, "problems while compiling " + modulePath);
+              res = null;
+              setErrorMessage(toplevelDecl, "compilation of imported module " + modulePath + " failed");
+              // no rethrow of exception, so that compilation of this file continues as far as possible
+            } finally {
+              initializeCaches(environment, true);
+            }
+            
+            if (res != null && res.hasFailed()) {
+              StringBuilder errorMsg = new StringBuilder();
+              if (!res.getParseErrors().isEmpty()) {
+                errorMsg.append("  parse errors:\n");
+                for (BadTokenException err : res.getParseErrors())
+                  errorMsg.append("  ").append(err.getMessage()).append(" (").append(err.getLineNumber()).append(",").append(err.getColumnNumber()).append(")\n");
+              }
+              for (String err : res.getCollectedErrors())
+                errorMsg.append("  ").append(err.replace("\n", "\n  ")).append("\n");
+              
+              setErrorMessage(toplevelDecl, "problems while compiling " + modulePath + ":\n" + errorMsg.toString());
             }
               
             log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
@@ -985,12 +1006,10 @@ public class Driver {
       paths.addAll(envTransformationPaths);
       environment.setTransformationPaths(paths);
       
-      storeCaches(environment);
       return compile(transformedTerm, transformedModel, monitor);
     } finally {
       environment.setTransformationPaths(envTransformationPaths);
       environment.setRenamings(envRenamings);
-      initializeCaches(environment, true);
       log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
     }
   }
@@ -1013,30 +1032,32 @@ public class Driver {
     try {
       log.beginTask("Compile transformation", "Compile transformation " + strPath.getRelativePath());
       trans = STRCommands.compile(compoundStr, "main-" + FileCommands.fileName(strPath), driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
-    } catch (TokenExpectedException e) {
-    } catch (BadTokenException e) {
-    } catch (InvalidParseTableException e) {
-    } catch (SGLRException e) {
+    } catch (Exception e) {
+      String msg = "problems while compiling transformation " + FileCommands.dropExtension(strPath.getRelativePath());
+      setErrorMessage(lastSugaredToplevelDecl, msg + ":\n" + e.getMessage());
+      throw new RuntimeException(msg, e);
     } finally {
       log.endTask();
     }
-    
-    if (trans == null)
-      throw new StrategoException("compilation of transformation " + FileCommands.fileName(strPath) + " failed");
       
     /*
-* applies each transformation's "main-<transformation name>" rule on the AST of
-* the current import
-*/
+     * applies each transformation's "main-<transformation name>" rule on the AST of
+     * the current import
+     */
     try {
       IStrategoTerm newTransformedTerm = STRCommands.assimilate("main-" + FileCommands.fileName(strPath), trans, currentTerm, interp);
       
-      if (newTransformedTerm == null)
-        throw new StrategoException("transformation failed: " + currentTerm);
+      if (newTransformedTerm == null) {
+        String msg = "model transformation failed " + FileCommands.dropExtension(strPath.getRelativePath()) + " applied to " + ATermCommands.atermToFile(currentTerm).getAbsolutePath();
+        setErrorMessage(lastSugaredToplevelDecl, msg);
+        throw new RuntimeException(msg);
+      }
       
       return newTransformedTerm;
     } catch (Exception e) {
-      throw new RuntimeException("model transformation failed; " + strPath.getRelativePath() + " applied to " + currentTerm, e);
+      String msg = "model transformation failed " + FileCommands.dropExtension(strPath.getRelativePath()) + " applied to " + ATermCommands.atermToFile(currentTerm).getAbsolutePath();
+      setErrorMessage(lastSugaredToplevelDecl, msg + ":\n" + e.getMessage());
+      throw new RuntimeException(msg, e);
     }
   }
 
@@ -1239,7 +1260,10 @@ public class Driver {
 
         String sdfExtensionContent = SDFCommands.prettyPrintSDF(sdfExtract, interp);
 
-        String sdfSource = SDFCommands.makePermissiveSdf(sdfExtensionHead + sdfExtensionContent, makePermissiveContext);
+        String sdfSource = sdfExtensionHead + sdfExtensionContent;
+        if (!sdfExtract.isList() || sdfExtract.getSubtermCount() == 0)
+          sdfSource = SDFCommands.makePermissiveSdf(sdfSource, makePermissiveContext);
+        
         driverResult.generateFile(sdfExtension, sdfSource);
         availableSDFImports.add(sdfExtension);
         
@@ -1270,15 +1294,15 @@ public class Driver {
       }
       
       /*
-* adapt current grammar
-*/
+       * adapt current grammar
+       */
       if (FileCommands.exists(sdfExtension)) {
         buildCompoundSdfModule();
       }
 
       /*
-* adapt current transformation
-*/
+       * adapt current transformation
+       */
       if (FileCommands.exists(strExtension))
         buildCompoundStrModule();
 
@@ -1328,10 +1352,10 @@ public class Driver {
     try {
       FileCommands.deleteTempFiles(currentTransProg);
       currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
-    } catch (StrategoException e) {
-      String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
-      log.logErr(msg);
-      setErrorMessage(lastSugaredToplevelDecl, msg);
+    } catch (Exception e) {
+      String msg = "checking transformation " + currentTransSTR + " failed";
+      setErrorMessage(lastSugaredToplevelDecl, msg + ":\n" + e.getMessage());
+      // no rethrow
     } finally {
       log.endTask();
     }
@@ -1382,6 +1406,8 @@ public class Driver {
     editorServicesParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.editorServicesTbl.getPath()), "Module");
 
     interp = new HybridInterpreter(); //TODO (ATermCommands.factory);
+    interp.addOperatorRegistry(new SugarJPrimitivesLibrary(environment));
+    
     sdfContext = tools.init();
     makePermissiveContext = make_permissive.init();
     extractionContext = extraction.init();
@@ -1696,7 +1722,7 @@ public class Driver {
         String rest = getString(restTerm);
     
         if (input.equals(rest))
-          throw new SGLRException(parser.getParser(), "empty toplevel declaration parse rule");
+          throw new SGLRException(parser.getParser(), "empty toplevel declaration");
         
         try {
           if (!rest.isEmpty())
@@ -1806,12 +1832,10 @@ public class Driver {
         currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
     
         return STRCommands.assimilate(currentTransProg, term, interp);
-      } catch (StrategoException e) {
-        String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
-        
-        log.logErr(msg);
-    
-        setErrorMessage(term, msg);
+      } catch (Exception e) {
+        String msg = "compilation of desugaring " + currentTransSTR + " failed";
+        setErrorMessage(lastSugaredToplevelDecl, msg + ":\n" + e.getMessage());
+        // no rethrow
         return term;
       } finally {
         log.endTask();

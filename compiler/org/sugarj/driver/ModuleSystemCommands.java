@@ -299,7 +299,9 @@ public class ModuleSystemCommands {
     List<RelativePath> joinedTransformationPaths = new LinkedList<RelativePath>(envTransformationPaths);
     if (transformationPaths != null)
       joinedTransformationPaths.addAll(transformationPaths);
+    
     String transformationPathString = StringCommands.makeTransformationPathString(joinedTransformationPaths);
+    
     String transformedModelPath = modulePath;
     if (!transformationPathString.isEmpty()) 
       transformedModelPath = modulePath + "$" + transformationPathString;
