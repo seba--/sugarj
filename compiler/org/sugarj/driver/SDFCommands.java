@@ -79,6 +79,7 @@ public class SDFCommands {
 //      PACK_SDF,
       "-i", sdf.getAbsolutePath(),
       "-o", def.getAbsolutePath(),
+      "-S",
       "-Idef", StdLib.sugarjDef.getPath(),
       "-Idef", StdLib.javaDef.getPath(),
       "-Idef", StdLib.atermDef.getPath(),

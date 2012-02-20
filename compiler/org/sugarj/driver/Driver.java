@@ -1040,7 +1040,6 @@ public class Driver {
     } finally {
       environment.setTransformationPaths(envTransformationPaths);
       environment.setRenamings(envRenamings);
-      log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
     }
   }
 
@@ -1092,7 +1091,7 @@ public class Driver {
   }
 
 
-  private List<RelativePath> resolveTransformationPaths(String modulePath, List<String> transformationPaths, IStrategoTerm importTerm) {
+  private List<RelativePath> resolveTransformationPaths(String modulePath, List<String> transformationPaths, IStrategoTerm importTerm) throws IOException {
     log.beginTask("Resolving transformation paths for '" + StringCommands.printListSeparated(transformationPaths, ",") + "'.");
     List<RelativePath> resolvedTransformationPaths = new ArrayList<RelativePath>();
     try {
@@ -1102,7 +1101,6 @@ public class Driver {
           boolean moduleFound = false;
           for (RelativePath importPath : availableSTRImports) {
             if (FileCommands.dropExtension(importPath.getAbsolutePath()).endsWith(transformationPath)) {
-              // QST: Adding only transformationPath correct?
               resolvedTransformationPaths.add(importPath);
               moduleFound = true;
               break;
@@ -1114,7 +1112,10 @@ public class Driver {
             resolvedTransformationPaths.add(environment.new RelativePathBin(transformationPath+".str"));
           }
         } else { // this branch searches for FQN imports
-          // QST: Use of searchFile correct here?
+          String transModulePath = FileCommands.getRelativeModulePath(transformationPath);
+          RelativeSourceLocationPath importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
+          prepareImport(transModulePath, importSourceFile, null, null, importTerm, false);
+          
           RelativePath p = ModuleSystemCommands.searchFile(transformationPath, ".str", environment);
           if (p==null)
             ATermCommands.setErrorMessage(importTerm, "cannot resolve module '"+ transformationPath.replace("/", ".") + "'");
