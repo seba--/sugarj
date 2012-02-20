@@ -1,8 +1,10 @@
 package test;
 
-import Features;
+import variability.Config;
 import test.FeatureModel;
-
-config FeatureConfig for FeatureModel {
-  enable A, B;
+  
+config FeatureConfig for FeatureModel {  
+  enable A,B,C;
+  disable D;
 }
+ 

@@ -1,8 +1,8 @@
 package test;
 
-import Features;
+import variability.Model; 
 
 featuremodel FeatureModel {
   feature A;
   feature B implies A;
-}
+} 

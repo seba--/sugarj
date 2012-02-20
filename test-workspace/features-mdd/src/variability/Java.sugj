@@ -11,10 +11,55 @@ public sugar Java {
       VariableClassDec(mods, name, body) -> 
       ModelDec(ModelDecHead(mods, name), ModelBody(<meta-explode> body)) 
       
-    
 
   context-free syntax
     VariableClass -> ToplevelDeclaration
     AnnoOrSugarMod* "variable" "class" JavaId JavaClassBody -> VariableClass {cons("VariableClassDec")}
+    
+    JavaId -> FeatureName {cons("FeatureName")}
+ 
+ 
+  context-free syntax
+  //conditional elements
+   "#" "feature" "(" FeatureExpr ")" JavaMethodDec -> JavaMethodDec {cons("ConditionalMethod")}
+   "#" "feature" "(" FeatureExpr ")" JavaStm -> JavaStm {cons("ConditionalStatement")}
+   "#" "feature" "(" FeatureExpr ")" JavaTypeDec -> JavaTypeDec{cons("ConditionalType")}
+   FeatureName->FeatureExpr
+   FeatureExpr "&&" FeatureExpr -> FeatureExpr {cons("FeatureExprAnd")}
+   FeatureExpr "||" FeatureExpr -> FeatureExpr {cons("FeatureExprOr")}
+   "(" FeatureExpr ")" -> FeatureExpr
+   "!" FeatureExpr -> FeatureExpr {cons("FeatureExprNot")}
+   
+  context-free priorities
+   {"(" FeatureExpr ")" -> FeatureExpr } >
+   {FeatureExpr "&&" FeatureExpr -> FeatureExpr }>
+   {FeatureExpr "||" FeatureExpr -> FeatureExpr }>
+   {"!" FeatureExpr -> FeatureExpr }
+}
 
+public editor services Java {
+  //TODO coloring
+  //TODO configuration-aware folding
+  //TODO configuration-specific preview builder or with input dialog
+  //TODO outlining
+  //TODO reference resolving
+  //TODO code completion limited through candidate sorts
+
+  completions
+    completion trigger : "#"
+    completion template : JavaTypeDec = "#feature(" <e> ")" 
+    completion template : JavaMethodDec = "#feature(" <e> ")" 
+    completion template : JavaStm = "#feature(" <e> ")" 
+    completion template : JavaBlockStm = "#feature(" <e> ")" 
+
+  folding
+    _.ConditionalStatement
+    _.ConditionalMethod
+    _.ConditionalType
+
+//   colorer ConditionalMethodColoring
+//     environment _.ConditionalStatement : _ 192 255 255
+//     _.ConditionalStatement : _ 192 255 255
+//
+//     _.ConditionalMethod : _ 192 192 192
 }
