@@ -18,9 +18,17 @@ public transformation ModelSyntax {
     
     syntaxmodel-to-sugar :
       ModelDec(ModelDecHead(mods, name), ModelBody(("Syntax", Id(metamodel), SyntaxDec(prods)))) ->
-      SugarDec(SugarDecHead(mods, name), SugarBody([grammar-elem(context-free-syntax(<map(prod-to-sdf(|structures))> prods))]))
-    where <resolve-model; extract-model(|metamodel); ?ModelDec(_, ModelBody(("Metamodel", <id>)))> metamodel => structures
+      SugarDec(SugarDecHead(mods, name), SugarBody([grammar, transformations]))
+    where <resolve-model; extract-model(|metamodel)> metamodel => metamodeldec;
+          <?ModelDec(_, ModelBody(("Metamodel", <id>)))> metamodeldec => structures;
 
+          <map(prod-to-sdf(|structures))> prods => sdfprods;
+          <!grammar-elem(context-free-syntax(<id>))> sdfprods => grammar;
+
+          <mapconcat(![<prod-to-trans(|structures)>] <+ ![])> prods => rulez;
+          <!transformation-elem(Rules(<id>))> rulez => transformations 
+
+  rules
     prod-to-sdf(|structures) :
       Production(n, rhs) ->
       prod(<map(exp-to-sdf())> rhs, sort(n), attrs(annos))
@@ -37,8 +45,72 @@ public transformation ModelSyntax {
     exp-to-sdf : Group([e|es]) -> seq(<exp-to-sdf> e, <map(exp-to-sdf)> es)
 
     cons-anno : (n, structures) -> term(default(appl(unquoted("cons"), [fun(quoted(cons-name))])))
-      where <fetch(?Structure(n,_,_))> structures;
+      where <fetch-elem(?Structure(n,_,_))> structures;
             <conc-strings> (n,"__") => cons-name
+
+
+  desugarings
+    ast-for-metamodel
+  rules 
+    ast-for-metamodel = fail
+
+    prod-to-trans(|structures) : 
+      Production(n, rhs) ->
+      RDefNoArgs("ast-for-metamodel", rule)
+    where
+      <fetch-elem(?Structure(n,_,_))> structures => struct;
+      <?Structure(_,_,<id>)> struct => attributes;
+      <map(?Attribute(<id>,_); !Var(<id>))> attributes => vars;
+      <length> attributes => len;
+      <debug> (n, len, rhs, [], attributes);
+      <attr-extractors(|n, len, rhs, [])> attributes => conds;
+      <strat-seq> conds => cond;
+
+      rule := Rule(Var("e__"), NoAnnoList(Op(n,vars)), cond) 
+
+    strat-seq = !(<id>, Id()); foldl(Seq)
+
+    attr-extractors(|n, anum, rhs, used) :
+      [] -> []
+    attr-extractors(|n, anum, rhs, used) : 
+      [Attribute(a,type) | as] -> 
+      <debug> [strat | <attr-extractors(|n, anum, rhs, [index|used])> as]
+    where
+      <not(oncetd(?Labeled(a,_)))> rhs;
+      <debug> (Attribute(a, type), n, anum, rhs, used);
+      <conc-strings> (n,"__") => auxcons;
+      <next-unused-index> (0,used) => index;
+      <pattern-for-index> (index,anum) => pattern;
+      <attribute-type-coercion> type => type-coercion;
+      strat := AM(BA(Seq(Match(NoAnnoList(Op(auxcons, pattern))), type-coercion), Var("e__")), Var(a))
+    attr-extractors(|n, anum, rhs, used) : 
+      [Attribute(a,type) | as] -> 
+      <attr-extractors(|n, anum, rhs, used)> as
+    
+    next-unused-index(|i) = 
+      debug;
+      if elem
+        then (inc,id); debug(!"inc:"); next-unused-index
+        else ?(<id>,_)
+      end
+
+    pattern-for-index : (_,0) -> []
+    pattern-for-index : (0,n) -> [RootApp(Id()) | <pattern-for-index> (-1,<dec> n)]
+    pattern-for-index : (m,n) -> [Wld() | <pattern-for-index> (<dec> m,<dec> n)]
+
+    attribute-type-coercion : AttrReferenceType(_) -> Id()
+
+    type-coerce-list(s) : [] -> []
+    type-coerce-list(s) : [x|xs] -> [<s> x|<type-coerce-list(s)> xs]
+    type-coerce-list(s) : x -> [<s> x]
+
+    type-coerce-option(s) : None() -> None()
+    type-coerce-option(s) : Some(x) -> Some(<s> x)
+    type-coerce-option(s) : x -> Some(<s> x)
+
+    type-coerce-pair(s1,s2) : (x,y) -> (<s1> x, <s2> y)
+    type-coerce-pair(s1, s2) : _#([x,y]) -> (<s1> x, <s2> y)
+
 
   rules
     register-model-imports =
