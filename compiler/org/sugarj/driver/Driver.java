@@ -970,12 +970,27 @@ public class Driver {
       String trans = " with " + (transformationPaths != null ? StringCommands.printModuleList(transformationPaths, ", ") + " and " : "") + StringCommands.printModuleList(environment.getTransformationPaths(), ", "); 
       log.beginTask("Transform model", "Transform model " + model.getRelativePath() + trans);
       
-      if (transformationPaths != null)
-        for (RelativePath strPath : transformationPaths)
-          transformedTerm = executeTransformation(strPath, transformedTerm);
+      boolean isModel = true;
       
-      for (RelativePath strPath : environment.getTransformationPaths())
+      List<RelativePath> paths = new LinkedList<RelativePath>();
+      if (transformationPaths != null)
+        paths.addAll(transformationPaths);
+      transformationPaths.addAll(environment.getTransformationPaths());
+      
+      for (RelativePath strPath : paths) {
         transformedTerm = executeTransformation(strPath, transformedTerm);
+        
+        IStrategoTerm body = getApplicationSubterm(transformedTerm, "SugarCompilationUnit", 2);
+        isModel = false;
+        for (IStrategoTerm dec : body.getAllSubterms())
+          if (ATermCommands.isApplication(dec, "ModelDec")) {
+            isModel = true;
+            break;
+          }
+        
+        if (!isModel)
+          break;
+      }
       
       transformSuccessful = true;
       
