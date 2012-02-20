@@ -87,7 +87,7 @@ rules
                 )
               )
            )> attributes => consQuoted
-          ; <unquote(?'"')> consQuoted => cons
+          ; <unquote(?'"') <+ is-string> consQuoted => cons
 
   get-prod-type :
     ([], res) -> type
