@@ -1,10 +1,10 @@
 package entities.meta2;
 
-import meta.ModelSyntax;
-import entities.meta2.Syntax<ModelSyntax>;
+import entities.meta2.Syntax<meta.ModelSyntax>;
 import entities.meta2.Desugaring;
 
 public entity Test2 {
   foo :: String
   bar :: Test
+  link :: Test (inverse=link.back)
 }

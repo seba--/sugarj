@@ -3,6 +3,8 @@ package entities.meta2;
 import entities.meta2.Model;
 import meta.Syntax;
 
+import entities.meta2.Model<meta.CheckSyntaxLabels>;
+
 public syntax Syntax for Model {
   ToplevelDeclaration ::= Entity
   Entity ::= mods:AnnoOrSugarMod* "entity" name:JavaId superentity:SuperEntity? "{" props:Property* "}"

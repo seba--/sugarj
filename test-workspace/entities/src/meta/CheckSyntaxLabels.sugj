@@ -1,0 +1,26 @@
+package meta;
+
+import org.sugarj.languages.Java;
+import org.sugarj.languages.Stratego;
+import org.sugarj.languages.SugarJ;
+import meta.Model;
+
+public transformation CheckSyntaxLabels {
+  rules 
+    main = SugarCompilationUnit(id, ensure-aux-import, metamodel-to-labelcheck)
+
+    metamodel-to-labelcheck :
+      ModelDec(ModelDecHead(mods, name), ModelBody(("Metamodel", body)))
+      -> SugarDec(SugarDecHead(mods, name), SugarBody([transformation-elem(Rules(decls))]))
+      where <mapconcat(debug;register-labels;debug)> body => decls
+
+    register-labels : Structure(name,_,attrs) -> <map(debug;register-label(|name))> attrs
+
+    register-label(|struct) : 
+      Attribute(name,_) -> 
+      SDefNoArgs("valid-syntax-label", Match(NoAnnoList(Tuple([NoAnnoList(Str(struct)), NoAnnoList(Str(name))]))))
+
+    ensure-aux-import : imps -> <union> (imps, [auximp])
+      where auximp := TypeImportDec(TypeName(PackageOrTypeName(Id("meta")), Id("CheckSyntaxLabelsAux")))
+
+}

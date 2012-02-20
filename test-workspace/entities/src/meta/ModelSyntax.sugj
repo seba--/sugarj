@@ -78,12 +78,18 @@ public transformation ModelSyntax {
       <not(oncetd(?Labeled(a,_)))> rhs;
       <conc-strings> (n,"__") => auxcons;
       <next-unused-index> (0,used) => index;
-      <pattern-for-index> (index,anum) => pattern;
+      <pattern-for-index(|RootApp(Id()))> (index,anum) => pattern;
       <attribute-type-coercion> type => type-coercion;
       strat := AM(BA(Seq(Match(NoAnnoList(Op(auxcons, pattern))), type-coercion), Var("e__")), Var(a))
-//    attr-extractors(|n, anum, rhs, used) : 
-//      [Attribute(a,type) | as] -> 
-//      <attr-extractors(|n, anum, rhs, used)> as
+    attr-extractors(|n, anum, rhs, used) : 
+      [Attribute(a,type) | as] -> 
+      [strat | <attr-extractors(|n, anum, rhs, [index|used])> as]
+    where
+      <conc-strings> (n,"__") => auxcons;
+      <filter(not(?Terminal(_))); index-of(oncetd(?Labeled(a,_)))> rhs => index;
+      <pattern-for-index(|RootApp(Id()))> (index,anum) => pattern;
+      <attribute-type-coercion> type => type-coercion;
+      strat := AM(BA(Seq(Match(NoAnnoList(Op(auxcons, pattern))), type-coercion), Var("e__")), Var(a))
     
     next-unused-index = 
       if elem
@@ -91,9 +97,12 @@ public transformation ModelSyntax {
         else ?(<id>,_)
       end
 
-    pattern-for-index : (_,0) -> []
-    pattern-for-index : (0,n) -> [RootApp(Id()) | <pattern-for-index> (-1,<dec> n)]
-    pattern-for-index : (m,n) -> [Wld() | <pattern-for-index> (<dec> m,<dec> n)]
+    index-of(s) : [x|_] -> 0 where <s> x
+    index-of(s) : [_|xs] -> <index-of(s);inc> xs
+
+    pattern-for-index(|t) : (_,0) -> []
+    pattern-for-index(|t) : (0,n) -> [t | <pattern-for-index(|t)> (-1,<dec> n)]
+    pattern-for-index(|t) : (m,n) -> [Wld() | <pattern-for-index(|t)> (<dec> m,<dec> n)]
 
     attribute-type-coercion : AttrReferenceType(_) -> Id()
     attribute-type-coercion : 
@@ -145,7 +154,7 @@ public transformation ModelSyntax {
   	  fetch-elem(?ModelDec(ModelDecHead(_, Id(name)), _))
 
   rules
-    ensure-imports(|metamodel) = debug; ensure-aux-import; debug; ensure-metamodel-import(|metamodel); debug
+    ensure-imports(|metamodel) = ensure-aux-import; ensure-metamodel-import(|metamodel)
 
     ensure-aux-import : imps -> <union> (imps, [auximp])
       where auximp := TypeImportDec(TypeName(PackageOrTypeName(Id("meta")), Id("ModelSyntaxAux")))

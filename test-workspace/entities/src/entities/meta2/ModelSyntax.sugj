@@ -25,7 +25,7 @@ public sugar ModelSyntax {
 
   rules
     ast-for-metamodel :
-      e_ -> Entity(mods, name, superentity, props)
+      e_ -> Entity(name, mods, superentity, props)
       where
         <?Entity_(_,<id>,_,_); id> e_ => name;
         <?Entity_(<id>,_,_,_); list-of(id)> e_ => mods;
