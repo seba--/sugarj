@@ -258,7 +258,7 @@ public class STRCommands {
         }
         return term;
       }
-      else
+      else 
         throw new RuntimeException("hybrid interpreter failed");
     }
     catch (Exception e) {

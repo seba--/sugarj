@@ -1113,7 +1113,7 @@ public class Driver {
           }
         } else { // this branch searches for FQN imports
           String transModulePath = FileCommands.getRelativeModulePath(transformationPath);
-          RelativeSourceLocationPath importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
+          RelativeSourceLocationPath importSourceFile = ModuleSystemCommands.locateSourceFile(transModulePath, environment.getSourcePath());
           prepareImport(transModulePath, importSourceFile, null, null, importTerm, false);
           
           RelativePath p = ModuleSystemCommands.searchFile(transformationPath, ".str", environment);
