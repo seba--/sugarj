@@ -878,6 +878,17 @@ public class Driver {
                 res = compile(importSourceFile, monitor);
               }
             } catch (Exception e) {
+              /*
+               * Ensure recompilation of this module after a change to the transformation or model.
+               * Usually these dependencies are indirect via the transformed model.
+               */
+              driverResult.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(model.getRelativePath()), ".dep", environment), environment);
+              if (transformationPaths != null)
+                for (RelativePath p : transformationPaths)
+                  driverResult.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(p.getRelativePath()), ".dep", environment), environment);
+              for (RelativePath p : environment.getTransformationPaths())
+                driverResult.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(p.getRelativePath()), ".dep", environment), environment);
+              
               res = null;
               setErrorMessage(toplevelDecl, "compilation of imported module " + modulePath + " failed");
               // no rethrow of exception, so that compilation of this file continues as far as possible
