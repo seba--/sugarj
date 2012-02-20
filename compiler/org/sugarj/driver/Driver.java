@@ -802,9 +802,9 @@ public class Driver {
           modulePath = transformedModelPath;
           
           if (localModelName != null)
-            environment.getRenamings().add(new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(transformedModelSourceFile)));
+            environment.getRenamings().add(0, new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(transformedModelSourceFile)));
           else if (model != null)
-            environment.getRenamings().add(new Renaming(model, transformedModelSourceFile));
+            environment.getRenamings().add(0, new Renaming(model, transformedModelSourceFile));
         }
       }
       
@@ -1010,7 +1010,7 @@ public class Driver {
     try {
       log.log("Need to compile the imported model first; processing it now.");
 
-      environment.getRenamings().add(new Renaming(model, transformedModel));
+      environment.getRenamings().add(0, new Renaming(model, transformedModel));
       
       List<RelativePath> paths = new LinkedList<RelativePath>();
       if (transformationPaths != null)
