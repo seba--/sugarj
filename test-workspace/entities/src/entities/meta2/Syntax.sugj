@@ -19,4 +19,8 @@ public syntax Syntax for Model {
 
   Sorts ::= Sort
   Sorts ::= Sort "," Sorts
+
+  
+
+  Bogus ::= bad:Bogus
 }

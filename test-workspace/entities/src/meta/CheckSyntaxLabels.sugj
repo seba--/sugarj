@@ -7,12 +7,12 @@ import meta.Model;
 
 public transformation CheckSyntaxLabels {
   rules 
-    main = SugarCompilationUnit(id, ensure-aux-import, mapconcat(metamodel-to-labelcheck))
+    main = SugarCompilationUnit(id, ensure-aux-import, map(metamodel-to-labelcheck))
 
     metamodel-to-labelcheck :
       ModelDec(ModelDecHead(mods, name), ModelBody(("Metamodel", body)))
       -> SugarDec(SugarDecHead(mods, name), SugarBody([transformation-elem(Rules(decls))]))
-      where <mapconcat(register-labels;debug)> body => decls
+      where <mapconcat(register-labels)> body => decls
 
     register-labels : Structure(name,_,attrs) -> <map(register-label(|name))> attrs
 
