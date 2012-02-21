@@ -10,7 +10,7 @@ public sugar Core {
   rules
     template-to-sugar :
       TemplateDec(mods, name, body) ->
-      SugarDec(SugarDecHead(mods, name), SugarBody(transformation-elem(Rules(main-strategy))))
+      SugarDec(SugarDecHead(mods, name), SugarBody([transformation-elem(Rules([main-strategy]))]))
     where
       <compile-template-body> body => compiled-body;
       main-strategy := SDefNoArgs("main", compiled-body)
