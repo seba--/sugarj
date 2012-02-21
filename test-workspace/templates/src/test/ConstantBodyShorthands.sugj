@@ -1,0 +1,17 @@
+package test;
+
+import template.ConcreteSyntax;
+import template.Unquote;
+import template.Shorthands;
+
+public template ConstantBodyShorthands {
+  $pkg = extract(?PackageDec(_,<id>))
+  $classname = extract(?ModelDecHead(_,<id>))
+
+  package $pkg;
+  public class $classname {
+    public static void main(String[] args) {
+      System.out.println("This transformation produces the same class declaration for any model. Only the class and package names differ.");
+    }
+  }
+}
