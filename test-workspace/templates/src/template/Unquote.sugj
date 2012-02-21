@@ -5,12 +5,9 @@ import org.sugarj.languages.Stratego;
 import template.Core;
 import template.ConcreteSyntax;
 import template.util.MetaExplode;
+import template.util.Strategies;
 
 public sugar Unquote { 
-  context-free syntax
-    ConcreteSyntaxTemplateWithUnquote -> TemplateBody {prefer}
-    SugarCompilationUnit -> ConcreteSyntaxTemplateWithUnquote {cons("ConcreteSyntaxTemplateWithUnquote")}
-
   context-free syntax
     Unquote -> JavaPackageDec
     Unquote -> JavaPackageName
@@ -19,23 +16,25 @@ public sugar Unquote {
     "typename" Unquote -> JavaTypeName
     "id" Unquote -> JavaId
 
-  context-free priorities
     Unquote -> JavaTypeName
-  > Unquote -> JavaId
+    Unquote -> JavaId {avoid}
 
 
   context-free syntax
     "${" Unquoted "}" -> Unquote {cons("FromMetaExpr")}
     StrategoStrategy -> Unquoted {cons("Unquoted")}
 
+  desugarings
+    unquote-desugar
+
   rules
-    compile-template-body :
-      ConcreteSyntaxTemplateWithUnquote(template) -> 
-      Seq(Match(Var(modelvar)), rest)
+    unquote-desugar :
+      TransBody([Rules([SDefNoArgs("main", body)])]) -> 
+      TransBody([Rules([SDefNoArgs("main", Seq(Match(Var(modelvar)), body'))])])
     where
+      <oncetd(?Unquoted(_))> body;
       modelvar := "this__";
-      <topdown(try(unquoted-app(|modelvar)))> template => template';
-      <compile-template-body> template' => rest
+      <topdown(try(unquoted-app(|modelvar)))> body => body'
 
     unquoted-app(|modelvar) : Unquoted(strat) -> App(strat, Var(modelvar))
 }
