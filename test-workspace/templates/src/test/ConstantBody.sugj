@@ -1,0 +1,13 @@
+package test;
+
+import template.ConcreteSyntax;
+import template.Unquote;
+
+public template ConstantBody {
+  package test.models;
+  public class PersonEntity$test_ConstantTarget {
+    public static void main(String[] args) {
+      System.out.println("Hello from a rather ridiculous example");
+    }
+  }
+}
