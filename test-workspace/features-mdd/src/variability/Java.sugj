@@ -11,6 +11,10 @@ public sugar Java {
       VariableClassDec(mods, name, body) -> 
       ModelDec(ModelDecHead(mods, name), ModelBody(<meta-explode> body)) 
       
+    to-concrete :
+      ModelDec(ModelDecHead(mods, name), ModelBody(body))
+      -> ClassDec(ClassDecHead(mods, name, None, None, None), body)    
+      
 
   context-free syntax
     VariableClass -> ToplevelDeclaration
@@ -21,9 +25,9 @@ public sugar Java {
  
   context-free syntax
   //conditional elements
-   "#" "feature" "(" FeatureExpr ")" JavaMethodDec -> JavaMethodDec {cons("ConditionalMethod")}
-   "#" "feature" "(" FeatureExpr ")" JavaStm -> JavaStm {cons("ConditionalStatement")}
-   "#" "feature" "(" FeatureExpr ")" JavaTypeDec -> JavaTypeDec{cons("ConditionalType")}
+   "#" "feature" "(" FeatureExpr ")" JavaMethodDec -> JavaMethodDec {cons("OptionalNode")}
+   "#" "feature" "(" FeatureExpr ")" JavaStm -> JavaStm {cons("OptionalNode")}
+   "#" "feature" "(" FeatureExpr ")" JavaTypeDec -> JavaTypeDec{cons("OptionalNode")}
    FeatureName->FeatureExpr
    FeatureExpr "&&" FeatureExpr -> FeatureExpr {cons("FeatureExprAnd")}
    FeatureExpr "||" FeatureExpr -> FeatureExpr {cons("FeatureExprOr")}
@@ -35,6 +39,17 @@ public sugar Java {
    {FeatureExpr "&&" FeatureExpr -> FeatureExpr }>
    {FeatureExpr "||" FeatureExpr -> FeatureExpr }>
    {"!" FeatureExpr -> FeatureExpr }
+   
+   signature
+    constructors
+     FeatureName : JavaId -> FeatureName 
+     FeatureExpr : FeatureName -> FeatureExpr
+     OptionalNode : FeatureExpr * JavaMethodDec -> JavaMethodDec
+     OptionalNode : FeatureExpr * JavaStm -> JavaStm
+     OptionalNode : FeatureExpr * JavaTypeDec -> JavaTypeDec
+     FeatureExprAnd : FeatureExpr * FeatureExpr -> FeatureExpr
+     FeatureExprOr : FeatureExpr * FeatureExpr -> FeatureExpr
+     FeatureExprNot : FeatureExpr -> FeatureExpr
 }
 
 public editor services Java {

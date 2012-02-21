@@ -1,11 +1,12 @@
 package variability;
 
 import org.sugarj.languages.Java;
-import variability.Java;
 
-public sugar Config { 
-	
- context-free syntax	
+public sugar Config {
+
+ context-free syntax 
+  JavaId -> FeatureName {cons("FeatureName")}
+ 
   //config declaration
   AnnoOrSugarMod* "config" JavaId "for" JavaId "{" ConfigDeclaration*  "}" -> ToplevelDeclaration {cons("ConfigDecl")}
   "enable" {FeatureName ","}+ ";" -> ConfigDeclaration {cons("FeatureActivation")}
@@ -16,12 +17,23 @@ public sugar Config {
 	featureconfig2trans      
 
  rules
-  	featureconfig2trans : 
+ 	main = topdown(optional);
+ 	       try(to-concrete)
+ 	       
+ 	to-concrete = fail
+ 
+  	featureconfig2trans :
   		ConfigDecl(mods, Id(n), Id(fm), configs)
   		-> TransDec(TransDecHead(mods, Id(n)), TransBody(concRulez))
   		where 
   		<map(featureconfig2rules)> configs => rulez;
-  		<conc> ([ Rules([SDefNoArgs("main", Call(SVar("oncetd"), [CallNoArgs(SVar("model-to-java"))]))]) ], rulez) => concRulez
+  		<conc> ([ Rules([SDefNoArgs(
+                  "main"
+                , Seq(
+                    Call(SVar("topdown"), [CallNoArgs(SVar("optional"))])
+                  , CallNoArgs(SVar("to-concrete"))
+                  )
+                )]) ], rulez) => concRulez
   		
   	featureconfig2rules :
   	    FeatureActivation(fnames)
@@ -40,43 +52,16 @@ public sugar Config {
   		-> SDefNoArgs("feature-disabled", Match(NoAnnoList(Str(n))))	
   
   	featureconfig2trans = fail
-  		
-    model-to-java : 
-      ModelDec(ModelDecHead(mods, name), ModelBody(body))
-      -> ClassDec(ClassDecHead(mods, name, None, None, None), configuredBody)
-      where  
-  	  <topdown(cond-stm <+ cond-methods <+ cond-type <+ id)> body => configuredBody 
- 
- 	model-to-java = fail
-    
+ 	  
 
-  rules
-    cond-stm :
-      ConditionalStatement(e, s) -> s
-       where <eval-condition> e
-
-    cond-stm :
-      ConditionalStatement(e, s) -> Empty 
-       where <not(eval-condition)> e
-
-    filter-method :
-      ConditionalMethod(e, m) -> m
-       where <eval-condition> e
-
-    filter-method :
-      m -> m
-      where <not(?ConditionalMethod(_,_))> m
-
-    cond-methods :
-      list -> <filter(filter-method)> list
-
-    cond-type :
-      ConditionalType(e, t) -> t
-       where <eval-condition> e
-
-    cond-type :
-      ConditionalType(e, t) -> [] 
-       where <not(eval-condition)> e
+  rules 
+  	optional : 
+  	  OptionalNode(e, s) -> s
+  	   where <eval-condition> e
+  	  
+  	optional :
+  	  OptionalNode(e, s) -> Empty
+  	   where <not(eval-condition)> e
 
     eval-condition :
       e@FeatureName(Id(n)) -> e 
@@ -100,4 +85,12 @@ public sugar Config {
     eval-condition :
       o@FeatureExprOr(e1, e2) -> o 
       where <eval-condition> e2
+      
+     signature
+      constructors 
+       OptionalNode : FeatureExpr * Expr -> Expr
+       FeatureExpr : FeatureName -> FeatureExpr
+       FeatureExprAnd : FeatureExpr * FeatureExpr -> FeatureExpr
+	   FeatureExprOr : FeatureExpr * FeatureExpr -> FeatureExpr
+	   FeatureExprNot : FeatureExpr -> FeatureExpr
 }
