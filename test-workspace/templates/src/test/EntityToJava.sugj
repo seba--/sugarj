@@ -1,0 +1,10 @@
+package test;
+
+import template.Requote;
+
+public template EntityToJava {
+  package ${ extract(?PackageDec(_,<id>)) };
+  public class ${ extract(?ModelDecHead(_,<id>)) } {
+    
+  }
+}

@@ -1,0 +1,14 @@
+package template;
+
+import template.Unquote;
+
+public sugar Requote {
+  context-free syntax
+    Requote -> StrategoTerm {cons("ToMetaExpr")}
+    "}" Requoted "${" -> Requote
+
+    JavaFieldDec -> Requoted
+    JavaMethodDec -> Requoted
+    JavaExpr -> Requoted
+    JavaBlockStm -> Requoted    
+}
