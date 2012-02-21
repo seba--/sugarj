@@ -17,11 +17,6 @@ public sugar Config {
 	featureconfig2trans      
 
  rules
- 	main = topdown(optional);
- 	       try(to-concrete)
- 	       
- 	to-concrete = fail
- 
   	featureconfig2trans :
   		ConfigDecl(mods, Id(n), Id(fm), configs)
   		-> TransDec(TransDecHead(mods, Id(n)), TransBody(concRulez))
