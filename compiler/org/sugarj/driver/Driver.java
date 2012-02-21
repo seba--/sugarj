@@ -1191,8 +1191,7 @@ public class Driver {
           IStrategoTerm mods = getApplicationSubterm(head, "NativeSugarDecHead", 0);
           
           for (IStrategoTerm t : getList(mods))
-            if (isApplication(t, "Public"))
-            {
+            if (isApplication(t, "Public")) {
               isPublic = true;
               break;
             }
@@ -1279,6 +1278,11 @@ public class Driver {
         // this is a list of SDF and Stratego statements
         IStrategoTerm sugarBody = getApplicationSubterm(body, "SugarBody", 0);
   
+        if (!sugarBody.isList()) {
+          setErrorMessage(toplevelDecl, "Sugar declaration body must be a list.");
+          sugarBody = ATermCommands.makeList("SugarBodyDef*", sugarBody);
+        }
+        
         IStrategoTerm sdfExtract = fixSDF(extractSDF(sugarBody, extractionContext), interp);
         IStrategoTerm strExtract = extractSTR(sugarBody, extractionContext);
         
@@ -1942,7 +1946,7 @@ public class Driver {
   }
   
   private void handleException(Exception e, IStrategoTerm trm) {
-    String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
+    String msg = e.getClass().getName() + ": " + (e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString());
     
     if (!(e instanceof StrategoException))
       e.printStackTrace();
