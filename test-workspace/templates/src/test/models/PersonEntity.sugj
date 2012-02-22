@@ -2,6 +2,7 @@ package test.models;
 
 public model PersonEntity {
   Entity(None,
-         [PropertyNoAnno("name",Simple,SimpleSort("String")),
-          PropertyNoAnno("email",Simple,SimpleSort("String"))])
+         [Property("name",SimpleSort("String")),
+          Property("addr",SimpleSort("String")),
+          Property("email",SimpleSort("String"))])
 }

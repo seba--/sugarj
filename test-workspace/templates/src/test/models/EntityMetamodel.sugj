@@ -1,0 +1,8 @@
+package test.models;
+
+public sugar EntityMetamodel {
+  signature constructors
+    Entity : Opt(Super) * Body -> Entity
+    Property : Name * Sort -> Property
+    SimpleSort : Name -> Sort
+}

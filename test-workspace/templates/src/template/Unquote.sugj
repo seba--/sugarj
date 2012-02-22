@@ -12,7 +12,6 @@ public sugar Unquote {
     Unquote -> JavaPackageDec
     Unquote -> JavaPackageName
     Unquote -> JavaImportDec
-    Unquote -> JavaMethodDec*
 
     "typename" Unquote -> JavaTypeName
     "id" Unquote -> JavaId
