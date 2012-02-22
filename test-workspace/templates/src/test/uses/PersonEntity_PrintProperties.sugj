@@ -1,0 +1,10 @@
+package test.uses;
+
+import test.models.PersonEntity<test.PrintProperties>;
+
+public class PersonEntity_PrintProperties {
+  public static void main(String[] args) {
+    System.out.println("Calling transformed model's main method.");
+    PersonEntity.main(args);
+  }
+}
