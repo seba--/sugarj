@@ -4,7 +4,6 @@ import test.models.PersonEntity<test.ToJavaClass>;
 
 public class PersonEntity_ToJavaClass {
   public static void main(String[] args) {
-    System.out.println("Calling transformed model's main method.");
-    // PersonEntity.main(args);
+     
   }
 }

@@ -6,8 +6,8 @@ import template.ListUnquote;
 import test.models.EntityMetamodel;
 
 public template PrintProperties {
-  package ${ extract(?PackageDec(_,<id>)) };
-  public class ${ extract(?ModelDecHead(_,<id>)) } {
+  package ${ collect-one(?PackageDec(_,<id>)) };
+  public class ${ collect-one(?ModelDecHead(_,<id>)) } {
     public static void main(String[] args) {
       System.out.println("Model has the following properties:");
  

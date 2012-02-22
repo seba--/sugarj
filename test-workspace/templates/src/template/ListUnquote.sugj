@@ -5,7 +5,6 @@ import org.sugarj.languages.Stratego;
 import template.Core;
 import template.ConcreteSyntax;
 import template.util.MetaExplode;
-import template.util.Strategies;
 
 public sugar ListUnquote { 
   context-free syntax

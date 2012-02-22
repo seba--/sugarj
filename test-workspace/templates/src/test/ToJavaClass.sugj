@@ -4,21 +4,34 @@ import template.Unquote;
 import template.ListUnquote;
 import template.Shorthands;
 import template.Requote;
+import template.util.AutoScopeRules;
+
 
 import test.models.EntityMetamodel;
 import org.sugarj.languages.Java;
 
 public template ToJavaClass {
-  $pkg = extract(?PackageDec(_,<id>))
-  $classname = extract(?ModelDecHead(_,<id>))
+  $pkg = collect-one(?PackageDec(_,<id>))
+  $classname = collect-one(?ModelDecHead(_,<id>))
 
   package $pkg;
   public class $classname {
 
-    $*{ extract(?Entity(_,<id>));
-        map(\ Property(name, SimpleSort(type)) -> } 
-          private ${!TypeName(Id(type))} ${!Id(name)}; 
-        ${ \)
-    }
+    $*{
+    collect-one(?Entity(_,<id>));
+    mapconcat(
+      \ Property(propname, SimpleSort(proptype)) ->
+    } 
+      public $type $fieldname; 
+
+      public $type $getter-name() {
+        return $fieldname;
+      }
+    ${
+    where
+      type := TypeName(Id(proptype));
+      fieldname := Id(propname);
+      getter-name := Id(<concat-strings> ["get", <string-as-chars([to-upper|id])> propname])
+    \)}
   }
 }
