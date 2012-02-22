@@ -7,8 +7,9 @@ public sugar Requote {
     Requote -> StrategoTerm {cons("ToMetaExpr")}
     "}" Requoted "${" -> Requote
 
-    JavaFieldDec -> Requoted
-    JavaMethodDec -> Requoted
+    JavaClassBodyDec -> Requoted
+    JavaClassBodyDec* -> Requoted {avoid}
+
     JavaExpr -> Requoted
     JavaBlockStm -> Requoted    
 }

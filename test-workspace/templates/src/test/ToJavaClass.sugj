@@ -1,0 +1,24 @@
+package test;
+
+import template.Unquote;
+import template.ListUnquote;
+import template.Shorthands;
+import template.Requote;
+
+import test.models.EntityMetamodel;
+import org.sugarj.languages.Java;
+
+public template ToJavaClass {
+  $pkg = extract(?PackageDec(_,<id>))
+  $classname = extract(?ModelDecHead(_,<id>))
+
+  package $pkg;
+  public class $classname {
+
+    $*{ extract(?Entity(_,<id>));
+        map(\ Property(name, SimpleSort(type)) -> } 
+          private ${!TypeName(Id(type))} ${!Id(name)}; 
+        ${ \)
+    }
+  }
+}

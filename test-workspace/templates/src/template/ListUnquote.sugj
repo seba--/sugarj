@@ -27,7 +27,7 @@ public sugar ListUnquote {
     where
       <oncetd(?ListUnquoted(_))> body;
       modelvar := "this__";
-      <topdown(try(debug;list-unquoted-app(|modelvar);debug(!"worked")))> body => body'
+      <topdown(try(list-unquoted-app(|modelvar)))> body => body'
 
     list-unquoted-app(|modelvar) :
       Op("Cons",[ListUnquoted(strat), xs]) ->
