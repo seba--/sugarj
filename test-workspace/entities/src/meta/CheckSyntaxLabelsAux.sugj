@@ -1,0 +1,16 @@
+package meta;
+
+import meta.Syntax;
+
+public sugar CheckSyntaxLabelsAux {
+  rules
+    constraint-error : Production(struct, exps) -> <check-syntax-label(|struct)> exps
+
+    check-syntax-label(|struct) : Labeled(l, e) ->  [(l,msg) | <check-syntax-label(|struct)> e]
+      where <not(valid-syntax-label)> (struct, l);
+            msg := <concat-strings> ["Invalid label ",l," for structure ",struct,"."]
+    check-syntax-label(|struct) : Labeled(l, e) ->  <check-syntax-label(|struct)> e
+    check-syntax-label(|struct) : c#(xs) -> <mapconcat(check-syntax-label(|struct))> xs
+
+    valid-syntax-label = fail
+}

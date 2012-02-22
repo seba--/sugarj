@@ -1,0 +1,21 @@
+package meta;
+
+public sugar ModelSyntaxAux {
+  rules
+    type-coerce-list(s) : [] -> []
+    type-coerce-list(s) : [x|xs] -> [<s> x|<type-coerce-list(s)> xs]
+    type-coerce-list(s) : x -> [<s> x]
+
+    type-coerce-option(s) : None() -> None()
+    type-coerce-option(s) : Some(x) -> Some(<s> x)
+    type-coerce-option(s) : x -> Some(<s> x)
+
+    type-coerce-pair(s1,s2) : (x,y) -> (<s1> x, <s2> y)
+    type-coerce-pair(s1, s2) : _#([x,y]) -> (<s1> x, <s2> y)
+
+  desugarings
+    ast-for-metamodel
+  rules 
+    ast-for-metamodel = fail
+
+}

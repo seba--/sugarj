@@ -9,6 +9,6 @@ public sugar Desugaring {
 
   rules
     entity-model :
-      entity@Entity(mods, name, super, body) -> 
+      entity@Entity(name, mods, super, body) -> 
       ModelDec(ModelDecHead(mods, name), ModelBody(("Entity", super, body)))
 }

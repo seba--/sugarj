@@ -1,0 +1,10 @@
+package test.uses;
+
+import test.models.PersonEntity<test.ConstantBodyShorthands>;
+
+public class PersonEntity_ConstantBodyShorthands {
+  public static void main(String[] args) {
+    System.out.println("Calling transformed model's main method.");
+    PersonEntity.main(args);
+  }
+}

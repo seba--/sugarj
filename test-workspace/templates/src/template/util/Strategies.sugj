@@ -1,0 +1,10 @@
+package template.util;
+
+public sugar Strategies {
+  rules
+    extract(s) : x -> <s> x
+    extract(s) : x@(_#(xs)) -> <extract(s)> xs where <not(is-list)> x
+    extract(s) : [x|_] -> <s> x
+    extract(s) : [_#(xs)|_] -> <extract(s)> xs
+    extract(s) : [_|xs] -> <extract(s)> xs
+}

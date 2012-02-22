@@ -802,9 +802,9 @@ public class Driver {
           modulePath = transformedModelPath;
           
           if (localModelName != null)
-            environment.getRenamings().add(new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(transformedModelSourceFile)));
+            environment.getRenamings().add(0, new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(transformedModelSourceFile)));
           else if (model != null)
-            environment.getRenamings().add(new Renaming(model, transformedModelSourceFile));
+            environment.getRenamings().add(0, new Renaming(model, transformedModelSourceFile));
         }
       }
       
@@ -872,15 +872,23 @@ public class Driver {
                 IStrategoTerm transformedTerm = transformModel(model, importSourceFile, transformationPaths);
                 storeCaches(environment);
                 res = compileTransformedModel(transformedTerm, importSourceFile, model, transformationPaths);
-                res.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(model.getRelativePath()), ".dep", environment), environment);
-                for (RelativePath p : transformationPaths)
-                  res.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(p.getRelativePath()), ".dep", environment), environment);
               }
               else {
                 storeCaches(environment);
                 res = compile(importSourceFile, monitor);
               }
             } catch (Exception e) {
+              /*
+               * Ensure recompilation of this module after a change to the transformation or model.
+               * Usually these dependencies are indirect via the transformed model.
+               */
+              driverResult.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(model.getRelativePath()), ".dep", environment), environment);
+              if (transformationPaths != null)
+                for (RelativePath p : transformationPaths)
+                  driverResult.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(p.getRelativePath()), ".dep", environment), environment);
+              for (RelativePath p : environment.getTransformationPaths())
+                driverResult.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(p.getRelativePath()), ".dep", environment), environment);
+              
               res = null;
               setErrorMessage(toplevelDecl, "compilation of imported module " + modulePath + " failed");
               // no rethrow of exception, so that compilation of this file continues as far as possible
@@ -973,12 +981,27 @@ public class Driver {
       String trans = " with " + (transformationPaths != null ? StringCommands.printModuleList(transformationPaths, ", ") + " and " : "") + StringCommands.printModuleList(environment.getTransformationPaths(), ", "); 
       log.beginTask("Transform model", "Transform model " + model.getRelativePath() + trans);
       
-      if (transformationPaths != null)
-        for (RelativePath strPath : transformationPaths)
-          transformedTerm = executeTransformation(strPath, transformedTerm);
+      boolean isModel = true;
       
-      for (RelativePath strPath : environment.getTransformationPaths())
+      List<RelativePath> paths = new LinkedList<RelativePath>();
+      if (transformationPaths != null)
+        paths.addAll(transformationPaths);
+      transformationPaths.addAll(environment.getTransformationPaths());
+      
+      for (RelativePath strPath : paths) {
         transformedTerm = executeTransformation(strPath, transformedTerm);
+        
+        IStrategoTerm body = getApplicationSubterm(transformedTerm, "SugarCompilationUnit", 2);
+        isModel = false;
+        for (IStrategoTerm dec : body.getAllSubterms())
+          if (ATermCommands.isApplication(dec, "ModelDec")) {
+            isModel = true;
+            break;
+          }
+        
+        if (!isModel)
+          break;
+      }
       
       transformSuccessful = true;
       
@@ -998,7 +1021,7 @@ public class Driver {
     try {
       log.log("Need to compile the imported model first; processing it now.");
 
-      environment.getRenamings().add(new Renaming(model, transformedModel));
+      environment.getRenamings().add(0, new Renaming(model, transformedModel));
       
       List<RelativePath> paths = new LinkedList<RelativePath>();
       if (transformationPaths != null)
@@ -1006,11 +1029,17 @@ public class Driver {
       paths.addAll(envTransformationPaths);
       environment.setTransformationPaths(paths);
       
-      return compile(transformedTerm, transformedModel, monitor);
+      Result res = compile(transformedTerm, transformedModel, monitor);
+      
+      res.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(model.getRelativePath()), ".dep", environment), environment);
+      for (RelativePath p : paths)
+        res.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(p.getRelativePath()), ".dep", environment), environment);
+      res.rewriteDependencyFile();
+
+      return res;
     } finally {
       environment.setTransformationPaths(envTransformationPaths);
       environment.setRenamings(envRenamings);
-      log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
     }
   }
 
@@ -1062,7 +1091,7 @@ public class Driver {
   }
 
 
-  private List<RelativePath> resolveTransformationPaths(String modulePath, List<String> transformationPaths, IStrategoTerm importTerm) {
+  private List<RelativePath> resolveTransformationPaths(String modulePath, List<String> transformationPaths, IStrategoTerm importTerm) throws IOException {
     log.beginTask("Resolving transformation paths for '" + StringCommands.printListSeparated(transformationPaths, ",") + "'.");
     List<RelativePath> resolvedTransformationPaths = new ArrayList<RelativePath>();
     try {
@@ -1072,7 +1101,6 @@ public class Driver {
           boolean moduleFound = false;
           for (RelativePath importPath : availableSTRImports) {
             if (FileCommands.dropExtension(importPath.getAbsolutePath()).endsWith(transformationPath)) {
-              // QST: Adding only transformationPath correct?
               resolvedTransformationPaths.add(importPath);
               moduleFound = true;
               break;
@@ -1084,7 +1112,10 @@ public class Driver {
             resolvedTransformationPaths.add(environment.new RelativePathBin(transformationPath+".str"));
           }
         } else { // this branch searches for FQN imports
-          // QST: Use of searchFile correct here?
+          String transModulePath = FileCommands.getRelativeModulePath(transformationPath);
+          RelativeSourceLocationPath importSourceFile = ModuleSystemCommands.locateSourceFile(transModulePath, environment.getSourcePath());
+          prepareImport(transModulePath, importSourceFile, null, null, importTerm, false);
+          
           RelativePath p = ModuleSystemCommands.searchFile(transformationPath, ".str", environment);
           if (p==null)
             ATermCommands.setErrorMessage(importTerm, "cannot resolve module '"+ transformationPath.replace("/", ".") + "'");
@@ -1160,8 +1191,7 @@ public class Driver {
           IStrategoTerm mods = getApplicationSubterm(head, "NativeSugarDecHead", 0);
           
           for (IStrategoTerm t : getList(mods))
-            if (isApplication(t, "Public"))
-            {
+            if (isApplication(t, "Public")) {
               isPublic = true;
               break;
             }
@@ -1248,6 +1278,11 @@ public class Driver {
         // this is a list of SDF and Stratego statements
         IStrategoTerm sugarBody = getApplicationSubterm(body, "SugarBody", 0);
   
+        if (!sugarBody.isList()) {
+          setErrorMessage(toplevelDecl, "Sugar declaration body must be a list.");
+          sugarBody = ATermCommands.makeList("SugarBodyDef*", sugarBody);
+        }
+        
         IStrategoTerm sdfExtract = fixSDF(extractSDF(sugarBody, extractionContext), interp);
         IStrategoTerm strExtract = extractSTR(sugarBody, extractionContext);
         
@@ -1261,7 +1296,7 @@ public class Driver {
         String sdfExtensionContent = SDFCommands.prettyPrintSDF(sdfExtract, interp);
 
         String sdfSource = sdfExtensionHead + sdfExtensionContent;
-        if (!sdfExtract.isList() || sdfExtract.getSubtermCount() == 0)
+        if (!sdfExtract.isList() || sdfExtract.getSubtermCount() > 0)
           sdfSource = SDFCommands.makePermissiveSdf(sdfSource, makePermissiveContext);
         
         driverResult.generateFile(sdfExtension, sdfSource);
@@ -1911,7 +1946,7 @@ public class Driver {
   }
   
   private void handleException(Exception e, IStrategoTerm trm) {
-    String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
+    String msg = e.getClass().getName() + ": " + (e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString());
     
     if (!(e instanceof StrategoException))
       e.printStackTrace();

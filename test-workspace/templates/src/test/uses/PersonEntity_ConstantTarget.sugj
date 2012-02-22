@@ -1,0 +1,10 @@
+package test.uses;
+
+import test.models.PersonEntity<test.ConstantTarget>;
+
+public class PersonEntity_ConstantTarget {
+  public static void main(String[] args) {
+    System.out.println("Calling transformed model's main method.");
+    PersonEntity.main(args);
+  }
+}

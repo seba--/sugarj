@@ -1,0 +1,13 @@
+package test;
+
+import template.ConcreteSyntax;
+import template.Unquote;
+
+public template ConstantBody {
+  package ${ extract(?PackageDec(_,<id>)) };
+  public class ${ extract(?ModelDecHead(_,<id>)) } {
+    public static void main(String[] args) {
+      System.out.println("This transformation produces the same class declaration for any model. Only the class and package names differ.");
+    }
+  }
+}
