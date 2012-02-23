@@ -1,0 +1,9 @@
+package test.uses;
+
+import test.models.PersonEntity<test.ToJavaClass>;
+
+public class PersonEntity_ToJavaClass {
+  public static void main(String[] args) {
+     
+  }
+}

@@ -1,0 +1,22 @@
+package test;
+
+import template.Unquote;
+import template.ListUnquote;
+
+import test.models.EntityMetamodel;
+
+public template PrintProperties {
+  package ${ collect-one(?PackageDec(_,<id>)) };
+  public class ${ collect-one(?ModelDecHead(_,<id>)) } {
+    public static void main(String[] args) {
+      System.out.println("Model has the following properties:");
+ 
+      $*{ extract(?Entity(_,<id>));
+          map(\ Property(name, SimpleSort(sort))
+                ->
+                ExprStm(Invoke(Method(MethodName(AmbName(AmbName(Id("System")), Id("out")), Id("println"))), 
+                  [Plus(Plus(Lit(String([Chars(name)])), Lit(String([Chars(" of type ")]))), Lit(String([Chars(sort)])))])) \) 
+        }
+    }
+  }
+}

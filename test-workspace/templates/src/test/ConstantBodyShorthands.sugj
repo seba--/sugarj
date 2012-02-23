@@ -5,8 +5,8 @@ import template.Unquote;
 import template.Shorthands;
 
 public template ConstantBodyShorthands {
-  $pkg = extract(?PackageDec(_,<id>))
-  $classname = extract(?ModelDecHead(_,<id>))
+  $pkg = collect-one(?PackageDec(_,<id>))
+  $classname = collect-one(?ModelDecHead(_,<id>))
 
   package $pkg;
   public class $classname {
