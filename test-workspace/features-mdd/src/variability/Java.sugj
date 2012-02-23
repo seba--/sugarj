@@ -9,17 +9,7 @@ public sugar Java {
   rules
     desugar-variable-class :
       VariableClassDec(mods, name, body) -> 
-      ModelDec(ModelDecHead(mods, name), ModelBody( ("VariableClass", <meta-explode> body) )) 
-       
-      
-  desugarings
-     no-var-java
-    
-  rules 
-    no-var-java :
-      ModelDec(ModelDecHead(mods, name), ModelBody( ("VariableClass", body) ))
-      -> ClassDec(ClassDecHead(mods, name, None, None, None), body)
-      where <not(oncetd(?OptionalNode(_,_)))> body
+      ModelDec(ModelDecHead(mods, name), ModelBody( ("VariableStructure", ClassDec(ClassDecHead(mods, name, None, None, None), body) ) )) 
       
 
   context-free syntax
@@ -45,17 +35,7 @@ public sugar Java {
    {FeatureExpr "&&" FeatureExpr -> FeatureExpr }>
    {FeatureExpr "||" FeatureExpr -> FeatureExpr }>
    {"!" FeatureExpr -> FeatureExpr }
-   
-   signature
-    constructors
-     FeatureName : JavaId -> FeatureName 
-     FeatureExpr : FeatureName -> FeatureExpr
-     OptionalNode : FeatureExpr * JavaMethodDec -> JavaMethodDec
-     OptionalNode : FeatureExpr * JavaStm -> JavaStm
-     OptionalNode : FeatureExpr * JavaTypeDec -> JavaTypeDec
-     FeatureExprAnd : FeatureExpr * FeatureExpr -> FeatureExpr
-     FeatureExprOr : FeatureExpr * FeatureExpr -> FeatureExpr
-     FeatureExprNot : FeatureExpr -> FeatureExpr
+
 }
 
 public editor services Java {

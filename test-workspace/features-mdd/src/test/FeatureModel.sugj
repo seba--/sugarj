@@ -2,7 +2,7 @@ package test;
 
 import variability.Model; 
 
-featuremodel FeatureModel {
+featuremodel FeatureModel  {
   feature A;
   feature B implies A;
 } 
