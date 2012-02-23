@@ -8,6 +8,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import org.eclipse.core.runtime.FileLocator;
+
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
@@ -16,9 +18,22 @@ public class StdLib {
   public static URL stdLibDir;
   private static String stdLibTmpDir;
   static {
-    stdLibDir = StdLib.class.getProtectionDomain().getCodeSource().getLocation();
-
+    String thisClassPath = "org/sugarj/stdlib/StdLib.class";
+    URL thisClassURL = StdLib.class.getClassLoader().getResource(thisClassPath);
+    
+    if (thisClassURL.getProtocol().equals("bundleresource"))
+      try {
+        thisClassURL = FileLocator.resolve(thisClassURL);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    
+    String classPath = thisClassURL.getPath();
+    String binPath = classPath.substring(0, classPath.length() - thisClassPath.length());
+    
     try {
+      stdLibDir = new File(binPath).toURI().toURL();
+      
       File f = File.createTempFile("org.sugarj.stdlib", "");
       f.delete();
       f.mkdir();
