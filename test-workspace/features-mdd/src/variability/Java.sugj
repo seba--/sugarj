@@ -9,11 +9,17 @@ public sugar Java {
   rules
     desugar-variable-class :
       VariableClassDec(mods, name, body) -> 
-      ModelDec(ModelDecHead(mods, name), ModelBody(<meta-explode> body)) 
+      ModelDec(ModelDecHead(mods, name), ModelBody( ("VariableClass", <meta-explode> body) )) 
+       
       
-    to-concrete :
-      ModelDec(ModelDecHead(mods, name), ModelBody(body))
-      -> ClassDec(ClassDecHead(mods, name, None, None, None), body)    
+  desugarings
+     no-var-java
+    
+  rules 
+    no-var-java :
+      ModelDec(ModelDecHead(mods, name), ModelBody( ("VariableClass", body) ))
+      -> ClassDec(ClassDecHead(mods, name, None, None, None), body)
+      where <not(oncetd(?OptionalNode(_,_)))> body
       
 
   context-free syntax

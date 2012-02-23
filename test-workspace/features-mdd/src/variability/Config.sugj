@@ -16,7 +16,7 @@ public sugar Config {
  desugarings
 	featureconfig2trans      
 
- rules
+ rules 	 
   	featureconfig2trans :
   		ConfigDecl(mods, Id(n), Id(fm), configs)
   		-> TransDec(TransDecHead(mods, Id(n)), TransBody(concRulez))
@@ -24,10 +24,7 @@ public sugar Config {
   		<map(featureconfig2rules)> configs => rulez;
   		<conc> ([ Rules([SDefNoArgs(
                   "main"
-                , Seq(
-                    Call(SVar("topdown"), [CallNoArgs(SVar("optional"))])
-                  , CallNoArgs(SVar("to-concrete"))
-                  )
+                , Call(SVar("topdown"), [CallNoArgs(SVar("optional"))])
                 )]) ], rulez) => concRulez
   		
   	featureconfig2rules :

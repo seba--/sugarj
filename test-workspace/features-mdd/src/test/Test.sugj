@@ -2,11 +2,11 @@ package test;
 
 import variability.Java;
 
-import test.FeatureModel;  
+import test.FeatureModel;
  
 public variable class Test {
   #feature(A)
-  void foo(){ 
+  void foo(){
     foo();
     #feature(B){ 
     bar();
