@@ -1,0 +1,88 @@
+package variability;
+
+import org.sugarj.languages.Java;
+
+public sugar Config {
+
+ context-free syntax 
+  JavaId -> FeatureName {cons("FeatureName")}
+ 
+  //config declaration
+  AnnoOrSugarMod* "config" JavaId "for" JavaId "{" ConfigDeclaration*  "}" -> ToplevelDeclaration {cons("ConfigDecl")}
+  "enable" {FeatureName ","}+ ";" -> ConfigDeclaration {cons("FeatureActivation")}
+  "disable" {FeatureName ","}+ ";" -> ConfigDeclaration {cons("FeatureDeactivation")}
+  "color" FeatureName EditorServiceInt EditorServiceInt EditorServiceInt ";" -> ConfigDeclaration {cons("FeatureColorDefinition")}
+
+ desugarings
+	featureconfig2trans      
+
+ rules 	 
+  	featureconfig2trans :
+  		ConfigDecl(mods, Id(n), Id(fm), configs)
+  		-> TransDec(TransDecHead(mods, Id(n)), TransBody(concRulez))
+  		where 
+  		<map(featureconfig2rules)> configs => rulez;
+  		<conc> ([ Rules([SDefNoArgs(
+                  "main"
+                , Call(SVar("topdown"), [CallNoArgs(SVar("optional"))])
+                )]) ], rulez) => concRulez
+  		
+  	featureconfig2rules :
+  	    FeatureActivation(fnames)
+  	    -> Rules(<map(featurename2rule-enabled)> fnames)
+  	    
+  	featureconfig2rules :
+  	    FeatureDeactivation(fnames)
+  	    -> Rules(<map(featurename2rule-disabled)> fnames)
+  	    
+  	featurename2rule-enabled :
+  		FeatureName(Id(n))
+  		-> SDefNoArgs("feature-enabled", Match(NoAnnoList(Str(n))))	
+  	    
+  	featurename2rule-disabled :
+  		FeatureName(Id(n))
+  		-> SDefNoArgs("feature-disabled", Match(NoAnnoList(Str(n))))	
+  
+  	featureconfig2trans = fail
+ 	  
+
+  rules 
+  	optional : 
+  	  OptionalNode(e, s) -> s
+  	   where <eval-condition> e
+  	  
+  	optional :
+  	  OptionalNode(e, s) -> Empty
+  	   where <not(eval-condition)> e
+
+    eval-condition :
+      e@FeatureName(Id(n)) -> e 
+      where <feature-enabled> n
+      
+    feature-enabled = fail
+
+    eval-condition :
+      n@FeatureExprNot(e) -> n 
+      where <not(eval-condition)> e
+
+    eval-condition :
+      a@FeatureExprAnd(e1, e2) -> a 
+      where <eval-condition> e1;
+            <eval-condition> e2
+
+    eval-condition :
+      o@FeatureExprOr(e1, e2) -> o 
+      where <eval-condition> e1
+
+    eval-condition :
+      o@FeatureExprOr(e1, e2) -> o 
+      where <eval-condition> e2
+      
+     signature
+      constructors 
+       OptionalNode : FeatureExpr * Expr -> Expr
+       FeatureExpr : FeatureName -> FeatureExpr
+       FeatureExprAnd : FeatureExpr * FeatureExpr -> FeatureExpr
+	   FeatureExprOr : FeatureExpr * FeatureExpr -> FeatureExpr
+	   FeatureExprNot : FeatureExpr -> FeatureExpr
+}

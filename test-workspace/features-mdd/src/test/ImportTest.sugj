@@ -1,0 +1,11 @@
+package test;
+
+import test.FeatureConfig;
+import test.Test < FeatureConfig >;
+
+public class ImportTest { 
+	public static void main(String[] args) {  
+		Test t =  new Test(); 
+		t.foo();   
+	} 
+} 
