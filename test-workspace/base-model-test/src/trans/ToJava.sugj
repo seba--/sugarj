@@ -7,7 +7,7 @@ import concretesyntax.Java;
 
 public transformation ToJava {
   rules
-    main = oncetd(model-to-javaclass(body-trans))
+    main = oncetd(?ClassDec(_,_) <+ model-to-javaclass(body-trans))
     body-trans = single-method(make-main-method(single-stmt(println-stmt(compile-exp))))
   
   rules
