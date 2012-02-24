@@ -1,6 +1,6 @@
-module org/sugarj/init/initGrammar_atomicImports
-imports org/sugarj/languages/Java
-        org/sugarj/languages/SugarJ
+module org/sugarj/java/init/initGrammar_atomicImports
+imports org/sugarj/java/Java
+        org/sugarj/java/SugarJ
 
 exports
   sorts NextToplevelDeclaration ToplevelDeclaration Rest JavaImportDecs

@@ -1,4 +1,4 @@
-module org/sugarj/init/initGrammar
+module org/sugarj/java/init/initGrammar
 imports org/sugarj/languages/Java
         org/sugarj/languages/SugarJ
 

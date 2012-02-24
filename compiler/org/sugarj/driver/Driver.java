@@ -45,6 +45,8 @@ import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoException;
 import org.strategoxt.permissivegrammars.make_permissive;
 import org.strategoxt.tools.tools;
+import org.sugarj.JavaLib;
+import org.sugarj.LanguageLib;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.cli.CLIError;
@@ -130,7 +132,11 @@ public class Driver{
   private boolean generateFiles;
   private Path delegateCompilation = null;
   
+  
+  
   private Driver_Java drj;
+  private LanguageLib langLib;
+  
   
   public Driver(Environment env) {
     this.environment=env;
@@ -146,6 +152,9 @@ public class Driver{
     } catch (IOException e) {
       throw new RuntimeException("error while initializing driver", e);
     }
+    
+    langLib = new JavaLib();
+    
   }  
   
   
@@ -693,7 +702,7 @@ public class Driver{
   private IStrategoTerm currentParse(String remainingInput, boolean recovery) throws IOException,
       InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     // recompile the current grammar definition
-    currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfContext, makePermissiveContext, sdfCache, environment);
+    currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfContext, makePermissiveContext, sdfCache, environment, langLib);
 //    FileCommands.deleteTempFiles(driverResult.getLastParseTable());
 //    driverResult.setLastParseTable(currentGrammarTBL);
     ParseTable table = org.strategoxt.imp.runtime.Environment.loadParseTable(currentGrammarTBL.getAbsolutePath());
@@ -1166,7 +1175,7 @@ public class Driver{
     log.beginTask("checking grammar", "CHECK current grammar");
     
     try {
-      Path p = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfContext, makePermissiveContext, sdfCache, environment);
+      Path p = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfContext, makePermissiveContext, sdfCache, environment, langLib);
       FileCommands.deleteTempFiles(p);
     } finally {
       log.endTask();
@@ -1189,8 +1198,8 @@ public class Driver{
   }
   
   private void initEditorServices() throws IOException, TokenExpectedException, BadTokenException, SGLRException {
-    IStrategoTerm initEditor = editorServicesParser.parse(new FileInputStream(StdLib.initEditor.getPath()), StdLib.initEditor.getPath());
-    
+    IStrategoTerm initEditor = editorServicesParser.parse(new FileInputStream(new File(langLib.getInitEditor())), new File(langLib.getInitEditor()).getPath());
+
     IStrategoTerm services = ATermCommands.getApplicationSubterm(initEditor, "Module", 2);
     
     if (!ATermCommands.isList(services))
@@ -1210,19 +1219,19 @@ public class Driver{
     
     this.driverResult = new Result(generateFiles);
 
-    currentGrammarSDF = new AbsolutePath(StdLib.initGrammar.getPath());
-    currentGrammarModule = StdLib.initGrammarModule;
-
-    currentTransSTR = new AbsolutePath(StdLib.initTrans.getPath());
-    currentTransModule = StdLib.initTransModule;
-
+    currentGrammarSDF = new AbsolutePath(langLib.getInitGrammar().getPath());
+    currentGrammarModule = langLib.getInitGrammarModule();
+    
+    currentTransSTR = new AbsolutePath(langLib.getInitTrans().getPath());
+    currentTransModule = langLib.getInitTransModule();
+    
     // list of imports that contain SDF extensions
-    availableSDFImports = new ArrayList<String>();
-    availableSDFImports.add(StdLib.initGrammarModule);
+    availableSDFImports = new ArrayList<String>();    
+    availableSDFImports.add(langLib.getInitGrammarModule());
 
     // list of imports that contain Stratego extensions
     availableSTRImports = new ArrayList<String>();
-    availableSTRImports.add(StdLib.initTransModule);
+    availableSTRImports.add(langLib.getInitTransModule());
 
     inputTreeBuilder = new RetractableTreeBuilder();
     

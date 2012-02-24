@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.sugarj.JavaLib;
+import org.sugarj.LanguageLib;
 import org.sugarj.driver.path.AbsolutePath;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
@@ -71,6 +73,8 @@ public class Environment implements Serializable {
   public static boolean rocache = false;
   public static boolean wocache = false;
   
+  
+  private LanguageLib langLib = new JavaLib();  // XXX: do stuff
   
   
   private Path cacheDir = null;

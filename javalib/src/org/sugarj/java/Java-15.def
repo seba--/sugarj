@@ -1294,7 +1294,7 @@ imports languages/java-15/lexical/Main languages/java-15/types/Main
 module Java-15
 imports languages/java-15/Main
 
-module org/sugarj/languages/Java
+module org/sugarj/java/Java
 imports Java-15
           [ CompilationUnit       => JavaCompilationUnit
             TypeDec               => JavaTypeDec
