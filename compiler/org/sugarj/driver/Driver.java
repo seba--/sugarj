@@ -129,7 +129,7 @@ public class Driver {
   
   private boolean generateFiles;
   private Path delegateCompilation = null;
-  private boolean hasModelImport = false;
+  private boolean dependsOnModel = false;
   
   private Set<RelativePath> generatedJavaClasses = new HashSet<RelativePath>();
   
@@ -476,7 +476,7 @@ public class Driver {
           log.log("The editor services is not public.");
       
         generateModel(extName, toplevelDecl);
-        if (hasModelImport)
+        if (dependsOnModel)
           return;
         
         IStrategoTerm services = ATermCommands.getApplicationSubterm(body, "EditorServicesBody", 0);
@@ -579,7 +579,7 @@ public class Driver {
           log.log("The plain file is not public.");
         
         generateModel(extName, toplevelDecl);
-        if (hasModelImport)
+        if (dependsOnModel)
           return;
       
         String plainContent = Term.asJavaString(ATermCommands.getApplicationSubterm(body, "PlainBody", 0));
@@ -784,8 +784,10 @@ public class Driver {
       boolean skipProcessImport = prepareImport(modulePath, importSourceFile, null, null, toplevelDecl, false);
       
       // apply transformation prior to import
+      boolean modelImport = isApplication(toplevelDecl, "ModelImportDec") || isApplication(toplevelDecl, "ModelTransImportDec");
       boolean transformedImport = isApplication(toplevelDecl, "TransImportDec") || isApplication(toplevelDecl, "ModelTransImportDec") || !environment.getTransformationPaths().isEmpty();
-
+      boolean transitivelyTransformedImport = !environment.getTransformationPaths().isEmpty();
+      
       if (transformedImport) {
         List<String> importTransformations = ModuleSystemCommands.extractImportedTransformationNames(toplevelDecl, interp);
         List<String> transformationPaths = new ArrayList<String>();
@@ -813,13 +815,17 @@ public class Driver {
         }
       }
       
-      boolean modelImport = isApplication(toplevelDecl, "ModelImportDec") || isApplication(toplevelDecl, "ModelTransImportDec");
-      
       boolean success;
       if (skipProcessImport)
         success = true;
-      else if (modelImport)
+      else if (modelImport) {
         success = processModelImport(modulePath);
+        boolean codeImportSuccess = false;
+        if (transitivelyTransformedImport)
+          codeImportSuccess = processImport(modulePath);
+        if (!codeImportSuccess)
+          dependsOnModel = true;
+      }
       else
         success = processImport(modulePath);
       
@@ -990,27 +996,12 @@ public class Driver {
       String trans = " with " + (transformationPaths != null ? StringCommands.printModuleList(transformationPaths, ", ") + " and " : "") + StringCommands.printModuleList(environment.getTransformationPaths(), ", "); 
       log.beginTask("Transform model", "Transform model " + model.getRelativePath() + trans);
       
-      boolean isModel = true;
-      
-      List<RelativePath> paths = new LinkedList<RelativePath>();
       if (transformationPaths != null)
-        paths.addAll(transformationPaths);
-      paths.addAll(environment.getTransformationPaths());
-      
-      for (RelativePath strPath : paths) {
-        transformedTerm = executeTransformation(strPath, transformedTerm);
-        
-        IStrategoTerm body = getApplicationSubterm(transformedTerm, "SugarCompilationUnit", 2);
-        isModel = false;
-        for (IStrategoTerm dec : body.getAllSubterms())
-          if (ATermCommands.isApplication(dec, "ModelDec")) {
-            isModel = true;
-            break;
-          }
-        
-        if (!isModel)
-          break;
-      }
+        for (RelativePath strPath : transformationPaths)
+          transformedTerm = executeTransformation(strPath, transformedTerm, false);
+
+      for (RelativePath strPath : environment.getTransformationPaths())
+        transformedTerm = executeTransformation(strPath, transformedTerm, true);
       
       transformSuccessful = true;
       
@@ -1053,7 +1044,7 @@ public class Driver {
   }
 
 
-  private IStrategoTerm executeTransformation(RelativePath strPath, IStrategoTerm currentTerm) throws IOException {
+  private IStrategoTerm executeTransformation(RelativePath strPath, IStrategoTerm currentTerm, boolean mayFail) throws IOException {
     /*
      * create a temporary stratego file that connects already available imports
      * with the currently processed transformation
@@ -1085,14 +1076,17 @@ public class Driver {
     try {
       IStrategoTerm newTransformedTerm = STRCommands.assimilate("main-" + FileCommands.fileName(strPath), trans, currentTerm, interp);
       
-      if (newTransformedTerm == null) {
+      if (newTransformedTerm == null && !mayFail) {
         String msg = "model transformation failed " + FileCommands.dropExtension(strPath.getRelativePath()) + " applied to " + ATermCommands.atermToFile(currentTerm).getAbsolutePath();
         setErrorMessage(lastSugaredToplevelDecl, msg);
         throw new RuntimeException(msg);
       }
-      
+
       return newTransformedTerm;
+      
     } catch (Exception e) {
+      if (mayFail) 
+        return currentTerm;
       String msg = "model transformation failed " + FileCommands.dropExtension(strPath.getRelativePath()) + " applied to " + ATermCommands.atermToFile(currentTerm).getAbsolutePath();
       setErrorMessage(lastSugaredToplevelDecl, msg + ":\n" + e.getMessage());
       throw new RuntimeException(msg, e);
@@ -1156,7 +1150,7 @@ public class Driver {
       String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
       
       generateModel(decName, toplevelDecl);
-      if (hasModelImport)
+      if (dependsOnModel)
         return;
 
       checkToplevelDeclarationName(decName, "java declaration", toplevelDecl);
@@ -1250,7 +1244,7 @@ public class Driver {
 
 
         generateModel(extName, toplevelDecl);
-        if (hasModelImport)
+        if (dependsOnModel)
           return;
       } finally {
         log.endTask();
