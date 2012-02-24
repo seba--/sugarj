@@ -779,11 +779,10 @@ public class Driver {
       RelativeSourceLocationPath importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
       boolean skipProcessImport = prepareImport(modulePath, importSourceFile, null, null, toplevelDecl, false);
       
-      
-      // generate and import transformed model?
-      boolean transformedModelImport = (isApplication(toplevelDecl, "TransImportDec") || !environment.getTransformationPaths().isEmpty());
+      // apply transformation prior to import
+      boolean transformedImport = isApplication(toplevelDecl, "TransImportDec") || isApplication(toplevelDecl, "ModelTransImportDec") || !environment.getTransformationPaths().isEmpty();
 
-      if (transformedModelImport) {
+      if (transformedImport) {
         List<String> importTransformations = ModuleSystemCommands.extractImportedTransformationNames(toplevelDecl, interp);
         List<String> transformationPaths = new ArrayList<String>();
         if (importTransformations != null)
@@ -810,13 +809,17 @@ public class Driver {
         }
       }
       
+      boolean modelImport = isApplication(toplevelDecl, "ModelImportDec") || isApplication(toplevelDecl, "ModelTransImportDec");
+      
       boolean success;
       if (skipProcessImport)
         success = true;
-      else 
+      else if (modelImport)
+        success = processModelImport(modulePath);
+      else
         success = processImport(modulePath);
       
-      if (!success && !transformedModelImport && !ATermCommands.hasError(toplevelDecl))
+      if (!success && !transformedImport && !ATermCommands.hasError(toplevelDecl))
         setErrorMessage(toplevelDecl, "module not found: " + modulePath);
       
     } catch (Exception e) {
@@ -964,13 +967,13 @@ public class Driver {
     success |= ModuleSystemCommands.importEditorServices(modulePath, driverResult, environment);
     ModuleSystemCommands.registerSearchedEditorServicesFiles(modulePath, driverResult, environment);
     
+    return success;
+  }
+  
+  private boolean processModelImport(String modulePath) throws IOException {
     RelativePath model = ModuleSystemCommands.importModel(modulePath, environment);
     ModuleSystemCommands.registerSearchedModelFiles(modulePath, driverResult, environment);
-    if (model != null) {
-      success = true;
-    }
-
-    return success;
+    return model != null;
   }
 
 

@@ -164,11 +164,11 @@ public class ModuleSystemCommands {
     String name = null;
     log.beginTask("Extracting", "Extract name of imported module");
     try {
-      if (isApplication(toplevelDecl, "TypeImportDec"))
+      if (isApplication(toplevelDecl, "TypeImportDec") || isApplication(toplevelDecl, "ModelImportDec"))
         name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp);
-      if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
+      else if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
         name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp) + ".*";
-      if (isApplication(toplevelDecl, "TransImportDec"))
+      else if (isApplication(toplevelDecl, "TransImportDec") || isApplication(toplevelDecl, "ModelTransImportDec"))
         name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp);
     } finally {
       log.endTask(name);
