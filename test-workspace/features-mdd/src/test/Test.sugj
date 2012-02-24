@@ -5,13 +5,15 @@ import variability.Java;
 import test.FeatureModel;
  
 public variable class Test {
-  #feature(A)
+  
   void foo(){
-    foo();
+    #feature(A)
+    foo(); 
+    
     #feature(B){ 
     bar();
     }
   } 
-  
+ 
   void bar(){}
 }
