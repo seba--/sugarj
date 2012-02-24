@@ -49,7 +49,7 @@ public class ATermCommands {
     private final String highlevelPattern;
     
     public MatchError(IStrategoTerm scrutinee, String kind, String highlevelPattern) {
-      super("Error while matching " + kind + " of " + highlevelPattern);
+      super("Error while matching " + kind + " of " + highlevelPattern + " against " + (scrutinee.getTermType() == IStrategoTerm.APPL ? ((IStrategoAppl) scrutinee).getConstructor().getName() : scrutinee));
       
       this.scrutinee = scrutinee;
       this.kind = kind;
