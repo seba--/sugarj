@@ -105,7 +105,7 @@ public class Driver {
   private List<IStrategoTerm> sugaredImportDecls = new ArrayList<IStrategoTerm>();
   private List<IStrategoTerm> desugaredImportDecls = new ArrayList<IStrategoTerm>();
   private List<IStrategoTerm> sugaredBodyDecls = new ArrayList<IStrategoTerm>();
-  private List<IStrategoTerm> desugaredBodyDecls = new ArrayList<IStrategoTerm>();
+  // private List<IStrategoTerm> desugaredBodyDecls = new ArrayList<IStrategoTerm>();
   
   private IStrategoTerm lastSugaredToplevelDecl;
   
@@ -129,6 +129,7 @@ public class Driver {
   
   private boolean generateFiles;
   private Path delegateCompilation = null;
+  private boolean hasModelImport = false;
   
   private Set<RelativePath> generatedJavaClasses = new HashSet<RelativePath>();
   
@@ -474,6 +475,10 @@ public class Driver {
         else
           log.log("The editor services is not public.");
       
+        generateModel(extName, toplevelDecl);
+        if (hasModelImport)
+          return;
+        
         IStrategoTerm services = ATermCommands.getApplicationSubterm(body, "EditorServicesBody", 0);
         
         if (!ATermCommands.isList(services))
@@ -508,7 +513,6 @@ public class Driver {
           buf.append(service).append('\n');
         }
         
-        generateModel(extName);
         driverResult.generateFile(editorServicesFile, buf.toString());
       } finally {
         log.endTask();
@@ -573,6 +577,10 @@ public class Driver {
           log.log("The plain file is public.");
         else
           log.log("The plain file is not public.");
+        
+        generateModel(extName, toplevelDecl);
+        if (hasModelImport)
+          return;
       
         String plainContent = Term.asJavaString(ATermCommands.getApplicationSubterm(body, "PlainBody", 0));
         
@@ -580,8 +588,6 @@ public class Driver {
         Path plainFile = environment.new RelativePathBin(relPackageNameSep() + extName + ext);
         FileCommands.createFile(plainFile);
   
-        generateModel(extName);
-        
         log.log("writing plain content to " + plainFile);
         driverResult.generateFile(plainFile, plainContent);
       } finally {
@@ -700,21 +706,19 @@ public class Driver {
     if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
         sugaredBodyDecls.add(lastSugaredToplevelDecl);
 
-    desugaredBodyDecls.add(toplevelDecl);
-    
     String modelName = SDFCommands.prettyPrintJava(getApplicationSubterm(getApplicationSubterm(toplevelDecl, "ModelDec", 0), "ModelDecHead", 1), interp);
     for (Renaming ren : environment.getRenamings())
       modelName = StringCommands.rename(modelName, ren);
     
-    generateModel(modelName);
+    generateModel(modelName, toplevelDecl);
   }
   
-  private void generateModel(String modelName) throws IOException {
+  private void generateModel(String modelName, IStrategoTerm body) throws IOException {
     log.beginTask("Generate model.");
     try {
       RelativePath modelOutFile = environment.new RelativePathBin(relPackageNameSep() + modelName + ".model");
       
-      IStrategoTerm modelTerm = makeDesugaredSyntaxTree();
+      IStrategoTerm modelTerm = makeDesugaredSyntaxTree(body);
       driverResult.generateFile(modelOutFile, ATermCommands.atermToString(modelTerm));
     } finally {
       log.endTask();
@@ -1144,19 +1148,22 @@ public class Driver {
         sugaredBodyDecls.add(lastSugaredToplevelDecl);
 
       
+      IStrategoTerm dec = isApplication(toplevelDecl, "JavaTypeDec") ? getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0) : toplevelDecl;
+      
+      for (Renaming ren : environment.getRenamings())
+        dec = ATermCommands.renameJava(dec, ren, renamingContext);
+      
+      String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
+      
+      generateModel(decName, toplevelDecl);
+      if (hasModelImport)
+        return;
+
+      checkToplevelDeclarationName(decName, "java declaration", toplevelDecl);
+      RelativePath clazz = environment.new RelativePathBin(relPackageNameSep() + decName + ".class");
+      
       log.beginTask("Generate Java code.");
       try {
-        IStrategoTerm dec = isApplication(toplevelDecl, "JavaTypeDec") ? getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0) : toplevelDecl;
-        
-        for (Renaming ren : environment.getRenamings())
-          dec = ATermCommands.renameJava(dec, ren, renamingContext);
-        
-        String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
-        
-        checkToplevelDeclarationName(decName, "java declaration", toplevelDecl);
-        RelativePath clazz = environment.new RelativePathBin(relPackageNameSep() + decName + ".class");
-        
-        generateModel(decName);
         generatedJavaClasses.add(clazz);
         javaSource.addBodyDecl(SDFCommands.prettyPrintJava(dec, interp));
       } finally {
@@ -1242,6 +1249,9 @@ public class Driver {
           log.log("The sugar is not native.");
 
 
+        generateModel(extName, toplevelDecl);
+        if (hasModelImport)
+          return;
       } finally {
         log.endTask();
       }
@@ -1345,8 +1355,6 @@ public class Driver {
        */
       if (FileCommands.exists(strExtension))
         buildCompoundStrModule();
-
-      generateModel(extName);
     } finally {
       log.endTask();
     }
@@ -1642,12 +1650,12 @@ public class Driver {
   /**
 * @return the desugared syntax tree of the complete file.
 */
-  private IStrategoTerm makeDesugaredSyntaxTree() {
+  private IStrategoTerm makeDesugaredSyntaxTree(IStrategoTerm bodyTerm) {
     IStrategoTerm packageDecl = ATermCommands.makeSome(desugaredPackageDecl, inputTreeBuilder.getTokenizer() == null ? null : inputTreeBuilder.getTokenizer().getTokenAt(0));
     IStrategoTerm imports =
       ATermCommands.makeList("JavaImportDec*", ImploderAttachment.getRightToken(packageDecl), desugaredImportDecls);
     IStrategoTerm body =
-      ATermCommands.makeList("TypeOrSugarDec*", ImploderAttachment.getRightToken(imports), desugaredBodyDecls);
+      ATermCommands.makeList("TypeOrSugarDec*", ImploderAttachment.getRightToken(imports), bodyTerm);
     
     IStrategoTerm term =
       ATermCommands.makeAppl("SugarCompilationUnit", "SugarCompilationUnit", 3,
