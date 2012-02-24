@@ -4,6 +4,8 @@ import test.models.PersonEntity<test.ToJavaClass>;
 
 public class PersonEntity_ToJavaClass {
   public static void main(String[] args) {
-     
+     PersonEntity e = new PersonEntity("Sebastian", "Marburg", "seba@informatik");
+
+     System.out.println("Entity: name='" + e.getName() + "', address='" + e.getAddr() + "', email='" + e.getEmail() + "'");
   }
 }

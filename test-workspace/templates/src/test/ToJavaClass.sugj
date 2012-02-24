@@ -25,16 +25,19 @@ public template ToJavaClass {
       $fieldname = !Id(propname)
       $getter-name = !Id(<concat-strings> ["get", <string-as-chars([to-upper|id])> propname])
       
-      public $type $fieldname; 
+      private $type $fieldname; 
 
       public $type $getter-name() {
         return $fieldname;
       }
     }
 
-    public $classname($for(Property(propname, SimpleSort(proptype)) in !properties){
+    public $classname($for(Property(propname, SimpleSort(proptype)) in !properties) {
                         ${!TypeName(Id(proptype))} ${!Id(propname)}
                       }) {
+      $for(Property(propname, SimpleSort(proptype)) in !properties) {
+        this.${!Id(propname)} = ${!Id(propname)};
+      }
     }
   }
 }
