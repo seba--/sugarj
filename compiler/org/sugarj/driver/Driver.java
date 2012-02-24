@@ -605,7 +605,11 @@ public class Driver {
       if (depOutFile == null)
         depOutFile = environment.new RelativePathBin(relPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       try {
-        if (isApplication(toplevelDecl, "TypeImportDec") || isApplication(toplevelDecl, "TypeImportOnDemandDec") || isApplication(toplevelDecl, "TransImportDec")) {
+        if (isApplication(toplevelDecl, "TypeImportDec") || 
+            isApplication(toplevelDecl, "TypeImportOnDemandDec") || 
+            isApplication(toplevelDecl, "TransImportDec") ||
+            isApplication(toplevelDecl, "ModelImportDec") ||
+            isApplication(toplevelDecl, "ModelTransImportDec")) {
           if (!environment.isAtomicImportParsing())
             processImportDec(toplevelDecl);
           else
@@ -738,7 +742,9 @@ public class Driver {
       if (term != null &&
           (isApplication(term, "TypeImportDec") ||
            isApplication(term, "TypeImportOnDemandDec") ||
-           isApplication(term, "TransImportDec"))) {
+           isApplication(term, "TransImportDec") ||
+           isApplication(toplevelDecl, "ModelImportDec") ||
+           isApplication(toplevelDecl, "ModelTransImportDec"))) {
         pendingImports.add(term);
       }
       else {
