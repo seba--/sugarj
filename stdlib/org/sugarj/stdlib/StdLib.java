@@ -11,6 +11,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 
+import org.eclipse.core.runtime.FileLocator;
+
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
@@ -19,27 +21,23 @@ public class StdLib {
   public static URI stdLibDir;
   private static String stdLibTmpDir;
   static {
-    try {
-      /*String dir = URLEncoder.encode(StdLib.class.getProtectionDomain().getCodeSource().getLocation().toString(), "UTF-8");
-      URL dirURL = new URL(dir);
-      System.out.println("std lib dir: " + dir); // XXX
-      System.out.println("std lib dir url: " + dirURL);
-      stdLibDir = dirURL.toURI();
-      System.out.println("std lib dir uri: " + stdLibDir);
-      //stdLibDir = StdLib.class.getProtectionDomain().getCodeSource().getLocation().toURI();
-       * 
-       */
-      
-      String dir = StdLib.class.getProtectionDomain().getCodeSource().getLocation().toString();
-      dir = dir.replace(" ", "%20");
-      stdLibDir = new URI(dir);
-      System.out.println("std lib dir uri: " + stdLibDir);
-      
-    } catch (URISyntaxException e1) {
-      e1.printStackTrace();
-    }
 
+    String thisClassPath = "org/sugarj/stdlib/StdLib.class";
+    URL thisClassURL = StdLib.class.getClassLoader().getResource(thisClassPath);
+    
+    if (thisClassURL.getProtocol().equals("bundleresource"))
+      try {
+        thisClassURL = FileLocator.resolve(thisClassURL);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    
+    String classPath = thisClassURL.getPath();
+    String binPath = classPath.substring(0, classPath.length() - thisClassPath.length());
+    
     try {
+      stdLibDir = new File(binPath).toURI();
+      
       File f = File.createTempFile("org.sugarj.stdlib", "");
       f.delete();
       f.mkdir();
