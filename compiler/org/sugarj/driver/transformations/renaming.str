@@ -10,7 +10,19 @@ rules
   do-rename-java(|pkg, from, to) :
        ClassDecHead(mods, Id(from), typeParams, super, interface)
     -> ClassDecHead(mods, Id(to), typeParams, super, interface) 
-  
+    
+  do-rename-java(|pkg, from, to) :
+       InterfaceDecHead(mods, Id(from), typeParams, interface)
+    -> InterfaceDecHead(mods, Id(to), typeParams, interface) 
+
+  do-rename-java(|pkg, from, to) :
+       EnumDecHead(mods, Id(from), interface)
+    -> EnumDecHead(mods, Id(to), interface) 
+    
+  do-rename-java(|pkg, from, to) :
+       AnnoDecHead(mods, Id(from))
+    -> AnnoDecHead(mods, Id(to)) 
+    
   do-rename-java(|pkg, from, to) :
        ConstrDecHead(mods, typeParams, Id(from), params, throws)
     -> ConstrDecHead(mods, typeParams, Id(to), params, throws)
