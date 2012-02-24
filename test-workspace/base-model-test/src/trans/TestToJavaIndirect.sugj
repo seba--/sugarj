@@ -1,0 +1,10 @@
+package trans;
+
+import trans.ToJava;
+import model.ModelImport<ToJava>;
+
+public class TestToJavaIndirect {
+  public static void main(String[] args) {
+    ModelImport.main(args);
+  }
+}

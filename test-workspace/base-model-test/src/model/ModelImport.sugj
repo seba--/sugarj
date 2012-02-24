@@ -4,6 +4,7 @@ model import model.ModelDec;
 
 public class ModelImport {
   public static void main(String[] args) {
+    System.out.println("redirect to ModelDec");
     ModelDec.main(args);
   }
 }
