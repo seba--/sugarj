@@ -1,40 +1,36 @@
 package test;
 
 import template.Unquote;
+import template.ListUnquote;
 import template.Shorthands;
+import template.Requote;
+import template.util.AutoScopeRules;
 import template.InlineShorthands;
-import template.Foreach;
 
 import test.models.EntityMetamodel;
 import org.sugarj.languages.Java;
 
-public template ToJavaClass {
+public template ToJavaClassSimple {
   $pkg = collect-one(?PackageDec(_,<id>))
   $classname = collect-one(?ModelDecHead(_,<id>))
 
   package $pkg;
   public class $classname {
 
-    $properties = collect-one(?Entity(_,<id>))
-
-    $for(Property(propname, SimpleSort(proptype)) in !properties) { 
+    $*{
+    collect-one(?Entity(_,<id>));
+    mapconcat(
+      \ Property(propname, SimpleSort(proptype)) ->
+    } 
       $type = !TypeName(Id(proptype))
       $fieldname = !Id(propname)
       $getter-name = !Id(<concat-strings> ["get", <string-as-chars([to-upper|id])> propname])
       
-      private $type $fieldname; 
+      public $type $fieldname; 
 
       public $type $getter-name() {
         return $fieldname;
       }
-    }
-
-    public $classname($for(Property(propname, SimpleSort(proptype)) in !properties) {
-                        ${!TypeName(Id(proptype))} ${!Id(propname)}
-                      }) {
-      $for(Property(propname, SimpleSort(proptype)) in !properties) {
-        this.${!Id(propname)} = ${!Id(propname)};
-      }
-    }
+    ${\)}
   }
 }

@@ -11,7 +11,7 @@ public template PrintProperties {
     public static void main(String[] args) {
       System.out.println("Model has the following properties:");
  
-      $*{ extract(?Entity(_,<id>));
+      $*{ collect-one(?Entity(_,<id>));
           map(\ Property(name, SimpleSort(sort))
                 ->
                 ExprStm(Invoke(Method(MethodName(AmbName(AmbName(Id("System")), Id("out")), Id("println"))), 

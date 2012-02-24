@@ -9,7 +9,7 @@ public variable class Test {
   
   void foo(){
     #feature(A)
-    foo(); 
+    System.out.println("Feature A enabled"); 
     
     #feature(B){
     bar();

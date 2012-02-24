@@ -11,5 +11,7 @@ public sugar Requote {
     JavaClassBodyDec* -> Requoted {avoid}
 
     JavaExpr -> Requoted
-    JavaBlockStm -> Requoted    
+    JavaBlockStm -> Requoted
+
+    JavaFormalParam -> Requoted
 }
