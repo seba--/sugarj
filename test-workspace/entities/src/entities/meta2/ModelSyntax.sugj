@@ -1,8 +1,10 @@
 package entities.meta2;
 
-//import meta.Signatures;
 import entities.meta2.Model<meta.Signatures>;
 
+/*
+ * Hand-crafted model syntax for entities.meta2.Model metamodel.
+ */
 public sugar ModelSyntax {
   context-free syntax
     Entity -> ToplevelDeclaration

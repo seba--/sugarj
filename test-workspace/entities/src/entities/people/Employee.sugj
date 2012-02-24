@@ -2,7 +2,7 @@ package entities.people;
 
 import entities.meta.Model;
 
-import entities.people.Person;
+model import entities.people.Person;
 
 public entity Employee extends Person {
   position :: String

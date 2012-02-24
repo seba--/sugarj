@@ -2,12 +2,13 @@ package entities.transactions;
 
 import entities.meta.Model;
 
-import entities.accounts.CheckingAccount;
-import entities.people.Customer;
+model import entities.accounts.CheckingAccount;
+model import entities.people.Customer;
 
 public entity CreditTransfer {
   source         :: Customer
   source_account :: CheckingAccount
   target         :: Customer
   target_account :: CheckingAccount
+  amount         :: Integer
 }

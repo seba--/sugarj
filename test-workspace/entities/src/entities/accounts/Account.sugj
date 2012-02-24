@@ -2,7 +2,7 @@ package entities.accounts;
 
 import entities.meta.Model;
 
-import entities.people.Customer;
+model import entities.people.Customer;
 
 public entity Account {
   uid   :: Int

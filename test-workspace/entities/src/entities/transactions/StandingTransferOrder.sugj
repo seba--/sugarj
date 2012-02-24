@@ -1,8 +1,11 @@
 package entities.transactions;
 
+import entities.transactions.Cycle;
 import java.util.Date;
 
 import entities.meta.Model;
+
+model import entities.transactions.CreditTransfer;
 
 public entity StandingTransferOrder extends CreditTransfer {
   cycle :: Cycle
