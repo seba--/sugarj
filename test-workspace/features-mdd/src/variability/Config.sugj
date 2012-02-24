@@ -59,9 +59,10 @@ public sugar Config {
       ModelDec(ModelDecHead(mods, name), ModelBody( ("VariableStructure", structure) ))
       -> structure
       where <not(oncetd(?OptionalNode(_,_)))> structure
-      
+
     eliminate-variability = topdown(try(configure-optional-node)); 
-           SugarCompilationUnit(id,id,map(try(no-variability)))
+                            SugarCompilationUnit(id,id,map(try(no-variability)));
+                            topdown(try(filter(not(?VariabilityHole))))
 
     
 
@@ -71,7 +72,7 @@ public sugar Config {
       where <is-condition-enabled> e
      
     configure-optional-node :
-     OptionalNode(e, s) -> Empty
+     OptionalNode(e, s) -> VariabilityHole
       where <is-condition-disabled> e
 
     is-condition-enabled :
@@ -125,6 +126,7 @@ public sugar Config {
      
      signature
       constructors 
+       VariabilityHole : VariabilityHole
        OptionalNode : FeatureExpr * Expr -> Expr
        FeatureName : Identifier -> FeatureName
        FeatureExpr : FeatureName -> FeatureExpr
