@@ -743,8 +743,8 @@ public class Driver {
           (isApplication(term, "TypeImportDec") ||
            isApplication(term, "TypeImportOnDemandDec") ||
            isApplication(term, "TransImportDec") ||
-           isApplication(toplevelDecl, "ModelImportDec") ||
-           isApplication(toplevelDecl, "ModelTransImportDec"))) {
+           isApplication(term, "ModelImportDec") ||
+           isApplication(term, "ModelTransImportDec"))) {
         pendingImports.add(term);
       }
       else {
