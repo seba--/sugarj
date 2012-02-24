@@ -15,27 +15,14 @@ public sugar Java {
   context-free syntax
     VariableClass -> ToplevelDeclaration
     AnnoOrSugarMod* "variable" "class" JavaId JavaClassBody -> VariableClass {cons("VariableClassDec")}
-    
-    JavaId -> FeatureName {cons("FeatureName")}
- 
  
   context-free syntax
+   JavaId -> FeatureName {cons("FeatureName")}
+   FeatureName->FeatureExpr
   //conditional elements
    "#" "feature" "(" FeatureExpr ")" JavaMethodDec -> JavaMethodDec {cons("OptionalNode")}
    "#" "feature" "(" FeatureExpr ")" JavaStm -> JavaStm {cons("OptionalNode")}
    "#" "feature" "(" FeatureExpr ")" JavaTypeDec -> JavaTypeDec{cons("OptionalNode")}
-   FeatureName->FeatureExpr
-   FeatureExpr "&&" FeatureExpr -> FeatureExpr {cons("FeatureExprAnd")}
-   FeatureExpr "||" FeatureExpr -> FeatureExpr {cons("FeatureExprOr")}
-   "(" FeatureExpr ")" -> FeatureExpr
-   "!" FeatureExpr -> FeatureExpr {cons("FeatureExprNot")}
-   
-  context-free priorities
-   {"(" FeatureExpr ")" -> FeatureExpr } >
-   {FeatureExpr "&&" FeatureExpr -> FeatureExpr }>
-   {FeatureExpr "||" FeatureExpr -> FeatureExpr }>
-   {"!" FeatureExpr -> FeatureExpr }
-
 }
 
 public editor services Java {

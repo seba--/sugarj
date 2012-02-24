@@ -5,13 +5,22 @@ import org.sugarj.languages.Java;
 public sugar Config { 
 
  context-free syntax 
-  JavaId -> FeatureName {cons("FeatureName")}
- 
+   FeatureExpr "&&" FeatureExpr -> FeatureExpr {cons("FeatureExprAnd")}
+   FeatureExpr "||" FeatureExpr -> FeatureExpr {cons("FeatureExprOr")}
+   "(" FeatureExpr ")" -> FeatureExpr
+   "!" FeatureExpr -> FeatureExpr {cons("FeatureExprNot")}
+
   //config declaration
   AnnoOrSugarMod* "config" JavaId "for" JavaId "{" ConfigDeclaration*  "}" -> ToplevelDeclaration {cons("ConfigDecl")}
   "enable" {FeatureName ","}+ ";" -> ConfigDeclaration {cons("FeatureActivation")}
   "disable" {FeatureName ","}+ ";" -> ConfigDeclaration {cons("FeatureDeactivation")}
   "color" FeatureName EditorServiceInt EditorServiceInt EditorServiceInt ";" -> ConfigDeclaration {cons("FeatureColorDefinition")}
+   
+ context-free priorities
+   {"(" FeatureExpr ")" -> FeatureExpr } >
+   {FeatureExpr "&&" FeatureExpr -> FeatureExpr }>
+   {FeatureExpr "||" FeatureExpr -> FeatureExpr }>
+   {"!" FeatureExpr -> FeatureExpr }
 
  desugarings
     featureconfig2trans      
@@ -117,8 +126,6 @@ public sugar Config {
      signature
       constructors 
        OptionalNode : FeatureExpr * Expr -> Expr
+       FeatureName : Identifier -> FeatureName
        FeatureExpr : FeatureName -> FeatureExpr
-       FeatureExprAnd : FeatureExpr * FeatureExpr -> FeatureExpr
-       FeatureExprOr : FeatureExpr * FeatureExpr -> FeatureExpr
-       FeatureExprNot : FeatureExpr -> FeatureExpr
 }
