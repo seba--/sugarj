@@ -3,26 +3,43 @@ package variability;
 import concretesyntax.MetaExplode;
 
 public sugar Java {
-  desugarings
-    desugar-variable-class
-
-  rules
-    desugar-variable-class :
-      VariableClassDec(mods, name, body) -> 
-      ModelDec(ModelDecHead(mods, name), ModelBody( ("VariableStructure", ClassDec(ClassDecHead(mods, name, None, None, None), body) ) )) 
-      
 
   context-free syntax
-    VariableClass -> ToplevelDeclaration
+    JavaVariableType -> ToplevelDeclaration
+
+    VariableClass -> JavaVariableType
     AnnoOrSugarMod* "variable" "class" JavaId JavaClassBody -> VariableClass {cons("VariableClassDec")}
- 
-  context-free syntax
+    
+    VariableInterface -> JavaVariableType
+    VariableInterfaceDecHead "{" JavaInterfaceMemberDec* "}" -> VariableInterface {cons("VariableInterfaceDec")}
+    AnnoOrSugarMod* "variable" "interface" JavaId JavaTypeParams? JavaExtendsInterfaces? -> VariableInterfaceDecHead  {cons("VariableInterfaceDecHead")}
+    
+    
+
    JavaId -> FeatureName {cons("FeatureName")}
    FeatureName->FeatureExpr
   //conditional elements
    "#" "feature" "(" FeatureExpr ")" JavaMethodDec -> JavaMethodDec {cons("OptionalNode")}
    "#" "feature" "(" FeatureExpr ")" JavaStm -> JavaStm {cons("OptionalNode")}
-   "#" "feature" "(" FeatureExpr ")" JavaTypeDec -> JavaTypeDec{cons("OptionalNode")}
+   "#" "feature" "(" FeatureExpr ")" JavaInterfaceMemberDec -> JavaInterfaceMemberDec {cons("OptionalNode")}
+   "#" "feature" "(" FeatureExpr ")" JavaVariableType -> JavaVariableType{cons("OptionalNode")}
+
+  desugarings
+    desugar-variable-type
+    variable-type-declaration
+
+  rules         
+    desugar-variable-type :
+      VariableClassDec(mods, name, body) -> 
+      ModelDec(ModelDecHead(mods, name), ModelBody(("VariableStructure", ClassDec(ClassDecHead(mods, name, None, None, None), body))))
+      
+    desugar-variable-type :
+      VariableInterfaceDec(VariableInterfaceDecHead(mods,name,params,extendsifc),body) ->
+      ModelDec(ModelDecHead(mods, name), ModelBody(("VariableStructure", InterfaceDec(InterfaceDecHead(mods,name,params,extendsifc),body))))
+
+    variable-type-declaration : 
+     OptionalNode( exp, ModelDec(head, ModelBody( ("VariableStructure", vartypedec ) )) ) ->
+     ModelDec(head, ModelBody( ("VariableStructure", OptionalNode(exp, vartypedec) )) )
 }
 
 public editor services Java {

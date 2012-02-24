@@ -1,7 +1,8 @@
 package test;
 
 import test.FeatureConfig;
-import test.Test<FeatureConfig>; 
+import test.Test<FeatureConfig>;
+import test.InterfaceTest<FeatureConfig>;
 
 public class ImportTest {
 	public static void main(String[] args) {  

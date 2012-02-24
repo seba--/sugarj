@@ -4,16 +4,17 @@ import variability.Java;
 
 import test.FeatureModel;
  
+#feature(C) 
 public variable class Test {
   
   void foo(){
     #feature(A)
     foo(); 
     
-    #feature(B){ 
+    #feature(B){
     bar();
     }
   } 
- 
+   
   void bar(){}
 }
