@@ -1,7 +1,9 @@
 package model;
 
-import model.ModelDec;
+model import model.ModelDec;
 
-public model ModelImport {
-[]
+public class ModelImport {
+  public static void main(String[] args) {
+    ModelDec.main(args);
+  }
 }
