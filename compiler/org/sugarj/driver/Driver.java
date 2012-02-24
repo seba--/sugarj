@@ -991,7 +991,7 @@ public class Driver {
       List<RelativePath> paths = new LinkedList<RelativePath>();
       if (transformationPaths != null)
         paths.addAll(transformationPaths);
-      transformationPaths.addAll(environment.getTransformationPaths());
+      paths.addAll(environment.getTransformationPaths());
       
       for (RelativePath strPath : paths) {
         transformedTerm = executeTransformation(strPath, transformedTerm);
