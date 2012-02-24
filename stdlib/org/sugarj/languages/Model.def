@@ -24,3 +24,7 @@ exports
   context-free syntax
     "import" JavaTypeName "<" {JavaTypeName ","}+ ">" ImportAs? ";" -> JavaImportDec {cons("TransImportDec")}
     "as" JavaTypeName -> ImportAs {cons("ImportAs")}
+
+  context-free syntax
+    "model" "import" TypeName ";"  -> ImportDec {cons("ModelImportDec")}
+    "model" "import" JavaTypeName "<" {JavaTypeName ","}+ ">" ImportAs? ";" -> JavaImportDec {cons("ModelTransImportDec")}
