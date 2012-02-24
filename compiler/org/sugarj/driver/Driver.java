@@ -508,6 +508,7 @@ public class Driver {
           buf.append(service).append('\n');
         }
         
+        generateModel(extName);
         driverResult.generateFile(editorServicesFile, buf.toString());
       } finally {
         log.endTask();
@@ -579,6 +580,8 @@ public class Driver {
         Path plainFile = environment.new RelativePathBin(relPackageNameSep() + extName + ext);
         FileCommands.createFile(plainFile);
   
+        generateModel(extName);
+        
         log.log("writing plain content to " + plainFile);
         driverResult.generateFile(plainFile, plainContent);
       } finally {
@@ -692,21 +695,17 @@ public class Driver {
   private void processModel(IStrategoTerm toplevelDecl) throws IOException {
     if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
         sugaredBodyDecls.add(lastSugaredToplevelDecl);
-    
-    
-    IStrategoTerm head = getApplicationSubterm(toplevelDecl, "ModelDec", 0);
-    // IStrategoTerm bodyDec = getApplicationSubterm(toplevelDecl, "ModelDec", 1);
-    
+
     desugaredBodyDecls.add(toplevelDecl);
     
-    String modelName;
-    log.beginTask("Extracting name and accessibility of the model.");
-    try {
-      modelName = SDFCommands.prettyPrintJava(getApplicationSubterm(head, "ModelDecHead", 1), interp);
-    } finally {
-      log.endTask();
-    }
+    String modelName = SDFCommands.prettyPrintJava(getApplicationSubterm(toplevelDecl, "ModelDecHead", 1), interp);
+    for (Renaming ren : environment.getRenamings())
+      modelName = StringCommands.rename(modelName, ren);
     
+    generateModel(modelName);
+  }
+  
+  private void generateModel(String modelName) throws IOException {
     log.beginTask("Generate model.");
     try {
       RelativePath modelOutFile = environment.new RelativePathBin(relPackageNameSep() + modelName + ".model");
@@ -716,9 +715,6 @@ public class Driver {
     } finally {
       log.endTask();
     }
-    
-    // imports in generated Java code are optional because the model contains the imports
-    javaSource.setOptionalImport(true);
   }
   
   private IStrategoTerm processImportDecs(IStrategoTerm toplevelDecl) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
@@ -1149,9 +1145,9 @@ public class Driver {
         String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
         
         checkToplevelDeclarationName(decName, "java declaration", toplevelDecl);
-        
         RelativePath clazz = environment.new RelativePathBin(relPackageNameSep() + decName + ".class");
         
+        generateModel(decName);
         generatedJavaClasses.add(clazz);
         javaSource.addBodyDecl(SDFCommands.prettyPrintJava(dec, interp));
       } finally {
@@ -1341,6 +1337,7 @@ public class Driver {
       if (FileCommands.exists(strExtension))
         buildCompoundStrModule();
 
+      generateModel(extName);
     } finally {
       log.endTask();
     }
