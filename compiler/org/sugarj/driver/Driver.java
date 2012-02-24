@@ -706,6 +706,8 @@ public class Driver {
     if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
         sugaredBodyDecls.add(lastSugaredToplevelDecl);
 
+    javaSource.setOptionalImport(true);
+    
     String modelName = SDFCommands.prettyPrintJava(getApplicationSubterm(getApplicationSubterm(toplevelDecl, "ModelDec", 0), "ModelDecHead", 1), interp);
     for (Renaming ren : environment.getRenamings())
       modelName = StringCommands.rename(modelName, ren);
