@@ -1,10 +1,7 @@
 package test;
 
 import template.Unquote;
-import template.ListUnquote;
 import template.Shorthands;
-import template.Requote;
-import template.util.AutoScopeRules;
 import template.InlineShorthands;
 import template.Foreach;
 
