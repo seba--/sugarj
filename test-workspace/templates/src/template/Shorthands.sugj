@@ -28,8 +28,11 @@ public sugar Shorthands {
   rules
     compile-template-body :
       ShorthandCons(ShorthandDef(varname, strat), rest) -> 
-      Seq(Where(AM(strat, Var(varname))), <compile-template-body> rest')
-    where <?ShorthandCons(_,_) <+ unquote-shorthands> rest => rest'
+      Seq(Where(AM(strat, Var(varname))), <compile-template-body> rest)
 
-    unquote-shorthands = topdown(try(?UnquotedShorthand(<id>); !Var(<id>)))
+  desugarings
+    unquote-shorthands
+
+  rules
+    unquote-shorthands = ?UnquotedShorthand(<id>); !Var(<id>)
 } 

@@ -5,7 +5,7 @@ import template.ListUnquote;
 import template.Shorthands;
 import template.Requote;
 import template.util.AutoScopeRules;
-
+import template.InlineShorthands;
 
 import test.models.EntityMetamodel;
 import org.sugarj.languages.Java;
@@ -22,16 +22,15 @@ public template ToJavaClass {
     mapconcat(
       \ Property(propname, SimpleSort(proptype)) ->
     } 
+      $type = !TypeName(Id(proptype))
+      $fieldname = !Id(propname)
+      $getter-name = !Id(<concat-strings> ["get", <string-as-chars([to-upper|id])> propname])
+      
       public $type $fieldname; 
 
       public $type $getter-name() {
         return $fieldname;
       }
-    ${
-    where
-      type := TypeName(Id(proptype));
-      fieldname := Id(propname);
-      getter-name := Id(<concat-strings> ["get", <string-as-chars([to-upper|id])> propname])
-    \)}
+    ${\)}
   }
 }

@@ -18,10 +18,10 @@ public sugar ListUnquote {
     StrategoStrategy -> ListUnquoted {cons("ListUnquoted")}
 
   desugarings
-    unquote-desugar
+    list-unquote-desugar
 
   rules
-    unquote-desugar :
+    list-unquote-desugar :
       TransBody([Rules([SDefNoArgs("main", body)])]) -> 
       TransBody([Rules([SDefNoArgs("main", Seq(Match(Var(modelvar)), body'))])])
     where
