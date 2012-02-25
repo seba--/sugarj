@@ -457,15 +457,16 @@ public class Driver {
             break;
           }
         
+        fullExtName = relPackageNameSep() + extName;
+
         for (Renaming ren : environment.getRenamings())
-          extName = StringCommands.rename(extName, ren);
+          fullExtName = StringCommands.rename(fullExtName, ren);
+
+        fullExtName = fullExtName.replace("$", "__");
+        extName = FileCommands.fileName(new AbsolutePath(fullExtName));
 
         if (isPublic)
           checkToplevelDeclarationName(extName, "editor service declaration", toplevelDecl);
-        
-        extName = extName.replace("$", "__");
-        
-        fullExtName = relPackageNameSep() + extName;
         
         log.log("The name of the editor services is '" + extName + "'.");
         log.log("The full name of the editor services is '" + fullExtName + "'.");
@@ -560,15 +561,18 @@ public class Driver {
             break;
           }
         
+        fullExtName = relPackageNameSep() + extName;
+
         for (Renaming ren : environment.getRenamings())
-          extName = StringCommands.rename(extName, ren);
+          fullExtName = StringCommands.rename(fullExtName, ren);
+
+        fullExtName = fullExtName.replace("$", "__");
+        extName = FileCommands.fileName(new AbsolutePath(fullExtName));
+        fullExtName = fullExtName + (extension == null ? "" : ("." + extension));
 
         if (isPublic)
           checkToplevelDeclarationName(extName, "plain declaration", toplevelDecl);
         
-        extName = extName.replace("$", "__");
-        
-        fullExtName = relPackageNameSep() + extName + (extension == null ? "" : ("." + extension));
 
         log.log("The name is '" + extName + "'.");
         log.log("The full name is '" + fullExtName + "'.");
@@ -709,8 +713,15 @@ public class Driver {
     javaSource.setOptionalImport(true);
     
     String modelName = SDFCommands.prettyPrintJava(getApplicationSubterm(getApplicationSubterm(toplevelDecl, "ModelDec", 0), "ModelDecHead", 1), interp);
+    
+    String fullExtName = relPackageNameSep() + modelName;
+
     for (Renaming ren : environment.getRenamings())
-      modelName = StringCommands.rename(modelName, ren);
+      fullExtName = StringCommands.rename(fullExtName, ren);
+
+    fullExtName = fullExtName.replace("$", "__");
+    modelName = FileCommands.fileName(new AbsolutePath(fullExtName));
+
     
     generateModel(modelName, toplevelDecl);
   }
@@ -1219,18 +1230,17 @@ public class Driver {
             }
         }
         
-        
+        fullExtName = relPackageNameSep() + extName;
         
         for (Renaming ren : environment.getRenamings())
-          extName = StringCommands.rename(extName, ren);
+          fullExtName = StringCommands.rename(fullExtName, ren);
+
+        fullExtName = fullExtName.replace("$", "__");
+        extName = FileCommands.fileName(new AbsolutePath(fullExtName));
         
         if (isPublic)
-          checkToplevelDeclarationName(extName, "sugar declaration", toplevelDecl);
+          checkToplevelDeclarationName(extName.replace("__", "$"), "sugar declaration", toplevelDecl);
         
-        extName = extName.replace("$", "__");
-
-        fullExtName = relPackageNameSep() + extName; 
-
         log.log("The name of the sugar is '" + extName + "'.");
         log.log("The full name of the sugar is '" + fullExtName + "'.");
 
@@ -1252,8 +1262,8 @@ public class Driver {
         log.endTask();
       }
       
-      RelativePath sdfExtension = environment.new RelativePathBin(relPackageNameSep() + extName + ".sdf");
-      RelativePath strExtension = environment.new RelativePathBin(relPackageNameSep() + extName + ".str");
+      RelativePath sdfExtension = environment.new RelativePathBin(fullExtName + ".sdf");
+      RelativePath strExtension = environment.new RelativePathBin(fullExtName + ".str");
       
       String sdfImports = " imports " + StringCommands.printModuleList(availableSDFImports, " ") + "\n";
       String strImports = " imports " + StringCommands.printModuleList(availableSTRImports, " ") + "\n";
