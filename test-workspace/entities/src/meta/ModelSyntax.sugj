@@ -122,12 +122,12 @@ public transformation ModelSyntax {
       !t
 
     register-model-import =
-      ?TypeImportDec(name);
+      ?ModelImportDec(name);
       path := <import-model-path> name;
       register-model-import(|path)
 
     register-model-import =
-      ?TransImportDec(name, trans, _);
+      ?ModelTransImportDec(name, trans, _);
       path := <import-model-path-trans> (<import-model-path> name, trans);
       register-model-import(|path)
 
@@ -135,6 +135,7 @@ public transformation ModelSyntax {
       unqualifiedname := <unqualified-name-from-path> path;
       prim("SUGARJ_resolve_model", path) => model;
       rules(resolve-model :+ unqualifiedname -> model)
+      //debug(![unqualifiedname, " -> ", model])
 
     unqualified-name-from-path = 
       string-as-chars(reverse; take-until(?'/'); reverse)
@@ -146,7 +147,7 @@ public transformation ModelSyntax {
     import-model-pkg : PackageOrTypeName(pkg, Id(name)) -> <conc-strings> (<import-model-pkg> pkg, "/", name)
 
     import-model-path-trans : (name, []) -> name
-    import-model-path-trans = !"resolution of transformation-generated models not yet implemented"; error; fail
+    import-model-path-trans = !"Resolution of transformation-generated models not yet implemented."; error; fail
 
   rules
     extract-model(|name) =
@@ -154,13 +155,11 @@ public transformation ModelSyntax {
   	  fetch-elem(?ModelDec(ModelDecHead(_, Id(name)), _))
 
   rules
-    ensure-imports(|metamodel) = ensure-aux-import; ensure-metamodel-import(|metamodel)
+    ensure-imports(|metamodel) = ensure-aux-import; map(try(metamodel-signatures-import(|metamodel)))
 
     ensure-aux-import : imps -> <union> (imps, [auximp])
       where auximp := TypeImportDec(TypeName(PackageOrTypeName(Id("meta")), Id("ModelSyntaxAux")))
 
-    ensure-metamodel-import(|metamodel) : imps -> <union> (imps, [metamodelimp])
-      where <fetch-elem(?TypeImportDec(TypeName(_, Id(metamodel))) <+ ?TypeImportDec(TypeName(Id(metamodel))))> imps => origimp;
-            <?TypeImportDec(<id>)> origimp => metamodel-typename;
-            metamodelimp := TransImportDec(metamodel-typename, [TypeName(PackageOrTypeName(Id("meta")), Id("Signatures"))], None())
+    metamodel-signatures-import(|metamodel) : imp@ModelImportDec(type) -> TransImportDec(type, [TypeName(PackageOrTypeName(Id("meta")), Id("Signatures"))], None())
+      where <?TypeName(_, Id(metamodel)) <+ ?TypeName(Id(metamodel))> type
 }
