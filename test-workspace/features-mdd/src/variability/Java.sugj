@@ -1,5 +1,6 @@
 package variability;
   
+import variability.FeatureExpressions;
 import concretesyntax.MetaExplode;
 
 public sugar Java {
@@ -13,16 +14,23 @@ public sugar Java {
     VariableInterface -> JavaVariableType
     VariableInterfaceDecHead "{" JavaInterfaceMemberDec* "}" -> VariableInterface {cons("VariableInterfaceDec")}
     AnnoOrSugarMod* "variable" "interface" JavaId JavaTypeParams? JavaExtendsInterfaces? -> VariableInterfaceDecHead  {cons("VariableInterfaceDecHead")}
-    
-    
 
-   JavaId -> FeatureName {cons("FeatureName")}
-   FeatureName->FeatureExpr
   //conditional elements
    "#" "feature" "(" FeatureExpr ")" JavaMethodDec -> JavaMethodDec {cons("OptionalNode")}
+   "#" "feature" "(" FeatureExpr ")" JavaFormalParam -> JavaFormalParam {cons("OptionalNode")}
    "#" "feature" "(" FeatureExpr ")" JavaStm -> JavaStm {cons("OptionalNode")}
+   "#" "feature" "(" FeatureExpr ")" JavaFieldDec -> JavaFieldDec {cons("OptionalNode")}
+   "#" "feature" "(" FeatureExpr ")" JavaLocalVarDecStm -> JavaLocalVarDecStm {cons("OptionalNode")}
    "#" "feature" "(" FeatureExpr ")" JavaInterfaceMemberDec -> JavaInterfaceMemberDec {cons("OptionalNode")}
-   "#" "feature" "(" FeatureExpr ")" JavaVariableType -> JavaVariableType{cons("OptionalNode")}
+   "#" "feature" "(" FeatureExpr ")" JavaVariableType -> JavaVariableType {cons("OptionalNode")}
+   "#" "feature" "(" FeatureExpr ")" JavaExpr -> JavaExpr {cons("OptionalNode")}
+   "#" "feature" "(" FeatureExpr ")" "{" JavaExpr "}" "{" JavaExpr "}" -> JavaExpr {cons("VariableNode")}
+
+  context-free priorities
+    { JavaExpr ";" -> JavaStm } >
+    { "#" "feature" "(" FeatureExpr ")" JavaExpr -> JavaExpr {cons("OptionalNode")} }
+    
+    
 
   desugarings
     desugar-variable-type
