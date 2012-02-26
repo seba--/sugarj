@@ -16,10 +16,9 @@ public sugar Java {
     AnnoOrSugarMod* "variable" "interface" JavaId JavaTypeParams? JavaExtendsInterfaces? -> VariableInterfaceDecHead  {cons("VariableInterfaceDecHead")}
 
   //conditional elements
-   "#" "feature" "(" FeatureExpr ")" JavaMethodDec -> JavaMethodDec {cons("OptionalNode")}
+   "#" "feature" "(" FeatureExpr ")" JavaClassBodyDec -> JavaClassBodyDec {cons("OptionalNode")}
    "#" "feature" "(" FeatureExpr ")" JavaFormalParam -> JavaFormalParam {cons("OptionalNode")}
    "#" "feature" "(" FeatureExpr ")" JavaStm -> JavaStm {cons("OptionalNode")}
-   "#" "feature" "(" FeatureExpr ")" JavaFieldDec -> JavaFieldDec {cons("OptionalNode")}
    "#" "feature" "(" FeatureExpr ")" JavaLocalVarDecStm -> JavaLocalVarDecStm {cons("OptionalNode")}
    "#" "feature" "(" FeatureExpr ")" JavaInterfaceMemberDec -> JavaInterfaceMemberDec {cons("OptionalNode")}
    "#" "feature" "(" FeatureExpr ")" JavaVariableType -> JavaVariableType {cons("OptionalNode")}
