@@ -4,16 +4,23 @@ import variability.Java;
 
 import test.FeatureModel;
  
+#feature(C) 
 public variable class Test {
   
-  void foo(){
+  void foo(int x,
+  #feature(B) int y) {
+  	
     #feature(A)
     System.out.println("Feature A enabled"); 
     
-    #feature(B){ 
+    #feature(B){
     bar();
     }
+    
+    if (2 + #feature(A) {3} {0} == 5) {
+       System.out.println("result was 5");
+    }
   } 
- 
+   
   void bar(){}
 }

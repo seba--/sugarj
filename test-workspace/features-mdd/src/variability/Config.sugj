@@ -1,26 +1,16 @@
 package variability;
 
+import variability.FeatureExpressions;
 import org.sugarj.languages.Java;
 
 public sugar Config { 
 
  context-free syntax 
-   FeatureExpr "&&" FeatureExpr -> FeatureExpr {cons("FeatureExprAnd")}
-   FeatureExpr "||" FeatureExpr -> FeatureExpr {cons("FeatureExprOr")}
-   "(" FeatureExpr ")" -> FeatureExpr
-   "!" FeatureExpr -> FeatureExpr {cons("FeatureExprNot")}
-
   //config declaration
   AnnoOrSugarMod* "config" JavaId "for" JavaId "{" ConfigDeclaration*  "}" -> ToplevelDeclaration {cons("ConfigDecl")}
   "enable" {FeatureName ","}+ ";" -> ConfigDeclaration {cons("FeatureActivation")}
   "disable" {FeatureName ","}+ ";" -> ConfigDeclaration {cons("FeatureDeactivation")}
   "color" FeatureName EditorServiceInt EditorServiceInt EditorServiceInt ";" -> ConfigDeclaration {cons("FeatureColorDefinition")}
-   
- context-free priorities
-   {"(" FeatureExpr ")" -> FeatureExpr } >
-   {FeatureExpr "&&" FeatureExpr -> FeatureExpr }>
-   {FeatureExpr "||" FeatureExpr -> FeatureExpr }>
-   {"!" FeatureExpr -> FeatureExpr }
 
  desugarings
     featureconfig2trans      
@@ -59,19 +49,28 @@ public sugar Config {
       ModelDec(ModelDecHead(mods, name), ModelBody( ("VariableStructure", structure) ))
       -> structure
       where <not(oncetd(?OptionalNode(_,_)))> structure
-      
-    eliminate-variability = topdown(try(configure-optional-node)); 
-           SugarCompilationUnit(id,id,map(try(no-variability)))
+
+    eliminate-variability = topdown(try(configure-node)); 
+                            SugarCompilationUnit(id,id,map(try(no-variability)));
+                            topdown(try(filter(not(?VariabilityHole))))
 
     
 
   rules 
-    configure-optional-node : 
+    configure-node : 
      OptionalNode(e, s) -> s
       where <is-condition-enabled> e
      
-    configure-optional-node :
-     OptionalNode(e, s) -> Empty
+    configure-node :
+     OptionalNode(e, s) -> VariabilityHole
+      where <is-condition-disabled> e
+      
+    configure-node :
+     VariableNode(e, s1, s2) -> s1
+      where <is-condition-enabled> e
+      
+    configure-node :
+     VariableNode(e, s1, s2) -> s2
       where <is-condition-disabled> e
 
     is-condition-enabled :
@@ -125,7 +124,7 @@ public sugar Config {
      
      signature
       constructors 
+       VariabilityHole : VariabilityHole
        OptionalNode : FeatureExpr * Expr -> Expr
-       FeatureName : Identifier -> FeatureName
-       FeatureExpr : FeatureName -> FeatureExpr
+       VariableNode : FeatureExpr * Expr * Expr -> Expr
 }
