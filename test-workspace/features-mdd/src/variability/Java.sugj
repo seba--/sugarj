@@ -27,9 +27,26 @@ public sugar Java {
    "#" "feature" "(" FeatureExpr ")" "{" JavaExpr "}" "{" JavaExpr "}" -> JavaExpr {cons("VariableNode")}
 
   context-free priorities
-    { JavaExpr ";" -> JavaStm } >
-    { "#" "feature" "(" FeatureExpr ")" JavaExpr -> JavaExpr {cons("OptionalNode")} }
+    JavaExpr ";" -> JavaStm >
+    "#" "feature" "(" FeatureExpr ")" JavaExpr -> JavaExpr {cons("OptionalNode")}
     
+  context-free priorities
+    // The remaining priorities follow by transitivity.
+      {right:
+      JavaLHS "="    JavaExpr -> JavaExpr
+      JavaLHS "*="   JavaExpr -> JavaExpr
+      JavaLHS "/="   JavaExpr -> JavaExpr
+      JavaLHS "%="   JavaExpr -> JavaExpr
+      JavaLHS "+="   JavaExpr -> JavaExpr
+      JavaLHS "-="   JavaExpr -> JavaExpr
+      JavaLHS "<<="  JavaExpr -> JavaExpr
+      JavaLHS ">>="  JavaExpr -> JavaExpr
+      JavaLHS ">>>=" JavaExpr -> JavaExpr
+      JavaLHS "&="   JavaExpr -> JavaExpr
+      JavaLHS "^="   JavaExpr -> JavaExpr
+      JavaLHS "|="   JavaExpr -> JavaExpr
+    } >
+    "#" "feature" "(" FeatureExpr ")" JavaExpr -> JavaExpr {cons("OptionalNode")}
     
 
   desugarings
