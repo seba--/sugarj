@@ -3,6 +3,8 @@ package statemachine.test;
 import statemachine.Language;
 
 public statemachine ATM {
+  initial state Init 
+
   state Init {
     Withdraw => Withdraw1
     Cancel => Init

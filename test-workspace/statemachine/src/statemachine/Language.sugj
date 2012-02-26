@@ -6,14 +6,15 @@ public sugar Language {
 
   rules
     statemachine-model :
-      model@Statemachine(mods, name, body) -> 
-      ModelDec(ModelDecHead(mods, name), ModelBody(("Statemachine", body)))
+      model@Statemachine(mods, name, init, states) -> 
+      ModelDec(ModelDecHead(mods, name), ModelBody(("Statemachine", init, states)))
 
   context-free syntax
     Statemachine -> ToplevelDeclaration
-    AnnoOrSugarMod* "statemachine" JavaId "{" State* "}" -> Statemachine {cons("Statemachine")}
+    AnnoOrSugarMod* "statemachine" JavaId "{" InitialState State* "}" -> Statemachine {cons("Statemachine")}
 
     JavaId -> StateName
+    "initial" "state" StateName -> InitialState {cons("InitialState")}
     "state" StateName "{" Transition* "}" -> State {cons("State")}
     Event "=>" StateName -> Transition {cons("Transition")}
 

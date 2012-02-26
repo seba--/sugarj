@@ -11,12 +11,22 @@ public template ToJava {
 
   package $pkg;
 
-  import statemachine.java.Event;
-  import statemachine.java.State;
+  import java.lang.IllegalArgumentException;
 
   public class $classname {
-    private enum States implements State{
-      
+    public static enum Event {
+      PinOK, PinNOK
+    }
+    public static enum State {
+      Init {
+        public State step(Event e) {
+          if (e == PinOK)
+            return Init;
+          throw new IllegalArgumentException();
+        }
+      };
+
+      public abstract State step(Event e);
     }
 
     private State state;
