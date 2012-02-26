@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Not$Eq_2_0 instance = new $Not$Eq_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy g_22, Strategy h_22)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy v_22, Strategy w_22)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("NotEq_2_0");
-    Fail118:
+    Fail121:
     { 
-      IStrategoTerm d_121 = null;
-      IStrategoTerm b_121 = null;
-      IStrategoTerm c_121 = null;
-      IStrategoTerm e_121 = null;
+      IStrategoTerm x_121 = null;
+      IStrategoTerm u_121 = null;
+      IStrategoTerm w_121 = null;
+      IStrategoTerm y_121 = null;
       if(term.getTermType() != IStrategoTerm.APPL || renaming._consNotEq_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail118;
-      b_121 = term.getSubterm(0);
-      c_121 = term.getSubterm(1);
+        break Fail121;
+      u_121 = term.getSubterm(0);
+      w_121 = term.getSubterm(1);
       IStrategoList annos103 = term.getAnnotations();
-      d_121 = annos103;
-      term = g_22.invoke(context, b_121);
+      x_121 = annos103;
+      term = v_22.invoke(context, u_121);
       if(term == null)
-        break Fail118;
-      e_121 = term;
-      term = h_22.invoke(context, c_121);
+        break Fail121;
+      y_121 = term;
+      term = w_22.invoke(context, w_121);
       if(term == null)
-        break Fail118;
-      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consNotEq_2, new IStrategoTerm[]{e_121, term}), checkListAnnos(termFactory, d_121));
+        break Fail121;
+      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consNotEq_2, new IStrategoTerm[]{y_121, term}), checkListAnnos(termFactory, x_121));
       context.popOnSuccess();
       if(true)
         return term;

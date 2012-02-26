@@ -20,11 +20,11 @@ import java.lang.ref.WeakReference;
     context.push("rename_java_0_3");
     Fail0:
     { 
-      lifted0 lifted00 = new lifted0();
-      lifted00.l_12 = l_12;
-      lifted00.m_12 = m_12;
-      lifted00.n_12 = n_12;
-      term = topdown_1_0.instance.invoke(context, term, lifted00);
+      lifted6 lifted65 = new lifted6();
+      lifted65.l_12 = l_12;
+      lifted65.m_12 = m_12;
+      lifted65.n_12 = n_12;
+      term = topdown_1_0.instance.invoke(context, term, lifted65);
       if(term == null)
         break Fail0;
       context.popOnSuccess();

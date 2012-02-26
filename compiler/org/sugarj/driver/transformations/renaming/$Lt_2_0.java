@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Lt_2_0 instance = new $Lt_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy q_22, Strategy r_22)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy f_23, Strategy g_23)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("Lt_2_0");
-    Fail123:
+    Fail126:
     { 
-      IStrategoTerm h_122 = null;
-      IStrategoTerm e_122 = null;
-      IStrategoTerm f_122 = null;
-      IStrategoTerm i_122 = null;
+      IStrategoTerm z_122 = null;
+      IStrategoTerm x_122 = null;
+      IStrategoTerm y_122 = null;
+      IStrategoTerm a_123 = null;
       if(term.getTermType() != IStrategoTerm.APPL || renaming._consLt_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail123;
-      e_122 = term.getSubterm(0);
-      f_122 = term.getSubterm(1);
+        break Fail126;
+      x_122 = term.getSubterm(0);
+      y_122 = term.getSubterm(1);
       IStrategoList annos108 = term.getAnnotations();
-      h_122 = annos108;
-      term = q_22.invoke(context, e_122);
+      z_122 = annos108;
+      term = f_23.invoke(context, x_122);
       if(term == null)
-        break Fail123;
-      i_122 = term;
-      term = r_22.invoke(context, f_122);
+        break Fail126;
+      a_123 = term;
+      term = g_23.invoke(context, y_122);
       if(term == null)
-        break Fail123;
-      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consLt_2, new IStrategoTerm[]{i_122, term}), checkListAnnos(termFactory, h_122));
+        break Fail126;
+      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consLt_2, new IStrategoTerm[]{a_123, term}), checkListAnnos(termFactory, z_122));
       context.popOnSuccess();
       if(true)
         return term;

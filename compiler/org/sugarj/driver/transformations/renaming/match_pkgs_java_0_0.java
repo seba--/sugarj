@@ -16,62 +16,62 @@ import java.lang.ref.WeakReference;
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("match_pkgs_java_0_0");
-    Fail6:
+    Fail9:
     { 
-      IStrategoTerm term4 = term;
-      Success4:
+      IStrategoTerm term7 = term;
+      Success7:
       { 
-        Fail7:
+        Fail10:
         { 
-          IStrategoTerm s_13 = null;
+          IStrategoTerm h_14 = null;
           if(term.getTermType() != IStrategoTerm.TUPLE || term.getSubtermCount() != 2)
-            break Fail7;
-          IStrategoTerm arg5 = term.getSubterm(0);
-          if(arg5.getTermType() != IStrategoTerm.LIST || ((IStrategoList)arg5).isEmpty())
-            break Fail7;
-          s_13 = ((IStrategoList)arg5).head();
-          IStrategoTerm arg6 = ((IStrategoList)arg5).tail();
-          if(arg6.getTermType() != IStrategoTerm.LIST || !((IStrategoList)arg6).isEmpty())
-            break Fail7;
-          IStrategoTerm arg7 = term.getSubterm(1);
-          if(arg7.getTermType() != IStrategoTerm.APPL || renaming._consPackageOrTypeName_1 != ((IStrategoAppl)arg7).getConstructor())
-            break Fail7;
-          IStrategoTerm arg8 = arg7.getSubterm(0);
-          if(arg8.getTermType() != IStrategoTerm.APPL || renaming._consId_1 != ((IStrategoAppl)arg8).getConstructor())
-            break Fail7;
-          if(arg8.getSubterm(0) != s_13 && !s_13.match(arg8.getSubterm(0)))
-            break Fail7;
+            break Fail10;
+          IStrategoTerm arg8 = term.getSubterm(0);
+          if(arg8.getTermType() != IStrategoTerm.LIST || ((IStrategoList)arg8).isEmpty())
+            break Fail10;
+          h_14 = ((IStrategoList)arg8).head();
+          IStrategoTerm arg9 = ((IStrategoList)arg8).tail();
+          if(arg9.getTermType() != IStrategoTerm.LIST || !((IStrategoList)arg9).isEmpty())
+            break Fail10;
+          IStrategoTerm arg10 = term.getSubterm(1);
+          if(arg10.getTermType() != IStrategoTerm.APPL || renaming._consPackageOrTypeName_1 != ((IStrategoAppl)arg10).getConstructor())
+            break Fail10;
+          IStrategoTerm arg11 = arg10.getSubterm(0);
+          if(arg11.getTermType() != IStrategoTerm.APPL || renaming._consId_1 != ((IStrategoAppl)arg11).getConstructor())
+            break Fail10;
+          if(arg11.getSubterm(0) != h_14 && !h_14.match(arg11.getSubterm(0)))
+            break Fail10;
           if(true)
-            break Success4;
+            break Success7;
         }
-        term = term4;
-        IStrategoTerm n_13 = null;
-        IStrategoTerm o_13 = null;
-        IStrategoTerm p_13 = null;
-        IStrategoTerm q_13 = null;
+        term = term7;
+        IStrategoTerm c_14 = null;
+        IStrategoTerm d_14 = null;
+        IStrategoTerm e_14 = null;
+        IStrategoTerm f_14 = null;
         if(term.getTermType() != IStrategoTerm.TUPLE || term.getSubtermCount() != 2)
-          break Fail6;
-        o_13 = term.getSubterm(0);
-        IStrategoTerm arg9 = term.getSubterm(1);
-        if(arg9.getTermType() != IStrategoTerm.APPL || renaming._consPackageOrTypeName_2 != ((IStrategoAppl)arg9).getConstructor())
-          break Fail6;
-        n_13 = arg9.getSubterm(0);
-        IStrategoTerm arg10 = arg9.getSubterm(1);
-        if(arg10.getTermType() != IStrategoTerm.APPL || renaming._consId_1 != ((IStrategoAppl)arg10).getConstructor())
-          break Fail6;
-        p_13 = arg10.getSubterm(0);
-        term = split_last_0_0.instance.invoke(context, o_13);
+          break Fail9;
+        d_14 = term.getSubterm(0);
+        IStrategoTerm arg12 = term.getSubterm(1);
+        if(arg12.getTermType() != IStrategoTerm.APPL || renaming._consPackageOrTypeName_2 != ((IStrategoAppl)arg12).getConstructor())
+          break Fail9;
+        c_14 = arg12.getSubterm(0);
+        IStrategoTerm arg13 = arg12.getSubterm(1);
+        if(arg13.getTermType() != IStrategoTerm.APPL || renaming._consId_1 != ((IStrategoAppl)arg13).getConstructor())
+          break Fail9;
+        e_14 = arg13.getSubterm(0);
+        term = split_last_0_0.instance.invoke(context, d_14);
         if(term == null)
-          break Fail6;
+          break Fail9;
         if(term.getTermType() != IStrategoTerm.TUPLE || term.getSubtermCount() != 2)
-          break Fail6;
-        if(term.getSubterm(0) != p_13 && !p_13.match(term.getSubterm(0)))
-          break Fail6;
-        q_13 = term.getSubterm(1);
-        term = termFactory.makeTuple(q_13, n_13);
+          break Fail9;
+        if(term.getSubterm(0) != e_14 && !e_14.match(term.getSubterm(0)))
+          break Fail9;
+        f_14 = term.getSubterm(1);
+        term = termFactory.makeTuple(f_14, c_14);
         term = this.invoke(context, term);
         if(term == null)
-          break Fail6;
+          break Fail9;
       }
       context.popOnSuccess();
       if(true)

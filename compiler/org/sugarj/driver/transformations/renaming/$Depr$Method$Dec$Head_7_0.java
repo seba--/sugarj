@@ -12,65 +12,65 @@ import java.lang.ref.WeakReference;
 { 
   public static $Depr$Method$Dec$Head_7_0 instance = new $Depr$Method$Dec$Head_7_0();
 
-  public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy f_18, Strategy g_18, Strategy h_18, Strategy i_18, Strategy j_18, Strategy k_18, Strategy l_18)
+  public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy u_18, Strategy v_18, Strategy w_18, Strategy x_18, Strategy y_18, Strategy z_18, Strategy a_19)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("DeprMethodDecHead_7_0");
-    Fail63:
+    Fail66:
     { 
-      IStrategoTerm f_110 = null;
-      IStrategoTerm y_109 = null;
-      IStrategoTerm z_109 = null;
-      IStrategoTerm a_110 = null;
-      IStrategoTerm b_110 = null;
-      IStrategoTerm c_110 = null;
-      IStrategoTerm d_110 = null;
-      IStrategoTerm e_110 = null;
-      IStrategoTerm g_110 = null;
-      IStrategoTerm h_110 = null;
-      IStrategoTerm i_110 = null;
-      IStrategoTerm j_110 = null;
-      IStrategoTerm k_110 = null;
-      IStrategoTerm l_110 = null;
+      IStrategoTerm v_110 = null;
+      IStrategoTerm o_110 = null;
+      IStrategoTerm p_110 = null;
+      IStrategoTerm q_110 = null;
+      IStrategoTerm r_110 = null;
+      IStrategoTerm s_110 = null;
+      IStrategoTerm t_110 = null;
+      IStrategoTerm u_110 = null;
+      IStrategoTerm b_111 = null;
+      IStrategoTerm d_111 = null;
+      IStrategoTerm e_111 = null;
+      IStrategoTerm f_111 = null;
+      IStrategoTerm g_111 = null;
+      IStrategoTerm h_111 = null;
       if(term.getTermType() != IStrategoTerm.APPL || renaming._consDeprMethodDecHead_7 != ((IStrategoAppl)term).getConstructor())
-        break Fail63;
-      y_109 = term.getSubterm(0);
-      z_109 = term.getSubterm(1);
-      a_110 = term.getSubterm(2);
-      b_110 = term.getSubterm(3);
-      c_110 = term.getSubterm(4);
-      d_110 = term.getSubterm(5);
-      e_110 = term.getSubterm(6);
+        break Fail66;
+      o_110 = term.getSubterm(0);
+      p_110 = term.getSubterm(1);
+      q_110 = term.getSubterm(2);
+      r_110 = term.getSubterm(3);
+      s_110 = term.getSubterm(4);
+      t_110 = term.getSubterm(5);
+      u_110 = term.getSubterm(6);
       IStrategoList annos52 = term.getAnnotations();
-      f_110 = annos52;
-      term = f_18.invoke(context, y_109);
+      v_110 = annos52;
+      term = u_18.invoke(context, o_110);
       if(term == null)
-        break Fail63;
-      g_110 = term;
-      term = g_18.invoke(context, z_109);
+        break Fail66;
+      b_111 = term;
+      term = v_18.invoke(context, p_110);
       if(term == null)
-        break Fail63;
-      h_110 = term;
-      term = h_18.invoke(context, a_110);
+        break Fail66;
+      d_111 = term;
+      term = w_18.invoke(context, q_110);
       if(term == null)
-        break Fail63;
-      i_110 = term;
-      term = i_18.invoke(context, b_110);
+        break Fail66;
+      e_111 = term;
+      term = x_18.invoke(context, r_110);
       if(term == null)
-        break Fail63;
-      j_110 = term;
-      term = j_18.invoke(context, c_110);
+        break Fail66;
+      f_111 = term;
+      term = y_18.invoke(context, s_110);
       if(term == null)
-        break Fail63;
-      k_110 = term;
-      term = k_18.invoke(context, d_110);
+        break Fail66;
+      g_111 = term;
+      term = z_18.invoke(context, t_110);
       if(term == null)
-        break Fail63;
-      l_110 = term;
-      term = l_18.invoke(context, e_110);
+        break Fail66;
+      h_111 = term;
+      term = a_19.invoke(context, u_110);
       if(term == null)
-        break Fail63;
-      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consDeprMethodDecHead_7, new IStrategoTerm[]{g_110, h_110, i_110, j_110, k_110, l_110, term}), checkListAnnos(termFactory, f_110));
+        break Fail66;
+      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consDeprMethodDecHead_7, new IStrategoTerm[]{b_111, d_111, e_111, f_111, g_111, h_111, term}), checkListAnnos(termFactory, v_110));
       context.popOnSuccess();
       if(true)
         return term;
