@@ -1,0 +1,9 @@
+package test;
+
+import variability.Java;
+
+public variable class AnotherTest {
+
+#feature(A)
+   public int someInt;
+}
