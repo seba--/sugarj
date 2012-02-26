@@ -1,0 +1,1 @@
+STRJ -i org/sugarj/driver/transformations/renaming.str --lib -p org.sugarj.driver.transformations.renaming -I ../stdlib/ -o org/sugarj/driver/transformations/renaming
