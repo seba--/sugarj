@@ -1,0 +1,8 @@
+package statemachine.java;
+
+import statemachine.Event;
+
+public interface State {
+  public String getName();
+  public State step(Event e) throws java.lang.IllegalArgumentException;
+}

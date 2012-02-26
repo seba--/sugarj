@@ -1,0 +1,4 @@
+package statemachine.java;
+
+public interface Event {
+}

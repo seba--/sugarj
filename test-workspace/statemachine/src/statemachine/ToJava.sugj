@@ -1,0 +1,35 @@
+package statemachine;
+
+import template.Unquote;
+import template.Shorthands;
+import template.InlineShorthands;
+import template.Foreach;
+
+public template ToJava {
+  $pkg = collect-one(?PackageDec(_,<id>))
+  $classname = collect-one(?ModelDecHead(_,<id>))
+
+  package $pkg;
+
+  import statemachine.java.Event;
+  import statemachine.java.State;
+
+  public class $classname {
+    private enum States implements State{
+      
+    }
+
+    private State state;
+
+    public State step(Event e) {
+      state = state.step(e);
+      return state;
+    }
+
+    public State run(Event[] es) {
+      for (Event e : es)
+        step(e);
+      return state;
+    }
+  }
+}
