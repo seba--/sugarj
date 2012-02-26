@@ -1,0 +1,23 @@
+package template;
+
+import org.sugarj.languages.Model;
+import org.sugarj.languages.Stratego;
+
+public sugar Core {
+  desugarings
+    template-to-sugar
+
+  rules
+    template-to-sugar :
+      TemplateDec(mods, name, body) ->
+      TransDec(TransDecHead(mods, name), TransBody([Rules([main-strategy])]))
+    where
+      <compile-template-body> body => compiled-body;
+      main-strategy := SDefNoArgs("main", compiled-body)
+
+    compile-template-body = fail
+
+  context-free syntax
+    TemplateDec -> ToplevelDeclaration
+    AnnoOrSugarMod* "template" JavaId "{" TemplateBody "}" -> TemplateDec {cons("TemplateDec")}
+}

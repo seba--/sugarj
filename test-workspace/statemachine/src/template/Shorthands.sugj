@@ -1,0 +1,38 @@
+package template;
+
+import org.sugarj.languages.Stratego;
+
+import template.Core;
+
+public sugar Shorthands { 
+  context-free syntax
+    ShorthandDef TemplateBody -> TemplateBody {cons("ShorthandCons")}
+    "$" StrategoId "=" StrategoStrategy -> ShorthandDef {cons("ShorthandDef")}
+
+    UnquoteShorthand -> JavaPackageDec
+    UnquoteShorthand -> JavaPackageName
+    UnquoteShorthand -> JavaImportDec
+
+    "typename" UnquoteShorthand -> JavaTypeName
+    "id" UnquoteShorthand -> JavaId
+
+    UnquoteShorthand -> JavaTypeName
+    UnquoteShorthand -> JavaId {avoid}
+
+    UnquotedShorthand -> UnquoteShorthand {cons("FromMetaExpr")}
+    "$" StrategoId -> UnquotedShorthand {cons("UnquotedShorthand")}
+
+  lexical syntax
+    "$" [A-Za-z0-9\_\$]* -> JavaID {reject}
+
+  rules
+    compile-template-body :
+      ShorthandCons(ShorthandDef(varname, strat), rest) -> 
+      Seq(Where(AM(strat, Var(varname))), <compile-template-body> rest)
+
+  desugarings
+    unquote-shorthands
+
+  rules
+    unquote-shorthands = ?UnquotedShorthand(<id>); !Var(<id>)
+} 
