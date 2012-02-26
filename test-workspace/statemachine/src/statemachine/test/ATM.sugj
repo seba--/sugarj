@@ -8,12 +8,12 @@ public statemachine ATM {
     Cancel => Init
   }
   state Withdraw1 {
-    PinOK => GiveMoney
+    PinOK => GiveCardMoney
     PinNOK => Withdraw2
     Cancel => Init
   }
   state Withdraw2 {
-    PinOK => GiveMoney
+    PinOK => GiveCardMoney
     PinNOK => Withdraw3
     Cancel => Init
   }
