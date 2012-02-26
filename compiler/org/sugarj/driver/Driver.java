@@ -722,6 +722,7 @@ public class Driver {
     fullExtName = fullExtName.replace("$", "__");
     modelName = FileCommands.fileName(new AbsolutePath(fullExtName));
 
+    checkToplevelDeclarationName(modelName.replace("__", "$"), "model", toplevelDecl);
     
     generateModel(modelName, toplevelDecl);
   }
@@ -1978,6 +1979,6 @@ public class Driver {
   
   private void checkToplevelDeclarationName(String name, String what, IStrategoTerm toplevelDecl) {
     if (!name.equals(FileCommands.fileName(sourceFile)))
-      setErrorMessage(toplevelDecl, "File name differs from " + what + " name.");
+      setErrorMessage(toplevelDecl, "File name differs from " + what + " name. was: " + name + ", expected: " + FileCommands.fileName(sourceFile));
   }
 }
