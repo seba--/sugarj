@@ -466,7 +466,7 @@ public class Driver {
         extName = FileCommands.fileName(new AbsolutePath(fullExtName));
 
         if (isPublic)
-          checkToplevelDeclarationName(extName, "editor service declaration", toplevelDecl);
+          checkToplevelDeclarationName(extName.replace("__", "$"), "editor service declaration", toplevelDecl);
         
         log.log("The name of the editor services is '" + extName + "'.");
         log.log("The full name of the editor services is '" + fullExtName + "'.");
