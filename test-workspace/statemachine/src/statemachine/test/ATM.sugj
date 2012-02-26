@@ -1,0 +1,31 @@
+package statemachine.test;
+
+import statemachine.Language;
+
+public statemachine ATM {
+  state Init {
+    Withdraw => Withdraw1
+    Cancel => Init
+  }
+  state Withdraw1 {
+    PinOK => GiveMoney
+    PinNOK => Withdraw2
+    Cancel => Init
+  }
+  state Withdraw2 {
+    PinOK => GiveMoney
+    PinNOK => Withdraw3
+    Cancel => Init
+  }
+  state Withdraw3 {
+    PinOK => GiveCardMoney
+    PinNOK => RevokeCard
+    Cancel => Init
+  }
+  state GiveCardMoney {
+    CardMoneyTaken => Init
+  }
+  state RevokeCard {
+    CardRevoked => Init
+  }
+}
