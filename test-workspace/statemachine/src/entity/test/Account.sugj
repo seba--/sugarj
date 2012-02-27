@@ -1,0 +1,11 @@
+package entity.test;
+
+import entity.Language;
+
+model import entity.test.Customer;
+
+public entity Account {
+  uid     :: Integer
+  owner   :: Customer
+  balance :: Integer
+}

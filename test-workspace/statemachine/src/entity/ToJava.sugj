@@ -1,0 +1,59 @@
+package entity;
+
+import template.Unquote;
+import template.Shorthands;
+import template.InlineShorthands;
+import template.Foreach;
+import template.UnquoteEnum;
+import template.LocalStrategies;
+
+import entity.Language;
+import org.sugarj.languages.Java;
+
+public template ToJava {
+  $$sort-to-type : SimpleSort(name) -> TypeName(name)
+  $$sort-to-type : GenericSort(tyop, tyargs) ->
+                   ClassOrInterfaceType(TypeName(tyop),
+                                        Some(TypeArgs(<map(sort-to-type)> tyargs)))
+  $$is-import =   ?TypeImportDec(_)
+                + ?TypeImportOnDemandDec(_)
+                + ?StaticImportDec(_,_)
+                + ?StaticImportOnDemandDec(_)
+                + ?ModelImportDec(_)
+                + ?TransImportDec(_,_,_)
+                + ?ModelTransImportDec(_,_,_)
+  
+  $pkg = collect-one(?PackageDec(_,<id>))
+  $classname = collect-one(?ModelDecHead(_,<id>))
+
+  package $pkg;
+
+  $*{collect-all(is-import)}
+
+  public class $classname {
+    $for(Property(name, sort) in collect-all(?Property(_,_))) {
+      $type = <sort-to-type> sort
+      $upperName = <?Id(<id>); string-as-chars([to-upper|id])> name
+      $getter-name = !Id(<concat-strings> ["get", upperName])
+      $setter-name = !Id(<concat-strings> ["set", upperName])
+      
+      private $type $name; 
+
+      public $type $getter-name() {
+        return $name;
+      }
+
+      public void $setter-name($type $name) {
+        this.$name = $name;
+      }
+    }
+
+    public $classname($for(Property(name, sort) in collect-all(?Property(_,_))) {
+                        ${<sort-to-type> sort} $name
+                      }) {
+      $for(Property(name, _) in collect-all(?Property(_,_))) {
+        this.$name = $name;
+      }
+    }
+  }
+}
