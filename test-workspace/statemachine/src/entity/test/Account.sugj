@@ -8,4 +8,5 @@ public entity Account {
   uid     :: Integer
   owner   :: Customer
   balance :: Integer
+  pin     :: String
 }

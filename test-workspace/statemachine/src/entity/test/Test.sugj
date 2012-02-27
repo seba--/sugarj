@@ -10,14 +10,14 @@ public class Test {
     Customer alice = new Customer("Alice", "Marburg", new HashSet<Account>());
     Customer bob = new Customer("Bob", "Marburg", new HashSet<Account>());
 
-    Account alicesPublicAccount = new Account(17, bob, 100);
+    Account alicesPublicAccount = new Account(17, bob, 100, "0000");
     alice.getAccounts().add(alicesPublicAccount);
-    Account alicesPrivateAccount = new Account(901, bob, 100000);
+    Account alicesPrivateAccount = new Account(901, bob, 100000, "0000");
     alice.getAccounts().add(alicesPrivateAccount);
 
-    Account bobsExpenses = new Account(35, bob, 300000);
+    Account bobsExpenses = new Account(35, bob, 300000, "0000");
     bob.getAccounts().add(bobsExpenses);
-    Account bobsPrivateAccount = new Account(61, bob, 4000);
+    Account bobsPrivateAccount = new Account(61, bob, 4000, "0000");
     bob.getAccounts().add(bobsPrivateAccount);
 
     // Bob corrects Alice's trust issues once and for all
