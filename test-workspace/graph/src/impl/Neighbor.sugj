@@ -1,0 +1,85 @@
+package impl;
+
+import variability.Java;
+
+public variable class Neighbor /*implements 
+#feature(GNONLYNEIGHBORS) 
+EdgeIfc
+
+, NeighborIfc*/ {
+#feature(GNONLYNEIGHBORS)
+  public Vertex neighbor;
+
+  public Neighbor(){
+#feature(GNONLYNEIGHBORS)
+    neighbor=null;
+
+#feature(GENEDGES)
+    end=null;
+
+#feature(GENEDGES)
+    edge=null;
+
+  }
+#feature(GNONLYNEIGHBORS)
+  public Neighbor(  Vertex theNeighbor,
+#feature(WEIGHTED)
+  int aweight
+
+){
+    neighbor=theNeighbor;
+#feature(WEIGHTED)
+    weight=aweight;
+
+  }
+
+#feature(GNONLYNEIGHBORS)
+  public void display(){
+    System.out.print(neighbor.name + " ,");
+  }
+
+#feature(GNONLYNEIGHBORS)
+  public Vertex getStart(){
+    return null;
+  }
+
+#feature(GNONLYNEIGHBORS)
+  public Vertex getEnd(){
+    return neighbor;
+  }
+
+#feature(WEIGHTED && GNONLYNEIGHBORS)
+  public int weight;
+
+#feature(WEIGHTED && GNONLYNEIGHBORS)
+  public void setWeight(  int weight){
+    this.weight=weight;
+  }
+
+#feature(WEIGHTED && GNONLYNEIGHBORS)
+  public int getWeight(){
+    return this.weight;
+  }
+
+#feature(GNONLYNEIGHBORS)
+  public Vertex getOtherVertex(  Vertex vertex){
+    return neighbor;
+  }
+
+#feature(GNONLYNEIGHBORS)
+  public void adjustAdorns(  EdgeIfc the_edge){
+  }
+
+#feature(GENEDGES)
+  public Vertex end;
+
+#feature(GENEDGES)
+  public Edge edge;
+
+#feature(GENEDGES)
+  public Neighbor(  Vertex v,  Edge e){
+    end=v;
+    edge=e;
+  }
+
+}

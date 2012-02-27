@@ -1,0 +1,24 @@
+package model;
+
+import variability.Model; 
+
+featuremodel GraphFeatureModel  {
+  feature CYCLE;
+  feature UNDIRECTED;
+  feature SEARCHBASE;
+  feature WEIGHTED;
+  feature STRONGLYCONNECTED;
+  feature BFS;
+  feature GENEDGES;
+  feature GNONLYNEIGHBORS;
+  feature GNOEDGES;
+  feature BENCHMARK;
+  feature BASEIMPL;
+  feature CONNECTED;
+  feature MSTKRUSKAL;
+  feature MSTPRIM;
+  feature NUMBER;
+  feature SEARCHALG;
+  feature TRANSPOSE;
+  feature DFS;
+}

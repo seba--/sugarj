@@ -1,0 +1,48 @@
+package impl;
+
+import variability.Java;
+
+#feature(SEARCHBASE)
+public variable class Edge /*implements EdgeIfc*/ {
+  private Vertex start;
+  private Vertex end;
+  public Edge(  Vertex the_start,  Vertex the_end,
+#feature(WEIGHTED)
+  int aweight
+){
+    start=the_start;
+    end=the_end;
+#feature(WEIGHTED)
+    weight=aweight;
+  }
+  public void adjustAdorns(  EdgeIfc the_edge){
+#feature(WEIGHTED)
+    setWeight(the_edge.getWeight());
+  }
+#feature(WEIGHTED)
+  private int weight;
+#feature(WEIGHTED)
+  public void setWeight(  int weight){
+    this.weight=weight;
+  }
+#feature(WEIGHTED)
+  public int getWeight(){
+    return this.weight;
+  }
+  public Vertex getOtherVertex(  Vertex vertex){
+    if (vertex == start)     return end;
+ else     if (vertex == end)     return start;
+ else     return null;
+  }
+  public Vertex getStart(){
+    return start;
+  }
+  public Vertex getEnd(){
+    return end;
+  }
+  public void display(){
+#feature(WEIGHTED)
+    System.out.print(" Weight=" + weight);
+    System.out.println(" start=" + start.getName() + " end="+ end.getName());
+  }
+}

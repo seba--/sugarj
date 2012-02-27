@@ -1,0 +1,15 @@
+package impl;
+
+import variability.Java;
+
+public variable interface EdgeIfc {
+  public Vertex getStart();
+  public Vertex getEnd();
+  public void display();
+  public Vertex getOtherVertex(  Vertex vertex);
+  public void adjustAdorns(  EdgeIfc the_edge);
+#feature(WEIGHTED)
+  public void setWeight(  int weight);
+#feature(WEIGHTED)
+  public int getWeight();
+}
