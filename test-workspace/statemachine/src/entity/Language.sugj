@@ -26,8 +26,6 @@ public sugar Language {
   context-free syntax %% Types
     SimpleSort -> Sort
     GenericSort -> Sort
-    RefSort -> Sort
-    FunctionSort -> Sort
     
     JavaId                     -> SimpleSort {cons("SimpleSort")}
     JavaId "<" {Sort ","}+ ">" -> GenericSort {cons("GenericSort")}
