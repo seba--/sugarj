@@ -12,23 +12,23 @@ import java.lang.ref.WeakReference;
 { 
   public static $Wildcard$Lower$Bound_1_0 instance = new $Wildcard$Lower$Bound_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy o_25)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy w_25)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("WildcardLowerBound_1_0");
-    Fail161:
+    Fail163:
     { 
-      IStrategoTerm v_129 = null;
-      IStrategoTerm u_129 = null;
+      IStrategoTerm g_130 = null;
+      IStrategoTerm f_130 = null;
       if(term.getTermType() != IStrategoTerm.APPL || renaming._consWildcardLowerBound_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail161;
-      u_129 = term.getSubterm(0);
+        break Fail163;
+      f_130 = term.getSubterm(0);
       IStrategoList annos142 = term.getAnnotations();
-      v_129 = annos142;
-      term = o_25.invoke(context, u_129);
+      g_130 = annos142;
+      term = w_25.invoke(context, f_130);
       if(term == null)
-        break Fail161;
-      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consWildcardLowerBound_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, v_129));
+        break Fail163;
+      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consWildcardLowerBound_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, g_130));
       context.popOnSuccess();
       if(true)
         return term;

@@ -12,65 +12,65 @@ import java.lang.ref.WeakReference;
 { 
   public static $Depr$Abstract$Method$Dec_7_0 instance = new $Depr$Abstract$Method$Dec_7_0();
 
-  public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy u_16, Strategy v_16, Strategy w_16, Strategy x_16, Strategy y_16, Strategy z_16, Strategy a_17)
+  public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy c_17, Strategy d_17, Strategy e_17, Strategy f_17, Strategy g_17, Strategy h_17, Strategy i_17)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("DeprAbstractMethodDec_7_0");
-    Fail45:
+    Fail47:
     { 
-      IStrategoTerm s_105 = null;
-      IStrategoTerm k_105 = null;
-      IStrategoTerm l_105 = null;
-      IStrategoTerm m_105 = null;
-      IStrategoTerm n_105 = null;
-      IStrategoTerm o_105 = null;
-      IStrategoTerm p_105 = null;
-      IStrategoTerm r_105 = null;
+      IStrategoTerm b_106 = null;
       IStrategoTerm t_105 = null;
       IStrategoTerm u_105 = null;
       IStrategoTerm v_105 = null;
       IStrategoTerm w_105 = null;
       IStrategoTerm x_105 = null;
       IStrategoTerm y_105 = null;
+      IStrategoTerm z_105 = null;
+      IStrategoTerm c_106 = null;
+      IStrategoTerm d_106 = null;
+      IStrategoTerm e_106 = null;
+      IStrategoTerm f_106 = null;
+      IStrategoTerm g_106 = null;
+      IStrategoTerm h_106 = null;
       if(term.getTermType() != IStrategoTerm.APPL || renaming._consDeprAbstractMethodDec_7 != ((IStrategoAppl)term).getConstructor())
-        break Fail45;
-      k_105 = term.getSubterm(0);
-      l_105 = term.getSubterm(1);
-      m_105 = term.getSubterm(2);
-      n_105 = term.getSubterm(3);
-      o_105 = term.getSubterm(4);
-      p_105 = term.getSubterm(5);
-      r_105 = term.getSubterm(6);
+        break Fail47;
+      t_105 = term.getSubterm(0);
+      u_105 = term.getSubterm(1);
+      v_105 = term.getSubterm(2);
+      w_105 = term.getSubterm(3);
+      x_105 = term.getSubterm(4);
+      y_105 = term.getSubterm(5);
+      z_105 = term.getSubterm(6);
       IStrategoList annos33 = term.getAnnotations();
-      s_105 = annos33;
-      term = u_16.invoke(context, k_105);
+      b_106 = annos33;
+      term = c_17.invoke(context, t_105);
       if(term == null)
-        break Fail45;
-      t_105 = term;
-      term = v_16.invoke(context, l_105);
+        break Fail47;
+      c_106 = term;
+      term = d_17.invoke(context, u_105);
       if(term == null)
-        break Fail45;
-      u_105 = term;
-      term = w_16.invoke(context, m_105);
+        break Fail47;
+      d_106 = term;
+      term = e_17.invoke(context, v_105);
       if(term == null)
-        break Fail45;
-      v_105 = term;
-      term = x_16.invoke(context, n_105);
+        break Fail47;
+      e_106 = term;
+      term = f_17.invoke(context, w_105);
       if(term == null)
-        break Fail45;
-      w_105 = term;
-      term = y_16.invoke(context, o_105);
+        break Fail47;
+      f_106 = term;
+      term = g_17.invoke(context, x_105);
       if(term == null)
-        break Fail45;
-      x_105 = term;
-      term = z_16.invoke(context, p_105);
+        break Fail47;
+      g_106 = term;
+      term = h_17.invoke(context, y_105);
       if(term == null)
-        break Fail45;
-      y_105 = term;
-      term = a_17.invoke(context, r_105);
+        break Fail47;
+      h_106 = term;
+      term = i_17.invoke(context, z_105);
       if(term == null)
-        break Fail45;
-      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consDeprAbstractMethodDec_7, new IStrategoTerm[]{t_105, u_105, v_105, w_105, x_105, y_105, term}), checkListAnnos(termFactory, s_105));
+        break Fail47;
+      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consDeprAbstractMethodDec_7, new IStrategoTerm[]{c_106, d_106, e_106, f_106, g_106, h_106, term}), checkListAnnos(termFactory, b_106));
       context.popOnSuccess();
       if(true)
         return term;

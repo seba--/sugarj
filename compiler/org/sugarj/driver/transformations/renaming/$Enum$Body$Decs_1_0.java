@@ -12,23 +12,23 @@ import java.lang.ref.WeakReference;
 { 
   public static $Enum$Body$Decs_1_0 instance = new $Enum$Body$Decs_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy k_17)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy s_17)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("EnumBodyDecs_1_0");
-    Fail48:
+    Fail50:
     { 
-      IStrategoTerm x_106 = null;
-      IStrategoTerm v_106 = null;
+      IStrategoTerm g_107 = null;
+      IStrategoTerm e_107 = null;
       if(term.getTermType() != IStrategoTerm.APPL || renaming._consEnumBodyDecs_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail48;
-      v_106 = term.getSubterm(0);
+        break Fail50;
+      e_107 = term.getSubterm(0);
       IStrategoList annos36 = term.getAnnotations();
-      x_106 = annos36;
-      term = k_17.invoke(context, v_106);
+      g_107 = annos36;
+      term = s_17.invoke(context, e_107);
       if(term == null)
-        break Fail48;
-      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consEnumBodyDecs_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, x_106));
+        break Fail50;
+      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consEnumBodyDecs_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, g_107));
       context.popOnSuccess();
       if(true)
         return term;

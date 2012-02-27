@@ -37,6 +37,15 @@ rules
     where <match-pkgs-java> (pkg, qual)
 
   do-rename-java(|pkg, from, to) :
+       PackageOrTypeName(Id(from))
+    -> PackageOrTypeName(Id(to))
+
+  do-rename-java(|pkg, from, to) :
+       PackageOrTypeName(qual, Id(from))
+    -> PackageOrTypeName(qual, Id(to))
+    where <match-pkgs-java> (pkg, qual)
+
+  do-rename-java(|pkg, from, to) :
        AmbName(Id(from))
     -> AmbName(Id(to))
 

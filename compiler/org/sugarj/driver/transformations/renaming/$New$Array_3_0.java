@@ -12,37 +12,37 @@ import java.lang.ref.WeakReference;
 { 
   public static $New$Array_3_0 instance = new $New$Array_3_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy r_15, Strategy s_15, Strategy t_15)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy z_15, Strategy a_16, Strategy b_16)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("NewArray_3_0");
-    Fail32:
+    Fail34:
     { 
-      IStrategoTerm r_102 = null;
-      IStrategoTerm o_102 = null;
-      IStrategoTerm p_102 = null;
-      IStrategoTerm q_102 = null;
-      IStrategoTerm s_102 = null;
-      IStrategoTerm t_102 = null;
+      IStrategoTerm z_102 = null;
+      IStrategoTerm w_102 = null;
+      IStrategoTerm x_102 = null;
+      IStrategoTerm y_102 = null;
+      IStrategoTerm a_103 = null;
+      IStrategoTerm b_103 = null;
       if(term.getTermType() != IStrategoTerm.APPL || renaming._consNewArray_3 != ((IStrategoAppl)term).getConstructor())
-        break Fail32;
-      o_102 = term.getSubterm(0);
-      p_102 = term.getSubterm(1);
-      q_102 = term.getSubterm(2);
+        break Fail34;
+      w_102 = term.getSubterm(0);
+      x_102 = term.getSubterm(1);
+      y_102 = term.getSubterm(2);
       IStrategoList annos20 = term.getAnnotations();
-      r_102 = annos20;
-      term = r_15.invoke(context, o_102);
+      z_102 = annos20;
+      term = z_15.invoke(context, w_102);
       if(term == null)
-        break Fail32;
-      s_102 = term;
-      term = s_15.invoke(context, p_102);
+        break Fail34;
+      a_103 = term;
+      term = a_16.invoke(context, x_102);
       if(term == null)
-        break Fail32;
-      t_102 = term;
-      term = t_15.invoke(context, q_102);
+        break Fail34;
+      b_103 = term;
+      term = b_16.invoke(context, y_102);
       if(term == null)
-        break Fail32;
-      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consNewArray_3, new IStrategoTerm[]{s_102, t_102, term}), checkListAnnos(termFactory, r_102));
+        break Fail34;
+      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consNewArray_3, new IStrategoTerm[]{a_103, b_103, term}), checkListAnnos(termFactory, z_102));
       context.popOnSuccess();
       if(true)
         return term;
