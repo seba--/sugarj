@@ -14,4 +14,5 @@ public sugar Requote {
     JavaBlockStm -> Requoted
 
     JavaFormalParam -> Requoted
+    JavaType -> Requoted
 }

@@ -11,19 +11,20 @@ public sugar Unquote {
     Unquote -> JavaPackageDec
     Unquote -> JavaPackageName
     Unquote -> JavaImportDec
+    Unquote -> JavaType
 
-    "typename" Unquote -> JavaTypeName
     "id" Unquote -> JavaId
-
-    Unquote -> JavaTypeName
     Unquote -> JavaId {avoid}
 
     Unquote -> JavaBlockStm
     Unquote -> JavaExpr
 
-  context-free syntax
     "${" Unquoted "}" -> Unquote {cons("FromMetaExpr")}
     StrategoStrategy -> Unquoted {cons("Unquoted")}
+
+  context-free priorities
+    JavaId -> JavaTypeName
+  > Unquote -> JavaId
 
   desugarings
     unquote-desugar

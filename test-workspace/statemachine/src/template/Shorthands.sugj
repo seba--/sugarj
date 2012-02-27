@@ -12,15 +12,17 @@ public sugar Shorthands {
     UnquoteShorthand -> JavaPackageDec
     UnquoteShorthand -> JavaPackageName
     UnquoteShorthand -> JavaImportDec
+    UnquoteShorthand -> JavaType
 
-    "typename" UnquoteShorthand -> JavaTypeName
     "id" UnquoteShorthand -> JavaId
-
-    UnquoteShorthand -> JavaTypeName
     UnquoteShorthand -> JavaId {avoid}
 
     UnquotedShorthand -> UnquoteShorthand {cons("FromMetaExpr")}
     "$" StrategoId -> UnquotedShorthand {cons("UnquotedShorthand")}
+
+  context-free priorities
+    JavaId -> JavaTypeName
+  > UnquoteShorthand -> JavaId
 
   lexical syntax
     "$" [A-Za-z0-9\_\$]* -> JavaID {reject}
