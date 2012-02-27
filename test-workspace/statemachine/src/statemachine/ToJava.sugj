@@ -58,5 +58,9 @@ public template ToJava {
         step(e);
       return state;
     }
+
+    public State currentState() {
+      return state;
+    }
   }
 }
