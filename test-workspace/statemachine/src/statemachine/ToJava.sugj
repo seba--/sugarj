@@ -4,8 +4,18 @@ import template.Unquote;
 import template.Shorthands;
 import template.InlineShorthands;
 import template.Foreach;
+import template.UnquoteEnum;
+import template.LocalStrategies;
+
+import statemachine.Language;
+import org.sugarj.languages.Java;
 
 public template ToJava {
+  $$event-as-enum : NamedEvent(name) -> EnumConst(name, None, None)
+  $$all-events-as-enums = collect-all(event-as-enum)
+  $$transition-premise : Transition(NamedEvent(name),_) -> >e == Event.$name<
+  $$transition-consequence : Transition(_, state) -> [ >return State.$state;< ]
+
   $pkg = collect-one(?PackageDec(_,<id>))
   $classname = collect-one(?ModelDecHead(_,<id>))
 
@@ -14,22 +24,29 @@ public template ToJava {
   import java.lang.IllegalArgumentException;
 
   public class $classname {
-    public static enum Event {
-      PinOK, PinNOK
+    public enum Event {
+      $*{all-events-as-enums}
     }
-    public static enum State {
-      Init {
-        public State step(Event e) {
-          if (e == PinOK)
-            return Init;
-          throw new IllegalArgumentException();
-        }
+
+    public enum State {
+      $for(State(name, transitions) in collect-all(?State(_,_))) {
+         $name {
+           public State step(Event e) {
+             $for(t in !transitions) {
+               if (${<transition-premise> t}) {
+                 $*{<transition-consequence> t}
+               }
+             }
+
+             throw new IllegalArgumentException("Unexpected event " + e);
+           }
+         }
       };
 
       public abstract State step(Event e);
     }
 
-    private State state;
+    private State state = State.${collect-one(?InitialState(<id>))};
 
     public State step(Event e) {
       state = state.step(e);

@@ -22,8 +22,8 @@ public sugar ListUnquote {
 
   rules
     list-unquote-desugar :
-      TransBody([Rules([SDefNoArgs("main", body)])]) -> 
-      TransBody([Rules([SDefNoArgs("main", Seq(Match(Var(modelvar)), body'))])])
+      SDefNoArgs("main", body) -> 
+      SDefNoArgs("main", Seq(Match(Var(modelvar)), body'))
     where
       <oncetd(?ListUnquoted(_))> body;
       modelvar := "this__";

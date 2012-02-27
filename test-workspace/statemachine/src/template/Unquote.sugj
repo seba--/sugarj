@@ -18,6 +18,8 @@ public sugar Unquote {
     Unquote -> JavaTypeName
     Unquote -> JavaId {avoid}
 
+    Unquote -> JavaBlockStm
+    Unquote -> JavaExpr
 
   context-free syntax
     "${" Unquoted "}" -> Unquote {cons("FromMetaExpr")}
@@ -28,8 +30,8 @@ public sugar Unquote {
 
   rules
     unquote-desugar :
-      TransBody([Rules([SDefNoArgs("main", body)])]) -> 
-      TransBody([Rules([SDefNoArgs("main", Seq(Match(Var(modelvar)), body'))])])
+      SDefNoArgs("main", body) -> 
+      SDefNoArgs("main", Seq(Match(Var(modelvar)), body'))
     where
       <oncetd(?Unquoted(_))> body;
       modelvar := "this__";
