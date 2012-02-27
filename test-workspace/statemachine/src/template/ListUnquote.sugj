@@ -12,6 +12,7 @@ public sugar ListUnquote {
     ListUnquote -> JavaClassBodyDec
     ListUnquote -> JavaBlockStm
     ListUnquote -> JavaFormalParam
+    ListUnquote -> JavaActualTypeArg
 
   context-free syntax
     "$*{" ListUnquoted "}" -> ListUnquote {cons("FromMetaExpr")}
