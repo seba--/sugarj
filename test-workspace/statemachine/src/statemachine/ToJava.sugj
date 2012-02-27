@@ -11,7 +11,7 @@ import statemachine.Language;
 import org.sugarj.languages.Java;
 
 public template ToJava {
-  $$event-as-enum : NamedEvent(name) -> EnumConst(name, None, None)
+  $$event-as-enum : Event(name) -> EnumConst(name, None, None)
   $$all-events-as-enums = collect-all(event-as-enum)
   $$transition-premise : Transition(NamedEvent(name),_) -> >e == Event.$name<
   $$transition-consequence : Transition(_, state) -> [ >return State.$state;< ]
