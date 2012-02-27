@@ -251,37 +251,37 @@ public class Driver {
   private static Result run(Driver driver, ToplevelDeclarationProvider declProvider, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     Entry<ToplevelDeclarationProvider, Driver> pending = null;
     
-    synchronized (Driver.class) {
-      pending = getPendingRun(sourceFile);
-      if (pending != null && !pending.getKey().equals(declProvider) && pending.getValue().generateFiles == generateFiles) {
-        log.log("interrupting " + sourceFile);
-        pending.getValue().interrupt();
-      }
-
-      if (pending == null) {
-        Result result = getResult(sourceFile);
-        if (result != null && result.isUpToDate(declProvider.getSourceHashCode(), sourceFile.getSourceLocation().getEnvironment()))
-          return result;
+    try {
+      synchronized (Driver.class) {
+        pending = getPendingRun(sourceFile);
+        if (pending != null && !pending.getKey().equals(declProvider) && pending.getValue().generateFiles == generateFiles) {
+          log.log("interrupting " + sourceFile);
+          pending.getValue().interrupt();
+        }
+  
+        if (pending == null) {
+          Result result = getResult(sourceFile);
+          if (result != null && result.isUpToDate(declProvider.getSourceHashCode(), sourceFile.getSourceLocation().getEnvironment()))
+            return result;
+        }
+        
+        if (pending == null)
+          putPendingRun(sourceFile, declProvider, driver);
       }
       
-      if (pending == null)
-        putPendingRun(sourceFile, declProvider, driver);
-    }
-    
-    if (pending != null) {
-      waitForPending(sourceFile);
-      return run(driver, declProvider, sourceFile, monitor, generateFiles);
-    }
-    
-    if (generateFiles)
-      synchronized (currentlyProcessing) {
-        // TODO we need better circular dependency handling
-        if (currentlyProcessing.contains(sourceFile))
-           throw new IllegalStateException("Uncaptured circular processing");
-        currentlyProcessing.add(sourceFile);
+      if (pending != null) {
+        waitForPending(sourceFile);
+        return run(driver, declProvider, sourceFile, monitor, generateFiles);
       }
-
-    try {
+      
+      if (generateFiles)
+        synchronized (currentlyProcessing) {
+          // TODO we need better circular dependency handling
+          if (currentlyProcessing.contains(sourceFile))
+             throw new IllegalStateException("Uncaptured circular processing");
+          currentlyProcessing.add(sourceFile);
+        }
+  
       synchronized (processingListener) {
         for (ProcessingListener listener : processingListener)
           listener.processingStarts(sourceFile);
