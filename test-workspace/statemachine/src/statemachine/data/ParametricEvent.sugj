@@ -1,0 +1,10 @@
+package statemachine.data;
+
+import statemachine.Language;
+import entity.Language;
+
+public sugar ParametricEvent {
+  context-free syntax
+    "event" EventName "(" {Sort ","}+ ")" -> EventDec {cons("ParametricEvent")}
+    EventName "(" {JavaId ","}+ ")" -> Event {cons("ParametricEvent")} 
+}

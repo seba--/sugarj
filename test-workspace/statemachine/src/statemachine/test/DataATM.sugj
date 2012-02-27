@@ -1,0 +1,47 @@
+package statemachine.test;
+
+import statemachine.Language;
+
+import statemachine.data.ParametricEvent;
+import statemachine.data.TransitionCondition;
+
+public statemachine DataATM {
+  initial state Init 
+
+  event Withdraw
+  event Cancel
+  event Pin(String)
+  event Amount(Integer)
+  event CardMoneyTaken
+  event CardRevoked
+
+  state Init {
+    Withdraw => Withdraw1
+    Cancel => Init
+  }
+  state Withdraw1 {
+    Pin(p) if p == "1234" => HowMuch
+    Pin(p) if p != "1234" => Withdraw2
+    Cancel => Init
+  }
+  state Withdraw2 {
+    Pin(p) if p == "1234" => HowMuch
+    Pin(p) if p != "1234" => Withdraw3
+    Cancel => Init
+  }
+  state Withdraw3 {
+    Pin(p) if p == "1234" => HowMuch
+    Pin(p) if p != "1234"  => RevokeCard
+    Cancel => Init
+  }
+  state HowMuch {
+    Amount(i) if i < 2000 => GiveCardMoney
+    Cancel => Init
+  }
+  state GiveCardMoney {
+    CardMoneyTaken => Init
+  }
+  state RevokeCard {
+    CardRevoked => Init
+  }
+}
