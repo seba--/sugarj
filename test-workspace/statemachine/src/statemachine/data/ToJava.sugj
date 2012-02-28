@@ -16,7 +16,9 @@ public transformation ToJava {
     main = main-entity_ToJava
   
   rules
-    event-as-enum :
+    all-events-as-enums = collect-all(![<event-as-enum>] + ![<parametric-event-as-enum>,<parametric-event-create-method>]); concat
+
+    parametric-event-as-enum :
       ParametricEvent(name, ss) ->
       > $name {
           $names = <event-data-names> ss
@@ -27,17 +29,25 @@ public transformation ToJava {
           $for((name, type) in !names_types) {
             public $type $name;
           }
+        }
+      <
 
-          public static Event create($for((name, type) in !names_types) {
-                                       $type $name
-                                     }) {
-            $for((name, _) in !names_types) {
-              this.$name = $name;
-            }
+    parametric-event-create-method :
+      ParametricEvent(name,ss) ->
+      > public static Event ${<concat-strings> ["create",<firstUpper> name]}
+                            ($for((name, type) in !names_types) {
+                               $type $name
+                             }) {
+          $for((name, _) in !names_types) {
+            this.$name = $name;
           }
         }
       <
- 
+      where
+        names := <event-data-names> ss;
+        types := <map(sort-to-type)> ss;
+        names_types := <zip> (names, types)
+
     event-data-names = not(?(_,_)); !(<id>,0); event-data-names
     event-data-names : ([],_) -> []
     event-data-names : ([_|ss],i) -> [name | <event-data-names> (ss, <inc> i)]

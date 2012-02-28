@@ -22,6 +22,8 @@ public template ToJava {
                 + ?ModelImportDec(_)
                 + ?TransImportDec(_,_,_)
                 + ?ModelTransImportDec(_,_,_)
+
+  $$firstUpper = string-as-chars([to-upper|id])
   
   $pkg = collect-one(?PackageDec(_,<id>))
   $classname = collect-one(?ModelDecHead(_,<id>))
@@ -33,7 +35,7 @@ public template ToJava {
   public class $classname {
     $for(Property(name, sort) in collect-all(?Property(_,_))) {
       $type = <sort-to-type> sort
-      $upperName = <?Id(<id>); string-as-chars([to-upper|id])> name
+      $upperName = <?Id(<id>); firstUpper> name
       $getter-name = !Id(<concat-strings> ["get", upperName])
       $setter-name = !Id(<concat-strings> ["set", upperName])
       
