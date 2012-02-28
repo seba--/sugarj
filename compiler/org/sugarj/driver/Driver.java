@@ -69,7 +69,7 @@ import org.sugarj.util.ToplevelDeclarationProvider;
 */
 public class Driver {
   
-  public final static String CACHE_VERSION = "model-0.3";
+  public final static String CACHE_VERSION = "model-0.3c";
   
   private final static int PENDING_TIMEOUT = 30000;
 
@@ -1070,11 +1070,12 @@ public class Driver {
     builder.append(StringCommands.printModuleList(availableSTRImports, " "));
     builder.append(" ").append(FileCommands.dropExtension(strPath.getRelativePath()));
     FileCommands.writeToFile(compoundStr, builder.toString());
+    String strat = "main-" + FileCommands.dropExtension(strPath.getRelativePath()).replace('/', '_');
     
     Path trans = null;
     try {
       log.beginTask("Compile transformation", "Compile transformation " + strPath.getRelativePath());
-      trans = STRCommands.compile(compoundStr, "main-" + FileCommands.fileName(strPath), driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
+      trans = STRCommands.compile(compoundStr, strat, driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
     } catch (Exception e) {
       String msg = "problems while compiling transformation " + FileCommands.dropExtension(strPath.getRelativePath());
       setErrorMessage(lastSugaredToplevelDecl, msg + ":\n" + e.getMessage());
@@ -1462,7 +1463,7 @@ public class Driver {
     editorServicesParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.editorServicesTbl.getPath()), "Module");
 
     interp = new HybridInterpreter(); //TODO (ATermCommands.factory);
-    interp.addOperatorRegistry(new SugarJPrimitivesLibrary(environment));
+    interp.addOperatorRegistry(new SugarJPrimitivesLibrary(this, environment));
     
     sdfContext = tools.init();
     makePermissiveContext = make_permissive.init();
@@ -1980,5 +1981,13 @@ public class Driver {
   private void checkToplevelDeclarationName(String name, String what, IStrategoTerm toplevelDecl) {
     if (!name.equals(FileCommands.fileName(sourceFile)))
       setErrorMessage(toplevelDecl, "File name differs from " + what + " name. was: " + name + ", expected: " + FileCommands.fileName(sourceFile));
+  }
+  
+  public IStrategoTerm getPackageDec() {
+    return desugaredPackageDecl;
+  }
+  
+  public String getRelPackageName() {
+    return relPackageName;
   }
 }
