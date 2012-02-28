@@ -8,8 +8,14 @@ import statemachine.data.TransitionCondition;
 
 public transformation ToJava {
   rules
-    main = main-statemachine_ToJava
+    main = ?SugarCompilationUnit(_,imps,_); 
+           main-statemachine_ToJava;
+           SugarCompilationUnit(id, !(<id>,imps); conc, id)
+    
+    // apply entity transformation to linked enity models
+    main = main-entity_ToJava
   
+  rules
     event-as-enum :
       ParametricEvent(name, ss) ->
       > $name {
@@ -22,7 +28,7 @@ public transformation ToJava {
             public $type $name;
           }
 
-          public static $name create($for((name, type) in !names_types) {
+          public static Event create($for((name, type) in !names_types) {
                                        $type $name
                                      }) {
             $for((name, _) in !names_types) {
@@ -35,7 +41,7 @@ public transformation ToJava {
     event-data-names = not(?(_,_)); !(<id>,0); event-data-names
     event-data-names : ([],_) -> []
     event-data-names : ([_|ss],i) -> [name | <event-data-names> (ss, <inc> i)]
-      where name := <conc-strings> ("a", <int-to-string> i)
+      where name := Id(<conc-strings> ("a", <int-to-string> i))
 
     transition-premise :
       Transition(ParametricEvent(name, params),_) ->
