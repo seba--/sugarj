@@ -11,5 +11,5 @@ public sugar ConcreteSyntax {
     SugarCompilationUnit -> ConcreteSyntaxTemplate {cons("ConcreteSyntaxTemplate")}
 
   rules
-    compile-template-body : ConcreteSyntaxTemplate(code) -> Build(<trm-explode> code)
+    compile-template-body : ConcreteSyntaxTemplate(code) -> Build(ToMetaExpr(code))
 }

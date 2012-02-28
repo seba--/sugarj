@@ -16,7 +16,7 @@ public sugar LocalStrategies {
 
 
   rules
-    compile-template-body = LocalStrategy(meta-explode, compile-template-body)
+    compile-template-body = LocalStrategy(id, compile-template-body)
 
   desugarings
     desugar-local-strategies

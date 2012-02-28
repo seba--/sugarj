@@ -53,6 +53,10 @@ public sugar MetaExplode {
 	    Op(i,[]) -> NoAnnoList(Int(<int-to-string> i))
 	    where <is-int> i
 	
+
+    desugarings
+      meta-explode
+
 	strategies
 	
 	  meta-explode = 
