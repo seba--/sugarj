@@ -2,13 +2,17 @@ package statemachine.test;
 
 import statemachine.Language;
 
+import statemachine.data.InternalData;
 import statemachine.data.ParametricEvent;
 import statemachine.data.TransitionCondition;
 
 public statemachine DataATM {
   initial state Init 
 
-  event Withdraw
+  data acc :: Account
+  data pinCount :: Integer
+
+  event Withdraw(Account)
   event Cancel
   event Pin(String)
   event Amount(Integer)
@@ -16,22 +20,14 @@ public statemachine DataATM {
   event CardRevoked
 
   state Init {
-    Withdraw => Withdraw1
+    Withdraw(acc) => Withdraw
     Cancel => Init
   }
-  state Withdraw1 {
-    Pin(p) if p == "1234" => HowMuch
-    Pin(p) if p != "1234" => Withdraw2
-    Cancel => Init
-  }
-  state Withdraw2 {
-    Pin(p) if p == "1234" => HowMuch
-    Pin(p) if p != "1234" => Withdraw3
-    Cancel => Init
-  }
-  state Withdraw3 {
-    Pin(p) if p == "1234" => HowMuch
-    Pin(p) if p != "1234"  => RevokeCard
+  state Withdraw { 
+    Pin(p) if pinCount < 3 && p == "1234"
+      => HowMuch
+    Pin(p) if pinCount >= 3 || p != "1234"
+      => Withdraw
     Cancel => Init
   }
   state HowMuch {
