@@ -1,0 +1,29 @@
+package statemachine.test;
+
+import statemachine.Language;
+
+import statemachine.data.InternalData;
+import statemachine.data.ParametricEvent;
+import statemachine.data.TransitionCondition;
+import statemachine.data.TransitionEffect;
+
+model import entity.test.Account;
+
+public statemachine DataATMExcerpt {
+  initial state Init 
+
+  data acc :: Account
+  data pinCount :: Integer
+
+  event InsertCard(Account)
+  event Cancel
+  event Pin(String)
+  event Amount(Integer)
+  event MoneyTaken
+  event CardTaken
+  event CardRevoked
+
+  state Withdraw { 
+    Cancel => ReturnCard
+  }
+}

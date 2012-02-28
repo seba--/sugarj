@@ -1,0 +1,95 @@
+package statemachine.data;
+
+import entity.ToJava;
+import statemachine.ToJava;
+
+import statemachine.data.ParametricEvent;
+import statemachine.data.TransitionCondition;
+
+public transformation ToJava {
+  rules
+    main = main-statemachine_ToJava
+  
+    event-as-enum :
+      ParametricEvent(name, ss) ->
+      > $name {
+          $names = <event-data-names> ss
+          // sort-to-type reused from entity.ToJava
+          $types = <map(sort-to-type)> ss
+          $names_types = <zip> (names, types)
+
+          $for((name, type) in !names_types) {
+            public $type $name;
+          }
+
+          public static $name create($for((name, type) in !names_types) {
+                                       $type $name
+                                     }) {
+            $for((name, _) in !names_types) {
+              this.$name = $name;
+            }
+          }
+        }
+      <
+ 
+    event-data-names = not(?(_,_)); !(<id>,0); event-data-names
+    event-data-names : ([],_) -> []
+    event-data-names : ([_|ss],i) -> [name | <event-data-names> (ss, <inc> i)]
+      where name := <conc-strings> ("a", <int-to-string> i)
+
+    transition-premise :
+      Transition(ParametricEvent(name, params),_) ->
+      >e == Event.$name<
+
+    transition-premise :
+      Transition(WithCondition(event, exp),to) ->
+      And(<transition-premise> Transition(event,to), exp)
+    where <event-bindings> event => env;
+          <ee-java(|env)> exp
+
+    event-bindings : NamedEvent(_) -> []
+    event-bindings : ParametricEvent(name, params) -> <zip> (params, <event-data-names> params)
+
+  rules
+    ee-java(|env) : Var(n) -> ExprName(ExprName(Id("e")), field)
+      where <lookup> (n, env) => field
+    ee-java(|env) : Var(n) -> ExprName(n)
+
+    ee-java(|env) : FieldAccess(e, n) -> ExprName(j, n)
+      where <ee-java(|env); is-name> e => j
+    ee-java(|env) : FieldAccess(e, n) -> Field(j, n)
+      where <ee-java(|env)> e => j
+    ee-java(|env) : Call(e, n, args) -> Invoke(Method(MethodName(j, n)), <map(ee-java(|env))> args) 
+      where <ee-java(|env); is-name> e => j
+    ee-java(|env) : Call(e, n, args) -> Invoke(Method(j, None, n), <map(ee-java(|env))> args) 
+      where <ee-java(|env); is-name> e => j
+    
+    ee-java(|env) = Eq(ee-java(|env), ee-java(|env))
+    ee-java(|env) = NotEq(ee-java(|env), ee-java(|env))
+    ee-java(|env) : LargerThan(e1, e2) -> Gt(<ee-java(|env)> e1, <ee-java(|env)> e2)
+    ee-java(|env) : LargerThanOrEqual(e1, e2) -> GtEq(<ee-java(|env)> e1, <ee-java(|env)> e2)
+    ee-java(|env) : SmallerThan(e1, e2) -> Lt(<ee-java(|env)> e1, <ee-java(|env)> e2)
+    ee-java(|env) : SmallerThanOrEqual(e1, e2) -> LtEq(<ee-java(|env)> e1, <ee-java(|env)> e2)
+
+    ee-java(|env) : True -> Lit(Bool(True)) 
+    ee-java(|env) : False -> Lit(Bool(False)) 
+    ee-java(|env) : Null -> Lit(Null) 
+    ee-java(|env) : This -> This 
+
+    ee-java(|env) : And(e1,e2) -> LazyAnd(<ee-java(|env)> e1, <ee-java(|env)> e2)
+    ee-java(|env) : Or(e1,e2) -> LazyOr(<ee-java(|env)> e1, <ee-java(|env)> e2)
+    ee-java(|env) = Not(ee-java(|env))
+
+    ee-java(|env) = Mul(ee-java(|env),ee-java(|env))
+    ee-java(|env) = Div(ee-java(|env),ee-java(|env))
+    ee-java(|env) = Plus(ee-java(|env),ee-java(|env))
+    ee-java(|env) = Minus(ee-java(|env),ee-java(|env))
+    ee-java(|env) : Mod(e1,e2) -> Remain(<ee-java(|env)> e1, <ee-java(|env)> e2)
+
+    ee-java(|env) : Int(i) -> Lit(Deci(i)) 
+    ee-java(|env) : Long(l) -> Lit(Deci(l)) 
+    ee-java(|env) : Float(f) -> Lit(Float(f)) 
+    ee-java(|env) : String(s) -> Lit(s) 
+
+    is-name = ?ExprName(_) + ?ExprName(_,_) + ?AmbName(_) + ?AmbName(_,_) + ?MethodName(_) + ?MethodName(_,_)
+} 
