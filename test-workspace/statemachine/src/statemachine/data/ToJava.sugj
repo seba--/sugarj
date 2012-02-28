@@ -40,7 +40,7 @@ public transformation ToJava {
           public static Event create($for((name, type) in !names_types) {
                                        $type $name
                                      }) {
-            Event e = new id $eventname();
+            id $eventname e = new id $eventname();
             $for((name, _) in !names_types) {
               e.$name = $name;
             }
