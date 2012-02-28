@@ -15,4 +15,9 @@ public sugar Requote {
 
     JavaFormalParam -> Requoted
     JavaType -> Requoted
+
+  context-free priorities
+    JavaBlockStm -> Requoted
+  > JavaClassDec -> JavaBlockStm
+
 }

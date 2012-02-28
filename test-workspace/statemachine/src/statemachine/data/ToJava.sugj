@@ -8,19 +8,26 @@ import statemachine.data.TransitionCondition;
 
 public transformation ToJava {
   rules
-    main = ?SugarCompilationUnit(_,imps,_); 
-           main-statemachine_ToJava;
-           SugarCompilationUnit(id, !(<id>,imps); conc, id)
-    
+    main =
+      ?orig;
+      where(oncetd(?ModelBody(("Statemachine",_))));
+      main-statemachine_ToJava;
+      copy-imports(|orig)
+
     // apply entity transformation to linked enity models
-    main = main-entity_ToJava
+    main =
+      where(oncetd(?ModelBody(("Entity",_,_))));
+      main-entity_ToJava
+
+  rules
+    copy-imports(|orig) =
+      where(<?SugarCompilationUnit(_,imps,_)> orig);
+      SugarCompilationUnit(id, !(<id>,imps);conc, id)
   
   rules
-    all-events-as-enums = collect-all(![<event-as-enum>] + ![<parametric-event-as-enum>,<parametric-event-create-method>]); concat
-
-    parametric-event-as-enum :
-      ParametricEvent(name, ss) ->
-      > $name {
+    event-as-class :
+      ParametricEvent(eventname, ss) ->
+      > public static class $eventname implements Event {
           $names = <event-data-names> ss
           // sort-to-type reused from entity.ToJava
           $types = <map(sort-to-type)> ss
@@ -29,24 +36,18 @@ public transformation ToJava {
           $for((name, type) in !names_types) {
             public $type $name;
           }
-        }
-      <
 
-    parametric-event-create-method :
-      ParametricEvent(name,ss) ->
-      > public static Event ${<concat-strings> ["create",<firstUpper> name]}
-                            ($for((name, type) in !names_types) {
-                               $type $name
-                             }) {
-          $for((name, _) in !names_types) {
-            this.$name = $name;
+          public static Event create($for((name, type) in !names_types) {
+                                       $type $name
+                                     }) {
+            Event e = new id $eventname();
+            $for((name, _) in !names_types) {
+              e.$name = $name;
+            }
+            return e;
           }
         }
       <
-      where
-        names := <event-data-names> ss;
-        types := <map(sort-to-type)> ss;
-        names_types := <zip> (names, types)
 
     event-data-names = not(?(_,_)); !(<id>,0); event-data-names
     event-data-names : ([],_) -> []

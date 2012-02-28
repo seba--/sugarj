@@ -11,8 +11,8 @@ import statemachine.Language;
 import org.sugarj.languages.Java;
 
 public template ToJava {
-  $$event-as-enum : Event(name) -> EnumConst(name, None, None)
-  $$all-events-as-enums = collect-all(event-as-enum)
+  $$event-as-class : Event(name) -> > public static class $name implements Event { } <
+  $$all-events-as-classes = collect-all(event-as-class)
   $$transition-premise : Transition(NamedEvent(name),_) -> >e == Event.$name<
   $$transition-consequence : Transition(_, state) -> [ >return State.$state;< ]
 
@@ -24,9 +24,9 @@ public template ToJava {
   import java.lang.IllegalArgumentException;
 
   public class $classname {
-    public enum Event {
-      $*{all-events-as-enums}
-    }
+    public static interface Event {}
+    $*{all-events-as-classes}
+    
 
     public enum State {
       $for(State(name, transitions) in collect-all(?State(_,_))) {
