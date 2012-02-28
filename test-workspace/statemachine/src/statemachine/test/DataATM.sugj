@@ -5,6 +5,9 @@ import statemachine.Language;
 import statemachine.data.InternalData;
 import statemachine.data.ParametricEvent;
 import statemachine.data.TransitionCondition;
+import statemachine.data.TransitionEffect;
+
+model import entity.test.Account;
 
 public statemachine DataATM {
   initial state Init 
@@ -12,32 +15,49 @@ public statemachine DataATM {
   data acc :: Account
   data pinCount :: Integer
 
-  event Withdraw(Account)
+  event InsertCard(Account)
   event Cancel
   event Pin(String)
   event Amount(Integer)
-  event CardMoneyTaken
+  event MoneyTaken
+  event CardTaken
   event CardRevoked
 
   state Init {
-    Withdraw(acc) => Withdraw
+    InsertCard(clientAcc) => Withdraw {
+      acc := clientAcc
+      pinCount := 0 
+    }
+
     Cancel => Init
   }
+
   state Withdraw { 
-    Pin(p) if pinCount < 3 && p == "1234"
+    Pin(p) if pinCount < 3 && p == acc.pin
       => HowMuch
-    Pin(p) if pinCount >= 3 || p != "1234"
-      => Withdraw
-    Cancel => Init
+
+    Pin(p) if pinCount >= 3 || p != acc.pin
+      => Withdraw { pinCount := pinCount + 1 }
+
+    Cancel => ReturnCard
   }
+
   state HowMuch {
-    Amount(i) if i < 2000 => GiveCardMoney
-    Cancel => Init
+    Amount(amount) if amount < 2000 && amount < acc.balance
+      => GiveMoney { acc.balance := acc.balance - amount }
+
+    Cancel => ReturnCard
   }
-  state GiveCardMoney {
-    CardMoneyTaken => Init
+
+  state GiveMoney {
+    MoneyTaken => ReturnCard
   }
+
+  state ReturnCard {
+    CardTaken => Init { acc := null }
+  }
+
   state RevokeCard {
-    CardRevoked => Init
+    CardRevoked => Init { acc := null }
   }
 }

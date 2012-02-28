@@ -23,7 +23,10 @@ public sugar Language {
     "event" EventName -> EventDec {cons("Event")}
     "state" StateName "{" Transition* "}" -> StateDec {cons("State")}
 
-    Event "=>" StateName -> Transition {cons("Transition")}
+    TransitionFrom "=>" TransitionTo -> Transition {cons("Transition")}
+    
+    Event -> TransitionFrom
+    StateName -> TransitionTo
 
     EventName -> Event {cons("NamedEvent")}
 }
