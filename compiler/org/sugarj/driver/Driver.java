@@ -1059,23 +1059,24 @@ public class Driver {
 
 
   private IStrategoTerm executeTransformation(RelativePath strPath, IStrategoTerm currentTerm, boolean mayFail) throws IOException {
-    /*
-     * create a temporary stratego file that connects already available imports
-     * with the currently processed transformation
-     */
-    Path compoundStr = FileCommands.newTempFile("str");
-    StringBuilder builder = new StringBuilder();
-    builder.append("module ").append(FileCommands.fileName(compoundStr)).append("\n");
-    builder.append("imports ");
-    builder.append(StringCommands.printModuleList(availableSTRImports, " "));
-    builder.append(" ").append(FileCommands.dropExtension(strPath.getRelativePath()));
-    FileCommands.writeToFile(compoundStr, builder.toString());
+//    /*
+//     * create a temporary stratego file that connects already available imports
+//     * with the currently processed transformation
+//     */
+//    Path compoundStr = FileCommands.newTempFile("str");
+//    StringBuilder builder = new StringBuilder();
+//    builder.append("module ").append(FileCommands.fileName(compoundStr)).append("\n");
+//    builder.append("imports ");
+//    builder.append(StringCommands.printModuleList(availableSTRImports, " "));
+//    builder.append(" ").append(FileCommands.dropExtension(strPath.getRelativePath()));
+//    FileCommands.writeToFile(compoundStr, builder.toString());
+
     String strat = "main-" + FileCommands.dropExtension(strPath.getRelativePath()).replace('/', '_');
     
     Path trans = null;
     try {
       log.beginTask("Compile transformation", "Compile transformation " + strPath.getRelativePath());
-      trans = STRCommands.compile(compoundStr, strat, driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
+      trans = STRCommands.compile(strPath, strat, driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
     } catch (Exception e) {
       String msg = "problems while compiling transformation " + FileCommands.dropExtension(strPath.getRelativePath());
       setErrorMessage(lastSugaredToplevelDecl, msg + ":\n" + e.getMessage());
