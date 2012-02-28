@@ -1089,7 +1089,7 @@ public class Driver {
      * the current import
      */
     try {
-      IStrategoTerm newTransformedTerm = STRCommands.assimilate("main-" + FileCommands.fileName(strPath), trans, currentTerm, interp);
+      IStrategoTerm newTransformedTerm = STRCommands.assimilate(strat, trans, currentTerm, interp);
       
       if (newTransformedTerm == null && !mayFail) {
         String msg = "model transformation failed " + FileCommands.dropExtension(strPath.getRelativePath()) + " applied to " + ATermCommands.atermToFile(currentTerm).getAbsolutePath();
