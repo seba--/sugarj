@@ -31,12 +31,29 @@ public sugar Unquote {
 
   rules
     unquote-desugar :
-      SDefNoArgs("main", body) -> 
-      SDefNoArgs("main", Seq(Match(Var(modelvar)), body'))
+      SDefNoArgs(s, body) -> 
+      SDefNoArgs(s, Seq(Match(Var(modelvar)), body'))
     where
       <oncetd(?Unquoted(_))> body;
       modelvar := "this__";
       <topdown(try(unquoted-app(|modelvar)))> body => body'
+
+    unquote-desugar :
+      RuleNoCond(t1, t2) -> 
+      RuleNoCond(As(Var(modelvar), t1), t2')
+    where
+      <oncetd(?Unquoted(_))> t2;
+      modelvar := "this__";
+      <topdown(try(unquoted-app(|modelvar)))> t2 => t2'
+
+    unquote-desugar :
+      Rule(t1, t2, conds) -> 
+      Rule(As(Var(modelvar), t1), t2', conds')
+    where
+      <oncetd(?Unquoted(_))> t2;
+      modelvar := "this__";
+      <topdown(try(unquoted-app(|modelvar)))> t2 => t2';
+      <topdown(try(unquoted-app(|modelvar)))> conds => conds'
 
     unquoted-app(|modelvar) : Unquoted(strat) -> App(strat, Var(modelvar))
 }
