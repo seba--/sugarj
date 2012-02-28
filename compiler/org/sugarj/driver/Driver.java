@@ -1076,7 +1076,7 @@ public class Driver {
     Path trans = null;
     try {
       log.beginTask("Compile transformation", "Compile transformation " + strPath.getRelativePath());
-      trans = STRCommands.compile(strPath, strat, driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
+      trans = STRCommands.compile(strPath, strat, Collections.<Path>emptyList(), strParser, strjContext, strCache, environment);
     } catch (Exception e) {
       String msg = "problems while compiling transformation " + FileCommands.dropExtension(strPath.getRelativePath());
       setErrorMessage(lastSugaredToplevelDecl, msg + ":\n" + e.getMessage());
