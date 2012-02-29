@@ -130,6 +130,7 @@ public class Driver {
   private boolean generateFiles;
   private Path delegateCompilation = null;
   private boolean dependsOnModel = false;
+  private boolean modelUnchanged;
   
   private Set<RelativePath> generatedJavaClasses = new HashSet<RelativePath>();
   
@@ -820,8 +821,10 @@ public class Driver {
         if (model == null && isApplication(toplevelDecl, "TransImportDec"))
           setErrorMessage(toplevelDecl, "model not found " + modulePath);
         else if (model != null) {
+          modelUnchanged = false;
           skipProcessImport |= prepareImport(transformedModelPath, transformedModelSourceFile, model, resolvedTransformationPaths, toplevelDecl, true);
-          modulePath = transformedModelPath;
+          if (!modelUnchanged)
+            modulePath = transformedModelPath;
           
           if (localModelName != null)
             environment.getRenamings().add(0, new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(transformedModelSourceFile)));
@@ -1038,15 +1041,15 @@ public class Driver {
     
     IStrategoTerm modelTerm = ATermCommands.atermFromFile(model.getAbsolutePath());
     if (transformedTerm != null && transformedTerm.equals(modelTerm)) {
+      modelUnchanged = true;
       Path modelDep = ModuleSystemCommands.searchFile(FileCommands.dropExtension(model.getRelativePath()), ".dep", environment);
       if (modelDep != null) {
         Result res = Result.readDependencyFile(modelDep, environment);
         if (res != null) {
-          // reuse the model's result
-          res.setSourceFile(transformedModel);
+          res.resetDelegation();
           ModuleSystemCommands.registerResults(res, environment, model);
           ModuleSystemCommands.registerResults(res, environment, paths);
-          RelativePath dep = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".dep");
+          RelativePath dep = environment.new RelativePathBin(FileCommands.dropExtension(transformedModel.getRelativePath()) + ".dep");
           res.writeDependencyFile(dep);
           return res;
         }

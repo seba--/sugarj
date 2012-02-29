@@ -349,6 +349,11 @@ public class Result {
     return deferredSourceFiles.containsKey(sourceFile) && deferredSourceFiles.get(sourceFile).containsKey(compileFile);
   }
   
+  void resetDelegation() {
+    availableGeneratedFiles.clear();
+    deferredSourceFiles.clear();
+  }
+  
   void registerParseTable(Path tbl) {
     this.parseTableFile = tbl;
   }
