@@ -23,7 +23,38 @@ public statemachine DataATMExcerpt {
   event CardTaken
   event CardRevoked
 
-  state Withdraw { 
+  state Init {
+    InsertCard(clientAcc) => Withdraw
+
+    Cancel => Init
+  }
+
+  state Withdraw {
+    Pin(p) if pinCount < 3 && p == acc.pin
+      => HowMuch
+
+    Pin(p) if pinCount >= 3 || p != acc.pin
+      => Withdraw
+
     Cancel => ReturnCard
+  }
+
+  state HowMuch {
+    Amount(amount) if amount < 2000 && amount < acc.balance
+      => GiveMoney
+
+    Cancel => ReturnCard
+  }
+
+  state GiveMoney {
+    MoneyTaken => ReturnCard
+  }
+
+  state ReturnCard {
+    CardTaken => Init
+  }
+
+  state RevokeCard {
+    CardRevoked => Init
   }
 }

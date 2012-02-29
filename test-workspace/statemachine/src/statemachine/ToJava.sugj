@@ -11,10 +11,13 @@ import statemachine.Language;
 import org.sugarj.languages.Java;
 
 public template ToJava {
-  $$event-as-class : Event(name) -> > public static class $name implements Event { } <
+  $$event-as-class : Event(name) -> > public class $name implements Event {
+                                        public static Event instance = new id $name();
+                                        private $name() { } 
+                                      } <
   $$all-events-as-classes = collect-all(event-as-class)
-  $$transition-premise : Transition(NamedEvent(name),_) -> >e instanceof id $name<
-  $$transition-consequence : Transition(_, state@(Id(_))) -> [ >return State.$state;< ]
+  $$transition-premise : Transition(NamedEvent(name),_) -> >e == $name.instance<
+  $$transition-consequence : Transition(_, state@(Id(_))) -> [ >return $state.instance;< ]
 
   $pkg = collect-one(?PackageDec(_,<id>))
   $classname = collect-one(?ModelDecHead(_,<id>))
@@ -25,26 +28,29 @@ public template ToJava {
 
   public class $classname {
     public static interface Event {}
+
     $*{all-events-as-classes}
     
 
-    public enum State {
-      $for(State(name, transitions) in collect-all(?State(_,_))) {
-         $name {
-           public State step(Event e) {
-             $for(t in !transitions) {
-               if (${<transition-premise> t}) {
-                 $*{<transition-consequence> t}
-               }
-             }
-
-             throw new IllegalArgumentException("Unexpected event " + e);
-           }
-         }
-      };
-
-      public abstract State step(Event e);
+    public static interface State {
+      public State step(Event e);
     }
+
+    $for(State(name, transitions) in collect-all(?State(_,_))) {
+      public class $name implements State {
+        public static State instance = new id $name();
+        private $name() { }
+
+        public State step(Event e) {
+          $for(t in !transitions) {
+            if (${<transition-premise> t}) {
+              $*{<transition-consequence> t}
+            }
+          }
+          throw new IllegalArgumentException("Unexpected event " + e);
+        }
+      }
+    };
 
     private State state = State.${collect-one(?InitialState(<id>))};
 

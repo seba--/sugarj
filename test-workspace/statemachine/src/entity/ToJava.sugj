@@ -11,7 +11,7 @@ import entity.Language;
 import org.sugarj.languages.Java;
 
 public template ToJava {
-  $$sort-to-type : SimpleSort(name) -> TypeName(name)
+  $$sort-to-type : SimpleSort(name) -> ClassOrInterfaceType(TypeName(name), None)
   $$sort-to-type : GenericSort(tyop, tyargs) ->
                    ClassOrInterfaceType(TypeName(tyop),
                                         Some(TypeArgs(<map(sort-to-type)> tyargs)))

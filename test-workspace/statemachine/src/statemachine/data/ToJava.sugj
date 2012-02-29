@@ -3,6 +3,7 @@ package statemachine.data;
 import entity.ToJava;
 import statemachine.ToJava;
 
+import statemachine.data.InternalData;
 import statemachine.data.ParametricEvent;
 import statemachine.data.TransitionCondition;
 
@@ -12,7 +13,8 @@ public transformation ToJava {
       ?orig;
       where(oncetd(?ModelBody(("Statemachine",_))));
       main-statemachine_ToJava;
-      copy-imports(|orig)
+      copy-imports(|orig);
+      add-internal-data-decls(|orig)
 
     // apply entity transformation to linked enity models
     main =
@@ -23,7 +25,20 @@ public transformation ToJava {
     copy-imports(|orig) =
       where(<?SugarCompilationUnit(_,imps,_)> orig);
       SugarCompilationUnit(id, !(<id>,imps);conc, id)
+
+    add-internal-data-decls(|orig) =
+      where(<collect-all(?PropertyData(_,_))> orig => decls;
+            <map(prop-data-java)> decls => jdecls);
+      oncetd(\ClassBody(xs) -> ClassBody(<conc> (<debug>xs, jdecls))\)
   
+    prop-data-java :
+      PropertyData(Property(name, sort), None) ->
+      > private ${<sort-to-type> sort} $name; <
+
+    prop-data-java :
+      PropertyData(Property(name, sort), Some(exp)) ->
+      > private ${<sort-to-type> sort} $name = ${<ee-java(|[])> exp}; <
+
   rules
     event-as-class :
       ParametricEvent(eventname, ss) ->
@@ -56,7 +71,7 @@ public transformation ToJava {
 
     transition-premise :
       Transition(ParametricEvent(name, params),_) ->
-      >e instanceof id $name<
+      >e == $name.instance<
 
     transition-premise :
       Transition(WithCondition(event, exp),to) ->
