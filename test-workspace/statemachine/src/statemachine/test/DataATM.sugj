@@ -9,8 +9,7 @@ import statemachine.data.TransitionEffect;
 
 model import entity.test.Account;
 
-
-public statemachine DataATMExcerpt {
+public statemachine DataATM {
   initial state Init 
 
   data acc :: Account
@@ -25,24 +24,27 @@ public statemachine DataATMExcerpt {
   event CardRevoked
 
   state Init {
-    InsertCard(clientAcc) => Withdraw
+    InsertCard(clientAcc) => Withdraw {
+      acc := clientAcc
+      pinCount := 0 
+    }
 
     Cancel => Init
   }
 
-  state Withdraw {
+  state Withdraw { 
     Pin(p) if pinCount < 3 && p == acc.pin
       => HowMuch
 
     Pin(p) if pinCount >= 3 || p != acc.pin
-      => Withdraw
+      => Withdraw { pinCount := pinCount + 1 }
 
     Cancel => ReturnCard
   }
 
   state HowMuch {
     Amount(amount) if amount < 2000 && amount < acc.balance
-      => GiveMoney
+      => GiveMoney { acc.balance := acc.balance - amount }
 
     Cancel => ReturnCard
   }
@@ -52,10 +54,10 @@ public statemachine DataATMExcerpt {
   }
 
   state ReturnCard {
-    CardTaken => Init
+    CardTaken => Init { acc := null }
   }
 
   state RevokeCard {
-    CardRevoked => Init
+    CardRevoked => Init { acc := null }
   }
 }

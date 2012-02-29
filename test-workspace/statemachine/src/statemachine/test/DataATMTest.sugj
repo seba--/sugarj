@@ -1,14 +1,14 @@
 package statemachine.test;
 
-import statemachine.test.DataATMExcerpt<statemachine.data.ToJava>;
+import statemachine.test.DataATM<statemachine.data.ToJava>;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 
-public class DataATMExcerptTest {
+public class DataATMTest {
   public static void main(String[] args) {
-    DataATMExcerpt machine = new DataATMExcerpt();
-     
+    DataATM machine = new DataATM();
+    
   }
 }
