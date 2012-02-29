@@ -10,9 +10,9 @@ public class Test {
     Customer alice = new Customer("Alice", "Marburg", new HashSet<Account>());
     Customer bob = new Customer("Bob", "Marburg", new HashSet<Account>());
 
-    Account alicesPublicAccount = new Account(17, bob, 100, "0000");
+    Account alicesPublicAccount = new Account(17, alice, 100, "0000");
     alice.getAccounts().add(alicesPublicAccount);
-    Account alicesPrivateAccount = new Account(901, bob, 100000, "0000");
+    Account alicesPrivateAccount = new Account(901, alice, 100000, "0000");
     alice.getAccounts().add(alicesPrivateAccount);
 
     Account bobsExpenses = new Account(35, bob, 300000, "0000");
