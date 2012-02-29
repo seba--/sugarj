@@ -6,6 +6,7 @@ import statemachine.ToJava;
 import statemachine.data.InternalData;
 import statemachine.data.ParametricEvent;
 import statemachine.data.TransitionCondition;
+import statemachine.data.TransitionEffect;
 
 public transformation ToJava {
   rules
@@ -68,9 +69,10 @@ public transformation ToJava {
     event-data-names : ([_|ss],i) -> [name | <event-data-names> (ss, <inc> i)]
       where name := Id(<conc-strings> ("a", <int-to-string> i))
 
+  rules
     transition-premise :
-      Transition(ParametricEvent(name, params),_) ->
-      >e instanceof id $name<
+      Transition(ParametricEvent(name, params),to) ->
+      <transition-premise> Transition(NamedEvent(name),to)
 
     transition-premise :
       Transition(WithCondition(event, exp),to) ->
@@ -78,8 +80,26 @@ public transformation ToJava {
     where <event-bindings> event => env;
           <ee-java(|env)> exp => jexp
 
+  rules
+    transition-consequence :
+      Transition(from, WithEffect(state, effects)) ->
+      <conc> (jeffects, <transition-consequence> Transition(from, state))
+
+    where
+      <event-bindings> from => env;
+      <map(assignment-java(|env))> effects => jeffects
+
+    assignment-java(|env) :
+      Assignment(e1,e2) ->
+      ExprStm(Assign(e1', e2'))
+    where
+      <ee-java(|env)> e1 => e1';
+      <ee-java(|env)> e2 => e2'
+
+  rules
     event-bindings : NamedEvent(_) -> []
     event-bindings : ParametricEvent(name, params) -> <zip> (params, <event-data-names; map(!(name,<id>))> params)
+    event-bindings : WithCondition(event,_) -> <event-bindings> event
 
   rules
     ee-java(|env) : Var(n) -> Field(CastRef(ClassOrInterfaceType(TypeName(event), None), ExprName(Id("e"))), field)
