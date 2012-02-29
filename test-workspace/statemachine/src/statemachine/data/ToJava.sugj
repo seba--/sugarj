@@ -91,10 +91,10 @@ public transformation ToJava {
 
     assignment-java(|env) :
       Assignment(e1,e2) ->
-      ExprStm(Assign(e1', e2'))
+      ExprStm(ass)
     where
-      <ee-java(|env)> e1 => e1';
-      <ee-java(|env)> e2 => e2'
+      <ee-java(|env)> e2 => e2';
+      <ee-java-assign(|env,e2')> e1 => ass
 
   rules
     event-bindings : NamedEvent(_) -> []
@@ -133,8 +133,8 @@ public transformation ToJava {
 
     ee-java(|env) = Mul(ee-java(|env),ee-java(|env))
     ee-java(|env) = Div(ee-java(|env),ee-java(|env))
-    ee-java(|env) = Plus(ee-java(|env),ee-java(|env))
-    ee-java(|env) = Minus(ee-java(|env),ee-java(|env))
+    ee-java(|env) : Add(e1,e2) -> Plus(<ee-java(|env)> e1, <ee-java(|env)> e2)
+    ee-java(|env) : Sub(e1,e2) -> Minus(<ee-java(|env)> e1, <ee-java(|env)> e2)
     ee-java(|env) : Mod(e1,e2) -> Remain(<ee-java(|env)> e1, <ee-java(|env)> e2)
 
     ee-java(|env) : Int(i) -> Lit(Deci(i)) 
@@ -143,4 +143,12 @@ public transformation ToJava {
     ee-java(|env) : String(s) -> Lit(s) 
 
     is-name = ?ExprName(_) + ?ExprName(_,_) + ?AmbName(_) + ?AmbName(_,_) + ?MethodName(_) + ?MethodName(_,_)
+
+  rules
+    ee-java-assign(|env,v) : Var(n) -> Assign(<ee-java(|env)> Var(n), v)
+    ee-java-assign(|env,v) : FieldAccess(e, n) -> Invoke(Method(j, None, setter-name), [v])
+      where <ee-java(|env)> e => j;
+            <?Id(<id>); firstUpper> n => upperName;
+            !Id(<concat-strings> ["set", upperName]) => setter-name
+
 } 
