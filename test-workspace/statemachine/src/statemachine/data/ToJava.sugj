@@ -56,13 +56,13 @@ public transformation ToJava {
 
     transition-premise :
       Transition(ParametricEvent(name, params),_) ->
-      >e == Event.$name<
+      >e instanceof id $name<
 
     transition-premise :
       Transition(WithCondition(event, exp),to) ->
-      And(<transition-premise> Transition(event,to), exp)
+      LazyAnd(<transition-premise> Transition(event,to), jexp)
     where <event-bindings> event => env;
-          <ee-java(|env)> exp
+          <ee-java(|env)> exp => jexp
 
     event-bindings : NamedEvent(_) -> []
     event-bindings : ParametricEvent(name, params) -> <zip> (params, <event-data-names> params)

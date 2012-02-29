@@ -13,8 +13,8 @@ import org.sugarj.languages.Java;
 public template ToJava {
   $$event-as-class : Event(name) -> > public static class $name implements Event { } <
   $$all-events-as-classes = collect-all(event-as-class)
-  $$transition-premise : Transition(NamedEvent(name),_) -> >e == Event.$name<
-  $$transition-consequence : Transition(_, state) -> [ >return State.$state;< ]
+  $$transition-premise : Transition(NamedEvent(name),_) -> >e instanceof id $name<
+  $$transition-consequence : Transition(_, state@(Id(_))) -> [ >return State.$state;< ]
 
   $pkg = collect-one(?PackageDec(_,<id>))
   $classname = collect-one(?ModelDecHead(_,<id>))
