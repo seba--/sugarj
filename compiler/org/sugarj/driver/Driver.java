@@ -1047,6 +1047,7 @@ public class Driver {
         Result res = Result.readDependencyFile(modelDep, environment);
         if (res != null) {
           res.resetDelegation();
+          res.getFileDependencies(environment);
           ModuleSystemCommands.registerResults(res, environment, model);
           ModuleSystemCommands.registerResults(res, environment, paths);
           RelativePath dep = environment.new RelativePathBin(FileCommands.dropExtension(transformedModel.getRelativePath()) + ".dep");
@@ -1094,7 +1095,9 @@ public class Driver {
     Path trans = null;
     try {
       log.beginTask("Compile transformation", "Compile transformation " + strPath.getRelativePath());
-      trans = STRCommands.compile(strPath, strat, Collections.<Path>emptyList(), strParser, strjContext, strCache, environment);
+      Path depPath = ModuleSystemCommands.searchFile(FileCommands.dropExtension(strPath.getRelativePath()), ".dep", environment);
+      Result dep = Result.readDependencyFile(depPath, environment);
+      trans = STRCommands.compile(strPath, strat, dep.getFileDependencies(environment), strParser, strjContext, strCache, environment);
     } catch (Exception e) {
       String msg = "problems while compiling transformation " + FileCommands.dropExtension(strPath.getRelativePath());
       setErrorMessage(lastSugaredToplevelDecl, msg + ":\n" + e.getMessage());
