@@ -13,9 +13,14 @@ import org.sugarj.languages.Java;
 public template ToJava {
   $$instance-name = Id(!(<id>,"_instance");conc-strings)
   $$ensure-list = is-list <+ ![<id>]
-  $$event-as-class : Event(name) -> > public class $name implements Event {
-                                        private $name() { } 
-                                      } <
+  $$event-as-class : Event(name) -> 
+    > public class $name implements Event {
+        private $name() { } 
+      }
+      public Event ${<Id(!("create_",<id>);conc-strings)> name}() {
+        return new id $name();
+      }
+    <
   $$all-events-as-classes = collect-all(event-as-class; ensure-list); concat
   $$transition-premise : Transition(NamedEvent(name),_) -> >e instanceof id $name<
   $$transition-consequence : Transition(_, state@(Id(_))) -> [ >return id ${<instance-name> state};< ]

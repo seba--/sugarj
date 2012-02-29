@@ -36,8 +36,11 @@ public statemachine DataATM {
     Pin(p) if pinCount < 3 && p == acc.pin
       => HowMuch
 
-    Pin(p) if pinCount >= 3 || p != acc.pin
+    Pin(p) if pinCount < 3 && p != acc.pin
       => Withdraw { pinCount := pinCount + 1 }
+
+    Pin(p) if pinCount >= 3
+      => RevokeCard
 
     Cancel => ReturnCard
   }
