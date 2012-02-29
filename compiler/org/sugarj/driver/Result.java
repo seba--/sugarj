@@ -139,12 +139,6 @@ public class Result {
   }
   
   public Collection<Path> getFileDependencies(Environment env) throws IOException {
-    if (allDependentFiles == null) {
-      allDependentFiles = new HashSet<Path>(generatedFileHashes.keySet());
-      for (Path depFile : dependencies.keySet())
-        allDependentFiles.addAll(readDependencyFile(depFile, env).getFileDependencies(env));
-    }
-    
     return allDependentFiles;
   }
   
@@ -426,7 +420,6 @@ public class Result {
   @SuppressWarnings("unchecked")
   public static Result readDependencyFile(Path dep, Environment env) throws IOException {
     Result result = new Result(true, null);
-    result.allDependentFiles = null;
     ObjectInputStream ois = null;
     
     try {

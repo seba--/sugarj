@@ -10,6 +10,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -315,5 +316,17 @@ public class ModuleSystemCommands {
       return p;
     
     return null;
+  } 
+  
+  public static void registerResults(Result res, Environment env, RelativePath... ps) throws IOException {
+    for (RelativePath p : ps) {
+      Path dep = searchFile(FileCommands.dropExtension(p.getRelativePath()), ".dep", env);
+      if (dep != null)
+        res.addDependency(dep, env);
+    }
+  }
+  
+  public static void registerResults(Result res, Environment env, Collection<? extends RelativePath> ps) throws IOException {
+    registerResults(res, env, ps.toArray(new RelativePath[ps.size()]));
   }
 }

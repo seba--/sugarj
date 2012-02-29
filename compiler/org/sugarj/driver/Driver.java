@@ -722,6 +722,7 @@ public class Driver {
     fullExtName = fullExtName.replace("$", "__");
     modelName = FileCommands.fileName(new AbsolutePath(fullExtName));
 
+    log.log("The name of the model is '" + modelName + "'.");
     checkToplevelDeclarationName(modelName.replace("__", "$"), "model", toplevelDecl);
     
     generateModel(modelName, toplevelDecl);
@@ -911,12 +912,10 @@ public class Driver {
                * Ensure recompilation of this module after a change to the transformation or model.
                * Usually these dependencies are indirect via the transformed model.
                */
-              driverResult.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(model.getRelativePath()), ".dep", environment), environment);
+              ModuleSystemCommands.registerResults(driverResult, environment, model);
               if (transformationPaths != null)
-                for (RelativePath p : transformationPaths)
-                  driverResult.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(p.getRelativePath()), ".dep", environment), environment);
-              for (RelativePath p : environment.getTransformationPaths())
-                driverResult.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(p.getRelativePath()), ".dep", environment), environment);
+                ModuleSystemCommands.registerResults(driverResult, environment, transformationPaths);
+              ModuleSystemCommands.registerResults(driverResult, environment, environment.getTransformationPaths());
               
               res = null;
               setErrorMessage(toplevelDecl, "compilation of imported module " + modulePath + " failed");
@@ -1032,22 +1031,38 @@ public class Driver {
   private Result compileTransformedModel(IStrategoTerm transformedTerm, RelativeSourceLocationPath transformedModel, RelativePath model, List<RelativePath> transformationPaths) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     List<RelativePath> envTransformationPaths = environment.getTransformationPaths(); 
     List<Renaming> envRenamings = new LinkedList<Renaming>(environment.getRenamings());
+    List<RelativePath> paths = new LinkedList<RelativePath>();
+    if (transformationPaths != null)
+      paths.addAll(transformationPaths);
+    paths.addAll(envTransformationPaths);
+    
+    IStrategoTerm modelTerm = ATermCommands.atermFromFile(model.getAbsolutePath());
+    if (transformedTerm != null && transformedTerm.equals(modelTerm)) {
+      Path modelDep = ModuleSystemCommands.searchFile(FileCommands.dropExtension(model.getRelativePath()), ".dep", environment);
+      if (modelDep != null) {
+        Result res = Result.readDependencyFile(modelDep, environment);
+        if (res != null) {
+          // reuse the model's result
+          res.setSourceFile(transformedModel);
+          ModuleSystemCommands.registerResults(res, environment, model);
+          ModuleSystemCommands.registerResults(res, environment, paths);
+          RelativePath dep = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".dep");
+          res.writeDependencyFile(dep);
+          return res;
+        }
+      }
+    }
+    
     try {
       log.log("Need to compile the imported model first; processing it now.");
 
       environment.getRenamings().add(0, new Renaming(model, transformedModel));
-      
-      List<RelativePath> paths = new LinkedList<RelativePath>();
-      if (transformationPaths != null)
-        paths.addAll(transformationPaths);
-      paths.addAll(envTransformationPaths);
       environment.setTransformationPaths(paths);
       
       Result res = compile(transformedTerm, transformedModel, monitor);
       
-      res.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(model.getRelativePath()), ".dep", environment), environment);
-      for (RelativePath p : paths)
-        res.addDependency(ModuleSystemCommands.searchFile(FileCommands.dropExtension(p.getRelativePath()), ".dep", environment), environment);
+      ModuleSystemCommands.registerResults(res, environment, model);
+      ModuleSystemCommands.registerResults(res, environment, paths);
       res.rewriteDependencyFile();
 
       return res;
