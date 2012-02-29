@@ -221,7 +221,6 @@ public class Result {
   }
   
   public boolean isUpToDate(Path inputFile, Environment env) throws IOException {
-    Log.log.logErr("Result.isUpToDate " + inputFile);
     return isUpToDate(FileCommands.fileHash(inputFile), env);
   }
 
