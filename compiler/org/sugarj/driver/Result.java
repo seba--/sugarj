@@ -221,6 +221,7 @@ public class Result {
   }
   
   public boolean isUpToDate(Path inputFile, Environment env) throws IOException {
+    Log.log.logErr("Result.isUpToDate " + inputFile);
     return isUpToDate(FileCommands.fileHash(inputFile), env);
   }
 
@@ -253,11 +254,24 @@ public class Result {
     if (!isUpToDateShallow(inputHash, env))
       return false;
 
-    for (Entry<Path, Integer> entry : dependencies.entrySet()) {
-      Result r = Result.readDependencyFile(entry.getKey(), env);
-      if (r == null || !r.isUpToDate(r.getSourceFile(), env))
+    Set<Path> checked = new HashSet<Path>();
+    Set<Path> dependends = new HashSet<Path>(dependencies.keySet());
+    
+    while (!dependends.isEmpty()) {
+      Path path = dependends.iterator().next();
+      dependends.remove(path);
+      
+      if (checked.contains(path))
+        continue;
+      
+      Result r = Result.readDependencyFile(path, env);
+      if (r == null || !r.isUpToDateShallow(r.getSourceFile(), env))
         return false;
+      
+      dependends.addAll(r.dependencies.keySet());
+      checked.add(path);
     }
+
     return true;
   }
   
