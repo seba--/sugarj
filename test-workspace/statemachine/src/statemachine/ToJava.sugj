@@ -11,13 +11,14 @@ import statemachine.Language;
 import org.sugarj.languages.Java;
 
 public template ToJava {
-  $$event-as-class : Event(name) -> > public class $name implements Event {
-                                        public static Event instance = new id $name();
+  $$instance-name = Id(!(<id>,"_instance");conc-strings)
+  $$event-as-class : Event(name) -> > public final static Event ${<instance-name> name} = new id $name();
+                                      public class $name implements Event {
                                         private $name() { } 
                                       } <
-  $$all-events-as-classes = collect-all(event-as-class)
+  $$all-events-as-classes = collect-all(event-as-class; is-list <+ ![<id>]); concat
   $$transition-premise : Transition(NamedEvent(name),_) -> >e instanceof id $name<
-  $$transition-consequence : Transition(_, state@(Id(_))) -> [ >return $state.instance;< ]
+  $$transition-consequence : Transition(_, state@(Id(_))) -> [ >return id ${<instance-name> state};< ]
 
   $pkg = collect-one(?PackageDec(_,<id>))
   $classname = collect-one(?ModelDecHead(_,<id>))
@@ -37,8 +38,8 @@ public template ToJava {
     }
 
     $for(State(name, transitions) in collect-all(?State(_,_))) {
+      public final static State ${<instance-name> name} = new id $name();
       public class $name implements State {
-        public final static State instance = new id $name();
         private $name() { }
 
         public State step(Event e) {
@@ -52,7 +53,7 @@ public template ToJava {
       }
     };
 
-    private State state = ${collect-one(?InitialState(<id>))}.instance;
+    private State state = id ${collect-one(?InitialState(<id>)); instance-name};
 
     public State step(Event e) {
       state = state.step(e);

@@ -42,7 +42,8 @@ public transformation ToJava {
   rules
     event-as-class :
       ParametricEvent(eventname, ss) ->
-      > public static class $eventname implements Event {
+      > public final static Event ${<instance-name> eventname} = new id $eventname();
+        public static class $eventname implements Event {
           $names = <event-data-names> ss
           // sort-to-type reused from entity.ToJava
           $types = <map(sort-to-type)> ss
