@@ -9,15 +9,18 @@ public sugar Java {
     JavaVariableType -> ToplevelDeclaration
 
     VariableClass -> JavaVariableType
-    AnnoOrSugarMod* "variable" "class" JavaId JavaClassBody -> VariableClass {cons("VariableClassDec")}
+    VariableClassDecHead JavaClassBody -> VariableClass {cons("VariableClassDec")}
+    AnnoOrSugarMod* "variable" "class" JavaId JavaTypeParams? JavaSuper? JavaInterfaces? -> VariableClassDecHead {cons("VariableClassDecHead")}
     
     VariableInterface -> JavaVariableType
     VariableInterfaceDecHead "{" JavaInterfaceMemberDec* "}" -> VariableInterface {cons("VariableInterfaceDec")}
     AnnoOrSugarMod* "variable" "interface" JavaId JavaTypeParams? JavaExtendsInterfaces? -> VariableInterfaceDecHead  {cons("VariableInterfaceDecHead")}
 
-  //conditional elements
+  //conditional elements  
+   "#" "feature" "(" FeatureExpr ")" JavaImportDec -> JavaImportDec {cons("OptionalNode")}
    "#" "feature" "(" FeatureExpr ")" JavaClassBodyDec -> JavaClassBodyDec {cons("OptionalNode")}
    "#" "feature" "(" FeatureExpr ")" JavaFormalParam -> JavaFormalParam {cons("OptionalNode")}
+   "#" "feature" "(" FeatureExpr ")" JavaInterfaceType -> JavaInterfaceType {cons("OptionalNode")}
    "#" "feature" "(" FeatureExpr ")" JavaStm -> JavaStm {cons("OptionalNode")}
    "#" "feature" "(" FeatureExpr ")" JavaLocalVarDecStm -> JavaLocalVarDecStm {cons("OptionalNode")}
    "#" "feature" "(" FeatureExpr ")" JavaInterfaceMemberDec -> JavaInterfaceMemberDec {cons("OptionalNode")}
@@ -54,8 +57,8 @@ public sugar Java {
 
   rules         
     desugar-variable-type :
-      VariableClassDec(mods, name, body) -> 
-      ModelDec(ModelDecHead(mods, name), ModelBody(("VariableStructure", ClassDec(ClassDecHead(mods, name, None, None, None), body))))
+      VariableClassDec(VariableClassDecHead(mods, name, params, super, interfaces), body) -> 
+      ModelDec(ModelDecHead(mods, name), ModelBody(("VariableStructure", ClassDec(ClassDecHead(mods, name, params, super, interfaces), body))))
       
     desugar-variable-type :
       VariableInterfaceDec(VariableInterfaceDecHead(mods,name,params,extendsifc),body) ->

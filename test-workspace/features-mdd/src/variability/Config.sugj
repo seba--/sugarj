@@ -49,9 +49,10 @@ public sugar Config {
       ModelDec(ModelDecHead(mods, name), ModelBody( ("VariableStructure", structure) ))
       -> structure
       where <not(oncetd(?OptionalNode(_,_)))> structure
+      
 
     eliminate-variability = topdown(try(configure-node)); 
-                            SugarCompilationUnit(id,id,map(try(no-variability)));
+                            SugarCompilationUnit(id,try(filter(not(?VariabilityHole))),map(try(no-variability)));
                             topdown(try(filter(not(?VariabilityHole))))
 
     

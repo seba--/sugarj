@@ -3,6 +3,9 @@ package impl;
 import variability.Java;
 import java.util.LinkedList;
 
+import impl.Vertex;
+
+
 #feature(BFS)
 public variable class GlobalVarsWrapper {
   public static LinkedList<Vertex> queue=new LinkedList<Vertex>();

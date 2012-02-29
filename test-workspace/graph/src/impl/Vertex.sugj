@@ -4,14 +4,18 @@ import variability.Java;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-variable class Vertex /*implements 
-#feature(GNOEDGES)
-EdgeIfc
+import impl.EdgeIfc;
+import impl.EdgeIter;
+import impl.NeighborIfc;
+import impl.Neighbor;
+import impl.GlobalVarsWrapper;
 
-, 
+variable class Vertex implements 
+#feature(GNOEDGES)
+EdgeIfc, 
 #feature(GNOEDGES)
 NeighborIfc
-*/
+
  {
   public String name=null;
   public Vertex assignName(  String name){

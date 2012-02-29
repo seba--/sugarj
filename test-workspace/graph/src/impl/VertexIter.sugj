@@ -2,6 +2,10 @@ package impl;
 
 import java.util.Iterator;
 
+import impl.Graph;
+import impl.Vertex;
+
+
 public class VertexIter {
   private Iterator iter;
   VertexIter(){

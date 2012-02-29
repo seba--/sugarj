@@ -2,6 +2,9 @@ package impl;
 
 import variability.Java;
 
+import impl.Vertex;
+
+
 #feature(SEARCHALG)
 public variable class WorkSpace {
   public void init_vertex(  Vertex v){

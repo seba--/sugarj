@@ -2,8 +2,12 @@ package impl;
 
 import variability.Java;
 
+import impl.WorkSpace;
+import impl.Vertex;
+
+
 #feature(CONNECTED)
-public variable class RegionWorkSpace /*extends WorkSpace*/ {
+public variable class RegionWorkSpace extends WorkSpace {
   int counter;
   public RegionWorkSpace(){
     counter=0;

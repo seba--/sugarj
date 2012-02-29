@@ -13,6 +13,19 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
+import impl.Vertex;
+import impl.VertexIter;
+import impl.Edge;
+import impl.EdgeIfc;
+import impl.EdgeIter;
+import impl.Neighbor;
+import impl.NeighborIfc;
+import impl.NumberWorkSpace;
+import impl.RegionWorkSpace;
+import impl.FinishTimeWorkSpace;
+import impl.CycleWorkSpace;
+import impl.WorkSpaceTranspose;
+
 
 variable class Graph { 
   LinkedList<Vertex> vertices;

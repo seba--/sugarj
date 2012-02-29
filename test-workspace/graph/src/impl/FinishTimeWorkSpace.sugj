@@ -2,8 +2,12 @@ package impl;
 
 import variability.Java;
 
+import impl.WorkSpace;
+import impl.Vertex;
+
+
 #feature(STRONGLYCONNECTED)
-public variable class FinishTimeWorkSpace /*extends WorkSpace*/ {
+public variable class FinishTimeWorkSpace extends WorkSpace {
   int FinishCounter;
   public FinishTimeWorkSpace(){
     FinishCounter=1;

@@ -2,6 +2,12 @@ package impl;
 
 import variability.Java;
 
+import impl.Vertex;
+import impl.Graph;
+import impl.EdgeIfc;
+
+
+
 #feature(BASEIMPL)
 public variable class Main {
   static Vertex V[];
