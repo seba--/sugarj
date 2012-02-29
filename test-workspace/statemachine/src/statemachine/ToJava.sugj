@@ -12,11 +12,11 @@ import org.sugarj.languages.Java;
 
 public template ToJava {
   $$instance-name = Id(!(<id>,"_instance");conc-strings)
-  $$event-as-class : Event(name) -> > public final static Event ${<instance-name> name} = new id $name();
-                                      public class $name implements Event {
+  $$ensure-list = is-list <+ ![<id>]
+  $$event-as-class : Event(name) -> > public class $name implements Event {
                                         private $name() { } 
                                       } <
-  $$all-events-as-classes = collect-all(event-as-class; is-list <+ ![<id>]); concat
+  $$all-events-as-classes = collect-all(event-as-class; ensure-list); concat
   $$transition-premise : Transition(NamedEvent(name),_) -> >e instanceof id $name<
   $$transition-consequence : Transition(_, state@(Id(_))) -> [ >return id ${<instance-name> state};< ]
 
@@ -38,7 +38,7 @@ public template ToJava {
     }
 
     $for(State(name, transitions) in collect-all(?State(_,_))) {
-      public final static State ${<instance-name> name} = new id $name();
+      public final State ${<instance-name> name} = new id $name();
       public class $name implements State {
         private $name() { }
 

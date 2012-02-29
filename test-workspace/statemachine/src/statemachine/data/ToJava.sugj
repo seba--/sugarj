@@ -42,8 +42,7 @@ public transformation ToJava {
   rules
     event-as-class :
       ParametricEvent(eventname, ss) ->
-      > public final static Event ${<instance-name> eventname} = new id $eventname();
-        public static class $eventname implements Event {
+      > public class $eventname implements Event {
           $names = <event-data-names> ss
           // sort-to-type reused from entity.ToJava
           $types = <map(sort-to-type)> ss
@@ -52,8 +51,8 @@ public transformation ToJava {
           $for((name, type) in !names_types) {
             public $type $name;
           }
-
-          public static Event create($for((name, type) in !names_types) {
+        }
+        public Event ${<Id(!("create_",<id>);conc-strings)> eventname}($for((name, type) in !names_types) {
                                        $type $name
                                      }) {
             id $eventname e = new id $eventname();
@@ -62,7 +61,6 @@ public transformation ToJava {
             }
             return e;
           }
-        }
       <
 
     event-data-names = not(?(_,_)); !(<id>,0); event-data-names

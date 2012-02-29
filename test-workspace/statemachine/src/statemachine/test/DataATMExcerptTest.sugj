@@ -11,4 +11,4 @@ public class DataATMExcerptTest {
     DataATMExcerpt machine = new DataATMExcerpt();
      
   }
-} 
+}
