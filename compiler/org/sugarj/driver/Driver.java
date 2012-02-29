@@ -1186,6 +1186,8 @@ public class Driver {
       
       String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
       
+      log.log("The name of the Java declaration is '" + decName + "'.");
+      
       generateModel(decName, toplevelDecl);
       if (dependsOnModel)
         return;
