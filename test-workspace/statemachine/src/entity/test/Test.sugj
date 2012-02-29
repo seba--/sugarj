@@ -4,7 +4,7 @@ import entity.test.Account<entity.ToJava>;
 import entity.test.Customer<entity.ToJava>;
 
 import java.util.HashSet;
-
+ 
 public class Test {
   public static void main(String[] args) {
     Customer alice = new Customer("Alice", "Marburg", new HashSet<Account>());

@@ -9,6 +9,7 @@ import statemachine.data.TransitionEffect;
 
 model import entity.test.Account;
 
+
 public statemachine DataATMExcerpt {
   initial state Init 
 

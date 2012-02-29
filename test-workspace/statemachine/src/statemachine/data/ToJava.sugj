@@ -29,7 +29,7 @@ public transformation ToJava {
     add-internal-data-decls(|orig) =
       where(<collect-all(?PropertyData(_,_))> orig => decls;
             <map(prop-data-java)> decls => jdecls);
-      oncetd(\ClassBody(xs) -> ClassBody(<conc> (<debug>xs, jdecls))\)
+      oncetd(\ClassBody(xs) -> ClassBody(<conc> (xs, jdecls))\)
   
     prop-data-java :
       PropertyData(Property(name, sort), None) ->
@@ -71,7 +71,7 @@ public transformation ToJava {
 
     transition-premise :
       Transition(ParametricEvent(name, params),_) ->
-      >e == $name.instance<
+      >e instanceof id $name<
 
     transition-premise :
       Transition(WithCondition(event, exp),to) ->
@@ -80,17 +80,17 @@ public transformation ToJava {
           <ee-java(|env)> exp => jexp
 
     event-bindings : NamedEvent(_) -> []
-    event-bindings : ParametricEvent(name, params) -> <zip> (params, <event-data-names> params)
+    event-bindings : ParametricEvent(name, params) -> <zip> (params, <event-data-names; map(!(name,<id>))> params)
 
   rules
-    ee-java(|env) : Var(n) -> ExprName(ExprName(Id("e")), field)
-      where <lookup> (n, env) => field
+    ee-java(|env) : Var(n) -> Field(CastRef(ClassOrInterfaceType(TypeName(event), None), ExprName(Id("e"))), field)
+      where <lookup> (n, env) => (event,field)
     ee-java(|env) : Var(n) -> ExprName(n)
 
-    ee-java(|env) : FieldAccess(e, n) -> ExprName(j, n)
-      where <ee-java(|env); is-name> e => j
-    ee-java(|env) : FieldAccess(e, n) -> Field(j, n)
-      where <ee-java(|env)> e => j
+    ee-java(|env) : FieldAccess(e, n) -> Invoke(Method(j, None, getter-name), [])
+      where <ee-java(|env)> e => j;
+            <?Id(<id>); firstUpper> n => upperName;
+            !Id(<concat-strings> ["get", upperName]) => getter-name
     ee-java(|env) : Call(e, n, args) -> Invoke(Method(MethodName(j, n)), <map(ee-java(|env))> args) 
       where <ee-java(|env); is-name> e => j
     ee-java(|env) : Call(e, n, args) -> Invoke(Method(j, None, n), <map(ee-java(|env))> args) 

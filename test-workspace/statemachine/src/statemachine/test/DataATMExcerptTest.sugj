@@ -9,6 +9,6 @@ import java.io.IOException;
 public class DataATMExcerptTest {
   public static void main(String[] args) {
     DataATMExcerpt machine = new DataATMExcerpt();
-    
+     
   }
 } 
