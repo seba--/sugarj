@@ -2,8 +2,12 @@ package impl;
 
 import variability.Java;
 
+import impl.WorkSpace;
+import impl.Vertex;
+
+
 #feature(CYCLE)
-public variable class CycleWorkSpace /*extends WorkSpace*/ {
+public variable class CycleWorkSpace extends WorkSpace {
   public boolean AnyCycles;
   public int counter;
   public static final int WHITE=0;

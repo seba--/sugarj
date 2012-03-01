@@ -2,11 +2,16 @@ package impl;
 
 import variability.Java;
 
-public variable class Neighbor /*implements 
+import impl.Vertex;
+import impl.Edge;
+import impl.EdgeIfc;
+
+
+public variable class Neighbor implements 
 #feature(GNONLYNEIGHBORS) 
 EdgeIfc
 
-, NeighborIfc*/ {
+, NeighborIfc {
 #feature(GNONLYNEIGHBORS)
   public Vertex neighbor;
 

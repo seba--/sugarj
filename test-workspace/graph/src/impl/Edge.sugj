@@ -2,8 +2,12 @@ package impl;
 
 import variability.Java;
 
+import impl.EdgeIfc;
+import impl.Vertex;
+
+
 #feature(SEARCHBASE)
-public variable class Edge /*implements EdgeIfc*/ {
+public variable class Edge implements EdgeIfc {
   private Vertex start;
   private Vertex end;
   public Edge(  Vertex the_start,  Vertex the_end,

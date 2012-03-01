@@ -2,8 +2,13 @@ package impl;
 
 import variability.Java;
 
+import impl.Vertex;
+import impl.WorkSpace;
+
+
+
 #feature(STRONGLYCONNECTED)
-public variable class WorkSpaceTranspose /*extends WorkSpace*/ {
+public variable class WorkSpaceTranspose extends WorkSpace {
   int SCCCounter;
   public WorkSpaceTranspose(){
     SCCCounter=0;
@@ -16,4 +21,4 @@ public variable class WorkSpaceTranspose /*extends WorkSpace*/ {
   public void nextRegionAction(  Vertex v){
     SCCCounter++;
   }
-}
+} 

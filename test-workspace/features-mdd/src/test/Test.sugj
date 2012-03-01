@@ -1,12 +1,13 @@
 package test;
 
 import variability.Java;
+#feature(A)
 import test.AnotherTest;
 
 import test.FeatureModel;
  
 #feature(C) 
-public variable class Test {
+public variable class Test extends Object {
   
   void foo(int x,
   #feature(B) int y) {

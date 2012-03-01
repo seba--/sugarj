@@ -2,6 +2,10 @@ package impl;
 
 import variability.Java;
 
+import impl.EdgeIfc;
+import impl.Vertex;
+
+
 public variable interface EdgeIfc {
   public Vertex getStart();
   public Vertex getEnd();
