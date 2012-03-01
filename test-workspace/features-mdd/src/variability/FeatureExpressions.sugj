@@ -3,16 +3,15 @@ package variability;
 public sugar FeatureExpressions {
 
   context-free syntax
-   JavaId -> FeatureName {cons("FeatureName")}
-   FeatureName->FeatureExpr
+   JavaId -> FeatureName
+   FeatureName->FeatureExpr {cons("FeatureName")}
    FeatureExpr "&&" FeatureExpr -> FeatureExpr {left, cons("FeatureExprAnd")}
    FeatureExpr "||" FeatureExpr -> FeatureExpr {left, cons("FeatureExprOr")}
-   "(" FeatureExpr ")" -> FeatureExpr
+   "(" FeatureExpr ")" -> FeatureExpr {bracket}
    "!" FeatureExpr -> FeatureExpr {cons("FeatureExprNot")} 
 
  context-free priorities
-   {"(" FeatureExpr ")" -> FeatureExpr } >
-   {FeatureExpr "&&" FeatureExpr -> FeatureExpr }>
-   {FeatureExpr "||" FeatureExpr -> FeatureExpr }>
-   {"!" FeatureExpr -> FeatureExpr }
+   "!" FeatureExpr -> FeatureExpr > 
+   FeatureExpr "&&" FeatureExpr -> FeatureExpr >
+   FeatureExpr "||" FeatureExpr -> FeatureExpr
 }

@@ -12,8 +12,9 @@ public sugar Model {
    AnnoOrSugarMod* "featuremodel" JavaId FeatureModelBody -> ToplevelDeclaration{cons("FMDecl")}
    "{" FeatureDeclaration* "}" -> FeatureModelBody {cons("FMBody")}
    "feature" FeatureName FeatureDependencies? ";" -> FeatureDeclaration {cons("FeatureDecl")}
-   "implies" FeatureName -> FeatureDependencies
-
+   "requires" {FeatureLiteral ","}* -> FeatureDependencies
+   FeatureName -> FeatureLiteral {cons("PositiveFeatureLiteral")}
+   "not" FeatureName -> FeatureLiteral {cons("NegativeFeatureLiteral")}
 	
  desugarings
    featuremodel
@@ -22,29 +23,34 @@ public sugar Model {
    featuremodel : 
      FMDecl(mods, Id(n), FMBody(decls))
      -> 
-     [SugarDec(SugarDecHead(mods, Id(n)), SugarBody([sugar])),
+     [SugarDec(SugarDecHead(mods, Id(n)), SugarBody([transformation-elem(rulesblock) | <map(!transformation-elem(<id>))> rulesblocks])),
       EditorServicesDec(EditorServicesDecHead(mods, Id(n)), EditorServicesBody(services))]
      where 
-       <featuredecl2sugar(|n)> decls => pre-sugar;
-       !transformation-elem(pre-sugar) => sugar;
+       <featuredecl2sugar(|n)> decls => rulesblock;
+       <filter(feature-requirements2rules)> decls => rulesblocks;
 
        <map(featuredecl2service)> decls => services
 
-     featuredecl2sugar(|n) :
-       decls
-       ->
-       |[ rules featuremodel : string~n -> term~names ]|
-       where
-         <get-decl-names; map(!NoAnnoList(Str(<id>))); !NoAnnoList(List(<id>))> decls => names
-    
-    featuredecl2service :
+  featuredecl2sugar(|n) :
+    decls
+    ->
+    |[ rules featuremodel-names : string~n -> term~names ]|
+    where
+      <get-decl-names; map(!NoAnnoList(Str(<id>))); !NoAnnoList(List(<id>))> decls => names
+  featuremodel-names = fail
+
+  feature-requirements2rules :
+    FeatureDecl(FeatureName(Id(n)), Some(lits))
+    ->
+    |[ rules feature-requirements : string~n -> term~(<trm-explode> lits) ]|
+  feature-requirements = fail
+
+  featuredecl2service :
      FeatureDecl(FeatureName(Id(n)), _)
      ->
      |[  completions
            completion template : FeatureName = string~n
      ]|
     
-    featuremodel = fail
-
     get-decl-names = map(?FeatureDecl(FeatureName(Id(<id>)), _))
 }

@@ -1,6 +1,7 @@
 package variability;
 
 import variability.FeatureExpressions;
+import variability.Model;
 import org.sugarj.languages.Java;
 
 public sugar Config { 
@@ -18,12 +19,11 @@ public sugar Config {
  rules
     featureconfig2trans :
     ConfigDecl(mods, Id(n), Id(fm), configs)
-    -> TransDec(TransDecHead(mods, Id(n)), TransBody(concRulez))
+    -> TransDec(TransDecHead(mods, Id(n)), TransBody(rulez))
     where 
-    <map(featureconfig2rules)> configs => rulez;
-    <conc> ([
-              Rules([ SDefNoArgs("main", CallNoArgs(SVar("eliminate-variability"))) ])
-            ] , rulez) => concRulez
+    <map(featureconfig2rules)> configs => rulez1;
+    <map(feature-requirements2rules(|fm))> configs => rulez2;
+    <conc> ([Rules([ SDefNoArgs("main", CallNoArgs(SVar("eliminate-variability"))) ])] , rulez1, rulez2) => rulez
     
    featureconfig2rules :
        FeatureActivation(fnames)
@@ -41,8 +41,23 @@ public sugar Config {
     FeatureName(Id(n))
     -> SDefNoArgs("feature-disabled", Match(NoAnnoList(Str(n)))) 
   
-   featureconfig2trans = fail
-   
+   feature-requirements2rules(|fm) =
+     (?FeatureActivation(<id>) <+ ![]);
+     !Rules(<mapconcat(feature-requirement2rules <+ ![])>)
+
+   feature-requirement2rules :
+     FeatureName(Id(n)) ->
+     rulez
+   where <feature-requirements> n => required;
+         <map(feature-literal2rule)> required => rulez
+
+   feature-literal2rule :
+     PositiveFeatureLiteral(FeatureName(Id(name))) ->
+     SDefNoArgs("feature-enabled", Match(NoAnnoList(Str(name))))
+
+   feature-literal2rule :
+     NegativeFeatureLiteral(FeatureName(Id(name))) ->
+     SDefNoArgs("feature-disabled", Match(NoAnnoList(Str(name))))
 
   rules 
     no-variability :
@@ -74,6 +89,7 @@ public sugar Config {
      VariableNode(e, s1, s2) -> s2
       where <is-condition-disabled> e
 
+  rules
     is-condition-enabled :
       e@FeatureName(Id(n)) -> e 
       where <feature-enabled> n;
@@ -96,6 +112,7 @@ public sugar Config {
       o@FeatureExprOr(e1, e2) -> o 
       where <is-condition-enabled> e2
       
+  rules
     is-condition-disabled :
       e@FeatureName(Id(n)) -> e 
       where <feature-disabled> n;

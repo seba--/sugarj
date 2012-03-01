@@ -4,5 +4,7 @@ import variability.Model;
 
 featuremodel FeatureModel {
   feature A;
-  feature B implies A;
+  feature B requires A;
+  feature C requires D;
+  feature D;
 } 
