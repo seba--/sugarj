@@ -139,7 +139,17 @@ public sugar Config {
     
     feature-disabled = fail     
 
-     
+
+  rules
+    constraint-error =
+      ?ConfigDecl(_,_,Id(fm),<id>);
+      where(<featuremodel-names> fm => names);
+      collect-all(constraint-feature-configuration(|names))
+
+    constraint-feature-configuration(|names) :
+      fname@FeatureName(Id(n)) -> (fname, <conc-strings> ("Undeclared feature name ", n, "."))
+    where <not(elem)> (n,names)
+
      signature
       constructors 
        VariabilityHole : VariabilityHole
