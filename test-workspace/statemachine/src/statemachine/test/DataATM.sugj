@@ -26,7 +26,7 @@ public statemachine DataATM {
   state Init {
     InsertCard(clientAcc) => Withdraw {
       acc := clientAcc
-      pinCount := 0 
+      pinCount := 0
     }
 
     Cancel => Init
@@ -36,10 +36,10 @@ public statemachine DataATM {
     Pin(p) if pinCount < 3 && p == acc.pin
       => HowMuch
 
-    Pin(p) if pinCount < 3 && p != acc.pin
+    Pin(p) if pinCount < 2 && p != acc.pin
       => Withdraw { pinCount := pinCount + 1 }
 
-    Pin(p) if pinCount >= 3
+    Pin(p) if pinCount >= 2 && p != acc.pin
       => RevokeCard
 
     Cancel => ReturnCard
