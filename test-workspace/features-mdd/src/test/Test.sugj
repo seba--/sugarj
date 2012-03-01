@@ -1,8 +1,8 @@
 package test;
 
 import variability.Java;
-#feature(A)
-import test.AnotherTest;
+//#feature(A)
+model import test.AnotherTest;
 
 import test.FeatureModel;
  
