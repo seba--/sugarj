@@ -4,10 +4,11 @@ import concretesyntax.Stratego;
 import concretesyntax.EditorServices;
 import org.sugarj.languages.Java;
 
+import variability.FeatureExpressions;
+
 public sugar Model {
 
  context-free syntax
-   JavaId -> FeatureName {cons("FeatureName")}
    //feature model
    AnnoOrSugarMod* "featuremodel" JavaId FeatureModelBody -> ToplevelDeclaration{cons("FMDecl")}
    "{" FeatureDeclaration* "}" -> FeatureModelBody {cons("FMBody")}

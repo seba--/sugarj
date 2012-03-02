@@ -1048,6 +1048,7 @@ public class Driver {
         if (res != null) {
           res.resetDelegation();
           res.getFileDependencies(environment);
+          res.setSourceFile(transformedModel);
           ModuleSystemCommands.registerResults(res, environment, model);
           ModuleSystemCommands.registerResults(res, environment, paths);
           RelativePath dep = environment.new RelativePathBin(FileCommands.dropExtension(transformedModel.getRelativePath()) + ".dep");
