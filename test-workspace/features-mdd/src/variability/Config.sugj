@@ -19,45 +19,35 @@ public sugar Config {
  rules
     featureconfig2trans :
     ConfigDecl(mods, Id(n), Id(fm), configs)
-    -> TransDec(TransDecHead(mods, Id(n)), TransBody(rulez))
+    -> TransDec(TransDecHead(mods, Id(n)), TransBody([Rules([main-rule | rulez])]))
     where 
-    <map(featureconfig2rules)> configs => rulez1;
-    <map(feature-requirements2rules(|fm))> configs => rulez2;
-    <conc> ([Rules([ SDefNoArgs("main", CallNoArgs(SVar("eliminate-variability"))) ])] , rulez1, rulez2) => rulez
+      <compute-feature-config> configs => (enabled, disabled);
+      <(map(feature-enabled2rule), map(feature-disabled2rule)); conc> (enabled, disabled) => rulez;
+      main-rule := SDefNoArgs("main", CallNoArgs(SVar("eliminate-variability")))
     
-   featureconfig2rules :
-       FeatureActivation(fnames)
-       -> Rules(<map(featurename2rule-enabled)> fnames)
-       
-   featureconfig2rules :
-       FeatureDeactivation(fnames)
-       -> Rules(<map(featurename2rule-disabled)> fnames)
-       
-   featurename2rule-enabled :
-    FeatureName(Id(n))
-    -> SDefNoArgs("feature-enabled", Match(NoAnnoList(Str(n)))) 
-       
-   featurename2rule-disabled :
-    FeatureName(Id(n))
-    -> SDefNoArgs("feature-disabled", Match(NoAnnoList(Str(n)))) 
-  
-   feature-requirements2rules(|fm) =
-     (?FeatureActivation(<id>) <+ ![]);
-     !Rules(<mapconcat(feature-requirement2rules <+ ![])>)
+   feature-enabled2rule = !SDefNoArgs("feature-enabled", Match(NoAnnoList(Str(<id>))))
+   feature-disabled2rule = !SDefNoArgs("feature-disabled", Match(NoAnnoList(Str(<id>))))
 
-   feature-requirement2rules :
-     FeatureName(Id(n)) ->
-     rulez
-   where <feature-requirements> n => required;
-         <map(feature-literal2rule)> required => rulez
+  rules
+    compute-feature-config = ?configs;
+      <filter(?FeatureActivation(<collect-all(?FeatureName(Id(<id>)))>)); concat> configs => enabled;
+      <filter(?FeatureDeactivation(<collect-all(?FeatureName(Id(<id>)))>)); concat> configs => disabled;
+      <feature-config-closure(|[])> (enabled, disabled)
 
-   feature-literal2rule :
-     PositiveFeatureLiteral(FeatureName(Id(name))) ->
-     SDefNoArgs("feature-enabled", Match(NoAnnoList(Str(name))))
-
-   feature-literal2rule :
-     NegativeFeatureLiteral(FeatureName(Id(name))) ->
-     SDefNoArgs("feature-disabled", Match(NoAnnoList(Str(name))))
+    feature-config-closure(|done) : ([],dis) -> ([],dis)
+    feature-config-closure(|done) :
+      ([en|ens],dis) ->
+      <feature-config-closure(|done)> (ens,dis)
+      where <elem> (en,done)
+    feature-config-closure(|done) :
+      ([en|ens],dis) ->
+      ([en|<conc> (new-ens, ens')], <conc> (new-dis, dis'))
+      where
+        <not(elem)> (en,done);
+        <feature-config-closure(|[en|done])> (ens,dis) => (ens',dis');
+        <feature-requirements <+ ![]> en => required;
+        <filter(?PositiveFeatureLiteral(FeatureName(Id(<id>))))> required => new-ens;
+        <filter(?NegativeFeatureLiteral(FeatureName(Id(<id>))))> required => new-dis      
 
   rules 
     no-variability :
@@ -144,14 +134,31 @@ public sugar Config {
     constraint-error =
       ?ConfigDecl(_,_,Id(fm),<id>);
       where(<featuremodel-names> fm => names);
-      collect-all(constraint-feature-configuration(|names))
+      where(collect-all(constraint-feature-configuration(|names)) => undeclared);
+      where(conflicting-features => conflicts);
+      <conc> (undeclared, conflicts)
+      
 
     constraint-feature-configuration(|names) :
       fname@FeatureName(Id(n)) -> (fname, <conc-strings> ("Undeclared feature name ", n, "."))
     where <not(elem)> (n,names)
 
-     signature
-      constructors 
+    conflicting-features =
+      compute-feature-config;
+      isect;
+      map(!(<id>, <conc-strings> ("Configuration conflict for feature ",<id>, ".")))
+
+    constraint-note =
+      ?decl@ConfigDecl(_,_,Id(fm),<id>);
+      compute-feature-config;
+      !(decl, ["Enabled features: ", <Fst; intersperse(|",")>, ". Disabled features: ", <Snd; intersperse(|",")>, "."])
+
+    intersperse(|s) : [] -> []
+    intersperse(|s) : [x] -> [x]
+    intersperse(|s) : [x|y] -> [x,s| <intersperse(|s)> y]
+
+  signature
+    constructors 
        VariabilityHole : VariabilityHole
        OptionalNode : FeatureExpr * Expr -> Expr
        VariableNode : FeatureExpr * Expr * Expr -> Expr

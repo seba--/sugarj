@@ -7,4 +7,6 @@ featuremodel FeatureModel {
   feature B requires A;
   feature C requires D;
   feature D;
+  feature E requires not F;
+  feature F;
 } 
