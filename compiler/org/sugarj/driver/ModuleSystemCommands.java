@@ -309,6 +309,13 @@ public class ModuleSystemCommands {
     return new RelativeSourceLocationPath(new SourceLocation(environment.bin, environment), transformedModelPath + ".aterm");
   }
   
+  public static RelativePath transformedModelPath(RelativePath modelPath, RelativePath transformationPath) {
+    String extension = FileCommands.getExtension(modelPath);
+    String rest = FileCommands.dropExtension(modelPath.getRelativePath());
+    String newrest = rest + "$" + FileCommands.dropExtension(transformationPath.getRelativePath().replace('/', '_'));
+    return new RelativePath(modelPath.getBasePath(), newrest + (extension == null ? "" : ("." + extension)));
+  }
+  
   public static RelativeSourceLocationPath locateTransformedModelSourceFile(String modulePath, List<RelativePath> transformationPaths, Environment environment) {
     RelativeSourceLocationPath p = getTransformedModelSourceFilePath(modulePath, transformationPaths, environment);
     
