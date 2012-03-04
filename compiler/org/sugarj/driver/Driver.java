@@ -1033,7 +1033,7 @@ public class Driver {
       
       if (transformationPaths != null)
         for (RelativePath strPath : transformationPaths)
-          transformedResult = executeTransformation(strPath, transformedResult.a, transformedResult.b, true);
+          transformedResult = executeTransformation(strPath, transformedResult.a, transformedResult.b, false);
 
       for (RelativePath strPath : environment.getTransformationPaths())
         transformedResult = executeTransformation(strPath, transformedResult.a, transformedResult.b, true);
@@ -1080,7 +1080,7 @@ public class Driver {
   }
 
 
-  private Pair<IStrategoTerm, RelativePath> executeTransformation(RelativePath strPath, IStrategoTerm currentTerm, RelativePath currentPath, boolean mayFail) throws IOException {
+  private Pair<IStrategoTerm, RelativePath> executeTransformation(RelativePath strPath, IStrategoTerm currentTerm, RelativePath currentPath, boolean transitiveTrans) throws IOException {
 //    /*
 //     * create a temporary stratego file that connects already available imports
 //     * with the currently processed transformation
@@ -1113,26 +1113,25 @@ public class Driver {
      * applies each transformation's "main-<transformation name>" rule on the AST of
      * the current import
      */
+    RelativePath transformedPath = ModuleSystemCommands.transformedModelPath(currentPath, strPath);
     try {
-      IStrategoTerm newTransformedTerm = STRCommands.assimilate(strat, trans, currentTerm, interp);
+      IStrategoTerm transformedTerm = STRCommands.assimilate(strat, trans, currentTerm, interp);
       
-      if (newTransformedTerm == null && !mayFail) {
-        String msg = "model transformation failed " + FileCommands.dropExtension(strPath.getRelativePath()) + " applied to " + ATermCommands.atermToFile(currentTerm).getAbsolutePath();
-        setErrorMessage(lastSugaredToplevelDecl, msg);
-        throw new RuntimeException(msg);
-      }
+//      if (newTransformedTerm == null &&) {
+//        String msg = "model transformation failed " + FileCommands.dropExtension(strPath.getRelativePath()) + " applied to " + ATermCommands.atermToFile(currentTerm).getAbsolutePath();
+//        setErrorMessage(lastSugaredToplevelDecl, msg);
+//        throw new RuntimeException(msg);
+//      }
 
-      if (newTransformedTerm == null && mayFail)
-        return Pair.create(currentTerm, currentPath);
+      if (transformedTerm == null)
+        return Pair.create(currentTerm, transitiveTrans ? currentPath : transformedPath);
       
-      return Pair.create(newTransformedTerm, ModuleSystemCommands.transformedModelPath(currentPath, strPath));
-      
+      return Pair.create(transformedTerm, transformedPath);
     } catch (Exception e) {
-      if (mayFail) 
-        return Pair.create(currentTerm, currentPath);
-      String msg = "model transformation failed " + FileCommands.dropExtension(strPath.getRelativePath()) + " applied to " + ATermCommands.atermToFile(currentTerm).getAbsolutePath();
-      setErrorMessage(lastSugaredToplevelDecl, msg + ":\n" + e.getMessage());
-      throw new RuntimeException(msg, e);
+      return Pair.create(currentTerm, transitiveTrans ? currentPath : transformedPath);
+//      StringtransformedPathransformation failed " + FileCommands.dropExtension(strPath.getRelativePath()) + " applied to " + ATermCommands.atermToFile(currentTerm).getAbsolutePath();
+//      setErrorMessage(lastSugaredToplevelDecl, msg + ":\n" + e.getMessage());
+//      throw new RuntimeException(msg, e);
     }
   }
 
