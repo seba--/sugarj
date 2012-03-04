@@ -824,15 +824,17 @@ public class Driver {
         if (model == null && isApplication(toplevelDecl, "TransImportDec"))
           setErrorMessage(toplevelDecl, "model not found " + modulePath);
         else if (model != null) {
-          modulePath = ModuleSystemCommands.getModulePath(prepareImport(transformedModelPath, transformedModelSourceFile, model, resolvedTransformationPaths, toplevelDecl, true));
-          
-          if (localModelName != null)
-            environment.getRenamings().add(0, new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(transformedModelSourceFile)));
-          else if (model != null)
-            environment.getRenamings().add(0, new Renaming(model, transformedModelSourceFile));
+          RelativePath actualModulePath = prepareImport(transformedModelPath, transformedModelSourceFile, model, resolvedTransformationPaths, toplevelDecl, true);
+          modulePath = ModuleSystemCommands.getModulePath(actualModulePath);
           
           if (modulePath == null)
             return;
+
+          if (localModelName != null)
+            environment.getRenamings().add(0, new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(actualModulePath)));
+          else if (model != null)
+            environment.getRenamings().add(0, new Renaming(model, actualModulePath));
+          
         }
       }
       
