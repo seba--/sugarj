@@ -17,11 +17,6 @@ public transformation ToJava {
       copy-imports(|orig);
       add-internal-data-decls(|orig)
 
-    // apply entity transformation to linked enity models
-    main =
-      where(oncetd(?ModelBody(("Entity",_,_))));
-      main-entity_ToJava
-
   rules
     copy-imports(|orig) =
       where(<?SugarCompilationUnit(_,imps,_)> orig);
