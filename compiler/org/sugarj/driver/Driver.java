@@ -799,7 +799,7 @@ public class Driver {
       RelativeSourceLocationPath importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
       
       Pair<RelativePath, Boolean> preparedImport = prepareImport(modulePath, importSourceFile, null, null, toplevelDecl, false);
-      modulePath = ModuleSystemCommands.getModulePath(preparedImport.a);
+      modulePath = preparedImport.a != null ? ModuleSystemCommands.getModulePath(preparedImport.a) : modulePath;
       boolean skipImport = preparedImport.b;
 
       if (skipImport)
@@ -828,7 +828,7 @@ public class Driver {
           setErrorMessage(toplevelDecl, "model not found " + modulePath);
         else if (model != null) {
           preparedImport = prepareImport(transformedModelPath, transformedModelSourceFile, model, resolvedTransformationPaths, toplevelDecl, true);
-          modulePath = ModuleSystemCommands.getModulePath(preparedImport.a);
+          modulePath = preparedImport.a != null ? ModuleSystemCommands.getModulePath(preparedImport.a) : modulePath;
           skipImport = preparedImport.b;
           
           if (localModelName != null)
@@ -885,8 +885,10 @@ public class Driver {
         log.logErr("could not read dependency file " + dep);
       }
       
-      if (res != null && res.getSourceFile() != null && res.getSourceFile().getBasePath().equals(environment.getRoot()))
+      if (res != null && res.getSourceFile() != null) {
         importSourceFile = res.getSourceFile();
+        modulePath = ModuleSystemCommands.getModulePath(importSourceFile);
+      }
     }
     
     if (res != null && !res.isUpToDate(res.getSourceFile(), environment))
@@ -899,11 +901,14 @@ public class Driver {
         setErrorMessage(toplevelDecl, "module outdated, compile first: " + modulePath);
       }
       else {
+        dep = environment.new RelativePathBin(modulePath + ".dep");
+        
         IStrategoTerm importTransformedTerm = null;
         if (transformModel) {
           Pair<IStrategoTerm, RelativePath> transformedResult = transformModel(model, transformationPaths);
           importTransformedTerm = transformedResult.a;
           importSourceFile = new RelativeSourceLocationPath(transformedResult.b, environment);
+          modulePath = ModuleSystemCommands.getModulePath(importSourceFile);
         }
 
         if (currentlyProcessing.contains(importSourceFile)) {
@@ -913,14 +918,17 @@ public class Driver {
           delegateCompilation = importSourceFile;
         }
         else {
-          
-          
           log.log("Need to compile the imported module first; processing it now.");
 
           try {
             storeCaches(environment);
-            if (transformModel)
+            if (transformModel) {
               res = compileTransformedModel(importTransformedTerm, importSourceFile, model, transformationPaths);
+              
+              // Ensure dependency file is written for full transformation path.
+              if (res != null)
+                res.writeDependencyFile(dep);
+            }
             else
               res = compile(importSourceFile, monitor);
           } catch (Exception e) {
@@ -958,9 +966,6 @@ public class Driver {
       }
     }
     
-    if (dep == null)
-      dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
-
     if (dep != null && !skipProcessImport)
       driverResult.addDependency(dep, environment);
 
