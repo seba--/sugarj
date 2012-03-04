@@ -797,9 +797,12 @@ public class Driver {
       
       String modulePath = FileCommands.getRelativeModulePath(ModuleSystemCommands.extractImportedModuleName(toplevelDecl, interp));
       RelativeSourceLocationPath importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
-      modulePath = ModuleSystemCommands.getModulePath(prepareImport(modulePath, importSourceFile, null, null, toplevelDecl, false));
       
-      if (modulePath == null)
+      Pair<RelativePath, Boolean> preparedImport = prepareImport(modulePath, importSourceFile, null, null, toplevelDecl, false);
+      modulePath = ModuleSystemCommands.getModulePath(preparedImport.a);
+      boolean skipImport = preparedImport.b;
+
+      if (skipImport)
         return;
       
       // apply transformation prior to import
@@ -824,17 +827,17 @@ public class Driver {
         if (model == null && isApplication(toplevelDecl, "TransImportDec"))
           setErrorMessage(toplevelDecl, "model not found " + modulePath);
         else if (model != null) {
-          RelativePath actualModulePath = prepareImport(transformedModelPath, transformedModelSourceFile, model, resolvedTransformationPaths, toplevelDecl, true);
-          modulePath = ModuleSystemCommands.getModulePath(actualModulePath);
+          preparedImport = prepareImport(transformedModelPath, transformedModelSourceFile, model, resolvedTransformationPaths, toplevelDecl, true);
+          modulePath = ModuleSystemCommands.getModulePath(preparedImport.a);
+          skipImport = preparedImport.b;
           
-          if (modulePath == null)
-            return;
-
           if (localModelName != null)
-            environment.getRenamings().add(0, new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(actualModulePath)));
+            environment.getRenamings().add(0, new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(preparedImport.a)));
           else if (model != null)
-            environment.getRenamings().add(0, new Renaming(model, actualModulePath));
-          
+            environment.getRenamings().add(0, new Renaming(model, preparedImport.a));
+
+          if (skipImport)
+            return;
         }
       }
       
@@ -861,12 +864,12 @@ public class Driver {
   }
   
   /**
-   * @return a relative path to be used for processing the import.
-   *         Might be null, in which case the processing of this import should be skipped. 
+   * @return a relative path to be used for processing the import and
+   *         a flag indicating whether to skip processing this import. 
    */
-  private RelativePath prepareImport(String modulePath, RelativeSourceLocationPath importSourceFile, RelativePath model, List<RelativePath> transformationPaths, IStrategoTerm toplevelDecl, boolean transformModel) throws IOException {
+  private Pair<RelativePath, Boolean> prepareImport(String modulePath, RelativeSourceLocationPath importSourceFile, RelativePath model, List<RelativePath> transformationPaths, IStrategoTerm toplevelDecl, boolean transformModel) throws IOException {
     if (modulePath.startsWith("org/sugarj"))
-      return importSourceFile;
+      return Pair.<RelativePath, Boolean>create(importSourceFile, false);
     
     boolean skipProcessImport = false;
     
@@ -971,7 +974,7 @@ public class Driver {
       skipProcessImport = true;
     }
     
-    return skipProcessImport ? null : importSourceFile;
+    return Pair.<RelativePath, Boolean>create(importSourceFile, skipProcessImport);
   }
   
   private boolean processImport(String modulePath) throws IOException {
