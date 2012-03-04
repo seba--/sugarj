@@ -1,5 +1,7 @@
 package org.sugarj.driver.path;
 
+import org.sugarj.driver.Environment;
+
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
@@ -18,6 +20,11 @@ public class RelativeSourceLocationPath extends RelativePath {
     if (!loc.getPath().equals(p.getBasePath()))
       throw new IllegalArgumentException("Given path is not part of the given source location");
     this.sourceLocation = loc;
+  }
+  
+  public RelativeSourceLocationPath(RelativePath p, Environment environment) {
+    super(p.getBasePath(), p.getRelativePath());
+    this.sourceLocation = new SourceLocation(p.getBasePath(), environment);
   }
   
   public SourceLocation getSourceLocation() {

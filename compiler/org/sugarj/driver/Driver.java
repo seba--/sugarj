@@ -131,7 +131,6 @@ public class Driver {
   private boolean generateFiles;
   private Path delegateCompilation = null;
   private boolean dependsOnModel = false;
-  private String transformedModulePath;
   
   private Set<RelativePath> generatedJavaClasses = new HashSet<RelativePath>();
   
@@ -798,7 +797,10 @@ public class Driver {
       
       String modulePath = FileCommands.getRelativeModulePath(ModuleSystemCommands.extractImportedModuleName(toplevelDecl, interp));
       RelativeSourceLocationPath importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
-      boolean skipProcessImport = prepareImport(modulePath, importSourceFile, null, null, toplevelDecl, false);
+      modulePath = ModuleSystemCommands.getModulePath(prepareImport(modulePath, importSourceFile, null, null, toplevelDecl, false));
+      
+      if (modulePath == null)
+        return;
       
       // apply transformation prior to import
       boolean modelImport = isApplication(toplevelDecl, "ModelImportDec") || isApplication(toplevelDecl, "ModelTransImportDec");
@@ -822,22 +824,20 @@ public class Driver {
         if (model == null && isApplication(toplevelDecl, "TransImportDec"))
           setErrorMessage(toplevelDecl, "model not found " + modulePath);
         else if (model != null) {
-          transformedModulePath = null;
-          skipProcessImport |= prepareImport(transformedModelPath, transformedModelSourceFile, model, resolvedTransformationPaths, toplevelDecl, true);
-          if (transformedModulePath != null)
-            modulePath = transformedModulePath;
+          modulePath = ModuleSystemCommands.getModulePath(prepareImport(transformedModelPath, transformedModelSourceFile, model, resolvedTransformationPaths, toplevelDecl, true));
           
           if (localModelName != null)
             environment.getRenamings().add(0, new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(transformedModelSourceFile)));
           else if (model != null)
             environment.getRenamings().add(0, new Renaming(model, transformedModelSourceFile));
+          
+          if (modulePath == null)
+            return;
         }
       }
       
       boolean success;
-      if (skipProcessImport)
-        success = true;
-      else if (modelImport) {
+      if (modelImport) {
         success = processModelImport(modulePath);
         boolean codeImportSuccess = false;
         if (transitivelyTransformedImport)
@@ -858,9 +858,13 @@ public class Driver {
     }
   }
   
-  private boolean prepareImport(String modulePath, RelativeSourceLocationPath importSourceFile, RelativePath model, List<RelativePath> transformationPaths, IStrategoTerm toplevelDecl, boolean transformModel) throws IOException {
+  /**
+   * @return a relative path to be used for processing the import.
+   *         Might be null, in which case the processing of this import should be skipped. 
+   */
+  private RelativePath prepareImport(String modulePath, RelativeSourceLocationPath importSourceFile, RelativePath model, List<RelativePath> transformationPaths, IStrategoTerm toplevelDecl, boolean transformModel) throws IOException {
     if (modulePath.startsWith("org/sugarj"))
-      return false;
+      return importSourceFile;
     
     boolean skipProcessImport = false;
     
@@ -890,61 +894,62 @@ public class Driver {
         setErrorMessage(toplevelDecl, "module outdated, compile first: " + modulePath);
       }
       else {
-          if (currentlyProcessing.contains(importSourceFile)) {
-            // assume source file does not provide syntactic sugar
-            javaSource.addImport(modulePath.replace('/', '.'));
-            skipProcessImport = true;
-            delegateCompilation = importSourceFile;
-          }
-          else {
-            
-            
-            log.log("Need to compile the imported module first; processing it now.");
+        IStrategoTerm importTransformedTerm = null;
+        if (transformModel) {
+          Pair<IStrategoTerm, RelativePath> transformedResult = transformModel(model, transformationPaths);
+          importTransformedTerm = transformedResult.a;
+          importSourceFile = new RelativeSourceLocationPath(transformedResult.b, environment);
+        }
 
-            try {
-              if (transformModel) {
-                Pair<IStrategoTerm, RelativePath> transformedResult = transformModel(model, transformationPaths);
-                transformedModulePath = FileCommands.dropExtension(transformedResult.b.getRelativePath());
+        if (currentlyProcessing.contains(importSourceFile)) {
+          // assume source file does not provide syntactic sugar
+          javaSource.addImport(modulePath.replace('/', '.'));
+          skipProcessImport = true;
+          delegateCompilation = importSourceFile;
+        }
+        else {
+          
+          
+          log.log("Need to compile the imported module first; processing it now.");
 
-                storeCaches(environment);
-                res = compileTransformedModel(transformedResult.a, transformedResult.b, model, transformationPaths);
-              }
-              else {
-                storeCaches(environment);
-                res = compile(importSourceFile, monitor);
-              }
-            } catch (Exception e) {
-              /*
-               * Ensure recompilation of this module after a change to the transformation or model.
-               * Usually these dependencies are indirect via the transformed model.
-               */
-              ModuleSystemCommands.registerResults(driverResult, environment, model);
-              if (transformationPaths != null)
-                ModuleSystemCommands.registerResults(driverResult, environment, transformationPaths);
-              ModuleSystemCommands.registerResults(driverResult, environment, environment.getTransformationPaths());
-              
-              res = null;
-              setErrorMessage(toplevelDecl, "compilation of imported module " + modulePath + " failed");
-              // no rethrow of exception, so that compilation of this file continues as far as possible
-            } finally {
-              initializeCaches(environment, true);
-            }
+          try {
+            storeCaches(environment);
+            if (transformModel)
+              res = compileTransformedModel(importTransformedTerm, importSourceFile, model, transformationPaths);
+            else
+              res = compile(importSourceFile, monitor);
+          } catch (Exception e) {
+            /*
+             * Ensure recompilation of this module after a change to the transformation or model.
+             * Usually these dependencies are indirect via the transformed model.
+             */
+            ModuleSystemCommands.registerResults(driverResult, environment, model);
+            if (transformationPaths != null)
+              ModuleSystemCommands.registerResults(driverResult, environment, transformationPaths);
+            ModuleSystemCommands.registerResults(driverResult, environment, environment.getTransformationPaths());
             
-            if (res != null && res.hasFailed()) {
-              StringBuilder errorMsg = new StringBuilder();
-              if (!res.getParseErrors().isEmpty()) {
-                errorMsg.append("  parse errors:\n");
-                for (BadTokenException err : res.getParseErrors())
-                  errorMsg.append("  ").append(err.getMessage()).append(" (").append(err.getLineNumber()).append(",").append(err.getColumnNumber()).append(")\n");
-              }
-              for (String err : res.getCollectedErrors())
-                errorMsg.append("  ").append(err.replace("\n", "\n  ")).append("\n");
-              
-              setErrorMessage(toplevelDecl, "problems while compiling " + modulePath + ":\n" + errorMsg.toString());
-            }
-              
-            log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
+            res = null;
+            setErrorMessage(toplevelDecl, "compilation of imported module " + modulePath + " failed");
+            // no rethrow of exception, so that compilation of this file continues as far as possible
+          } finally {
+            initializeCaches(environment, true);
           }
+          
+          if (res != null && res.hasFailed()) {
+            StringBuilder errorMsg = new StringBuilder();
+            if (!res.getParseErrors().isEmpty()) {
+              errorMsg.append("  parse errors:\n");
+              for (BadTokenException err : res.getParseErrors())
+                errorMsg.append("  ").append(err.getMessage()).append(" (").append(err.getLineNumber()).append(",").append(err.getColumnNumber()).append(")\n");
+            }
+            for (String err : res.getCollectedErrors())
+              errorMsg.append("  ").append(err.replace("\n", "\n  ")).append("\n");
+            
+            setErrorMessage(toplevelDecl, "problems while compiling " + modulePath + ":\n" + errorMsg.toString());
+          }
+            
+          log.log("CONTINUE PROCESSING'" + sourceFile + "'.");
+        }
       }
     }
     
@@ -964,7 +969,7 @@ public class Driver {
       skipProcessImport = true;
     }
     
-    return skipProcessImport;
+    return skipProcessImport ? null : importSourceFile;
   }
   
   private boolean processImport(String modulePath) throws IOException {
@@ -1018,7 +1023,7 @@ public class Driver {
       
       if (transformationPaths != null)
         for (RelativePath strPath : transformationPaths)
-          transformedResult = executeTransformation(strPath, transformedResult.a, transformedResult.b, false);
+          transformedResult = executeTransformation(strPath, transformedResult.a, transformedResult.b, true);
 
       for (RelativePath strPath : environment.getTransformationPaths())
         transformedResult = executeTransformation(strPath, transformedResult.a, transformedResult.b, true);
@@ -1046,7 +1051,9 @@ public class Driver {
     try {
       log.log("Need to compile the imported model first; processing it now.");
 
-      environment.getRenamings().add(0, new Renaming(model, transformedModel));
+      LinkedList<Renaming> renaming = new LinkedList<Renaming>();
+      renaming.add(new Renaming(model, transformedModel));
+      environment.setRenamings(renaming);
       environment.setTransformationPaths(paths);
       
       Result res = compile(transformedTerm, new RelativeSourceLocationPath(new SourceLocation(transformedModel.getBasePath(), environment), transformedModel), monitor);
@@ -1475,7 +1482,7 @@ public class Driver {
     strParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.strategoTbl.getPath()), "StrategoModule");
     editorServicesParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.editorServicesTbl.getPath()), "Module");
 
-    interp = new HybridInterpreter(); //TODO (ATermCommands.factory);
+    interp = new HybridInterpreter(ATermCommands.factory);
     interp.addOperatorRegistry(new SugarJPrimitivesLibrary(this, environment));
     
     sdfContext = tools.init();

@@ -336,4 +336,10 @@ public class ModuleSystemCommands {
   public static void registerResults(Result res, Environment env, Collection<? extends RelativePath> ps) throws IOException {
     registerResults(res, env, ps.toArray(new RelativePath[ps.size()]));
   }
+  
+  public static String getModulePath(RelativePath p) {
+    if (p == null)
+      return null;
+    return FileCommands.dropExtension(p.getRelativePath());
+  }
 }
