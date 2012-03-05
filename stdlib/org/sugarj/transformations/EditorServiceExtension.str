@@ -1,7 +1,9 @@
 module org/sugarj/transformations/EditorServiceExtension
 
 imports org/sugarj/languages/EditorServices 
-        org/sugarj/languages/SugarJ
+
+// todo: Not really language independent:
+// "ChecksDec"
 
 signature
   constructors

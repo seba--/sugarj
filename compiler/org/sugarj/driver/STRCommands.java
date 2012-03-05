@@ -6,6 +6,7 @@ import static org.sugarj.driver.Log.log;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -32,6 +33,7 @@ import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoException;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.strj.main_strj_0_0;
+import org.sugarj.LanguageLib;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.path.Path;
@@ -54,23 +56,27 @@ public class STRCommands {
   /**
    *  Compiles a {@code *.str} file to a single {@code *.java} file. 
    */
-  private static void strj(Path str, Path java, String main, Context strjContext, Collection<Path> paths) throws IOException {
+  private static void strj(Path str, Path java, String main, Context strjContext, Collection<Path> paths, LanguageLib langLib) throws IOException {
     
     /*
      * We can include as many paths as we want here, checking the
      * adequacy of the occurring imports is done elsewhere.
      */
-    
-    
+    // TODO: Make this pretty
     List<String> cmd = new ArrayList<String>(Arrays.asList(new String[] {
         "-i", toWindowsPath(str.getAbsolutePath()),
         "-o", toWindowsPath(java.getAbsolutePath()),
         "-m", main,
-        "-I", StdLib.stdLibDir.getPath(),
         "-p", "sugarj",
         "--library",
         "-O", "0"
     }));
+    
+    cmd.add("-I");
+    cmd.add(StdLib.stdLibDir.getPath());
+    cmd.add("-I");
+    cmd.add(langLib.getLibraryDirectory().getPath());
+
     
     for (Path path : paths)
       if (path.getFile().isDirectory()){
@@ -78,6 +84,12 @@ public class STRCommands {
         cmd.add(path.getAbsolutePath());
       }
 
+    
+    for (String s : cmd) {  // XXX: debug output
+      System.out.println(s);
+    }
+    
+    
     final ByteArrayOutputStream log = new ByteArrayOutputStream();
 
     try {
@@ -116,12 +128,23 @@ public class STRCommands {
   }
   
   
-  public static Path compile(Path str, String main, Collection<Path> dependentFiles, JSGLRI strParser, Context strjContext, ModuleKeyCache<Path> strCache, Environment environment) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  public static Path compile(Path str,
+                              String main,
+                              Collection<Path> dependentFiles,
+                              JSGLRI strParser,
+                              Context strjContext,
+                              ModuleKeyCache<Path> strCache,
+                              Environment environment,
+                              LanguageLib langLib) throws IOException,
+                                                          InvalidParseTableException,
+                                                          TokenExpectedException,
+                                                          BadTokenException,
+                                                          SGLRException {
     ModuleKey key = getModuleKeyForAssimilation(str, main, dependentFiles, strParser);
     Path prog = lookupAssimilationInCache(strCache, key);
     
     if (prog == null) {
-      prog = generateAssimilator(key, str, main, strjContext, environment.getIncludePath());
+      prog = generateAssimilator(key, str, main, strjContext, environment.getIncludePath(), langLib);
       cacheAssimilator(strCache, key, prog, environment);
     }
     return prog;
@@ -131,16 +154,17 @@ public class STRCommands {
                                           Path str,
                                           String main,
                                           Context strjContext,
-                                          Collection<Path> paths) throws IOException {
+                                          Collection<Path> paths,
+                                          LanguageLib langLib) throws IOException {
     boolean success = false;
     log.beginTask("Generating", "Generate the assimilator");
     try {
       Path dir = FileCommands.newTempDir();
       FileCommands.createDir(new RelativePath(dir, "sugarj"));
       String javaFilename = FileCommands.fileName(str).replace("-", "_");
-      Path java = new RelativePath(dir, "sugarj" + sep + javaFilename + ".java");
+      Path java = new RelativePath(dir, "sugarj" + sep + javaFilename + ".java");     // XXX: Java dependency, probably use langLib to get file extension 
       log.log("calling STRJ");
-      strj(str, java, main, strjContext, paths);
+      strj(str, java, main, strjContext, paths, langLib);
       
       if (!JavaCommands.javac(java, dir, paths))
         throw new RuntimeException("java compilation failed");

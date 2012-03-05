@@ -4,30 +4,31 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
+import java.io.Serializable;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import org.eclipse.core.runtime.FileLocator;
 
+public class JavaLib extends LanguageLib implements Serializable {
 
-
-
-public class JavaLib extends LanguageLib {
-
-	private URI libDir = null;
-	private String libTmpDir;
+	private static final long serialVersionUID = 1817193221140795776L;
+	
+	private transient File libDir;
+	private transient File libTmpDir;
 	
 	@Override
-	public List<URI> getGrammars() {
-		List<URI> grammars = new LinkedList<URI>(super.getGrammars());
-		grammars.add(ensureFile("org/sugarj/java/SugarJ.def"));
-		grammars.add(ensureFile("org/sugarj/java/Java-15.def"));
+	public List<File> getGrammars() {
+		List<File> grammars = new LinkedList<File>(super.getGrammars());
+		grammars.add(ensureFile("org/sugarj/languages/SugarJ.def"));
+		grammars.add(ensureFile("org/sugarj/languages/Java-15.def"));
 		return Collections.unmodifiableList(grammars);
 	}
 	
 	@Override
-	public URI getInitGrammar() {
+	public File getInitGrammar() {
 		return ensureFile("org/sugarj/java/init/initGrammar.sdf");
 	}
 
@@ -37,7 +38,7 @@ public class JavaLib extends LanguageLib {
 	}
 
 	@Override
-	public URI getInitGrammarAtomicImports() {
+	public File getInitGrammarAtomicImports() {
 		return ensureFile("org/sugarj/java/init/initGrammar_atomicImports.sdf");
 	}
 
@@ -47,22 +48,22 @@ public class JavaLib extends LanguageLib {
 	}
 
 	@Override
-	public URI getInitGrammarXTBL() {
+	public File getInitGrammarXTBL() {
 		return ensureFile("org/sugarj/java/init/initGrammar.xtbl");
 	}
 
 	@Override
-	public URI getInitTrans() {
-		return ensureFile("org/sugarj/java/init/initTrans.str");
+	public File getInitTrans() {
+		return ensureFile("org/sugarj/java/init/InitTrans.str");
 	}
 	
 	@Override
 	public String getInitTransModule() {
-		return "org/sugarj/java/init/initTrans";
+		return "org/sugarj/java/init/InitTrans";
 	}
 
 	@Override
-	public URI getInitEditor() {
+	public File getInitEditor() {
 		return ensureFile("org/sugarj/java/init/initEditor.serv");
 	}
 
@@ -70,67 +71,61 @@ public class JavaLib extends LanguageLib {
 	public String getInitEditorModule() {
 		return "org/sugarj/java/init/initEditor";
 	}
-
-	/*
-	protected void setupDirectories(String tempDirPrefix) {
-		try {
-			// XXX: possibly modify this to use the implementation's directory?
-			libDir = LanguageLib.class.getProtectionDomain().getCodeSource().getLocation().toURI();
-		} catch (URISyntaxException e1) {
-			e1.printStackTrace();
-		}
-		
-		try {
-										// org.sugarj.stdlib
-			File f = File.createTempFile(tempDirPrefix, "");
-			f.delete();
-			f.mkdir();
-			libTmpDir = f.getPath();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-	}*/
 	
-	public URI ensureFile(String resource) {
+	@Override
+	public File getLibraryDirectory() {
 		if (libDir == null) {	// set up directories first
-			try {
-				/*String dir = URLEncoder.encode(JavaLib.class.getProtectionDomain().getCodeSource().getLocation().toString(), "UTF-8");
-				URL dirURL = new URL(dir);
-				System.out.println("java lib dir: " + dir);		// XXX
-				System.out.println("java lib dir url: " + dirURL);
-				libDir = dirURL.toURI();
-				System.out.println("java lib dir uri" + libDir); */
-				String dir = JavaLib.class.getProtectionDomain().getCodeSource().getLocation().toString();		//
-				dir = dir.replace(" ", "%20");
-				libDir = new URI(dir);
-				System.out.println("java lib dir uri" + libDir);
-
-			} catch (URISyntaxException e) {
-				e.printStackTrace();
-			}
+			String thisClassPath = "org/sugarj/JavaLib.class";
+			URL thisClassURL = JavaLib.class.getClassLoader().getResource(thisClassPath);
 			
+			System.out.println(thisClassURL);
+			
+			if (thisClassURL.getProtocol().equals("bundleresource"))
+			  try {
+			    thisClassURL = FileLocator.resolve(thisClassURL);
+			  } catch (IOException e) {
+			    e.printStackTrace();
+			  }
+			
+			String classPath = thisClassURL.getPath();
+			String binPath = classPath.substring(0, classPath.length() - thisClassPath.length());
+			
+			libDir = new File(binPath);
+		}
+		
+		return libDir;
+	}
+	
+	private File getTmpLibraryDirectory() {
+		if (libTmpDir == null)
 			try {
 				File f = File.createTempFile("org.sugarj.javalib", "");
 				f.delete();
 				f.mkdir();
-				libTmpDir = f.getPath();
+				libTmpDir = f;
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		}
 		
-		File f = new File(libDir.getPath() + File.separator + resource);
+		return libTmpDir;
+	}
+	
+	public File ensureFile(String resource) {
+		File f = new File(getLibraryDirectory().getPath() + File.separator + resource);
+		
+		System.out.println("javalib ensure file: " + f);
+		
 		if (f.exists())
-			return f.toURI();
+			return f;
 
-		f = new File(libTmpDir + "/" + resource);
+		f = new File(getTmpLibraryDirectory().getPath() + "/" + resource);
+		System.out.println("f does not exist, making temp file " + f);
 		f.getParentFile().mkdirs();
 
 		try {
 			InputStream in = LanguageLib.class.getClassLoader().getResourceAsStream(resource);
 			if (in == null)
-				return  new File(libDir.getPath() + File.separator + resource).toURI();
+				return  new File(getLibraryDirectory().getPath() + File.separator + resource);
 
 			FileOutputStream fos = new FileOutputStream(f);
 			byte[] bs = new byte[256];
@@ -142,15 +137,15 @@ public class JavaLib extends LanguageLib {
 			e.printStackTrace();
 		}
 
-		return f.toURI();
+		return f;
 	}
 
 	
 	  public static void main(String args[]) throws URISyntaxException {
 		JavaLib jl = new JavaLib();
 		
-		for (URI uri : jl.getGrammars()) 
-			exists(uri);
+		for (File file : jl.getGrammars()) 
+			exists(file);
 
 
 	    exists(jl.getInitGrammar());
@@ -161,43 +156,13 @@ public class JavaLib extends LanguageLib {
 	    exists(jl.libDir);
 	  }
 	  
-	  private static void exists(URI uri) {
-	    if (new File(uri).exists())
-	      System.out.println(uri.getPath() + " exists.");
+	  private static void exists(File file) {
+	    if (file.exists())
+	      System.out.println(file.getPath() + " exists.");
 	    else
-	      System.err.println(uri.getPath() + " does not exist.");
+	      System.err.println(file.getPath() + " does not exist.");
 	  }
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	/*
-	public JavaLib() {
-		setupDirectories("org.sugarj.javalib");
-		
-		initGrammars.initGrammar = ensureFile("org/sugarj/java/init/initGrammar.sdf");
-		initGrammars.initGrammarModule = "org/sugarj/java/init/initGrammar";
-		initGrammars.initGrammarAtomicImports = ensureFile("org/sugarj/java/init/initGrammar_atomicImports.sdf");
-		initGrammars.initGrammarAtomicImportsModule = "org/sugarj/java/init/initGrammar_atomicImports";
-		initGrammars.initGrammarXTBL = ensureFile("org/sugarj/java/init/initGrammar.xtbl");
-		
-		initEditor = ensureFile("org/sugarj/java/init/initEditor.serv");;
-		initTrans = ensureFile("org/sugarj/java/init/InitTrans.str");
-		
-		languageGrammars.add(ensureFile("org/sugarj/java/SugarJ.def"));				
-		languageGrammars.add(ensureFile("org/sugarj/java/Java-15.def"));
-		languageGrammars.add(ensureFile("org/sugarj/languages/Sdf2.def"));			// language-specific?
-		// tbl?
-		languageGrammars.add(ensureFile("org/sugarj/languages/Stratego.def"));		// ?
-		// tbl?
-		languageGrammars.add(ensureFile("org/sugarj/languages/EditorServices.def"));// ?
-		// tbl?
-		languageGrammars.add(ensureFile("org/sugarj/languages/Plain.def"));			// ?
-	} */
+
+
 
 }

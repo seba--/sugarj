@@ -4,12 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLEncoder;
 
 import org.eclipse.core.runtime.FileLocator;
 
@@ -18,7 +13,7 @@ import org.eclipse.core.runtime.FileLocator;
  */
 public class StdLib {
 
-  public static URI stdLibDir;
+  public static File stdLibDir;
   private static String stdLibTmpDir;
   static {
 
@@ -36,7 +31,7 @@ public class StdLib {
     String binPath = classPath.substring(0, classPath.length() - thisClassPath.length());
     
     try {
-      stdLibDir = new File(binPath).toURI();
+      stdLibDir = new File(binPath);
       
       File f = File.createTempFile("org.sugarj.stdlib", "");
       f.delete();
@@ -47,10 +42,10 @@ public class StdLib {
     }
   }
 
-  public static URI ensureFile(String resource) {
+  public static File ensureFile(String resource) {
     File f = new File(stdLibDir.getPath() + File.separator + resource);
     if (f.exists())
-      return f.toURI();
+      return f;
     
     f = new File(stdLibTmpDir + "/" + resource);
     f.getParentFile().mkdirs();
@@ -58,7 +53,7 @@ public class StdLib {
     try {
       InputStream in = StdLib.class.getClassLoader().getResourceAsStream(resource);
       if (in == null)
-        return  new File(stdLibDir.getPath() + File.separator + resource).toURI();
+        return  new File(stdLibDir.getPath() + File.separator + resource);
       
       FileOutputStream fos = new FileOutputStream(f);
       byte[] bs = new byte[256];
@@ -70,34 +65,20 @@ public class StdLib {
       e.printStackTrace();
     }
     
-    return f.toURI();
+    return f;
   }
   
 
+  public static File sdfDef = ensureFile("org/sugarj/languages/Sdf2.def");
+  public static File sdfTbl = ensureFile("org/sugarj/languages/Sdf2.tbl");
+  public static File strategoDef = ensureFile("org/sugarj/languages/Stratego.def");
+  public static File strategoTbl = ensureFile("org/sugarj/languages/Stratego.tbl");
+  public static File editorServicesDef = ensureFile("org/sugarj/languages/EditorServices.def");
+  public static File editorServicesTbl = ensureFile("org/sugarj/languages/EditorServices.tbl");
+  public static File plainDef = ensureFile("org/sugarj/languages/Plain.def");
   
-//  public static URI sugarjDef = ensureFile("org/sugarj/languages/SugarJ.def");
-//  public static URI javaDef = ensureFile("org/sugarj/languages/Java-15.def");
-  public static URI sdfDef = ensureFile("org/sugarj/languages/Sdf2.def");
-  public static URI sdfTbl = ensureFile("org/sugarj/languages/Sdf2.tbl");
-  public static URI strategoDef = ensureFile("org/sugarj/languages/Stratego.def");
-  public static URI strategoTbl = ensureFile("org/sugarj/languages/Stratego.tbl");
-  public static URI editorServicesDef = ensureFile("org/sugarj/languages/EditorServices.def");
-  public static URI editorServicesTbl = ensureFile("org/sugarj/languages/EditorServices.tbl");
-  public static URI plainDef = ensureFile("org/sugarj/languages/Plain.def");
-  
-//  public static URI initGrammar = ensureFile("org/sugarj/init/initGrammar.sdf");
-//  public static String initGrammarModule = "org/sugarj/init/initGrammar";
-//  public static URI initGrammarAtomicImports = ensureFile("org/sugarj/init/initGrammar_atomicImports.sdf");
-//  public static String initGrammarAtomicImportsModule = "org/sugarj/init/initGrammar_atomicImports";
-//  public static URI initGrammarXTBL = ensureFile("org/sugarj/init/initGrammar.xtbl");
-//  public static URI initTrans = ensureFile("org/sugarj/init/InitTrans.str");
-//  public static String initTransModule = "org/sugarj/init/InitTrans";
-//  public static URI initEditor = ensureFile("org/sugarj/init/initEditor.serv");
-//  public static String initEditorModule = "org/sugarj/init/initEditor";
 
-
-  public static void main(String args[]) throws URISyntaxException {
-//    exists(javaDef);
+  public static void main(String args[]) {
     exists(sdfDef);
     exists(sdfTbl);
     exists(strategoDef);
@@ -105,18 +86,13 @@ public class StdLib {
     exists(editorServicesDef);
     exists(editorServicesTbl);
     exists(plainDef);
-//    exists(initGrammar);
-//    exists(initGrammarAtomicImports);
-//    exists(initGrammarXTBL);
-//    exists(initTrans);
-//    exists(initEditor);
     exists(stdLibDir);
   }
   
-  private static void exists(URI uri) {
-    if (new File(uri).exists())
-      System.out.println(uri.getPath() + " exists.");
+  private static void exists(File file) {
+    if (file.exists())
+      System.out.println(file.getPath() + " exists.");
     else
-      System.err.println(uri.getPath() + " does not exist.");
+      System.err.println(file.getPath() + " does not exist.");
   }
 }

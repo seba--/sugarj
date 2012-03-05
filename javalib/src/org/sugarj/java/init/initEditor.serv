@@ -1,4 +1,4 @@
-module org/sugarj/init/initEditor
+module org/sugarj/java/init/initEditor
 
 colorer Default, token-based highlighting
                                   

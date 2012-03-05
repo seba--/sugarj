@@ -739,7 +739,7 @@ public class Driver{
         "DESUGAR the current toplevel declaration.");
     try {
       FileCommands.deleteTempFiles(currentTransProg);
-      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
+      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment, langLib);
 
       return STRCommands.assimilate(currentTransProg, term, interp);
     } catch (StrategoException e) {
@@ -1187,7 +1187,7 @@ public class Driver{
     
     try {
       FileCommands.deleteTempFiles(currentTransProg);
-      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
+      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment, langLib);
     } catch (StrategoException e) {
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
       log.logErr(msg);
@@ -1198,7 +1198,7 @@ public class Driver{
   }
   
   private void initEditorServices() throws IOException, TokenExpectedException, BadTokenException, SGLRException {
-    IStrategoTerm initEditor = editorServicesParser.parse(new FileInputStream(new File(langLib.getInitEditor())), new File(langLib.getInitEditor()).getPath());
+    IStrategoTerm initEditor = editorServicesParser.parse(new FileInputStream(langLib.getInitEditor()), langLib.getInitEditor().getPath());
 
     IStrategoTerm services = ATermCommands.getApplicationSubterm(initEditor, "Module", 2);
     

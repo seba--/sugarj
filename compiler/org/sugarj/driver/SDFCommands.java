@@ -3,6 +3,7 @@ package org.sugarj.driver;
 import static org.sugarj.driver.FileCommands.toCygwinPath;
 import static org.sugarj.driver.Log.log;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -77,42 +78,31 @@ public class SDFCommands {
      * We can include as many paths as we want here, checking the
      * adequacy of the occurring imports is done elsewhere.
      */
-    // TODO: Replace language-dependent grammars by list
-    /*
-    List<String> cmd = new ArrayList<String>(Arrays.asList(new String[] {
-//      PACK_SDF,
-      "-i", sdf.getAbsolutePath(),
-      "-o", def.getAbsolutePath(),
-      "-Idef", StdLib.sugarjDef.getPath(),
-      "-Idef", StdLib.javaDef.getPath(),
-      "-Idef", StdLib.sdfDef.getPath(),
-      "-Idef", StdLib.strategoDef.getPath(),
-      "-Idef", StdLib.editorServicesDef.getPath(),
-      "-Idef", StdLib.plainDef.getPath(), 
-      "-I", StdLib.stdLibDir.getPath(),
-    }));
-    */
+    // TODO: Make this pretty
     
     List<String> cmd = new ArrayList<String>(Arrays.asList(new String[]{
         "-i", sdf.getAbsolutePath(),
         "-o", def.getAbsolutePath()
     }));
-
-    for (URI grammarUri : langLib.getGrammars()) {
+    
+    for (File grammarFile : langLib.getGrammars()) {
       cmd.add("-Idef");
-      cmd.add(grammarUri.getPath());
+      cmd.add(grammarFile.getPath());
     }
     
     cmd.add("-I");
-    cmd.add(StdLib.stdLibDir.getPath());  // XXX: Replace by langLib?
-
-
-    
+    cmd.add(langLib.getLibraryDirectory().getPath());
+   
     for (Path path : paths) 
       if (path.getFile().isDirectory()){
         cmd.add("-I");
         cmd.add(path.getAbsolutePath());
       }
+    
+    for (String s : cmd.toArray(new String[cmd.size()])) {  // XXX: debug output
+      System.out.println(s);
+    }
+    
     
     try {
       sdfContext.invokeStrategyCLI(main_pack_sdf_0_0.instance, "pack-sdf", cmd.toArray(new String[cmd.size()]));
