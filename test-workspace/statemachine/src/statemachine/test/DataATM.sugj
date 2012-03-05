@@ -33,7 +33,7 @@ public statemachine DataATM {
   }
 
   state Withdraw { 
-    Pin(p) if pinCount < 3 && p == acc.pin
+    Pin(p) if p == acc.pin
       => HowMuch
 
     Pin(p) if pinCount < 2 && p != acc.pin
