@@ -26,10 +26,14 @@ public class ATMTest {
 	    else if ("reset".equals(in))
 	      machine = new ATM();
 	    else {
-          ATM.Event e = ATM_IO.parseEvent(machine, in);
-          if (e == null)
-            throw new IllegalArgumentException("Unknown event " + in);
-	      machine.step(e);
+          try {
+	        ATM.Event e = ATM_IO.parseEvent(machine, in);
+	        if (e == null)
+	          throw new IllegalArgumentException("Unknown event " + in);
+		    machine.step(e);
+          } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage() + "; try again.");
+          }
 	    }
         System.out.println("Current state is " + machine.currentState() + ". Next event?");
 	  }
