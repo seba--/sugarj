@@ -1,0 +1,56 @@
+package statemachine;
+
+import template.Unquote;
+import template.Shorthands;
+import template.InlineShorthands;
+import template.Foreach;
+import template.UnquoteEnum;
+import template.LocalStrategies;
+import template.IdentifierComposition;
+
+import statemachine.Language;
+import org.sugarj.languages.Java;
+
+public template ToJavaIO {
+  $$id-as-string = ?Id(<id>); !Lit(String([Chars(<id>)]))
+  $$pkg-type = ?PackageName(<id>); pkgs-type
+  $$pkgs-type : [y] -> PackageOrTypeName(y)
+  $$pkgs-type : ys -> PackageOrTypeName(<pkgs-type> ys', z) 
+      where <split-init-last> ys => (ys',z)
+
+  $pkg = collect-one(?PackageDec(_,<id>))
+  $classname = collect-one(?ModelDecHead(_,<id>))
+
+  package $pkg;
+
+  import java.util.List;
+  import java.util.LinkedList;
+
+  import ${<pkg-type> pkg}.$classname<statemachine.ToJava> as Machine;
+
+  public class $classname {
+
+    public static List<String> eventNames() {
+      List<String> res = new LinkedList<String>();
+
+      $for(Event(name) in collect-all(?Event(_))) {
+        res.add(${<id-as-string> name});
+      }
+
+      return res;
+    } 
+
+    public static Machine.Event parseEvent(Machine machine, String input) {
+      if (input == null)
+        return null;
+
+      $for(Event(name) in collect-all(?Event(_))) {
+        if(input.equals(${<id-as-string> name}))
+          return machine.create_#$name();
+      }
+
+      return null;
+    } 
+
+  }
+}

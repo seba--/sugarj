@@ -10,6 +10,7 @@ public sugar Unquote {
   context-free syntax
     Unquote -> JavaPackageDec
     Unquote -> JavaPackageName
+    Unquote -> JavaPackageOrTypeName
     Unquote -> JavaImportDec
     Unquote -> JavaType
 

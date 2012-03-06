@@ -1,6 +1,7 @@
 package statemachine.test;
 
 import statemachine.test.ATM<statemachine.ToJava>;
+import statemachine.test.ATM<statemachine.ToJavaIO> as ATM_IO;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -14,22 +15,23 @@ public class ATMTest {
     String in;
     
     System.out.println("Welcome. Possible events are:");
-    for (ATM.Event e : ATM.Event.values())
-      System.out.print(e + ", ");
+    for (String s : ATM_IO.eventNames())
+      System.out.print(s + ", ");
     System.out.println("reset, and exit.");
 
     try {
 	  while ((in = inputReader.readLine()) != null) {
 	    if ("exit".equals(in))
 	      break;
-	    else if ("reset".equals(in)) {
-	      main(args);
-          break;
-        }
+	    else if ("reset".equals(in))
+	      machine = new ATM();
 	    else {
-	      machine.step(ATM.Event.valueOf(in));
-	      System.out.println("Current state is " + machine.currentState() + ". Next event?");
+          ATM.Event e = ATM_IO.parseEvent(machine, in);
+          if (e == null)
+            throw new IllegalArgumentException("Unknown event " + in);
+	      machine.step(e);
 	    }
+        System.out.println("Current state is " + machine.currentState() + ". Next event?");
 	  }
     } catch (IOException e) {
       e.printStackTrace();

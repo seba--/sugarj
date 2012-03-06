@@ -6,24 +6,26 @@ import template.InlineShorthands;
 import template.Foreach;
 import template.UnquoteEnum;
 import template.LocalStrategies;
+import template.IdentifierComposition;
 
 import statemachine.Language;
 import org.sugarj.languages.Java;
 
 public template ToJava {
-  $$instance-name = Id(!(<id>,"_instance");conc-strings)
+  $$id-as-string = ?Id(<id>); !Lit(String([Chars(<id>)]))
   $$ensure-list = is-list <+ ![<id>]
   $$event-as-class : Event(name) -> 
     > public class $name implements Event {
         private $name() { } 
+        public String toString() { return ${<id-as-string> name}; }
       }
-      public Event ${<Id(!("create_",<id>);conc-strings)> name}() {
+      public Event create_#$name() {
         return new id $name();
       }
     <
   $$all-events-as-classes = collect-all(event-as-class; ensure-list); concat
   $$transition-premise : Transition(NamedEvent(name),_) -> >e instanceof id $name<
-  $$transition-consequence : Transition(_, state@(Id(_))) -> [ >return id ${<instance-name> state};< ]
+  $$transition-consequence : Transition(_, state@(Id(_))) -> [ >return $state#_instance;< ]
 
   $pkg = collect-one(?PackageDec(_,<id>))
   $classname = collect-one(?ModelDecHead(_,<id>))
@@ -43,9 +45,10 @@ public template ToJava {
     }
 
     $for(State(name, transitions) in collect-all(?State(_,_))) {
-      public final State ${<instance-name> name} = new id $name();
+      public final State $name#_instance = new id $name();
       public class $name implements State {
         private $name() { }
+        public String toString() { return ${<id-as-string> name}; }
 
         public State step(Event e) {
           $for(t in !transitions) {
@@ -58,7 +61,7 @@ public template ToJava {
       }
     };
 
-    private State state = id ${collect-one(?InitialState(<id>)); instance-name};
+    private State state = ${collect-one(?InitialState(<id>))}#_instance;
 
     public State step(Event e) {
       state = state.step(e);

@@ -9,7 +9,8 @@ public statemachine ATM {
   event Cancel
   event PinOK
   event PinNOK
-  event CardMoneyTaken
+  event MoneyTaken
+  event CardTaken
   event CardRevoked
 
   state Init {
@@ -17,22 +18,25 @@ public statemachine ATM {
     Cancel => Init
   }
   state Withdraw1 {
-    PinOK => GiveCardMoney
+    PinOK => GiveMoney
     PinNOK => Withdraw2
     Cancel => Init
   }
   state Withdraw2 {
-    PinOK => GiveCardMoney
+    PinOK => GiveMoney
     PinNOK => Withdraw3
     Cancel => Init
   }
   state Withdraw3 {
-    PinOK => GiveCardMoney
+    PinOK => GiveMoney
     PinNOK => RevokeCard
     Cancel => Init
   }
-  state GiveCardMoney {
-    CardMoneyTaken => Init
+  state GiveMoney {
+    MoneyTaken => ReturnCard
+  }
+  state ReturnCard {
+    CardTaken => Init
   }
   state RevokeCard {
     CardRevoked => Init
