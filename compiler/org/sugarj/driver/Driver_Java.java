@@ -12,6 +12,7 @@ import java.util.Set;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
+import org.sugarj.driver.Environment.RelativePathBin;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
 import org.sugarj.driver.path.RelativeSourceLocationPath;
@@ -26,11 +27,11 @@ public class Driver_Java {
   
   
   protected void processJavaTypeDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp) throws IOException {
-    IStrategoTerm dec =  isApplication(toplevelDecl, "JavaTypeDec") ? getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0) : toplevelDecl;
+    IStrategoTerm dec =  isApplication(toplevelDecl, "JavaTypeDec") ? getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0) : toplevelDecl;   // XXX: Extract JavaTypeDec stuff
     
     String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
     
-    RelativePath clazz = environment.new RelativePathBin(relPackageNameSep() + decName + ".class");
+    RelativePath clazz = environment.new RelativePathBin(getRelPackageNameSep() + decName + ".class");
     
     generatedJavaClasses.add(clazz);
     javaSource.addBodyDecl(SDFCommands.prettyPrintJava(dec, interp));
@@ -38,7 +39,7 @@ public class Driver_Java {
   
   
   
-  public String relPackageNameSep() {
+  public String getRelPackageNameSep() {
     if (relPackageName == null || relPackageName.isEmpty())
       return "";
     
@@ -100,7 +101,7 @@ public class Driver_Java {
     checkPackageName(toplevelDecl, sourceFile, driverResult);
     
     if (javaOutFile == null)
-      javaOutFile = environment.new RelativePathBin(relPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".java");
+      javaOutFile = environment.new RelativePathBin(getRelPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".java");
 
     // moved here before depOutFile==null check
     javaSource.setPackageDecl(SDFCommands.prettyPrintJava(toplevelDecl, interp));
@@ -112,5 +113,41 @@ public class Driver_Java {
     driverResult.logError(msg);
     ATermCommands.setErrorMessage(toplevelDecl, msg);
   }
+   
+  public String getSourcecodeExtension() {
+    return ".java";
+  }
   
+  public void checkPackage(IStrategoTerm decl, RelativeSourceLocationPath sourceFile, Result driverResult) {
+    if (relPackageName == null)
+      checkPackageName(decl, sourceFile, driverResult);
+  }
+  
+  public void checkSourceOutFile(Environment environment, Result driverResult) {
+    if (javaOutFile == null)
+      setJavaOutFile(environment.new RelativePathBin(getRelPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + getSourcecodeExtension()));
+  }
+  
+  
+  // ----------------
+  public boolean needsTypeDecProcessing(IStrategoTerm decl) {
+    return isApplication(decl, "JavaTypeDec") ||    // XXX remove this branch           (copied from Driver.java--still valid?)
+            isApplication(decl, "ClassDec") ||
+            isApplication(decl, "InterfaceDec") ||
+            isApplication(decl, "EnumDec") ||
+            isApplication(decl, "AnnoDec");
+  }
+  
+  public boolean needsSugarDecProcessing(IStrategoTerm decl) {
+    return isApplication(decl, "SugarDec");
+  }
+  
+  public boolean needsEditorServiceDecProcessing(IStrategoTerm decl) {
+    return isApplication(decl, "EditorServicesDec");
+  }
+  
+  public boolean needsImportDecProcessing(IStrategoTerm decl) {
+    return isApplication(decl, "TypeImportDec") || isApplication(decl, "TypeImportOnDemandDec");
+
+  }
 }

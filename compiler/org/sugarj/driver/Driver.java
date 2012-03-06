@@ -532,7 +532,7 @@ public class Driver{
             break;
           }
         
-        fullExtName = drj.relPackageNameSep() + extName;
+        fullExtName = drj.getRelPackageNameSep() + extName;
 
         log.log("The name of the editor services is '" + extName + "'.");
         log.log("The full name of the editor services is '" + fullExtName + "'.");
@@ -552,7 +552,7 @@ public class Driver{
         // XXX if (currentTransProg != null)
         editorServices = ATermCommands.registerSemanticProvider(editorServices, currentTransProg);
   
-        Path editorServicesFile = environment.new RelativePathBin(drj.relPackageNameSep() + extName + ".serv");
+        Path editorServicesFile = environment.new RelativePathBin(drj.getRelPackageNameSep() + extName + ".serv");
         
         log.log("writing editor services to " + editorServicesFile);
         
@@ -613,7 +613,7 @@ public class Driver{
             break;
           }
         
-        fullExtName = drj.relPackageNameSep() + extName + (extension == null ? "" : ("." + extension));
+        fullExtName = drj.getRelPackageNameSep() + extName + (extension == null ? "" : ("." + extension));
 
         log.log("The name is '" + extName + "'.");
         log.log("The full name is '" + fullExtName + "'.");
@@ -626,7 +626,7 @@ public class Driver{
         String plainContent = Term.asJavaString(ATermCommands.getApplicationSubterm(body, "PlainBody", 0));
         
         String ext = extension == null ? "" : ("." + extension);
-        Path plainFile = environment.new RelativePathBin(drj.relPackageNameSep() + extName + ext);
+        Path plainFile = environment.new RelativePathBin(drj.getRelPackageNameSep() + extName + ext);
         FileCommands.createFile(plainFile);
   
         log.log("writing plain content to " + plainFile);
@@ -645,30 +645,24 @@ public class Driver{
     if (isApplication(toplevelDecl, "PackageDec"))
       processPackageDec(toplevelDecl);
     else {
-      if (drj.getRelPackageName() == null)  // XXX: Move to Driver_Java
-        drj.checkPackageName(toplevelDecl, sourceFile, driverResult);
-      if (drj.getJavaOutFile() == null)
-        drj.setJavaOutFile(environment.new RelativePathBin(drj.relPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".java")); // XXX: Move to Driver_Java
+      drj.checkPackage(toplevelDecl, sourceFile, driverResult);   // XXX: check -> setup ?
+      drj.checkSourceOutFile(environment, driverResult);
       if (depOutFile == null)
-        depOutFile = environment.new RelativePathBin(drj.relPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
+        depOutFile = environment.new RelativePathBin(drj.getRelPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       try {
-        if (isApplication(toplevelDecl, "TypeImportDec") || isApplication(toplevelDecl, "TypeImportOnDemandDec")) {
+        if (drj.needsImportDecProcessing(toplevelDecl)) {
           if (!environment.isAtomicImportParsing())
             processImportDec(toplevelDecl);
           else 
             processImportDecs(toplevelDecl);
         }
-        else if (isApplication(toplevelDecl, "JavaTypeDec") || //XXX remove this branch
-                 isApplication(toplevelDecl, "ClassDec") ||
-                 isApplication(toplevelDecl, "InterfaceDec") ||
-                 isApplication(toplevelDecl, "EnumDec") ||
-                 isApplication(toplevelDecl, "AnnoDec"))
+        else if (drj.needsTypeDecProcessing(toplevelDecl))
           processJavaTypeDec(toplevelDecl);
-        else if (isApplication(toplevelDecl, "SugarDec"))
+        else if (drj.needsSugarDecProcessing(toplevelDecl))
           processSugarDec(toplevelDecl);
-        else if (isApplication(toplevelDecl, "EditorServicesDec")) 
+        else if (drj.needsEditorServiceDecProcessing(toplevelDecl)) 
           processEditorServicesDec(toplevelDecl);
-        else if (isApplication(toplevelDecl, "PlainDec")) 
+        else if (isApplication(toplevelDecl, "PlainDec"))   // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
           processPlainDec(toplevelDecl);
         else if (ATermCommands.isList(toplevelDecl))
           /* 
@@ -767,7 +761,7 @@ public class Driver{
 
       drj.processPackageDec(toplevelDecl, environment, interp, driverResult, packageName, sourceFile);
       if (depOutFile == null)
-        depOutFile = environment.new RelativePathBin(drj.relPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
+        depOutFile = environment.new RelativePathBin(drj.getRelPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       
 //      javaSource.setPackageDecl(SDFCommands.prettyPrintJava(toplevelDecl, interp));
     } finally {
@@ -1030,7 +1024,7 @@ public class Driver{
         
         
         
-        fullExtName = drj.relPackageNameSep() + extName;
+        fullExtName = drj.getRelPackageNameSep() + extName;
 
         log.log("The name of the sugar is '" + extName + "'.");
         log.log("The full name of the sugar is '" + fullExtName + "'.");
@@ -1050,8 +1044,8 @@ public class Driver{
         log.endTask();
       }
       
-      Path sdfExtension = environment.new RelativePathBin(drj.relPackageNameSep() + extName + ".sdf");
-      Path strExtension = environment.new RelativePathBin(drj.relPackageNameSep() + extName + ".str");
+      Path sdfExtension = environment.new RelativePathBin(drj.getRelPackageNameSep() + extName + ".sdf");
+      Path strExtension = environment.new RelativePathBin(drj.getRelPackageNameSep() + extName + ".str");
       
       String sdfImports = " imports " + StringCommands.printListSeparated(availableSDFImports, " ") + "\n";
       String strImports = " imports " + StringCommands.printListSeparated(availableSTRImports, " ") + "\n";
