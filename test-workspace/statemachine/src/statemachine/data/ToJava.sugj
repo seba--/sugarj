@@ -48,7 +48,7 @@ public transformation ToJava {
             public $type $name;
           }
         }
-        public Event ${<Id(!("create_",<id>);conc-strings)> eventname}($for((name, type) in !names_types) {
+        public Event ${<Id(!("event_",<id>);conc-strings)> eventname}($for((name, type) in !names_types) {
                                        $type $name
                                      }) {
             id $eventname e = new id $eventname();

@@ -46,7 +46,7 @@ public template ToJavaIO {
 
       $for(Event(name) in collect-all(?Event(_))) {
         if(input.equals(${<id-as-string> name}))
-          return machine.create_#$name();
+          return machine.event_#$name();
       }
 
       return null;

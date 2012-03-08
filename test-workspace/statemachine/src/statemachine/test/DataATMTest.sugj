@@ -16,20 +16,22 @@ public class DataATMTest {
     
     DataATM atm = new DataATM();
     report(atm.currentState());
-    report(atm.step(atm.create_InsertCard(alicesPublicAccount)));
-    report(atm.step(atm.create_Pin("xxxx")));
-    report(atm.step(atm.create_Amount(1500)));
-    report(atm.step(atm.create_MoneyTaken()));
-    report(atm.step(atm.create_CardTaken()));
+    report(atm.step(atm.event_InsertCard(alicesPublicAccount)));
+    report(atm.step(atm.event_Pin("xxxx")));
+    report(atm.step(atm.event_Amount(1500)));
+    report(atm.step(atm.event_MoneyTaken()));
+    report(atm.step(atm.event_CardTaken()));
+    assert atm.currentState() == atm.state_Init();
 
     printAccountInfo(alice);
     
     report(atm.currentState());
-    report(atm.step(atm.create_InsertCard(alicesPublicAccount)));
-    report(atm.step(atm.create_Pin("yyyy")));
-    report(atm.step(atm.create_Pin("yyyy")));
-    report(atm.step(atm.create_Pin("yyyy")));
-    report(atm.step(atm.create_CardRevoked()));
+    report(atm.step(atm.event_InsertCard(alicesPublicAccount)));
+    report(atm.step(atm.event_Pin("yyyy")));
+    report(atm.step(atm.event_Pin("yyyy")));
+    report(atm.step(atm.event_Pin("yyyy")));
+    report(atm.step(atm.event_CardRevoked()));
+    assert atm.currentState() == atm.state_Init();
   }
 
   private static void printAccountInfo(Customer c) {

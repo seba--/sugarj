@@ -19,7 +19,7 @@ public template ToJava {
         private $name() { } 
         public String toString() { return ${<id-as-string> name}; }
       }
-      public Event create_#$name() {
+      public Event event_#$name() {
         return new id $name();
       }
     <
@@ -45,7 +45,12 @@ public template ToJava {
     }
 
     $for(State(name, transitions) in collect-all(?State(_,_))) {
-      public final State $name#_instance = new id $name();
+      private final State $name#_instance = new id $name();
+
+      public State state_#$name() {
+        return $name#_instance;
+      }
+
       public class $name implements State {
         private $name() { }
         public String toString() { return ${<id-as-string> name}; }
