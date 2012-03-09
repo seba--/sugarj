@@ -18,10 +18,11 @@ public class DataATMTest {
     report(atm.currentState());
     report(atm.step(atm.event_InsertCard(alicesPublicAccount)));
     report(atm.step(atm.event_Pin("xxxx")));
-    report(atm.step(atm.event_Amount(1500)));
+    report(atm.step(atm.event_Amount(2500)));
     report(atm.step(atm.event_MoneyTaken()));
     report(atm.step(atm.event_CardTaken()));
     assert atm.currentState() == atm.state_Init();
+    assert alicesPublicAccount.getBalance() == 500;
 
     printAccountInfo(alice);
     

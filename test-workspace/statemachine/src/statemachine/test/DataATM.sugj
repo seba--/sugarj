@@ -2,10 +2,7 @@ package statemachine.test;
 
 import statemachine.Language;
 
-import statemachine.data.InternalData;
-import statemachine.data.ParametricEvent;
-import statemachine.data.TransitionCondition;
-import statemachine.data.TransitionEffect;
+import statemachine.DataExtension;
 
 model import entity.test.Account;
 
@@ -46,7 +43,7 @@ public statemachine DataATM {
   }
 
   state HowMuch {
-    Amount(amount) if amount < 2000 && amount < acc.balance
+    Amount(amount) if amount < acc.balance
       => GiveMoney { acc.balance := acc.balance - amount }
 
     Cancel => ReturnCard
