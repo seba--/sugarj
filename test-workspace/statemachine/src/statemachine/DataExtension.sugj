@@ -1,0 +1,9 @@
+package statemachine;
+
+import statemachine.data.InternalData;
+import statemachine.data.ParametricEvent;
+import statemachine.data.TransitionCondition;
+import statemachine.data.TransitionEffect;
+
+public sugar DataExtension {
+}
