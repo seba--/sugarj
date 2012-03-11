@@ -11,6 +11,7 @@ import impl.NeighborIfc;
 model import impl.Neighbor;
 model import impl.GlobalVarsWrapper;
 
+
 variable class Vertex implements 
 #feature(GNOEDGES)
 EdgeIfc,

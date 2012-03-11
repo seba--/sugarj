@@ -2,11 +2,13 @@ package impl;
 
 import java.util.Iterator;
 
+import variability.Java;
+
 model import impl.Graph;
 model import impl.Vertex;
 
 
-public class VertexIter {
+public variable class VertexIter {
   private Iterator iter;
   VertexIter(){
   }
