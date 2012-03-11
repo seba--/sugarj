@@ -776,6 +776,7 @@ public class Driver {
       lastSugaredToplevelDecl = pendingImport;
       try {
         processImportDec(pendingImport);
+        stepped();
       } catch (Exception e) {
         handleException(e, pendingImport);
       }
