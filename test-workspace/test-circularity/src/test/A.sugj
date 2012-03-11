@@ -7,6 +7,7 @@ public class A {
 
   public A() {
     b.a = this;
+    b.c.e.a = this;
   } 
 
   public static void main(String[] args) {
@@ -16,5 +17,6 @@ public class A {
     System.out.println(a.b.c);
     System.out.println(a.b.c.d1);
     System.out.println(a.b.c.d1.d2);
+    System.out.println(a.b.c.e);
   }
 }
