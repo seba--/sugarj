@@ -369,7 +369,7 @@ public class Driver {
       stepped();
       
       // COMPILE the generated java file
-      if (compilationDelegates.isEmpty())
+      if (compilationDelegates.isEmpty() && !dependsOnModel)
         compileGeneratedJavaFiles();
       else {
         Path delegate = null;
@@ -378,8 +378,10 @@ public class Driver {
             delegate = p;
             break;
           }
-        assert delegate != null;
-        driverResult.delegateCompilation(delegate, javaOutFile, javaSource, generatedJavaClasses);
+        if (delegate != null)
+          driverResult.delegateCompilation(delegate, javaOutFile, javaSource, generatedJavaClasses);
+        else
+          assert dependsOnModel;
       }
       
        driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
