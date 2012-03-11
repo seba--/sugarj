@@ -283,9 +283,7 @@ public class SugarJParser extends JSGLRI {
     Path strCachePath = environment.new RelativePathCache("strCache");
     ModuleKeyCache<Path> strCache = null;
     try {
-      strCache = Driver.reallocate(
-          (ModuleKeyCache<Path>) new ObjectInputStream(new FileInputStream(strCachePath.getFile())).readObject(),
-          environment);
+      strCache = (ModuleKeyCache<Path>) new ObjectInputStream(new FileInputStream(strCachePath.getFile())).readObject();
     }
     catch (Exception e) {
       strCache = new ModuleKeyCache<Path>();

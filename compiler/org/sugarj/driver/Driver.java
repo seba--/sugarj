@@ -853,8 +853,10 @@ public class Driver {
       else
         success = processImport(modulePath);
       
-      if (!success && !transformedImport && !ATermCommands.hasError(toplevelDecl))
+      if (!success && !transformedImport && !ATermCommands.hasError(toplevelDecl)) {
         setErrorMessage(toplevelDecl, "module not found: " + modulePath);
+        log.logErr("module not found: " + modulePath);
+      }
       
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -1569,9 +1571,7 @@ public class Driver {
     if (sdfCache == null || force)
       try {
         // log.log("load sdf cache from " + sdfCachePath);
-          sdfCache = reallocate(
-              (ModuleKeyCache<Path>) new ObjectInputStream(new FileInputStream(sdfCachePath.getFile())).readObject(),
-              environment);
+          sdfCache = (ModuleKeyCache<Path>) new ObjectInputStream(new FileInputStream(sdfCachePath.getFile())).readObject();
       }
       catch (Exception e) {
         log.logErr("Could not read sdf cache, generating new one.");
@@ -1586,9 +1586,7 @@ public class Driver {
     if (strCache == null || force)
       try {
         // log.log("load str cache from " + strCachePath);
-        strCache = reallocate(
-            (ModuleKeyCache<Path>) new ObjectInputStream(new FileInputStream(strCachePath.getFile())).readObject(),
-            environment);
+        strCache = (ModuleKeyCache<Path>) new ObjectInputStream(new FileInputStream(strCachePath.getFile())).readObject();
       }
       catch (Exception e) {
         log.logErr("Could not read str cache, generating new one.");
