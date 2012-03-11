@@ -893,7 +893,11 @@ public class Driver {
     if (res != null && !res.isUpToDate(res.getSourceFile(), environment))
       res = null;
     
-    if (importSourceFile != null && res == null) {
+    if (sourceFile.equals(importSourceFile)) {
+      setErrorMessage(toplevelDecl, "A library cannot import itself.");
+      return Pair.<RelativePath, Boolean>create(importSourceFile, true);
+    }
+    else if (importSourceFile != null && res == null) {
       if (!generateFiles) {
         // boolean b = res == null || !res.isUpToDate(res.getSourceFile(), environment);
         // System.out.println(b);
