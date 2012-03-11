@@ -900,6 +900,8 @@ public class Driver {
         // System.out.println(b);
         setErrorMessage(toplevelDecl, "module outdated, compile first: " + modulePath);
       }
+      else if (!importSourceFile.getAbsolutePath().startsWith(environment.getRoot().getAbsolutePath()))
+        setErrorMessage(toplevelDecl, "Cannot locate external binary " + modulePath);
       else {
         dep = environment.new RelativePathBin(modulePath + ".dep");
         

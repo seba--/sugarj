@@ -298,6 +298,8 @@ public class FileCommands {
   }
 
   public static boolean exists(Path file) {
+    if (file == null)
+      return false;
     return file.getFile().exists();
   }
   

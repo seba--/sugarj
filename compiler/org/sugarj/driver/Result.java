@@ -102,6 +102,8 @@ public class Result {
   }
   
   void addDependency(Result result, Environment env) throws IOException {
+    assert result.getSourceFile() != null;
+    
     allDependentFiles.addAll(result.getFileDependencies(env));
     
     for (Entry<Path, Map<Path, Set<RelativePath>>> e : result.availableGeneratedFiles.entrySet())
@@ -474,7 +476,7 @@ public class Result {
       result.sourceFile = (RelativeSourceLocationPath) Path.readPath(ois, env);
       result.sourceFileHash = ois.readInt();
       
-      boolean reallocate = !result.sourceFile.getBasePath().equals(env.getRoot());
+      boolean reallocate = false; // result.sourceFile.getAbsolutePath().startsWith(env.getRoot().getAbsolutePath());
       
       int numDependencies = ois.readInt();
       for (int i = 0; i < numDependencies; i++) {
