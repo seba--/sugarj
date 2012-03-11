@@ -129,7 +129,7 @@ public class Driver {
   private boolean interrupt = false;
   
   private boolean generateFiles;
-  private Path delegateCompilation = null;
+  private Set<Path> compilationDelegates = new HashSet<Path>();
   private boolean dependsOnModel = false;
   
   private Set<RelativePath> generatedJavaClasses = new HashSet<RelativePath>();
@@ -369,10 +369,16 @@ public class Driver {
       stepped();
       
       // COMPILE the generated java file
-      if (delegateCompilation == null)
+      if (compilationDelegates.isEmpty())
         compileGeneratedJavaFiles();
-      else
-        driverResult.delegateCompilation(delegateCompilation, javaOutFile, javaSource, generatedJavaClasses);
+      else {
+        Path delegate = null;
+        for (Path p : currentlyProcessing)
+          if (compilationDelegates.contains(p)) 
+            delegate = p;
+        assert delegate != null;
+        driverResult.delegateCompilation(delegate, javaOutFile, javaSource, generatedJavaClasses);
+      }
       
        driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
       
@@ -914,7 +920,7 @@ public class Driver {
           if (!ATermCommands.isModelImport(toplevelDecl) || ATermCommands.isTransitivelyTransformedImport(toplevelDecl, environment))
             javaSource.addImport(modulePath.replace('/', '.'));
           skipProcessImport = true;
-          delegateCompilation = importSourceFile;
+          compilationDelegates.add(importSourceFile);
         }
         else {
           log.log("Need to compile the imported module first; processing it now.");
@@ -975,7 +981,7 @@ public class Driver {
           skipProcessImport = true;
           
           if (!p.equals(sourceFile))
-            delegateCompilation = p;
+            compilationDelegates.add(p);
         }
     
     return Pair.<RelativePath, Boolean>create(importSourceFile, skipProcessImport);
