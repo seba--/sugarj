@@ -3,7 +3,7 @@ package impl;
 import variability.Java;
 import java.util.LinkedList;
 
-import impl.Vertex;
+model import impl.Vertex;
 
 
 #feature(BFS)

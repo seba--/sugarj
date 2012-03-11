@@ -2,8 +2,8 @@ package impl;
 
 import java.util.Iterator;
 
-import impl.Graph;
-import impl.Vertex;
+model import impl.Graph;
+model import impl.Vertex;
 
 
 public class VertexIter {

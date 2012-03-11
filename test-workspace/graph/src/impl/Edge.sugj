@@ -2,8 +2,8 @@ package impl;
 
 import variability.Java;
 
-import impl.EdgeIfc;
-import impl.Vertex;
+model import impl.EdgeIfc;
+model import impl.Vertex;
 
 
 #feature(SEARCHBASE)

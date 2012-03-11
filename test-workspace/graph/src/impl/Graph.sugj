@@ -1,4 +1,4 @@
-package impl;
+package impl; 
 
 import variability.Java;
 import java.io.FileReader;
@@ -13,18 +13,18 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-import impl.Vertex;
-import impl.VertexIter;
-import impl.Edge;
-import impl.EdgeIfc;
-import impl.EdgeIter;
-import impl.Neighbor;
+model import impl.EdgeIter;
+model import impl.VertexIter;
 import impl.NeighborIfc;
-import impl.NumberWorkSpace;
-import impl.RegionWorkSpace;
-import impl.FinishTimeWorkSpace;
-import impl.CycleWorkSpace;
-import impl.WorkSpaceTranspose;
+model import impl.Vertex;
+model import impl.Edge;
+model import impl.EdgeIfc;
+model import impl.Neighbor;
+model import impl.NumberWorkSpace;
+model import impl.RegionWorkSpace;
+model import impl.FinishTimeWorkSpace; 
+model import impl.CycleWorkSpace;
+model import impl.WorkSpaceTranspose; 
 
 
 variable class Graph { 
@@ -32,7 +32,7 @@ variable class Graph {
 #feature(SEARCHBASE)
   private LinkedList<EdgeIfc> edges;
   
-  Graph(){
+  Graph(){ 
     vertices=new LinkedList<Vertex>();
 #feature(GENEDGES)
     edges=new LinkedList<EdgeIfc>();

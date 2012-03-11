@@ -2,8 +2,8 @@ package impl;
 
 import variability.Java;
 
-import impl.Vertex;
-import impl.WorkSpace;
+model import impl.Vertex;
+model import impl.WorkSpace;
 
 
 

@@ -2,9 +2,10 @@ package impl;
 
 import variability.Java;
 
-import impl.Vertex;
-import impl.Edge;
-import impl.EdgeIfc;
+model import impl.Vertex;
+model import impl.Edge;
+model import impl.EdgeIfc;
+import impl.NeighborIfc;
 
 
 public variable class Neighbor implements 

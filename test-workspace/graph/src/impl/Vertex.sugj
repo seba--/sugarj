@@ -4,15 +4,16 @@ import variability.Java;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import impl.EdgeIfc;
-import impl.EdgeIter;
+model import impl.EdgeIter;
+model import impl.VertexIter;
+model import impl.EdgeIfc;
 import impl.NeighborIfc;
-import impl.Neighbor;
-import impl.GlobalVarsWrapper;
+model import impl.Neighbor;
+model import impl.GlobalVarsWrapper;
 
 variable class Vertex implements 
 #feature(GNOEDGES)
-EdgeIfc, 
+EdgeIfc,
 #feature(GNOEDGES)
 NeighborIfc
 
