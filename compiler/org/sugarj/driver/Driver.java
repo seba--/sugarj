@@ -977,19 +977,26 @@ public class Driver {
       driverResult.addDependency(dep, environment);
 
     
-    if (res != null) {
+    boolean importWasDelegated = false;
+
+    if (res != null)
       // if importSourceFile is delegated to something currently processed
       for (Path p : currentlyProcessing)
         if (res.isDelegatedTo(p, importSourceFile)) {
+          importWasDelegated = true;
+          
           javaSource.addImport(modulePath.replace('/', '.'));
           skipProcessImport = true;
           
           if (!p.equals(sourceFile))
             compilationDelegates.add(p);
+          
+          break;
         }
-    } 
-    else if (driverResult.isDelegatedTo(sourceFile, importSourceFile)) {
+    
+    if (!importWasDelegated && driverResult.isDelegatedTo(sourceFile, importSourceFile)) {
       // else if importSourceFile was transitively delegated to this sourceFile already
+      importWasDelegated = true;
       javaSource.addImport(modulePath.replace('/', '.'));
       skipProcessImport = true;
     }
