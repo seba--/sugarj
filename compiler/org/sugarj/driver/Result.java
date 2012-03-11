@@ -444,14 +444,13 @@ public class Result {
         if (oos != null)
           oos.close();
       }
+
+      synchronized (results) {
+        results.put(dep, new WeakReference<Result>(this));
+      }
     }
     
     setPersistentPath(dep);
-    
-    synchronized (results) {
-      results.put(dep, new WeakReference<Result>(this));
-    }
-    
   }
   
   @SuppressWarnings("unchecked")
@@ -525,7 +524,7 @@ public class Result {
     return result;
   }
   
-  public void setPersistentPath(Path dep) throws IOException {
+  private void setPersistentPath(Path dep) throws IOException {
     persistentPath = dep;
     persistentHash = FileCommands.fileHash(dep);
   }

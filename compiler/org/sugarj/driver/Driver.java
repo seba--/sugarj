@@ -277,7 +277,6 @@ public class Driver {
       
       if (generateFiles)
         synchronized (currentlyProcessing) {
-          // TODO we need better circular dependency handling
           if (currentlyProcessing.contains(sourceFile))
              throw new IllegalStateException("Uncaptured circular processing");
           currentlyProcessing.add(sourceFile);
