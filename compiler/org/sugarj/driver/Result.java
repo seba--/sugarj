@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -29,6 +30,11 @@ import org.sugarj.util.AppendableObjectOutputStream;
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
 public class Result {
+  
+  /**
+   * Canonicalizing mapping for results
+   */
+  private static HashMap<Path, WeakReference<Result>> results = new HashMap<Path, WeakReference<Result>>();
   
   /**
    * Path and hash of the disk-stored version of this result.
@@ -439,11 +445,26 @@ public class Result {
     }
     
     setPersistentPath(dep);
+    
+    synchronized (results) {
+      results.put(dep, new WeakReference<Result>(this));
+    }
+    
   }
   
   @SuppressWarnings("unchecked")
   public static Result readDependencyFile(Path dep, Environment env) throws IOException {
-    Result result = new Result(true, null);
+    Result result = null;
+    
+    synchronized (results) {
+      WeakReference<Result> ref = results.get(dep);
+      if (ref != null)
+        result = ref.get();
+    }
+    if (result != null && !result.hasPersistentVersionChanged())
+      return result;
+    
+    result = new Result(true, null);
     result.allDependentFiles = null;
     ObjectInputStream ois = null;
     
@@ -453,7 +474,7 @@ public class Result {
       result.sourceFile = (RelativeSourceLocationPath) Path.readPath(ois, env);
       result.sourceFileHash = ois.readInt();
       
-      boolean reallocate = result.sourceFile.getBasePath().toString().equals(env.getRoot());
+      boolean reallocate = !result.sourceFile.getBasePath().equals(env.getRoot());
       
       int numDependencies = ois.readInt();
       for (int i = 0; i < numDependencies; i++) {
@@ -494,6 +515,11 @@ public class Result {
     }
     
     result.setPersistentPath(dep);
+
+    synchronized (results) {
+      results.put(dep, new WeakReference<Result>(result));
+    }
+
     return result;
   }
   
