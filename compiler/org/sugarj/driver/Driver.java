@@ -976,7 +976,9 @@ public class Driver {
     if (dep != null && !skipProcessImport)
       driverResult.addDependency(dep, environment);
 
-    if (res != null)
+    
+    if (res != null) {
+      // if importSourceFile is delegated to something currently processed
       for (Path p : currentlyProcessing)
         if (res.isDelegatedTo(p, importSourceFile)) {
           javaSource.addImport(modulePath.replace('/', '.'));
@@ -985,6 +987,12 @@ public class Driver {
           if (!p.equals(sourceFile))
             compilationDelegates.add(p);
         }
+    } 
+    else if (driverResult.isDelegatedTo(sourceFile, importSourceFile)) {
+      // else if importSourceFile was transitively delegated to this sourceFile already
+      javaSource.addImport(modulePath.replace('/', '.'));
+      skipProcessImport = true;
+    }
     
     return Pair.<RelativePath, Boolean>create(importSourceFile, skipProcessImport);
   }
