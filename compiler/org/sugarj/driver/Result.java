@@ -333,7 +333,11 @@ public class Result {
             }
           }
     
-    writeToFile(javaOutFile, javaSource.getCode(generatedClasses));
+    try {
+      writeToFile(javaOutFile, javaSource.getCode(generatedClasses));
+    } catch (ClassNotFoundException e) {
+      throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + javaOutFile);
+    }
     
     compileJava(javaOutFiles, bin, path, generatedClasses);
   }
@@ -372,8 +376,8 @@ public class Result {
     deferredSourceFiles.put(delegate, sourceFiles);
   }
   
-  boolean hasDelegatedCompilation(Path compileFile) {
-    return deferredSourceFiles.containsKey(sourceFile) && deferredSourceFiles.get(sourceFile).containsKey(compileFile);
+  boolean isDelegatedTo(Path delegate, Path compileFile) {
+    return deferredSourceFiles.containsKey(delegate) && deferredSourceFiles.get(delegate).containsKey(compileFile);
   }
   
   void resetDelegation() {

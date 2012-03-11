@@ -481,4 +481,8 @@ public class ATermCommands {
   public static boolean isTransformedImport(IStrategoTerm term) {
     return isApplication(term, "TransImportDec") || isApplication(term, "ModelTransImportDec");
   }
+
+  public static boolean isTransitivelyTransformedImport(IStrategoTerm term, Environment environment) {
+    return isModelImport(term) && !environment.getTransformationPaths().isEmpty();
+  }
 }
