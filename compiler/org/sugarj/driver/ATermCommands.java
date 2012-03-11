@@ -1,5 +1,7 @@
 package org.sugarj.driver;
 
+import static org.sugarj.driver.ATermCommands.isApplication;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -470,5 +472,13 @@ public class ATermCommands {
     term = getApplicationSubterm(term, "ImportAs", 0);
           
     return SDFCommands.prettyPrintJava(term, interp);
+  }
+  
+  public static boolean isModelImport(IStrategoTerm term) {
+    return isApplication(term, "ModelImportDec") || isApplication(term, "ModelTransImportDec");
+  }
+
+  public static boolean isTransformedImport(IStrategoTerm term) {
+    return isApplication(term, "TransImportDec") || isApplication(term, "ModelTransImportDec");
   }
 }

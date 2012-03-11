@@ -806,8 +806,8 @@ public class Driver {
         return;
       
       // apply transformation prior to import
-      boolean modelImport = isApplication(toplevelDecl, "ModelImportDec") || isApplication(toplevelDecl, "ModelTransImportDec");
-      boolean transformedImport = isApplication(toplevelDecl, "TransImportDec") || isApplication(toplevelDecl, "ModelTransImportDec");
+      boolean modelImport = ATermCommands.isModelImport(toplevelDecl);
+      boolean transformedImport = ATermCommands.isTransformedImport(toplevelDecl);
       boolean transitivelyTransformedImport = modelImport && !environment.getTransformationPaths().isEmpty();
       
       if (transformedImport || transitivelyTransformedImport) {
@@ -921,7 +921,8 @@ public class Driver {
 
         if (currentlyProcessing.contains(importSourceFile)) {
           // assume source file does not provide syntactic sugar
-          javaSource.addImport(modulePath.replace('/', '.'));
+          if (!ATermCommands.isModelImport(toplevelDecl))
+            javaSource.addImport(modulePath.replace('/', '.'));
           skipProcessImport = true;
           delegateCompilation = importSourceFile;
         }
