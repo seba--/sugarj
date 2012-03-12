@@ -1,51 +1,42 @@
 package entity;
 
+import template.ConcreteSyntax;
 import template.Unquote;
+import template.ListUnquote;
 import template.Shorthands;
-import template.InlineShorthands;
-import template.Foreach;
-import template.UnquoteEnum;
 import template.LocalStrategies;
+import template.IdentifierComposition;
+import template.Foreach;
 
 import entity.Language;
 import org.sugarj.languages.Java;
 
 public template ToJava {
+  $$first-upper = string-as-chars([to-upper|id])
   $$sort-to-type : SimpleSort(name) -> ClassOrInterfaceType(TypeName(name), None)
   $$sort-to-type : GenericSort(tyop, tyargs) ->
                    ClassOrInterfaceType(TypeName(tyop),
                                         Some(TypeArgs(<map(sort-to-type)> tyargs)))
-  $$is-import =   ?TypeImportDec(_)
-                + ?TypeImportOnDemandDec(_)
-                + ?StaticImportDec(_,_)
-                + ?StaticImportOnDemandDec(_)
-                + ?ModelImportDec(_)
-                + ?TransImportDec(_,_,_)
-                + ?ModelTransImportDec(_,_,_)
-
-  $$firstUpper = string-as-chars([to-upper|id])
   
   $pkg = collect-one(?PackageDec(_,<id>))
   $classname = collect-one(?ModelDecHead(_,<id>))
 
   package $pkg;
 
-  $*{collect-all(is-import)}
+  $*{?SugarCompilationUnit(_,<id>,_)}
 
   public class $classname {
     $for(Property(name, sort) in collect-all(?Property(_,_))) {
       $type = <sort-to-type> sort
-      $upperName = <?Id(<id>); firstUpper> name
-      $getter-name = !Id(<concat-strings> ["get", upperName])
-      $setter-name = !Id(<concat-strings> ["set", upperName])
+      $uppername = <Id(first-upper)> name
       
       private $type $name; 
 
-      public $type $getter-name() {
+      public $type get#$uppername() {
         return $name;
       }
 
-      public void $setter-name($type $name) {
+      public void set#$uppername($type $name) {
         this.$name = $name;
       }
     }

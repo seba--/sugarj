@@ -103,7 +103,7 @@ public transformation ToJava {
 
     ee-java(|env) : FieldAccess(e, n) -> Invoke(Method(j, None, getter-name), [])
       where <ee-java(|env)> e => j;
-            <?Id(<id>); firstUpper> n => upperName;
+            <?Id(<id>); first-upper> n => upperName;
             !Id(<concat-strings> ["get", upperName]) => getter-name
     ee-java(|env) : Call(e, n, args) -> Invoke(Method(MethodName(j, n)), <map(ee-java(|env))> args) 
       where <ee-java(|env); is-name> e => j
@@ -143,7 +143,7 @@ public transformation ToJava {
     ee-java-assign(|env,v) : Var(n) -> Assign(<ee-java(|env)> Var(n), v)
     ee-java-assign(|env,v) : FieldAccess(e, n) -> Invoke(Method(j, None, setter-name), [v])
       where <ee-java(|env)> e => j;
-            <?Id(<id>); firstUpper> n => upperName;
+            <?Id(<id>); first-upper> n => upperName;
             !Id(<concat-strings> ["set", upperName]) => setter-name
 
 } 

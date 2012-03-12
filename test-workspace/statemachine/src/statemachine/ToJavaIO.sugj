@@ -2,7 +2,6 @@ package statemachine;
 
 import template.Unquote;
 import template.Shorthands;
-import template.InlineShorthands;
 import template.Foreach;
 import template.UnquoteEnum;
 import template.LocalStrategies;
