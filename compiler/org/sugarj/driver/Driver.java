@@ -941,14 +941,16 @@ public class Driver {
             else
               res = compile(importSourceFile, monitor, currentlyProcessing);
           } catch (Exception e) {
-            /*
-             * Ensure recompilation of this module after a change to the transformation or model.
-             * Usually these dependencies are indirect via the transformed model.
-             */
-            ModuleSystemCommands.registerResults(driverResult, environment, model);
-            if (transformationPaths != null)
-              ModuleSystemCommands.registerResults(driverResult, environment, transformationPaths);
-            ModuleSystemCommands.registerResults(driverResult, environment, environment.getTransformationPaths());
+            if (transformModel) {
+              /*
+               * Ensure recompilation of this module after a change to the transformation or model.
+               * Usually these dependencies are indirect via the transformed model.
+               */
+              ModuleSystemCommands.registerResults(driverResult, environment, model);
+              if (transformationPaths != null)
+                ModuleSystemCommands.registerResults(driverResult, environment, transformationPaths);
+              ModuleSystemCommands.registerResults(driverResult, environment, environment.getTransformationPaths());
+            }
             
             res = null;
             setErrorMessage(toplevelDecl, "compilation of imported module " + modulePath + " failed");
@@ -1515,7 +1517,7 @@ public class Driver {
     strParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.strategoTbl.getPath()), "StrategoModule");
     editorServicesParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.editorServicesTbl.getPath()), "Module");
 
-    interp = new HybridInterpreter(ATermCommands.factory);
+    interp = new HybridInterpreter();
     interp.addOperatorRegistry(new SugarJPrimitivesLibrary(this, environment));
     
     sdfContext = tools.init();
