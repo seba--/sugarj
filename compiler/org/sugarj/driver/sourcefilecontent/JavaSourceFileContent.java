@@ -82,4 +82,8 @@ public class JavaSourceFileContent implements ISourceFileContent {
            other.importsOptional == importsOptional &&
            other.bodyDecls.equals(bodyDecls);
   }
+  
+  public boolean isEmpty() {
+    return bodyDecls.isEmpty();
+  }
 }

@@ -354,12 +354,14 @@ public class Result {
     Map<Path, Set<RelativePath>> myGeneratedFiles = availableGeneratedFiles.get(delegate);
     if (myGeneratedFiles == null)
       myGeneratedFiles = new HashMap<Path, Set<RelativePath>>();
-    myGeneratedFiles.put(sourceFile, generatedFiles);
+    if (!generatedFiles.isEmpty())
+      myGeneratedFiles.put(sourceFile, generatedFiles);
     
     if (availableGeneratedFiles.containsKey(sourceFile))
       myGeneratedFiles.putAll(availableGeneratedFiles.get(sourceFile));
 
-    availableGeneratedFiles.put(delegate, myGeneratedFiles);
+    if (!myGeneratedFiles.isEmpty())
+      availableGeneratedFiles.put(delegate, myGeneratedFiles);
     
     Map<Path, Map<Path, ISourceFileContent>> sourceFiles = deferredSourceFiles.get(delegate);
     if (sourceFiles == null)
@@ -367,13 +369,16 @@ public class Result {
     Map<Path, ISourceFileContent> sources = sourceFiles.get(sourceFile);
     if (sources == null)
       sources = new HashMap<Path, ISourceFileContent>();
-    sources.put(compileFile, fileContent);
-    sourceFiles.put(sourceFile, sources);
+    if (!fileContent.isEmpty())
+      sources.put(compileFile, fileContent);
+    if (!sources.isEmpty())
+      sourceFiles.put(sourceFile, sources);
     
     if (deferredSourceFiles.containsKey(sourceFile))
       sourceFiles.putAll(deferredSourceFiles.get(sourceFile));
     
-    deferredSourceFiles.put(delegate, sourceFiles);
+    if (!sourceFiles.isEmpty())
+      deferredSourceFiles.put(delegate, sourceFiles);
   }
   
   boolean isDelegatedTo(Path delegate, Path compileFile) {
