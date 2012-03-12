@@ -20,6 +20,7 @@ model import impl.Vertex;
 model import impl.Edge;
 model import impl.EdgeIfc;
 model import impl.Neighbor;
+model import impl.WorkSpace;
 model import impl.NumberWorkSpace;
 model import impl.RegionWorkSpace;
 model import impl.FinishTimeWorkSpace; 
@@ -27,7 +28,7 @@ model import impl.CycleWorkSpace;
 model import impl.WorkSpaceTranspose; 
 
 
-variable class Graph { 
+public variable class Graph { 
   LinkedList<Vertex> vertices;
 #feature(SEARCHBASE)
   private LinkedList<EdgeIfc> edges;
