@@ -1,8 +1,10 @@
 package impl;
 
+import variability.Java;
+
 model import impl.EdgeIfc;
 
-public class EdgeIter {
+public variable class EdgeIter {
   public boolean hasNext(){
     return false;
   }
