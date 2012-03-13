@@ -373,10 +373,10 @@ public class Driver {
       if (compilationDelegates.isEmpty() && !dependsOnModel)
         compileGeneratedJavaFiles();
       else {
-        Path delegate = null;
-        for (Path p : currentlyProcessing.keySet())
-          if (compilationDelegates.contains(p)) {
-            delegate = p;
+        Result delegate = null;
+        for (Map.Entry<Path, Driver> e : currentlyProcessing.entrySet())
+          if (compilationDelegates.contains(e.getKey())) {
+            delegate = e.getValue().driverResult;
             break;
           }
         if (delegate != null)
@@ -985,7 +985,7 @@ public class Driver {
     if (!skipProcessImport && importSourceFile != null)
       // if importSourceFile is delegated to something currently being processed
       for (Driver dr : currentlyProcessing.values())
-        if (dr.driverResult.isDelegatedTo(dr.sourceFile, importSourceFile)) {
+        if (dr.driverResult.isDelegateOf(importSourceFile)) {
           javaSource.addImport(modulePath.replace('/', '.'));
           skipProcessImport = true;
           

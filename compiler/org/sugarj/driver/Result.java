@@ -25,6 +25,7 @@ import org.sugarj.driver.path.RelativeSourceLocationPath;
 import org.sugarj.driver.sourcefilecontent.ISourceFileContent;
 import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
 import org.sugarj.util.AppendableObjectOutputStream;
+import org.sugarj.util.Pair;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -60,18 +61,16 @@ public class Result {
   private String cacheVersion;
 
   /**
-   * deferred to (*.sugj) -> 
    * deferred source files (*.sugj) -> 
    * to-be-generated files (e.g., *.class) 
    */
-  private Map<Path, Map<Path, Set<RelativePath>>> availableGeneratedFiles = new HashMap<Path, Map<Path, Set<RelativePath>>>();
+  private Map<Path, Set<RelativePath>> availableGeneratedFiles = new HashMap<Path, Set<RelativePath>>();
   
   /**
-   * deferred to (*.sugj) -> 
    * deferred source files (*.sugj) -> 
    * to-be-compiled source files (e.g., *.java + JavaSourceFileContent) 
    */
-  private Map<Path, Map<Path, Map<Path, ISourceFileContent>>> deferredSourceFiles = new HashMap<Path, Map<Path, Map<Path, ISourceFileContent>>>();
+  private Map<Path, Pair<Path, ISourceFileContent>> deferredSourceFiles = new HashMap<Path, Pair<Path, ISourceFileContent>>();
   
   public final static Result OUTDATED_RESULT = new Result(true, null) {
     @Override
@@ -106,17 +105,17 @@ public class Result {
     
     allDependentFiles.addAll(result.getFileDependencies(env));
     
-    for (Entry<Path, Map<Path, Set<RelativePath>>> e : result.availableGeneratedFiles.entrySet())
-      if (!availableGeneratedFiles.containsKey(e.getKey()))
-        availableGeneratedFiles.put(e.getKey(), e.getValue());
-      else {
-        Map<Path, Set<RelativePath>> deferred = availableGeneratedFiles.get(e.getKey());
-        for (Entry<Path, Set<RelativePath>> e2 : e.getValue().entrySet())
-          if (deferred.containsKey(e2.getKey()) && !deferred.get(e2.getKey()).equals(e2.getValue()))
-            throw new IllegalStateException("Deferred generated files differ.");
-          else
-            deferred.put(e2.getKey(), e2.getValue());
-      }
+//    for (Entry<Path, Map<Path, Set<RelativePath>>> e : result.availableGeneratedFiles.entrySet())
+//      if (!availableGeneratedFiles.containsKey(e.getKey()))
+//        availableGeneratedFiles.put(e.getKey(), e.getValue());
+//      else {
+//        Map<Path, Set<RelativePath>> deferred = availableGeneratedFiles.get(e.getKey());
+//        for (Entry<Path, Set<RelativePath>> e2 : e.getValue().entrySet())
+//          if (deferred.containsKey(e2.getKey()) && !deferred.get(e2.getKey()).equals(e2.getValue()))
+//            throw new IllegalStateException("Deferred generated files differ.");
+//          else
+//            deferred.put(e2.getKey(), e2.getValue());
+//      }
     
 //    Map<Path, Set<RelativePath>> map = availableGeneratedFiles.get(sourceFile);
 //    if (map == null) {
@@ -133,17 +132,17 @@ public class Result {
 //        set.add((RelativePath) e.getKey());
     
     
-    for (Entry<Path, Map<Path, Map<Path, ISourceFileContent>>> e : result.deferredSourceFiles.entrySet())
-      if (!deferredSourceFiles.containsKey(e.getKey()))
-        deferredSourceFiles.put(e.getKey(), e.getValue());
-      else {
-        Map<Path, Map<Path, ISourceFileContent>> deferred = deferredSourceFiles.get(e.getKey());
-        for (Entry<Path, Map<Path, ISourceFileContent>> e2 : e.getValue().entrySet())
-          if (deferred.containsKey(e2.getKey()) && !deferred.get(e2.getKey()).equals(e2.getValue()))
-            throw new IllegalStateException("Deferred source files differ.");
-          else
-            deferred.put(e2.getKey(), e2.getValue());
-      }
+//    for (Entry<Path, Map<Path, Map<Path, ISourceFileContent>>> e : result.deferredSourceFiles.entrySet())
+//      if (!deferredSourceFiles.containsKey(e.getKey()))
+//        deferredSourceFiles.put(e.getKey(), e.getValue());
+//      else {
+//        Map<Path, Map<Path, ISourceFileContent>> deferred = deferredSourceFiles.get(e.getKey());
+//        for (Entry<Path, Map<Path, ISourceFileContent>> e2 : e.getValue().entrySet())
+//          if (deferred.containsKey(e2.getKey()) && !deferred.get(e2.getKey()).equals(e2.getValue()))
+//            throw new IllegalStateException("Deferred source files differ.");
+//          else
+//            deferred.put(e2.getKey(), e2.getValue());
+//      }
   }
   
   public Collection<Path> getFileDependencies(Environment env) throws IOException {
@@ -307,31 +306,25 @@ public class Result {
   }
 
   void compileJava(Path javaOutFile, JavaSourceFileContent javaSource, Path bin, List<Path> path, Set<RelativePath> generatedJavaClasses) throws IOException, ClassNotFoundException {
-    Map<Path, Set<RelativePath>> generatedFiles = availableGeneratedFiles.get(sourceFile);
     Set<RelativePath> generatedClasses = new HashSet<RelativePath>(generatedJavaClasses);
     
-    if (generatedFiles != null) {
-      for (Set<RelativePath> files: generatedFiles.values())
-        for (RelativePath file : files)
-          if ("class".equals(FileCommands.getExtension(file)))
-            generatedClasses.add(file);
-    }
+    for (Set<RelativePath> files: availableGeneratedFiles.values())
+      for (RelativePath file : files)
+        if ("class".equals(FileCommands.getExtension(file)))
+          generatedClasses.add(file);
 
-    Map<Path, Map<Path, ISourceFileContent>> sourceFiles = deferredSourceFiles.get(sourceFile);
     List<Path> javaOutFiles = new ArrayList<Path>();
     javaOutFiles.add(javaOutFile);
 
-    if (sourceFiles != null)
-      for (Entry<Path, Map<Path, ISourceFileContent>> sources : sourceFiles.entrySet())
-        for (Entry<Path, ISourceFileContent> source : sources.getValue().entrySet())
-          if (source.getValue() instanceof JavaSourceFileContent) {
-            JavaSourceFileContent otherJavaSource = (JavaSourceFileContent) source.getValue();
-            try {
-              writeToFile(source.getKey(), otherJavaSource.getCode(generatedClasses));
-            } catch (ClassNotFoundException e) {
-              throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + source.getKey());
-            }
-          }
+    for (Pair<Path, ISourceFileContent> source : deferredSourceFiles.values())
+      if (source.b instanceof JavaSourceFileContent) {
+        JavaSourceFileContent otherJavaSource = (JavaSourceFileContent) source.b;
+        try {
+          writeToFile(source.a, otherJavaSource.getCode(generatedClasses));
+        } catch (ClassNotFoundException e) {
+          throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + source.a);
+        }
+      }
     
     try {
       writeToFile(javaOutFile, javaSource.getCode(generatedClasses));
@@ -350,39 +343,18 @@ public class Result {
     }
   }
   
-  void delegateCompilation(Path delegate, Path compileFile, ISourceFileContent fileContent, Set<RelativePath> generatedFiles) {
-    Map<Path, Set<RelativePath>> myGeneratedFiles = availableGeneratedFiles.get(delegate);
-    if (myGeneratedFiles == null)
-      myGeneratedFiles = new HashMap<Path, Set<RelativePath>>();
+  void delegateCompilation(Result delegate, Path compileFile, ISourceFileContent fileContent, Set<RelativePath> generatedFiles) {
+    delegate.availableGeneratedFiles.putAll(availableGeneratedFiles);
     if (!generatedFiles.isEmpty())
-      myGeneratedFiles.put(sourceFile, generatedFiles);
+      delegate.availableGeneratedFiles.put(sourceFile, generatedFiles);
     
-    if (availableGeneratedFiles.containsKey(sourceFile))
-      myGeneratedFiles.putAll(availableGeneratedFiles.get(sourceFile));
-
-    if (!myGeneratedFiles.isEmpty())
-      availableGeneratedFiles.put(delegate, myGeneratedFiles);
-    
-    Map<Path, Map<Path, ISourceFileContent>> sourceFiles = deferredSourceFiles.get(delegate);
-    if (sourceFiles == null)
-      sourceFiles = new HashMap<Path, Map<Path,ISourceFileContent>>();
-    Map<Path, ISourceFileContent> sources = sourceFiles.get(sourceFile);
-    if (sources == null)
-      sources = new HashMap<Path, ISourceFileContent>();
+    delegate.deferredSourceFiles.putAll(deferredSourceFiles);
     if (!fileContent.isEmpty())
-      sources.put(compileFile, fileContent);
-    if (!sources.isEmpty())
-      sourceFiles.put(sourceFile, sources);
-    
-    if (deferredSourceFiles.containsKey(sourceFile))
-      sourceFiles.putAll(deferredSourceFiles.get(sourceFile));
-    
-    if (!sourceFiles.isEmpty())
-      deferredSourceFiles.put(delegate, sourceFiles);
+      delegate.deferredSourceFiles.put(sourceFile, Pair.create(compileFile, fileContent));
   }
   
-  boolean isDelegatedTo(Path delegate, Path compileFile) {
-    return deferredSourceFiles.containsKey(delegate) && deferredSourceFiles.get(delegate).containsKey(compileFile);
+  boolean isDelegateOf(Path compileFile) {
+    return deferredSourceFiles.containsKey(compileFile);
   }
   
   void resetDelegation() {
@@ -500,8 +472,8 @@ public class Result {
         result.generatedFileHashes.put(file, hash);
       }
       
-      result.availableGeneratedFiles = (Map<Path, Map<Path, Set<RelativePath>>>) ois.readObject();
-      result.deferredSourceFiles = (Map<Path, Map<Path, Map<Path, ISourceFileContent>>>) ois.readObject();
+      result.availableGeneratedFiles = (Map<Path, Set<RelativePath>>) ois.readObject();
+      result.deferredSourceFiles = (Map<Path, Pair<Path, ISourceFileContent>>) ois.readObject();
 
       result.cacheVersion = (String) ois.readObject();
       
