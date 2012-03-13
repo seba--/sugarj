@@ -652,7 +652,7 @@ public class Driver {
             sugaredBodyDecls.add(lastSugaredToplevelDecl);
         }
         else
-          throw new IllegalArgumentException("unexpected toplevel declaration, desugaring probably failed: " + toplevelDecl.toString(5));
+          throw new IllegalArgumentException("unexpected toplevel declaration, desugaring probably failed: " + ATermCommands.atermToFile(toplevelDecl));
       } catch (Exception e) {
         handleException(e, toplevelDecl);
       } finally {
