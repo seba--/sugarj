@@ -7,5 +7,5 @@ featuremodel FeatureModel {
 
   requires B -> A
   requires C -> D
-  requires !(E && F)
+  requires E xor F
 }
