@@ -33,7 +33,7 @@ public variable class Graph {
 #feature(SEARCHBASE)
   private LinkedList<EdgeIfc> edges;
   
-  Graph(){ 
+  public Graph(){ 
     vertices=new LinkedList<Vertex>();
 #feature(GENEDGES)
     edges=new LinkedList<EdgeIfc>();
