@@ -101,65 +101,42 @@ tempNeighbor.weight
   public void sortVertices(  Comparator<Vertex> c){
     Collections.sort(vertices,c);
   }
+
 #feature(SEARCHBASE)
   public void sortEdges(  Comparator<EdgeIfc> c){
     Collections.sort(edges,c);
   }
 
-  EdgeIfc addEdge(  Vertex start,  Vertex end,
-#feature(WEIGHTED)
-  int weight
+  EdgeIfc addEdge(Vertex start, Vertex end, #feature(WEIGHTED) int weight) {
+    #feature(GNOEDGES) {
+      start.addAdjacent(end);
+      #feature(UNDIRECTED)
+        end.addAdjacent(start);
+      #feature(WEIGHTED)
+        start.setWeight(weight);
+      #feature(UNDIRECTED && WEIGHTED)
+        end.addWeight(weight);
+      if (true)     return (EdgeIfc)start;
+    }
 
-){
-#feature(GNOEDGES)
-    start.addAdjacent(end);
+    #feature(GNONLYNEIGHBORS) {
+      Neighbor e=new Neighbor(end, #feature(WEIGHTED) weight);
+      addEdge(start,e);
+      if (true)     return e;
+    }
 
-#feature(UNDIRECTED && GNOEDGES)
-    end.addAdjacent(start);
-
-#feature(WEIGHTED && GNOEDGES)
-    start.setWeight(weight);
-
-#feature(UNDIRECTED && WEIGHTED && GNOEDGES)
-    end.addWeight(weight);
-
-#feature(GNOEDGES)
-    if (true)     return (EdgeIfc)start;
-
-#feature(GNONLYNEIGHBORS)
-    Neighbor e=new Neighbor(end,
-#feature(WEIGHTED)
-weight
-
-);
-
-#feature(GNONLYNEIGHBORS)
-    addEdge(start,e);
-
-#feature(GNONLYNEIGHBORS)
-    if (true)     return e;
-
-#feature(GENEDGES)
-    Edge theEdge=new Edge(start,end,
-#feature(WEIGHTED)
-weight
-
-);
-
-#feature(GENEDGES)
-    edges.add(theEdge);
-
-#feature(GENEDGES)
-    start.addNeighbor(new Neighbor(end,theEdge));
-
-#feature(GENEDGES)
-    end.addNeighbor(new Neighbor(start,theEdge));
-
-#feature(GENEDGES)
-    if (true)     return theEdge;
+    #feature(GENEDGES) {
+      Edge theEdge=new Edge(start, end, #feature(WEIGHTED) weight);
+      edges.add(theEdge);
+	  start.addNeighbor(new Neighbor(end,theEdge));
+	  end.addNeighbor(new Neighbor(start,theEdge));
+	  if (true)     return theEdge;
+    }
 
     return null;
   }
+
+
 #feature(GNONLYNEIGHBORS)
   public void addEdge(  Vertex start,  Neighbor theNeighbor){
     start.addEdge(theNeighbor);
