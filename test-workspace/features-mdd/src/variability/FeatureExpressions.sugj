@@ -7,11 +7,16 @@ public sugar FeatureExpressions {
    FeatureName -> FeatureExpr
    FeatureExpr "&&" FeatureExpr -> FeatureExpr {left, cons("FeatureExprAnd")}
    FeatureExpr "||" FeatureExpr -> FeatureExpr {left, cons("FeatureExprOr")}
+   FeatureExpr "->" FeatureExpr -> FeatureExpr {cons("FeatureExprImplies")}
    "(" FeatureExpr ")" -> FeatureExpr {bracket}
    "!" FeatureExpr -> FeatureExpr {cons("FeatureExprNot")} 
 
  context-free priorities
    "!" FeatureExpr -> FeatureExpr > 
    FeatureExpr "&&" FeatureExpr -> FeatureExpr >
-   FeatureExpr "||" FeatureExpr -> FeatureExpr
+   FeatureExpr "||" FeatureExpr -> FeatureExpr >
+   FeatureExpr "->" FeatureExpr -> FeatureExpr
+
+  desugarings
+    \ FeatureExprImplies(a,b) -> FeatureExprOr(FeatureExprNot(a), b) \
 }

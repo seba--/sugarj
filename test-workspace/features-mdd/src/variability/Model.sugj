@@ -11,47 +11,44 @@ public sugar Model {
  context-free syntax
    //feature model
    AnnoOrSugarMod* "featuremodel" JavaId FeatureModelBody -> ToplevelDeclaration{cons("FMDecl")}
-   "{" FeatureDeclaration* "}" -> FeatureModelBody {cons("FMBody")}
-   "feature" FeatureName FeatureDependencies? ";" -> FeatureDeclaration {cons("FeatureDecl")}
-   "requires" {FeatureLiteral ","}* -> FeatureDependencies
-   FeatureName -> FeatureLiteral {cons("PositiveFeatureLiteral")}
-   "not" FeatureName -> FeatureLiteral {cons("NegativeFeatureLiteral")}
+   "{" FeatureDeclaration* FeatureRequirement* "}" -> FeatureModelBody {cons("FMBody")}
+   "features" {FeatureName ","}* -> FeatureDeclaration {cons("FeatureDecl")}
+   "requires" FeatureExpr -> FeatureRequirement {cons("FeatureRequirement")}
 	
  desugarings
    featuremodel
 
  rules
    featuremodel : 
-     FMDecl(mods, Id(n), FMBody(decls))
+     FMDecl(mods, Id(n), FMBody(features, requirements))
      -> 
-     [SugarDec(SugarDecHead(mods, Id(n)), SugarBody([transformation-elem(rulesblock) | <map(!transformation-elem(<id>))> rulesblocks])),
+     [SugarDec(SugarDecHead(mods, Id(n)), SugarBody([transformation-elem(rulesblock1), transformation-elem(rulesblock2)])),
       EditorServicesDec(EditorServicesDecHead(mods, Id(n)), EditorServicesBody(services))]
      where 
-       <featuredecl2sugar(|n)> decls => rulesblock;
-       <filter(feature-requirements2rules)> decls => rulesblocks;
+       <featuredecl2sugar(|n)> features => rulesblock1;
+       <feature-requirements2rules(|n)> requirements => rulesblock2;
 
-       <map(featuredecl2service)> decls => services
+       <featuredecl2service> features => services
 
-  featuredecl2sugar(|n) :
-    decls
-    ->
-    |[ rules featuremodel-names : string~n -> term~names ]|
-    where
-      <get-decl-names; map(!NoAnnoList(Str(<id>))); !NoAnnoList(List(<id>))> decls => names
+  featuredecl2sugar(|n) =
+    get-decl-names;
+    map(!NoAnnoList(Str(<id>))); !NoAnnoList(List(<id>));
+    ?names;
+    !|[ rules featuremodel-names : string~n -> term~names ]|
   featuremodel-names = fail
 
-  feature-requirements2rules :
-    FeatureDecl(FeatureName(Id(n)), Some(lits))
-    ->
-    |[ rules feature-requirements : string~n -> term~(<trm-explode> lits) ]|
-  feature-requirements = fail
+  feature-requirements2rules(|n) =
+    map(?FeatureRequirement(<id>));
+    ?requirements;
+    !|[ rules model-requirements : string~n -> term~(<trm-explode> requirements) ]|
+  model-requirements = fail
 
-  featuredecl2service :
-     FeatureDecl(FeatureName(Id(n)), _)
-     ->
-     |[  completions
-           completion template : FeatureName = string~n
-     ]|
+  featuredecl2service =
+     get-decl-names;
+     map({name: ?name;
+       !|[ completions
+             completion template : FeatureName = string~name
+        ]|})
     
-    get-decl-names = map(?FeatureDecl(FeatureName(Id(<id>)), _))
+    get-decl-names = mapconcat(?FeatureDecl(<map(?FeatureName(Id(<id>)))>))
 }

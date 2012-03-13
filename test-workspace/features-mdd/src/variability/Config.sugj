@@ -21,7 +21,7 @@ public sugar Config {
     ConfigDecl(mods, Id(n), Id(fm), configs)
     -> TransDec(TransDecHead(mods, Id(n)), TransBody([Rules([main-rule | rulez])]))
     where 
-      <compute-feature-config> configs => (enabled, disabled);
+      <get-feature-config> configs => (enabled, disabled);
       <(map(feature-enabled2rule), map(feature-disabled2rule)); conc> (enabled, disabled) => rulez;
       main-rule := SDefNoArgs("main", CallNoArgs(SVar("eliminate-variability")))
     
@@ -29,25 +29,10 @@ public sugar Config {
    feature-disabled2rule = !SDefNoArgs("feature-disabled", Match(NoAnnoList(Str(<id>))))
 
   rules
-    compute-feature-config = ?configs;
+    get-feature-config = ?configs;
       <filter(?FeatureActivation(<collect-all(?FeatureName(Id(<id>)))>)); concat> configs => enabled;
       <filter(?FeatureDeactivation(<collect-all(?FeatureName(Id(<id>)))>)); concat> configs => disabled;
-      <feature-config-closure(|[])> (enabled, disabled)
-
-    feature-config-closure(|done) : ([],dis) -> ([],dis)
-    feature-config-closure(|done) :
-      ([en|ens],dis) ->
-      <feature-config-closure(|done)> (ens,dis)
-      where <elem> (en,done)
-    feature-config-closure(|done) :
-      ([en|ens],dis) ->
-      ([en|<conc> (new-ens, ens')], <conc> (new-dis, dis'))
-      where
-        <not(elem)> (en,done);
-        <feature-config-closure(|[en|done])> (ens,dis) => (ens',dis');
-        <feature-requirements <+ ![]> en => required;
-        <filter(?PositiveFeatureLiteral(FeatureName(Id(<id>))))> required => new-ens;
-        <filter(?NegativeFeatureLiteral(FeatureName(Id(<id>))))> required => new-dis      
+      !(enabled, disabled)
 
   rules 
     no-variability :
@@ -80,50 +65,66 @@ public sugar Config {
       where <is-condition-disabled> e
 
   rules
-    is-condition-enabled :
+    is-condition-enabled = is-condition-enabled(|([],[]))
+
+    is-condition-enabled(|c) :
+      e@FeatureName(Id(n)) -> e
+      where !c => (en,dis);
+            <elem> (n, en);
+            <not(elem)> (n, dis)
+
+    is-condition-enabled(|c) :
       e@FeatureName(Id(n)) -> e 
       where <feature-enabled> n;
             <not(feature-disabled)> n
 
-    is-condition-enabled :
+    is-condition-enabled(|c) :
       n@FeatureExprNot(e) -> n 
-      where <is-condition-disabled> e
+      where <is-condition-disabled(|c)> e
 
-    is-condition-enabled :
+    is-condition-enabled(|c) :
       a@FeatureExprAnd(e1, e2) -> a 
-      where <is-condition-enabled> e1;
-            <is-condition-enabled> e2
+      where <is-condition-enabled(|c)> e1;
+            <is-condition-enabled(|c)> e2
 
-    is-condition-enabled :
+    is-condition-enabled(|c) :
       o@FeatureExprOr(e1, e2) -> o 
-      where <is-condition-enabled> e1
+      where <is-condition-enabled(|c)> e1
 
-    is-condition-enabled :
+    is-condition-enabled(|c) :
       o@FeatureExprOr(e1, e2) -> o 
-      where <is-condition-enabled> e2
+      where <is-condition-enabled(|c)> e2
       
   rules
-    is-condition-disabled :
+    is-condition-disabled = is-condition-disabled(|([],[]))
+
+    is-condition-disabled(|c) :
+      e@FeatureName(Id(n)) -> e
+      where !c => (en,dis);
+            <elem> (n, dis);
+            <not(elem)> (n, en)
+
+    is-condition-disabled(|c) :
       e@FeatureName(Id(n)) -> e 
       where <feature-disabled> n;
             <not(feature-enabled)> n      
 
-    is-condition-disabled :
+    is-condition-disabled(|c) :
       o@FeatureExprOr(e1, e2) -> o
-      where <is-condition-disabled> e1;
-            <is-condition-disabled> e2 
+      where <is-condition-disabled(|c)> e1;
+            <is-condition-disabled(|c)> e2 
 
-    is-condition-disabled :
+    is-condition-disabled(|c) :
       o@FeatureExprAnd(e1, e2) -> o
-      where <is-condition-disabled> e1
+      where <is-condition-disabled(|c)> e1
 
-    is-condition-disabled :
+    is-condition-disabled(|c) :
       o@FeatureExprAnd(e1, e2) -> o
-      where <is-condition-disabled> e2
+      where <is-condition-disabled(|c)> e2
 
-    is-condition-disabled :
+    is-condition-disabled(|c) :
       n@FeatureExprNot(e) -> n 
-      where <is-condition-enabled> e
+      where <is-condition-enabled(|c)> e
 
     feature-enabled = fail
     
@@ -136,7 +137,8 @@ public sugar Config {
       where(<featuremodel-names> fm => names);
       where(collect-all(constraint-feature-configuration(|names)) => undeclared);
       where(conflicting-features => conflicts);
-      <conc> (undeclared, conflicts)
+      where(check-model-requirements(|fm) => requirements);
+      <conc> (undeclared, conflicts, requirements)
       
 
     constraint-feature-configuration(|names) :
@@ -144,14 +146,22 @@ public sugar Config {
     where <not(elem)> (n,names)
 
     conflicting-features =
-      compute-feature-config;
+      get-feature-config;
       isect;
       map(!(<id>, <conc-strings> ("Configuration conflict for feature ",<id>, ".")))
 
+    check-model-requirements(|fm) =
+      get-feature-config => config;
+      <model-requirements> fm;
+      filter(is-condition-disabled(|config));
+      map(!(fm, ["Model requirement vilolated: ",<id>,"."]))
+
+/*
     constraint-note =
       ?decl@ConfigDecl(_,_,Id(fm),<id>);
       compute-feature-config;
       !(decl, ["Enabled features: ", <Fst; intersperse(|",")>, ". Disabled features: ", <Snd; intersperse(|",")>, "."])
+*/
 
     intersperse(|s) : [] -> []
     intersperse(|s) : [x] -> [x]

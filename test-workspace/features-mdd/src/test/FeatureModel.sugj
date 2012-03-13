@@ -3,10 +3,9 @@ package test;
 import variability.Model; 
 
 featuremodel FeatureModel {
-  feature A;
-  feature B requires A;
-  feature C requires D;
-  feature D;
-  feature E requires not F;
-  feature F;
-} 
+  features A, B, C, D, E, F
+
+  requires B -> A
+  requires C -> D
+  requires !(E && F)
+}

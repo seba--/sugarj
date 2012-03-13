@@ -10,4 +10,4 @@ public config FeatureConfig for FeatureModel {
   enable E;
   enable F;
   enable INTERFACE;
-}  
+}
