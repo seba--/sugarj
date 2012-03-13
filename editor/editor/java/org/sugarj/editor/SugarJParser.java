@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -162,7 +163,7 @@ public class SugarJParser extends JSGLRI {
     SugarJConsole.activateConsoleOnce();
     
     try {
-      return Driver.parse(input, sourceFile, monitor, new LinkedList<Path>());
+      return Driver.parse(input, sourceFile, monitor, new LinkedHashMap<Path, Driver>());
     } catch (InterruptedException e) {
       throw e;
     } catch (Exception e) {
