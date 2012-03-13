@@ -889,7 +889,7 @@ public class Driver {
       }
       
       if (res != null && res.getSourceFile() != null) {
-        importSourceFile = res.getSourceFile();
+        importSourceFile = new RelativeSourceLocationPath(res.getSourceFile(), environment);
         modulePath = ModuleSystemCommands.getModulePath(importSourceFile);
       }
     }

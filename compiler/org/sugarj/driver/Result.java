@@ -54,7 +54,7 @@ public class Result {
   private IStrategoTerm sugaredSyntaxTree = null;
   private Path parseTableFile;
   private Path desugaringsFile;
-  private RelativeSourceLocationPath sourceFile;
+  private RelativePath sourceFile;
   private Integer sourceFileHash;
   private Set<Path> allDependentFiles = new HashSet<Path>();
   private Path generationLog;
@@ -520,7 +520,7 @@ public class Result {
     this.sourceFileHash = sourceFileHash;
   }
 
-  public RelativeSourceLocationPath getSourceFile() {
+  public RelativePath getSourceFile() {
     return sourceFile;
   }
   
