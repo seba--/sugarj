@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +78,7 @@ public class Driver {
   private static Map<Path, Result> resultCache = new HashMap<Path, Result>(); // new LRUMap(50);
   private static Map<Path, Entry<ToplevelDeclarationProvider, Driver>> pendingRuns = new HashMap<Path, Map.Entry<ToplevelDeclarationProvider,Driver>>();
   
-  private List<Path> currentlyProcessing = new ArrayList<Path>();
+  private LinkedHashMap<Path, Driver> currentlyProcessing = new LinkedHashMap<Path, Driver>();
 
   private static List<ProcessingListener> processingListener = new LinkedList<ProcessingListener>();
   
@@ -138,7 +139,7 @@ public class Driver {
 
   private RetractableTreeBuilder inputTreeBuilder;
   
-  public Driver(Environment env, List<Path> currentlyProcessing) {
+  public Driver(Environment env, LinkedHashMap<Path, Driver> currentlyProcessing) {
     this.environment = env;
     this.currentlyProcessing = currentlyProcessing;
     
@@ -207,43 +208,43 @@ public class Driver {
     Log.log.log(resultCache.size());
   }
   
-  public static Result compile(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, List<Path> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  public static Result compile(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LinkedHashMap<Path, Driver> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     return run(sourceFile, monitor, true, currentlyProcessing);
   }
 
-  public static Result parse(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, List<Path> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  public static Result parse(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LinkedHashMap<Path, Driver> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     return run(sourceFile, monitor, false, currentlyProcessing);
   }
   
-  public static Result compile(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, List<Path> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  public static Result compile(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LinkedHashMap<Path, Driver> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     return run(source, sourceFile, monitor, true, currentlyProcessing);
   }
   
-  public static Result parse(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, List<Path> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  public static Result parse(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LinkedHashMap<Path, Driver> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     return run(source, sourceFile, monitor, false, currentlyProcessing);
   }
 
-  public static Result compile(IStrategoTerm source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, List<Path> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  public static Result compile(IStrategoTerm source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LinkedHashMap<Path, Driver> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     return run(source, sourceFile, monitor, true, currentlyProcessing);
   }
 
-  public static Result parse(IStrategoTerm source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, List<Path> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  public static Result parse(IStrategoTerm source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LinkedHashMap<Path, Driver> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     return run(source, sourceFile, monitor, false, currentlyProcessing);
   }
 
   
   
-  public static Result run(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles, List<Path> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  public static Result run(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles, LinkedHashMap<Path, Driver> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     return run(FileCommands.readFileAsString(sourceFile), sourceFile, monitor, generateFiles, currentlyProcessing);
   }
 
-  private static Result run(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles, List<Path> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private static Result run(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles, LinkedHashMap<Path, Driver> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     Driver driver = new Driver(sourceFile.getSourceLocation().getEnvironment(), currentlyProcessing);
     ToplevelDeclarationProvider declProvider = driver.new SourceCodeToplevelDeclarationProvider(source);
     return run(driver, declProvider, sourceFile, monitor, generateFiles);
   }
   
-  private static Result run(IStrategoTerm source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles, List<Path> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private static Result run(IStrategoTerm source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles, LinkedHashMap<Path, Driver> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     Driver driver = new Driver(sourceFile.getSourceLocation().getEnvironment(), currentlyProcessing);
     ToplevelDeclarationProvider declProvider = driver.new TermToplevelDeclarationProvider(source);
     return run(driver, declProvider, sourceFile, monitor, generateFiles);
@@ -317,7 +318,7 @@ public class Driver {
     boolean success = false;
     try {
       init(declProvider, sourceFile, generateFiles);
-      currentlyProcessing.add(sourceFile);
+      currentlyProcessing.put(sourceFile, this);
       driverResult.setSourceFile(this.sourceFile, declProvider.getSourceHashCode());
       
       if (sourceFile != null) {
@@ -373,7 +374,7 @@ public class Driver {
         compileGeneratedJavaFiles();
       else {
         Path delegate = null;
-        for (Path p : currentlyProcessing)
+        for (Path p : currentlyProcessing.keySet())
           if (compilationDelegates.contains(p)) {
             delegate = p;
             break;
@@ -919,7 +920,7 @@ public class Driver {
           modulePath = ModuleSystemCommands.getModulePath(importSourceFile);
         }
 
-        if (currentlyProcessing.contains(importSourceFile)) {
+        if (currentlyProcessing.keySet().contains(importSourceFile)) {
           // assume source file does not provide syntactic sugar
           if (!ATermCommands.isModelImport(toplevelDecl) || ATermCommands.isTransitivelyTransformedImport(toplevelDecl, environment))
             javaSource.addImport(modulePath.replace('/', '.'));
@@ -981,29 +982,25 @@ public class Driver {
       driverResult.addDependency(dep, environment);
 
     
-    boolean importWasDelegated = false;
-
-    if (res != null)
-      // if importSourceFile is delegated to something currently processed
-      for (Path p : currentlyProcessing)
-        if (res.isDelegatedTo(p, importSourceFile)) {
-          importWasDelegated = true;
-          
+    if (!skipProcessImport && importSourceFile != null)
+      // if importSourceFile is delegated to something currently being processed
+      for (Driver dr : currentlyProcessing.values())
+        if (dr.driverResult.isDelegatedTo(dr.sourceFile, importSourceFile)) {
           javaSource.addImport(modulePath.replace('/', '.'));
           skipProcessImport = true;
           
-          if (!p.equals(sourceFile))
-            compilationDelegates.add(p);
+          if (dr != this)
+            compilationDelegates.add(dr.sourceFile);
           
           break;
         }
     
-    if (!importWasDelegated && driverResult.isDelegatedTo(sourceFile, importSourceFile)) {
-      // else if importSourceFile was transitively delegated to this sourceFile already
-      importWasDelegated = true;
-      javaSource.addImport(modulePath.replace('/', '.'));
-      skipProcessImport = true;
-    }
+//    if (!importWasDelegated && driverResult.isDelegatedTo(sourceFile, importSourceFile)) {
+//      // else if importSourceFile was transitively delegated to this sourceFile already
+//      importWasDelegated = true;
+//      javaSource.addImport(modulePath.replace('/', '.'));
+//      skipProcessImport = true;
+//    }
     
     return Pair.<RelativePath, Boolean>create(importSourceFile, skipProcessImport);
   }
@@ -1548,7 +1545,7 @@ public class Driver {
         RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(source), environment.getSourcePath());
         
         monitor.beginTask("compile " + sourceFile, IProgressMonitor.UNKNOWN);
-        Result res = compile(sourceFile, monitor, new LinkedList<Path>());
+        Result res = compile(sourceFile, monitor, new LinkedHashMap<Path, Driver>());
         if (!DriverCLI.processResultCLI(res, sourceFile, new File(".").getAbsolutePath()))
           throw new RuntimeException("compilation of " + sourceFile + " failed");
       }
