@@ -107,33 +107,33 @@ tempNeighbor.weight
     Collections.sort(edges,c);
   }
 
+  #feature(GNOEDGES)
   EdgeIfc addEdge(Vertex start, Vertex end, #feature(WEIGHTED) int weight) {
-    #feature(GNOEDGES) {
-      start.addAdjacent(end);
-      #feature(UNDIRECTED)
-        end.addAdjacent(start);
-      #feature(WEIGHTED)
-        start.setWeight(weight);
-      #feature(UNDIRECTED && WEIGHTED)
-        end.addWeight(weight);
-      if (true)     return (EdgeIfc)start;
-    }
+    start.addAdjacent(end);
+    #feature(UNDIRECTED)
+      end.addAdjacent(start);
+    #feature(WEIGHTED)
+      start.setWeight(weight);
+    #feature(UNDIRECTED && WEIGHTED)
+      end.addWeight(weight);
+    return (EdgeIfc)start;
+  }
 
-    #feature(GNONLYNEIGHBORS) {
-      Neighbor e=new Neighbor(end, #feature(WEIGHTED) weight);
-      addEdge(start,e);
-      if (true)     return e;
-    }
 
-    #feature(GENEDGES) {
-      Edge theEdge=new Edge(start, end, #feature(WEIGHTED) weight);
-      edges.add(theEdge);
-	  start.addNeighbor(new Neighbor(end,theEdge));
-	  end.addNeighbor(new Neighbor(start,theEdge));
-	  if (true)     return theEdge;
-    }
+  #feature(GNONLYNEIGHBORS)
+  EdgeIfc addEdge(Vertex start, Vertex end, #feature(WEIGHTED) int weight) {
+    Neighbor e=new Neighbor(end, #feature(WEIGHTED) weight);
+    addEdge(start,e);
+    return e;
+  }
 
-    return null;
+  #feature(GENEDGES)
+  EdgeIfc addEdge(Vertex start, Vertex end, #feature(WEIGHTED) int weight) {
+    Edge theEdge=new Edge(start, end, #feature(WEIGHTED) weight);
+    edges.add(theEdge);
+	start.addNeighbor(new Neighbor(end,theEdge));
+	end.addNeighbor(new Neighbor(start,theEdge));
+	return theEdge;
   }
 
 

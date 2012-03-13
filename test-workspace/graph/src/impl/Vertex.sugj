@@ -49,9 +49,9 @@ NeighborIfc
 
   }
 
-  public VertexIter getNeighbors(){
-#feature(GNOEDGES)
-    if (true) 
+  
+  #feature(GNOEDGES)
+  public VertexIter getNeighbors() {
     return new VertexIter(){
       private Iterator<Vertex> iter=adjacentVertices.iterator();
       public Vertex next(){
@@ -60,11 +60,11 @@ NeighborIfc
       public boolean hasNext(){
         return iter.hasNext();
       }
-    }
-;
+    };
+  }
 
-#feature(GNONLYNEIGHBORS)
-    if (true) 
+  #feature(GNONLYNEIGHBORS)
+  public VertexIter getNeighbors() {
     return new VertexIter(){
       private Iterator<Neighbor> iter=adjacentNeighbors.iterator();
       public Vertex next(){
@@ -73,10 +73,11 @@ NeighborIfc
       public boolean hasNext(){
         return iter.hasNext();
       }
-    }
-;
+    };
+  }
 
-#feature(GENEDGES)
+  #feature(GENEDGES)
+  public VertexIter getNeighbors() {
     return new VertexIter(){
       private Iterator<Neighbor> iter=neighbors.iterator();
       public Vertex next(){
@@ -85,19 +86,15 @@ NeighborIfc
       public boolean hasNext(){
         return iter.hasNext();
       }
-    }
-;
-
+    };
   }
   
-#feature(GNOEDGES)
+  #feature(GNOEDGES)
   public Vertex getStart(){
-#feature(UNDIRECTED)
-    if (true) 
+    #feature(UNDIRECTED)
       return this;
-    else
+    #feature(!UNDIRECTED)
       return null;
-
   }
 
 #feature(GNOEDGES)
@@ -139,10 +136,8 @@ NeighborIfc
     neighbors.add(n);
   }
 
-#feature(SEARCHBASE)
-  public EdgeIter getEdges(){
-#feature(GNOEDGES)
-    if (true) 
+  #feature(SEARCHBASE && GNOEDGES)
+  public EdgeIter getEdges() {
     return new EdgeIter(){
       private Iterator<Vertex> iter=adjacentVertices.iterator();
       public EdgeIfc next(){
@@ -151,12 +146,12 @@ NeighborIfc
       public boolean hasNext(){
         return iter.hasNext();
       }
-    }
-;
+    };
+  }
 
 
-#feature(GNONLYNEIGHBORS)
-    if (true) 
+  #feature(SEARCHBASE && GNONLYNEIGHBORS)
+  public EdgeIter getEdges() {
     return new EdgeIter(){
       private Iterator<Neighbor> iter=adjacentNeighbors.iterator();
       public EdgeIfc next(){
@@ -165,10 +160,11 @@ NeighborIfc
       public boolean hasNext(){
         return iter.hasNext();
       }
-    }
-;
+    };
+  }
 
-#feature(GENEDGES)
+  #feature(SEARCHBASE && GENEDGES)
+  public EdgeIter getEdges() {
     return new EdgeIter(){
       private Iterator<Neighbor> iter=neighbors.iterator();
       public EdgeIfc next(){
@@ -177,23 +173,18 @@ NeighborIfc
       public boolean hasNext(){
         return iter.hasNext();
       }
-    }
-;
+    };
   }
 
   public LinkedList getNeighborsObj(){
-#feature(GNONLYNEIGHBORS)
-    if (true) 
-    return adjacentNeighbors;
-
-#feature(GENEDGES)
-    if (true) 
-    return neighbors;
-
-#feature(GNOEDGES)
-    return adjacentVertices;
-
+    #feature(GNONLYNEIGHBORS)
+      return adjacentNeighbors;
+    #feature(GENEDGES)
+      return neighbors;
+    #feature(GNOEDGES)
+      return adjacentVertices;
   }
+
 #feature(WEIGHTED && GNOEDGES)
   public LinkedList<Integer> weightsList=new LinkedList<Integer>();
 
@@ -226,10 +217,10 @@ NeighborIfc
   public void nodeSearch(  WorkSpace w){
 #feature(BFS)
     int s, c;
-
-    Vertex v;
 #feature(BFS)
     Vertex header;
+
+    Vertex v;
 
     w.preVisitAction((Vertex)this);
     if (visited) {
