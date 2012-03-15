@@ -1,0 +1,253 @@
+%%
+%% Syntax definition of Prolog in SDF
+%%
+%% derived from a grammar in the Sicstus manual
+%%
+%% Author: Eelco Visser
+%% Date: 2003-05-26
+%%
+%% Restrictions
+%%
+%% User-defined operators are disambiguated arbitrarily. A post-parse
+%% transformation should be used to reassociate operators in the right
+%% order.
+%%
+%% Words (names starting with a letter) are excluded as operators.
+%%
+%% The equals sign = is forced to be an infix operator.
+%%
+definition
+module Prolog
+exports
+  context-free start-symbols Program
+  sorts Program Sentence
+  context-free syntax
+    %%    Module ":" Sentence 	-> Sentence
+	
+%%	ModuleDec Sentence*	-> Program {cons("Program"), prefer}
+%%	Sentence*			-> Program {cons("Program")}
+	
+    Clause 			-> Sentence 
+    Directive 			-> Sentence 
+    GrammarRule 		-> Sentence
+    NonUnitClause  		-> Clause
+    UnitClause 			-> Clause
+    Command 			-> Directive
+    Query 			-> Directive
+
+  context-free syntax       %% my additions
+    ":-"            -> Execute {cons("Execute")}        %% Execute? Apply? 
+
+	Execute "module" "(" Word "," List ")"	"." -> ModuleDec {prefer, cons("ModuleDec")}    %% module definition
+    Execute "use_module" "(" Word "," List ")" "."  -> ModuleImport {prefer, cons("ModuleImport")}  %% module import
+    Execute "reexport"  "(" Word, "," List ")" "."  -> ModuleReexport {prefer, cons("ModuleReexport")}  %% module reexport   
+
+%% ---
+
+  context-free syntax
+    Head ":-" Body "." 		-> NonUnitClause {cons("NonUnitClause")}
+    Head "."			-> UnitClause {cons("UnitClause")}
+    ":-" Body "."		-> Command {cons("Command")}
+    "?-" Body "."		-> Query {cons("Query")}
+
+    Module ":" Head 		-> Head {cons("ModuleHead")}
+    Goal			-> Head
+    Atom 			-> Module
+
+  context-free syntax
+    Module ":" Body 		-> Body {cons("ModuleBody")}
+    "+" Body			-> Body {cons("BodyPlus")}
+    Body "->" Body ";" Body	-> Body {cons("BodyArrowSeq"),right}
+    Body "->" Body		-> Body {cons("BodyArrow"),right}
+    Body ";" Body		-> Body {cons("BodyOr"),right}
+    Body "," Body		-> Body {cons("BodyAnd"),right}
+    "(" Body ")"		-> Body {bracket}
+    Goal			-> Body {cons("BodyGoal")}
+    Term			-> Goal	
+				   %% where term is not otherwise a Body 
+  context-free priorities
+    Module ":" Body 		-> Body
+  > "+" Body			-> Body
+  > Body "->" Body ";" Body	-> Body
+  > Body "->" Body		-> Body
+  > Body ";" Body		-> Body
+  > Body "," Body		-> Body
+
+  context-free syntax %% Terms
+    Term PostfixOp 		-> Term {cons("Postfix")}
+    PrefixOp Term		-> Term {cons("Prefix")}
+				   %% except in the case of a number
+                          	   %% if subterm starts with a (,
+                         	   %% op must be followed by layout-text
+    Term Op Term 		-> Term {cons("Infix"),left,prefer}
+    Functor "(" {Term ","}+ ")" -> Term {cons("Func")}  
+				   %% provided there is no layout-text between 
+				   %% the functor and the ( }
+    "(" Term ")"		-> Term {cons("Bracket")}
+    "{" Term "}"		-> Term {cons("Curly")}
+    List			-> Term 
+    String			-> Term {cons("String")}
+    Constant 			-> Term 
+    Variable			-> Term {cons("Var")}
+    "[" {Term ","}* "]"		-> List {cons("List")}
+    "[" {Term ","}+ "|" Term "]"-> List {cons("ListTl")}
+  context-free priorities
+    PrefixOp Term		-> Term 
+  > Term Op 			-> Term 
+  > Term Op Term 		-> Term 
+
+  context-free syntax %% Operators, Constants, Functors
+    Atom 			-> Constant
+    Number 			-> Constant 
+    Name			-> Atom 	{cons("Atom")}
+    Name			-> Functor 	{cons("Functor")}
+    Name			-> Op 		{cons("Op")}
+				   %% where name has been declared as an
+                           	   %% operator of type T and precedence N
+
+    Word			-> Op 		{reject} %% EV: heuristic
+    Op				-> PrefixOp
+    Op				-> PostfixOp
+    [\=]			-> PrefixOp 	{reject} %% EV: heuristic
+    [\=]			-> PostfixOp 	{reject} %% EV: heuristic
+  context-free restrictions
+    Functor 			-/- ~[\(]
+    PrefixOp 			-/- [\(]
+    Op				-/- [\(]
+
+  context-free syntax %% Numbers
+    UnsignedNumber 		-> Number 		{cons("UnsignedNumber")}
+    Sign UnsignedNumber 	-> Number 		{cons("Number")}
+    Sign Inf 			-> Number 		{cons("Inf")}
+    Sign Nan			-> Number 		{cons("Nan")}
+    NaturalNumber		-> UnsignedNumber 	{cons("Nat")}
+    UnsignedFloat		-> UnsignedNumber 	{cons("Float")}
+  lexical syntax
+    [0-9]			-> Digit
+    Digit+ 			-> NaturalNumber
+    Base "'" Alpha+		-> NaturalNumber
+                         	%% where each Alpha must be less than the base,
+                         	%% treating a,b,... and A,B,... as 10,11,... 
+    "0" "'" CharItem		-> NaturalNumber
+                   	 	%% yielding the character code for char
+    Digit+			-> Base %% in the range [2..36]
+    SimpleFloat			-> UnsignedFloat
+    SimpleFloat [eE] Exponent	-> UnsignedFloat
+    Digit+ "." Digit+		-> SimpleFloat
+    Digit+ 			-> Exponent
+    Sign Digit+			-> Exponent
+    "-" 			-> Sign
+    "+" 			-> Sign
+  lexical restrictions
+    NaturalNumber -/- [0-9A-Za-z]
+
+  lexical syntax
+    SoloChar 			-> Name
+    %% "[" LayoutText "]"  	-> Name
+    "{" LayoutText? "}"  	-> Name
+
+  context-free syntax
+    Word 			-> Name {cons("Word")}
+  lexical syntax
+    [a-z] Alpha* 		-> Word
+  lexical restrictions
+    Word -/- [A-Za-z0-9\_]
+
+  context-free syntax
+    Symbol 					-> Name {cons("Symbol")}
+  lexical syntax %% Symbols
+    FirstSymbolChar SymbolChar* 		-> Symbol 
+    %% except in the case of a full-stop 
+    %% or where the first 2 chars are
+    [\+\-\*\\\^\<\>\=\~\:\.\?\@\#\$\&] 		-> FirstSymbolChar
+    [\/]					-> Slash
+    Slash					-> FirstSymbolChar
+    [\+\-\*\/\\\^\<\>\=\'\~\:\.\?\@\#\$\&] 	-> SymbolChar
+    [\.]					-> Symbol {reject}
+  lexical restrictions
+    Symbol 	-/- [\+\-\*\/\\\^\<\>\=\'\~\:\.\?\@\#\$\&]
+    Slash 	-/- [\*]
+    %% Note: ' removed as first symbol char because of ambiguities with
+    %% QuotedNames
+
+  context-free syntax
+    QuotedName 			-> Name {cons("QuotedName")}
+  lexical syntax
+    "'" QuotedItem+ "'"         -> QuotedName
+    ~[\'\\]  			-> QuotedItem %% other than ' or \ }
+    "\\\"" 			-> QuotedItem 
+    [\\][\'] 			-> QuotedItem 
+    "\\" EscapeSequence 	-> QuotedItem 
+
+  lexical syntax
+   Char 			-> CharItem %% other than \ 
+   "\\" EscapeSequence		-> CharItem
+
+  lexical syntax
+   [\_A-Z] Alpha* 		-> Variable
+  lexical restrictions
+    Variable -/- [0-9A-Za-z]
+
+  lexical syntax
+    "\"" StringItem* "\""	-> String
+
+    ~[\"\n]  			-> StringItem %% other than " or \
+    "\"\""			-> StringItem 
+    "\\" EscapeSequence		-> StringItem 
+
+
+  lexical syntax
+    "." 			-> FullStop 
+				%% the following token, if any, must be layout-text
+
+  lexical syntax
+   LayoutChar 			-> Char
+   Alpha 			-> Char
+   SymbolChar 			-> Char
+   SoloChar 			-> Char
+   PunctuationChar 		-> Char
+   QuoteChar 			-> Char
+
+   [A-Za-z0-9\_]		-> Alpha
+
+   [b]        			-> EscapeSequence %% backspace, character code 8
+   [t]         			-> EscapeSequence %% horizontal tab, character code 9
+   [n]         			-> EscapeSequence %% newline, character code 10
+   [v]         			-> EscapeSequence %% vertical tab, character code 11
+   [f]         			-> EscapeSequence %% form feed, character code 12
+   [r]         			-> EscapeSequence %% carriage return, character code 13
+   [e]         			-> EscapeSequence %% escape, character code 27
+   [d]         			-> EscapeSequence %% delete, character code 127
+   [a]         			-> EscapeSequence %% alarm, character code 7
+   [x] Alpha Alpha        	-> EscapeSequence
+                         	%% treating a,b,... and A,B,... as 10,11,...
+                                %% in the range [0..15], hex character code
+   Digit Digit? Digit?         	-> EscapeSequence
+                                %% in the range [0..7], octal character code
+   "^?"         		-> EscapeSequence %% delete, character code 127
+   "^" [A-Z]        		-> EscapeSequence
+   "^" [a-z]        		-> EscapeSequence
+                                %% the control character Alpha mod 32
+   "c" LayoutChar*         	-> EscapeSequence %% ignored
+   LayoutChar          		-> EscapeSequence %% ignored
+%%   Char            		-> EscapeSequence %% other than the above, represents itself
+
+
+  lexical syntax
+    LayoutText			-> LAYOUT
+
+    LayoutTextItem+ 		-> LayoutText
+    LayoutChar 			-> LayoutTextItem
+    Comment 			-> LayoutTextItem
+    [\0-\32\127]		-> LayoutChar
+
+   "%" ~[\n]* [\n]		-> Comment 
+   "/*" CommChar* "*/"		-> Comment 
+    ~[\*]               	-> CommChar
+    Asterisk            	-> CommChar
+    [\*]			-> Asterisk
+  lexical restrictions
+    Asterisk -/- [\/]
+
+  lexical restrictions
+    LayoutText -/- [\0-\32\127\%] | [\/].[\*]

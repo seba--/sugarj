@@ -1,0 +1,135 @@
+definition
+
+module org/sugarj/languages/SugarProlog
+imports org/sugarj/languages/Prolog 
+        org/sugarj/languages/Sdf2
+        org/sugarj/languages/Stratego
+        org/sugarj/languages/EditorServices
+        org/sugarj/languages/Plain
+
+exports
+  sorts SugarDec TypeOrSugarDec SugarMod AnnoOrSugarMod SugarBody SugarDecHead
+        NativeSugarDecHead NativeSugarBody SugarCompilationUnit
+        ToplevelDeclaration SugarProLayout
+
+  lexical syntax
+    [\ \t\12\r\n] -> LAYOUT
+    [\ \t\12\r\n]         -> SugarPrologLayout %% TODO: actually use prolog-specific layout rules
+    Comment           -> SugarPrologLayout 
+    "%%" line:~[\n]* "\n" -> SugarPrologLayout {cons("line"), category("Comment")}
+
+  context-free restrictions
+    SugarPrologLayout? -/- [\ \t\12\n\r\%]
+    SugarPrologLayout? -/- [\/] . [\*]
+    SugarPrologLayout? -/- [\/] . [\/]
+
+  context-free start-symbols
+    SugarCompilationUnit
+
+  context-free syntax
+    ModuleDec ModuleReexport* ModuleImport* TypeOrSugarDec* -> SugarCompilationUnit {prefer, cons("CompilationUnit")}
+    %% Attention: We require every prolog program to be a module        
+    %% JavaPackageDec -> ModuleDec, added module reexports
+    %% JavaImportDec* -> ModuleImport*
+    %% can modules be imported anywhere in (swi) prolog? --> Change
+
+    JavaTypeDec                                    -> TypeOrSugarDec       {cons("JavaTypeDec")}
+    SugarDec                                       -> TypeOrSugarDec       
+
+  context-free syntax
+    SugarDecHead SugarBody                 -> SugarDec {cons("SugarDec")}
+    NativeSugarDecHead NativeSugarBody ";" -> SugarDec {cons("SugarDec")}
+
+  context-free syntax
+    AnnoOrSugarMod* "sugar" JavaId            -> SugarDecHead       {cons("SugarDecHead")}
+    AnnoOrSugarMod* JavaNative "sugar" JavaId -> NativeSugarDecHead {cons("NativeSugarDecHead")}
+    JavaAnno                                  -> AnnoOrSugarMod     
+    SugarMod                                  -> AnnoOrSugarMod     
+    JavaPublic                                -> SugarMod           
+
+  lexical restrictions
+    "sugar" -/- [a-zA-Z0-9\'\-\_]
+
+  context-free syntax
+    "{" SugarDef "}"    -> SugarBody       {cons("SugarBody")}
+    "=" StrategoModName -> NativeSugarBody {cons("NativeSugarBody")}
+
+  sorts Grammar Transformation Desugaring SugarDef SugarDefElem
+
+  context-free start-symbols
+    SugarDef
+
+  context-free syntax
+    Grammar        -> SugarDefElem {cons("grammar-elem")}
+    Transformation -> SugarDefElem {cons("transformation-elem")}
+    SugarDefElem*  -> SugarDef     
+
+  context-free syntax
+    "sorts" Sdf2Symbols                            -> Grammar {cons("sorts")}
+    "syntax" Sdf2Productions                       -> Grammar {cons("syntax")}
+    "lexical" "syntax" Sdf2Productions             -> Grammar {cons("lexical-syntax")}
+    "context-free" "syntax" Sdf2Productions        -> Grammar {cons("context-free-syntax")}
+    "variables" Sdf2Productions                    -> Grammar {cons("variables")}
+    "lexical" "variables" Sdf2Productions          -> Grammar {cons("lexical-variables")}
+    "priorities" Sdf2Priorities                    -> Grammar {cons("priorities")}
+    "lexical" "priorities" Sdf2Priorities          -> Grammar {cons("lexical-priorities")}
+    "context-free" "priorities" Sdf2Priorities     -> Grammar {cons("context-free-priorities")}
+    "restrictions" Sdf2Restrictions                -> Grammar {cons("restrictions")}
+    "lexical" "restrictions" Sdf2Restrictions      -> Grammar {cons("lexical-restrictions")}
+    "context-free" "restrictions" Sdf2Restrictions -> Grammar {cons("context-free-restrictions")}
+    "aliases" Sdf2Aliases                          -> Grammar {cons("aliases")}
+
+  lexical syntax
+    "sorts"        -> StrategoId {reject}
+    "lexical"      -> StrategoId {reject}
+    "context-free" -> StrategoId {reject}
+    "variables"    -> StrategoId {reject}
+    "priorities"   -> StrategoId {reject}
+    "restrictions" -> StrategoId {reject}
+    "aliases"      -> StrategoId {reject}
+
+  context-free syntax
+    "strategies" StrategoDef*   -> Transformation {cons("Strategies")}
+    "signature" StrategoSdecl*  -> Transformation {cons("Signature")}
+    "rules" StrategoDef*        -> Transformation {cons("Rules")}
+    "overlays" StrategoOverlay* -> Transformation {cons("Overlays")}
+
+  lexical syntax
+    "desugarings" -> StrategoKeyword 
+
+  context-free syntax
+    "desugarings" Desugaring* -> Transformation {cons("Desugarings")}
+
+  context-free syntax
+    StrategoStrategy                                               -> Desugaring {cons("PureDesugaring")}
+    StrategoStrategy ":" Sdf2Symbol "->" Sdf2Symbol Sdf2Attributes -> Desugaring {cons("InjectDesugaring")}
+
+  lexical restrictions
+    "desugarings" -/- [a-zA-Z0-9\'\-\_]
+
+  sorts EditorServicesDecHead EditorServicesBody
+
+  context-free syntax
+    EditorServicesDecHead EditorServicesBody   -> SugarDec              {cons("EditorServicesDec")}
+    AnnoOrSugarMod* "editor" "services" JavaId -> EditorServicesDecHead {cons("EditorServicesDecHead")}
+    "{" EditorServiceSection* "}"              -> EditorServicesBody    {cons("EditorServicesBody")}
+
+  context-free syntax
+    ChecksDecHead ChecksBody   -> ToplevelDeclaration              {cons("ChecksDec")}              %% modify here
+    AnnoOrSugarMod* "analysis" JavaId -> ChecksDecHead {cons("ChecksDecHead")}
+    AnnoOrSugarMod* "checks" JavaId -> ChecksDecHead {cons("ChecksDecHead")}
+    "{" CheckingRule* "}"              -> ChecksBody    {cons("ChecksBody")}
+
+  context-free syntax
+    "errors" CheckingRuleBody*                          -> CheckingRule     {cons("CheckingRuleErrors")}
+    "warnings" CheckingRuleBody*                        -> CheckingRule     {cons("CheckingRuleWarnings")}
+    "notes" CheckingRuleBody*                           -> CheckingRule     {cons("CheckingRuleNotes")}
+    StrategoTerm "=" StrategoTerm                          -> CheckingRuleBody {cons("RuleNoCond")}
+    StrategoTerm "=" StrategoTerm "where" StrategoStrategy -> CheckingRuleBody {cons("Rule")}
+    StrategoTerm "=" StrategoTerm StrategoRuleCond+        -> CheckingRuleBody {cons("Rule"), avoid}
+
+    "rules" StrategoDef*        -> CheckingRule {cons("Rules")}
+
+  lexical syntax
+         -> "}" {recover, reject}
+
