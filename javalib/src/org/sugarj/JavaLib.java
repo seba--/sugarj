@@ -37,7 +37,8 @@ public class JavaLib extends LanguageLib implements Serializable {
 		return "org/sugarj/java/init/initGrammar";
 	}
 
-	@Override
+	// XXX: Remove
+/*	@Override
 	public File getInitGrammarAtomicImports() {
 		return ensureFile("org/sugarj/java/init/initGrammar_atomicImports.sdf");
 	}
@@ -50,7 +51,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 	@Override
 	public File getInitGrammarXTBL() {
 		return ensureFile("org/sugarj/java/init/initGrammar.xtbl");
-	}
+	}	*/
 
 	@Override
 	public File getInitTrans() {
@@ -149,8 +150,6 @@ public class JavaLib extends LanguageLib implements Serializable {
 
 
 	    exists(jl.getInitGrammar());
-	    exists(jl.getInitGrammarAtomicImports());
-	    exists(jl.getInitGrammarXTBL());
 	    exists(jl.getInitTrans());
 	    exists(jl.getInitEditor());
 	    exists(jl.libDir);

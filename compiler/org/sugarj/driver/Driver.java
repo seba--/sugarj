@@ -134,13 +134,13 @@ public class Driver{
   
   
   
-  private Driver_Java drj;
+  private JavaDriver drj;
   private LanguageLib langLib;
   
   
   public Driver(Environment env) {
     this.environment=env;
-    drj = new Driver_Java();
+    drj = new JavaDriver();
     
     try {      
       if (environment.getCacheDir() != null)
@@ -650,19 +650,19 @@ public class Driver{
       if (depOutFile == null)
         depOutFile = environment.new RelativePathBin(drj.getRelPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       try {
-        if (drj.needsImportDecProcessing(toplevelDecl)) {
+        if (drj.isImport(toplevelDecl)) {
           if (!environment.isAtomicImportParsing())
             processImportDec(toplevelDecl);
           else 
             processImportDecs(toplevelDecl);
         }
-        else if (drj.needsTypeDecProcessing(toplevelDecl))
+        else if (drj.isLanguageSpecificDec(toplevelDecl))
           processJavaTypeDec(toplevelDecl);
-        else if (drj.needsSugarDecProcessing(toplevelDecl))
+        else if (drj.isSugarDec(toplevelDecl))
           processSugarDec(toplevelDecl);
-        else if (drj.needsEditorServiceDecProcessing(toplevelDecl)) 
+        else if (drj.isEditorService(toplevelDecl)) 
           processEditorServicesDec(toplevelDecl);
-        else if (isApplication(toplevelDecl, "PlainDec"))   // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
+        else if (drj.isPlain(toplevelDecl))   // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
           processPlainDec(toplevelDecl);
         else if (ATermCommands.isList(toplevelDecl))
           /* 

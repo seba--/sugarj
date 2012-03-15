@@ -18,9 +18,9 @@ public abstract class LanguageLib implements Serializable {
 	
 	public abstract File getInitGrammar();   
 	public abstract String getInitGrammarModule();
-	public abstract File getInitGrammarAtomicImports();
-	public abstract String getInitGrammarAtomicImportsModule();
-	public abstract File getInitGrammarXTBL();
+	// public abstract File getInitGrammarAtomicImports();           // TODO: remove
+	// public abstract String getInitGrammarAtomicImportsModule();   // TODO: remove
+	// public abstract File getInitGrammarXTBL();                    // TODO: remove
 	public abstract File getInitTrans();
 	public abstract String getInitTransModule();
 	public abstract File getInitEditor();
