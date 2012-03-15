@@ -1,7 +1,7 @@
 package test;
 
-import config.AllEnabledConfig;
-import impl.Graph<AllEnabledConfig>;
+import config.MinimalGraphConfig;
+import impl.Graph<MinimalGraphConfig>;
 
 
 public class GraphTest {

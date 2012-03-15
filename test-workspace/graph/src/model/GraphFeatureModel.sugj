@@ -3,22 +3,42 @@ package model;
 import variability.Model; 
 
 featuremodel GraphFeatureModel  {
-  feature CYCLE;
-  feature UNDIRECTED;
-  feature SEARCHBASE;
-  feature WEIGHTED;
-  feature STRONGLYCONNECTED;
-  feature BFS;
-  feature GENEDGES;
-  feature GNONLYNEIGHBORS;
-  feature GNOEDGES;
-  feature BENCHMARK;
-  feature BASEIMPL;
-  feature CONNECTED;
-  feature MSTKRUSKAL;
-  feature MSTPRIM;
-  feature NUMBER;
-  feature SEARCHALG;
-  feature TRANSPOSE;
-  feature DFS;
+  features 
+   // GPL
+   BENCHMARK,
+   BASEIMPL,
+   SEARCHALG,
+   UNDIRECTED,
+   WEIGHTED,
+   // GPL::Algorithms
+   NUMBER,
+   CONNECTED,
+   TRANSPOSE,
+   MSTPRIM,
+   MSTKRUSKAL,
+   CYCLE,
+   STRONGLYCONNECTED,
+   // GPL::Searchalg
+   SEARCHBASE,
+   DFS,
+   BFS,
+   // GPL::BaseImpl
+   GENEDGES,
+   GNONLYNEIGHBORS,
+   GNOEDGES
+   
+   // structural requirements
+   requires BASEIMPL
+   requires BASEIMPL -> (GNONLYNEIGHBORS xor GENEDGES xor GNOEDGES)
+
+   requires SEARCHBASE -> SEARCHALG
+   requires SEARCHALG -> (DFS xor BFS)
+
+   // additional requirements
+   requires CONNECTED -> UNDIRECTED
+   requires (DFS || BFS || NUMBER || CONNECTED) -> SEARCHBASE
+   requires STRONGLYCONNECTED -> (!UNDIRECTED && DFS && TRANSPOSE)
+   requires CYCLE -> DFS
+   requires (MSTPRIM || MSTKRUSKAL) -> (UNDIRECTED && WEIGHTED)
+   
 }
