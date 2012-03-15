@@ -13,7 +13,7 @@ import org.sugarj.languages.Java;
 public template ToJava {
   $$id-as-string = ?Id(<id>); !Lit(String([Chars(<id>)]))
   $$ensure-list = is-list <+ ![<id>]
-  $$event-as-class : Event(name) -> 
+  $$event-as-class : EventName(name) -> 
     > public class $name implements Event {
         private $name() { } 
         public String toString() { return ${<id-as-string> name}; }
@@ -22,7 +22,7 @@ public template ToJava {
         return new id $name();
       }
     <
-  $$all-events-as-classes = collect-all(event-as-class; ensure-list); concat
+  $$all-events-as-classes = collect-all(?Events(<id>); mapconcat(event-as-class; ensure-list)); concat
   $$transition-premise : Transition(NamedEvent(name),_) -> >e instanceof id $name<
   $$transition-consequence : Transition(_, state@(Id(_))) -> [ >return $state#_instance;< ]
 

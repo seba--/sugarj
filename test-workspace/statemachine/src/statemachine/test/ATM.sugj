@@ -5,13 +5,7 @@ import statemachine.Language;
 public statemachine ATM {
   initial state Init 
 
-  event DoWithdraw
-  event Cancel
-  event PinOK
-  event PinNOK
-  event MoneyTaken
-  event CardTaken
-  event CardRevoked
+  events DoWithdraw, Cancel, PinOK, PinNOK, MoneyTaken, CardTaken, CardRevoked
 
   state Init {
     DoWithdraw => Withdraw

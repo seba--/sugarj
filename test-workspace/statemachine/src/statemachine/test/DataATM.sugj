@@ -12,13 +12,7 @@ public statemachine DataATM {
   data acc :: Account
   data pinCount :: Integer
 
-  event InsertCard(Account)
-  event Cancel
-  event Pin(String)
-  event Amount(Integer)
-  event MoneyTaken
-  event CardTaken
-  event CardRevoked
+  events InsertCard(Account), Cancel, Pin(String), Amount(Integer), MoneyTaken, CardTaken, CardRevoked
 
   state Init {
     InsertCard(clientAcc) => Withdraw {

@@ -13,14 +13,15 @@ public sugar Language {
     Statemachine -> ToplevelDeclaration
     AnnoOrSugarMod* "statemachine" JavaId "{" StatemachineBody "}" -> Statemachine {cons("Statemachine")}
 
-    InitialState EventDec* StateDec* -> StatemachineBody {cons("StatemachineBody")}
+    InitialState EventsDec* StateDec* -> StatemachineBody {cons("StatemachineBody")}
 
     JavaId -> StateName
     JavaId -> EventName
 
     "initial" "state" StateName -> InitialState {cons("InitialState")}
 
-    "event" EventName -> EventDec {cons("Event")}
+    "events" {EventDec ","}+ -> EventsDec {cons("Events")}
+    EventName -> EventDec {cons("EventName")}
     "state" StateName "{" Transition* "}" -> StateDec {cons("State")}
 
     TransitionFrom "=>" TransitionTo -> Transition {cons("Transition")}

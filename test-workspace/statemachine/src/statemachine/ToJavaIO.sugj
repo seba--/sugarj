@@ -32,7 +32,7 @@ public template ToJavaIO {
     public static List<String> eventNames() {
       List<String> res = new LinkedList<String>();
 
-      $for(Event(name) in collect-all(?Event(_))) {
+      $for(EventName(name) in collect-all(?EventName(_))) {
         res.add(${<id-as-string> name});
       }
 
@@ -43,7 +43,7 @@ public template ToJavaIO {
       if (input == null)
         return null;
 
-      $for(Event(name) in collect-all(?Event(_))) {
+      $for(EventName(name) in collect-all(?EventName(_))) {
         if(input.equals(${<id-as-string> name}))
           return machine.event_#$name();
       }
