@@ -1,4 +1,4 @@
-package variability;
+package variability; 
   
 import variability.FeatureExpressions;
 import concretesyntax.MetaExplode;
@@ -16,8 +16,8 @@ public sugar Java {
     VariableInterfaceDecHead "{" JavaInterfaceMemberDec* "}" -> VariableInterface {cons("VariableInterfaceDec")}
     AnnoOrSugarMod* "variable" "interface" JavaId JavaTypeParams? JavaExtendsInterfaces? -> VariableInterfaceDecHead  {cons("VariableInterfaceDecHead")}
 
-  //conditional elements  
-   "#" "feature" "(" FeatureExpr ")" JavaImportDec -> JavaImportDec {cons("OptionalNode")}
+  //conditional elements   
+   //"#" "feature" "(" FeatureExpr ")" JavaImportDec -> JavaImportDec {cons("OptionalNode")}
    "#" "feature" "(" FeatureExpr ")" JavaClassBodyDec -> JavaClassBodyDec {cons("OptionalNode")}
    "#" "feature" "(" FeatureExpr ")" JavaFormalParam -> JavaFormalParam {cons("OptionalNode")}
    "#" "feature" "(" FeatureExpr ")" JavaInterfaceType -> JavaInterfaceType {cons("OptionalNode")}
@@ -65,8 +65,9 @@ public sugar Java {
       ModelDec(ModelDecHead(mods, name), ModelBody(("VariableStructure", InterfaceDec(InterfaceDecHead(mods,name,params,extendsifc),body))))
 
     variable-type-declaration : 
-     OptionalNode( exp, ModelDec(head, ModelBody( ("VariableStructure", vartypedec ) )) ) ->
-     ModelDec(head, ModelBody( ("VariableStructure", OptionalNode(exp, vartypedec) )) )
+      OptionalNode( exp, ModelDec(head, ModelBody( ("VariableStructure", vartypedec ) )) ) ->
+      ModelDec(head, ModelBody( ("VariableStructure", OptionalNode(exp, vartypedec) )) )
+     
 }
 
 public editor services Java {

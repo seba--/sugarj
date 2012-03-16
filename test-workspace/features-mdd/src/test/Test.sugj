@@ -3,11 +3,12 @@ package test;
 import variability.Java;
 //#feature(A)
 model import test.AnotherTest;
+model import test.InterfaceTest;
 
 import test.FeatureModel;
  
 #feature(C) 
-public variable class Test extends Object {
+public variable class Test extends Object implements InterfaceTest {
   
   void foo(int x,
   #feature(B) int y) {

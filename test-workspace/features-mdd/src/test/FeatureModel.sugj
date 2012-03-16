@@ -3,7 +3,7 @@ package test;
 import variability.Model; 
 
 featuremodel FeatureModel {
-  features A, B, C, D, E, F
+  features A, B, C, D, E, F, INTERFACE
 
   requires B -> A
   requires C -> D

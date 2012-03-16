@@ -1,11 +1,13 @@
-package test;
+package test; 
 
 import variability.Java; 
 
 #feature(INTERFACE)
 public variable interface InterfaceTest {
-    #feature(A)
+
+  #feature(A)
 	public void doSomething();
+	
 	#feature(B)
-    public void doSomethingElse();
+  public void doSomethingElse();
 } 

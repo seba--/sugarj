@@ -8,6 +8,6 @@ public config FeatureConfig for FeatureModel {
   disable B;
   enable C;
   enable E;
-  enable F;
-  enable INTERFACE;
+  disable F;
+  disable INTERFACE;
 }

@@ -41,20 +41,30 @@ public sugar Config {
       where <not(oncetd(?OptionalNode(_,_)))> structure
       
 
-    eliminate-variability = topdown(try(configure-node)); 
+    eliminate-variability = topdown(try(empty-variable-type));
+                            topdown(try(configure-node)); 
                             SugarCompilationUnit(id,try(filter(not(?VariabilityHole))),map(try(no-variability)));
                             topdown(try(filter(not(?VariabilityHole))))
 
-    
 
   rules 
+    empty-variable-type : 
+     ModelDec(mhead, ModelBody( ("VariableStructure", OptionalNode(e,ClassDec(chead, ClassBody(elems)))) ))
+     -> ModelDec(mhead, ModelBody( ("VariableStructure", ClassDec(chead, ClassBody([]))) ))
+      where <is-condition-disabled> e 
+
+    empty-variable-type : 
+     ModelDec(mhead, ModelBody( ("VariableStructure", OptionalNode(e,InterfaceDec(ihead, ibody))) ))
+     -> ModelDec(mhead, ModelBody( ("VariableStructure", InterfaceDec(ihead, [])) ))
+      where <is-condition-disabled> e 
+
     configure-node : 
      OptionalNode(e, s) -> s
       where <is-condition-enabled> e
      
     configure-node :
      OptionalNode(e, s) -> VariabilityHole
-      where <is-condition-disabled> e
+      where <is-condition-disabled> e    
       
     configure-node :
      VariableNode(e, s1, s2) -> s1
@@ -171,5 +181,5 @@ public sugar Config {
     constructors 
        VariabilityHole : VariabilityHole
        OptionalNode : FeatureExpr * Expr -> Expr
-       VariableNode : FeatureExpr * Expr * Expr -> Expr
+       VariableNode : FeatureExpr * Expr * Expr -> Expr       
 }
