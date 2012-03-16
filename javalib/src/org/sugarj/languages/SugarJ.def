@@ -181,3 +181,13 @@ exports
          -> "}" {recover, reject}
 
   )
+
+  %% from initgrammar
+  context-free start-symbols NextToplevelDeclaration
+  
+  context-free syntax %% ToplevelDeclaration
+    JavaPackageDec -> ToplevelDeclaration
+    JavaImportDec -> ToplevelDeclaration
+    JavaTypeDec -> ToplevelDeclaration
+    SugarDec -> ToplevelDeclaration
+

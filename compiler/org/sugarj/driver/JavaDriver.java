@@ -27,8 +27,8 @@ public class JavaDriver extends LanguageDriver {
   private Path javaOutFile;
 
   
-  
-  protected void processJavaTypeDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp) throws IOException {
+  @Override
+  public void processLanguageSpecific(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp) throws IOException {
     IStrategoTerm dec =  isApplication(toplevelDecl, "JavaTypeDec") ? getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0) : toplevelDecl;   // XXX: Extract JavaTypeDec stuff
     
     String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));

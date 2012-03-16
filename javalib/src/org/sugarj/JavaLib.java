@@ -30,11 +30,13 @@ public class JavaLib extends LanguageLib implements Serializable {
 	@Override
 	public File getInitGrammar() {
 		return ensureFile("org/sugarj/java/init/initGrammar.sdf");
+		//return ensureFile("org/sugarj/languages/SugarJ.def");
 	}
 
 	@Override
 	public String getInitGrammarModule() {
 		return "org/sugarj/java/init/initGrammar";
+		//return "org/sugarj/languages/sugarJ";
 	}
 
 	// XXX: Remove

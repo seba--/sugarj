@@ -8,7 +8,7 @@ imports org/sugarj/languages/Prolog
         org/sugarj/languages/Plain
 
 exports
-  sorts SugarDec TypeOrSugarDec SugarMod AnnoOrSugarMod SugarBody SugarDecHead
+  sorts SugarDec SentenceOrSugar AnnoOrSugarMod SugarBody SugarDecHead
         NativeSugarDecHead NativeSugarBody SugarCompilationUnit
         ToplevelDeclaration SugarProLayout
 
@@ -27,32 +27,33 @@ exports
     SugarCompilationUnit
 
   context-free syntax
-    ModuleDec ModuleReexport* ModuleImport* TypeOrSugarDec* -> SugarCompilationUnit {prefer, cons("CompilationUnit")}
+    ModuleDec ModuleReexport* ModuleImport* SentenceOrSugar* -> SugarCompilationUnit {prefer, cons("CompilationUnit")}
     %% Attention: We require every prolog program to be a module        
     %% JavaPackageDec -> ModuleDec, added module reexports
     %% JavaImportDec* -> ModuleImport*
     %% can modules be imported anywhere in (swi) prolog? --> Change
 
-    JavaTypeDec                                    -> TypeOrSugarDec       {cons("JavaTypeDec")}
-    SugarDec                                       -> TypeOrSugarDec       
+    %% JavaTypeDec                                    -> TypeOrSugarDec       {cons("JavaTypeDec")}
+    Sentence                                       -> SentenceOrSugar            %% TypeOrSugarDec ---> SentenceOrSugar
+    SugarDec                                       -> SentenceOrSugar       
 
   context-free syntax
     SugarDecHead SugarBody                 -> SugarDec {cons("SugarDec")}
-    NativeSugarDecHead NativeSugarBody ";" -> SugarDec {cons("SugarDec")}
 
   context-free syntax
-    AnnoOrSugarMod* "sugar" JavaId            -> SugarDecHead       {cons("SugarDecHead")}
-    AnnoOrSugarMod* JavaNative "sugar" JavaId -> NativeSugarDecHead {cons("NativeSugarDecHead")}
-    JavaAnno                                  -> AnnoOrSugarMod     
-    SugarMod                                  -> AnnoOrSugarMod     
-    JavaPublic                                -> SugarMod           
+%%    AnnoOrSugarMod* "sugar" JavaId            -> SugarDecHead       {cons("SugarDecHead")}
+    "sugar" Name                              -> SugarDecHead
+
+%%    AnnoOrSugarMod* JavaNative "sugar" JavaId -> NativeSugarDecHead {cons("NativeSugarDecHead")}
+%%    JavaAnno                                  -> AnnoOrSugarMod     
+%%    SugarMod                                  -> AnnoOrSugarMod     
+%%    JavaPublic                                -> SugarMod           
 
   lexical restrictions
     "sugar" -/- [a-zA-Z0-9\'\-\_]
 
   context-free syntax
-    "{" SugarDef "}"    -> SugarBody       {cons("SugarBody")}
-    "=" StrategoModName -> NativeSugarBody {cons("NativeSugarBody")}
+    ":=" SugarDef "°"    -> SugarBody       {cons("SugarBody")}         %% debug, replace by ':-' and '.'
 
   sorts Grammar Transformation Desugaring SugarDef SugarDefElem
 
@@ -111,14 +112,15 @@ exports
 
   context-free syntax
     EditorServicesDecHead EditorServicesBody   -> SugarDec              {cons("EditorServicesDec")}
-    AnnoOrSugarMod* "editor" "services" JavaId -> EditorServicesDecHead {cons("EditorServicesDecHead")}
-    "{" EditorServiceSection* "}"              -> EditorServicesBody    {cons("EditorServicesBody")}
+    %%AnnoOrSugarMod* "editor" "services" JavaId -> EditorServicesDecHead {cons("EditorServicesDecHead")}
+    "editor_services" Name                      -> EditorServicesDecHead {cons("EditorServicesDecHead")}
+    ":-" EditorServiceSection* "."              -> EditorServicesBody    {cons("EditorServicesBody")}       %% replaced '{' and '}' by ':-' and '.'
 
   context-free syntax
     ChecksDecHead ChecksBody   -> ToplevelDeclaration              {cons("ChecksDec")}              %% modify here
     AnnoOrSugarMod* "analysis" JavaId -> ChecksDecHead {cons("ChecksDecHead")}
     AnnoOrSugarMod* "checks" JavaId -> ChecksDecHead {cons("ChecksDecHead")}
-    "{" CheckingRule* "}"              -> ChecksBody    {cons("ChecksBody")}
+    ":-" CheckingRule* "."              -> ChecksBody    {cons("ChecksBody")}                        %% replaced '{' and '}' by ':-' and '.'
 
   context-free syntax
     "errors" CheckingRuleBody*                          -> CheckingRule     {cons("CheckingRuleErrors")}
@@ -131,5 +133,18 @@ exports
     "rules" StrategoDef*        -> CheckingRule {cons("Rules")}
 
   lexical syntax
-         -> "}" {recover, reject}
+         -> "." {recover, reject}           %% replaced '}' by '.'
 
+
+
+  %% from initgrammar
+  context-free start-symbols NextToplevelDeclaration
+  
+  context-free syntax %% ToplevelDeclaration
+    ModuleDec -> ToplevelDeclaration
+    ModuleImport -> ToplevelDeclaration
+    ModuleReexport -> ToplevelDeclaration       %% needed?
+    Sentence -> ToplevelDeclaration
+    SugarDec -> ToplevelDeclaration
+  
+  

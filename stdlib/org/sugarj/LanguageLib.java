@@ -13,7 +13,7 @@ public abstract class LanguageLib implements Serializable {
   private static final long serialVersionUID = -6712835686318143995L;
 
   public List<File> getGrammars() {
-		return Arrays.asList(new File[]{StdLib.sdfDef, StdLib.strategoDef, StdLib.editorServicesDef, StdLib.plainDef});
+		return Arrays.asList(new File[]{StdLib.sdfDef, StdLib.strategoDef, StdLib.editorServicesDef, StdLib.plainDef, StdLib.commonDef});
 	}
 	
 	public abstract File getInitGrammar();   

@@ -962,7 +962,7 @@ public class Driver{
       
       log.beginTask("Generate Java code.");
       try {
-        drj.processJavaTypeDec(toplevelDecl, environment, interp);
+        drj.processLanguageSpecific(toplevelDecl, environment, interp);
       } finally {
         log.endTask();
       }

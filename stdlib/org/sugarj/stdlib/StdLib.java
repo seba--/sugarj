@@ -76,6 +76,7 @@ public class StdLib {
   public static File editorServicesDef = ensureFile("org/sugarj/languages/EditorServices.def");
   public static File editorServicesTbl = ensureFile("org/sugarj/languages/EditorServices.tbl");
   public static File plainDef = ensureFile("org/sugarj/languages/Plain.def");
+  public static File commonDef = ensureFile("org/sugarj/stdlib/Common.def");
   
 
   public static void main(String args[]) {
