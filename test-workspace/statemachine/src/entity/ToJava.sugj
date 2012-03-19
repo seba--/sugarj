@@ -2,7 +2,7 @@ package entity;
 
 import template.ConcreteSyntax;
 import template.Unquote;
-import template.ListUnquote;
+import template.UnquoteSplicing;
 import template.Shorthands;
 import template.LocalStrategies;
 import template.IdentifierComposition;

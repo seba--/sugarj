@@ -6,16 +6,16 @@ import template.Core;
 import template.ConcreteSyntax;
 import template.util.MetaExplode;
 
-public sugar ListUnquote { 
+public sugar UnquoteSplicing { 
   context-free syntax
-    ListUnquote -> JavaImportDec
-    ListUnquote -> JavaClassBodyDec
-    ListUnquote -> JavaBlockStm
-    ListUnquote -> JavaFormalParam
+    UnquoteSplicing -> JavaImportDec
+    UnquoteSplicing -> JavaClassBodyDec
+    UnquoteSplicing -> JavaBlockStm
+    UnquoteSplicing -> JavaFormalParam
 
   context-free syntax
-    "$*{" ListUnquoted "}" -> ListUnquote {cons("FromMetaExpr")}
-    StrategoStrategy -> ListUnquoted {cons("ListUnquoted")}
+    "$*{" UnquoteSplice "}" -> UnquoteSplicing {cons("FromMetaExpr")}
+    StrategoStrategy -> UnquoteSplice {cons("UnquoteSplice")}
 
   desugarings
     list-unquote-desugar
@@ -25,12 +25,12 @@ public sugar ListUnquote {
       TransBody([Rules([SDefNoArgs("main", body)])]) -> 
       TransBody([Rules([SDefNoArgs("main", Seq(Match(Var(modelvar)), body'))])])
     where
-      <oncetd(?ListUnquoted(_))> body;
+      <oncetd(?UnquoteSplice(_))> body;
       modelvar := "this__";
       <topdown(try(list-unquoted-app(|modelvar)))> body => body'
 
     list-unquoted-app(|modelvar) :
-      Op("Cons",[ListUnquoted(strat), xs]) ->
+      Op("Cons",[UnquoteSplice(strat), xs]) ->
       App(CallNoArgs(SVar("conc")), NoAnnoList(Tuple([strat-app, xs])))
     where strat-app := App(strat, Var(modelvar))
 }

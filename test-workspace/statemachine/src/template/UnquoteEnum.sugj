@@ -3,7 +3,7 @@ package template;
 public sugar UnquoteEnum {
   context-free syntax
     Unquote -> JavaEnumConst
-    ListUnquote -> JavaEnumConst
+    UnquoteSplicing -> JavaEnumConst
 
     JavaEnumConst -> Requoted {avoid}
 }

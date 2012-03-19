@@ -1,12 +1,12 @@
 package template;
 
-import template.ListUnquote;
+import template.UnquoteSplicing;
 import template.Requote;
 import template.util.AutoScopeRules;
 
 public sugar Foreach {
   context-free syntax
-    ForeachTemplate -> ListUnquote {cons("FromMetaExpr")}
+    ForeachTemplate -> UnquoteSplicing {cons("FromMetaExpr")}
     "$for" "(" StrategoTerm "in" StrategoStrategy ")" "{" Requoted "}" -> ForeachTemplate {cons("ForeachTemplate")}
 
   desugarings
@@ -15,7 +15,7 @@ public sugar Foreach {
   rules
     desugar-foreach-template :
       ForeachTemplate(t, s, body) ->
-      ListUnquoted(Seq(s, Call(SVar("mapconcat"), [ 
+      UnquoteSplice(Seq(s, Call(SVar("mapconcat"), [ 
         Seq(LRule(RuleNoCond(t, ToMetaExpr(body))),
             LChoice(CallNoArgs(SVar("is-list")), Build(NoAnnoList(List([RootApp(Id())])))))])))
 } 
