@@ -1770,6 +1770,26 @@ public class Driver {
   }
   
   
+  private IStrategoTerm currentDesugar(IStrategoTerm term) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+    // assimilate toplevelDec using current transformation
+    log.beginTask(
+        "desugaring",
+        "DESUGAR the current toplevel declaration.");
+    try {
+      FileCommands.deleteTempFiles(currentTransProg);
+      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
+    
+      return STRCommands.assimilate(currentTransProg, term, interp);
+    } catch (Exception e) {
+      String msg = "compilation of desugaring " + currentTransSTR + " failed";
+      setErrorMessage(lastSugaredToplevelDecl, msg + ":\n" + e.getMessage());
+      // no rethrow
+      return term;
+    } finally {
+      log.endTask();
+    }
+  }
+  
   class SourceCodeToplevelDeclarationProvider implements ToplevelDeclarationProvider {
 
     private String lastRemainingInput;
@@ -1925,28 +1945,6 @@ public class Driver {
       return parseResult;
     }
 
-    private IStrategoTerm currentDesugar(IStrategoTerm term) throws IOException,
-        InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
-      // assimilate toplevelDec using current transformation
-    
-      log.beginTask(
-          "desugaring",
-          "DESUGAR the current toplevel declaration.");
-      try {
-        FileCommands.deleteTempFiles(currentTransProg);
-        currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment);
-    
-        return STRCommands.assimilate(currentTransProg, term, interp);
-      } catch (Exception e) {
-        String msg = "compilation of desugaring " + currentTransSTR + " failed";
-        setErrorMessage(lastSugaredToplevelDecl, msg + ":\n" + e.getMessage());
-        // no rethrow
-        return term;
-      } finally {
-        log.endTask();
-      }
-    }
-
     @Override
     public boolean hasNextToplevelDecl() {
       return !remainingInput.isEmpty();
@@ -1988,8 +1986,8 @@ public class Driver {
     }
 
     @Override
-    public IStrategoTerm desugarToplevelDecl(IStrategoTerm term) {
-      return term;
+    public IStrategoTerm desugarToplevelDecl(IStrategoTerm term) throws TokenExpectedException, BadTokenException, IOException, InvalidParseTableException, SGLRException {
+      return currentDesugar(term);
     }
 
     @Override
