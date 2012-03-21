@@ -981,7 +981,7 @@ public class Driver{
         sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
 
       
-      boolean isNative;
+      boolean isNative;         // TODO: Remove native
       String extName = null;
       String fullExtName = null;
       boolean isPublic = false;
@@ -993,7 +993,7 @@ public class Driver{
       try {
         isNative = isApplication(head, "NativeSugarDecHead");
         
-        if (isNative) {
+        if (isNative) {   // TODO: remove native
           extName =
             SDFCommands.prettyPrintJava(
             getApplicationSubterm(head, "NativeSugarDecHead", 2), interp);

@@ -9,7 +9,7 @@ imports org/sugarj/languages/Prolog
 
 exports
   sorts SugarDec SentenceOrSugar AnnoOrSugarMod SugarBody SugarDecHead
-        NativeSugarDecHead NativeSugarBody SugarCompilationUnit
+        SugarCompilationUnit
         ToplevelDeclaration SugarProLayout
 
   lexical syntax
@@ -42,7 +42,7 @@ exports
 
   context-free syntax
 %%    AnnoOrSugarMod* "sugar" JavaId            -> SugarDecHead       {cons("SugarDecHead")}
-    "sugar" Name                              -> SugarDecHead
+    "sugar" Name                              -> SugarDecHead   {cons("SugarDecHead")}
 
 %%    AnnoOrSugarMod* JavaNative "sugar" JavaId -> NativeSugarDecHead {cons("NativeSugarDecHead")}
 %%    JavaAnno                                  -> AnnoOrSugarMod     

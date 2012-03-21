@@ -17,15 +17,15 @@
 %% The equals sign = is forced to be an infix operator.
 %%
 definition
-module Prolog
+module org/sugarj/languages/Prolog
 exports
   context-free start-symbols Program
   sorts Program Sentence
   context-free syntax
     %%    Module ":" Sentence 	-> Sentence
 	
-%%	ModuleDec Sentence*	-> Program {cons("Program"), prefer}
-%%	Sentence*			-> Program {cons("Program")}
+	ModuleDec ModuleReexport* ModuleImport* Sentence*	-> Program {cons("Program"), prefer}       %% remove
+%%	Sentence*			-> Program {cons("Program")}               %% remove
 	
     Clause 			-> Sentence 
     Directive 			-> Sentence 
@@ -36,11 +36,10 @@ exports
     Query 			-> Directive
 
   context-free syntax       %% my additions
-    ":-"            -> Execute {cons("Execute")}        %% Execute? Apply? 
-
-	Execute "module" "(" Word "," List ")"	"." -> ModuleDec {prefer, cons("ModuleDec")}    %% module definition
-    Execute "use_module" "(" Word "," List ")" "."  -> ModuleImport {prefer, cons("ModuleImport")}  %% module import
-    Execute "reexport"  "(" Word, "," List ")" "."  -> ModuleReexport {prefer, cons("ModuleReexport")}  %% module reexport   
+    
+	":-" "module" "(" Word "," List ")"	"." -> ModuleDec {prefer, cons("ModuleDec")}    %% module definition
+    ":-" "use_module" "(" Word "," List ")" "."  -> ModuleImport {prefer, cons("ModuleImport")}  %% module import
+    ":-" "reexport"  "(" Word "," List ")" "."  -> ModuleReexport {prefer, cons("ModuleReexport")}  %% module reexport   
 
 %% ---
 

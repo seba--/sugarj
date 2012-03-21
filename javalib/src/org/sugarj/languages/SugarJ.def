@@ -61,7 +61,7 @@ exports
   (
 
   sorts SugarDec TypeOrSugarDec SugarMod AnnoOrSugarMod SugarBody SugarDecHead
-        NativeSugarDecHead NativeSugarBody SugarCompilationUnit
+        SugarCompilationUnit
         ToplevelDeclaration SugarJLayout
 
   lexical syntax
@@ -85,11 +85,9 @@ exports
 
   context-free syntax
     SugarDecHead SugarBody                 -> SugarDec {cons("SugarDec")}
-    NativeSugarDecHead NativeSugarBody ";" -> SugarDec {cons("SugarDec")}
 
   context-free syntax
     AnnoOrSugarMod* "sugar" JavaId            -> SugarDecHead       {cons("SugarDecHead")}
-    AnnoOrSugarMod* JavaNative "sugar" JavaId -> NativeSugarDecHead {cons("NativeSugarDecHead")}
     JavaAnno                                  -> AnnoOrSugarMod     
     SugarMod                                  -> AnnoOrSugarMod     
     JavaPublic                                -> SugarMod           
@@ -99,7 +97,6 @@ exports
 
   context-free syntax
     "{" SugarDef "}"    -> SugarBody       {cons("SugarBody")}
-    "=" StrategoModName -> NativeSugarBody {cons("NativeSugarBody")}
 
   sorts Grammar Transformation Desugaring SugarDef SugarDefElem
 
