@@ -44,18 +44,22 @@ public sugar Config {
     eliminate-variability = topdown(try(empty-variable-type));
                             topdown(try(configure-node)); 
                             SugarCompilationUnit(id,try(filter(not(?VariabilityHole))),map(try(no-variability)));
-                            topdown(try(filter(not(?VariabilityHole))))
-
+                            topdown(try(filter(not(?VariabilityHole))));
+                            topdown(try(empty-interface-list))
+                           
+  rules
+    empty-interface-list :
+      Some(ImplementsDec([])) -> None
 
   rules 
     empty-variable-type : 
-     ModelDec(mhead, ModelBody( ("VariableStructure", OptionalNode(e,ClassDec(chead, ClassBody(elems)))) ))
-     -> ModelDec(mhead, ModelBody( ("VariableStructure", ClassDec(chead, ClassBody([]))) ))
+     ModelDec(mhead, ModelBody( ("VariableStructure", OptionalNode(e,ClassDec(ClassDecHead(mods, name, params, super, interfaces), ClassBody(elems)))) ))
+     -> ModelDec(mhead, ModelBody( ("VariableStructure", ClassDec(ClassDecHead(mods, name, params, None, None), ClassBody([]))) ))
       where <is-condition-disabled> e 
 
     empty-variable-type : 
-     ModelDec(mhead, ModelBody( ("VariableStructure", OptionalNode(e,InterfaceDec(ihead, ibody))) ))
-     -> ModelDec(mhead, ModelBody( ("VariableStructure", InterfaceDec(ihead, [])) ))
+     ModelDec(mhead, ModelBody( ("VariableStructure", OptionalNode(e,InterfaceDec(InterfaceDecHead(mods,name,params,extendsifc), ibody))) ))
+     -> ModelDec(mhead, ModelBody( ("VariableStructure", InterfaceDec(InterfaceDecHead(mods,name,params,None), [])) ))
       where <is-condition-disabled> e 
 
     configure-node : 

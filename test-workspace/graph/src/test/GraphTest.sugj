@@ -1,11 +1,13 @@
 package test;
 
 import config.MinimalGraphConfig;
-import impl.Graph<MinimalGraphConfig>;
+//import config.FullGraphConfig;
+import impl.Main<MinimalGraphConfig>;
 
 
 public class GraphTest {
    public static void main(String[] args) {
-      Graph g = new Graph();
+      String[] l_args = {"Graph.txt"};
+      Main.main(l_args);
    }
 } 

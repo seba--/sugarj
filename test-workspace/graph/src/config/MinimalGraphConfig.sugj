@@ -4,11 +4,11 @@ import variability.Config;
 import model.GraphFeatureModel;
 
 config MinimalGraphConfig for GraphFeatureModel {
-   disable BENCHMARK;
+   enable BENCHMARK;
    enable BASEIMPL;
    disable SEARCHALG;
    enable UNDIRECTED;
-   disable WEIGHTED;
+   disable WEIGHTED; 
    
    disable NUMBER;
    disable CONNECTED;

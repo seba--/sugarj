@@ -30,6 +30,8 @@ featuremodel GraphFeatureModel  {
    // structural requirements
    requires BASEIMPL
    requires BASEIMPL -> (GNONLYNEIGHBORS xor GENEDGES xor GNOEDGES)
+   requires BASEIMPL -> BENCHMARK
+   
 
    requires SEARCHBASE -> SEARCHALG
    requires SEARCHALG -> (DFS xor BFS)

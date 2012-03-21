@@ -193,7 +193,7 @@ theNeighbor.weight
   static long last=0, current=0, accum=0;
 
 #feature(BENCHMARK)
-  public void runBenchmark(  String FileName) throws IOException {
+  public void runBenchmark(String FileName) throws IOException {
     try {
       inFile=new FileReader(FileName);
     }
@@ -458,12 +458,11 @@ theNeighbor.weight
       theName=vxiter.next().getName();
       newGraph.addVertex(new Vertex().assignName(theName));
     }
-    Vertex theStart, theEnd;
-    Vertex theNewStart, theNewEnd;
-    EdgeIfc theEdge;
+    Vertex theStart = null, theEnd = null;
+    Vertex theNewStart = null, theNewEnd = null;
+    EdgeIfc theEdge = null;
     for (int i=0; i < A.size(); i++) {
       theEdge=(EdgeIfc)A.get(i);
-      theStart=theEdge.getStart();
       theEnd=theEdge.getEnd();
       theNewStart=newGraph.findsVertex(theStart.getName());
       theNewEnd=newGraph.findsVertex(theEnd.getName());

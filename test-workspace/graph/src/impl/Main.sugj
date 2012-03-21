@@ -2,6 +2,7 @@ package impl;
 
 import variability.Java;
 
+import java.io.IOException;
 model import impl.Vertex;
 model import impl.Graph;
 model import impl.EdgeIfc;
@@ -44,7 +45,7 @@ public variable class Main {
       for (i=0; i < num_edges; i++) {
         startVertices[i]=g.readNumber();
         endVertices[i]=g.readNumber();
-      }
+      } 
     }
  catch (    IOException e) {
     }
@@ -67,7 +68,7 @@ public variable class Main {
   static EdgeIfc addEdge(  Graph g,  int n){
     Vertex v1=(Vertex)V[startVertices[n]];
     Vertex v2=(Vertex)V[endVertices[n]];
-    return g.addEdge(v1,v2,0);
+    return g.addEdge(v1,v2,#feature(WEIGHTED) 0);
   }
   static void readWeights(  Graph g,  int num_edges){
   }
