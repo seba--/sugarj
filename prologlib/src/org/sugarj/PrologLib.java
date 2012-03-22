@@ -49,14 +49,14 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	@Override
 	public File getInitEditor() {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO Create a real prolog editor
+		return ensureFile("org/sugarj/prolog/init/initEditor.serv");
 	}
 
 	@Override
 	public String getInitEditorModule() {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO Create a real prolog editor
+		return "org/sugarj/prolog/init/initEditor";
 	}
 
 	@Override

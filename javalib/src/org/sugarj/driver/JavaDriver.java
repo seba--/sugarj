@@ -2,7 +2,7 @@ package org.sugarj.driver;
 
 import static org.sugarj.driver.ATermCommands.getApplicationSubterm;
 import static org.sugarj.driver.ATermCommands.isApplication;
-import static org.sugarj.driver.Environment.sep;
+import static org.sugarj.IEnvironment.sep;
 import static org.sugarj.driver.Log.log;
 
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.util.Set;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
-import org.sugarj.driver.Environment.RelativePathBin;
+import org.sugarj.LanguageDriver;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
 import org.sugarj.driver.path.RelativeSourceLocationPath;

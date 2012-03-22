@@ -1,13 +1,11 @@
-package org.sugarj.driver.path;
+package org.sugarj.common.path;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 
-import org.sugarj.driver.Environment;
-import org.sugarj.driver.Environment.RelativePathBin;
-import org.sugarj.driver.Environment.RelativePathCache;
+import org.sugarj.IEnvironment;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -34,13 +32,13 @@ public abstract class Path implements Serializable {
   }
 
   protected String trimFront(String path) {
-    while (path.startsWith(Environment.sep))
+    while (path.startsWith(IEnvironment.sep))
       path = path.substring(1, path.length());
     return path;
   }
   
   protected String trimBack(String path) {
-    while (path.endsWith(Environment.sep))
+    while (path.endsWith(IEnvironment.sep))
       path = path.substring(0, path.length() - 1);
     return path;
   }
@@ -51,22 +49,23 @@ public abstract class Path implements Serializable {
 //   */
 //  public abstract RelativePath makeRelativeTo(Path p);
 
-  public static Path readPath(ObjectInputStream ois, Environment env) throws IOException, ClassNotFoundException {
+  public static Path readPath(ObjectInputStream ois, IEnvironment env) throws IOException, ClassNotFoundException {
     return readPath(ois, env, true);
   }
   
-  public static Path readPath(ObjectInputStream ois, Environment env, boolean reallocate) throws IOException, ClassNotFoundException {
+  public static Path readPath(ObjectInputStream ois, IEnvironment env, boolean reallocate) throws IOException, ClassNotFoundException {
     Path p = (Path) ois.readObject();
     return reallocate ? reallocate(p, env) : p;
   }
   
-  public static Path reallocate(Path p, Environment env) {
-    if (p instanceof RelativePathBin)
-      return env.new RelativePathBin(((RelativePath) p).getRelativePath());
+  public static Path reallocate(Path p, IEnvironment env) {
+    // TODO: Uncomment
+/*    if (p instanceof RelativePathBin)
+      return env.new RelativePathBin(((RelativePath) p).getRelativePath(), env);
     
     if (p instanceof RelativePathCache)
-      return env.new RelativePathCache(((RelativePath) p).getRelativePath());
-    
+      return env.new RelativePathCache(((RelativePath) p).getRelativePath(), env);
+    */
     return p;
   }
 }

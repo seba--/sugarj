@@ -1,4 +1,4 @@
-package org.sugarj.driver.path;
+package org.sugarj.common.path;
 
 
 /**

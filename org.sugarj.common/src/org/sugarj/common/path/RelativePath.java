@@ -1,6 +1,6 @@
-package org.sugarj.driver.path;
+package org.sugarj.common.path;
 
-import org.sugarj.driver.Environment;
+import org.sugarj.IEnvironment;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -40,6 +40,6 @@ public class RelativePath extends Path {
     if (getBasePath() == null)
       throw new IllegalStateException("Base of relative path is still open; cannot construct absolute path yet.");
       
-    return getBasePath() + Environment.sep + getRelativePath();
+    return getBasePath() + IEnvironment.sep + getRelativePath();
   }
 }

@@ -3,6 +3,7 @@ package org.sugarj.driver;
 import static org.sugarj.driver.ATermCommands.isApplication;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.sugarj.LanguageDriver;
 
 // TODO: Move to prolog library
 

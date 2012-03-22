@@ -1,4 +1,4 @@
-package org.sugarj.driver;
+package org.sugarj;
 
 import java.io.IOException;
 
@@ -16,6 +16,7 @@ public abstract class LanguageDriver {
   public abstract boolean isPlain(IStrategoTerm decl); // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
 
   public abstract void processLanguageSpecific(IStrategoTerm toplevelDecl,
-                                                Environment environment, 
+                                                IEnvironment environment, 
                                                 HybridInterpreter interp) throws IOException;
+
 }

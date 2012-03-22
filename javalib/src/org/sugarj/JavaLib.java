@@ -39,22 +39,6 @@ public class JavaLib extends LanguageLib implements Serializable {
 		//return "org/sugarj/languages/sugarJ";
 	}
 
-	// XXX: Remove
-/*	@Override
-	public File getInitGrammarAtomicImports() {
-		return ensureFile("org/sugarj/java/init/initGrammar_atomicImports.sdf");
-	}
-
-	@Override
-	public String getInitGrammarAtomicImportsModule() {
-		return "org/sugarj/java/init/initGrammar_atomicImports";
-	}
-
-	@Override
-	public File getInitGrammarXTBL() {
-		return ensureFile("org/sugarj/java/init/initGrammar.xtbl");
-	}	*/
-
 	@Override
 	public File getInitTrans() {
 		return ensureFile("org/sugarj/java/init/InitTrans.str");

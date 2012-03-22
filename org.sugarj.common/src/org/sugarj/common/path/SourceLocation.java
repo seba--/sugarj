@@ -1,19 +1,19 @@
-package org.sugarj.driver.path;
+package org.sugarj.common.path;
 
 import java.io.Serializable;
 
-import org.sugarj.driver.Environment;
+import org.sugarj.IEnvironment;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
 public class SourceLocation implements Serializable {
-  private static final long serialVersionUID = -7115409347263943546L;
+  private static final long serialVersionUID = 108583591484866411L;
 
   private Path path;
-  private Environment env;
+  private IEnvironment env;
 
-  public SourceLocation(Path path, Environment env) {
+  public SourceLocation(Path path, IEnvironment env) {
     this.path = path;
     this.env = env;
   }
@@ -22,7 +22,7 @@ public class SourceLocation implements Serializable {
     return path;
   }
 
-  public Environment getEnvironment() {
+  public IEnvironment getEnvironment() {
     return env;
   }
 }
