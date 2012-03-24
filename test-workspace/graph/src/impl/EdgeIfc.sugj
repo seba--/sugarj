@@ -11,8 +11,8 @@ public variable interface EdgeIfc {
   public void display();
   public Vertex getOtherVertex(  Vertex vertex);
   public void adjustAdorns(  EdgeIfc the_edge);
-#feature(WEIGHTED)
-  public void setWeight(  int weight);
-#feature(WEIGHTED)
-  public int getWeight();
+  #feature(Weighted)
+    public void setWeight(  int weight);
+  #feature(Weighted)
+    public int getWeight();
 } 

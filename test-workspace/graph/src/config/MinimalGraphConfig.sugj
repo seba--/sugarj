@@ -4,25 +4,25 @@ import variability.Config;
 import model.GraphFeatureModel;
 
 config MinimalGraphConfig for GraphFeatureModel {
-   enable BENCHMARK;
-   enable BASEIMPL;
-   disable SEARCHALG;
-   enable UNDIRECTED;
-   disable WEIGHTED; 
+   enable Benchmark;
+   enable BaseImpl;
+   disable SearchAlg;
+   enable Undirected;
+   disable Weighted; 
    
-   disable NUMBER;
-   disable CONNECTED;
-   disable TRANSPOSE;
-   disable MSTPRIM;
-   disable MSTKRUSKAL;
-   disable CYCLE;
-   disable STRONGLYCONNECTED;
+   disable Number;
+   disable Connected;
+   disable Transpose;
+   disable Mstprim;
+   disable Mstkruskal;
+   disable Cycle;
+   disable StronglyConnected;
    
-   disable SEARCHBASE;
-   disable DFS;
-   disable BFS;
+   disable SearchBase;
+   disable Dfs;
+   disable Bfs;
 
-   disable GENEDGES;
-   disable GNONLYNEIGHBORS;
-   enable GNOEDGES;
+   disable GenEdges;
+   disable GNOnlyNeighbours;
+   enable GNoEdges;
 }

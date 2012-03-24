@@ -6,7 +6,7 @@ import java.util.LinkedList;
 model import impl.Vertex;
 
 
-#feature(BFS)
+#feature(Bfs)
 public variable class GlobalVarsWrapper {
   public static LinkedList<Vertex> queue=new LinkedList<Vertex>();
 }

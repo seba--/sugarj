@@ -30,56 +30,41 @@ model import impl.WorkSpaceTranspose;
 
 public variable class Graph { 
   LinkedList<Vertex> vertices;
-#feature(SEARCHBASE)
-  private LinkedList<EdgeIfc> edges;
+  #feature(SearchBase) private LinkedList<EdgeIfc> edges;
   
   public Graph(){ 
     vertices=new LinkedList<Vertex>();
-#feature(GENEDGES)
-    edges=new LinkedList<EdgeIfc>();
+    #feature(GenEdges)
+      edges=new LinkedList<EdgeIfc>();
 
   }
   public VertexIter getVertices(){
     return new VertexIter(this);
   }
-#feature(SEARCHBASE)
+  #feature(SearchBase)
   public EdgeIter getEdges(){
-    if (
-// TODO: maybe reformat code?
-#feature(GENEDGES) {false && edgesNotBuilt} {edgesNotBuilt} 
-        ) {
+    if (#feature(GenEdges) {false && edgesNotBuilt} {edgesNotBuilt}) {
       edgesNotBuilt=false;
       edges=new LinkedList<EdgeIfc>();
       int k1=0, k2=0, sizeAV=0;
-#feature(GNONLYNEIGHBORS)
-      Neighbor tempNeighbor;
+      #feature(GNOnlyNeighbours) Neighbor tempNeighbor;
       
       for (VertexIter vxiter=getVertices(); vxiter.hasNext(); ) {
         Vertex v=vxiter.next(); 
-#feature(GNOEDGES)
-        sizeAV=v.adjacentVertices.size();
-        
-#feature(GNONLYNEIGHBORS)
-        sizeAV=v.adjacentNeighbors.size();
+        #feature(GNoEdges) sizeAV=v.adjacentVertices.size();
+        #feature(GNOnlyNeighbours) sizeAV=v.adjacentNeighbors.size();
 
         for (k2=0; k2 < sizeAV; k2++) {
-#feature(GNOEDGES)
-          edges.add(new Edge(v,v.adjacentVertices.get(k2),
-#feature(WEIGHTED)
-v.weightsList.get(k2).intValue()
-
-)); 
-
-#feature(GNONLYNEIGHBORS)
-          tempNeighbor=v.adjacentNeighbors.get(k2);
-
-#feature(GNONLYNEIGHBORS)
-          edges.add(new Edge(v,tempNeighbor.neighbor,
-#feature(WEIGHTED)
-tempNeighbor.weight
-
-));
-
+          #feature(GNoEdges)
+            edges.add(
+              new Edge(v,v.adjacentVertices.get(k2), #feature(Weighted) v.weightsList.get(k2).intValue())
+            ); 
+          #feature(GNOnlyNeighbours)
+            tempNeighbor=v.adjacentNeighbors.get(k2);
+          #feature(GNOnlyNeighbours)
+            edges.add(
+              new Edge(v,tempNeighbor.neighbor, #feature(Weighted) tempNeighbor.weight)
+            );
         } 
       }
     }
@@ -91,70 +76,64 @@ tempNeighbor.weight
       public boolean hasNext(){
         return iter.hasNext();
       }
-    }
-;
+    };
   }
 
-#feature(SEARCHBASE)
-  boolean edgesNotBuilt=true; 
+  #feature(SearchBase)  boolean edgesNotBuilt=true; 
 
   public void sortVertices(  Comparator<Vertex> c){
     Collections.sort(vertices,c);
   }
 
-#feature(SEARCHBASE)
+  #feature(SearchBase)
   public void sortEdges(  Comparator<EdgeIfc> c){
     Collections.sort(edges,c);
   }
 
-  #feature(GNOEDGES)
-  EdgeIfc addEdge(Vertex start, Vertex end, #feature(WEIGHTED) int weight) {
+  #feature(GNoEdges)
+  EdgeIfc addEdge(Vertex start, Vertex end, #feature(Weighted) int weight) {
     start.addAdjacent(end);
-    #feature(UNDIRECTED)
+    #feature(Undirected)
       end.addAdjacent(start);
-    #feature(WEIGHTED)
+    #feature(Weighted)
       start.setWeight(weight);
-    #feature(UNDIRECTED && WEIGHTED)
+    #feature(Undirected && Weighted)
       end.addWeight(weight);
     return (EdgeIfc)start;
   }
 
 
-  #feature(GNONLYNEIGHBORS)
-  EdgeIfc addEdge(Vertex start, Vertex end, #feature(WEIGHTED) int weight) {
-    Neighbor e=new Neighbor(end, #feature(WEIGHTED) weight);
+  #feature(GNOnlyNeighbours)
+  EdgeIfc addEdge(Vertex start, Vertex end, #feature(Weighted) int weight) {
+    Neighbor e=new Neighbor(end, #feature(Weighted) weight);
     addEdge(start,e);
     return e;
   }
 
-  #feature(GENEDGES)
-  EdgeIfc addEdge(Vertex start, Vertex end, #feature(WEIGHTED) int weight) {
-    Edge theEdge=new Edge(start, end, #feature(WEIGHTED) weight);
+  #feature(GenEdges)
+  EdgeIfc addEdge(Vertex start, Vertex end, #feature(Weighted) int weight) {
+    Edge theEdge=new Edge(start, end, #feature(Weighted) weight);
     edges.add(theEdge);
-	start.addNeighbor(new Neighbor(end,theEdge));
-	end.addNeighbor(new Neighbor(start,theEdge));
-	return theEdge;
+	  start.addNeighbor(new Neighbor(end,theEdge));
+	  end.addNeighbor(new Neighbor(start,theEdge));
+	  return theEdge;
   }
 
 
-#feature(GNONLYNEIGHBORS)
+  #feature(GNOnlyNeighbours)
   public void addEdge(  Vertex start,  Neighbor theNeighbor){
     start.addEdge(theNeighbor);
-#feature(UNDIRECTED)
-    Vertex end=theNeighbor.neighbor;
-
-#feature(UNDIRECTED)
-    end.addEdge(new Neighbor(start,
-#feature(WEIGHTED)
-theNeighbor.weight
-
-));
-
+    #feature(Undirected)
+      Vertex end=theNeighbor.neighbor;
+    #feature(Undirected)
+      end.addEdge(
+        new Neighbor(start, #feature(Weighted) theNeighbor.weight)
+      );
   }
 
-  Vertex findsVertex(  String name){
+  Vertex findsVertex(String name){
     Vertex theVertex;
-    if (name == null)     return null;
+    if (name == null) return null;
     for (VertexIter vxiter=getVertices(); vxiter.hasNext(); ) {
       theVertex=vxiter.next();
       if (name.equals(theVertex.getName())) {
@@ -163,51 +142,47 @@ theNeighbor.weight
     }
     return null;
   }
+
   void display(){
     System.out.println("******************************************");
     System.out.println("Vertices ");
     for (int i=0; i < vertices.size(); i++)     vertices.get(i).display();
     System.out.println("******************************************");
-#feature(GENEDGES)
-    System.out.println("Edges ");
+    #feature(GenEdges)
+      System.out.println("Edges ");
 
-#feature(GENEDGES)
-    for (EdgeIter edgeiter=getEdges(); edgeiter.hasNext(); ) 
-#feature(GENEDGES)
-    edgeiter.next().display();
+    #feature(GenEdges)
+      for (EdgeIter edgeiter=getEdges(); edgeiter.hasNext(); ) 
+        edgeiter.next().display();
 
-#feature(GENEDGES)
-    System.out.println("******************************************");
-    
+    #feature(GenEdges)
+      System.out.println("******************************************");
   }
+
   void addVertex(  Vertex v){
     vertices.add(v);
   }
-#feature(BENCHMARK)
-  public Reader inFile;
 
-#feature(BENCHMARK)
-  public static int ch;
+  #feature(Benchmark) public Reader inFile;
+  #feature(Benchmark) public static int ch;
+  #feature(Benchmark) static long last=0, current=0, accum=0;
 
-#feature(BENCHMARK)
-  static long last=0, current=0, accum=0;
-
-#feature(BENCHMARK)
+  #feature(Benchmark)
   public void runBenchmark(String FileName) throws IOException {
     try {
       inFile=new FileReader(FileName);
     }
- catch (    IOException e) {
+    catch (IOException e) {
       System.out.println("Your file " + FileName + " cannot be read");
     }
   }
 
-#feature(BENCHMARK)
+  #feature(Benchmark)
   public void stopBenchmark() throws IOException {
     inFile.close();
   }
 
-#feature(BENCHMARK)
+  #feature(Benchmark)
   public int readNumber() throws IOException {
     int index=0;
     char[] word=new char[80];
@@ -226,93 +201,94 @@ theNeighbor.weight
     return Integer.parseInt(theString,10);
   }
 
-#feature(BENCHMARK)
+  #feature(Benchmark)
   public static void startProfile(){
     accum=0;
     current=System.currentTimeMillis();
     last=current;
   }
 
-#feature(BENCHMARK)
+  #feature(Benchmark)
   public static void stopProfile(){
     current=System.currentTimeMillis();
     accum=accum + (current - last);
   }
 
-#feature(BENCHMARK)
+  #feature(Benchmark)
   public static void resumeProfile(){
     current=System.currentTimeMillis();
     last=current;
   }
   
-#feature(BENCHMARK)
+  #feature(Benchmark)
   public static void endProfile(){
     current=System.currentTimeMillis();
     accum=accum + (current - last);
     System.out.println("Time elapsed: " + accum + " milliseconds");
   }
 
-#feature(BASEIMPL)
-  public void run(  Vertex v){
-#feature(CONNECTED)
-    connectedComponents();
+  #feature(BaseImpl)
+  public void run(Vertex v){
+    #feature(Connected)
+      ConnectedComponents();
 
-#feature(CYCLE)
-    System.out.println(" Cycle? " + cycleCheck());
-
-#feature(MSTKRUSKAL)
-    Graph gaux=kruskal();
-
-#feature(MSTKRUSKAL)
-    Graph.stopProfile();
-
-#feature(MSTKRUSKAL)
-    gaux.display();
-
-#feature(MSTKRUSKAL)
-    Graph.resumeProfile();
-
-#feature(MSTPRIM)
-    Graph gaux1=prim(v);
-
-#feature(MSTPRIM)
-    Graph.stopProfile();
-
-#feature(MSTPRIM)
-    gaux1.display();
-
-#feature(MSTPRIM)
-    Graph.resumeProfile();
-
-#feature(NUMBER)
-    numberVertices();
-
-#feature(STRONGLYCONNECTED)
-    Graph gaux2=strongComponents();
-
-#feature(STRONGLYCONNECTED)
-    Graph.stopProfile();
-
-#feature(STRONGLYCONNECTED)
-    gaux2.display();
-
-#feature(STRONGLYCONNECTED)
-    Graph.resumeProfile();
-
+	  #feature(Cycle)
+	    System.out.println(" Cycle? " + cycleCheck());
+	
+	  #feature(Mstkruskal)
+	    Graph gaux=kruskal();
+	
+	  #feature(Mstkruskal)
+	    Graph.stopProfile();
+	
+	  #feature(Mstkruskal)
+	    gaux.display();
+	
+	  #feature(Mstkruskal)
+	    Graph.resumeProfile();
+	
+	  #feature(Mstprim)
+	    Graph gaux1=prim(v);
+	
+	  #feature(Mstprim)
+	    Graph.stopProfile();
+	
+	  #feature(Mstprim)
+	    gaux1.display();
+	
+	  #feature(Mstprim)
+	    Graph.resumeProfile();
+	
+	  #feature(Number)
+	    numberVertices();
+	
+	  #feature(StronglyConnected)
+	    Graph gaux2=strongComponents();
+	
+	  #feature(StronglyConnected)
+	    Graph.stopProfile();
+	
+	  #feature(StronglyConnected)
+	    gaux2.display();
+	
+	  #feature(StronglyConnected)
+	    Graph.resumeProfile();
   }
 
-#feature(SEARCHBASE)
+  #feature(SearchBase)
   public EdgeIfc findsEdge(  Vertex theSource,  Vertex theTarget){
     Vertex v1=theSource;
     for (EdgeIter edgeiter=v1.getEdges(); edgeiter.hasNext(); ) {
       EdgeIfc theEdge=edgeiter.next();
       Vertex v2=theEdge.getOtherVertex(v1);
-      if ((v1.getName().equals(theSource.getName()) && v2.getName().equals(theTarget.getName())) || (v1.getName().equals(theTarget.getName()) && v2.getName().equals(theSource.getName())))       return theEdge;
+      if ((v1.getName().equals(theSource.getName()) && v2.getName().equals(theTarget.getName())) ||
+          (v1.getName().equals(theTarget.getName()) && v2.getName().equals(theSource.getName())))
+       return theEdge;
     }
     return null;
   }
 
-#feature(SEARCHALG)
+  #feature(SearchAlg)
   public void graphSearch(  WorkSpace w){
     VertexIter vxiter=getVertices();
     if (vxiter.hasNext() == false) {
@@ -331,35 +307,34 @@ theNeighbor.weight
     }
   }
 
-#feature(NUMBER)
+  #feature(Number)
   public void numberVertices(){
     graphSearch(new NumberWorkSpace());
   }
 
-#feature(CONNECTED)
-  public void connectedComponents(){
+  #feature(Connected)
+  public void ConnectedComponents(){
     graphSearch(new RegionWorkSpace());
   }
 
-#feature(STRONGLYCONNECTED)
+  #feature(StronglyConnected)
   public Graph strongComponents(){
     FinishTimeWorkSpace FTWS=new FinishTimeWorkSpace();
     graphSearch(FTWS);
     sortVertices(new Comparator<Vertex>(){
-      public int compare(      Vertex v1,      Vertex v2){
-        if (v1.finishTime > v2.finishTime)         return -1;
-        if (v1.finishTime == v2.finishTime)         return 0;
+      public int compare(Vertex v1, Vertex v2){
+        if (v1.finishTime > v2.finishTime) return -1;
+        if (v1.finishTime == v2.finishTime) return 0;
         return 1;
       }
-    }
-);
+    });
     Graph gaux=computeTranspose((Graph)this);
     WorkSpaceTranspose WST=new WorkSpaceTranspose();
     gaux.graphSearch(WST);
     return gaux;
   }
 
-#feature(TRANSPOSE)
+  #feature(Transpose)
   public Graph computeTranspose(  Graph the_graph){
     int i;
     String theName;
@@ -382,24 +357,21 @@ theNeighbor.weight
       for (VertexIter neighbors=theVertex.getNeighbors(); neighbors.hasNext(); ) {
         theNeighbor=neighbors.next();
         newVertex=(Vertex)newVertices.get(theNeighbor.getName());
-        newEdge=newGraph.addEdge(newVertex,newAdjacent,
-#feature(WEIGHTED)
-0
-
-);
+        newEdge=
+          newGraph.addEdge(newVertex, newAdjacent, #feature(Weighted) 0);
       }
     }
     return newGraph;
   }
 
-#feature(CYCLE)
+  #feature(Cycle)
   public boolean cycleCheck(){
     CycleWorkSpace c=new CycleWorkSpace();
     graphSearch(c);
     return c.AnyCycles;
   }
 
-#feature(MSTKRUSKAL)
+  #feature(Mstkruskal)
   public Graph kruskal(){
     LinkedList A=new LinkedList();
     for (VertexIter vxiter=getVertices(); vxiter.hasNext(); ) {
@@ -410,13 +382,12 @@ theNeighbor.weight
     LinkedList Vneighbors=new LinkedList();
     EdgeIter dummyIter=getEdges();
     sortEdges(new Comparator<EdgeIfc>(){
-      public int compare(      EdgeIfc e1,      EdgeIfc e2){
-        if (e1.getWeight() < e2.getWeight())         return -1;
-        if (e1.getWeight() == e2.getWeight())         return 0;
+      public int compare( EdgeIfc e1, EdgeIfc e2){
+        if (e1.getWeight() < e2.getWeight()) return -1;
+        if (e1.getWeight() == e2.getWeight()) return 0;
         return 1;
       }
-    }
-);
+    });
     Vertex vaux, urep, vrep;
     for (EdgeIter edgeiter=getEdges(); edgeiter.hasNext(); ) {
       EdgeIfc e1=edgeiter.next();
@@ -437,8 +408,7 @@ theNeighbor.weight
           (urep.members).add(v);
           if (!v.equals(vrep))           (urep.members).add(vrep);
           (vrep.members).clear();
-        }
- else {
+        } else {
           for (int j=0; j < (urep.members).size(); j++) {
             vaux=(Vertex)(urep.members).get(j);
             vaux.representative=vrep;
@@ -472,7 +442,7 @@ theNeighbor.weight
     return newGraph;
   }
 
-#feature(MSTPRIM)
+  #feature(Mstprim)
   public Graph prim(  Vertex r){
     Vertex root;
     root=r;
@@ -522,17 +492,15 @@ theNeighbor.weight
           queue.remove(residue);
           indx.remove(v.getName());
           int position=Collections.binarySearch(queue,v,new Comparator<Vertex>(){
-            public int compare(            Vertex v1,            Vertex v2){
-              if (v1.key < v2.key)               return -1;
-              if (v1.key == v2.key)               return 0;
+            public int compare(Vertex v1, Vertex v2){
+              if (v1.key < v2.key) return -1;
+              if (v1.key == v2.key) return 0;
               return 1;
             }
-          }
-);
+          });
           if (position < 0) {
             queue.add(-(position + 1),v);
-          }
- else {
+          } else {
             queue.add(position,v);
           }
           indx.add(v.getName());
@@ -552,7 +520,7 @@ theNeighbor.weight
     for (VertexIter vxiter=getVertices(); vxiter.hasNext(); ) {
       theVertex=vxiter.next();
       thePred=findsVertex(theVertex.pred);
-      if (thePred == null)       continue;
+      if (thePred == null) continue;
       theNewVertex=newGraph.findsVertex(theVertex.name);
       theNewPred=newGraph.findsVertex(thePred.name);
       EdgeIfc theNewEdge=newGraph.addEdge(theNewPred,theNewVertex,0);

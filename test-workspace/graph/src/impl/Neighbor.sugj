@@ -9,83 +9,70 @@ import impl.NeighborIfc;
 
 
 public variable class Neighbor implements 
-#feature(GNONLYNEIGHBORS) 
-EdgeIfc
+  #feature(GNOnlyNeighbours) EdgeIfc, 
+  NeighborIfc {
 
-, NeighborIfc {
-#feature(GNONLYNEIGHBORS)
+  #feature(GNOnlyNeighbours)
   public Vertex neighbor;
 
   public Neighbor(){
-#feature(GNONLYNEIGHBORS)
-    neighbor=null;
-
-#feature(GENEDGES)
-    end=null;
-
-#feature(GENEDGES)
-    edge=null;
-
+    #feature(GNOnlyNeighbours) neighbor=null;
+    #feature(GenEdges) end=null;
+    #feature(GenEdges) edge=null;
   }
-#feature(GNONLYNEIGHBORS)
-  public Neighbor(  Vertex theNeighbor,
-#feature(WEIGHTED)
-  int aweight
-
-){
+  
+  #feature(GNOnlyNeighbours)
+  public Neighbor(Vertex theNeighbor, #feature(Weighted) int aweight) {
     neighbor=theNeighbor;
-#feature(WEIGHTED)
-    weight=aweight;
-
+    #feature(Weighted) weight=aweight;
   }
 
-#feature(GNONLYNEIGHBORS)
+  #feature(GNOnlyNeighbours)
   public void display(){
     System.out.print(neighbor.name + " ,");
   }
 
-#feature(GNONLYNEIGHBORS)
+  #feature(GNOnlyNeighbours)
   public Vertex getStart(){
     return null;
   }
 
-#feature(GNONLYNEIGHBORS)
+  #feature(GNOnlyNeighbours)
   public Vertex getEnd(){
     return neighbor;
   }
 
-#feature(WEIGHTED && GNONLYNEIGHBORS)
+  #feature(Weighted && GNOnlyNeighbours)
   public int weight;
 
-#feature(WEIGHTED && GNONLYNEIGHBORS)
+  #feature(Weighted && GNOnlyNeighbours)
   public void setWeight(  int weight){
     this.weight=weight;
   }
 
-#feature(WEIGHTED && GNONLYNEIGHBORS)
+  #feature(Weighted && GNOnlyNeighbours)
   public int getWeight(){
     return this.weight;
   }
 
-#feature(GNONLYNEIGHBORS)
+  #feature(GNOnlyNeighbours)
   public Vertex getOtherVertex(  Vertex vertex){
     return neighbor;
   }
 
-#feature(GNONLYNEIGHBORS)
+  #feature(GNOnlyNeighbours)
   public void adjustAdorns(  EdgeIfc the_edge){
   }
 
-#feature(GENEDGES)
+  #feature(GenEdges)
   public Vertex end;
 
-#feature(GENEDGES)
+  #feature(GenEdges)
   public Edge edge;
 
-#feature(GENEDGES)
+  #feature(GenEdges)
   public Neighbor(  Vertex v,  Edge e){
     end=v;
     edge=e;
   }
-
 }

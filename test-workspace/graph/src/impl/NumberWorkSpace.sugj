@@ -6,13 +6,13 @@ model import impl.WorkSpace;
 model import impl.Vertex;
 
 
-#feature(NUMBER)
+#feature(Number)
 public variable class NumberWorkSpace extends WorkSpace {
   int vertexCounter;
   public NumberWorkSpace(){
     vertexCounter=0;
   }
-  public void preVisitAction(  Vertex v){
+  public void preVisitAction(Vertex v){
     if (v.visited != true) {
       v.vertexNumber=vertexCounter++;
     }

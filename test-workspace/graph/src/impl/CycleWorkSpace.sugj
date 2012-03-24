@@ -6,7 +6,7 @@ model import impl.WorkSpace;
 model import impl.Vertex;
 
 
-#feature(CYCLE)
+#feature(Cycle)
 public variable class CycleWorkSpace extends WorkSpace {
   public boolean AnyCycles;
   public int counter;
@@ -35,11 +35,9 @@ public variable class CycleWorkSpace extends WorkSpace {
     if ((vsource.VertexColor == GRAY) && (vtarget.VertexColor == GRAY)) {
       AnyCycles=true;
     }
-#feature(UNDIRECTED)
-    if ((vsource.VertexColor == GRAY) && (vtarget.VertexColor == GRAY) && vsource.VertexCycle != vtarget.VertexCycle + 1) 
-#feature(UNDIRECTED)
-{
-      AnyCycles=true;
-    }
+    #feature(Undirected)
+      if ((vsource.VertexColor == GRAY) && (vtarget.VertexColor == GRAY) && vsource.VertexCycle != vtarget.VertexCycle + 1) {
+        AnyCycles=true;
+      }
   }
 }

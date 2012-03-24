@@ -9,7 +9,7 @@ model import impl.EdgeIfc;
 
 
 
-#feature(BASEIMPL)
+#feature(BaseImpl)
 public variable class Main {
   static Vertex V[];
   static int startVertices[];
@@ -20,7 +20,7 @@ public variable class Main {
     try {
       g.runBenchmark(args[0]);
     }
- catch (    IOException e) {
+    catch (IOException e) {
     }
     int num_vertices=0;
     int num_edges=0;
@@ -47,13 +47,13 @@ public variable class Main {
         endVertices[i]=g.readNumber();
       } 
     }
- catch (    IOException e) {
+    catch (    IOException e) {
     }
     Main.readWeights(g,num_edges);
     try {
       g.stopBenchmark();
     }
- catch (    IOException e) {
+    catch (IOException e) {
     }
     for (i=0; i < num_edges; i++)     Main.addEdge(g,i);
     Graph.startProfile();
@@ -68,9 +68,9 @@ public variable class Main {
   static EdgeIfc addEdge(  Graph g,  int n){
     Vertex v1=(Vertex)V[startVertices[n]];
     Vertex v2=(Vertex)V[endVertices[n]];
-    return g.addEdge(v1,v2,#feature(WEIGHTED) 0);
+    return g.addEdge(v1, v2, #feature(Weighted) 0);
   }
-  static void readWeights(  Graph g,  int num_edges){
+  static void readWeights(Graph g, int num_edges){
   }
 }
 

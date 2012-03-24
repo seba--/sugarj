@@ -5,7 +5,7 @@ import variability.Java;
 model import impl.Vertex;
 
 
-#feature(SEARCHALG)
+#feature(SearchAlg)
 public variable class WorkSpace {
   public void init_vertex(  Vertex v){
   }

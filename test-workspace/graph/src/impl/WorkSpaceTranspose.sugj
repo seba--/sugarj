@@ -7,18 +7,18 @@ model import impl.WorkSpace;
 
 
 
-#feature(STRONGLYCONNECTED)
+#feature(StronglyConnected)
 public variable class WorkSpaceTranspose extends WorkSpace {
   int SCCCounter;
   public WorkSpaceTranspose(){
     SCCCounter=0;
   }
-  public void preVisitAction(  Vertex v){
+  public void preVisitAction(Vertex v){
     if (v.visited != true) {
       v.strongComponentNumber=SCCCounter;
     }
   }
-  public void nextRegionAction(  Vertex v){
+  public void nextRegionAction(Vertex v){
     SCCCounter++;
   }
 } 

@@ -5,25 +5,25 @@ import model.GraphFeatureModel;
 
 
 config FullGraphConfig for GraphFeatureModel {
-   enable BENCHMARK;
-   enable BASEIMPL;
-   enable SEARCHALG;
-   enable UNDIRECTED;
-   enable WEIGHTED; 
+   enable Benchmark;
+   enable BaseImpl;
+   enable SearchAlg;
+   enable Undirected;
+   enable Weighted; 
    
-   enable NUMBER;
-   enable CONNECTED;
-   enable TRANSPOSE;
-   enable MSTPRIM;
-   enable MSTKRUSKAL;
-   enable CYCLE;
-   disable STRONGLYCONNECTED;
+   enable Number;
+   enable Connected;
+   enable Transpose;
+   enable Mstprim;
+   enable Mstkruskal;
+   enable Cycle;
+   disable StronglyConnected;
    
-   enable SEARCHBASE;
-   enable DFS;
-   disable BFS;
+   enable SearchBase;
+   enable Dfs;
+   disable Bfs;
 
-   enable GENEDGES;
-   disable GNONLYNEIGHBORS;
-   disable GNOEDGES;
+   enable GenEdges;
+   disable GNOnlyNeighbours;
+   disable GNoEdges;
 }
