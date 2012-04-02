@@ -16,6 +16,7 @@ import org.sugarj.LanguageDriver;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
+import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
 
@@ -34,7 +35,7 @@ public class JavaDriver extends LanguageDriver {
     
     String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
     
-    RelativePath clazz = environment.new RelativePathBin(getRelPackageNameSep() + decName + ".class");
+    RelativePath clazz = environment.createBinPath(getRelPackageNameSep() + decName + ".class");
     
     generatedJavaClasses.add(clazz);
     javaSource.addBodyDecl(SDFCommands.prettyPrintJava(dec, interp));
@@ -70,7 +71,7 @@ public class JavaDriver extends LanguageDriver {
   }
   
   public void setupSourceFile(RelativePath sourceFile, Environment environment) {
-    javaOutFile = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".java");
+    javaOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".java");
     javaSource = new JavaSourceFileContent();
     javaSource.setOptionalImport(false);
   }
@@ -104,7 +105,7 @@ public class JavaDriver extends LanguageDriver {
     checkPackageName(toplevelDecl, sourceFile, driverResult);
     
     if (javaOutFile == null)
-      javaOutFile = environment.new RelativePathBin(getRelPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".java");
+      javaOutFile = environment.createBinPath(getRelPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".java");
 
     // moved here before depOutFile==null check
     javaSource.setPackageDecl(SDFCommands.prettyPrintJava(toplevelDecl, interp));
@@ -128,7 +129,7 @@ public class JavaDriver extends LanguageDriver {
   
   public void checkSourceOutFile(Environment environment, Result driverResult) {
     if (javaOutFile == null)
-      setJavaOutFile(environment.new RelativePathBin(getRelPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + getSourcecodeExtension()));
+      setJavaOutFile(environment.createBinPath(getRelPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + getSourcecodeExtension()));
   }
   
   

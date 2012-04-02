@@ -30,9 +30,11 @@ import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.tools.sdf_desugar_0_0;
 import org.sugarj.common.path.Path;
-import org.sugarj.driver.FileCommands;
-import org.sugarj.driver.transformations.extraction.extract_sdf_0_0;
-import org.sugarj.driver.transformations.extraction.extract_str_0_0;
+import org.sugarj.common.FileCommands;
+// XXX: Copied extract_sdf_0_0 to org.sugarj.common to get this working
+// XXX: Copied extract_str_0_0 to org.sugarj.common to get this working
+//import org.sugarj.driver.transformations.extraction.extract_sdf_0_0;
+//import org.sugarj.driver.transformations.extraction.extract_str_0_0;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>

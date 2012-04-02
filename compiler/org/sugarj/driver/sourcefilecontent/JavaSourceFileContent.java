@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.sugarj.common.Environment;
-import org.sugarj.driver.FileCommands;
+import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.RelativePath;
 
 /**

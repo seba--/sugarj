@@ -1,6 +1,6 @@
 package org.sugarj.driver;
 
-import static org.sugarj.driver.FileCommands.toWindowsPath;
+import static org.sugarj.common.FileCommands.toWindowsPath;
 import static org.sugarj.driver.Log.log;
 
 import java.io.BufferedInputStream;
@@ -34,6 +34,7 @@ import org.strategoxt.strj.main_strj_0_0;
 import org.sugarj.LanguageLib;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
+import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.driver.caching.ModuleKey;

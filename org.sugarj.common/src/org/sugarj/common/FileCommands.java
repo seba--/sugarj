@@ -1,4 +1,4 @@
-package org.sugarj.driver;
+package org.sugarj.common;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -12,7 +12,6 @@ import java.net.URI;
 import java.net.URL;
 import java.util.List;
 
-import org.sugarj.common.Environment;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;

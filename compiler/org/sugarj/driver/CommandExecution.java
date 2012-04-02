@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.sugarj.common.FileCommands;
+
 /**
  * Provides methods for calling external commands. Includes input
  * and output stream forwarding to standard in and out.

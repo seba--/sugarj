@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
 import org.sugarj.common.Environment;
+import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.Path;
 
 /**
