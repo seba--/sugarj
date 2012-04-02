@@ -1,7 +1,7 @@
 package org.sugarj.driver;
 
 import static org.sugarj.common.ATermCommands.isApplication;
-import static org.sugarj.driver.Log.log;
+import static org.sugarj.common.Log.log;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

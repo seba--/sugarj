@@ -4,7 +4,7 @@ import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getLeftToken;
 import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getRightToken;
 import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getTokenizer;
 import static org.spoofax.terms.Term.tryGetConstructor;
-import static org.sugarj.driver.Log.log;
+import static org.sugarj.common.Log.log;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,10 +32,10 @@ import org.spoofax.terms.TermVisitor;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.runtime.Environment;
 import org.sugarj.common.ATermCommands;
+import org.sugarj.common.CommandExecution;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.SourceLocation;
-import org.sugarj.driver.CommandExecution;
 import org.sugarj.driver.Result;
 import org.sugarj.driver.STRCommands;
 
