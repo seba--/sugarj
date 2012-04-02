@@ -8,7 +8,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.spoofax.jsglr.shared.BadTokenException;
-import org.sugarj.driver.Result;
+import org.sugarj.common.Result;
 import org.sugarj.driver.path.RelativeSourceLocationPath;
 import org.sugarj.util.ProcessingListener;
 

@@ -1,4 +1,4 @@
-package org.sugarj.driver;
+package org.sugarj;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,13 +25,17 @@ import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.driver.sourcefilecontent.ISourceFileContent;
-import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
 import org.sugarj.util.AppendableObjectOutputStream;
+
+
+// XXX: How to handle this?
+// XXX: Make Interface and implement separately in each language? Or make abstract and implement only language-specific stuff?
+
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
-public class Result {
+public abstract class Result {
   
   /**
    * Path and hash of the disk-stored version of this result.
@@ -285,7 +289,9 @@ public class Result {
     return sugaredSyntaxTree;
   }
 
-  void compileJava(Path javaOutFile, JavaSourceFileContent javaSource, Path bin, List<Path> path, Set<RelativePath> generatedJavaClasses) throws IOException, ClassNotFoundException {
+  // XXX: Made this abstract so it can be implemented by each language library
+  protected abstract void compileLanguage(Path langOutFile, ISourceFileContent langSource, Path bin, List<Path> path, Set<RelativePath> generatedFiles) throws IOException, ClassNotFoundException;
+/*  void compileJava(Path javaOutFile, JavaSourceFileContent javaSource, Path bin, List<Path> path, Set<RelativePath> generatedJavaClasses) throws IOException, ClassNotFoundException {
     Map<Path, Set<RelativePath>> generatedFiles = availableGeneratedFiles.get(sourceFile);
     Set<RelativePath> generatedClasses = new HashSet<RelativePath>(generatedJavaClasses);
     
@@ -315,15 +321,18 @@ public class Result {
     writeToFile(javaOutFile, javaSource.getCode(generatedClasses));
     
     compileJava(javaOutFiles, bin, path, generatedClasses);
-  }
+  } */
   
+  
+  protected abstract void compileLanguage(List<Path> langOutFiles, Path bin, List<Path> path, Set<? extends Path> generatedFiles) throws IOException;
+  /*
   private void compileJava(List<Path> javaOutFiles, Path bin, List<Path> path, Set<? extends Path> generatedJavaClasses) throws IOException {
     if (generateFiles) {
       JavaCommands.javac(javaOutFiles, bin, path);
       for (Path cl : generatedJavaClasses)
         generatedFileHashes.put(cl, FileCommands.fileHash(cl));
     }
-  }
+  }*/
   
   void delegateCompilation(Path delegate, Path compileFile, ISourceFileContent fileContent, Set<RelativePath> generatedFiles) {
     Map<Path, Set<RelativePath>> myGeneratedFiles = availableGeneratedFiles.get(delegate);

@@ -31,12 +31,12 @@ import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.spoofax.terms.TermVisitor;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.runtime.Environment;
+import org.sugarj.Result;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.SourceLocation;
-import org.sugarj.driver.Result;
 import org.sugarj.driver.STRCommands;
 
 /**

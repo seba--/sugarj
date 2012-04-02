@@ -13,8 +13,8 @@ import org.sugarj.common.path.RelativePath;
  *
  */
 public class JavaSourceFileContent implements ISourceFileContent {
-  private static final long serialVersionUID = 1164576595940328804L;
-
+  private static final long serialVersionUID = -3684457648615950708L;
+  
   String packageDecl;
   List<String> imports = new LinkedList<String>();
   List<String> checkedImports = new LinkedList<String>();

@@ -32,10 +32,10 @@ import org.sugarj.common.ATermCommands;
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.Log;
+import org.sugarj.common.Result;
 import org.sugarj.driver.Driver;
 import org.sugarj.driver.Environment;
 import org.sugarj.driver.ModuleSystemCommands;
-import org.sugarj.driver.Result;
 import org.sugarj.driver.RetractableTreeBuilder;
 import org.sugarj.driver.path.RelativeSourceLocationPath;
 

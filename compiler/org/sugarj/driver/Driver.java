@@ -44,6 +44,7 @@ import org.strategoxt.permissivegrammars.make_permissive;
 import org.strategoxt.tools.tools;
 import org.sugarj.JavaLib;
 import org.sugarj.LanguageLib;
+import org.sugarj.Result;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.Environment;
