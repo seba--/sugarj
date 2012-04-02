@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 
-import org.sugarj.IEnvironment;
+import org.sugarj.common.Environment;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -32,13 +32,13 @@ public abstract class Path implements Serializable {
   }
 
   protected String trimFront(String path) {
-    while (path.startsWith(IEnvironment.sep))
+    while (path.startsWith(Environment.sep))
       path = path.substring(1, path.length());
     return path;
   }
   
   protected String trimBack(String path) {
-    while (path.endsWith(IEnvironment.sep))
+    while (path.endsWith(Environment.sep))
       path = path.substring(0, path.length() - 1);
     return path;
   }
@@ -49,16 +49,16 @@ public abstract class Path implements Serializable {
 //   */
 //  public abstract RelativePath makeRelativeTo(Path p);
 
-  public static Path readPath(ObjectInputStream ois, IEnvironment env) throws IOException, ClassNotFoundException {
+  public static Path readPath(ObjectInputStream ois, Environment env) throws IOException, ClassNotFoundException {
     return readPath(ois, env, true);
   }
   
-  public static Path readPath(ObjectInputStream ois, IEnvironment env, boolean reallocate) throws IOException, ClassNotFoundException {
+  public static Path readPath(ObjectInputStream ois, Environment env, boolean reallocate) throws IOException, ClassNotFoundException {
     Path p = (Path) ois.readObject();
     return reallocate ? reallocate(p, env) : p;
   }
   
-  public static Path reallocate(Path p, IEnvironment env) {
+  public static Path reallocate(Path p, Environment env) {
     // TODO: Uncomment
 /*    if (p instanceof RelativePathBin)
       return env.new RelativePathBin(((RelativePath) p).getRelativePath(), env);

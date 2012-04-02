@@ -1,7 +1,7 @@
 package org.sugarj.driver;
 
-import static org.sugarj.driver.ATermCommands.getApplicationSubterm;
-import static org.sugarj.driver.ATermCommands.isApplication;
+import static org.sugarj.common.ATermCommands.getApplicationSubterm;
+import static org.sugarj.common.ATermCommands.isApplication;
 import static org.sugarj.IEnvironment.sep;
 import static org.sugarj.driver.Log.log;
 
@@ -13,9 +13,10 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.sugarj.LanguageDriver;
-import org.sugarj.driver.path.Path;
-import org.sugarj.driver.path.RelativePath;
-import org.sugarj.driver.path.RelativeSourceLocationPath;
+import org.sugarj.common.path.Path;
+import org.sugarj.common.path.RelativePath;
+import org.sugarj.common.path.RelativeSourceLocationPath;
+import org.sugarj.common.Environment;
 import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
 
 // TODO: Move to java library

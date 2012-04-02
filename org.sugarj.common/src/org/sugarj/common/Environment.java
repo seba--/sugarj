@@ -1,6 +1,5 @@
 package org.sugarj.common;
 
-import static org.sugarj.driver.Log.log;
 
 import java.io.File;
 import java.io.Serializable;
@@ -10,14 +9,10 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.sugarj.IEnvironment;
-import org.sugarj.JavaLib;
-import org.sugarj.LanguageLib;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.SourceLocation;
-import org.sugarj.stdlib.StdLib;
 
 
 /**
@@ -25,7 +20,7 @@ import org.sugarj.stdlib.StdLib;
  * 
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
-public class Environment implements IEnvironment {
+public class Environment implements Serializable {
   
   private static final long serialVersionUID = -8403625415393122607L;
 
@@ -71,11 +66,7 @@ public class Environment implements IEnvironment {
    * read-only/write-only cache flags.
    */
   public static boolean rocache = false;
-  public static boolean wocache = false;
-  
-  
-  private LanguageLib langLib = new JavaLib();  // XXX: do stuff
-  
+  public static boolean wocache = false;  
   
   private Path cacheDir = null;
   
@@ -104,7 +95,6 @@ public class Environment implements IEnvironment {
   
   public Environment() {
     includePath.add(bin);
-    includePath.add(new AbsolutePath(StdLib.stdLibDir.getPath()));
   }
   
   public Path getRoot() {
@@ -182,35 +172,10 @@ public class Environment implements IEnvironment {
     this.includePath = includePath;
   }
 
-  public Long getTick() {
-    return tick;
-  }
-
-  public void setTick(Long tick) {
-    this.tick = tick;
-  }
-
-  private Long tick;
-  
-  public void tick() {
-    tick = System.currentTimeMillis();
-  }
-  
-  public void tack() {
-    tack("");
-  }
-  
-  public void tack(String s) {
-    log.log(s + " " + (System.currentTimeMillis() - tick) + "ms");
-    tick();
-  }
-
-  @Override
   public RelativePath createCachePath(String relativePath) {
     return new RelativePathCache(relativePath);
   }
 
-  @Override
   public RelativePath createBinPath(String relativePath) {
     return new RelativePathBin(relativePath);
   }

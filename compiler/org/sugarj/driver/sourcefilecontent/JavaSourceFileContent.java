@@ -4,9 +4,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.sugarj.driver.Environment;
+import org.sugarj.common.Environment;
 import org.sugarj.driver.FileCommands;
-import org.sugarj.driver.path.RelativePath;
+import org.sugarj.common.path.RelativePath;
 
 /**
  * @author seba

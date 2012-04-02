@@ -1,7 +1,5 @@
 package org.sugarj.driver;
 
-import static org.sugarj.driver.Environment.sep;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,9 +12,10 @@ import java.net.URI;
 import java.net.URL;
 import java.util.List;
 
-import org.sugarj.driver.path.AbsolutePath;
-import org.sugarj.driver.path.Path;
-import org.sugarj.driver.path.RelativePath;
+import org.sugarj.common.Environment;
+import org.sugarj.common.path.AbsolutePath;
+import org.sugarj.common.path.Path;
+import org.sugarj.common.path.RelativePath;
 
 /**
  * Provides methods for doing stuff with files.
@@ -139,7 +138,7 @@ public class FileCommands {
   
   public static String fileName(Path file_doof) {
     String file = toCygwinPath(file_doof.getAbsolutePath());
-    int index = file.lastIndexOf(sep);
+    int index = file.lastIndexOf(Environment.sep);
 
     if (index >= 0)
       file = file.substring(index + 1);
@@ -178,7 +177,7 @@ public class FileCommands {
   @Deprecated
   public static String findFile(String filename, String... paths) {
     for (String path : paths) {
-      File f = new File(path + sep + filename);
+      File f = new File(path + Environment.sep + filename);
       if (f.exists())
         return f.getAbsolutePath();
     }
@@ -332,7 +331,7 @@ public class FileCommands {
   }
 
   public static String getRelativeModulePath(String module) {
-    return module.replace(".", sep);
+    return module.replace(".", Environment.sep);
   }
 
   public static int fileHash(Path file) throws IOException {

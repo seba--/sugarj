@@ -1,6 +1,6 @@
 package org.sugarj.driver;
 
-import static org.sugarj.driver.ATermCommands.isApplication;
+import static org.sugarj.common.ATermCommands.isApplication;
 import static org.sugarj.driver.Log.log;
 
 import java.io.BufferedReader;
@@ -13,10 +13,12 @@ import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.HybridInterpreter;
-import org.sugarj.driver.path.Path;
-import org.sugarj.driver.path.RelativePath;
-import org.sugarj.driver.path.RelativeSourceLocationPath;
-import org.sugarj.driver.path.SourceLocation;
+import org.sugarj.common.ATermCommands;
+import org.sugarj.common.Environment;
+import org.sugarj.common.path.Path;
+import org.sugarj.common.path.RelativePath;
+import org.sugarj.common.path.RelativeSourceLocationPath;
+import org.sugarj.common.path.SourceLocation;
 import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
 
 /**
@@ -179,7 +181,7 @@ public class ModuleSystemCommands {
   }
 
   private static RelativePath searchBinFile(String relativePath, String extension, Environment environment) {
-    RelativePath result = environment.new RelativePathBin(relativePath + extension);
+    RelativePath result = environment.createBinPath(relativePath + extension);
     if (result.getFile().exists())
       return result;
     
@@ -239,7 +241,7 @@ public class ModuleSystemCommands {
    * @throws IOException
    */
   public static void registerSearchedFiles(String relativePath, String extension, Result driverResult, Environment environment) throws IOException {
-    RelativePath binFile = environment.new RelativePathBin(relativePath + extension);
+    RelativePath binFile = environment.createBinPath(relativePath + extension);
     driverResult.addFileDependency(binFile);
     
     for (Path searchPath : environment.getIncludePath()) {

@@ -1,12 +1,10 @@
 package org.sugarj.driver;
 
-import static org.sugarj.driver.Environment.sep;
 import static org.sugarj.driver.FileCommands.toWindowsPath;
 import static org.sugarj.driver.Log.log;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -34,12 +32,13 @@ import org.strategoxt.lang.StrategoException;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.strj.main_strj_0_0;
 import org.sugarj.LanguageLib;
+import org.sugarj.common.ATermCommands;
+import org.sugarj.common.Environment;
+import org.sugarj.common.path.Path;
+import org.sugarj.common.path.RelativePath;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
-import org.sugarj.driver.path.Path;
-import org.sugarj.driver.path.RelativePath;
 import org.sugarj.stdlib.StdLib;
-import org.sugarj.util.LoggingOutputStream;
 
 /**
  * This class provides methods for various SDF commands. Each
@@ -162,7 +161,7 @@ public class STRCommands {
       Path dir = FileCommands.newTempDir();
       FileCommands.createDir(new RelativePath(dir, "sugarj"));
       String javaFilename = FileCommands.fileName(str).replace("-", "_");
-      Path java = new RelativePath(dir, "sugarj" + sep + javaFilename + ".java");     // XXX: Java dependency, probably use langLib to get file extension 
+      Path java = new RelativePath(dir, "sugarj" + Environment.sep + javaFilename + ".java");     // XXX: Java dependency, probably use langLib to get file extension 
       log.log("calling STRJ");
       strj(str, java, main, strjContext, paths, langLib);
       
@@ -189,7 +188,7 @@ public class STRCommands {
 
     log.beginTask("Caching", "Cache assimilator");
     try {
-      Path cacheProg = environment.new RelativePathCache(prog.getFile().getName());
+      Path cacheProg = environment.createCachePath(prog.getFile().getName());
       FileCommands.copyFile(prog, cacheProg);
       
       if (!Environment.rocache) {

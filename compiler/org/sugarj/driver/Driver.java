@@ -1,13 +1,12 @@
 package org.sugarj.driver;
 
-import static org.sugarj.driver.ATermCommands.extractSDF;
-import static org.sugarj.driver.ATermCommands.extractSTR;
-import static org.sugarj.driver.ATermCommands.fixSDF;
-import static org.sugarj.driver.ATermCommands.getApplicationSubterm;
-import static org.sugarj.driver.ATermCommands.getList;
-import static org.sugarj.driver.ATermCommands.getString;
-import static org.sugarj.driver.ATermCommands.isApplication;
-import static org.sugarj.driver.Environment.sep;
+import static org.sugarj.common.ATermCommands.extractSDF;
+import static org.sugarj.common.ATermCommands.extractSTR;
+import static org.sugarj.common.ATermCommands.fixSDF;
+import static org.sugarj.common.ATermCommands.getApplicationSubterm;
+import static org.sugarj.common.ATermCommands.getList;
+import static org.sugarj.common.ATermCommands.getString;
+import static org.sugarj.common.ATermCommands.isApplication;
 import static org.sugarj.driver.Log.log;
 
 import java.io.EOFException;
@@ -22,12 +21,10 @@ import java.text.ParseException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -47,16 +44,17 @@ import org.strategoxt.permissivegrammars.make_permissive;
 import org.strategoxt.tools.tools;
 import org.sugarj.JavaLib;
 import org.sugarj.LanguageLib;
+import org.sugarj.common.ATermCommands;
+import org.sugarj.common.Environment;
+import org.sugarj.common.path.AbsolutePath;
+import org.sugarj.common.path.Path;
+import org.sugarj.common.path.RelativePath;
+import org.sugarj.common.path.RelativeSourceLocationPath;
+import org.sugarj.common.path.SourceLocation;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.cli.CLIError;
 import org.sugarj.driver.cli.DriverCLI;
-import org.sugarj.driver.path.AbsolutePath;
-import org.sugarj.driver.path.Path;
-import org.sugarj.driver.path.RelativePath;
-import org.sugarj.driver.path.RelativeSourceLocationPath;
-import org.sugarj.driver.path.SourceLocation;
-import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
 import org.sugarj.driver.transformations.extraction.extraction;
 import org.sugarj.stdlib.StdLib;
 import org.sugarj.util.ProcessingListener;
@@ -320,8 +318,8 @@ public class Driver{
       if (sourceFile != null) {
         drj.setupSourceFile(sourceFile, environment);
 
-        depOutFile = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".dep");
-        Path genLog = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".gen");
+        depOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".dep");
+        Path genLog = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".gen");
         driverResult.setGenerationLog(genLog);
         clearGeneratedStuff();
       }
@@ -552,7 +550,7 @@ public class Driver{
         // XXX if (currentTransProg != null)
         editorServices = ATermCommands.registerSemanticProvider(editorServices, currentTransProg);
   
-        Path editorServicesFile = environment.new RelativePathBin(drj.getRelPackageNameSep() + extName + ".serv");
+        Path editorServicesFile = environment.createBinPath(drj.getRelPackageNameSep() + extName + ".serv");
         
         log.log("writing editor services to " + editorServicesFile);
         
@@ -626,7 +624,7 @@ public class Driver{
         String plainContent = Term.asJavaString(ATermCommands.getApplicationSubterm(body, "PlainBody", 0));
         
         String ext = extension == null ? "" : ("." + extension);
-        Path plainFile = environment.new RelativePathBin(drj.getRelPackageNameSep() + extName + ext);
+        Path plainFile = environment.createBinPath(drj.getRelPackageNameSep() + extName + ext);
         FileCommands.createFile(plainFile);
   
         log.log("writing plain content to " + plainFile);
@@ -648,7 +646,7 @@ public class Driver{
       drj.checkPackage(toplevelDecl, sourceFile, driverResult);   // XXX: check -> setup ?
       drj.checkSourceOutFile(environment, driverResult);
       if (depOutFile == null)
-        depOutFile = environment.new RelativePathBin(drj.getRelPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
+        depOutFile = environment.createBinPath(drj.getRelPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       try {
         if (drj.isImport(toplevelDecl)) {
           if (!environment.isAtomicImportParsing())
@@ -761,7 +759,7 @@ public class Driver{
 
       drj.processPackageDec(toplevelDecl, environment, interp, driverResult, packageName, sourceFile);
       if (depOutFile == null)
-        depOutFile = environment.new RelativePathBin(drj.getRelPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
+        depOutFile = environment.createBinPath(drj.getRelPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       
 //      javaSource.setPackageDecl(SDFCommands.prettyPrintJava(toplevelDecl, interp));
     } finally {
@@ -1044,8 +1042,8 @@ public class Driver{
         log.endTask();
       }
       
-      Path sdfExtension = environment.new RelativePathBin(drj.getRelPackageNameSep() + extName + ".sdf");
-      Path strExtension = environment.new RelativePathBin(drj.getRelPackageNameSep() + extName + ".str");
+      Path sdfExtension = environment.createBinPath(drj.getRelPackageNameSep() + extName + ".sdf");
+      Path strExtension = environment.createBinPath(drj.getRelPackageNameSep() + extName + ".str");
       
       String sdfImports = " imports " + StringCommands.printListSeparated(availableSDFImports, " ") + "\n";
       String strImports = " imports " + StringCommands.printListSeparated(availableSTRImports, " ") + "\n";
@@ -1293,7 +1291,7 @@ public class Driver{
     if (environment.getCacheDir() == null)
       return;
     
-    Path cacheVersion = environment.new RelativePathCache("version");
+    Path cacheVersion = environment.createCachePath("version");
     
     if (!cacheVersion.getFile().exists() ||
         !FileCommands.readFileAsString(cacheVersion).equals(CACHE_VERSION)) {
@@ -1304,8 +1302,8 @@ public class Driver{
       FileCommands.writeToFile(cacheVersion, CACHE_VERSION);
     }
     
-    Path sdfCachePath = environment.new RelativePathCache("sdfCache");
-    Path strCachePath = environment.new RelativePathCache("strCache");
+    Path sdfCachePath = environment.createCachePath("sdfCache");
+    Path strCachePath = environment.createCachePath("strCache");
     
     if (sdfCache == null || force)
       try {
@@ -1362,11 +1360,11 @@ public class Driver{
     if (environment.getCacheDir() == null)
       return;
     
-    Path cacheVersion = environment.new RelativePathCache("version");
+    Path cacheVersion = environment.createCachePath("version");
     FileCommands.writeToFile(cacheVersion, CACHE_VERSION);
     
-    Path sdfCachePath = environment.new RelativePathCache("sdfCache");
-    Path strCachePath = environment.new RelativePathCache("strCache");
+    Path sdfCachePath = environment.createCachePath("sdfCache");
+    Path strCachePath = environment.createCachePath("strCache");
 
     if (!sdfCachePath.getFile().exists())
       FileCommands.createFile(sdfCachePath);

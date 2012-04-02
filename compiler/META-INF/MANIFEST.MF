@@ -13,7 +13,9 @@ Require-Bundle: org.eclipse.ui,
  org.strategoxt.strj,
  org.strategoxt.imp.runtime,
  org.strategoxt.imp.nativebundle,
- org.sugarj.java
+ org.sugarj.java,
+ org.sugarj.common,
+ org.sugarj.languagelib
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.sugarj,

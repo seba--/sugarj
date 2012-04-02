@@ -4,6 +4,7 @@ Bundle-Name: org.sugarj.java
 Bundle-SymbolicName: org.sugarj.java;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Export-Package: org.sugarj,
+ org.sugarj.driver,
  org.sugarj.java.init,
  org.sugarj.languages
 Bundle-ActivationPolicy: lazy
@@ -15,4 +16,6 @@ Require-Bundle: org.eclipse.ui,
  org.spoofax.terms,
  org.strategoxt.imp.nativebundle,
  org.strategoxt.imp.runtime,
- org.strategoxt.strj
+ org.strategoxt.strj,
+ org.sugarj.languagelib,
+ org.sugarj.common

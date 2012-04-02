@@ -31,13 +31,13 @@ import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.spoofax.terms.TermVisitor;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.runtime.Environment;
-import org.sugarj.driver.ATermCommands;
+import org.sugarj.common.ATermCommands;
+import org.sugarj.common.path.AbsolutePath;
+import org.sugarj.common.path.Path;
+import org.sugarj.common.path.SourceLocation;
 import org.sugarj.driver.CommandExecution;
 import org.sugarj.driver.Result;
 import org.sugarj.driver.STRCommands;
-import org.sugarj.driver.path.AbsolutePath;
-import org.sugarj.driver.path.Path;
-import org.sugarj.driver.path.SourceLocation;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -325,7 +325,7 @@ public class DriverCLI {
    * @throws CLIError
    *         when the command line is not correct
    */
-  public static String[] handleOptions(String[] args, org.sugarj.driver.Environment environment) {
+  public static String[] handleOptions(String[] args, org.sugarj.common.Environment environment) {
     Options options = specifyOptions();
   
     try {
@@ -344,7 +344,7 @@ public class DriverCLI {
         false);
   }
 
-  private static String[] processOptions(Options options, CommandLine line, org.sugarj.driver.Environment environment) throws org.apache.commons.cli.ParseException {
+  private static String[] processOptions(Options options, CommandLine line, org.sugarj.common.Environment environment) throws org.apache.commons.cli.ParseException {
     if (line.hasOption("help")) {
       // TODO This is not exactly an error ...
       throw new CLIError("help requested", options);
@@ -369,11 +369,11 @@ public class DriverCLI {
       CommandExecution.CACHE_INFO = true;
   
     if (line.hasOption("buildpath"))
-      for (String path : line.getOptionValue("buildpath").split(org.sugarj.driver.Environment.classpathsep))
+      for (String path : line.getOptionValue("buildpath").split(org.sugarj.common.Environment.classpathsep))
         environment.getIncludePath().add(new AbsolutePath(path));
   
     if (line.hasOption("sourcepath"))
-      for (String path : line.getOptionValue("sourcepath").split(org.sugarj.driver.Environment.classpathsep))
+      for (String path : line.getOptionValue("sourcepath").split(org.sugarj.common.Environment.classpathsep))
         environment.getSourcePath().add(new SourceLocation(new AbsolutePath(path), environment));
   
     if (line.hasOption("d"))
@@ -383,10 +383,10 @@ public class DriverCLI {
       environment.setCacheDir(new AbsolutePath(line.getOptionValue("cache")));
   
     if (line.hasOption("read-only-cache"))
-      org.sugarj.driver.Environment.rocache = true;
+      org.sugarj.common.Environment.rocache = true;
     
     if (line.hasOption("write-only-cache"))
-      org.sugarj.driver.Environment.wocache = true;
+      org.sugarj.common.Environment.wocache = true;
     
     if (line.hasOption("gen-java"))
       environment.setGenerateJavaFile(true);
@@ -446,13 +446,13 @@ public class DriverCLI {
         null,
         "buildpath",
         true,
-        "Specify where to find compiled files. Multiple paths can be given separated by \'" + org.sugarj.driver.Environment.classpathsep + "\'.");
+        "Specify where to find compiled files. Multiple paths can be given separated by \'" + org.sugarj.common.Environment.classpathsep + "\'.");
   
     options.addOption(
         null,
         "sourcepath",
         true,
-        "Specify where to find source files. Multiple paths can be given separated by \'" + org.sugarj.driver.Environment.classpathsep + "\'.");
+        "Specify where to find source files. Multiple paths can be given separated by \'" + org.sugarj.common.Environment.classpathsep + "\'.");
   
     options.addOption(
         "d", 

@@ -6,7 +6,6 @@ import static org.sugarj.driver.Log.log;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -41,9 +40,11 @@ import org.strategoxt.stratego_xtc.stratego_xtc;
 import org.strategoxt.strc.pp_stratego_string_0_0;
 import org.strategoxt.tools.main_pack_sdf_0_0;
 import org.sugarj.LanguageLib;
+import org.sugarj.common.ATermCommands;
+import org.sugarj.common.Environment;
+import org.sugarj.common.path.Path;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
-import org.sugarj.driver.path.Path;
 import org.sugarj.stdlib.StdLib;
 
 /**
@@ -92,6 +93,9 @@ public class SDFCommands {
     
     cmd.add("-I");
     cmd.add(langLib.getLibraryDirectory().getPath());
+    cmd.add("-I");
+    cmd.add(StdLib.stdLibDir.getPath());
+    
    
     for (Path path : paths) 
       if (path.getFile().isDirectory()){
@@ -204,7 +208,7 @@ public class SDFCommands {
     
     log.beginTask("Caching", "Cache parse table");
     try {
-      Path cacheTbl = environment.new RelativePathCache(tbl.getFile().getName());
+      Path cacheTbl = environment.createCachePath(tbl.getFile().getName());
       FileCommands.copyFile(tbl, cacheTbl);
       
       if (!Environment.rocache) {
