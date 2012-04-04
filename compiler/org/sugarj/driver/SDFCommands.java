@@ -48,6 +48,7 @@ import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
+import org.sugarj.driver.transformations.extraction.extract_sdf_0_0;
 import org.sugarj.stdlib.StdLib;
 
 /**
@@ -460,5 +461,27 @@ public class SDFCommands {
   
   private static String defToSdf(String def) {
     return def.substring(11);
+  }
+  
+  
+  /**
+   * Filters SDF statements from the given term and
+   * compiles assimilation statements to SDF.
+   * 
+   * @param term a file containing a list of SDF 
+   *             and Stratego statements.
+   * @param sdf result file
+   * @throws InvalidParseTableException 
+   */
+  public static IStrategoTerm extractSDF(IStrategoTerm term, Context context) throws IOException, InvalidParseTableException {
+    IStrategoTerm result = null;
+    try {
+      result = extract_sdf_0_0.instance.invoke(context, term);
+    }
+    catch (StrategoExit e) {
+      if (e.getValue() != 0 || result == null)
+        throw new RuntimeException("Stratego extraction failed", e);
+    }
+    return result;
   }
 }

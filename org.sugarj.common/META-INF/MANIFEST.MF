@@ -13,6 +13,4 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.sugarj.common,
  org.sugarj.common.path,
- org.sugarj.driver.transformations,
- org.sugarj.driver.transformations.extraction,
  org.sugarj.util

@@ -1,13 +1,13 @@
 package org.sugarj.driver;
 
-import static org.sugarj.common.ATermCommands.extractSDF;
-import static org.sugarj.common.ATermCommands.extractSTR;
 import static org.sugarj.common.ATermCommands.fixSDF;
 import static org.sugarj.common.ATermCommands.getApplicationSubterm;
 import static org.sugarj.common.ATermCommands.getList;
 import static org.sugarj.common.ATermCommands.getString;
 import static org.sugarj.common.ATermCommands.isApplication;
 import static org.sugarj.common.Log.log;
+import static org.sugarj.driver.STRCommands.extractSTR;
+import static org.sugarj.driver.SDFCommands.extractSDF;
 
 import java.io.EOFException;
 import java.io.File;
@@ -44,7 +44,6 @@ import org.strategoxt.permissivegrammars.make_permissive;
 import org.strategoxt.tools.tools;
 import org.sugarj.JavaLib;
 import org.sugarj.LanguageLib;
-import org.sugarj.Result;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.Environment;
@@ -62,6 +61,7 @@ import org.sugarj.driver.cli.DriverCLI;
 import org.sugarj.driver.transformations.extraction.extraction;
 import org.sugarj.stdlib.StdLib;
 import org.sugarj.util.ProcessingListener;
+
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>

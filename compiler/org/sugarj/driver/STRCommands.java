@@ -40,6 +40,7 @@ import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
+import org.sugarj.driver.transformations.extraction.extract_str_0_0;
 import org.sugarj.stdlib.StdLib;
 
 /**
@@ -286,4 +287,26 @@ public class STRCommands {
       throw new RuntimeException("desugaring failed", e);
     }
   }
+  
+  /**
+   * Filters Stratego statements from the given term
+   * and compiles assimilation statements to Stratego.
+   * 
+   * @param term a file containing a list of SDF 
+   *             and Stratego statements.
+   * @param str result file
+   * @throws InvalidParseTableException 
+   */
+  public static IStrategoTerm extractSTR(IStrategoTerm term, Context context) throws IOException, InvalidParseTableException {
+    IStrategoTerm result = null;
+    try {
+      result = extract_str_0_0.instance.invoke(context, term);
+    }
+    catch (StrategoExit e) {
+      if (e.getValue() != 0 || result == null)
+        throw new RuntimeException("Stratego extraction failed", e);
+    }
+    return result;
+  }
+  
 }
