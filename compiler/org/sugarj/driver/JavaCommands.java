@@ -4,14 +4,23 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
+import org.sugarj.IResult;
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
+import org.sugarj.common.path.RelativePath;
+import org.sugarj.driver.sourcefilecontent.ISourceFileContent;
+import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
 
 /**
  * 
@@ -107,5 +116,54 @@ public class JavaCommands {
     
     CommandExecution.execute(cmd);
   }
+  
+  
+  //   private Map<Path, Map<Path, Set<RelativePath>>> availableGeneratedFiles = new HashMap<Path, Map<Path, Set<RelativePath>>>();
+
+  
+  
+  // from Result
+  static void compileJava(Path javaOutFile, JavaSourceFileContent javaSource, Path bin, List<Path> path, Set<RelativePath> generatedJavaClasses, IResult result) throws IOException, ClassNotFoundException {
+    Map<Path, Set<RelativePath>> generatedFiles = result.getAvailableGeneratedFiles().get(result.getSourceFile());
+    Set<RelativePath> generatedClasses = new HashSet<RelativePath>(generatedJavaClasses);
+    
+    if (generatedFiles != null) {
+      for (Set<RelativePath> files: generatedFiles.values())
+        for (RelativePath file : files)
+          if ("class".equals(FileCommands.getExtension(file)))
+            generatedClasses.add(file);
+    }
+
+    Map<Path, Map<Path, ISourceFileContent>> sourceFiles = result.getDeferredSourceFiles().get(result.getSourceFile());
+    List<Path> javaOutFiles = new ArrayList<Path>();
+    javaOutFiles.add(javaOutFile);
+
+    if (sourceFiles != null)
+      for (Entry<Path, Map<Path, ISourceFileContent>> sources : sourceFiles.entrySet())
+        for (Entry<Path, ISourceFileContent> source : sources.getValue().entrySet())
+          if (source.getValue() instanceof JavaSourceFileContent) {
+            JavaSourceFileContent otherJavaSource = (JavaSourceFileContent) source.getValue();
+            try {
+              result.writeToFile(source.getKey(), otherJavaSource.getCode(generatedClasses));
+            } catch (ClassNotFoundException e) {
+              throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + source.getKey());
+            }
+          }
+    
+    result.writeToFile(javaOutFile, javaSource.getCode(generatedClasses));
+    
+    compileJava(javaOutFiles, bin, path, generatedClasses, result);
+  }
+
+  // from Result
+  private static void compileJava(List<Path> javaOutFiles, Path bin, List<Path> path, Set<? extends Path> generatedJavaClasses, IResult result) throws IOException {
+    if (result.getGenerateFiles()) {
+      JavaCommands.javac(javaOutFiles, bin, path);
+      for (Path cl : generatedJavaClasses)
+        
+        result.getGeneratedFileHashes().put(cl, FileCommands.fileHash(cl));
+    }
+  }
+
   
 }

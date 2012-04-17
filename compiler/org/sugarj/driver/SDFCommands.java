@@ -417,6 +417,9 @@ public class SDFCommands {
    * @param aterm the name of a file which contains an aterm which encodes a Java AST
    * @throws IOException 
    */
+  // XXX: This should be abstracted and moved to the language implementation
+  // Where to get pp_java_string_0_0 ? What should be changed to allow other languages' pretty printers?
+  // What to do with Term.asJavaString ?
   public static String prettyPrintJava(IStrategoTerm term, HybridInterpreter interp) throws IOException {
     IStrategoTerm string = pp_java_string_0_0.instance.invoke(interp.getCompiledContext(), term);
     if (string != null)
