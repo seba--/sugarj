@@ -2,8 +2,8 @@ package org.sugarj.driver;
 
 import static org.sugarj.common.ATermCommands.getApplicationSubterm;
 import static org.sugarj.common.ATermCommands.isApplication;
-import static org.sugarj.IEnvironment.sep;
-import static org.sugarj.driver.Log.log;
+import static org.sugarj.common.Environment.sep;
+import static org.sugarj.common.Log.log;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -12,12 +12,15 @@ import java.util.Set;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
+import org.strategoxt.java_front.pp_java_string_0_0;
+import org.sugarj.IResult;
 import org.sugarj.LanguageDriver;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
+import org.sugarj.common.FileCommands;
 import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
 
 // TODO: Move to java library
@@ -38,7 +41,7 @@ public class JavaDriver extends LanguageDriver {
     RelativePath clazz = environment.createBinPath(getRelPackageNameSep() + decName + ".class");
     
     generatedJavaClasses.add(clazz);
-    javaSource.addBodyDecl(SDFCommands.prettyPrintJava(dec, interp));
+    javaSource.addBodyDecl(prettyPrint(dec, interp));
   }
   
   
@@ -54,7 +57,7 @@ public class JavaDriver extends LanguageDriver {
     return generatedJavaClasses;
   }
     
-  public JavaSourceFileContent getJavaSource() {
+  public JavaSourceFileContent getSource() {
     return javaSource;
   }
   
@@ -81,7 +84,7 @@ public class JavaDriver extends LanguageDriver {
     javaSource = null;
   }
   
-  public void checkPackageName(IStrategoTerm toplevelDecl, RelativeSourceLocationPath sourceFile, Result driverResult) {
+  public void checkPackageName(IStrategoTerm toplevelDecl, RelativeSourceLocationPath sourceFile, IResult driverResult) {
     if (sourceFile != null) {
       String packageName = relPackageName == null ? "" : relPackageName.replace('/', '.');
       
@@ -97,7 +100,7 @@ public class JavaDriver extends LanguageDriver {
     }
   }
   
-  public void processPackageDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, Result driverResult, String packageName, RelativeSourceLocationPath sourceFile) throws IOException {
+  public void processPackageDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IResult driverResult, String packageName, RelativeSourceLocationPath sourceFile) throws IOException {
     relPackageName = FileCommands.getRelativeModulePath(packageName);
 
     log.log("The SDF / Stratego package name is '" + relPackageName + "'.");
@@ -108,11 +111,11 @@ public class JavaDriver extends LanguageDriver {
       javaOutFile = environment.createBinPath(getRelPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".java");
 
     // moved here before depOutFile==null check
-    javaSource.setPackageDecl(SDFCommands.prettyPrintJava(toplevelDecl, interp));
+    javaSource.setPackageDecl(prettyPrint(toplevelDecl, interp));
   }
   
   
-  private void setErrorMessage(IStrategoTerm toplevelDecl, String msg, Result driverResult) {
+  private void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IResult driverResult) {
     // XXX: Merge with setErrorMessage from Driver
     driverResult.logError(msg);
     ATermCommands.setErrorMessage(toplevelDecl, msg);
@@ -122,12 +125,12 @@ public class JavaDriver extends LanguageDriver {
     return ".java";
   }
   
-  public void checkPackage(IStrategoTerm decl, RelativeSourceLocationPath sourceFile, Result driverResult) {
+  public void checkPackage(IStrategoTerm decl, RelativeSourceLocationPath sourceFile, IResult driverResult) {
     if (relPackageName == null)
       checkPackageName(decl, sourceFile, driverResult);
   }
   
-  public void checkSourceOutFile(Environment environment, Result driverResult) {
+  public void checkSourceOutFile(Environment environment, IResult driverResult) {
     if (javaOutFile == null)
       setJavaOutFile(environment.createBinPath(getRelPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + getSourcecodeExtension()));
   }
@@ -156,4 +159,48 @@ public class JavaDriver extends LanguageDriver {
   public boolean isPlain(IStrategoTerm decl) {
     return isApplication(decl, "PlainDec");         // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
   }
+  
+  
+  /**
+   * Pretty prints the content of a Java AST in some file.
+   * 
+   * @param aterm the name of a file which contains an aterm which encodes a Java AST
+   * @throws IOException 
+   */
+  // XXX: This should be abstracted and moved to the language implementation
+  // Where to get pp_java_string_0_0 ? What should be changed to allow other languages' pretty printers?
+  // What to do with Term.asJavaString ?
+  public String prettyPrint(IStrategoTerm term, HybridInterpreter interp) throws IOException {
+    IStrategoTerm string = pp_java_string_0_0.instance.invoke(interp.getCompiledContext(), term);
+    if (string != null)
+      return Term.asJavaString(string);
+    
+    throw new RuntimeException("pretty printing java AST failed: " + term);
+  }
+  
+  
+  
+  
+  
+  
+  // XXX: move this to language driver?
+  // from ModuleSystemCommands
+  public String extractImportedModuleName(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
+    String name = null;
+    log.beginTask("Extracting", "Extract name of imported module");
+    try {
+      if (isApplication(toplevelDecl, "TypeImportDec"))
+        name = prettyPrint(toplevelDecl.getSubterm(0), interp);
+      
+      if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
+        name = prettyPrint(toplevelDecl.getSubterm(0), interp) + ".*";
+    } finally {
+      log.endTask(name);
+    }
+    return name;
+  }
+
+  
+  
+  
 }

@@ -1,17 +1,17 @@
-package org.sugarj.driver;
+package org.sugarj;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import org.sugarj.IResult;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
+import org.sugarj.driver.sourcefilecontent.ISourceFileContent;
 
 public interface ICompilerCommands {
   // TODO: This should provide an interface to the commands in JavaCommands
+  // TODO: Rename the methods to something more sensible
   
     public  boolean javac(Path sourceFile, Path dir, Collection<Path> cp) throws IOException;
     
@@ -35,7 +35,7 @@ public interface ICompilerCommands {
     
     // from Result
     // XXX: generatedJavaClasses clearly is the wrong name. Think of a better name.
-    void compileJava(Path javaOutFile, JavaSourceFileContent javaSource, Path bin, List<Path> path, Set<RelativePath> generatedJavaClasses, IResult result) throws IOException, ClassNotFoundException;
+    void compile(Path javaOutFile, ISourceFileContent javaSource, Path bin, List<Path> path, Set<RelativePath> generatedJavaClasses, IResult result) throws IOException, ClassNotFoundException;
 
     
 

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +20,7 @@ import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.driver.sourcefilecontent.ISourceFileContent;
 import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
+import org.sugarj.ICompilerCommands;
 
 /**
  * 
@@ -30,20 +30,21 @@ import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  *
  */
-public class JavaCommands {
+public class JavaCommands implements ICompilerCommands {
+  // move this to java language library
 
 
-  public static boolean javac(Path sourceFile, Path dir, Collection<Path> cp) throws IOException {
+  public boolean javac(Path sourceFile, Path dir, Collection<Path> cp) throws IOException {
     ArrayList<Path> sourceFiles = new ArrayList<Path>();
     sourceFiles.add(sourceFile);
     return javac(sourceFiles, dir, cp);
   }
   
-  public static boolean javac(List<Path> sourceFiles, Path dir, Collection<Path> cp) throws IOException {
+  public boolean javac(List<Path> sourceFiles, Path dir, Collection<Path> cp) throws IOException {
     return javac(sourceFiles, dir, cp.toArray(new Path[cp.size()]));
   }
 
-  public static boolean javac(List<Path> sourceFiles, Path dir, Path... cp) throws IOException {
+  public boolean javac(List<Path> sourceFiles, Path dir, Path... cp) throws IOException {
     StringBuilder cpBuilder = new StringBuilder();
     
     for (int i = 0; i < cp.length; i++) {
@@ -83,7 +84,7 @@ public class JavaCommands {
    * Runs a compiled java program, linking against  {@code strategoxt.jar},
    * and providing a bunch of parameters. 
    */
-  public static void java(Path dir, String main, Collection<String> paths, String... args) throws IOException {
+  public void java(Path dir, String main, Collection<String> paths, String... args) throws IOException {
     StringBuilder classpath = new StringBuilder();
     classpath.append(FileCommands.toWindowsPath(dir.getAbsolutePath()));
     classpath.append(Environment.classpathsep);
@@ -105,7 +106,7 @@ public class JavaCommands {
   }
   
   
-  public static void jar(Path dir, Path output) {
+  public void jar(Path dir, Path output) {
     String[] cmd = {
         "jar",
         "cf",
@@ -123,7 +124,7 @@ public class JavaCommands {
   
   
   // from Result
-  static void compileJava(Path javaOutFile, JavaSourceFileContent javaSource, Path bin, List<Path> path, Set<RelativePath> generatedJavaClasses, IResult result) throws IOException, ClassNotFoundException {
+  public void compile(Path javaOutFile, ISourceFileContent javaSource, Path bin, List<Path> path, Set<RelativePath> generatedJavaClasses, IResult result) throws IOException, ClassNotFoundException {
     Map<Path, Set<RelativePath>> generatedFiles = result.getAvailableGeneratedFiles().get(result.getSourceFile());
     Set<RelativePath> generatedClasses = new HashSet<RelativePath>(generatedJavaClasses);
     
@@ -152,18 +153,22 @@ public class JavaCommands {
     
     result.writeToFile(javaOutFile, javaSource.getCode(generatedClasses));
     
-    compileJava(javaOutFiles, bin, path, generatedClasses, result);
+    compile(javaOutFiles, bin, path, generatedClasses, result);
   }
 
   // from Result
-  private static void compileJava(List<Path> javaOutFiles, Path bin, List<Path> path, Set<? extends Path> generatedJavaClasses, IResult result) throws IOException {
+  public void compile(List<Path> javaOutFiles, Path bin, List<Path> path, Set<? extends Path> generatedJavaClasses, IResult result) throws IOException {
     if (result.getGenerateFiles()) {
-      JavaCommands.javac(javaOutFiles, bin, path);
+      javac(javaOutFiles, bin, path);
       for (Path cl : generatedJavaClasses)
         
         result.getGeneratedFileHashes().put(cl, FileCommands.fileHash(cl));
     }
   }
 
+
+  
+  
+  
   
 }

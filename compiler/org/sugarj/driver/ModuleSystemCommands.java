@@ -149,21 +149,8 @@ public class ModuleSystemCommands {
   }
   
   
-  
-  public static String extractImportedModuleName(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
-    String name = null;
-    log.beginTask("Extracting", "Extract name of imported module");
-    try {
-      if (isApplication(toplevelDecl, "TypeImportDec"))
-        name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp);
-      
-      if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
-        name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp) + ".*";
-    } finally {
-      log.endTask(name);
-    }
-    return name;
-  }
+// moved this to languageDriver  
+//  public static String extractImportedModuleName(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
 
   
   /**

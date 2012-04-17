@@ -30,4 +30,7 @@ public abstract class LanguageLib implements Serializable {
 	
 	protected abstract File ensureFile(String resource);
 	
+	
+	public abstract ICompilerCommands getCompilerCommands();
+	
 }

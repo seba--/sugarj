@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import org.eclipse.core.runtime.FileLocator;
+import org.sugarj.driver.JavaCommands;
 
 public class JavaLib extends LanguageLib implements Serializable {
 
@@ -18,6 +19,9 @@ public class JavaLib extends LanguageLib implements Serializable {
 	
 	private transient File libDir;
 	private transient File libTmpDir;
+	
+	private static JavaCommands javaCommands;
+	
 	
 	@Override
 	public List<File> getGrammars() {
@@ -147,6 +151,16 @@ public class JavaLib extends LanguageLib implements Serializable {
 	    else
 	      System.err.println(file.getPath() + " does not exist.");
 	  }
+
+	@Override
+	public ICompilerCommands getCompilerCommands() {
+		// singleton pattern
+		if (javaCommands == null) {
+			javaCommands = new JavaCommands();
+		}
+
+		return javaCommands;
+	}
 
 
 

@@ -31,6 +31,7 @@ import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoException;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.strj.main_strj_0_0;
+import org.sugarj.LanguageDriver;
 import org.sugarj.LanguageLib;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.CommandExecution;
@@ -168,11 +169,12 @@ public class STRCommands {
       log.log("calling STRJ");
       strj(str, java, main, strjContext, paths, langLib);
       
-      if (!JavaCommands.javac(java, dir, paths))
+      
+      if (!langLib.getCompilerCommands().javac(java, dir, paths))
         throw new RuntimeException("java compilation failed");
         
       Path jarfile = FileCommands.newTempFile("jar");
-      JavaCommands.jar(dir, jarfile);
+      langLib.getCompilerCommands().jar(dir, jarfile);
 
       FileCommands.deleteTempFiles(dir);
       FileCommands.deleteTempFiles(java);

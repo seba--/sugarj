@@ -43,6 +43,7 @@ import org.strategoxt.lang.StrategoException;
 import org.strategoxt.permissivegrammars.make_permissive;
 import org.strategoxt.tools.tools;
 import org.sugarj.JavaLib;
+import org.sugarj.LanguageDriver;
 import org.sugarj.LanguageLib;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.CommandExecution;
@@ -136,7 +137,7 @@ public class Driver{
   
   
   
-  private JavaDriver drj;
+  private LanguageDriver drj;
   private LanguageLib langLib;
   
   
@@ -412,7 +413,7 @@ public class Driver{
       try {
         //driverResult.compileJava(javaOutFile, javaSource, environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), generatedJavaClasses);
         //XXX: maybe implement this in Driver_Java
-        driverResult.compileJava(drj.getJavaOutFile(), drj.getJavaSource(), environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), drj.getGeneratedJavaClasses());
+        langLib.getCompilerCommands().compile(drj.getJavaOutFile(), drj.getSource(), environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), drj.getGeneratedJavaClasses());
       } catch (ClassNotFoundException e) {
         setErrorMessage(lastSugaredToplevelDecl, "Could not resolve imported class " + e.getMessage());
         // throw new RuntimeException(e);
@@ -522,8 +523,10 @@ public class Driver{
       log.beginTask("Extracting name and accessibility of the editor services.");
       try {
         extName =
-          SDFCommands.prettyPrintJava(
+          drj.prettyPrint(
           getApplicationSubterm(head, "EditorServicesDecHead", 1), interp);    
+        
+        
         
         IStrategoTerm mods = getApplicationSubterm(head, "EditorServicesDecHead", 0);
         
@@ -596,7 +599,7 @@ public class Driver{
       log.beginTask("Extracting name and accessibility.");
       try {
         extName =
-          SDFCommands.prettyPrintJava(
+          drj.prettyPrint(
           getApplicationSubterm(head, "PlainDecHead", 1), interp);    
 
         String extension = null;
@@ -756,7 +759,7 @@ public class Driver{
       sugaredPackageDecl = lastSugaredToplevelDecl;
       
       String packageName =
-          SDFCommands.prettyPrintJava(
+          drj.prettyPrint(
           getApplicationSubterm(toplevelDecl, "PackageDec", 1), interp);
 
       log.log("The Java package name is '" + packageName + "'.");
@@ -997,7 +1000,7 @@ public class Driver{
         
         if (isNative) {   // TODO: remove native
           extName =
-            SDFCommands.prettyPrintJava(
+            drj.prettyPrint(
             getApplicationSubterm(head, "NativeSugarDecHead", 2), interp);
           
           IStrategoTerm mods = getApplicationSubterm(head, "NativeSugarDecHead", 0);
@@ -1011,7 +1014,7 @@ public class Driver{
         }
         else {
           extName =
-            SDFCommands.prettyPrintJava(
+            drj.prettyPrint(
             getApplicationSubterm(head, "SugarDecHead", 1), interp);    
           
           IStrategoTerm mods = getApplicationSubterm(head, "SugarDecHead", 0);
