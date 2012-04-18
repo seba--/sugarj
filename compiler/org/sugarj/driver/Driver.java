@@ -376,7 +376,7 @@ public class Driver{
       else {
         //driverResult.delegateCompilation(delegateCompilation, javaOutFile, javaSource, generatedJavaClasses);
         // XXX: Maybe implement this in Driver_Java
-        driverResult.delegateCompilation(delegateCompilation, drj.getJavaOutFile(), drj.getJavaSource(), drj.getGeneratedJavaClasses());
+        driverResult.delegateCompilation(delegateCompilation, drj.getOutFile(), drj.getSource(), drj.getCompiledFiles());
       }
         
       driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
@@ -413,7 +413,8 @@ public class Driver{
       try {
         //driverResult.compileJava(javaOutFile, javaSource, environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), generatedJavaClasses);
         //XXX: maybe implement this in Driver_Java
-        langLib.getCompilerCommands().compile(drj.getJavaOutFile(), drj.getSource(), environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), drj.getGeneratedJavaClasses());
+        
+        langLib.getCompilerCommands().compile(drj.getOutFile(), drj.getSource(), environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), drj.getCompiledFiles(), driverResult);
       } catch (ClassNotFoundException e) {
         setErrorMessage(lastSugaredToplevelDecl, "Could not resolve imported class " + e.getMessage());
         // throw new RuntimeException(e);
@@ -537,7 +538,7 @@ public class Driver{
             break;
           }
         
-        fullExtName = drj.getRelPackageNameSep() + extName;
+        fullExtName = drj.getRelNamespaceSep() + extName;
 
         log.log("The name of the editor services is '" + extName + "'.");
         log.log("The full name of the editor services is '" + fullExtName + "'.");
@@ -557,7 +558,7 @@ public class Driver{
         // XXX if (currentTransProg != null)
         editorServices = ATermCommands.registerSemanticProvider(editorServices, currentTransProg);
   
-        Path editorServicesFile = environment.createBinPath(drj.getRelPackageNameSep() + extName + ".serv");
+        Path editorServicesFile = environment.createBinPath(drj.getRelNamespaceSep() + extName + ".serv");
         
         log.log("writing editor services to " + editorServicesFile);
         
@@ -618,7 +619,7 @@ public class Driver{
             break;
           }
         
-        fullExtName = drj.getRelPackageNameSep() + extName + (extension == null ? "" : ("." + extension));
+        fullExtName = drj.getRelNamespaceSep() + extName + (extension == null ? "" : ("." + extension));
 
         log.log("The name is '" + extName + "'.");
         log.log("The full name is '" + fullExtName + "'.");
@@ -631,7 +632,7 @@ public class Driver{
         String plainContent = Term.asJavaString(ATermCommands.getApplicationSubterm(body, "PlainBody", 0));
         
         String ext = extension == null ? "" : ("." + extension);
-        Path plainFile = environment.createBinPath(drj.getRelPackageNameSep() + extName + ext);
+        Path plainFile = environment.createBinPath(drj.getRelNamespaceSep() + extName + ext);
         FileCommands.createFile(plainFile);
   
         log.log("writing plain content to " + plainFile);
@@ -650,10 +651,10 @@ public class Driver{
     if (isApplication(toplevelDecl, "PackageDec"))
       processPackageDec(toplevelDecl);
     else {
-      drj.checkPackage(toplevelDecl, sourceFile, driverResult);   // XXX: check -> setup ?
+      drj.checkNamespace(toplevelDecl, sourceFile, driverResult);   // XXX: check -> setup ?
       drj.checkSourceOutFile(environment, driverResult);
       if (depOutFile == null)
-        depOutFile = environment.createBinPath(drj.getRelPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
+        depOutFile = environment.createBinPath(drj.getRelNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       try {
         if (drj.isImport(toplevelDecl)) {
           if (!environment.isAtomicImportParsing())
@@ -764,9 +765,9 @@ public class Driver{
 
       log.log("The Java package name is '" + packageName + "'.");
 
-      drj.processPackageDec(toplevelDecl, environment, interp, driverResult, packageName, sourceFile);
+      drj.processNamespaceDec(toplevelDecl, environment, interp, driverResult, packageName, sourceFile);
       if (depOutFile == null)
-        depOutFile = environment.createBinPath(drj.getRelPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
+        depOutFile = environment.createBinPath(drj.getRelNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       
 //      javaSource.setPackageDecl(SDFCommands.prettyPrintJava(toplevelDecl, interp));
     } finally {
@@ -837,7 +838,7 @@ public class Driver{
     
     log.beginTask("processing", "PROCESS the desugared import declaration.");
     try {
-      String importModule = ModuleSystemCommands.extractImportedModuleName(toplevelDecl, interp);
+      String importModule = drj.extractImportedModuleName(toplevelDecl, interp);
 
       // TODO handle import declarations with asterisks, e.g. import foo.*;
       
@@ -877,7 +878,7 @@ public class Driver{
    
               if (currentlyProcessing.contains(importSourceFile)) {
                 // assume source file does not provide syntactic sugar
-                drj.getJavaSource().addImport(importModule.replace('/', '.'));
+                drj.getSource().addImport(importModule.replace('/', '.'));
                 skipProcessImport = true;
                 delegateCompilation = importSourceFile;
               }
@@ -906,11 +907,11 @@ public class Driver{
         
         if (res != null && res.hasDelegatedCompilation(sourceFile)) {
           delegateCompilation = res.getSourceFile();
-          drj.getJavaSource().addImport(importModule.replace('/', '.'));
+          drj.getSource().addImport(importModule.replace('/', '.'));
           skipProcessImport = true;
         }
         else if (driverResult.hasDelegatedCompilation(importSourceFile)) {
-          drj.getJavaSource().addImport(importModule.replace('/', '.'));
+          drj.getSource().addImport(importModule.replace('/', '.'));
           skipProcessImport = true;
         }
       }
@@ -930,7 +931,7 @@ public class Driver{
   private boolean processImport(String modulePath, IStrategoTerm importTerm) throws IOException {
     boolean success = false;
     
-    success |= ModuleSystemCommands.importClass(modulePath, drj.getJavaSource(), environment);
+    success |= ModuleSystemCommands.importClass(modulePath, drj.getSource(), environment);
     ModuleSystemCommands.registerSearchedClassFiles(modulePath, driverResult, environment);
 
     Path sdf = ModuleSystemCommands.importSdf(modulePath, environment);
@@ -1029,7 +1030,7 @@ public class Driver{
         
         
         
-        fullExtName = drj.getRelPackageNameSep() + extName;
+        fullExtName = drj.getRelNamespaceSep() + extName;
 
         log.log("The name of the sugar is '" + extName + "'.");
         log.log("The full name of the sugar is '" + fullExtName + "'.");
@@ -1049,8 +1050,8 @@ public class Driver{
         log.endTask();
       }
       
-      Path sdfExtension = environment.createBinPath(drj.getRelPackageNameSep() + extName + ".sdf");
-      Path strExtension = environment.createBinPath(drj.getRelPackageNameSep() + extName + ".str");
+      Path sdfExtension = environment.createBinPath(drj.getRelNamespaceSep() + extName + ".sdf");
+      Path strExtension = environment.createBinPath(drj.getRelNamespaceSep() + extName + ".str");
       
       String sdfImports = " imports " + StringCommands.printListSeparated(availableSDFImports, " ") + "\n";
       String strImports = " imports " + StringCommands.printListSeparated(availableSTRImports, " ") + "\n";

@@ -38,22 +38,24 @@ public class JavaDriver extends LanguageDriver {
     
     String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
     
-    RelativePath clazz = environment.createBinPath(getRelPackageNameSep() + decName + ".class");
+    RelativePath clazz = environment.createBinPath(getRelNamespaceSep() + decName + ".class");
     
     generatedJavaClasses.add(clazz);
     javaSource.addBodyDecl(prettyPrint(dec, interp));
   }
   
   
-  
-  public String getRelPackageNameSep() {
+  // was: getRelPackageNameSep
+  // XXX: Think of a better name
+  public String getRelNamespaceSep() {
     if (relPackageName == null || relPackageName.isEmpty())
       return "";
     
     return relPackageName + sep;
   }
   
-  public Set<RelativePath> getGeneratedJavaClasses() {
+  // was: getGeneratedJavaClasses
+  public Set<RelativePath> getCompiledFiles() {
     return generatedJavaClasses;
   }
     
@@ -61,7 +63,7 @@ public class JavaDriver extends LanguageDriver {
     return javaSource;
   }
   
-  public Path getJavaOutFile() {
+  public Path getOutFile() {
     return javaOutFile;
   }
   
@@ -69,7 +71,8 @@ public class JavaDriver extends LanguageDriver {
     this.javaOutFile = javaOutFile;
   }
   
-  public String getRelPackageName() {
+  // was: getRelPackageName
+  public String getNamespace() {
     return relPackageName;
   }
   
@@ -100,7 +103,8 @@ public class JavaDriver extends LanguageDriver {
     }
   }
   
-  public void processPackageDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IResult driverResult, String packageName, RelativeSourceLocationPath sourceFile) throws IOException {
+  // was: processPackageDec
+  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IResult driverResult, String packageName, RelativeSourceLocationPath sourceFile) throws IOException {
     relPackageName = FileCommands.getRelativeModulePath(packageName);
 
     log.log("The SDF / Stratego package name is '" + relPackageName + "'.");
@@ -108,7 +112,7 @@ public class JavaDriver extends LanguageDriver {
     checkPackageName(toplevelDecl, sourceFile, driverResult);
     
     if (javaOutFile == null)
-      javaOutFile = environment.createBinPath(getRelPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".java");
+      javaOutFile = environment.createBinPath(getRelNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".java");
 
     // moved here before depOutFile==null check
     javaSource.setPackageDecl(prettyPrint(toplevelDecl, interp));
@@ -125,14 +129,15 @@ public class JavaDriver extends LanguageDriver {
     return ".java";
   }
   
-  public void checkPackage(IStrategoTerm decl, RelativeSourceLocationPath sourceFile, IResult driverResult) {
+  // was: checkPackage
+  public void checkNamespace(IStrategoTerm decl, RelativeSourceLocationPath sourceFile, IResult driverResult) {
     if (relPackageName == null)
       checkPackageName(decl, sourceFile, driverResult);
   }
   
   public void checkSourceOutFile(Environment environment, IResult driverResult) {
     if (javaOutFile == null)
-      setJavaOutFile(environment.createBinPath(getRelPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + getSourcecodeExtension()));
+      setJavaOutFile(environment.createBinPath(getRelNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + getSourcecodeExtension()));
   }
   
   
@@ -184,6 +189,7 @@ public class JavaDriver extends LanguageDriver {
   
   
   // XXX: move this to language driver?
+  // XXX: Think of a good name -- what does this actually do?
   // from ModuleSystemCommands
   public String extractImportedModuleName(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
     String name = null;
