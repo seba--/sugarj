@@ -1,0 +1,8 @@
+package test2;
+
+import org.sugarj.languages.Java;
+
+public transformation Trans {
+  rules
+    main = oncetd(?ClassDecHead([Public()], Id("C"), None(), None(), None()))
+}
