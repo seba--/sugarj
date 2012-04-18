@@ -310,10 +310,14 @@ public class ModuleSystemCommands {
   }
   
   public static RelativePath transformedModelPath(RelativePath modelPath, RelativePath transformationPath) {
+    String newModuleName = transformedModuleName(FileCommands.dropExtension(modelPath.getRelativePath()), transformationPath);
     String extension = FileCommands.getExtension(modelPath);
-    String rest = FileCommands.dropExtension(modelPath.getRelativePath());
-    String newrest = rest + "$" + FileCommands.dropExtension(transformationPath.getRelativePath().replace('/', '_'));
-    return new RelativePath(modelPath.getBasePath(), newrest + (extension == null ? "" : ("." + extension)));
+    return new RelativePath(modelPath.getBasePath(), newModuleName + (extension == null ? "" : ("." + extension)));
+  }
+  
+  public static String transformedModuleName(String moduleName, RelativePath transformationPath) {
+    String dollar = moduleName.endsWith("$") ? "" : "$";
+    return moduleName + dollar + FileCommands.dropExtension(transformationPath.getRelativePath().replace('/', '_'));
   }
   
   public static RelativeSourceLocationPath locateTransformedModelSourceFile(String modulePath, List<RelativePath> transformationPaths, Environment environment) {

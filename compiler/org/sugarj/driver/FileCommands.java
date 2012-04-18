@@ -143,17 +143,21 @@ public class FileCommands {
   
   public static String fileName(Path file_doof) {
     String file = toCygwinPath(file_doof.getAbsolutePath());
-    int index = file.lastIndexOf(sep);
+    return fileName(file);
+  }
+  
+  public static String fileName(String modulePath) {
+    int index = modulePath.lastIndexOf(sep);
 
     if (index >= 0)
-      file = file.substring(index + 1);
+      modulePath = modulePath.substring(index + 1);
 
-    index = file.lastIndexOf(".");
+    index = modulePath.lastIndexOf(".");
 
     if (index > 0)
-      file = file.substring(0, index);
+      modulePath = modulePath.substring(0, index);
 
-    return file;
+    return modulePath;
   }
 
   /**

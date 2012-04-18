@@ -32,4 +32,13 @@ public class Renaming implements Serializable {
       this.pkgs.add(pkg);
     this.pkgs.remove(this.pkgs.size() - 1);
   }
+  
+  public Renaming(String fromPath, String toPath) {
+    this.from = FileCommands.fileName(fromPath);
+    this.to = FileCommands.fileName(toPath);
+    this.pkgs = new LinkedList<String>();
+    for (String pkg : fromPath.split(Environment.sep))
+      this.pkgs.add(pkg);
+    this.pkgs.remove(this.pkgs.size() - 1);
+  }
 }

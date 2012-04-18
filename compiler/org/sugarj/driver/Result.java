@@ -59,6 +59,8 @@ public class Result {
   private Set<Path> allDependentFiles = new HashSet<Path>();
   private Path generationLog;
   private String cacheVersion;
+  private Set<Path> influentialTransformations = new HashSet<Path>();
+  private String influencedModuleName;
 
   /**
    * deferred source files (*.sugj) -> 
@@ -415,6 +417,9 @@ public class Result {
         
         oos.writeObject(cacheVersion);
         
+        oos.writeObject(influentialTransformations);
+        oos.writeObject(influencedModuleName);
+        
   //      new TermReader(ATermCommands.factory).unparseToFile(sugaredSyntaxTree, oos);
   //      oos.writeBoolean(failed);
   //      oos.writeObject(collectedErrors);
@@ -477,6 +482,9 @@ public class Result {
 
       result.cacheVersion = (String) ois.readObject();
       
+      result.influentialTransformations = (Set<Path>) ois.readObject();
+      result.influencedModuleName = (String) ois.readObject();
+      
 //      result.sugaredSyntaxTree = new TermReader(ATermCommands.factory).parseFromStream(ois);
 //      result.failed = ois.readBoolean();
 //      result.collectedErrors = (List<String>) ois.readObject();
@@ -525,5 +533,25 @@ public class Result {
   
   public boolean hasFailed() {
     return !getParseErrors().isEmpty() || !getCollectedErrors().isEmpty();
+  }
+
+  public Set<Path> getInfluentialTransformations() {
+    return influentialTransformations;
+  }
+
+  public void setInfluentialTransformations(Set<Path> influentialTransformations) {
+    this.influentialTransformations = influentialTransformations;
+  }
+  
+  public void addInfluentialTransformation(Path p) {
+    influentialTransformations.add(p);
+  }
+  
+  public void setInfluencedModuleName(String moduleName) {
+    this.influencedModuleName = moduleName;
+  }
+
+  public String getInfluencedModuleName() {
+    return influencedModuleName;
   }
 }

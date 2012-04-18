@@ -89,9 +89,7 @@ public class Driver {
   
   private Result driverResult;
   
-  private Path javaOutFile;
   private JavaSourceFileContent javaSource;
-  private Path depOutFile;
   private String relPackageName;
   private RelativeSourceLocationPath sourceFile;
 
@@ -322,10 +320,9 @@ public class Driver {
       driverResult.setSourceFile(this.sourceFile, declProvider.getSourceHashCode());
       
       if (sourceFile != null) {
-        javaOutFile = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".java");
         javaSource = new JavaSourceFileContent();
         javaSource.setOptionalImport(false);
-        depOutFile = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".dep");
+        
         Path genLog = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".gen");
         driverResult.setGenerationLog(genLog);
         // clearGeneratedStuff();
@@ -370,8 +367,9 @@ public class Driver {
       stepped();
       
       // COMPILE the generated java file
+      Path javaOutFile = environment.new RelativePathBin(driverResult.getInfluencedModuleName() + ".java");
       if (compilationDelegates.isEmpty() && !dependsOnModel)
-        compileGeneratedJavaFiles();
+        compileGeneratedJavaFiles(javaOutFile);
       else {
         Result delegate = null;
         for (Map.Entry<Path, Driver> e : currentlyProcessing.entrySet())
@@ -398,6 +396,7 @@ public class Driver {
         driverResult.setDesugaring(currentTransProg);
       }
       
+      Path depOutFile = environment.new RelativePathBin(driverResult.getInfluencedModuleName() + ".dep");
       driverResult.writeDependencyFile(depOutFile);
 
       success = driverResult.getCollectedErrors().isEmpty() && driverResult.getParseErrors().isEmpty();
@@ -413,7 +412,7 @@ public class Driver {
     }
   }
 
-  private void compileGeneratedJavaFiles() throws IOException {
+  private void compileGeneratedJavaFiles(Path javaOutFile) throws IOException {
     boolean good = false;
     log.beginTask("compilation", "COMPILE the generated java file");
     try {
@@ -606,59 +605,59 @@ public class Driver {
   
   private void processToplevelDeclaration(IStrategoTerm toplevelDecl)
       throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
-    if (isApplication(toplevelDecl, "PackageDec"))
-      processPackageDec(toplevelDecl);
-    else {
-      if (relPackageName == null)
-        checkPackageName(toplevelDecl);
-      if (javaOutFile == null)
-        javaOutFile = environment.new RelativePathBin(relPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".java");
-      if (depOutFile == null)
-        depOutFile = environment.new RelativePathBin(relPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
-      try {
-        if (isApplication(toplevelDecl, "TypeImportDec") || 
-            isApplication(toplevelDecl, "TypeImportOnDemandDec") || 
-            isApplication(toplevelDecl, "TransImportDec") ||
-            isApplication(toplevelDecl, "ModelImportDec") ||
-            isApplication(toplevelDecl, "ModelTransImportDec")) {
-          if (!environment.isAtomicImportParsing())
-            processImportDec(toplevelDecl);
-          else
+    try {
+      if (isApplication(toplevelDecl, "PackageDec"))
+        processPackageDec(toplevelDecl);
+      else {
+        if (relPackageName == null)
+          checkPackageName(toplevelDecl);
+
+        if (ATermCommands.isImportDec(toplevelDecl)) {
+          if (environment.isAtomicImportParsing()) 
             toplevelDecl = processImportDecs(toplevelDecl);
+          else
+            processImportDec(toplevelDecl);
         }
-        else if (ATermCommands.isList(toplevelDecl))
+        else if (ATermCommands.isList(toplevelDecl)) {
           /*
            * Desugarings may generate lists of toplevel declarations. These declarations,
            * however, may not depend on one another.
            */
           for (IStrategoTerm term : ATermCommands.getList(toplevelDecl))
             processToplevelDeclaration(term);
-        else if (isApplication(toplevelDecl, "JavaTypeDec") || //XXX remove this branch
-                 isApplication(toplevelDecl, "ClassDec") ||
-                 isApplication(toplevelDecl, "InterfaceDec") ||
-                 isApplication(toplevelDecl, "EnumDec") ||
-                 isApplication(toplevelDecl, "AnnoDec"))
-          processJavaTypeDec(toplevelDecl);
-        else if (isApplication(toplevelDecl, "SugarDec"))
-          processSugarDec(toplevelDecl);
-        else if (isApplication(toplevelDecl, "EditorServicesDec"))
-          processEditorServicesDec(toplevelDecl);
-        else if (isApplication(toplevelDecl, "PlainDec"))
-          processPlainDec(toplevelDecl);
-        else if (isApplication(toplevelDecl, "ModelDec"))
-            processModel(toplevelDecl);
-        else if (ATermCommands.isString(toplevelDecl)) {
-          if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
-            sugaredBodyDecls.add(lastSugaredToplevelDecl);
         }
-        else
-          throw new IllegalArgumentException("unexpected toplevel declaration, desugaring probably failed: " + ATermCommands.atermToFile(toplevelDecl));
-      } catch (Exception e) {
-        handleException(e, toplevelDecl);
-      } finally {
-        if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
-          sugaredBodyDecls.add(lastSugaredToplevelDecl);
+        else {
+          // imports must are done, check which transformations had influence and change module name accordingly (renaming)
+          driverResult.setInfluencedModuleName(computeInfluencedModuleName());
+          environment.getRenamings().add(new Renaming(relModuleName(), driverResult.getInfluencedModuleName()));
+          
+          if (isApplication(toplevelDecl, "JavaTypeDec") || //XXX remove this branch
+                   isApplication(toplevelDecl, "ClassDec") ||
+                   isApplication(toplevelDecl, "InterfaceDec") ||
+                   isApplication(toplevelDecl, "EnumDec") ||
+                   isApplication(toplevelDecl, "AnnoDec"))
+            processJavaTypeDec(toplevelDecl);
+          else if (isApplication(toplevelDecl, "SugarDec"))
+            processSugarDec(toplevelDecl);
+          else if (isApplication(toplevelDecl, "EditorServicesDec"))
+            processEditorServicesDec(toplevelDecl);
+          else if (isApplication(toplevelDecl, "PlainDec"))
+            processPlainDec(toplevelDecl);
+          else if (isApplication(toplevelDecl, "ModelDec"))
+              processModel(toplevelDecl);
+          else if (ATermCommands.isString(toplevelDecl)) {
+            if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
+              sugaredBodyDecls.add(lastSugaredToplevelDecl);
+          }
+          else
+            throw new IllegalArgumentException("unexpected toplevel declaration, desugaring probably failed: " + ATermCommands.atermToFile(toplevelDecl));
+        }
       }
+    } catch (Exception e) {
+      handleException(e, toplevelDecl);
+    } finally {
+      if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
+        sugaredBodyDecls.add(lastSugaredToplevelDecl);
     }
   }
 
@@ -679,11 +678,6 @@ public class Driver {
       log.log("The SDF / Stratego package name is '" + relPackageName + "'.");
 
       checkPackageName(toplevelDecl);
-      
-      if (javaOutFile == null)
-        javaOutFile = environment.new RelativePathBin(relPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".java");
-      if (depOutFile == null)
-        depOutFile = environment.new RelativePathBin(relPackageNameSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       
       javaSource.setPackageDecl(SDFCommands.prettyPrintJava(toplevelDecl, interp));
     } finally {
@@ -799,8 +793,8 @@ public class Driver {
       String modulePath = FileCommands.getRelativeModulePath(ModuleSystemCommands.extractImportedModuleName(toplevelDecl, interp));
       RelativeSourceLocationPath importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
       
-      Pair<RelativePath, Boolean> preparedImport = prepareImport(modulePath, importSourceFile, null, null, toplevelDecl, false);
-      modulePath = preparedImport.a != null ? ModuleSystemCommands.getModulePath(preparedImport.a) : modulePath;
+      Pair<String, Boolean> preparedImport = prepareImport(modulePath, importSourceFile, null, null, toplevelDecl, false);
+      modulePath = preparedImport.a;
       boolean skipImport = preparedImport.b;
 
       if (skipImport)
@@ -829,13 +823,13 @@ public class Driver {
           setErrorMessage(toplevelDecl, "model not found " + modulePath);
         else if (model != null) {
           preparedImport = prepareImport(transformedModelPath, transformedModelSourceFile, model, resolvedTransformationPaths, toplevelDecl, true);
-          modulePath = preparedImport.a != null ? ModuleSystemCommands.getModulePath(preparedImport.a) : modulePath;
+          modulePath = preparedImport.a;
           skipImport = preparedImport.b;
           
           if (localModelName != null)
-            environment.getRenamings().add(0, new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(preparedImport.a)));
-          else if (model != null)
-            environment.getRenamings().add(0, new Renaming(model, preparedImport.a));
+            environment.getRenamings().add(0, new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(modulePath)));
+          else
+            environment.getRenamings().add(0, new Renaming(model.getRelativePath(), modulePath));
 
           if (skipImport)
             return;
@@ -870,9 +864,9 @@ public class Driver {
    * @return a relative path to be used for processing the import and
    *         a flag indicating whether to skip processing this import. 
    */
-  private Pair<RelativePath, Boolean> prepareImport(String modulePath, RelativeSourceLocationPath importSourceFile, RelativePath model, List<RelativePath> transformationPaths, IStrategoTerm toplevelDecl, boolean transformModel) throws IOException {
+  private Pair<String, Boolean> prepareImport(String modulePath, RelativeSourceLocationPath importSourceFile, RelativePath model, List<RelativePath> transformationPaths, IStrategoTerm toplevelDecl, boolean transformModel) throws IOException {
     if (modulePath.startsWith("org/sugarj"))
-      return Pair.<RelativePath, Boolean>create(importSourceFile, false);
+      return Pair.<String, Boolean>create(modulePath, false);
     
     boolean skipProcessImport = false;
     
@@ -899,7 +893,7 @@ public class Driver {
     
     if (sourceFile.equals(importSourceFile)) {
       setErrorMessage(toplevelDecl, "A library cannot import itself.");
-      return Pair.<RelativePath, Boolean>create(importSourceFile, true);
+      return Pair.<String, Boolean>create(modulePath, true);
     }
     else if (importSourceFile != null && res == null) {
       if (!generateFiles) {
@@ -941,6 +935,9 @@ public class Driver {
             }
             else
               res = compile(importSourceFile, monitor, currentlyProcessing);
+            
+            if (res != null)
+              modulePath = res.getInfluencedModuleName();
           } catch (Exception e) {
             if (transformModel) {
               /*
@@ -1002,7 +999,7 @@ public class Driver {
 //      skipProcessImport = true;
 //    }
     
-    return Pair.<RelativePath, Boolean>create(importSourceFile, skipProcessImport);
+    return Pair.<String, Boolean>create(modulePath, skipProcessImport);
   }
   
   private boolean processImport(String modulePath) throws IOException {
@@ -1058,8 +1055,12 @@ public class Driver {
         for (RelativePath strPath : transformationPaths)
           transformedResult = executeTransformation(strPath, transformedResult.a, transformedResult.b, false);
 
-      for (RelativePath strPath : environment.getTransformationPaths())
-        transformedResult = executeTransformation(strPath, transformedResult.a, transformedResult.b, true);
+      for (RelativePath strPath : environment.getTransformationPaths()) {
+        Pair<IStrategoTerm, RelativePath> tres = executeTransformation(strPath, transformedResult.a, transformedResult.b, true);
+        if (!tres.b.equals(transformedResult.b))
+          driverResult.addInfluentialTransformation(strPath);
+        transformedResult = tres;
+      }
       
       if (transformedResult.b.equals(model)) {
         String modulePath = FileCommands.dropExtension(model.getRelativePath()) + "$." + FileCommands.getExtension(model);
@@ -1099,6 +1100,10 @@ public class Driver {
       ModuleSystemCommands.registerResults(res, environment, paths);
       res.rewriteDependencyFile();
 
+      for (Path p : res.getInfluentialTransformations())
+        if (envRenamings.contains(p))
+          driverResult.addInfluentialTransformation(p);
+      
       return res;
     } finally {
       environment.setTransformationPaths(envTransformationPaths);
@@ -1470,10 +1475,7 @@ public class Driver {
   }
   
   private void init(ToplevelDeclarationProvider declProvider, RelativePath sourceFile, boolean generateFiles) throws FileNotFoundException, IOException, InvalidParseTableException {
-    javaOutFile = null;
     javaSource = null;
-    depOutFile = null;
-    // FileCommands.createFile(tmpOutdir, relModulePath + ".java");
 
     this.declProvider = declProvider;
     this.sourceFile = new RelativeSourceLocationPath(new SourceLocation(sourceFile.getBasePath(), environment), sourceFile);
@@ -1664,6 +1666,10 @@ public class Driver {
     return relPackageName + sep;
   }
   
+  private String relModuleName() {
+    return relPackageNameSep() + FileCommands.fileName(sourceFile);
+  }
+  
   /**
 * @return the non-desugared syntax tree of the complete file.
 */
@@ -1755,7 +1761,6 @@ public class Driver {
     driverResult.logError(msg);
     ATermCommands.setErrorMessage(toplevelDecl, msg);
   }
-  
   
   private IStrategoTerm currentDesugar(IStrategoTerm term) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     // assimilate toplevelDec using current transformation
@@ -2012,7 +2017,7 @@ public class Driver {
   }
   
   private void checkToplevelDeclarationName(String name, String what, IStrategoTerm toplevelDecl) {
-    if (!name.equals(FileCommands.fileName(sourceFile)))
+    if (!name.equals(FileCommands.fileName(driverResult.getInfluencedModuleName())))
       setErrorMessage(toplevelDecl, "File name differs from " + what + " name. was: " + name + ", expected: " + FileCommands.fileName(sourceFile));
   }
   
@@ -2022,5 +2027,15 @@ public class Driver {
   
   public String getRelPackageName() {
     return relPackageName;
+  }
+  
+  private String computeInfluencedModuleName() {
+    String influencedModuleName = relModuleName();
+    
+    for (RelativePath p : environment.getTransformationPaths())
+      if (driverResult.getInfluentialTransformations().contains(p))
+        influencedModuleName = ModuleSystemCommands.transformedModuleName(influencedModuleName, p);
+    
+    return influencedModuleName;
   }
 }
