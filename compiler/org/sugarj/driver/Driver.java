@@ -1104,18 +1104,6 @@ public class Driver {
 
 
   private Pair<IStrategoTerm, RelativePath> executeTransformation(RelativePath strPath, IStrategoTerm currentTerm, RelativePath currentPath, boolean transitiveTrans) throws IOException {
-//    /*
-//     * create a temporary stratego file that connects already available imports
-//     * with the currently processed transformation
-//     */
-//    Path compoundStr = FileCommands.newTempFile("str");
-//    StringBuilder builder = new StringBuilder();
-//    builder.append("module ").append(FileCommands.fileName(compoundStr)).append("\n");
-//    builder.append("imports ");
-//    builder.append(StringCommands.printModuleList(availableSTRImports, " "));
-//    builder.append(" ").append(FileCommands.dropExtension(strPath.getRelativePath()));
-//    FileCommands.writeToFile(compoundStr, builder.toString());
-
     String strat = "main-" + FileCommands.dropExtension(strPath.getRelativePath()).replace('/', '_');
     
     Path trans = null;
@@ -1136,25 +1124,17 @@ public class Driver {
      * applies each transformation's "main-<transformation name>" rule on the AST of
      * the current import
      */
+    
     RelativePath transformedPath = ModuleSystemCommands.transformedModelPath(currentPath, strPath);
     try {
       IStrategoTerm transformedTerm = STRCommands.assimilate(strat, trans, currentTerm, interp);
       
-//      if (newTransformedTerm == null &&) {
-//        String msg = "model transformation failed " + FileCommands.dropExtension(strPath.getRelativePath()) + " applied to " + ATermCommands.atermToFile(currentTerm).getAbsolutePath();
-//        setErrorMessage(lastSugaredToplevelDecl, msg);
-//        throw new RuntimeException(msg);
-//      }
-
       if (transformedTerm == null)
         return Pair.create(currentTerm, transitiveTrans ? currentPath : transformedPath);
       
       return Pair.create(transformedTerm, transformedPath);
     } catch (Exception e) {
       return Pair.create(currentTerm, transitiveTrans ? currentPath : transformedPath);
-//      StringtransformedPathransformation failed " + FileCommands.dropExtension(strPath.getRelativePath()) + " applied to " + ATermCommands.atermToFile(currentTerm).getAbsolutePath();
-//      setErrorMessage(lastSugaredToplevelDecl, msg + ":\n" + e.getMessage());
-//      throw new RuntimeException(msg, e);
     }
   }
 
@@ -1432,6 +1412,9 @@ public class Driver {
     FileCommands.writeToFile(currentGrammarSDF, builder.toString());
   }
   
+  /*
+   * TODO avoid building compound modules, put available imports in local sugar directly => better cache reuse
+   */
   private void buildCompoundStrModule() throws IOException {
     FileCommands.deleteTempFiles(currentTransSTR);
     currentTransSTR = FileCommands.newTempFile("str");

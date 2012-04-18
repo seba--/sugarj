@@ -3,6 +3,11 @@ package variability;
 import variability.FeatureExpressions;
 import concretesyntax.MetaExplode;
 
+public editor services Java {
+  folding
+    VariableClass._
+}
+
 public sugar Java {
 
   context-free syntax
