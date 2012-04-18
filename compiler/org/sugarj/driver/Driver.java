@@ -1061,7 +1061,11 @@ public class Driver {
       for (RelativePath strPath : environment.getTransformationPaths())
         transformedResult = executeTransformation(strPath, transformedResult.a, transformedResult.b, true);
       
-      transformSuccessful = true;
+      if (transformedResult.b.equals(model)) {
+        String modulePath = FileCommands.dropExtension(model.getRelativePath()) + "$." + FileCommands.getExtension(model);
+        RelativePath p = new RelativePath(model.getBasePath(), modulePath);
+        transformedResult = Pair.create(transformedResult.a, p);
+      }
       
       ATermCommands.atermToFile(transformedResult.a, transformedResult.b);
       log.log("Stored transformed model in " + transformedResult.b.getAbsolutePath());
@@ -1125,16 +1129,16 @@ public class Driver {
      * the current import
      */
     
-    RelativePath transformedPath = ModuleSystemCommands.transformedModelPath(currentPath, strPath);
     try {
       IStrategoTerm transformedTerm = STRCommands.assimilate(strat, trans, currentTerm, interp);
       
       if (transformedTerm == null)
-        return Pair.create(currentTerm, transitiveTrans ? currentPath : transformedPath);
+        return Pair.create(currentTerm, currentPath);
       
+      RelativePath transformedPath = ModuleSystemCommands.transformedModelPath(currentPath, strPath);
       return Pair.create(transformedTerm, transformedPath);
     } catch (Exception e) {
-      return Pair.create(currentTerm, transitiveTrans ? currentPath : transformedPath);
+      return Pair.create(currentTerm, currentPath);
     }
   }
 

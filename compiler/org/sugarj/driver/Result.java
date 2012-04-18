@@ -511,8 +511,7 @@ public class Result {
   }
   
   void setSourceFile(RelativeSourceLocationPath sourceFile) throws IOException {
-    this.sourceFile = sourceFile;
-    this.sourceFileHash = FileCommands.fileHash(sourceFile);
+    setSourceFile(sourceFile, FileCommands.fileHash(sourceFile));
   }
   
   void setSourceFile(RelativeSourceLocationPath sourceFile, int sourceFileHash) {

@@ -1,0 +1,6 @@
+package test;
+
+public transformation Trans {
+  rules
+    main = fail
+}

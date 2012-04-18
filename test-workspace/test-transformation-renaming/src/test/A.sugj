@@ -1,0 +1,6 @@
+package test;
+
+model import test.B;
+
+public class A {
+}
