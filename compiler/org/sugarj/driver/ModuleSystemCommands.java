@@ -317,7 +317,11 @@ public class ModuleSystemCommands {
   
   public static String transformedModuleName(String moduleName, RelativePath transformationPath) {
     String dollar = moduleName.endsWith("$") ? "" : "$";
-    return moduleName + dollar + FileCommands.dropExtension(transformationPath.getRelativePath().replace('/', '_'));
+    return moduleName + dollar + transformedPathSuffix(transformationPath);
+  }
+  
+  public static String transformedPathSuffix(RelativePath transformationPath) {
+    return FileCommands.dropExtension(transformationPath.getRelativePath().replace('/', '_'));
   }
   
   public static RelativeSourceLocationPath locateTransformedModelSourceFile(String modulePath, List<RelativePath> transformationPaths, Environment environment) {

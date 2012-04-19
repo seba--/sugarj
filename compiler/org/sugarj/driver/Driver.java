@@ -936,7 +936,7 @@ public class Driver {
             else
               res = compile(importSourceFile, monitor, currentlyProcessing);
             
-            if (res != null)
+            if (res != null && res.getInfluencedModuleName() != null)
               modulePath = res.getInfluencedModuleName();
           } catch (Exception e) {
             if (transformModel) {
@@ -2033,7 +2033,8 @@ public class Driver {
     String influencedModuleName = relModuleName();
     
     for (RelativePath p : environment.getTransformationPaths())
-      if (driverResult.getInfluentialTransformations().contains(p))
+      if (driverResult.getInfluentialTransformations().contains(p) &&
+          !influencedModuleName.contains(ModuleSystemCommands.transformedPathSuffix(p)))
         influencedModuleName = ModuleSystemCommands.transformedModuleName(influencedModuleName, p);
     
     return influencedModuleName;
