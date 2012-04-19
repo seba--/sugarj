@@ -1,0 +1,26 @@
+package editor;
+
+public sugar Origin {
+  rules
+	  origin-term      = prim("SSL_EXT_origin_term", <id>)
+	  origin-text      = prim("SSL_EXT_origin_text", <id>)
+	  origin-location  = prim("SSL_EXT_origin_location", <id>)
+	  origin-line      = origin-location => (<id>, _, _, _)
+	  origin-column    = origin-location => (_, <id>, _, _)
+	  origin-strip     = prim("SSL_EXT_origin_strip", <id>)
+	  origin-equal(|t) = prim("SSL_EXT_origin_equal", <id>, t)
+	  
+	  origin-surrounding-comments =
+	    prim("SSL_EXT_origin_surrounding_comments", "SugarJ", <id>)
+	    
+	  origin-documentation-comment =
+	    origin-surrounding-comments;
+	    filter(string-as-chars(documentation-comment-chars));
+	    concat-strings
+	  
+	  documentation-comment-chars:
+	    ['*' | c*] -> <ltrim(' ' + '\t' + '\n' + '\r')> c*
+	  
+	  origin-track-forced(s) =
+	    ![<id>]; all(s); ?[<id>]
+}
