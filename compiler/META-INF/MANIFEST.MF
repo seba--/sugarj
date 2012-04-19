@@ -22,7 +22,8 @@ Export-Package: org.sugarj,
  org.sugarj.driver,
  org.sugarj.driver.caching,
  org.sugarj.driver.transformations,
- org.sugarj.driver.transformations.extraction
+ org.sugarj.driver.transformations.extraction,
+ org.sugarj.util
 Bundle-ClassPath: make_permissive.jar,
  .,
  commons-cli-1.2.jar,

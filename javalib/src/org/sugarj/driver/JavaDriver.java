@@ -55,6 +55,7 @@ public class JavaDriver extends LanguageDriver {
   }
   
   // was: getGeneratedJavaClasses
+  // XXX: think of a better name (classes -> binary files? compiled files?)
   public Set<RelativePath> getCompiledFiles() {
     return generatedJavaClasses;
   }

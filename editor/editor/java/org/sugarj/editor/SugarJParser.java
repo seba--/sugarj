@@ -28,16 +28,17 @@ import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.spoofax.terms.attachments.ParentAttachment;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.imp.runtime.services.ContentProposer;
+import org.sugarj.JavaLib;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.Log;
-import org.sugarj.common.Result;
+import org.sugarj.driver.Result;
 import org.sugarj.driver.Driver;
-import org.sugarj.driver.Environment;
+import org.sugarj.common.Environment;
 import org.sugarj.driver.ModuleSystemCommands;
 import org.sugarj.driver.RetractableTreeBuilder;
-import org.sugarj.driver.path.RelativeSourceLocationPath;
+import org.sugarj.common.path.RelativeSourceLocationPath;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -113,7 +114,8 @@ public class SugarJParser extends JSGLRI {
   private synchronized void scheduleParse(final String input, final String filename) {
     SugarJParser.setPending(filename, true);
 
-    final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(filename), environment.getSourcePath());
+    // XXX: support non-java files in editor. (i.e. use actual language library here, not just JavaLib)
+    final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(filename), environment.getSourcePath(), new JavaLib());
 
     
     Job parseJob = new Job("SugarJ parser: " + sourceFile.getRelativePath()) {

@@ -1,6 +1,5 @@
 package org.sugarj.driver;
 
-import static org.sugarj.common.ATermCommands.isApplication;
 import static org.sugarj.common.Log.log;
 
 import java.io.BufferedReader;
@@ -11,49 +10,50 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Set;
 
-import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.strategoxt.HybridInterpreter;
+import org.sugarj.LanguageLib;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.common.path.SourceLocation;
-import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
+import org.sugarj.driver.sourcefilecontent.ISourceFileContent;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
 public class ModuleSystemCommands {
   
-  /**
-   * 
-   * @param modulePath
-   * @param importTerm
-   * @param javaOutFile
-   * @param interp
-   * @param driverResult
-   * @return true iff a class file existed.
-   * @throws IOException
-   */
-  public static boolean importClass(String modulePath, JavaSourceFileContent javaSource, Environment environment) throws IOException {
-    RelativePath clazz = searchFile(modulePath, ".class", environment);
-    if (clazz == null)
-      return false;
-    
-    log.beginTask("Generate Java code");
-    try {
-      javaSource.addCheckedImport(modulePath.replace('/', '.'));
-    } finally {
-      log.endTask();
+  
+    /**
+     * 
+     * @param modulePath
+     * @param importTerm
+     * @param javaOutFile
+     * @param interp
+     * @param driverResult
+     * @return true iff a class file existed.
+     * @throws IOException
+     */
+    public static boolean importClass(String modulePath, ISourceFileContent source, Environment environment, LanguageLib langLib) throws IOException {
+      RelativePath clazz = searchFile(modulePath, langLib.getBinFileExtension(), environment);
+      if (clazz == null)
+        return false;
+      
+      log.beginTask("Generate Java code");
+      try {
+        source.addCheckedImport(modulePath.replace('/', '.'));
+      } finally {
+        log.endTask();
+      }
+      
+      return true;
     }
     
-    return true;
-  }
-  
-  public static void registerSearchedClassFiles(String modulePath, Result driverResult, Environment environment) throws IOException {
-    registerSearchedFiles(modulePath, ".class", driverResult, environment);
-  }
+    public static void registerSearchedClassFiles(String modulePath, Result driverResult, Environment environment, LanguageLib langLib) throws IOException {
+      registerSearchedFiles(modulePath, langLib.getBinFileExtension(), driverResult, environment);
+    }
+
   
   /**
    * 
@@ -136,14 +136,14 @@ public class ModuleSystemCommands {
 
   
   
-  public static RelativeSourceLocationPath locateSourceFile(String modulePath, Set<SourceLocation> sourcePath) {
+  public static RelativeSourceLocationPath locateSourceFile(String modulePath, Set<SourceLocation> sourcePath, LanguageLib langLib) {
     if (modulePath.startsWith("org/sugarj"))
       return null;
     
-    RelativeSourceLocationPath result = searchFileInSourceLocationPath(modulePath, ".sugj", sourcePath);
+    RelativeSourceLocationPath result = searchFileInSourceLocationPath(modulePath, langLib.getSugarFileExtension(), sourcePath);
     
     if (result == null)
-      result = searchFileInSourceLocationPath(modulePath, ".java", sourcePath);
+      result = searchFileInSourceLocationPath(modulePath, langLib.getSourceFileExtension(), sourcePath);
     
     return result;
   }

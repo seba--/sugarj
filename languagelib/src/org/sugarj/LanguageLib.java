@@ -1,10 +1,13 @@
 package org.sugarj;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
+import org.sugarj.common.Environment;
+import org.sugarj.driver.sourcefilecontent.ISourceFileContent;
 import org.sugarj.stdlib.StdLib;
 
 
@@ -32,5 +35,11 @@ public abstract class LanguageLib implements Serializable {
 	
 	
 	public abstract ICompilerCommands getCompilerCommands();
+	
+	
+	
+	public abstract String getSourceFileExtension();
+	public abstract String getBinFileExtension();
+	public abstract String getSugarFileExtension();
 	
 }

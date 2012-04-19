@@ -862,7 +862,7 @@ public class Driver{
         }
         
         if (importSourceFile == null)
-          importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
+          importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath(), langLib);
 
         if (importSourceFile != null && (res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment))) {
           if (!generateFiles) {
@@ -931,8 +931,8 @@ public class Driver{
   private boolean processImport(String modulePath, IStrategoTerm importTerm) throws IOException {
     boolean success = false;
     
-    success |= ModuleSystemCommands.importClass(modulePath, drj.getSource(), environment);
-    ModuleSystemCommands.registerSearchedClassFiles(modulePath, driverResult, environment);
+    success |= ModuleSystemCommands.importClass(modulePath, drj.getSource(), environment, langLib);
+    ModuleSystemCommands.registerSearchedClassFiles(modulePath, driverResult, environment, langLib);
 
     Path sdf = ModuleSystemCommands.importSdf(modulePath, environment);
     ModuleSystemCommands.registerSearchedSdfFiles(modulePath, driverResult, environment);
@@ -1265,7 +1265,8 @@ public class Driver{
       
       for (String source : sources)
       {
-        RelativeSourceLocationPath p = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(source), environment.getSourcePath());
+        // XXX: Properly replace JavaLib by LanguageLib
+        RelativeSourceLocationPath p = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(source), environment.getSourcePath(), new JavaLib());
         
         allInputFiles.add(p);
         pendingInputFiles.add(p);

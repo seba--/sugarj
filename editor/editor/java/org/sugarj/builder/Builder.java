@@ -28,17 +28,18 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
+import org.sugarj.JavaLib;
 import org.sugarj.common.CommandExecution;
+import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.Log;
-import org.sugarj.common.Result;
+import org.sugarj.common.path.AbsolutePath;
+import org.sugarj.common.path.Path;
+import org.sugarj.common.path.RelativePath;
+import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.driver.Driver;
-import org.sugarj.driver.Environment;
 import org.sugarj.driver.ModuleSystemCommands;
-import org.sugarj.driver.path.AbsolutePath;
-import org.sugarj.driver.path.Path;
-import org.sugarj.driver.path.RelativePath;
-import org.sugarj.driver.path.RelativeSourceLocationPath;
+import org.sugarj.driver.Result;
 import org.sugarj.editor.SugarJConsole;
 import org.sugarj.editor.SugarJParseController;
 import org.sugarj.util.ProcessingListener;
@@ -137,7 +138,8 @@ public class Builder extends IncrementalProjectBuilder {
             String path = getProject().getLocation().makeAbsolute() + "/" + relPath;
             final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(
                     FileCommands.dropExtension(path.toString()),
-                    environment.getSourcePath());
+                    environment.getSourcePath(),
+                    new JavaLib()); // XXX: Replace this by languageLib to support more than java
             
             if (sourceFile == null) {
               org.strategoxt.imp.runtime.Environment.logWarning("cannot locate source file for ressource " + resource.getFullPath());

@@ -1,5 +1,7 @@
 package org.sugarj;
 
+import static org.sugarj.common.Log.log;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -11,7 +13,10 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import org.eclipse.core.runtime.FileLocator;
+import org.sugarj.common.Environment;
+import org.sugarj.common.path.RelativePath;
 import org.sugarj.driver.JavaCommands;
+import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
 
 public class JavaLib extends LanguageLib implements Serializable {
 
@@ -162,6 +167,20 @@ public class JavaLib extends LanguageLib implements Serializable {
 		return javaCommands;
 	}
 
+	@Override
+	public String getSourceFileExtension() {
+		return ".java";
+	}
 
+	@Override
+	public String getBinFileExtension() {
+		return ".class";
+	}
+
+	@Override
+	public String getSugarFileExtension() {
+		return ".sugj";
+	}
+	
 
 }
