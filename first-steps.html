@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="SugarJ : Library-based Language Extensibility" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>SugarJ</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/seba--/sugarj">Fork Me on GitHub</a>
+
+          <a href="index.html"><h1 id="project_title">SugarJ</h1>
+          <h2 id="project_tagline">Library-based Language Extensibility</h2></a>
+
+          <section id="downloads">
+            <a class="zip_download_link" href="https://github.com/seba--/sugarj/zipball/master">Download this project as a .zip file</a>
+            <a class="tar_download_link" href="https://github.com/seba--/sugarj/tarball/master">Download this project as a tar.gz file</a>
+          </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+
+<h2>First steps with SugarJ</h2>
+
+We collected a few guidelines to get you started with SugarJ more easily.
+
+<h3>Existing case studies</h3>
+
+A great of getting to know SugarJ is to look at existing case studies. We made
+all of our case studies available online as open source. You can find them in
+our <a href="https://github.com/seba--/sugarj/tree/master/test-workspace">github
+repository</a>.
+
+<h3>Setting up a SugarJ project</h3>
+
+We have not fully worked out an Eclipse wizzard to help you create a SugarJ
+project. For the meantime, please follow these three steps:
+
+<ol>
+<li> Create a new Java project.</li>
+<li>As for now, we need to register the SugarJ
+    builder for this project by hand: Open your project's '.project' file in any
+    text editor and replace the Java build command by the following code:
+  <blockquote>
+        &lt;buildCommand&gt;<br/>
+          &nbsp;&nbsp;&lt;name&gt;org.sugarj.editor.SugarJBuilder&lt;/name&gt;<br/>
+          &nbsp;&nbsp;&lt;arguments&gt;&lt;/arguments&gt;<br/>
+        &lt;/buildCommand&gt; 
+  </blockquote>
+</li>
+<li>We're ready to go. Note: SugarJ source files must have the file extension ".sugj".</li>
+</ol>
+
+<h3>Installation</h3>
+
+<ol>
+<li>Install Eclipse (follow instructions on <a href="eclipse.org">eclipse.org</a>).</li>
+<li>Start Eclipse.</li>
+<li>In Eclipse, select 'Install New Software' in the 'Help' menu.</li>
+<li>In the 'work with' field, copy the SugarJ update site <a
+href="http://update.sugarj.org">http://update.sugarj.org</a> and hit enter.</li>
+<li> Be sure to deselect the 'Group items by category' checkbox on the bottom of
+the window.</li> <li>Select the latest instance of Sugarclipse and click
+continue. This will install the SugarJ compiler and Eclipse plugin.</li>
+</ol>
+
+
+In addition, please ensure enough stack space (about 4-16 MB) is available for
+the SDF parser. You can set the stack space of your Java runtime using the
+-Xss16m command line argument when starting Eclipse or setting -Xss16m in your
+eclipse.ini file.
+
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <!-- <p class="copyright">SugarJ maintained by <a href="https://github.com/seba--">seba--</a></p> -->
+        <!-- <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p> -->
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
