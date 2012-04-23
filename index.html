@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="SugarJ : Library-based Language Extensibility" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>SugarJ</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/seba--/sugarj">Fork Me on GitHub</a>
+
+          <h1 id="project_title">SugarJ</h1>
+          <h2 id="project_tagline">Library-based Language Extensibility</h2>
+
+          <section id="downloads">
+            <a class="zip_download_link" href="https://github.com/seba--/sugarj/zipball/master">Download this project as a .zip file</a>
+            <a class="tar_download_link" href="https://github.com/seba--/sugarj/tarball/master">Download this project as a tar.gz file</a>
+          </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h2>News</h2>
+
+<ul>
+<li>What does language composition really mean?
+Paper at LDTA 2012
+[ <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications.html#ErdwegGR12">abstract</a>
+| <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications/bib.html#ErdwegGR12">bibtex</a>
+| <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications/languagecomposition.pdf">.pdf</a> ]</li>
+<li>SugarJ now on github: <a href="http://github.com/seba--/sugarj">http://github.com/seba--/sugarj</a>
+</li>
+<li>Tool demonstration and poster on SugarJ at SPLASH 2011</li>
+<li>Paper Growing a Language Environment with Editor Libraries at GPCE 2011
+[ <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications.html#ErdwegKRKOV11">abstract</a>
+| <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications/bib.html#ErdwegKRKOV11">bibtex</a>
+| <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications/editorlibs.pdf">.pdf</a> ]</li>
+<li>Paper SugarJ: Library-based Syntactic Language Extensibility at OOPSLA 2011
+[ <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications.html#ErdwegRKO11">abstract</a>
+| <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications/bib.html#ErdwegRKO11%0A%7C%20%5B.pdf%5D(http://www.informatik.uni-marburg.de/%7Eseba/publications/sugarj.pdf">bibtex</a> ]</li>
+</ul><h2>Description</h2>
+
+<p>In essence, the goal of SugarJ is to enable expressing programms in the syntax most natural to the problem domain the program is supposed to address. For instance, when generating XML documents in Java, the programmer should be able to use standard XML syntax instead of Java syntax for calling JDOM, say.</p>
+
+<p>We propose to integrate syntactic extensibility into the main extension mechanism of programming languages—libraries. Libraries thus export syntactic sugar in addition to semantic artifacts traditionally exported: classes, methods, data types, etc. When importing a library, the syntax of the general purpose language is augmented by the syntactic definition exported by the library.</p>
+
+<p><img src="http://www.uni-marburg.de/fb12/ps/research/xmleditorscreenshot.png" alt="SugarJ in action"></p>
+
+<p>Notably, libraries that contain syntactic sugar retain the composability and self-applicability of conventional libraries: syntactic sugar can be composed by importing multiple libraries; syntactic sugar can be used in the development of a library that exports syntactic sugar itself. This enables the embedding of DSLs and the development of meta-DSLs, that is a DSL for defining DSLs, without ever leaving or reasoning outside of a SugarJ program.</p>
+
+<h2>Installation and Usage</h2>
+
+<p>Please also take a look at <a href="TODO">first steps with SugarJ</a>.</p>
+
+<p>For a quick start, install our Eclipse plugin available at <a href="http://update.sugarj.org/">http://update.sugarj.org/</a>.
+The source code of all components of SugarJ is available on github at <a href="http://github.com/seba--/sugarj">http://github.com/seba--/sugarj</a>:
+<a href="http://github.com/seba--/sugarj/compiler">compiler</a>,
+<a href="http://github.com/seba--/sugarj/editor">IDE</a>,
+<a href="http://github.com/seba--/sugarj/test-workspace">case studies</a>.</p>
+
+<h2>Team</h2>
+
+<ul>
+<li>
+<a href="http://www.informatik.uni-marburg.de/%7Eseba/">Sebastian Erdweg</a>, project leader, University of Marburg</li>
+<li>
+<a href="http://www.informatik.uni-marburg.de/%7Erendel/">Tillmann Rendel</a>, University of Marburg</li>
+<li>
+<a href="www.uni-marburg.de/fb12/ps/team/kaestner">Christian Kästner</a>, University of Marburg</li>
+<li>
+<a href="http://www.informatik.uni-marburg.de/%7Ekos/">Klaus Ostermann</a>, University of Marburg</li>
+<li>
+<a href="http://www.lclnet.nl/">Lennart Kats</a>, Delft University of Technology</li>
+<li>
+<a href="http://eelcovisser.org/">Eelco Visser</a>, Delft University of Technology</li>
+<li>Jonas Pusch, University of Marburg</li>
+<li>Stefan Fehrenbach, University of Marburg</li>
+</ul><h2>Publications</h2>
+
+<p>Sebastian Erdweg, Paolo G. Giarrusso, and Tillmann Rendel. <strong>Language Composition Untangled</strong>. In <em>Proceedings of Workshop on Language Descriptions, Tools and Applications (LDTA)</em>, 2012. to appear.
+  [ <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications.html#ErdwegGR12">abstract</a>
+  | <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications/bib.html#ErdwegGR12">bibtex</a>
+  | <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications/languagecomposition.pdf">.pdf</a> ]</p>
+
+<p>Sebastian Erdweg and Lennart C. L. Kats and Tillmann Rendel and Christian Kästner and Klaus Ostermann and Eelco Visser. <strong>Growing a Language Environment with Editor Libraries</strong>. In <em>Proceedings of Conference on Generative Programming and Component Engineering (GPCE)</em>, pages 167–176. ACM, 2011.
+  [ <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications.html#ErdwegKRKOV11">abstract</a>
+  | <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications/bib.html#ErdwegKRKOV11">bibtex</a>
+  | <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications/editorlibs.pdf">.pdf</a> ]</p>
+
+<p>Sebastian Erdweg, Tillmann Rendel, Christian Kästner and Klaus Ostermann. <strong>SugarJ: Library-based Syntactic Language Extensibility</strong>. In <em>Proceedings of Conference on Object-Oriented Programming, Systems, Languages, and Applications (OOPSLA)</em>, pages 391–406. ACM, 2011. <strong>Distinguished Paper Award</strong>.
+  [ <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications.html#ErdwegRKO11">abstract</a>
+  | <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications/bib.html#ErdwegRKO11%0A%20%20%7C%20%5B.pdf%5D(http://www.informatik.uni-marburg.de/%7Eseba/publications/sugarj.pdf">bibtex</a> ]</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">SugarJ maintained by <a href="https://github.com/seba--">seba--</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
