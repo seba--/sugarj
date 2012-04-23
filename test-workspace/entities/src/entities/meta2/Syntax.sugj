@@ -1,6 +1,6 @@
 package entities.meta2;
 
-model import entities.meta2.Model;
+import model entities.meta2.Model;
 import meta.Syntax;
 
 import entities.meta2.Model<meta.CheckSyntaxLabels>;

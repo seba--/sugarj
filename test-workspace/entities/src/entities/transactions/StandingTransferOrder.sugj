@@ -5,7 +5,7 @@ import java.util.Date;
 
 import entities.meta.Model;
 
-model import entities.transactions.CreditTransfer;
+import model entities.transactions.CreditTransfer;
 
 public entity StandingTransferOrder extends CreditTransfer {
   cycle :: Cycle

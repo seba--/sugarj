@@ -13,19 +13,19 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-model import impl.EdgeIter;
-model import impl.VertexIter;
+import model impl.EdgeIter;
+import model impl.VertexIter;
 import impl.NeighborIfc;
-model import impl.Vertex;
-model import impl.Edge;
-model import impl.EdgeIfc;
-model import impl.Neighbor;
-model import impl.WorkSpace;
-model import impl.NumberWorkSpace;
-model import impl.RegionWorkSpace;
-model import impl.FinishTimeWorkSpace; 
-model import impl.CycleWorkSpace;
-model import impl.WorkSpaceTranspose; 
+import model impl.Vertex;
+import model impl.Edge;
+import model impl.EdgeIfc;
+import model impl.Neighbor;
+import model impl.WorkSpace;
+import model impl.NumberWorkSpace;
+import model impl.RegionWorkSpace;
+import model impl.FinishTimeWorkSpace; 
+import model impl.CycleWorkSpace;
+import model impl.WorkSpaceTranspose; 
 
 
 public variable class Graph { 

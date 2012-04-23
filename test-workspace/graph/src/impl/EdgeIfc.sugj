@@ -2,7 +2,7 @@ package impl;
 
 import variability.Java;
 
-model import impl.Vertex;
+import model impl.Vertex;
 
 
 public variable interface EdgeIfc {

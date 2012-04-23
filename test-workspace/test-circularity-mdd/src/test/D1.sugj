@@ -2,7 +2,7 @@ package test;
 
 import metamodel.Java;
 
-model import test.D2;
+import model test.D2;
 
 public class-model D1 {
   public D2 d2 = new D2();

@@ -2,8 +2,8 @@ package entities.transactions;
 
 import entities.meta.Model;
 
-model import entities.accounts.CheckingAccount;
-model import entities.people.Customer;
+import model entities.accounts.CheckingAccount;
+import model entities.people.Customer;
 
 public entity CreditTransfer {
   source         :: Customer

@@ -1,7 +1,7 @@
 package test2;
 
-model import test2.B;
-model import test2.C;
+import model test2.B;
+import model test2.C;
 
 public class A {
 }

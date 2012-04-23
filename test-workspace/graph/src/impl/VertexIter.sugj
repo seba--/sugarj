@@ -4,8 +4,8 @@ import java.util.Iterator;
 
 import variability.Java;
 
-model import impl.Graph;
-model import impl.Vertex;
+import model impl.Graph;
+import model impl.Vertex;
 
 
 public variable class VertexIter {

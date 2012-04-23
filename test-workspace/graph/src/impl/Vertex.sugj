@@ -4,13 +4,13 @@ import variability.Java;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-model import impl.WorkSpace;
-model import impl.EdgeIter;
-model import impl.VertexIter;
-model import impl.EdgeIfc;
+import model impl.WorkSpace;
+import model impl.EdgeIter;
+import model impl.VertexIter;
+import model impl.EdgeIfc;
 import impl.NeighborIfc;
-model import impl.Neighbor;
-model import impl.GlobalVarsWrapper; 
+import model impl.Neighbor;
+import model impl.GlobalVarsWrapper; 
 
 
 variable class Vertex implements 

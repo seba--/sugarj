@@ -1,6 +1,6 @@
 package test;
 
-model import test.B;
+import model test.B;
 
 public class A {
 }

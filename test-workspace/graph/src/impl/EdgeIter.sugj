@@ -2,7 +2,7 @@ package impl;
 
 import variability.Java;
 
-model import impl.EdgeIfc;
+import model impl.EdgeIfc;
 
 public variable class EdgeIter {
   public boolean hasNext(){

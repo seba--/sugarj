@@ -2,8 +2,8 @@ package entities.people;
 
 import entities.meta.Model;
 
-model import entities.accounts.Account;
-model import entities.people.Person;
+import model entities.accounts.Account;
+import model entities.people.Person;
 
 public entity Customer extends Person {
   signature :: Integer

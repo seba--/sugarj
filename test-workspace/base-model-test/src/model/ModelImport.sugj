@@ -1,6 +1,6 @@
 package model;
 
-model import model.ModelDec;
+import model model.ModelDec;
 
 public class ModelImport {
   public static void main(String[] args) {
