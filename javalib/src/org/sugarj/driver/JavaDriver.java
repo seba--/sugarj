@@ -13,6 +13,8 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.java_front.pp_java_string_0_0;
+import org.strategoxt.lang.Context;
+import org.strategoxt.tools.tools;
 import org.sugarj.IResult;
 import org.sugarj.LanguageDriver;
 import org.sugarj.common.path.Path;
@@ -85,7 +87,7 @@ public class JavaDriver extends LanguageDriver {
   
   public void init() {
     javaOutFile = null;
-    javaSource = null;
+    javaSource = null;   
   }
   
   public void checkPackageName(IStrategoTerm toplevelDecl, RelativeSourceLocationPath sourceFile, IResult driverResult) {
@@ -177,7 +179,15 @@ public class JavaDriver extends LanguageDriver {
   // Where to get pp_java_string_0_0 ? What should be changed to allow other languages' pretty printers?
   // What to do with Term.asJavaString ?
   public String prettyPrint(IStrategoTerm term, HybridInterpreter interp) throws IOException {
-    IStrategoTerm string = pp_java_string_0_0.instance.invoke(interp.getCompiledContext(), term);
+	System.err.println("---\n prettyprint context:");
+	Context ctx = interp.getCompiledContext();
+	System.err.println(ctx);
+	System.err.println("prettyprint term:");
+	System.err.println(term);
+	//IStrategoTerm string = pp_java_string_0_0.instance.invoke(interp.getCompiledContext(), term);
+	IStrategoTerm string = pp_java_string_0_0.instance.invoke(ctx, term);
+	System.err.println("prettyprint string:");
+	System.err.println(string);
     if (string != null)
       return Term.asJavaString(string);
     

@@ -137,13 +137,14 @@ public class Driver{
   
   
   
-  private LanguageDriver drj;
+  private LanguageDriver langDrv;
   private LanguageLib langLib;
   
   
-  public Driver(Environment env) {
+  public Driver(Environment env, LanguageLib langLib) {
     this.environment=env;
-    drj = new JavaDriver();
+    this.langLib = langLib;
+    langDrv = new JavaDriver();   // XXX: remove after integrating to javaLib
     
     try {      
       if (environment.getCacheDir() != null)
@@ -156,7 +157,6 @@ public class Driver{
       throw new RuntimeException("error while initializing driver", e);
     }
     
-    langLib = new JavaLib();
     
   }  
   
@@ -208,23 +208,23 @@ public class Driver{
     Log.log.log(resultCache.size());
   }
   
-  public static Result compile(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    return run(sourceFile, monitor, true);
+  public static Result compile(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LanguageLib langLib) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    return run(sourceFile, monitor, true, langLib);
   }
 
-  public static Result parse(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    return run(sourceFile, monitor, false);
+  public static Result parse(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LanguageLib langLib) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    return run(sourceFile, monitor, false, langLib);
   }
   
-  public static Result compile(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    return run(source, sourceFile, monitor, true);
+  public static Result compile(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LanguageLib langLib) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    return run(source, sourceFile, monitor, true, langLib);
   }
   
-  public static Result parse(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    return run(source, sourceFile, monitor, false);
+  public static Result parse(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LanguageLib langLib) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    return run(source, sourceFile, monitor, false, langLib);
   }
 
-  private static Result run(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private static Result run(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles, LanguageLib langLib) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     if (generateFiles)
       synchronized (currentlyProcessing) {
         // TODO we need better circular dependency handling
@@ -238,7 +238,7 @@ public class Driver{
     
     try {
       String source = FileCommands.readFileAsString(sourceFile);
-      res = run(source, sourceFile, monitor, generateFiles);
+      res = run(source, sourceFile, monitor, generateFiles, langLib);
     } finally {
       if (generateFiles)
         synchronized (currentlyProcessing) {
@@ -250,8 +250,8 @@ public class Driver{
     return res;
   }
   
-  private static Result run(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    Driver driver = new Driver(sourceFile.getSourceLocation().getEnvironment());
+  private static Result run(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles, LanguageLib langLib) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    Driver driver = new Driver(sourceFile.getSourceLocation().getEnvironment(), langLib);
     Entry<String, Driver> pending = null;
     
     synchronized (Driver.class) {
@@ -273,7 +273,7 @@ public class Driver{
     
     if (pending != null) {
       waitForPending(sourceFile);
-      return run(source, sourceFile, monitor, generateFiles);
+      return run(source, sourceFile, monitor, generateFiles, langLib);
     }
     
     try {
@@ -321,7 +321,7 @@ public class Driver{
       driverResult.setSourceFile(this.sourceFile, source.hashCode());
       
       if (sourceFile != null) {
-        drj.setupSourceFile(sourceFile, environment);
+        langDrv.setupSourceFile(sourceFile, environment);
 
         depOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".dep");
         Path genLog = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".gen");
@@ -376,7 +376,7 @@ public class Driver{
       else {
         //driverResult.delegateCompilation(delegateCompilation, javaOutFile, javaSource, generatedJavaClasses);
         // XXX: Maybe implement this in Driver_Java
-        driverResult.delegateCompilation(delegateCompilation, drj.getOutFile(), drj.getSource(), drj.getCompiledFiles());
+        driverResult.delegateCompilation(delegateCompilation, langDrv.getOutFile(), langDrv.getSource(), langDrv.getCompiledFiles());
       }
         
       driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
@@ -414,7 +414,7 @@ public class Driver{
         //driverResult.compileJava(javaOutFile, javaSource, environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), generatedJavaClasses);
         //XXX: maybe implement this in Driver_Java
         
-        langLib.getCompilerCommands().compile(drj.getOutFile(), drj.getSource(), environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), drj.getCompiledFiles(), driverResult);
+        langLib.getCompilerCommands().compile(langDrv.getOutFile(), langDrv.getSource(), environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), langDrv.getCompiledFiles(), driverResult);
       } catch (ClassNotFoundException e) {
         setErrorMessage(lastSugaredToplevelDecl, "Could not resolve imported class " + e.getMessage());
         // throw new RuntimeException(e);
@@ -524,7 +524,7 @@ public class Driver{
       log.beginTask("Extracting name and accessibility of the editor services.");
       try {
         extName =
-          drj.prettyPrint(
+          langDrv.prettyPrint(
           getApplicationSubterm(head, "EditorServicesDecHead", 1), interp);    
         
         
@@ -538,7 +538,7 @@ public class Driver{
             break;
           }
         
-        fullExtName = drj.getRelNamespaceSep() + extName;
+        fullExtName = langDrv.getRelNamespaceSep() + extName;
 
         log.log("The name of the editor services is '" + extName + "'.");
         log.log("The full name of the editor services is '" + fullExtName + "'.");
@@ -558,7 +558,7 @@ public class Driver{
         // XXX if (currentTransProg != null)
         editorServices = ATermCommands.registerSemanticProvider(editorServices, currentTransProg);
   
-        Path editorServicesFile = environment.createBinPath(drj.getRelNamespaceSep() + extName + ".serv");
+        Path editorServicesFile = environment.createBinPath(langDrv.getRelNamespaceSep() + extName + ".serv");
         
         log.log("writing editor services to " + editorServicesFile);
         
@@ -600,7 +600,7 @@ public class Driver{
       log.beginTask("Extracting name and accessibility.");
       try {
         extName =
-          drj.prettyPrint(
+          langDrv.prettyPrint(
           getApplicationSubterm(head, "PlainDecHead", 1), interp);    
 
         String extension = null;
@@ -619,7 +619,7 @@ public class Driver{
             break;
           }
         
-        fullExtName = drj.getRelNamespaceSep() + extName + (extension == null ? "" : ("." + extension));
+        fullExtName = langDrv.getRelNamespaceSep() + extName + (extension == null ? "" : ("." + extension));
 
         log.log("The name is '" + extName + "'.");
         log.log("The full name is '" + fullExtName + "'.");
@@ -632,7 +632,7 @@ public class Driver{
         String plainContent = Term.asJavaString(ATermCommands.getApplicationSubterm(body, "PlainBody", 0));
         
         String ext = extension == null ? "" : ("." + extension);
-        Path plainFile = environment.createBinPath(drj.getRelNamespaceSep() + extName + ext);
+        Path plainFile = environment.createBinPath(langDrv.getRelNamespaceSep() + extName + ext);
         FileCommands.createFile(plainFile);
   
         log.log("writing plain content to " + plainFile);
@@ -651,24 +651,24 @@ public class Driver{
     if (isApplication(toplevelDecl, "PackageDec"))
       processPackageDec(toplevelDecl);
     else {
-      drj.checkNamespace(toplevelDecl, sourceFile, driverResult);   // XXX: check -> setup ?
-      drj.checkSourceOutFile(environment, driverResult);
+      langDrv.checkNamespace(toplevelDecl, sourceFile, driverResult);   // XXX: check -> setup ?
+      langDrv.checkSourceOutFile(environment, driverResult);
       if (depOutFile == null)
-        depOutFile = environment.createBinPath(drj.getRelNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
+        depOutFile = environment.createBinPath(langDrv.getRelNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       try {
-        if (drj.isImport(toplevelDecl)) {
+        if (langDrv.isImport(toplevelDecl)) {
           if (!environment.isAtomicImportParsing())
             processImportDec(toplevelDecl);
           else 
             processImportDecs(toplevelDecl);
         }
-        else if (drj.isLanguageSpecificDec(toplevelDecl))
+        else if (langDrv.isLanguageSpecificDec(toplevelDecl))
           processJavaTypeDec(toplevelDecl);
-        else if (drj.isSugarDec(toplevelDecl))
+        else if (langDrv.isSugarDec(toplevelDecl))
           processSugarDec(toplevelDecl);
-        else if (drj.isEditorService(toplevelDecl)) 
+        else if (langDrv.isEditorService(toplevelDecl)) 
           processEditorServicesDec(toplevelDecl);
-        else if (drj.isPlain(toplevelDecl))   // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
+        else if (langDrv.isPlain(toplevelDecl))   // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
           processPlainDec(toplevelDecl);
         else if (ATermCommands.isList(toplevelDecl))
           /* 
@@ -760,14 +760,14 @@ public class Driver{
       sugaredPackageDecl = lastSugaredToplevelDecl;
       
       String packageName =
-          drj.prettyPrint(
+          langDrv.prettyPrint(
           getApplicationSubterm(toplevelDecl, "PackageDec", 1), interp);
 
       log.log("The Java package name is '" + packageName + "'.");
 
-      drj.processNamespaceDec(toplevelDecl, environment, interp, driverResult, packageName, sourceFile);
+      langDrv.processNamespaceDec(toplevelDecl, environment, interp, driverResult, packageName, sourceFile);
       if (depOutFile == null)
-        depOutFile = environment.createBinPath(drj.getRelNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
+        depOutFile = environment.createBinPath(langDrv.getRelNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       
 //      javaSource.setPackageDecl(SDFCommands.prettyPrintJava(toplevelDecl, interp));
     } finally {
@@ -838,7 +838,7 @@ public class Driver{
     
     log.beginTask("processing", "PROCESS the desugared import declaration.");
     try {
-      String importModule = drj.extractImportedModuleName(toplevelDecl, interp);
+      String importModule = langDrv.extractImportedModuleName(toplevelDecl, interp);
 
       // TODO handle import declarations with asterisks, e.g. import foo.*;
       
@@ -878,12 +878,12 @@ public class Driver{
    
               if (currentlyProcessing.contains(importSourceFile)) {
                 // assume source file does not provide syntactic sugar
-                drj.getSource().addImport(importModule.replace('/', '.'));
+                langDrv.getSource().addImport(importModule.replace('/', '.'));
                 skipProcessImport = true;
                 delegateCompilation = importSourceFile;
               }
               else {
-                res = compile(importSourceFile, monitor);
+                res = compile(importSourceFile, monitor, langLib);
                 initializeCaches(environment, true);
                 if (res.hasFailed())
                   setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
@@ -907,11 +907,11 @@ public class Driver{
         
         if (res != null && res.hasDelegatedCompilation(sourceFile)) {
           delegateCompilation = res.getSourceFile();
-          drj.getSource().addImport(importModule.replace('/', '.'));
+          langDrv.getSource().addImport(importModule.replace('/', '.'));
           skipProcessImport = true;
         }
         else if (driverResult.hasDelegatedCompilation(importSourceFile)) {
-          drj.getSource().addImport(importModule.replace('/', '.'));
+          langDrv.getSource().addImport(importModule.replace('/', '.'));
           skipProcessImport = true;
         }
       }
@@ -931,7 +931,7 @@ public class Driver{
   private boolean processImport(String modulePath, IStrategoTerm importTerm) throws IOException {
     boolean success = false;
     
-    success |= ModuleSystemCommands.importClass(modulePath, drj.getSource(), environment, langLib);
+    success |= ModuleSystemCommands.importClass(modulePath, langDrv.getSource(), environment, langLib);
     ModuleSystemCommands.registerSearchedClassFiles(modulePath, driverResult, environment, langLib);
 
     Path sdf = ModuleSystemCommands.importSdf(modulePath, environment);
@@ -968,7 +968,7 @@ public class Driver{
       
       log.beginTask("Generate Java code.");
       try {
-        drj.processLanguageSpecific(toplevelDecl, environment, interp);
+        langDrv.processLanguageSpecific(toplevelDecl, environment, interp);
       } finally {
         log.endTask();
       }
@@ -1001,7 +1001,7 @@ public class Driver{
         
         if (isNative) {   // TODO: remove native
           extName =
-            drj.prettyPrint(
+            langDrv.prettyPrint(
             getApplicationSubterm(head, "NativeSugarDecHead", 2), interp);
           
           IStrategoTerm mods = getApplicationSubterm(head, "NativeSugarDecHead", 0);
@@ -1015,7 +1015,7 @@ public class Driver{
         }
         else {
           extName =
-            drj.prettyPrint(
+            langDrv.prettyPrint(
             getApplicationSubterm(head, "SugarDecHead", 1), interp);    
           
           IStrategoTerm mods = getApplicationSubterm(head, "SugarDecHead", 0);
@@ -1030,7 +1030,7 @@ public class Driver{
         
         
         
-        fullExtName = drj.getRelNamespaceSep() + extName;
+        fullExtName = langDrv.getRelNamespaceSep() + extName;
 
         log.log("The name of the sugar is '" + extName + "'.");
         log.log("The full name of the sugar is '" + fullExtName + "'.");
@@ -1050,8 +1050,8 @@ public class Driver{
         log.endTask();
       }
       
-      Path sdfExtension = environment.createBinPath(drj.getRelNamespaceSep() + extName + ".sdf");
-      Path strExtension = environment.createBinPath(drj.getRelNamespaceSep() + extName + ".str");
+      Path sdfExtension = environment.createBinPath(langDrv.getRelNamespaceSep() + extName + ".sdf");
+      Path strExtension = environment.createBinPath(langDrv.getRelNamespaceSep() + extName + ".str");
       
       String sdfImports = " imports " + StringCommands.printListSeparated(availableSDFImports, " ") + "\n";
       String strImports = " imports " + StringCommands.printListSeparated(availableSTRImports, " ") + "\n";
@@ -1210,7 +1210,10 @@ public class Driver{
   }
   
   private void init(RelativePath sourceFile, boolean generateFiles) throws FileNotFoundException, IOException, InvalidParseTableException {
-    drj.init();
+    langDrv.init();
+    environment.getIncludePath().add(new AbsolutePath(langLib.getLibraryDirectory().getAbsolutePath()));
+    //     includePath.add(new AbsolutePath(StdLib.stdLibDir.getAbsolutePath()));
+
     depOutFile = null;
     // FileCommands.createFile(tmpOutdir, relModulePath + ".java");
 
@@ -1254,6 +1257,9 @@ public class Driver{
    * @throws IOException
    */
   public static void main(String[] args) {
+    // XXX: change language Library here:
+    LanguageLib langLib = new JavaLib();
+    
     // log.log("This is the extensible java compiler.");
     Environment environment = new Environment();
     
@@ -1266,7 +1272,7 @@ public class Driver{
       for (String source : sources)
       {
         // XXX: Properly replace JavaLib by LanguageLib
-        RelativeSourceLocationPath p = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(source), environment.getSourcePath(), new JavaLib());
+        RelativeSourceLocationPath p = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(source), environment.getSourcePath(), langLib);
         
         allInputFiles.add(p);
         pendingInputFiles.add(p);
@@ -1276,7 +1282,7 @@ public class Driver{
       
       for (final RelativeSourceLocationPath sourceFile : allInputFiles) {
         monitor.beginTask("compile " + sourceFile, IProgressMonitor.UNKNOWN);
-        Result res = compile(sourceFile, monitor);
+        Result res = compile(sourceFile, monitor, langLib);
         if (!DriverCLI.processResultCLI(res, sourceFile, new File(".").getAbsolutePath()))
           throw new RuntimeException("compilation of " + sourceFile + " failed");
       }

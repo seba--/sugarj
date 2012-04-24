@@ -13,6 +13,7 @@ import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.SourceLocation;
+import org.sugarj.stdlib.StdLib;
 
 
 /**
@@ -95,6 +96,8 @@ public class Environment implements Serializable {
   
   public Environment() {
     includePath.add(bin);
+    //includePath.add(new AbsolutePath(StdLib.stdLibDir.getPath()));
+    includePath.add(new AbsolutePath(StdLib.stdLibDir.getAbsolutePath()));
   }
   
   public Path getRoot() {

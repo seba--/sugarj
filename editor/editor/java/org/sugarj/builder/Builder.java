@@ -29,6 +29,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.sugarj.JavaLib;
+import org.sugarj.LanguageLib;
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
@@ -40,6 +41,7 @@ import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.driver.Driver;
 import org.sugarj.driver.ModuleSystemCommands;
 import org.sugarj.driver.Result;
+import org.sugarj.driver.UsedLanguageLibrary;
 import org.sugarj.editor.SugarJConsole;
 import org.sugarj.editor.SugarJParseController;
 import org.sugarj.util.ProcessingListener;
@@ -51,6 +53,9 @@ import org.sugarj.util.ProcessingListener;
  */
 public class Builder extends IncrementalProjectBuilder {
 
+  // XXX: Change language library here
+  LanguageLib langLib = UsedLanguageLibrary.langLib;
+  
   private class BuildInput {
     public IResource resource;
     public RelativeSourceLocationPath sourceFile;
@@ -181,7 +186,7 @@ public class Builder extends IncrementalProjectBuilder {
             RelativePath depFile = new RelativePath(environment.getBin(), FileCommands.dropExtension(input.sourceFile.getRelativePath()) + ".dep");
             Result res = Result.readDependencyFile(depFile, environment);
             if (res == null || !res.isUpToDate(input.sourceFile, environment))
-              res = Driver.compile(input.sourceFile, monitor);
+              res = Driver.compile(input.sourceFile, monitor, langLib);
             
             IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
             for (IWorkbenchWindow workbenchWindow : workbenchWindows)

@@ -29,12 +29,14 @@ import org.spoofax.terms.attachments.ParentAttachment;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.imp.runtime.services.ContentProposer;
 import org.sugarj.JavaLib;
+import org.sugarj.LanguageLib;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.Log;
 import org.sugarj.driver.Result;
 import org.sugarj.driver.Driver;
+import org.sugarj.driver.UsedLanguageLibrary;
 import org.sugarj.common.Environment;
 import org.sugarj.driver.ModuleSystemCommands;
 import org.sugarj.driver.RetractableTreeBuilder;
@@ -45,6 +47,10 @@ import org.sugarj.common.path.RelativeSourceLocationPath;
  */
 public class SugarJParser extends JSGLRI {
 
+  // XXX: Change language here:
+  LanguageLib langLib = UsedLanguageLibrary.langLib;
+  
+  
   private Environment environment;
   
   private static Map<String, Result> results = new HashMap<String, Result>();
@@ -155,7 +161,7 @@ public class SugarJParser extends JSGLRI {
     SugarJConsole.activateConsoleOnce();
     
     try {
-      return Driver.parse(input, sourceFile, monitor);
+      return Driver.parse(input, sourceFile, monitor, langLib);
     } catch (InterruptedException e) {
       throw e;
     } catch (Exception e) {

@@ -20,7 +20,7 @@ public abstract class LanguageDriver {
   
   public abstract ISourceFileContent getSource();
   public abstract Path getOutFile();
-  public abstract Set<RelativePath> getCompiledFiles();	// XXX: was: getGeneratedJavaClasses -- is getCompiledFiles a reasonably good name?
+  public abstract Set<RelativePath> getCompiledFiles();	// XXX: was: getGeneratedJavaClasses -- is getCompiledFiles a reasonably good name? Probably change to getGeneratedBinFiles?
   
   
   public abstract boolean isLanguageSpecificDec(IStrategoTerm decl);
@@ -34,9 +34,9 @@ public abstract class LanguageDriver {
                                                 HybridInterpreter interp) throws IOException;
   
   /**
-   * Pretty prints the content of a Java AST in some file.
+   * Pretty prints the content of an AST in some file.
    * 
-   * @param aterm the name of a file which contains an aterm which encodes a Java AST
+   * @param aterm the name of a file which contains an aterm which encodes an AST
    * @throws IOException 
    */
   public abstract String prettyPrint(IStrategoTerm term, HybridInterpreter interp) throws IOException;
