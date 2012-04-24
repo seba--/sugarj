@@ -7,7 +7,7 @@ import model impl.WorkSpace;
 
 
 
-#feature(StronglyConnected)
+#ifdef(StronglyConnected)
 public variable class WorkSpaceTranspose extends WorkSpace {
   int SCCCounter;
   public WorkSpaceTranspose(){

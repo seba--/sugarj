@@ -2,9 +2,9 @@ package test;
 
 import variability.Java;
 
-#feature(F)
+#ifdef(F)
 public variable class AnotherTest {
 
-#feature(A)
+#ifdef(A)
    public int someInt;
 }

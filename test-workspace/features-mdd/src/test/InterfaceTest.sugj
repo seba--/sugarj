@@ -2,12 +2,12 @@ package test;
 
 import variability.Java; 
 
-#feature(INTERFACE)
+#ifdef(INTERFACE)
 public variable interface InterfaceTest {
 
-  #feature(A)
-	public void doSomething();
+  #ifdef(A)
+  public void doSomething();
 	
-	#feature(B)
+  #ifdef(B)
   public void doSomethingElse();
 } 

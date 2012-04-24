@@ -5,6 +5,7 @@ import config.MinimalGraphConfig;
 import impl.Main<MinimalGraphConfig>;
 
 
+
 public class GraphTest {
    public static void main(String[] args) {
       String[] l_args = {"Graph.txt"};

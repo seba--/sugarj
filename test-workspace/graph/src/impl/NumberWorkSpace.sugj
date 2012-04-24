@@ -6,7 +6,7 @@ import model impl.WorkSpace;
 import model impl.Vertex;
 
 
-#feature(Number)
+#ifdef(Number)
 public variable class NumberWorkSpace extends WorkSpace {
   int vertexCounter;
   public NumberWorkSpace(){

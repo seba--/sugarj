@@ -13,7 +13,7 @@ public sugar Model {
    AnnoOrSugarMod* "featuremodel" JavaId FeatureModelBody -> ToplevelDeclaration{cons("FMDecl")}
    "{" FeatureDeclaration* FeatureRequirement* "}" -> FeatureModelBody {cons("FMBody")}
    "features" {FeatureName ","}* -> FeatureDeclaration {cons("FeatureDecl")}
-   "requires" FeatureExpr -> FeatureRequirement {cons("FeatureRequirement")}
+   "constraint" FeatureExpr -> FeatureRequirement {cons("FeatureRequirement")}
 	
  desugarings
    featuremodel

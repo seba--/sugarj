@@ -9,68 +9,68 @@ import impl.NeighborIfc;
 
 
 public variable class Neighbor implements 
-  #feature(GNOnlyNeighbours) EdgeIfc, 
+  #ifdef(GNOnlyNeighbours) EdgeIfc, 
   NeighborIfc {
 
-  #feature(GNOnlyNeighbours)
+  #ifdef(GNOnlyNeighbours)
   public Vertex neighbor;
 
   public Neighbor(){
-    #feature(GNOnlyNeighbours) neighbor=null;
-    #feature(GenEdges) end=null;
-    #feature(GenEdges) edge=null;
+    #ifdef(GNOnlyNeighbours) neighbor=null;
+    #ifdef(GenEdges) end=null;
+    #ifdef(GenEdges) edge=null;
   }
   
-  #feature(GNOnlyNeighbours)
-  public Neighbor(Vertex theNeighbor, #feature(Weighted) int aweight) {
+  #ifdef(GNOnlyNeighbours)
+  public Neighbor(Vertex theNeighbor, #ifdef(Weighted) int aweight) {
     neighbor=theNeighbor;
-    #feature(Weighted) weight=aweight;
+    #ifdef(Weighted) weight=aweight;
   }
 
-  #feature(GNOnlyNeighbours)
+  #ifdef(GNOnlyNeighbours)
   public void display(){
     System.out.print(neighbor.name + " ,");
   }
 
-  #feature(GNOnlyNeighbours)
+  #ifdef(GNOnlyNeighbours)
   public Vertex getStart(){
     return null;
   }
 
-  #feature(GNOnlyNeighbours)
+  #ifdef(GNOnlyNeighbours)
   public Vertex getEnd(){
     return neighbor;
   }
 
-  #feature(Weighted && GNOnlyNeighbours)
+  #ifdef(Weighted && GNOnlyNeighbours)
   public int weight;
 
-  #feature(Weighted && GNOnlyNeighbours)
+  #ifdef(Weighted && GNOnlyNeighbours)
   public void setWeight(  int weight){
     this.weight=weight;
   }
 
-  #feature(Weighted && GNOnlyNeighbours)
+  #ifdef(Weighted && GNOnlyNeighbours)
   public int getWeight(){
     return this.weight;
   }
 
-  #feature(GNOnlyNeighbours)
+  #ifdef(GNOnlyNeighbours)
   public Vertex getOtherVertex(  Vertex vertex){
     return neighbor;
   }
 
-  #feature(GNOnlyNeighbours)
+  #ifdef(GNOnlyNeighbours)
   public void adjustAdorns(  EdgeIfc the_edge){
   }
 
-  #feature(GenEdges)
+  #ifdef(GenEdges)
   public Vertex end;
 
-  #feature(GenEdges)
+  #ifdef(GenEdges)
   public Edge edge;
 
-  #feature(GenEdges)
+  #ifdef(GenEdges)
   public Neighbor(  Vertex v,  Edge e){
     end=v;
     edge=e;

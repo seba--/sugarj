@@ -9,7 +9,7 @@ import model impl.EdgeIfc;
 
 
 
-#feature(BaseImpl)
+#ifdef(BaseImpl)
 public variable class Main {
   static Vertex V[];
   static int startVertices[];
@@ -68,7 +68,7 @@ public variable class Main {
   static EdgeIfc addEdge(  Graph g,  int n){
     Vertex v1=(Vertex)V[startVertices[n]];
     Vertex v2=(Vertex)V[endVertices[n]];
-    return g.addEdge(v1, v2, #feature(Weighted) 0);
+    return g.addEdge(v1, v2, #ifdef(Weighted) 0);
   }
   static void readWeights(Graph g, int num_edges){
   }

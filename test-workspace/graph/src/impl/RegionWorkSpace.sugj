@@ -6,7 +6,7 @@ import model impl.WorkSpace;
 import model impl.Vertex;
 
 
-#feature(Connected)
+#ifdef(Connected)
 public variable class RegionWorkSpace extends WorkSpace {
   int counter;
   public RegionWorkSpace(){

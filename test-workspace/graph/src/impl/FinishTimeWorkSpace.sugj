@@ -6,7 +6,7 @@ import model impl.WorkSpace;
 import model impl.Vertex;
 
 
-#feature(StronglyConnected)
+#ifdef(StronglyConnected)
 public variable class FinishTimeWorkSpace extends WorkSpace {
   int FinishCounter;
   public FinishTimeWorkSpace(){

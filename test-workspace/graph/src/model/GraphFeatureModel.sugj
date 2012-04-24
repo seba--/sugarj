@@ -28,19 +28,19 @@ featuremodel GraphFeatureModel  {
    GNoEdges
    
    // structural requirements
-   requires BaseImpl
-   requires BaseImpl -> (GNOnlyNeighbours xor GenEdges xor GNoEdges)
-   requires BaseImpl -> Benchmark
+   constraint BaseImpl
+   constraint BaseImpl -> (GNOnlyNeighbours xor GenEdges xor GNoEdges)
+   constraint BaseImpl -> Benchmark
    
 
-   requires SearchBase -> SearchAlg
-   requires SearchAlg -> (Dfs xor Bfs)
+   constraint SearchBase -> SearchAlg
+   constraint SearchAlg -> (Dfs xor Bfs)
 
    // additional requirements
-   requires Connected -> Undirected
-   requires (Dfs || Bfs || Number || Connected) -> SearchBase
-   requires StronglyConnected -> (!Undirected && Dfs && Transpose)
-   requires Cycle -> Dfs
-   requires (Mstprim || Mstkruskal) -> (Undirected && Weighted)
+   constraint Connected -> Undirected
+   constraint (Dfs || Bfs || Number || Connected) -> SearchBase
+   constraint StronglyConnected -> (!Undirected && Dfs && Transpose)
+   constraint Cycle -> Dfs
+   constraint (Mstprim || Mstkruskal) -> (Undirected && Weighted)
    
 }

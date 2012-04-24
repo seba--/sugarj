@@ -1,26 +1,25 @@
 package test;
 
 import variability.Java;
-//#feature(A)
+//#ifdef(A)
 import model test.AnotherTest;
 import model test.InterfaceTest;
 
 import test.FeatureModel;
  
-#feature(C) 
+#ifdef(C) 
 public variable class Test extends Object implements InterfaceTest {
   
-  void foo(int x,
-  #feature(B) int y) {
+  void foo(int x, #ifdef(B) int y) {
   	
-    #feature(A)
+    #ifdef(A)
     System.out.println("Feature A enabled"); 
     
-    #feature(B){
+    #ifdef(B){
     bar();
     }
     
-    if (2 + #feature(A) {3} {0} == 5) {
+    if (2 + #ifdef(A) {3} {0} == 5) {
        System.out.println("result was 5");
     }
   } 

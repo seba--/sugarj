@@ -6,24 +6,24 @@ import model impl.EdgeIfc;
 import model impl.Vertex;
 
 
-#feature(SearchBase)
+#ifdef(SearchBase)
 public variable class Edge implements EdgeIfc {
   private Vertex start;
   private Vertex end;
-  public Edge(  Vertex the_start,  Vertex the_end, #feature(Weighted) int aweight) {
+  public Edge(  Vertex the_start,  Vertex the_end, #ifdef(Weighted) int aweight) {
     start=the_start;
     end=the_end;
-    #feature(Weighted) weight=aweight;
+    #ifdef(Weighted) weight=aweight;
   }
   public void adjustAdorns(EdgeIfc the_edge) {
-    #feature(Weighted) setWeight(the_edge.getWeight());
+    #ifdef(Weighted) setWeight(the_edge.getWeight());
   }
-  #feature(Weighted) private int weight;
-  #feature(Weighted)
+  #ifdef(Weighted) private int weight;
+  #ifdef(Weighted)
 	  public void setWeight(  int weight){
 	    this.weight=weight;
 	  }
-  #feature(Weighted)
+  #ifdef(Weighted)
 	  public int getWeight() {
 	    return this.weight;
 	  }
@@ -39,7 +39,7 @@ public variable class Edge implements EdgeIfc {
     return end;
   }
   public void display() {
-    #feature(Weighted)
+    #ifdef(Weighted)
       System.out.print(" Weight=" + weight);
     System.out.println(" start=" + start.getName() + " end="+ end.getName());
   }

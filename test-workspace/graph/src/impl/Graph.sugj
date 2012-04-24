@@ -30,40 +30,40 @@ import model impl.WorkSpaceTranspose;
 
 public variable class Graph { 
   LinkedList<Vertex> vertices;
-  #feature(SearchBase) private LinkedList<EdgeIfc> edges;
+  #ifdef(SearchBase) private LinkedList<EdgeIfc> edges;
   
   public Graph(){ 
     vertices=new LinkedList<Vertex>();
-    #feature(GenEdges)
+    #ifdef(GenEdges)
       edges=new LinkedList<EdgeIfc>();
 
   }
   public VertexIter getVertices(){
     return new VertexIter(this);
   }
-  #feature(SearchBase)
+  #ifdef(SearchBase)
   public EdgeIter getEdges(){
-    if (#feature(GenEdges) {false && edgesNotBuilt} {edgesNotBuilt}) {
+    if (#ifdef(GenEdges) {false && edgesNotBuilt} {edgesNotBuilt}) {
       edgesNotBuilt=false;
       edges=new LinkedList<EdgeIfc>();
       int k1=0, k2=0, sizeAV=0;
-      #feature(GNOnlyNeighbours) Neighbor tempNeighbor;
+      #ifdef(GNOnlyNeighbours) Neighbor tempNeighbor;
       
       for (VertexIter vxiter=getVertices(); vxiter.hasNext(); ) {
         Vertex v=vxiter.next(); 
-        #feature(GNoEdges) sizeAV=v.adjacentVertices.size();
-        #feature(GNOnlyNeighbours) sizeAV=v.adjacentNeighbors.size();
+        #ifdef(GNoEdges) sizeAV=v.adjacentVertices.size();
+        #ifdef(GNOnlyNeighbours) sizeAV=v.adjacentNeighbors.size();
 
         for (k2=0; k2 < sizeAV; k2++) {
-          #feature(GNoEdges)
+          #ifdef(GNoEdges)
             edges.add(
-              new Edge(v,v.adjacentVertices.get(k2), #feature(Weighted) v.weightsList.get(k2).intValue())
+              new Edge(v,v.adjacentVertices.get(k2), #ifdef(Weighted) v.weightsList.get(k2).intValue())
             ); 
-          #feature(GNOnlyNeighbours)
+          #ifdef(GNOnlyNeighbours)
             tempNeighbor=v.adjacentNeighbors.get(k2);
-          #feature(GNOnlyNeighbours)
+          #ifdef(GNOnlyNeighbours)
             edges.add(
-              new Edge(v,tempNeighbor.neighbor, #feature(Weighted) tempNeighbor.weight)
+              new Edge(v,tempNeighbor.neighbor, #ifdef(Weighted) tempNeighbor.weight)
             );
         } 
       }
@@ -79,40 +79,40 @@ public variable class Graph {
     };
   }
 
-  #feature(SearchBase)  boolean edgesNotBuilt=true; 
+  #ifdef(SearchBase)  boolean edgesNotBuilt=true; 
 
   public void sortVertices(  Comparator<Vertex> c){
     Collections.sort(vertices,c);
   }
 
-  #feature(SearchBase)
+  #ifdef(SearchBase)
   public void sortEdges(  Comparator<EdgeIfc> c){
     Collections.sort(edges,c);
   }
 
-  #feature(GNoEdges)
-  EdgeIfc addEdge(Vertex start, Vertex end, #feature(Weighted) int weight) {
+  #ifdef(GNoEdges)
+  EdgeIfc addEdge(Vertex start, Vertex end, #ifdef(Weighted) int weight) {
     start.addAdjacent(end);
-    #feature(Undirected)
+    #ifdef(Undirected)
       end.addAdjacent(start);
-    #feature(Weighted)
+    #ifdef(Weighted)
       start.setWeight(weight);
-    #feature(Undirected && Weighted)
+    #ifdef(Undirected && Weighted)
       end.addWeight(weight);
     return (EdgeIfc)start;
   }
 
 
-  #feature(GNOnlyNeighbours)
-  EdgeIfc addEdge(Vertex start, Vertex end, #feature(Weighted) int weight) {
-    Neighbor e=new Neighbor(end, #feature(Weighted) weight);
+  #ifdef(GNOnlyNeighbours)
+  EdgeIfc addEdge(Vertex start, Vertex end, #ifdef(Weighted) int weight) {
+    Neighbor e=new Neighbor(end, #ifdef(Weighted) weight);
     addEdge(start,e);
     return e;
   }
 
-  #feature(GenEdges)
-  EdgeIfc addEdge(Vertex start, Vertex end, #feature(Weighted) int weight) {
-    Edge theEdge=new Edge(start, end, #feature(Weighted) weight);
+  #ifdef(GenEdges)
+  EdgeIfc addEdge(Vertex start, Vertex end, #ifdef(Weighted) int weight) {
+    Edge theEdge=new Edge(start, end, #ifdef(Weighted) weight);
     edges.add(theEdge);
 	  start.addNeighbor(new Neighbor(end,theEdge));
 	  end.addNeighbor(new Neighbor(start,theEdge));
@@ -120,14 +120,14 @@ public variable class Graph {
   }
 
 
-  #feature(GNOnlyNeighbours)
+  #ifdef(GNOnlyNeighbours)
   public void addEdge(  Vertex start,  Neighbor theNeighbor){
     start.addEdge(theNeighbor);
-    #feature(Undirected)
+    #ifdef(Undirected)
       Vertex end=theNeighbor.neighbor;
-    #feature(Undirected)
+    #ifdef(Undirected)
       end.addEdge(
-        new Neighbor(start, #feature(Weighted) theNeighbor.weight)
+        new Neighbor(start, #ifdef(Weighted) theNeighbor.weight)
       );
   }
 
@@ -148,14 +148,14 @@ public variable class Graph {
     System.out.println("Vertices ");
     for (int i=0; i < vertices.size(); i++)     vertices.get(i).display();
     System.out.println("******************************************");
-    #feature(GenEdges)
+    #ifdef(GenEdges)
       System.out.println("Edges ");
 
-    #feature(GenEdges)
+    #ifdef(GenEdges)
       for (EdgeIter edgeiter=getEdges(); edgeiter.hasNext(); ) 
         edgeiter.next().display();
 
-    #feature(GenEdges)
+    #ifdef(GenEdges)
       System.out.println("******************************************");
   }
 
@@ -163,11 +163,11 @@ public variable class Graph {
     vertices.add(v);
   }
 
-  #feature(Benchmark) public Reader inFile;
-  #feature(Benchmark) public static int ch;
-  #feature(Benchmark) static long last=0, current=0, accum=0;
+  #ifdef(Benchmark) public Reader inFile;
+  #ifdef(Benchmark) public static int ch;
+  #ifdef(Benchmark) static long last=0, current=0, accum=0;
 
-  #feature(Benchmark)
+  #ifdef(Benchmark)
   public void runBenchmark(String FileName) throws IOException {
     try {
       inFile=new FileReader(FileName);
@@ -177,12 +177,12 @@ public variable class Graph {
     }
   }
 
-  #feature(Benchmark)
+  #ifdef(Benchmark)
   public void stopBenchmark() throws IOException {
     inFile.close();
   }
 
-  #feature(Benchmark)
+  #ifdef(Benchmark)
   public int readNumber() throws IOException {
     int index=0;
     char[] word=new char[80];
@@ -201,81 +201,81 @@ public variable class Graph {
     return Integer.parseInt(theString,10);
   }
 
-  #feature(Benchmark)
+  #ifdef(Benchmark)
   public static void startProfile(){
     accum=0;
     current=System.currentTimeMillis();
     last=current;
   }
 
-  #feature(Benchmark)
+  #ifdef(Benchmark)
   public static void stopProfile(){
     current=System.currentTimeMillis();
     accum=accum + (current - last);
   }
 
-  #feature(Benchmark)
+  #ifdef(Benchmark)
   public static void resumeProfile(){
     current=System.currentTimeMillis();
     last=current;
   }
   
-  #feature(Benchmark)
+  #ifdef(Benchmark)
   public static void endProfile(){
     current=System.currentTimeMillis();
     accum=accum + (current - last);
     System.out.println("Time elapsed: " + accum + " milliseconds");
   }
 
-  #feature(BaseImpl)
+  #ifdef(BaseImpl)
   public void run(Vertex v){
-    #feature(Connected)
+    #ifdef(Connected)
       ConnectedComponents();
 
-	  #feature(Cycle)
+	  #ifdef(Cycle)
 	    System.out.println(" Cycle? " + cycleCheck());
 	
-	  #feature(Mstkruskal)
+	  #ifdef(Mstkruskal)
 	    Graph gaux=kruskal();
 	
-	  #feature(Mstkruskal)
+	  #ifdef(Mstkruskal)
 	    Graph.stopProfile();
 	
-	  #feature(Mstkruskal)
+	  #ifdef(Mstkruskal)
 	    gaux.display();
 	
-	  #feature(Mstkruskal)
+	  #ifdef(Mstkruskal)
 	    Graph.resumeProfile();
 	
-	  #feature(Mstprim)
+	  #ifdef(Mstprim)
 	    Graph gaux1=prim(v);
 	
-	  #feature(Mstprim)
+	  #ifdef(Mstprim)
 	    Graph.stopProfile();
 	
-	  #feature(Mstprim)
+	  #ifdef(Mstprim)
 	    gaux1.display();
 	
-	  #feature(Mstprim)
+	  #ifdef(Mstprim)
 	    Graph.resumeProfile();
 	
-	  #feature(Number)
+	  #ifdef(Number)
 	    numberVertices();
 	
-	  #feature(StronglyConnected)
+	  #ifdef(StronglyConnected)
 	    Graph gaux2=strongComponents();
 	
-	  #feature(StronglyConnected)
+	  #ifdef(StronglyConnected)
 	    Graph.stopProfile();
 	
-	  #feature(StronglyConnected)
+	  #ifdef(StronglyConnected)
 	    gaux2.display();
 	
-	  #feature(StronglyConnected)
+	  #ifdef(StronglyConnected)
 	    Graph.resumeProfile();
   }
 
-  #feature(SearchBase)
+  #ifdef(SearchBase)
   public EdgeIfc findsEdge(  Vertex theSource,  Vertex theTarget){
     Vertex v1=theSource;
     for (EdgeIter edgeiter=v1.getEdges(); edgeiter.hasNext(); ) {
@@ -288,7 +288,7 @@ public variable class Graph {
     return null;
   }
 
-  #feature(SearchAlg)
+  #ifdef(SearchAlg)
   public void graphSearch(  WorkSpace w){
     VertexIter vxiter=getVertices();
     if (vxiter.hasNext() == false) {
@@ -307,17 +307,17 @@ public variable class Graph {
     }
   }
 
-  #feature(Number)
+  #ifdef(Number)
   public void numberVertices(){
     graphSearch(new NumberWorkSpace());
   }
 
-  #feature(Connected)
+  #ifdef(Connected)
   public void ConnectedComponents(){
     graphSearch(new RegionWorkSpace());
   }
 
-  #feature(StronglyConnected)
+  #ifdef(StronglyConnected)
   public Graph strongComponents(){
     FinishTimeWorkSpace FTWS=new FinishTimeWorkSpace();
     graphSearch(FTWS);
@@ -334,7 +334,7 @@ public variable class Graph {
     return gaux;
   }
 
-  #feature(Transpose)
+  #ifdef(Transpose)
   public Graph computeTranspose(  Graph the_graph){
     int i;
     String theName;
@@ -358,20 +358,20 @@ public variable class Graph {
         theNeighbor=neighbors.next();
         newVertex=(Vertex)newVertices.get(theNeighbor.getName());
         newEdge=
-          newGraph.addEdge(newVertex, newAdjacent, #feature(Weighted) 0);
+          newGraph.addEdge(newVertex, newAdjacent, #ifdef(Weighted) 0);
       }
     }
     return newGraph;
   }
 
-  #feature(Cycle)
+  #ifdef(Cycle)
   public boolean cycleCheck(){
     CycleWorkSpace c=new CycleWorkSpace();
     graphSearch(c);
     return c.AnyCycles;
   }
 
-  #feature(Mstkruskal)
+  #ifdef(Mstkruskal)
   public Graph kruskal(){
     LinkedList A=new LinkedList();
     for (VertexIter vxiter=getVertices(); vxiter.hasNext(); ) {
@@ -442,7 +442,7 @@ public variable class Graph {
     return newGraph;
   }
 
-  #feature(Mstprim)
+  #ifdef(Mstprim)
   public Graph prim(  Vertex r){
     Vertex root;
     root=r;

@@ -14,8 +14,8 @@ import model impl.GlobalVarsWrapper;
 
 
 variable class Vertex implements 
-#feature(GNoEdges) EdgeIfc,
-#feature(GNoEdges) NeighborIfc {
+#ifdef(GNoEdges) EdgeIfc,
+#ifdef(GNoEdges) NeighborIfc {
   
   public String name=null;
 
@@ -28,26 +28,26 @@ variable class Vertex implements
     return this.name;
   }
 
-  #feature(GNoEdges)
+  #ifdef(GNoEdges)
     public LinkedList<Vertex> adjacentVertices=new LinkedList<Vertex>();
 
-  #feature(GNOnlyNeighbours)
+  #ifdef(GNOnlyNeighbours)
     public LinkedList<Neighbor> adjacentNeighbors=new LinkedList<Neighbor>();
 
-  #feature(GNoEdges)
+  #ifdef(GNoEdges)
   public void addAdjacent(  Vertex n){
     adjacentVertices.add(n);
   }
 
-  #feature(GNoEdges)
+  #ifdef(GNoEdges)
   public void adjustAdorns(  Vertex the_vertex,  int index){
-    #feature(Weighted)
+    #ifdef(Weighted)
       int the_weight=the_vertex.weightsList.get(index).intValue();
-    #feature(Weighted)
+    #ifdef(Weighted)
       weightsList.add(new Integer(the_weight));
   }
 
-  #feature(GNoEdges)
+  #ifdef(GNoEdges)
   public VertexIter getNeighbors() {
     return new VertexIter(){
       private Iterator<Vertex> iter=adjacentVertices.iterator();
@@ -60,7 +60,7 @@ variable class Vertex implements
     };
   }
 
-  #feature(GNOnlyNeighbours)
+  #ifdef(GNOnlyNeighbours)
   public VertexIter getNeighbors() {
     return new VertexIter(){
       private Iterator<Neighbor> iter=adjacentNeighbors.iterator();
@@ -73,7 +73,7 @@ variable class Vertex implements
     };
   }
 
-  #feature(GenEdges)
+  #ifdef(GenEdges)
   public VertexIter getNeighbors() {
     return new VertexIter(){
       private Iterator<Neighbor> iter=neighbors.iterator();
@@ -86,51 +86,51 @@ variable class Vertex implements
     };
   }
   
-  #feature(GNoEdges)
+  #ifdef(GNoEdges)
   public Vertex getStart(){
-    #feature(Undirected) return this;
-    #feature(!Undirected) return null;
+    #ifdef(Undirected) return this;
+    #ifdef(!Undirected) return null;
   }
 
-  #feature(GNoEdges)
+  #ifdef(GNoEdges)
   public Vertex getEnd(){
     return null;
   }
 
-  #feature(GNoEdges)
+  #ifdef(GNoEdges)
   public int getWeight(){
     return 0;
   }
 
-  #feature(GNoEdges)
+  #ifdef(GNoEdges)
   public Vertex getOtherVertex(  Vertex vertex){
     return this;
   }
 
-  #feature(GNoEdges)
+  #ifdef(GNoEdges)
   public void adjustAdorns(  EdgeIfc the_edge){
   }
 
-  #feature(GNOnlyNeighbours)
+  #ifdef(GNOnlyNeighbours)
   public void addEdge(  Neighbor n){
     adjacentNeighbors.add(n);
   }
 
-  #feature(GNOnlyNeighbours)
+  #ifdef(GNOnlyNeighbours)
   public void adjustAdorns(Neighbor sourceNeighbor){
-    #feature(Weighted)
+    #ifdef(Weighted)
       adjacentNeighbors.getLast().weight=sourceNeighbor.weight;
   }
 
-  #feature(GenEdges)
+  #ifdef(GenEdges)
     public LinkedList<Neighbor> neighbors=new LinkedList<Neighbor>();
 
-  #feature(GenEdges)
+  #ifdef(GenEdges)
   public void addNeighbor(  Neighbor n){
     neighbors.add(n);
   }
 
-  #feature(SearchBase && GNoEdges)
+  #ifdef(SearchBase && GNoEdges)
   public EdgeIter getEdges() {
     return new EdgeIter(){
       private Iterator<Vertex> iter=adjacentVertices.iterator();
@@ -144,7 +144,7 @@ variable class Vertex implements
   }
 
 
-  #feature(SearchBase && GNOnlyNeighbours)
+  #ifdef(SearchBase && GNOnlyNeighbours)
   public EdgeIter getEdges() {
     return new EdgeIter(){
       private Iterator<Neighbor> iter=adjacentNeighbors.iterator();
@@ -157,7 +157,7 @@ variable class Vertex implements
     };
   }
 
-  #feature(SearchBase && GenEdges)
+  #ifdef(SearchBase && GenEdges)
   public EdgeIter getEdges() {
     return new EdgeIter(){
       private Iterator<Neighbor> iter=neighbors.iterator();
@@ -171,40 +171,40 @@ variable class Vertex implements
   }
 
   public LinkedList getNeighborsObj(){
-    #feature(GNOnlyNeighbours) return adjacentNeighbors;
-    #feature(GenEdges) return neighbors;
-    #feature(GNoEdges) return adjacentVertices;
+    #ifdef(GNOnlyNeighbours) return adjacentNeighbors;
+    #ifdef(GenEdges) return neighbors;
+    #ifdef(GNoEdges) return adjacentVertices;
   }
 
-  #feature(Weighted && GNoEdges)
+  #ifdef(Weighted && GNoEdges)
     public LinkedList<Integer> weightsList=new LinkedList<Integer>();
 
-  #feature(Weighted)
+  #ifdef(Weighted)
   public void addWeight(  int weight){
-    #feature(GNoEdges)
+    #ifdef(GNoEdges)
       weightsList.add(new Integer(weight));
-    #feature(GNOnlyNeighbours)
+    #ifdef(GNOnlyNeighbours)
       adjacentNeighbors.getLast().weight=weight;
   }
 
-  #feature(Weighted && GNoEdges)
+  #ifdef(Weighted && GNoEdges)
   public void setWeight(  int weight){
     addWeight(weight);
     adjacentVertices.getLast().addWeight(weight);
   }
 
-  #feature(SearchAlg)  public boolean visited=false;
+  #ifdef(SearchAlg)  public boolean visited=false;
 
-  #feature(SearchAlg)
+  #ifdef(SearchAlg)
   public void init_vertex(  WorkSpace w){
     visited=false;
     w.init_vertex((Vertex)this);
   }
 
-  #feature(SearchAlg)
+  #ifdef(SearchAlg)
   public void nodeSearch(  WorkSpace w){
-    #feature(Bfs) int s, c;
-    #feature(Bfs) Vertex header;
+    #ifdef(Bfs) int s, c;
+    #ifdef(Bfs) Vertex header;
     Vertex v;
 
     w.preVisitAction((Vertex)this);
@@ -212,21 +212,21 @@ variable class Vertex implements
       return;
     }
     visited=true;
-    #feature(Dfs)
+    #ifdef(Dfs)
 	    for (VertexIter vxiter=getNeighbors(); vxiter.hasNext(); ) {
 	      v=vxiter.next();
 	      w.checkNeighborAction((Vertex)this,v);
 	      v.nodeSearch(w);
 	    }
     w.postVisitAction((Vertex)this);
-    #feature(Bfs)
+    #ifdef(Bfs)
 	    for (VertexIter vxiter=getNeighbors(); vxiter.hasNext(); ) {
 	      v=vxiter.next();
 	      if (!v.visited) {
 	        GlobalVarsWrapper.queue.add(v);
 	      }
 	    }
-    #feature(Bfs)
+    #ifdef(Bfs)
 	    while (GlobalVarsWrapper.queue.size() != 0) {
 	      header=(Vertex)GlobalVarsWrapper.queue.get(0);
 	      GlobalVarsWrapper.queue.remove(0);
@@ -234,22 +234,22 @@ variable class Vertex implements
 	    }
   }
 
-  #feature(Number)  public int vertexNumber;
-  #feature(Connected)  public int componentNumber;
-  #feature(StronglyConnected)  public int finishTime;
-  #feature(StronglyConnected)  public int strongComponentNumber;
-  #feature(Cycle) public int VertexCycle;
-  #feature(Cycle) public int VertexColor;
-  #feature(Mstkruskal)  public Vertex representative;
-  #feature(Mstkruskal)  public LinkedList members;
-  #feature(Mstprim)  public String pred;
-  #feature(Mstprim)  public int key;
+  #ifdef(Number)  public int vertexNumber;
+  #ifdef(Connected)  public int componentNumber;
+  #ifdef(StronglyConnected)  public int finishTime;
+  #ifdef(StronglyConnected)  public int strongComponentNumber;
+  #ifdef(Cycle) public int VertexCycle;
+  #ifdef(Cycle) public int VertexColor;
+  #ifdef(Mstkruskal)  public Vertex representative;
+  #ifdef(Mstkruskal)  public LinkedList members;
+  #ifdef(Mstprim)  public String pred;
+  #ifdef(Mstprim)  public int key;
 
   public void display(){
-    #feature(Weighted && GNoEdges)
+    #ifdef(Weighted && GNoEdges)
       System.out.print(" Weights : ");
 
-    #feature(Weighted && GNoEdges)
+    #ifdef(Weighted && GNoEdges)
 	    for (int i=0; i < weightsList.size(); i++) {
 	      System.out.print(weightsList.get(i).intValue() + ", ");
 	    }
@@ -259,29 +259,29 @@ variable class Vertex implements
       Vertex v=vxiter.next();
       System.out.print(v.getName() + ", ");
     }
-    #feature(SearchAlg)
+    #ifdef(SearchAlg)
       if (visited) System.out.print("  visited");
       else System.out.println(" !visited");
 
-    #feature(Number)
+    #ifdef(Number)
       System.out.print(" # " + vertexNumber + " ");
 
-    #feature(Connected)
+    #ifdef(Connected)
       System.out.print(" comp# " + componentNumber + " ");
 
-    #feature(StronglyConnected)
+    #ifdef(StronglyConnected)
       System.out.print(" FinishTime -> " + finishTime + " SCCNo -> "+ strongComponentNumber);
 
-    #feature(Cycle)
+    #ifdef(Cycle)
       System.out.print(" VertexCycle# " + VertexCycle + " ");
 
-    #feature(Mstkruskal)
+    #ifdef(Mstkruskal)
 	    if (representative == null) 
 	      System.out.print("Rep null ");
 	    else 
 	      System.out.print(" Rep " + representative.getName() + " ");
 
-    #feature(Mstprim)
+    #ifdef(Mstprim)
       System.out.print(" Pred " + pred + " Key "+ key+ " ");
     System.out.println();
   }
