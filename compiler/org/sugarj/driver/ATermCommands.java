@@ -1,7 +1,5 @@
 package org.sugarj.driver;
 
-import static org.sugarj.driver.ATermCommands.isApplication;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -402,40 +400,7 @@ public class ATermCommands {
     }
   }
 
-  /**
-   * If term is a TransImportDec it is transformed into a normal TypeImportDec and
-   * the transformation postfix is attached to the imported module name
-   * @param term the input IStrategoTerm which is transformed if it is a TransImportDec
-   * @param sourceFile the source file of the imported module
-   * @return the transformed TypeImportDec
-   * @throws IOException
-   */
-  public static IStrategoTerm makeStdImport(IStrategoTerm term, String transPostfix) throws IOException {
-    if (isApplication(term, "TransImportDec")) {
-       IStrategoTerm transTypeName = getTransformationTypename(term, transPostfix);
-     return makeAppl("TypeImportDec", "ImportDec", 1, transTypeName);
-    }
-    return term;
-  }
   
-  private static IStrategoTerm getTransformationTypename(IStrategoTerm term, String transPostfix) throws IOException {
-    IStrategoTerm typeName = term.getSubterm(0);
-    String moduleName;
-    //  TypeName(Id(x))
-    if (typeName.getSubtermCount()==1) {
-      moduleName = typeName.getSubterm(0).getSubterm(0).toString().replace("\"", "");
-      return makeAppl("TypeName", "TypeName", 1, atermFromString("Id(\""+moduleName+"$"+transPostfix+"\")"));
-    }
-    //  TypeName(PackageOrTypeName(...), Id(x)) 
-    if (typeName.getSubtermCount()==2) {
-      moduleName = typeName.getSubterm(1).getSubterm(0).toString().replace("\"", "");
-      return makeAppl("TypeName", "TypeName", 2, typeName.getSubterm(0), 
-                                                        atermFromString("Id(\""+moduleName+"$"+transPostfix+"\")"));
-    }
-    return null;
-  }
-
-    
   public static IStrategoTerm implodeAterm(IStrategoTerm term, HybridInterpreter interp) {
     return implode_aterm_0_0.instance.invoke(interp.getCompiledContext(), term);
   }
@@ -460,10 +425,13 @@ public class ATermCommands {
   }
   
   public static String getLocalImportName(IStrategoTerm term, HybridInterpreter interp) throws IOException {
-    if (!isApplication(term, "TransImportDec"))
+    if (isApplication(term, "TransImportDec"))
+      term = getApplicationSubterm(term, "TransImportDec", 1);
+    else if (isApplication(term, "ModelTransImportDec"))
+      term = getApplicationSubterm(term, "ModelTransImportDec", 1);
+    else
       return null;
     
-    term = getApplicationSubterm(term, "TransImportDec", 2);
     term = getOptionalTerm(term);
     
     if (term == null)

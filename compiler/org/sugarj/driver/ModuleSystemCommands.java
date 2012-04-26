@@ -3,13 +3,10 @@ package org.sugarj.driver;
 import static org.sugarj.driver.ATermCommands.isApplication;
 import static org.sugarj.driver.Log.log;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -106,24 +103,14 @@ public class ModuleSystemCommands {
    * @return true iff a serv file existed.
    * @throws IOException
    */
-  public static boolean importEditorServices(String modulePath, Result driverResult, Environment environment) throws IOException {
+  public static RelativePath importEditorServices(String modulePath, Result driverResult, Environment environment) throws IOException {
     RelativePath serv = searchFile(modulePath, ".serv", environment);
     
     if (serv == null)
-      return false;
+      return null;
     
-    log.beginTask("Incorporation", "Incorporate the imported editor services " + modulePath);
-    try {
-      BufferedReader reader = new BufferedReader(new FileReader(serv.getFile()));
-      String line;
-      
-      while ((line = reader.readLine()) != null)
-        driverResult.addEditorService(ATermCommands.atermFromString(line));
-      
-      return true;
-    } finally {
-      log.endTask();
-    }
+    log.log("Found editor services for " + modulePath);
+    return serv;
   }
   
 
@@ -170,31 +157,18 @@ public class ModuleSystemCommands {
       else if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
         name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp) + ".*";
       else if (isApplication(toplevelDecl, "TransImportDec") || isApplication(toplevelDecl, "ModelTransImportDec"))
-        name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp);
+        name = SDFCommands.prettyPrintJava(ATermCommands.getApplicationSubterm(toplevelDecl.getSubterm(0), "TransApp", 0), interp);
     } finally {
       log.endTask(name);
     }
     return name;
   }
   
-  public static List<String> extractImportedTransformationNames(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
-    List<String> names = new ArrayList<String>();
-    log.beginTask("Extracting", "Extract names of imported transformation modules");
-    try {
-      if (isApplication(toplevelDecl, "TransImportDec")) {
-        List<IStrategoTerm> terms = ATermCommands.getList(toplevelDecl.getSubterm(1));
-        
-        for (IStrategoTerm term : terms) {
-          names.add(SDFCommands.prettyPrintJava(term, interp));
-        }
-      }
-      else
-        return null;
+  public static List<IStrategoTerm> extractImportedTransformationNames(IStrategoTerm toplevelDecl) {
+    if (isApplication(toplevelDecl, "TransImportDec") || isApplication(toplevelDecl, "ModelTransImportDec"))
+      return ATermCommands.getList(ATermCommands.getApplicationSubterm(toplevelDecl.getSubterm(0), "TransApp", 1));
 
-    } finally {
-      log.endTask(names.toString());
-    }
-    return names;
+    return null;
   }
   
 
