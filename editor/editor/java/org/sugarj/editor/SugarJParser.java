@@ -133,6 +133,7 @@ public class SugarJParser extends JSGLRI {
         Result result = null;
         boolean ok = false;
         try {
+          sourceFile.getSourceLocation().getEnvironment().getRenamings().clear();
           result = runParser(input, sourceFile, monitor);
           ok = true;
         } catch (InterruptedException e) {
