@@ -1046,7 +1046,6 @@ public class Driver {
     
     Pair<IStrategoTerm, RelativePath> transformedResult = Pair.create(term, model);
     
-    boolean transformSuccessful = false;
     try {
       String trans = " with " + (transformationPaths != null ? StringCommands.printModuleList(transformationPaths, ", ") + " and " : "") + StringCommands.printModuleList(environment.getTransformationPaths(), ", "); 
       log.beginTask("Transform model", "Transform model " + model.getRelativePath() + trans);
@@ -1071,7 +1070,7 @@ public class Driver {
       ATermCommands.atermToFile(transformedResult.a, transformedResult.b);
       log.log("Stored transformed model in " + transformedResult.b.getAbsolutePath());
     } finally {
-      log.endTask(transformSuccessful);
+      log.endTask();
     }
     
     return transformedResult;
@@ -1118,7 +1117,12 @@ public class Driver {
     Path trans = null;
     try {
       log.beginTask("Compile transformation", "Compile transformation " + strPath.getRelativePath());
-      Path depPath = ModuleSystemCommands.searchFile(FileCommands.dropExtension(strPath.getRelativePath()), ".dep", environment);
+      Path depPath = ModuleSystemCommands.searchFile(FileCommands.dropExtension(strPath.getRelativePath()).replace("__", "$"), ".dep", environment);
+      if (depPath == null) {
+        setErrorMessage(lastSugaredToplevelDecl, "Transformation not found " + FileCommands.dropExtension(strPath.getRelativePath()));
+        return Pair.create(currentTerm, currentPath);
+      }
+      
       Result dep = Result.readDependencyFile(depPath, environment);
       trans = STRCommands.compile(strPath, strat, dep.getFileDependencies(environment), strParser, strjContext, strCache, environment);
     } catch (Exception e) {
@@ -1140,6 +1144,7 @@ public class Driver {
       if (transformedTerm == null)
         return Pair.create(currentTerm, currentPath);
       
+      log.log(FileCommands.dropExtension(strPath.getRelativePath()) + " applied successfully.");
       RelativePath transformedPath = ModuleSystemCommands.transformedModelPath(currentPath, strPath);
       return Pair.create(transformedTerm, transformedPath);
     } catch (Exception e) {
@@ -1154,10 +1159,15 @@ public class Driver {
     try {
       for (String transformationPath : transformationPaths) {
         if (!transformationPath.contains("/")) { // this branch searches for relative imports
-          
+          String renamedPath = transformationPath;
+          for (Renaming ren : environment.getRenamings())
+            renamedPath = StringCommands.rename(renamedPath, ren);
+          renamedPath = renamedPath.replace("$", "__");
+
           boolean moduleFound = false;
           for (RelativePath importPath : availableSTRImports) {
-            if (FileCommands.dropExtension(importPath.getAbsolutePath()).endsWith(transformationPath)) {
+            if (FileCommands.dropExtension(importPath.getAbsolutePath()).endsWith(transformationPath) ||
+                FileCommands.dropExtension(importPath.getAbsolutePath()).endsWith(renamedPath)) {
               resolvedTransformationPaths.add(importPath);
               moduleFound = true;
               break;
