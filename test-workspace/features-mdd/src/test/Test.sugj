@@ -5,7 +5,7 @@ import variability.Java;
 import model test.AnotherTest;
 import model test.InterfaceTest;
 
-import test.FeatureModel;
+//import model test.FeatureModel;
  
 #ifdef(C) 
 public variable class Test extends Object implements InterfaceTest {
@@ -15,14 +15,14 @@ public variable class Test extends Object implements InterfaceTest {
     #ifdef(A)
     System.out.println("Feature A enabled"); 
     
-    #ifdef(B){
-    bar();
-    }
+    bar("B", #ifdef(B){"enabled"}{"disabled"});
     
     if (2 + #ifdef(A) {3} {0} == 5) {
        System.out.println("result was 5");
     }
   } 
    
-  void bar(){}
+  void bar(String fname, String state) {
+    System.out.println("Feature " + fname + " is " + state);
+  }
 }

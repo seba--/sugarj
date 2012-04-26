@@ -1,6 +1,6 @@
 package test;
 
-import test.FeatureConfig;
+import test.FeatureConfig<variability.ConfigTrans>;
 import test.Test<FeatureConfig>;
 import test.InterfaceTest<FeatureConfig>;
 

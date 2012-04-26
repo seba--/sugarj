@@ -1,0 +1,47 @@
+package variability;
+
+import org.sugarj.languages.Stratego;
+import org.sugarj.languages.SugarJ;
+
+import concretesyntax.Java;
+
+import variability.Config;
+import variability.FeatureExpressions;
+
+public transformation ConfigTrans {
+  rules
+    main = SugarCompilationUnit(?pkg,ensure-aux-import,map(featureconfig-to-trans(|pkg)))
+    main = ignore-featuremodel
+
+    featureconfig-to-trans(|pkg) :
+      ModelDec(ModelDecHead(mods, name), ModelBody(("FeatureConfig", model, configs)))
+      ->
+      SugarDec(SugarDecHead(mods, name), SugarBody([body]))
+    where
+      <get-feature-config> configs => (enabled, disabled);
+      <(map(feature-enabled2rule), map(feature-disabled2rule)); conc> (enabled, disabled) => rulez;
+      main-rule := SDefNoArgs("main", CallNoArgs(SVar("eliminate-variability")));
+
+      <pkg-name> pkg => pkg-name;
+      <conc-strings> (pkg-name,"_",<?Id(<id>)> name) => qualified-name;
+      <conc-strings> (qualified-name, "__variability_ConfigTrans") => my-qualified-name;
+      <rename-rules-block(|my-qualified-name)> Rules([main-rule | rulez]) => body
+
+    feature-enabled2rule = !SDefNoArgs("feature-enabled", Match(NoAnnoList(Str(<id>))))
+    feature-disabled2rule = !SDefNoArgs("feature-disabled", Match(NoAnnoList(Str(<id>))))
+
+    ensure-aux-import : imps -> <union> (imps, [auximp])
+      where auximp := |[ import variability.ConfigTransAux; ]| 
+
+    ignore-featuremodel =
+      SugarCompilationUnit(id, ![], map(
+        \  ModelDec(ModelDecHead(mods, name), ModelBody(("FeatureModel",_,_)))
+        -> ClassDec(ClassDecHead(mods, name, None, None, None), ClassBody([])) \))
+
+    pkg-name : [] -> []
+    pkg-name : [Id(x)] -> [x]
+    pkg-name : [Id(x) | ys] -> [x | <pkg-name>ys]
+    pkg-name = ?Some(<pkg-name>)
+    pkg-name = ?PackageDec(_,<pkg-name>)
+    pkg-name = ?PackageName(<pkg-name; concat-strings>)
+}

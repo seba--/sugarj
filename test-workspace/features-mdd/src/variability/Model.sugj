@@ -1,9 +1,5 @@
 package variability;
 
-import concretesyntax.Stratego;
-import concretesyntax.EditorServices;
-import org.sugarj.languages.Java;
-
 import variability.FeatureExpressions;
 
 public sugar Model {
@@ -20,35 +16,7 @@ public sugar Model {
 
  rules
    featuremodel : 
-     FMDecl(mods, Id(n), FMBody(features, requirements))
+     FMDecl(mods, name, FMBody(features, requirements))
      -> 
-     [SugarDec(SugarDecHead(mods, Id(n)), SugarBody([transformation-elem(rulesblock1), transformation-elem(rulesblock2)])),
-      EditorServicesDec(EditorServicesDecHead(mods, Id(n)), EditorServicesBody(services))]
-     where 
-       <featuredecl2sugar(|n)> features => rulesblock1;
-       <feature-requirements2rules(|n)> requirements => rulesblock2;
-
-       <featuredecl2service> features => services
-
-  featuredecl2sugar(|n) =
-    get-decl-names;
-    map(!NoAnnoList(Str(<id>))); !NoAnnoList(List(<id>));
-    ?names;
-    !|[ rules featuremodel-names : string~n -> term~names ]|
-  featuremodel-names = fail
-
-  feature-requirements2rules(|n) =
-    map(?FeatureRequirement(<id>));
-    ?requirements;
-    !|[ rules model-requirements : string~n -> term~(<trm-explode> requirements) ]|
-  model-requirements = fail
-
-  featuredecl2service =
-     get-decl-names;
-     map({name: ?name;
-       !|[ completions
-             completion template : FeatureName = string~name
-        ]|})
-    
-    get-decl-names = mapconcat(?FeatureDecl(<map(?FeatureName(Id(<id>)))>))
+     ModelDec(ModelDecHead(mods, name), ModelBody(("FeatureModel", features, requirements)))
 }
