@@ -20,6 +20,7 @@ import org.spoofax.jsglr.shared.BadTokenException;
 import org.sugarj.IResult;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
+import org.sugarj.common.ErrorLogging;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
@@ -35,7 +36,7 @@ import org.sugarj.util.AppendableObjectOutputStream;
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
-public class Result implements IResult {
+public class Result implements IResult, ErrorLogging {
   
   /**
    * Path and hash of the disk-stored version of this result.

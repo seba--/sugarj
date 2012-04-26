@@ -54,10 +54,8 @@ public interface IResult {
   public boolean isUpToDate(Path inputFile, Environment env) throws IOException;
   public boolean isUpToDateShallow(int inputHash, Environment env) throws IOException;
   public boolean isUpToDate(int inputHash, Environment env) throws IOException;	  
-  void logError(String error);
-  public List<String> getCollectedErrors();
-  void logParseError(BadTokenException e);
-  public Set<BadTokenException> getParseErrors();
+//  void logParseError(BadTokenException e);
+//  public Set<BadTokenException> getParseErrors();
   public void setSugaredSyntaxTree(IStrategoTerm sugaredSyntaxTree);
   public IStrategoTerm getSugaredSyntaxTree();
   public Collection<Path> getFileDependencies(Environment env) throws IOException;

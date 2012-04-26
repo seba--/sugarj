@@ -373,7 +373,7 @@ public class Driver{
       else {
         //driverResult.delegateCompilation(delegateCompilation, javaOutFile, javaSource, generatedJavaClasses);
         // XXX: Maybe implement this in Driver_Java
-        driverResult.delegateCompilation(delegateCompilation, langLib.getOutFile(), langLib.getSource(), langLib.getCompiledFiles());
+        driverResult.delegateCompilation(delegateCompilation, langLib.getOutFile(), langLib.getSource(), langLib.getGeneratedFiles());
       }
         
       driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
@@ -411,7 +411,7 @@ public class Driver{
         //driverResult.compileJava(javaOutFile, javaSource, environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), generatedJavaClasses);
         //XXX: maybe implement this in Driver_Java
         
-        langLib.getCompilerCommands().compile(langLib.getOutFile(), langLib.getSource(), environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), langLib.getCompiledFiles(), driverResult);
+        langLib.getCompilerCommands().compile(langLib.getOutFile(), langLib.getSource(), environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), langLib.getGeneratedFiles(), driverResult);
       } catch (ClassNotFoundException e) {
         setErrorMessage(lastSugaredToplevelDecl, "Could not resolve imported class " + e.getMessage());
         // throw new RuntimeException(e);

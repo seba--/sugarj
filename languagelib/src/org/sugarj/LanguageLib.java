@@ -53,13 +53,11 @@ public abstract class LanguageLib implements Serializable {
 	// stuff from LanguageDriver here:
 
 	public abstract void init();
-	
-	public abstract String getSourcecodeExtension();
-	  
+		  
 	  
 	public abstract ISourceFileContent getSource();
 	public abstract Path getOutFile();
-	public abstract Set<RelativePath> getCompiledFiles();	// XXX: was: getGeneratedJavaClasses -- is getCompiledFiles a reasonably good name? Probably change to getGeneratedBinFiles?
+	public abstract Set<RelativePath> getGeneratedFiles();	// XXX: was: getGeneratedJavaClasses -- is getCompiledFiles a reasonably good name? Probably change to getGeneratedBinFiles?
 	  
 	  
 	public abstract boolean isLanguageSpecificDec(IStrategoTerm decl);

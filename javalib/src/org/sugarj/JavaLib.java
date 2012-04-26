@@ -26,6 +26,7 @@ import org.strategoxt.java_front.pp_java_string_0_0;
 import org.strategoxt.lang.Context;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
+import org.sugarj.common.ErrorLogging;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
@@ -182,7 +183,8 @@ public class JavaLib extends LanguageLib implements Serializable {
 
 	@Override
 	public ICompilerCommands getCompilerCommands() {
-		// singleton pattern
+		// singleton pattern. 
+		// XXX: Also integrate compiler commands into language library or keep it separate to support pluggable compilers more easily?
 		if (javaCommands == null) {
 			javaCommands = new JavaCommands();
 		}
@@ -219,7 +221,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 	      checkPackageName(decl, sourceFile, driverResult);
 	  }
 	
-	public void checkPackageName(IStrategoTerm toplevelDecl, RelativeSourceLocationPath sourceFile, IResult driverResult) {
+	private void checkPackageName(IStrategoTerm toplevelDecl, RelativeSourceLocationPath sourceFile, IResult driverResult) {
 	    if (sourceFile != null) {
 	      String packageName = relPackageName == null ? "" : relPackageName.replace('/', '.');
 	      
@@ -231,13 +233,13 @@ public class JavaLib extends LanguageLib implements Serializable {
 	        setErrorMessage(
 	            toplevelDecl,
 	            "The declared package '" + packageName + "'" +
-	            " does not match the expected package '" + expectedPackage + "'.", driverResult);
+	            " does not match the expected package '" + expectedPackage + "'.", errorLog);
 	    }
 	  }
 
 	public void checkSourceOutFile(Environment environment, IResult driverResult) {
 	    if (javaOutFile == null)
-	      setJavaOutFile(environment.createBinPath(getRelNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + getSourcecodeExtension()));
+	      setJavaOutFile(environment.createBinPath(getRelNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + getSourceFileExtension()));
 	  }
 
 	// XXX: move this to language driver?
@@ -260,7 +262,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 
 	// was: getGeneratedJavaClasses
 	  // XXX: think of a better name (classes -> binary files? compiled files?)
-	  public Set<RelativePath> getCompiledFiles() {
+	  public Set<RelativePath> getGeneratedFiles() {
 	    return generatedJavaClasses;
 	  }
 
@@ -284,10 +286,6 @@ public class JavaLib extends LanguageLib implements Serializable {
 
 	public JavaSourceFileContent getSource() {
 	    return javaSource;
-	  }
-
-	public String getSourcecodeExtension() {
-	    return ".java";
 	  }
 
 	public boolean isEditorService(IStrategoTerm decl) {
@@ -366,9 +364,9 @@ public class JavaLib extends LanguageLib implements Serializable {
 	    javaSource.setPackageDecl(prettyPrint(toplevelDecl, interp));
 	  }
 
-	private void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IResult driverResult) {
+	private void setErrorMessage(IStrategoTerm toplevelDecl, String msg, ErrorLogging errorLog) {
 	    // XXX: Merge with setErrorMessage from Driver
-	    driverResult.logError(msg);
+	    errorLog.logError(msg);
 	    ATermCommands.setErrorMessage(toplevelDecl, msg);
 	  }
 

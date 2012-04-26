@@ -1,5 +1,11 @@
 package org.sugarj;
 
+import static org.sugarj.common.ATermCommands.getApplicationSubterm;
+import static org.sugarj.common.ATermCommands.isApplication;
+import static org.sugarj.common.Environment.sep;
+import static org.sugarj.common.Log.log;
+
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -8,15 +14,43 @@ import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.FileLocator;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.strategoxt.HybridInterpreter;
+import org.sugarj.common.Environment;
+import org.sugarj.common.path.Path;
+import org.sugarj.common.path.RelativePath;
+import org.sugarj.common.path.RelativeSourceLocationPath;
+import org.sugarj.driver.PrologCommands;
+import org.sugarj.driver.sourcefilecontent.ISourceFileContent;
 
 public class PrologLib extends LanguageLib implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6271882490466636509L;
 	private transient File libDir;
 	private transient File libTmpDir;
+	
+	
+	// XXX: Name!
+	private Set<RelativePath> generatedJavaClasses = new HashSet<RelativePath>();
+
+	private Path prologOutFile;
+
+	private ISourceFileContent prologSource;		// XXX: change to a prolog specific sourcefile
+
+	private String relPackageName;
+	
+	private static PrologCommands prologCommands;
+
+	
 	
 	@Override
 	public List<File> getGrammars() {
@@ -61,6 +95,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	@Override
 	public File getLibraryDirectory() {
+		// XXX: Do we need this in a language library? Just setup code, extract?
 		if (libDir == null) {	// set up directories first
 			String thisClassPath = "org/sugarj/PrologLib.class";
 			URL thisClassURL = PrologLib.class.getClassLoader().getResource(thisClassPath);
@@ -99,6 +134,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	@Override
 	public File ensureFile(String resource) {
+		// XXX: Do we need this in the language library? -> Extract
 		File f = new File(getLibraryDirectory().getPath() + File.separator + resource);
 		
 		System.out.println("prologlib ensure file: " + f);
@@ -148,5 +184,141 @@ public class PrologLib extends LanguageLib implements Serializable {
 	    else
 	      System.err.println(file.getPath() + " does not exist.");
 	  }
+	  
+	  // ---
+	  
+	  @Override
+	  public boolean isLanguageSpecificDec(IStrategoTerm decl) {
+	    return isApplication(decl, "Sentence");
+	  }
+
+	  @Override
+	  public boolean isSugarDec(IStrategoTerm decl) {
+	    return isApplication(decl, "SugarDec");           // XXX: Add to prolog
+	  }
+	  
+	  @Override
+	  public boolean isEditorService(IStrategoTerm decl) {
+	    return isApplication(decl, "EditorServicesDec");    // XXX: Add to prolog
+	  }
+
+	  @Override
+	  public boolean isImport(IStrategoTerm decl) {
+	    return isApplication(decl, "ModuleImport");
+	  }
+
+	  @Override
+	  public boolean isPlain(IStrategoTerm decl) {
+	    return isApplication(decl, "PlainDec");         // XXX: Add to prolog
+	  }
+
+	@Override
+	public ICompilerCommands getCompilerCommands() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getSourceFileExtension() {
+		return ".pro";
+	}
+
+	@Override
+	public String getBinFileExtension() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getSugarFileExtension() {
+		return ".sugp";
+	}
+
+	@Override
+	public void init() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public ISourceFileContent getSource() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Path getOutFile() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Set<RelativePath> getGeneratedFiles() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void processLanguageSpecific(IStrategoTerm toplevelDecl,
+			Environment environment, HybridInterpreter interp)
+			throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String prettyPrint(IStrategoTerm term,
+			HybridInterpreter interp) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String extractImportedModuleName(IStrategoTerm toplevelDecl, HybridInterpreter interp)
+			throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setupSourceFile(RelativePath sourceFile, Environment environment) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void checkSourceOutFile(Environment environment, IResult driverResult) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getNamespace() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getRelNamespaceSep() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void checkNamespace(IStrategoTerm decl,
+			RelativeSourceLocationPath sourceFile, IResult driverResult) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void processNamespaceDec(IStrategoTerm toplevelDecl,
+			Environment environment, HybridInterpreter interp,
+			IResult driverResult, String packageName,
+			RelativeSourceLocationPath sourceFile) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
 	
 }
