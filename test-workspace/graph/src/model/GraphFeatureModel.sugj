@@ -2,7 +2,7 @@ package model;
 
 import variability.Model; 
 
-featuremodel GraphFeatureModel  {
+public featuremodel GraphFeatureModel  {
   features 
    // GPL
    Benchmark,

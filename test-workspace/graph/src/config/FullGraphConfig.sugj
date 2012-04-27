@@ -1,10 +1,10 @@
 package config;
 
 import variability.Config;
-import model.GraphFeatureModel;
+import model model.GraphFeatureModel;
+import model.GraphFeatureModel<variability.CheckConfig>;
 
-
-config FullGraphConfig for GraphFeatureModel {
+public config FullGraphConfig for GraphFeatureModel {
    enable Benchmark;
    enable BaseImpl;
    enable SearchAlg;

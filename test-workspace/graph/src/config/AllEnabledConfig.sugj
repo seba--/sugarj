@@ -1,9 +1,15 @@
 package config;
 
 import variability.Config;
-import model.GraphFeatureModel;
+import model model.GraphFeatureModel;
+import model.GraphFeatureModel<variability.CheckConfig>;
 
-config AllEnabledConfig for GraphFeatureModel {
+/*
+ * This feature configuration violates a number of
+ * constraints from the feature model:
+ * Enabling all features simultaneously is illegal.
+ */
+public config AllEnabledConfig for GraphFeatureModel {
   enable Cycle;
   enable Undirected;
   enable SearchBase;

@@ -1,10 +1,9 @@
 package test;
 
-import config.MinimalGraphConfig;
-//import config.FullGraphConfig;
-import impl.Main<MinimalGraphConfig>;
+//import config.FullGraphConfig<variability.ConfigTrans> as Config;
+import config.MinimalGraphConfig<variability.ConfigTrans> as Config;
 
-
+import impl.Main<config.MinimalGraphConfig<variability.ConfigTrans>>;
 
 public class GraphTest {
    public static void main(String[] args) {
