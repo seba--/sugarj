@@ -10,6 +10,7 @@ import java.util.Set;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.HybridInterpreter;
 import org.sugarj.common.Environment;
+import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
@@ -84,14 +85,22 @@ public abstract class LanguageLib implements Serializable {
 	
 	
 	public abstract void setupSourceFile(RelativePath sourceFile, Environment environment);
-	public abstract void checkSourceOutFile(Environment environment, IResult driverResult);
+	public abstract void checkSourceOutFile(Environment environment, RelativeSourceLocationPath sourceFile);
 	
 	
 	public abstract String getNamespace();
 	public abstract String getRelNamespaceSep();
 	
-	public abstract void checkNamespace(IStrategoTerm decl, RelativeSourceLocationPath sourceFile, IResult driverResult);
-	public abstract void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IResult driverResult, String packageName, RelativeSourceLocationPath sourceFile) throws IOException;
+	public abstract void checkNamespace(IStrategoTerm decl, RelativeSourceLocationPath sourceFile, IErrorLogger errorLog);
+	public abstract void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IErrorLogger errorLog, String packageName, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException;
 
+	
+    // from Result
+    // XXX: generatedJavaClasses clearly is the wrong name. Think of a better name.
+	// moved to ICompilerCommands, move back to language library
+    // void compile(Path javaOutFile, ISourceFileContent javaSource, Path bin, List<Path> path, Set<RelativePath> generatedJavaClasses, IResult result) throws IOException, ClassNotFoundException;
+
+
+	public abstract LanguageLibFactory getFactoryForLanguage();
 	
 }

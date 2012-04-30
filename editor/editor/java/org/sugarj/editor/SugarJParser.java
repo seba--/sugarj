@@ -121,7 +121,7 @@ public class SugarJParser extends JSGLRI {
     SugarJParser.setPending(filename, true);
 
     // XXX: support non-java files in editor. (i.e. use actual language library here, not just JavaLib)
-    final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(filename), environment.getSourcePath(), new JavaLib());
+    final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(filename), environment.getSourcePath(), UsedLanguageLibrary.langLib);
 
     
     Job parseJob = new Job("SugarJ parser: " + sourceFile.getRelativePath()) {
@@ -161,7 +161,7 @@ public class SugarJParser extends JSGLRI {
     SugarJConsole.activateConsoleOnce();
     
     try {
-      return Driver.parse(input, sourceFile, monitor, langLib);
+      return Driver.parse(input, sourceFile, monitor, langLib.getFactoryForLanguage());
     } catch (InterruptedException e) {
       throw e;
     } catch (Exception e) {

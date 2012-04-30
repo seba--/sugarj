@@ -17,10 +17,9 @@ import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.shared.BadTokenException;
-import org.sugarj.IResult;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
-import org.sugarj.common.ErrorLogging;
+import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
@@ -36,7 +35,7 @@ import org.sugarj.util.AppendableObjectOutputStream;
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
-public class Result implements IResult, ErrorLogging {
+public class Result implements IErrorLogger {
   
   /**
    * Path and hash of the disk-stored version of this result.
@@ -102,7 +101,7 @@ public class Result implements IResult, ErrorLogging {
     addDependency(result, env);
   }
   
-  public void addDependency(IResult result, Environment env) throws IOException {
+  public void addDependency(Result result, Environment env) throws IOException {
     allDependentFiles.addAll(result.getFileDependencies(env));
     
     for (Entry<Path, Map<Path, Set<RelativePath>>> e : result.getAvailableGeneratedFiles().entrySet())
@@ -187,12 +186,6 @@ public class Result implements IResult, ErrorLogging {
     }
   }
   
-  public void writeToFile(Path file, String content) throws IOException {
-    if (generateFiles) {
-      FileCommands.writeToFile(file, content);
-      generatedFileHashes.put(file, FileCommands.fileHash(file));
-    }
-  }
   
   public void appendToFile(Path file, String content) throws IOException {
     if (generateFiles) {
@@ -466,23 +459,19 @@ public class Result implements IResult, ErrorLogging {
   }
 
 
-  @Override
   public Map<Path, Map<Path, Set<RelativePath>>> getAvailableGeneratedFiles() {
     return availableGeneratedFiles;
   }
 
-  @Override
   public Map<Path, Map<Path, Map<Path, ISourceFileContent>>> getDeferredSourceFiles() {
     return deferredSourceFiles;
   }
 
-  @Override
   public Map<Path, Integer> getGeneratedFileHashes() {
     return generatedFileHashes;
   }
 
-  @Override
-  public boolean getGenerateFiles() {
+  public boolean isGenerateFiles() {
     return generateFiles;
   }
   

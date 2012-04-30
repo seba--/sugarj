@@ -26,7 +26,7 @@ import org.strategoxt.java_front.pp_java_string_0_0;
 import org.strategoxt.lang.Context;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
-import org.sugarj.common.ErrorLogging;
+import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
@@ -216,12 +216,12 @@ public class JavaLib extends LanguageLib implements Serializable {
 	  }
 
 	// was: checkPackage
-	  public void checkNamespace(IStrategoTerm decl, RelativeSourceLocationPath sourceFile, IResult driverResult) {
+	  public void checkNamespace(IStrategoTerm decl, RelativeSourceLocationPath sourceFile, IErrorLogger errorLog) {
 	    if (relPackageName == null)
-	      checkPackageName(decl, sourceFile, driverResult);
+	      checkPackageName(decl, sourceFile, errorLog);
 	  }
 	
-	private void checkPackageName(IStrategoTerm toplevelDecl, RelativeSourceLocationPath sourceFile, IResult driverResult) {
+	private void checkPackageName(IStrategoTerm toplevelDecl, RelativeSourceLocationPath sourceFile, IErrorLogger errorLog) {
 	    if (sourceFile != null) {
 	      String packageName = relPackageName == null ? "" : relPackageName.replace('/', '.');
 	      
@@ -237,9 +237,9 @@ public class JavaLib extends LanguageLib implements Serializable {
 	    }
 	  }
 
-	public void checkSourceOutFile(Environment environment, IResult driverResult) {
+	public void checkSourceOutFile(Environment environment, RelativeSourceLocationPath sourceFile) {
 	    if (javaOutFile == null)
-	      setJavaOutFile(environment.createBinPath(getRelNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + getSourceFileExtension()));
+	      setJavaOutFile(environment.createBinPath(getRelNamespaceSep() + FileCommands.fileName(sourceFile) + getSourceFileExtension()));
 	  }
 
 	// XXX: move this to language driver?
@@ -350,21 +350,21 @@ public class JavaLib extends LanguageLib implements Serializable {
 	  }
 
 	// was: processPackageDec
-	  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IResult driverResult, String packageName, RelativeSourceLocationPath sourceFile) throws IOException {
+	  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IErrorLogger errorLog, String packageName, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException {
 	    relPackageName = FileCommands.getRelativeModulePath(packageName);
 	
 	    log.log("The SDF / Stratego package name is '" + relPackageName + "'.");
 	
-	    checkPackageName(toplevelDecl, sourceFile, driverResult);
-	    
+	    checkPackageName(toplevelDecl, sourceFile, errorLog);
+	
 	    if (javaOutFile == null)
-	      javaOutFile = environment.createBinPath(getRelNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".java");
+	      javaOutFile = environment.createBinPath(getRelNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + ".java");			// XXX: Can we just reuse sourceFile here?
 	
 	    // moved here before depOutFile==null check
 	    javaSource.setPackageDecl(prettyPrint(toplevelDecl, interp));
 	  }
 
-	private void setErrorMessage(IStrategoTerm toplevelDecl, String msg, ErrorLogging errorLog) {
+	private void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IErrorLogger errorLog) {
 	    // XXX: Merge with setErrorMessage from Driver
 	    errorLog.logError(msg);
 	    ATermCommands.setErrorMessage(toplevelDecl, msg);
@@ -379,6 +379,11 @@ public class JavaLib extends LanguageLib implements Serializable {
 	    javaSource = new JavaSourceFileContent();
 	    javaSource.setOptionalImport(false);
 	  }
+
+	@Override
+	public LanguageLibFactory getFactoryForLanguage() {
+		return new JavaLibFactory();
+	}
 	
 
 	

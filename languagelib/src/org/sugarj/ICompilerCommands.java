@@ -3,6 +3,7 @@ package org.sugarj;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.sugarj.common.path.Path;
@@ -33,11 +34,17 @@ public interface ICompilerCommands {
 
     
     
-    // from Result
-    // XXX: generatedJavaClasses clearly is the wrong name. Think of a better name.
-    void compile(Path javaOutFile, ISourceFileContent javaSource, Path bin, List<Path> path, Set<RelativePath> generatedJavaClasses, IResult result) throws IOException, ClassNotFoundException;
+    // XXX: Move back to language library
+    public void compile(Path javaOutFile, ISourceFileContent javaSource, Path bin, List<Path> path,
+  		  Set<RelativePath> generatedJavaClasses,
+  		  Map<Path, Set<RelativePath>> availableGeneratedFilesForSourceFile,
+  		  Map<Path, Map<Path, ISourceFileContent>> deferredSourceFilesForSourceFile,
+  		  Map<Path, Integer> generatedFileHashes,
+  		  boolean generateFiles
+  		  ) throws IOException, ClassNotFoundException;
 
-    
+    public void compile(List<Path> javaOutFiles, Path bin, List<Path> path, Set<? extends Path> generatedJavaClasses, Map<Path, Integer> generatedFileHashes, boolean generateFiles) throws IOException;
+
 
   
   

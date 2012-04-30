@@ -44,6 +44,7 @@ import org.strategoxt.permissivegrammars.make_permissive;
 import org.strategoxt.tools.tools;
 import org.sugarj.JavaLib;
 import org.sugarj.LanguageLib;
+import org.sugarj.LanguageLibFactory;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.Environment;
@@ -139,9 +140,9 @@ public class Driver{
   private LanguageLib langLib;
   
   
-  public Driver(Environment env, LanguageLib langLib) {
+  public Driver(Environment env, LanguageLibFactory langLibFactory) {
     this.environment=env;
-    this.langLib = langLib;
+    this.langLib = langLibFactory.createLanguageLibrary();   // XXX: Generate new languagelib here. (Maybe use a factory?)
     
     try {      
       if (environment.getCacheDir() != null)
@@ -205,23 +206,23 @@ public class Driver{
     Log.log.log(resultCache.size());
   }
   
-  public static Result compile(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LanguageLib langLib) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    return run(sourceFile, monitor, true, langLib);
+  public static Result compile(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    return run(sourceFile, monitor, true, langLibFactory);
   }
 
-  public static Result parse(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LanguageLib langLib) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    return run(sourceFile, monitor, false, langLib);
+  public static Result parse(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    return run(sourceFile, monitor, false, langLibFactory);
   }
   
-  public static Result compile(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LanguageLib langLib) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    return run(source, sourceFile, monitor, true, langLib);
+  public static Result compile(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    return run(source, sourceFile, monitor, true, langLibFactory);
   }
   
-  public static Result parse(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LanguageLib langLib) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    return run(source, sourceFile, monitor, false, langLib);
+  public static Result parse(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    return run(source, sourceFile, monitor, false, langLibFactory);
   }
 
-  private static Result run(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles, LanguageLib langLib) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private static Result run(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     if (generateFiles)
       synchronized (currentlyProcessing) {
         // TODO we need better circular dependency handling
@@ -235,7 +236,7 @@ public class Driver{
     
     try {
       String source = FileCommands.readFileAsString(sourceFile);
-      res = run(source, sourceFile, monitor, generateFiles, langLib);
+      res = run(source, sourceFile, monitor, generateFiles, langLibFactory);
     } finally {
       if (generateFiles)
         synchronized (currentlyProcessing) {
@@ -247,8 +248,8 @@ public class Driver{
     return res;
   }
   
-  private static Result run(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles, LanguageLib langLib) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    Driver driver = new Driver(sourceFile.getSourceLocation().getEnvironment(), langLib);
+  private static Result run(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    Driver driver = new Driver(sourceFile.getSourceLocation().getEnvironment(), langLibFactory);
     Entry<String, Driver> pending = null;
     
     synchronized (Driver.class) {
@@ -270,7 +271,7 @@ public class Driver{
     
     if (pending != null) {
       waitForPending(sourceFile);
-      return run(source, sourceFile, monitor, generateFiles, langLib);
+      return run(source, sourceFile, monitor, generateFiles, langLibFactory);
     }
     
     try {
@@ -409,9 +410,12 @@ public class Driver{
     try {
       try {
         //driverResult.compileJava(javaOutFile, javaSource, environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), generatedJavaClasses);
-        //XXX: maybe implement this in Driver_Java
-        
-        langLib.getCompilerCommands().compile(langLib.getOutFile(), langLib.getSource(), environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), langLib.getGeneratedFiles(), driverResult);
+        //XXX: change this after reintegrating compile into language library
+        langLib.getCompilerCommands().compile(langLib.getOutFile(), langLib.getSource(),
+            environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), langLib.getGeneratedFiles(),
+            driverResult.getAvailableGeneratedFiles().get(driverResult.getSourceFile()),
+            driverResult.getDeferredSourceFiles().get(driverResult.getSourceFile()),
+            driverResult.getGeneratedFileHashes(), driverResult.isGenerateFiles());
       } catch (ClassNotFoundException e) {
         setErrorMessage(lastSugaredToplevelDecl, "Could not resolve imported class " + e.getMessage());
         // throw new RuntimeException(e);
@@ -649,7 +653,7 @@ public class Driver{
       processPackageDec(toplevelDecl);
     else {
       langLib.checkNamespace(toplevelDecl, sourceFile, driverResult);   // XXX: check -> setup ?
-      langLib.checkSourceOutFile(environment, driverResult);
+      langLib.checkSourceOutFile(environment, driverResult.getSourceFile());
       if (depOutFile == null)
         depOutFile = environment.createBinPath(langLib.getRelNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       try {
@@ -761,8 +765,8 @@ public class Driver{
           getApplicationSubterm(toplevelDecl, "PackageDec", 1), interp);
 
       log.log("The Java package name is '" + packageName + "'.");
-
-      langLib.processNamespaceDec(toplevelDecl, environment, interp, driverResult, packageName, sourceFile);
+      // XXX: We have two sourcefiles here. Are they identical?
+      langLib.processNamespaceDec(toplevelDecl, environment, interp, driverResult, packageName, sourceFile, driverResult.getSourceFile());    
       if (depOutFile == null)
         depOutFile = environment.createBinPath(langLib.getRelNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       
@@ -880,7 +884,7 @@ public class Driver{
                 delegateCompilation = importSourceFile;
               }
               else {
-                res = compile(importSourceFile, monitor, langLib);
+                res = compile(importSourceFile, monitor, langLib.getFactoryForLanguage());    // XXX: Think of a better way to handle this
                 initializeCaches(environment, true);
                 if (res.hasFailed())
                   setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
@@ -1255,7 +1259,7 @@ public class Driver{
    */
   public static void main(String[] args) {
     // XXX: change language Library here:
-    LanguageLib langLib = new JavaLib();
+    LanguageLib langLib = UsedLanguageLibrary.langLib;
     
     // log.log("This is the extensible java compiler.");
     Environment environment = new Environment();
@@ -1279,7 +1283,7 @@ public class Driver{
       
       for (final RelativeSourceLocationPath sourceFile : allInputFiles) {
         monitor.beginTask("compile " + sourceFile, IProgressMonitor.UNKNOWN);
-        Result res = compile(sourceFile, monitor, langLib);
+        Result res = compile(sourceFile, monitor, langLib.getFactoryForLanguage());
         if (!DriverCLI.processResultCLI(res, sourceFile, new File(".").getAbsolutePath()))
           throw new RuntimeException("compilation of " + sourceFile + " failed");
       }

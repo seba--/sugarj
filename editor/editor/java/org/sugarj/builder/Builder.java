@@ -186,7 +186,7 @@ public class Builder extends IncrementalProjectBuilder {
             RelativePath depFile = new RelativePath(environment.getBin(), FileCommands.dropExtension(input.sourceFile.getRelativePath()) + ".dep");
             Result res = Result.readDependencyFile(depFile, environment);
             if (res == null || !res.isUpToDate(input.sourceFile, environment))
-              res = Driver.compile(input.sourceFile, monitor, langLib);
+              res = Driver.compile(input.sourceFile, monitor, langLib.getFactoryForLanguage());
             
             IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
             for (IWorkbenchWindow workbenchWindow : workbenchWindows)
