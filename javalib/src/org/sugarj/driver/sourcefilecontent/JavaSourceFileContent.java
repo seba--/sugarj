@@ -24,7 +24,7 @@ public class JavaSourceFileContent implements ISourceFileContent {
   public JavaSourceFileContent() {
   }
   
-  public void setPackageDecl(String packageDecl) {
+  public void setNamespaceDecl(String packageDecl) {
     this.packageDecl = packageDecl;
   }
   

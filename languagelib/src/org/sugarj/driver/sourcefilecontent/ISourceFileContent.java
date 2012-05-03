@@ -18,11 +18,11 @@ public interface ISourceFileContent extends Serializable {
   // TODO: Better method names for non-java languages
   // XXX: This interface was directly created from JavaSourceFileContent.java
   
-  public void setPackageDecl(String packageDecl);
+/*  public void setNamespaceDecl(String namespaceDecl);
   public void addImport(String imp);
   public void addCheckedImport(String imp);
   public void setOptionalImport(boolean isOptional);
-  public void addBodyDecl(String bodyDecl);
+  public void addBodyDecl(String bodyDecl); */
   public String getCode(Set<RelativePath> generatedClasses) throws ClassNotFoundException;
   public int hashCode();
   public boolean equals(Object o);

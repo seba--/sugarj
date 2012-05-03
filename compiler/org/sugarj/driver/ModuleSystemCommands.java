@@ -36,6 +36,9 @@ public class ModuleSystemCommands {
      * @throws IOException
      */
     public static boolean importClass(String modulePath, ISourceFileContent source, Environment environment, LanguageLib langLib) throws IOException {
+      if (langLib.getBinFileExtension() == null)    // if language does not have bin files (e.g. for interpreted languages), return true
+         return true;
+      
       RelativePath clazz = searchFile(modulePath, langLib.getBinFileExtension(), environment);
       if (clazz == null)
         return false;

@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.FileLocator;
@@ -28,10 +29,10 @@ import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.FileCommands;
+import org.sugarj.common.JavaCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
-import org.sugarj.driver.JavaCommands;
 import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
 
 public class JavaLib extends LanguageLib implements Serializable {
@@ -181,17 +182,16 @@ public class JavaLib extends LanguageLib implements Serializable {
 	      System.err.println(file.getPath() + " does not exist.");
 	  }
 
-	@Override
+/*	@Override
 	public ICompilerCommands getCompilerCommands() {
 		// singleton pattern. 
 		// XXX: Also integrate compiler commands into language library or keep it separate to support pluggable compilers more easily?
-		if (javaCommands == null) {
+		if (javaCommands == null)
 			javaCommands = new JavaCommands();
-		}
 
 		return javaCommands;
 	}
-
+*/
 	@Override
 	public String getSourceFileExtension() {
 		return ".java";
@@ -361,7 +361,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 	      javaOutFile = environment.createBinPath(getRelNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + ".java");			// XXX: Can we just reuse sourceFile here?
 	
 	    // moved here before depOutFile==null check
-	    javaSource.setPackageDecl(prettyPrint(toplevelDecl, interp));
+	    javaSource.setNamespaceDecl(prettyPrint(toplevelDecl, interp));
 	  }
 
 	private void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IErrorLogger errorLog) {
@@ -385,7 +385,14 @@ public class JavaLib extends LanguageLib implements Serializable {
 		return new JavaLibFactory();
 	}
 	
-
+	// from Result
+	public void compile(List<Path> javaOutFiles, Path bin, List<Path> path, Set<? extends Path> generatedJavaClasses, Map<Path, Integer> generatedFileHashes, boolean generateFiles) throws IOException {
+		if (generateFiles) {
+			JavaCommands.javac(javaOutFiles, bin, path);
+			for (Path cl : generatedJavaClasses)
+				generatedFileHashes.put(cl, FileCommands.fileHash(cl));
+		}
+	}
 	
 	
 

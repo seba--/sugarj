@@ -411,7 +411,7 @@ public class Driver{
       try {
         //driverResult.compileJava(javaOutFile, javaSource, environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), generatedJavaClasses);
         //XXX: change this after reintegrating compile into language library
-        langLib.getCompilerCommands().compile(langLib.getOutFile(), langLib.getSource(),
+        langLib.compile(langLib.getOutFile(), langLib.getSource(),
             environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), langLib.getGeneratedFiles(),
             driverResult.getAvailableGeneratedFiles().get(driverResult.getSourceFile()),
             driverResult.getDeferredSourceFiles().get(driverResult.getSourceFile()),

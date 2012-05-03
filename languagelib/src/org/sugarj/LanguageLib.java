@@ -3,13 +3,18 @@ package org.sugarj;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.HybridInterpreter;
 import org.sugarj.common.Environment;
+import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
@@ -41,7 +46,7 @@ public abstract class LanguageLib implements Serializable {
 	protected abstract File ensureFile(String resource);
 	
 	
-	public abstract ICompilerCommands getCompilerCommands();
+	//public abstract ICompilerCommands getCompilerCommands();
 	
 	
 	
@@ -94,13 +99,59 @@ public abstract class LanguageLib implements Serializable {
 	public abstract void checkNamespace(IStrategoTerm decl, RelativeSourceLocationPath sourceFile, IErrorLogger errorLog);
 	public abstract void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IErrorLogger errorLog, String packageName, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException;
 
-	
-    // from Result
-    // XXX: generatedJavaClasses clearly is the wrong name. Think of a better name.
-	// moved to ICompilerCommands, move back to language library
-    // void compile(Path javaOutFile, ISourceFileContent javaSource, Path bin, List<Path> path, Set<RelativePath> generatedJavaClasses, IResult result) throws IOException, ClassNotFoundException;
-
-
 	public abstract LanguageLibFactory getFactoryForLanguage();
 	
+	
+	// from Result
+	public void compile(Path outFile, ISourceFileContent source, Path bin, List<Path> path,
+			Set<RelativePath> generatedBinFiles,
+			Map<Path, Set<RelativePath>> availableGeneratedFilesForSourceFile,
+			Map<Path, Map<Path, ISourceFileContent>> deferredSourceFilesForSourceFile,
+			Map<Path, Integer> generatedFileHashes,
+			boolean generateFiles
+			) throws IOException, ClassNotFoundException {
+
+		Map<Path, Set<RelativePath>> generatedFiles = availableGeneratedFilesForSourceFile; //result.getAvailableGeneratedFiles().get(result.getSourceFile());
+		Set<RelativePath> generatedClasses = new HashSet<RelativePath>(generatedBinFiles);
+
+		if (generatedFiles != null) {
+			for (Set<RelativePath> files: generatedFiles.values())
+				for (RelativePath file : files)
+					if ("class".equals(FileCommands.getExtension(file)))
+						generatedClasses.add(file);
+		}
+
+		Map<Path, Map<Path, ISourceFileContent>> sourceFiles = deferredSourceFilesForSourceFile; //result.getDeferredSourceFiles().get(result.getSourceFile());
+		List<Path> javaOutFiles = new ArrayList<Path>();
+		javaOutFiles.add(outFile);
+
+		if (sourceFiles != null)
+			for (Entry<Path, Map<Path, ISourceFileContent>> sources : sourceFiles.entrySet())
+				for (Entry<Path, ISourceFileContent> currentSource : sources.getValue().entrySet())
+					if (currentSource.getValue() instanceof ISourceFileContent) {
+						ISourceFileContent otherSource = (ISourceFileContent) currentSource.getValue();
+						try {
+							//result.writeToFile(source.getKey(), otherJavaSource.getCode(generatedClasses));
+							writeToFile(generateFiles, generatedFileHashes, currentSource.getKey(), otherSource.getCode(generatedClasses));
+
+
+						} catch (ClassNotFoundException e) {
+							throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + currentSource.getKey());
+						}
+					}
+
+		writeToFile(generateFiles, generatedFileHashes, outFile, source.getCode(generatedClasses));
+		
+		this.compile(javaOutFiles, bin, path, generatedClasses, generatedFileHashes, generateFiles);
+	}
+
+	private void writeToFile(boolean generateFiles, Map<Path, Integer> generatedFileHashes, Path file, String content) throws IOException { 
+		if (generateFiles) {
+			FileCommands.writeToFile(file, content);
+			generatedFileHashes.put(file, FileCommands.fileHash(file));
+		}
+	}
+
+	public abstract void compile(List<Path> outFiles, Path bin, List<Path> path, Set<? extends Path> generatedFiles, Map<Path, Integer> generatedFileHashes, boolean generateFiles) throws IOException;
+
 }

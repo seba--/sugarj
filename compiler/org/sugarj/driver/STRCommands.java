@@ -36,6 +36,7 @@ import org.sugarj.common.ATermCommands;
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
+import org.sugarj.common.JavaCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.driver.caching.ModuleKey;
@@ -169,11 +170,11 @@ public class STRCommands {
       strj(str, java, main, strjContext, paths, langLib);
       
       
-      if (!langLib.getCompilerCommands().javac(java, dir, paths))
+      if (!JavaCommands.javac(java, dir, paths))
         throw new RuntimeException("java compilation failed");
         
       Path jarfile = FileCommands.newTempFile("jar");
-      langLib.getCompilerCommands().jar(dir, jarfile);
+      JavaCommands.jar(dir, jarfile);
 
       FileCommands.deleteTempFiles(dir);
       FileCommands.deleteTempFiles(java);

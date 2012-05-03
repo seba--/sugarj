@@ -17,17 +17,22 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.sugarj.common.Environment;
+import org.sugarj.common.FileCommands;
+import org.sugarj.common.IErrorLogger;
+import org.sugarj.common.JavaCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
-import org.sugarj.driver.PrologCommands;
 import org.sugarj.driver.sourcefilecontent.ISourceFileContent;
+import org.sugarj.driver.sourcefilecontent.PrologSourceFileContent;
 
 public class PrologLib extends LanguageLib implements Serializable {
 
@@ -39,17 +44,13 @@ public class PrologLib extends LanguageLib implements Serializable {
 	private transient File libTmpDir;
 	
 	
-	// XXX: Name!
-	private Set<RelativePath> generatedJavaClasses = new HashSet<RelativePath>();
+	private Set<RelativePath> generatedFiles = new HashSet<RelativePath>();
 
 	private Path prologOutFile;
 
 	private ISourceFileContent prologSource;		// XXX: change to a prolog specific sourcefile
 
-	private String relPackageName;
-	
-	private static PrologCommands prologCommands;
-
+	private String relNamespaceName;
 	
 	
 	@Override
@@ -67,7 +68,6 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	@Override
 	public String getInitGrammarModule() {
-		// XXX: ?
 		return "org/sugarj/prolog/init/initGrammar";
 	}
 
@@ -194,12 +194,12 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	  @Override
 	  public boolean isSugarDec(IStrategoTerm decl) {
-	    return isApplication(decl, "SugarDec");           // XXX: Add to prolog
+	    return isApplication(decl, "SugarDec");           
 	  }
 	  
 	  @Override
 	  public boolean isEditorService(IStrategoTerm decl) {
-	    return isApplication(decl, "EditorServicesDec");    // XXX: Add to prolog
+	    return isApplication(decl, "EditorServicesDec");   
 	  }
 
 	  @Override
@@ -209,14 +209,8 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	  @Override
 	  public boolean isPlain(IStrategoTerm decl) {
-	    return isApplication(decl, "PlainDec");         // XXX: Add to prolog
+	    return isApplication(decl, "PlainDec");        
 	  }
-
-	@Override
-	public ICompilerCommands getCompilerCommands() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public String getSourceFileExtension() {
@@ -225,7 +219,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	@Override
 	public String getBinFileExtension() {
-		// TODO Auto-generated method stub
+		// Return null, as swi prolog is an interpreted language.
 		return null;
 	}
 
@@ -236,34 +230,51 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	@Override
 	public void init() {
-		// TODO Auto-generated method stub
-		
+		prologOutFile = null;
+		prologSource = null;
 	}
 
 	@Override
 	public ISourceFileContent getSource() {
-		// TODO Auto-generated method stub
-		return null;
+		return prologSource;
 	}
 
 	@Override
 	public Path getOutFile() {
-		// TODO Auto-generated method stub
-		return null;
+		return prologOutFile;
 	}
 
 	@Override
 	public Set<RelativePath> getGeneratedFiles() {
-		// TODO Auto-generated method stub
-		return null;
+		return generatedFiles;
 	}
 
 	@Override
 	public void processLanguageSpecific(IStrategoTerm toplevelDecl,
 			Environment environment, HybridInterpreter interp)
 			throws IOException {
-		// TODO Auto-generated method stub
+		// :- module("foo", [bar/1, baz/2]).
 		
+		IStrategoTerm dec = isApplication(toplevelDecl, "ModuleDec") ?
+				getApplicationSubterm(toplevelDecl, "ModuleDec", 0) : toplevelDecl;
+		
+		String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));	// XXX: asJavaString?
+		RelativePath moduleFile = environment.createBinPath(getRelNamespaceSep() + decName + ".pro");
+		generatedFiles.add(moduleFile);
+		prologSource.addBodyDecl(prettyPrint(dec, interp));
+/*
+ * 	    IStrategoTerm dec =  isApplication(toplevelDecl, "JavaTypeDec") ?
+ *  getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0) : toplevelDecl;   // XXX: Extract JavaTypeDec stuff
+	    
+	    String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
+	    
+	    RelativePath clazz = environment.createBinPath(getRelNamespaceSep() + decName + ".class");
+	    
+	    generatedJavaClasses.add(clazz);
+	    javaSource.addBodyDecl(prettyPrint(dec, interp));
+
+ */
+		// XXX: IMPLEMENT THIS
 	}
 
 	@Override
@@ -276,37 +287,75 @@ public class PrologLib extends LanguageLib implements Serializable {
 	@Override
 	public String extractImportedModuleName(IStrategoTerm toplevelDecl, HybridInterpreter interp)
 			throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+/*
+ * 	    String name = null;
+	    log.beginTask("Extracting", "Extract name of imported module");
+	    try {
+	      if (isApplication(toplevelDecl, "TypeImportDec"))
+	        name = prettyPrint(toplevelDecl.getSubterm(0), interp);
+	      
+	      if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
+	        name = prettyPrint(toplevelDecl.getSubterm(0), interp) + ".*";
+	    } finally {
+	      log.endTask(name);
+	    }
+	    return name;
+
+ */
+		// java implementation above
+		// only one kind of import in prolog
+		
+		String name = null;
+		log.beginTask("Extracting", "Extract name of imported module");
+		try {
+			if (isApplication(toplevelDecl, "ModuleImport"))
+				name = prettyPrint(toplevelDecl.getSubterm(0), interp);
+		} finally {
+			log.endTask(name);
+		}
+		
+		return name;
 	}
 
 	@Override
 	public void setupSourceFile(RelativePath sourceFile, Environment environment) {
-		// TODO Auto-generated method stub
+
+/*
+ * 	    javaOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".java");
+	    javaSource = new JavaSourceFileContent();
+	    javaSource.setOptionalImport(false);
+		
+ */
+		prologOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".pro");
+		prologSource = new PrologSourceFileContent();
+		// XXX: set optional import?
 		
 	}
 
-	@Override
-	public void checkSourceOutFile(Environment environment, IResult driverResult) {
-		// TODO Auto-generated method stub
-		
-	}
+
 
 	@Override
 	public String getNamespace() {
-		// TODO Auto-generated method stub
-		return null;
+		return relNamespaceName;
 	}
 
 	@Override
 	public String getRelNamespaceSep() {
+		// XXX: Is there a namespace separator in prolog? Or even any notion of compound namespaces?
+		// XXX: From swi prolog doc: Modules are organised in a single and flat namespace and therefore module names must be chosen with some care to avoid conflicts.
+		return "";
+	}
+
+	@Override
+	public void checkSourceOutFile(Environment environment,
+			RelativeSourceLocationPath sourceFile) {
 		// TODO Auto-generated method stub
-		return null;
+		
 	}
 
 	@Override
 	public void checkNamespace(IStrategoTerm decl,
-			RelativeSourceLocationPath sourceFile, IResult driverResult) {
+			RelativeSourceLocationPath sourceFile, IErrorLogger errorLog) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -314,11 +363,30 @@ public class PrologLib extends LanguageLib implements Serializable {
 	@Override
 	public void processNamespaceDec(IStrategoTerm toplevelDecl,
 			Environment environment, HybridInterpreter interp,
-			IResult driverResult, String packageName,
-			RelativeSourceLocationPath sourceFile) throws IOException {
+			IErrorLogger errorLog, String packageName,
+			RelativeSourceLocationPath sourceFile,
+			RelativeSourceLocationPath sourceFileFromResult) throws IOException {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public LanguageLibFactory getFactoryForLanguage() {
+		return new PrologLibFactory();
+	}
+
+	@Override
+	public void compile(List<Path> outFiles, Path bin, List<Path> path,
+			Set<? extends Path> generatedFiles,
+			Map<Path, Integer> generatedFileHashes, boolean generateFiles)
+			throws IOException {
+		// TODO Auto-generated method stub
+
+	}
+
+
+
+
 
 	
 }
