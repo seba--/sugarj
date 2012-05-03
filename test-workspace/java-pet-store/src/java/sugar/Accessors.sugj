@@ -1,0 +1,66 @@
+package sugar;
+
+import org.sugarj.languages.Java;
+
+public sugar Accessors {
+	context-free syntax
+	    (JavaAnno | JavaFieldMod)* JavaType {JavaVarDec ","}+ AccDecs ";" -> AccFieldDec {cons("AccFieldDec")}
+		"{" AccClassBodyDec* "}" -> AccClassBody {cons("AccClassBody")}
+		AccFieldDec -> AccClassBodyDec
+		JavaClassBodyDec -> AccClassBodyDec
+		"{" {AccDec ";"}+ "}" -> AccDecs
+		JavaClassDecHead AccClassBody -> AccClassDec {cons("AccClassDec")}
+	
+		"con" -> AccDec {cons("AccCon")}
+		"get" -> AccDec {cons("AccGet")}
+		"get" Pre -> AccDec {cons("AccGetPre")}
+		"set" -> AccDec {cons("AccSet")}
+		"set" Pre -> AccDec {cons("AccSetPre")}
+	
+		"(" JavaMethodName ")" -> Pre {cons("NamePrefix")}
+
+	signature
+	constructors
+		ClassOrInterfaceType : Name -> ClassOrInterfaceType
+
+	desugarings
+		acc : AccClassDec -> JavaClassDec
+
+	rules
+		acc : AccClassDec(ClassDecHead(mods, Id(classname), a, b, c), AccClassBody(l))
+			-> ClassDec(ClassDecHead(mods, Id(classname), a, b, c),
+			            ClassBody(<concat> [<genFieldDecs> l, <genConstructor(|classname)> l, <genGetters> l, <genSetters> l, <removeAccDecs> l]))
+
+	rules
+		defaultPrefixBool : Boolean() -> "is"
+		defaultPrefixBool : ClassOrInterfaceType(TypeName(Id("Boolean"))) -> "is"
+		defaultPrefixOther : _ -> "get"
+
+	strategies
+		defaultPrefix = defaultPrefixBool <+ defaultPrefixOther
+		upcaseFirstChar = explode-string; one(to-upper); implode-string
+
+	strategies
+		// Takes the AccClassBody content (a list of AccFieldDecs, ConstrDecs, FieldDecs and MethodDecs) and returns only AccFieldDecs
+		filterAccDecs = filter(?AccFieldDec(_, _, _, _))
+		// Opposite of filterAccDecs
+		removeAccDecs = remove-all(?AccFieldDec(_, _, _, _))
+		fieldTriples = ?AccFieldDec(mods, type, vars, _); !vars; map(\VarDec(Id(name)) -> (mods, type, name)\)
+		genFieldDecs = filterAccDecs; mapconcat(fieldTriples); map(field)
+
+        getterTriples = ?AccFieldDec(_, type, vars, accs); if <elem> (AccGet(), accs) then !vars; map(\VarDec(Id(name)) -> (type, name, <defaultPrefix> type)\) else if !accs; filter(\AccGetPre(pre) -> pre\); ?[pre2] then !vars; map(\VarDec(Id(name)) -> (type, name, pre2)\) else ![] end end
+        genGetters = filterAccDecs ; mapconcat(getterTriples); map(getter) <+ ![]
+
+		setterTriples = ?AccFieldDec(_, type, vars, accs); if <elem> (AccSet(), accs) then !vars; map(\VarDec(Id(name)) -> (type, name, "set")\) else if !accs; filter(\AccSetPre(pre) -> pre\); ?[pre2] then !vars; map(\VarDec(Id(name)) -> (type, name, pre2)\) else ![] end end
+        genSetters = filterAccDecs ; mapconcat(setterTriples); map(setter) <+ ![]
+
+	rules
+		field  : (mods, type, name)   -> FieldDec(mods, type, [VarDec(Id(name))])
+		getter : (type, name, prefix) -> MethodDec(MethodDecHead([Public()], None(), type, Id(<conc-strings> (prefix, <upcaseFirstChar> name)), [], None()), Block([Return(Some(ExprName(Id(name))))]))
+		setter : (type, name, prefix) -> MethodDec(MethodDecHead([Public()], None(), Void(), Id(<conc-strings> (prefix, <upcaseFirstChar> name)), [Param([], type, Id(name))], None()), Block([ExprStm(Assign(Field(This(), Id(name)), ExprName(Id(name))))]))
+
+	strategies
+		constructorPairs = ?AccFieldDec(_, type, vars, accs); if <elem> (AccCon(), accs) then !vars; map(\VarDec(Id(name)) -> (type, name) \) else ![] end
+		genConstructor(|classname) = filterAccDecs; mapconcat(constructorPairs); if ?[] then ![] else ?l; ![ConstrDec(ConstrDecHead([Public()], None(), Id(classname), <map(\(type, name) -> Param([], type, Id(name))\)> l, None()), ConstrBody(Some(SuperConstrInv(None(), [])), <map(\(type, name) -> ExprStm(Assign(Field(This(), Id(name)), ExprName(Id(name))))\)> l))] end
+
+}

@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>database</title>
+</head>
+<body>
+<h2>Database</h2>
+<br>
+This version of petstore uses the Derby databased shipped with the Java EE 5 application server.&nbsp;<br>
+<h3>Known Issues</h3>
+The first time you run ant setup, and it populates the data you get
+some warnings saying it cant remove some rows from the tables. That is
+expetced behavior as the data does not yet exist. Spo you can ignore
+the warning notices.<br>
+<h3>Altering the data</h3>
+The petstore database tables are pre-populated with data from ficticous
+sellers so that the app will demo out of the box. This pre-population
+of data is done by running "ant setup" as part of the instructions to
+set up the petstore. The setup will call some SQL scripts which create
+the tables and insert data into the DB. If you want to alter the
+pre-populatd datayou can alter the setup scripts. <br>
+<br>
+But, one thing to be careful about is that we use auto generated IDs
+feature for some primary keys. And we do this for existing data, so the
+auto generated ids start at the next id in the sequence of existing
+data primary keys. <br>
+You can set this by <br>
+<h3>Primary Keys</h3>
+We use auto id generation for some of &nbsp;the data in the petstore
+DB. This is a portable feature of the Java Persistence APIs. But since
+we use <br>
+<br>
+<h3>Indexing for search</h3>
+Should we explain how they may need to re-index? Refer to separate doc for tinkering with Lucene?
+<h3>Using another Database</h3>
+Right now we only use and test on the Derby database shipped with the
+SDK. If you want to use another database, here are some things that
+could help you use Petstore with another DB.<br>
+<ul>
+  <li>The setup comand in our ant file sets up the database tables and the&nbsp;jdbc resources etc. The setup.xml file can be found at&nbsp; petstore/setup/ directory.</li>
+  <li>The database is called PetstoreDB.</li>
+  <li>The table names and schema can be found in the SQL scripts.</li>
+  <li>The SQL scripts used to populate the database may need to be
+altered for the particular DB you want to use. The scripts are located
+in&nbsp;</li>
+  <li>You will need to handle the auto id generation, as mentioned in the section above for altering the data.</li>
+</ul>
+</body>
+</html>

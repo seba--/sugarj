@@ -1,0 +1,161 @@
+<?xml version="1.0"?>
+<!-- Copyright 2006 Sun Microsystems, Inc.  All rights reserved.  You may not modify, use, reproduce, or distribute this software except in compliance with the terms of the License at: 
+ http://developer.sun.com/berkeley_license.html
+ $Id: dist.xml,v 1.21 2007-04-24 17:31:12 basler Exp $ -->
+
+<project name="petstore-dist" default="dist" basedir="..">
+    
+    <!-- The directory from where to get the libraries that the installer needs -->
+    <property name="poormans-installer.home" value="./lib/poormans-installer"/>
+
+    <target name="sdk-common">
+        <property file="setup/sdk-dist.properties"/>
+        <property name="tmpdist" value="dist/${release.dirname}"/>
+        <antcall target="sdk-dist"/>
+        <delete dir="${tmpdist}/ant-task"/>
+        <delete dir="${tmpdist}/lib/poormans-installer"/>
+        <delete dir="${tmpdist}/docs"/>
+        <delete file="${tmpdist}/index.html"/>
+        <!-- now these jars are built/copied from the bpcatalog that also resides in the sdk bundle -->
+        <delete file="${tmpdist}/lib/bp-ui-5.jar"/>
+        <delete file="${tmpdist}/lib/commons-logging-1.1.jar"/>
+        <delete file="${tmpdist}/lib/commons-fileupload-1.1.1.jar"/>
+        <delete file="${tmpdist}/lib/commons-io-1.2.jar"/>
+        <delete file="${tmpdist}/lib/rome-0.8.jar"/>
+        <delete file="${tmpdist}/lib/jdom.jar"/>
+        <delete file="${tmpdist}/lib/rome-fetcher-0.7.jar"/>
+        <delete file="${tmpdist}/lib/shale-remoting.jar"/>
+        <antcall target="create-zip"/>        
+    </target>
+    <target name="sdk" depends="sdk-common"/>
+    <target name="sdk-download" depends="sdk-common"/>
+    
+    <target name="sdk-dist">
+        <property file="setup/sdk-dist.properties"/>
+        <property name="tmpdist" value="dist/${release.dirname}"/>
+        <antcall target="clean"/>
+        <antcall target="assemble-dist"/>
+        <delete file="dist/petstore/bp-project.xml"/>
+        <copy tofile="dist/petstore/bp-project.xml" file="setup/sdk-bp-project.xml"/>
+        <delete dir="dist/petstore/bp-project"/>
+    </target>    
+    
+    <target name="dist">
+        <property file="setup/dist.properties"/>
+        <property name="tmpdist" value="dist/${release.dirname}"/>
+        <antcall target="clean"/>
+        <antcall target="assemble-dist"/>
+        <fixcrlf srcdir="${tmpdist}" tab="remove" tablength="2" eol="unix" includes="**/*.properties,**/*.jsp,**/*.html,**/*.sh,**/*.java,**/*.xml" excludes="**/ja/**" />
+        <delete dir="${tmpdist}/ant-task"/>
+        <delete dir="${tmpdist}/lib/poormans-installer"/>
+        <delete dir="${tmpdist}/docs"/>
+        <delete>
+            <fileset dir="${tmpdist}/setup" includes="**/sdk-*"/>
+        </delete>
+        <delete file="${tmpdist}/setup/manifest.mf"/>
+        <antcall target="create-zip"/>
+        <antcall target="create-installer"/>
+    </target>
+    
+    <target name="clean">
+        <delete dir="dist"/>
+        <ant target="clean" inheritAll="false" inheritRefs="false"/>
+    </target>
+    
+    <target name="assemble-dist">
+        <echo message="Creating ${release.dirname} distribution..."/>
+        <property name="tmpdist" value="dist/${release.dirname}"/>
+        <mkdir dir="${tmpdist}"/>
+        <copy file="lib/3RD-PARTY-LICENSE.txt" todir="${tmpdist}"/>
+        
+        <copy todir="${tmpdist}">
+            <fileset dir=".">
+                <exclude name="dist/**"/>
+                <exclude name="**/build/**"/>
+                <exclude name="**/dist/**"/>
+                <exclude name="**/test/**"/>
+                <exclude name="**/nbproject/private/**"/>
+                <exclude name="**/nbproject/build-impl.xml"/>
+                <exclude name="**/nbproject/private.properties"/>
+                <exclude name="**/nbproject/genfiles.properties"/>
+                <exclude name="developers/**"/>
+                <exclude name="setup/dist*"/>
+                <exclude name="setup/installer.xml"/>
+                <exclude name="setup/sdk*"/>
+            </fileset>
+        </copy>
+        <copy todir="${tmpdist}">
+            <fileset dir="../..">
+                <include name="bp-project/**"/>
+            </fileset>
+        </copy>
+        <delete file="${tmpdist}/bp-project.xml"/>
+        <copy file="setup/dist-bp-project.xml" tofile="${tmpdist}/bp-project.xml"/>
+        <copy tofile="${tmpdist}/bp-project/build.properties" file="${tmpdist}/bp-project/build.properties.sample"/>
+        <delete file="${tmpdist}/bp-project/build.properties.sample"/>
+    </target>
+    
+    <target name="fix-permissions">
+        <!-- Change permissions for executables -->
+        <chmod perm="ugo+rx">
+            <fileset dir="${tmpdist}">
+                <include name="**/*.sh"/>
+                <include name="**/*.exe"/>
+            </fileset>
+        </chmod>
+    </target>
+    
+    <target name="create-zip" depends="fix-permissions">
+        <zip zipfile="${release.zipfile}" basedir="dist"
+             includes="${release.dirname}/**" update="true" />
+    </target>    
+    
+    <taskdef name="installerBuilder" classname="org.jvnet.poormans_installer.builder.BuilderTask">
+        <classpath>
+            <fileset dir="${poormans-installer.home}" includes="*.jar"/>
+        </classpath>
+    </taskdef>
+    
+    <target name="create-installer">
+        <mkdir dir="dist/classes"/>
+        <echo message="Creating an installer..."/>
+        <installerBuilder
+            licenseFile="../../../www/LICENSE.txt"
+            zipFile="${release.zipfile}"
+            classFile="dist/classes/petstore.class"/>
+        <jar jarfile="dist/${release.fullname}-installer.jar" basedir="dist/classes" manifest="setup/manifest.mf"/>
+        <delete dir="dist/classes"/>
+    </target>
+    
+    <target name="create-phobos-dist">
+        <antcall target="clean"/>
+        
+        <ant antfile="build.xml" target="default"/>
+        <delete file="dist/petstore.war"/>
+        <mkdir dir="dist/classes"/>
+        <copy file="build/web/WEB-INF/classes/com/sun/javaee/blueprints/petstore/model/Address.class" todir="dist/jarfile/classes/com/sun/javaee/blueprints/petstore/model"/>
+        <copy file="build/web/WEB-INF/classes/com/sun/javaee/blueprints/petstore/model/Category.class" todir="dist/jarfile/classes/com/sun/javaee/blueprints/petstore/model"/>
+        <copy file="build/web/WEB-INF/classes/com/sun/javaee/blueprints/petstore/model/Item.class" todir="dist/jarfile/classes/com/sun/javaee/blueprints/petstore/model"/>
+        <copy file="build/web/WEB-INF/classes/com/sun/javaee/blueprints/petstore/model/Product.class" todir="dist/jarfile/classes/com/sun/javaee/blueprints/petstore/model"/>
+        <copy file="build/web/WEB-INF/classes/com/sun/javaee/blueprints/petstore/model/SellerContactInfo.class" todir="dist/jarfile/classes/com/sun/javaee/blueprints/petstore/model"/>
+        <copy file="build/web/WEB-INF/classes/com/sun/javaee/blueprints/petstore/model/Tag.class" todir="dist/jarfile/classes/com/sun/javaee/blueprints/petstore/model"/>
+        <copy file="build/web/WEB-INF/classes/com/sun/javaee/blueprints/petstore/model/ZipLocation.class" todir="dist/jarfile/classes/com/sun/javaee/blueprints/petstore/model"/>
+
+        <mkdir dir="dist/classes/meta-inf"/>
+        <copy file="src/conf/persistence.xml" todir="dist/jarfile//meta-inf"/>
+        
+        <mkdir dir="dist/jardir/PetstoreJPA"/>
+        <jar jarfile="dist/jardir/PetstoreJPA/PetstoreJPA.jar" basedir="dist/jarfile/"/>
+
+        <copy file="setup/sql/javadb/petstore.sql" todir="dist/jardir/PetstoreJPA"/>
+        
+        <zip zipfile="dist/PetstoreJPA.zip" basedir="dist/jardir" update="true" />
+        
+        <echo message="Creating an installer for phobos tutorial ..."/>
+        <installerBuilder
+            licenseFile="../../../www/LICENSE.txt"
+            zipFile="dist/PetstoreJPA.zip"
+            classFile="dist/classx/petstore.class"/>
+        <jar jarfile="dist/PetstoreJPA-phobos.jar" basedir="dist/classx" manifest="setup/manifest.mf"/>
+    </target>
+</project>
