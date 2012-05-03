@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2006 Sun Microsystems, Inc.  All rights reserved.  You may not modify, use, reproduce, or distribute this software except in compliance with the terms of the License at: 
+ http://developer.sun.com/berkeley_license.html
+ $Id: setup.xml,v 1.10 2006-05-03 22:03:20 inder Exp $ -->
+ 
+<project name="petstore-setup" default="setup" basedir="..">
+
+  <property file="./setup/javadb.properties" />
+  <import file="../bp-project.xml" />
+
+  <!-- Database configuration tasks -->
+  <target name="setup" depends="create-resource-local, create-db" />
+  <!-- target name="setup" depends="create-resource-local, start-db, create-db" / -->
+  <target name="unsetup" depends="delete-pool-local, delete-resource-local, delete-db" />
+  
+  <target name="create-db" depends="delete-db"
+  description="Create database tables and populate database." >
+    <sql driver="${db.driver}"
+         encoding="utf-8"
+         url="${db.url}"
+         userid="${db.user}"
+         password="${db.password}"
+         classpathref="db.classpath"
+         delimiter="${db.delimiter}"
+         autocommit="true"
+         onerror="abort" >
+      <transaction src="${db.create.src}"/>
+    </sql>    
+    <dirname property="petstore-setup.dir" file="${ant.file.petstore-setup}"/>
+    <sql driver="${db.driver}"
+         encoding="utf-8"
+         url="${db.url}"
+         userid="${db.user}"
+         password="${db.password}"
+         classpathref="db.classpath"
+         delimiter="${db.delimiter}"
+         autocommit="true"
+         onerror="abort" ><![CDATA[
+      CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ZIPLOCATION', '${petstore-setup.dir}/sql/javadb/cities.del', null, null, null, 0);
+      ]]>
+    </sql>
+    
+  </target>
+  
+  <target name="delete-db" description="Deletes the database tables." >
+    <echo>driver=${db.driver}</echo>
+    <echo>url=${db.url}</echo>
+    <echo>user=${db.user}</echo>
+    <echo>password=${db.password}</echo>
+    <sql driver="${db.driver}"
+         encoding="utf-8"
+         url="${db.url}"
+         userid="${db.user}"
+         password="${db.password}"
+         classpathref="db.classpath"
+         delimiter="${db.delimiter}"
+         autocommit="true"
+         onerror="continue" >       
+      <transaction src="${db.delete.src}"/>
+    </sql>
+  </target>
+  
+  <target name="create-pool-local" depends="tools">
+    <echo message="Registering jdbc-connection-pool PetstorePool."/>
+    <echo>ds=${db.datasource}</echo>
+    <antcall target="create-jdbc-connection-pool">
+      <param name="pool.name"     value="PetstorePool" />
+      <param name="db.serverName"   value="${javaee.server.name}" />
+      <param name="ds.class"      value="${db.datasource}" />
+    </antcall>
+ </target>
+
+ <target name="create-resource-local" depends="tools,create-pool-local">
+    <echo message="Registering jdbc resource jdbc/PetstoreDB."/>
+    <antcall target="create-jdbc-resource">
+      <param name="pool.name"            value="PetstorePool" />
+      <param name="jdbc.resource.name"   value="jdbc/PetstoreDB" />
+    </antcall>
+ </target>
+
+  <target name="delete-resource-local" depends="tools" >
+    <echo message="Deleting jdbc resource jdbc/PetstoreDB"/>
+    <antcall target="delete-jdbc-resource">
+      <param name="jdbc.resource.name" value="jdbc/PetstoreDB" />
+    </antcall> 
+ </target>
+
+ <target name="delete-pool-local" depends="tools, delete-resource-local">
+    <echo message="Deleting jdbc-connection-pool PetstorePool."/>
+    <antcall target="delete-jdbc-connection-pool">
+      <param name="pool.name" value="PetstorePool" />
+    </antcall>
+ </target>
+
+  <property environment="env" />
+</project>

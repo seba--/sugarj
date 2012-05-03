@@ -1,0 +1,65 @@
+/* Copyright 2006 Sun Microsystems, Inc. All rights reserved. You may not modify, use, reproduce, or distribute this software except in compliance with the terms of the License at: http://developer.sun.com/berkeley_license.html
+$Id: Tag.java,v 1.5 2007-01-03 23:11:26 inder Exp $ */
+
+package com.sun.javaee.blueprints.petstore.model;
+
+import java.util.Collection;
+import java.util.Vector;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.TableGenerator;
+
+import sugar.Accessors;
+import com.sun.javaee.blueprints.petstore.model.Address;
+
+
+@Entity
+public class Tag implements java.io.Serializable {
+
+    private int tagID=-1;
+    private Collection<Item> items= new Vector<Item>();
+    private String tag {get;set;con};
+    private int refCount {get;set};
+      
+    public Tag() {
+    }
+        
+    @TableGenerator(name="TAG_ID_GEN",
+            table="ID_GEN",
+            pkColumnName="GEN_KEY",
+            valueColumnName="GEN_VALUE",
+            pkColumnValue="TAG_ID",
+            allocationSize=1)
+    @GeneratedValue(strategy=GenerationType.TABLE,generator="TAG_ID_GEN")
+    @Id
+    public int getTagID() {
+        return tagID;
+    }
+    public void setTagID(int tagID) {
+        this.tagID=tagID;
+    }
+
+    public synchronized void incrementRefCount() {
+        refCount++;
+    }
+    
+    @ManyToMany
+    @JoinTable(name = "TAG_ITEM", joinColumns = @JoinColumn(name = "TAGID", referencedColumnName = "TAGID")
+    , inverseJoinColumns = @JoinColumn(name = "ITEMID", referencedColumnName = "ITEMID")
+    )
+    public Collection<Item> getItems() {
+        return items;
+    }
+    public void setItems(Collection<Item> items) {
+        this.items=items;
+    }
+    
+    public boolean itemExists(Item item) {
+        return this.getItems().contains(item);
+    }
+}

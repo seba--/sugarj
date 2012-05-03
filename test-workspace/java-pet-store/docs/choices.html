@@ -1,0 +1,367 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>PetstoreChoices</title>
+</head>
+<body>
+<h2>100 Design Choices and Tips we made when designing,
+implementing,
+refactoring the java petstore.
+</h2>
+<br>
+Here are 100 design choices we made when making petstore. These are
+brief and may refer to other docs for details. Lets capture briefly
+those choices and elaborate later
+<br>
+<ol>
+  <li>Use project conventions</li>
+  <p>By choosing some conventions for directory structure of the
+workspace
+and building of the project you save a lot of team discussion time and
+. Over time these conventions get better. <br>
+--choosing conventions for packaging?? snce not everything is mandated
+by packaging rules, some things are up to you to choose, like where to
+store JS files? </p>
+  <li>Pre-compile</li>
+  <p>We use the pre-compile option</p>
+  <li>Externalize app server environment properties</li>
+  <p>The application code may need access to an environment
+property, and
+often this ends up in your code somewhere as a constant or as a piece
+of code using System property lookups. For deployment environment
+properties that the code needs, use env-entires instead. </p>
+  <li>Chose a exception flow handling convention</li>
+  <p>We chose an exception handling design on client side for
+Javascript, on web server tier, and on model tier. So that exceptions
+flow though the system and we catch them when we can do something. We
+use chaining to save information about original causes. See this [link]
+doc for more details.</p>
+  <li>Choosing Logging conventions</li>
+  <p>Since logging will be used throughout you application its is
+a good practice to choose a convention so that it is handled
+consistently throughout the application.</p>
+  <li>Consider portability as an architectural issue</li>
+  <p>To avoid being bound to any application server as much as
+	possible. We externalized properties, mentioned above, we used standard
+mechanism for including third-party libraries, etc.&nbsp;
+You want to minimize dependencies of your application code from the
+environment and factors such as the particular database, appserver, OS,
+etc.&nbsp;
+Use env entries, where to store image files in a portable location, how
+to include third-party
+jars, use Java Persistence Query language since it enhances portable
+queries, and any others? </p>
+  <li>Use an existing Javascript Ajax library</li>
+  <p>Instead of reinventing all your own javascript and Ajax
+code, we chose to leverage an existing library, the DOJO toolkit.</p>
+  <li>Use Junit</li>
+  <p>We used Junit for some unit testing.</p>
+  <li>Chose a convention for our Constants files.</li>
+  <p>We use a private constructor to avoid folks tinkering and
+made public static final. See petstoreConstants.java for
+example.&nbsp;</p>
+  <li>Use Java SE 5 Features</li>
+  <p>Java SE 5 has lots of features that are a good practice to
+adopt using them. For example, auto-boxing, Generics, and enhanced for
+loop etc. <a href="#Java_SE">See the section below</a>&nbsp;</p>
+  <li>Choose Javascript Conventions</li>
+  <p>Choose some conventions for Javascript object style etc so
+that code works together on the same page and has some consistency and
+is easier to maintain.</p>
+  <li>Choose a Java serverside web framework architecture</li>
+  <p>There are many web app frameworks for Java apps. We chose to
+use JSF as a web framework since it is standard. We chose to use a
+hybrid of JSF and some of our own custom controller code so it is not
+totally JSF-centric.</p>
+  <li>Choose to move some functionality into a JSF library</li>
+  <p>For some of the PS functionality, we chose to wrap that
+functionality into a set of JSF components and then use that library.</p>
+  <li>Choose to use Java Persistence</li>
+  <p>There are many persistence mechanisms for Java applications,
+for example standard APIs such as JDBC and the new Java Persistence
+APIs, as well as many frameworks. We chose to use Java Persistence APIs
+for our domain model. It is standard on all Java EE 5 application
+servers and provides a nice ORM mapping facility.</p>
+  <li>Choose a web-only architecture</li>
+  <p>Java EE 5 applications have many technologies to choose from
+and many packaging options (ear files, war files, ejb-modules). We
+chose to have a web-only architecture and not use any EJBs. We chose to
+package the application as just a war file.</p>
+  <li>Choose to cache application-scoped resources for re-use</li>
+  <p>Since some resources in the application can be shared among
+all
+clients, its a good practice to hold onto them and reuse them for
+subsequent requests. For example, the CatalogFacade was designed in a
+thread safe manner so could be held for reuse. Resources such as
+factories like UserTransaction and EntityManagerFactory are designed to
+be thread-safe so can be re-used by multiple clients.</p>
+  <li>Choose to cache some application-scoped data for re-ues</li>
+  <p>Some data in PS was same for all clients and could be shared
+by the
+application. For example the RSS news shown in the news bar and in the
+news page was the same for all clients, Also this data didn't change a
+lot so could be periodically refreshed to get any latest news. So we
+were able to cache it in application-scope and reuse it for other clients, thus avoiding the need to go to the RSS feed on blueprints
+for each client request and save some time.</p>
+  <li>Choose to Validate at all tiers</li>
+  <p>Its a good practice to validate on the client side with
+Javascript,
+also on the web tier, and on the model tier. Here is what we did.</p>
+  <li>Choose to implement some patterns</li>
+  <p>We followed MVC and used other patterns such as Value List
+Handler, Facade, etc in order to follow established best practices.</p>
+  <li>put choice here
+    <p>put explanation here </p>
+  </li>
+  <li>Chose to mark Session state as transient or make sure its
+serializable??</li>
+  <p>Make sure all class attributes/fields are made as Transient
+or Serializable. This will help support session failover features if
+they are ever used.</p>
+  <p>What about marking servlets as distributable??</p>
+  <li>XHTML or HTML, and Doctype?</li>
+  <p>put XHTML is the new standard for pages, but many authors
+prefer HTML or XHTML-like-HTML(well form HTML). In addtion, HTML
+doctypes can be strict or loose? What did we choose in petstore and
+why? Are we consistent.?</p>
+  <p>Do we agree with <a class="moz-txt-link-freetext"
+ href="http://webkit.org/blog/?p=68">http://webkit.org/blog/?p=68</a>
+or what, it basically says</p>
+  <p>"On today's web, the best thing to do is to make your
+document HTML4 all the way. Full XHTML processing is not an option, so
+the best choice is to stick consistently with HTML4. Here's the best
+way to do that: <br>
+  <br>
+&nbsp;1. Use an HTML4 doctype declaration <a
+ class="moz-txt-link-rfc2396E" href="http://webkit.org/blog/?p=68">&lt;http://webkit.org/blog/?p=68&gt;</a>,
+  <br>
+&nbsp;&nbsp;&nbsp; ideally one that will trigger "standards
+mode" in web browsers. <br>
+&nbsp;&nbsp;&nbsp; One example of an HTML4 standards mode
+doctype is |&lt;!DOCTYPE HTML <br>
+&nbsp;&nbsp;&nbsp; PUBLIC "-//W3C//DTD HTML 4.01
+Transitional//EN" <br>
+&nbsp;&nbsp;&nbsp; <a class="moz-txt-link-rfc2396E"
+ href="http://www.w3.org/TR/html4/loose.dtd">"http://www.w3.org/TR/html4/loose.dtd"</a>&gt;|
+  <br>
+&nbsp;2. Serve your content with the <code class="moz-txt-verticalline"><span
+ class="moz-txt-tag">|</span>text/html<span class="moz-txt-tag">|</span></code>
+MIME type,
+or for local <br>
+&nbsp;&nbsp;&nbsp; content give it a |.html| or |.htm|
+suffix. This will lead <br>
+&nbsp;&nbsp;&nbsp; browsers, search engines, and other apps
+to properly process your <br>
+&nbsp;&nbsp;&nbsp; content as HTML.
+" [EndQuote]<br>
+  </p>
+  <p>Mark, mentioned, For popup, had some problems. Be cognizant
+of the effect different HTML Document Type Definitions (DOCTYPE) have
+on your component.&nbsp; In the case of the Popup Balloon, we ran
+into a problem when the http://www.w3.org/TR/html4/loose.dtd DOCTYPE
+interfered with the positioning algorithm in certain browsers.</p>
+  <li>Object Relational Mapping Development style</li>
+  <p>Chose not to do Java2DB, instead did mapping ourselves,
+relied on default mappings most of the time.
+Since we were creating tables and pojos from scratch we did not have
+legacy tables.<br>
+use naming conventions </p>
+  <li>Remove usage of deprecated methods</li>
+  <p>put After building, check pront outs and remove all usage of
+deprecated methods.</p>
+  <li>Chose an absolute size for pages</li>
+  <p>Absolute size, what size? 1024? Set banner to that size too?
+We wanted the UI to have a consistent look even when users opened up
+the browser in various sizes. &nbsp;</p>
+  <li>Chose to use "target" for external links in the UI</li>
+  <p>put The UI had a few links to external sites. These were in
+the footer and the banner for example. Use "target" for footer links,
+so pop up in new window. We decided to have same target id so all pop
+up into same named window. If you use "_blank" instead of "petstore" as
+id then each click pops into a new windo and opens a new window. For
+RSS bar, choose target "RSS" so that all the clicks in it open into the
+same window, so each announcement is in same window instead of a bunch
+of pops ups. Choose ids and group clicks to avoid to many pop ups. We
+didnt want the click of these links to replace the petstore app since
+we wanted users to stay in our PS site.</p>
+  <li>Pull all strings out of Java code</li>
+  <p>pull all strings out of Java code and other code? This is
+useful in the future if we want to do I18N and L10N. Use resource
+bundles, properties files one per package or in a central place. There
+could be strings for presentation in the JSP pages. How many property
+files, well in our case it was a small number of strings so we do just
+one.<br>
+For web pages we will use a common properties file petstore.properties
+in the util/message.properties directory.<br>
+For log files, same thing.&nbsp;</p>
+  <p>What types of string messages do we have? We had display
+messages shown in the ui of the app on browser, log messages used by a
+system admin, and there are also messages that come from the database
+but we are not covering that in this choice, we are looking at getting
+strings out of our code.</p>
+  <li>Pull all strings out of Javascript?</li>
+  <p>put explanation here</p>
+  <li>remove all system.out.println and system.err.println?</li>
+  <p>These are often used during development time to get a
+specific printout. Before releasing we wanted to remove them or replace
+them with usage of the logging utility instead.</p>
+  <li>Chose to remove duplicate Javascript libraries, such as DOJO</li>
+  <p>-what did we do since we needed multiple copies of dojo? The
+PS had some pages that needed used DOJO.jar, plus we had a ui.jar that
+included dojo.jar. Initially w eused both jar files, show snippet of
+URL of PS page using dojo directly(the old way) then the new way with
+shale remoting URL. The lesson here is: Reuse copies of DOJO instead of
+bundling multiple copies. Be careful how many. If we were a live
+application, deployed in the real world, our site would make dojo.jar
+available to all our apps or re-use a lived deployed version like AOL,
+but since we bundle we wanted our users to have a good experience.
+Where is our DOJO Wher.jar for ui.jar,&nbsp; is PS dojo.jar</p>
+  <li>Chose to use leverage autogenerated simple primary keys</li>
+  <p>For primary keys we chose to use autogenerated IDs instead
+of a key that was related to intrinsic values in the data. Java
+Persistence gives you a facility to generate unique keys. This adds an
+extra field to your data tables and an extra filed to your Java
+objects, but makes it very easy to manage keys.&nbsp;</p>
+  <li>Used BigDecimal instead of float to ensure prices where
+accurately captured and wouldn't lose precision during calculations.</li>
+  <p>Quoting Joshua Bloch from Effective Java: "The float and double
+types are designed primarily for scientific and engineering
+calculations. They perform binary floating-point arithmetic, which was
+carefully designed to furnish accurate approximations quickly over a
+broad range of magnitudes. They do not, however, provide exact results
+and should not be used where exact results are required. The float and
+double types are particularly ill-suited for monetary calculations
+because it is impossible to represent 0.1 (or any other negative power
+of ten) as a float or double exactly.".&nbsp; We could have also used a
+primitive long and kept track of the decimal, but then this can cause
+problems when the data is directly accessed from the database from
+reporting software and the fact that you report in cents has to be
+taken into account in multiple places.<br>
+  </p>
+  <li>put choice here ????
+    <p>Using the new foreach constructs saves us from creating an
+iterator and a regular for loop and is much easier to understand
+because of fewer lines</p>
+  </li>
+  <li>Used NumberFormat's Currency format versus DecimalFormat to show
+price.<br>
+  </li>
+  <p>The NumberFormat's Currency format has a method signature that
+takes an Object as well as a primitives.&nbsp; So no matter which
+approach you took to persist the price (BigDecimal or long), you can
+use the Currency format.<br>
+  </p>
+  <li>Kept price in US dollars instead of having uses enter the price
+in their local currency.<br>
+  </li>
+  <p>Usually money is kept in the same currency in which the corporate
+office files is taxes, so the numbers always reconcile to the general
+ledger.&nbsp; They wouldn't sell items in their catalog with a base
+price in a different currency because based of the exchange, their
+inventory price would change and it would be hard to track whether the
+exchange or their inventory has changed.&nbsp; Usually the only reason
+a conglomerate would have items using a difference base price would be
+if they owned a company that only did business in one country.&nbsp;
+Then usually the conversion would be done at the end of the accounting
+period based on a specific exchange rate (like the day the period
+closes).</p>
+  <li>put choice here</li>
+  <p>put explanation here</p>
+  <li>put choice here</li>
+  <p>put explanation here</p>
+  <li>put choice here</li>
+  <p>put explanation here</p>
+  <li>put choice here</li>
+  <p>put explanation here</p>
+</ol>
+<br>
+<br>
+As you can see the petstore has a lot of design choices so maybe this
+list can help you as a checklist on your own application<br>
+<h1><a name="Java_SE"></a>Java SE 5 Conventions</h1>
+here are some of the Java SE 5 conventions we chose to use
+<ol>
+  <li>Prefer using the new for loop</li>
+  <p>Using the new foreach constructs saves us from creating an
+iterator and a regular for loop and is much easier to understand
+because of fewer lines. Here is an example of a refactoring to use new
+for loop
+  <table style="text-align: left; width: 901px; height: 300px;"
+ border="1" cellpadding="2" cellspacing="2">
+    <tbody>
+      <tr>
+        <td>Code
+Before</td>
+        <td>Code After Using new for loop</td>
+      </tr>
+      <tr>
+        <td> <code></code><code>public void
+someMethod()...<br>
+{ <br>
+...<br>
+//processing a collection<br>
+if ( ...) {<br>
+&nbsp;&nbsp;Some iterator code here<br>
+&nbsp;&nbsp;</code><code><span style="font-weight: bold;"></span><br>
+&nbsp;&nbsp;}<br>
+...</code></td>
+        <td> <code><br>
+public </code><code>void someMethod()</code><code>
+...<br>
+        </code><code></code><code><br>
+...<br>
+//processing a collection<br>
+if ()) {<br>
+&nbsp; nice new for loop here</code><code style="font-weight: bold;"></code><code><br>
+}<br>
+        </code> </td>
+      </tr>
+    </tbody>
+  </table>
+  <span style="font-weight: bold;">Code Example&nbsp;:
+Refactoring to use new for loop from SE 5</span><br>
+  <br>
+  </p>
+  <li>Prefer using Generics</li>
+  <p>Generics are supported by the Java Persistence APIs so your
+model tier can return a collection of generics, and you can use
+generics all the way through your apps. For example, a web page showing
+a list that was retrieved from the DB can get a collection of generics
+	from DB and iterate through it.</p>
+  <li>Used NIO Channels instead of input and output streams</li>
+  <p>Channel has convenient methods (FileChannel.transferTo) to
+copy an input stream into an output stream without requiring tedious
+copying of reading and inputstream in a for loop in a buffer and
+copying it to the output stream.</p>
+  <li>If the result needs to be stored in a double value, cast integers
+to double before dividing to retain precision</li>
+  <p>Otherwise, int divided by int will be saved as int losing
+precision. The result will then be assigned to a double value which
+will have no effect on the precision itself. </p>
+  <li>While overriding a method from a base class, use @Override
+annotation
+    <p>Generally accepted good coding principle. This annotation helps
+ensure that the method actually gets overridden and helps catch any
+errors due to oversight. </p>
+  </li>
+  <li>Use @SuppressWarnings annotation to hide warnings that we know
+are meaningless.&nbsp;
+    <p>When a method returns a collections object, but the use of the
+method requires a parameterized collection, a spurious warning may be
+generated by the compiler. In this case, the warning is due to the fact
+that generic information is not preserved at runtime so there is no way
+for the compiler to generate a cast for a parameterized collection. We
+ignore such warnings by using the @SuppressWarnings annotation. </p>
+  </li>
+  <li>put choice here</li>
+  <p>put explanation here</p>
+  <li>put choice here</li>
+  <p>put explanation here</p>
+</ol>
+<ol>
+  <p></p>
+</ol>
+</body>
+</html>

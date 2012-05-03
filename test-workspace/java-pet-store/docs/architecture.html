@@ -1,0 +1,542 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+ xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>architecture</title>
+</head>
+<body>
+<h2>Petstore 2.0 Architecture</h2>
+<br>
+In this chapter, we illustrate how the design and implementation of the
+pet store application. We explain the motivational factors and issues
+that need to be considered, and make these issues concrete by showing
+how we came to the decisions we eventually made as we architected the
+pet store application. Through this examination, we hope to make it
+easier for you to determine how best to architect and design your own
+Web service applications.<br>
+<br>
+<h3>Overview of PetStore and UseCases</h3>
+<br>
+PetStore provides the users the ability to upload their pets to the
+site, and to navigate it in a Web 2.0 fashion. The following diagram
+presents all the use-cases that are covered in the petstore.
+<br>
+&nbsp;<br>
+<img alt="Use Case Diagram" longdesc="Use Cases for Pet Store"
+ src="UseCaseDiagram1.png" height="743" width="878"><br>
+<h2>High Level Architecture</h2>
+<p>The following diagram shows the high level architecture for the
+petstore application</p>
+<p>
+<img alt="overall architecture" src="architecture.jpg" height="983"
+ width="1051"></p>
+<p>A number of factors were considered when designing the petstore
+application. Some of the key design considerations will now be outlined
+briefly: </p>
+<ul>
+  <li>Choice of tiers</li>
+  <li>Using AJAX UI</li>
+  <li>Data Access and Transactional Needs</li>
+  <li>Page Application Architecture</li>
+  <li>Security</li>
+</ul>
+<h3>Choice of Tiers</h3>
+We chose to make it a pure web application. This means that we did not
+use the EJB technology to create reusable components.<br>
+<h3>Using Ajax UI</h3>
+Used an Ajax UI so used Dojo and custom JS. Plus decided to create a
+set of JSF components.<br>
+<p>Ajax UI features: </p>
+<p>When you mouse-over a link to each pet in the master list of query
+results, you get a pop-up box that has the details information. This
+pop-up uses an Ajax request to retrieve the data from the server.
+This pop-up functionality is implemented as a JSF component and is
+delivered as a part of the BluePrints Solutions catalog.<br>
+</p>
+<p><br>
+One component that I wish was more widely used is the Popup Balloon.
+This component can display detailed information about an object if it
+is trigger from the the mouseover Javascript event. This information is
+retrieve asynchronously through an Ajax call and shown once retrieval
+is complete. For Example:<br>
+</p>
+<p><img alt="Petstore Map popup" src="petstore_map_popup.jpg"
+ style="width: 800px; height: 510px;"><br>
+</p>
+<p>This methodology is used on some sites, but the idiom isn't used
+nearly
+as much as I would like.&nbsp; Currently, the <a
+ href="http://blogs.sun.com/roller/resources/basler/popup.jpg"
+ target="blog_popup">AJAX Popup Balloon</a> retrieves information
+through a jsp page that formulates and sends a response to a query.
+There is detailed
+documentation contained in the <a
+ href="https://blueprints.dev.java.net/servlets/ProjectDocumentList?folderID=4144&amp;expandFolder=4144&amp;folderID=0"
+ target="blog_popup">EE5 Java Blueprints Solutions Catalog</a> on the
+Popup Balloon's use and implementation as well as the other components
+the bundle provides.<br>
+<br>
+<br>
+<br>
+</p>
+<h3>Data Access and Transactional Needs</h3>
+We used Java Persistence APIs to create an object relational mapping.
+We also created a facade that provides convenient access to access
+these OR POJOs and enforces transactional boundaries. .
+<br>
+<h3>Patterns to structure application</h3>
+The petstore uses the Model-View-Controller (MVC) architectural pattern
+for overall structure. The controller is split in two: Web Controller
+and Ajax Controller.
+<br>
+The Web Controller keeps a mapping of client-requested URLs to action
+classes. It uses this mapping to invoke
+<br>
+<h3>Page Application Architecture</h3>
+We grouped the functionality logically into pieces that belong on the
+same page. For example, all of the catalog browsing is done through a
+single page. Search is another page. User file upload is done through
+another page.
+<br>
+<h3>Using a JSF Component Library</h3>
+<p>We chose to wrap most of the functionality in reusable JSF
+components. The JSF component library is written with JSF 1.2 version. </p>
+<h3>Security</h3>
+security considerations were like any classic web app, plus had to deal
+with JS security model, mashup with other services, user uploaded
+content. Our goal was to create a permissive system with security on an
+as needed basis. The petstore application does not require a user to
+maintain an account or login to access functionality. However, we do
+use CAPTCHA to prevent automated systems from spamming the site. We
+also built a user-policing feature where users can mark some content as
+inappropriate, and it gets removed. <br>
+<br>
+We also added a simple model that required a user to have an active
+session to access secondary pages.&nbsp; This was implemented using a
+ServletFilter that inspected each request and restricted access to the
+secondary pages if a session didn't exist.&nbsp; When accessing primary
+pages a session was created, thus allowing access to the secondary
+pages.<br>
+<br>
+<h3>Split Controller Architecture</h3>
+We use two controllers: <br>
+<ul>
+  <li>Client controller </li>
+  <li>Web controller</li>
+</ul>
+<p>The client controller is written in JavaScript and runs inside the
+browser of the user. The Web controller is written as a servlet. </p>
+<p>The client-controller manages the UI presented to the user, and
+sends requests to the Web controller for getting data. </p>
+<p>The Web controller uses action classes mapped to various request
+URLs to handle requests sent by the client controller. </p>
+<h3>Communication between Browser and Server</h3>
+<p>This communication is done in JSON.<br>
+</p>
+<p><br>
+</p>
+<p><br>
+<br>
+</p>
+<h3>Mashups</h3>
+When creating mashups, there are different types of techniques
+to consider like, client-side mashups,
+server-side proxy mashups and delegated mashups.&nbsp; Each have
+specific
+applications that they are suited for and are briefly described below:<br>
+<h4>Server-side Proxy Mashup<br>
+</h4>
+A server-side mashup has a server component that acts as a proxy to an
+exposed service.&nbsp; The server-side component(s) could add custom
+functionality to an exposed service, consolidate multiple exposed
+services or just pass through the result directly to the client for
+use.&nbsp; This type of mashup is used in the <a target="blog"
+ href="https://petstore.dev.java.net/">Petstore 2.0</a> reference
+application to retrieve the GeoCoding of an address for presentation on
+the Google Map and for retrieving an RSS feed for the news bar that is
+in the header of each page.&nbsp; The <a target="blog"
+ href="https://bpcatalog.dev.java.net/">Blueprints
+Solutions Catalog</a> wrapped the&nbsp;<a target="blog"
+ href="https://blueprints.dev.java.net/ajaxcomponents.html"> RSS bar
+into an easy to use JSF 1.2 component</a> that you can
+utilized by simply packaging the component jar with your
+application. <br>
+<br>
+<h4>Delegated Mashup<br>
+</h4>
+A delegated mashup is when information is forwarded to a site that then
+presents the result for the request.&nbsp; Like Digg, there are many
+other sites
+that use this form of interaction.&nbsp; PayPal is another example of a
+delegated mashup where a request is submitted to the PayPal site and
+then they continue prompting the user.&nbsp; Some sites like PayPal
+even provide a parameter for a call-back URL in the query string of the
+request.&nbsp; Once PayPal finishes the transaction, a request is sent
+to the call-back URL with optional custom fields populated.&nbsp; The <a
+ target="blog" href="https://bpcatalog.dev.java.net/">Blueprints
+Solutions Catalog</a>
+wrapped the <a target="blog"
+ href="https://blueprints.dev.java.net/ajaxcomponents.html">PayPal
+functionality in an easy to use JSF 1.2 component</a> that you can
+utilized by simply packaging the component jar with your
+application.&nbsp; This component jar is also used in the <a
+ target="blog" href="https://petstore.dev.java.net/">Petstore 2.0</a>
+reference application, so you can take a look at the component in
+action.<br>
+<br>
+<h4>Client-side Mashup<br>
+</h4>
+A client-side mashup is where the integration/interaction with the
+mashup occurs in the client, like a browser.&nbsp; <a target="blog"
+ href="http://www.google.com/apis/maps/">Google Maps</a> is a great
+example of a client-side mashup.&nbsp; To utilize Google Maps you
+include Google's Javascript file in your web page and use the <a
+ target="blog"
+ href="http://www.google.com/apis/maps/documentation/reference.html">document
+API</a> to create a wide variety of user interactive maps. Google also
+provides <a target="blog"
+ href="http://www.google.com/apis/maps/documentation/#Examples">numerous
+examples</a> to get your page prototyped quickly.&nbsp; The <a
+ target="blog" href="https://bpcatalog.dev.java.net/">Blueprints
+Solutions Catalog</a> wrapped the <a target="blog"
+ href="https://blueprints.dev.java.net/ajaxcomponents.html">Google Maps
+functionality in an easy to use JSF 1.2 component</a> that you can
+utilized by simply packaging the component jar with your
+application.&nbsp; This component jar is also used in the <a
+ target="blog" href="https://petstore.dev.java.net/">Petstore 2.0</a>
+reference application, so you can take a look at the component in
+action.<br>
+<br>
+A client-side mashup is when the client-side of the application
+directly mashes up with another website by making a request to another
+site for content or functionality of presentation.&nbsp; Since the
+browser security model will not allow the XMLHttpRequest to communicate
+to another domain this does pose a problem.&nbsp; A frame and iframe
+can display information from another domain, but you can't access the
+information through Javascript to effect the a browser page that isn't
+loaded from the same domain.&nbsp; If you have tried you would have
+received some sort of exception, for example "Permission
+denied to call method XMLHttpRequest.open". <br>
+<br>
+The client-side style of&nbsp; mashup is a good solution when you want
+to
+add functionality that another site offers and don't want to use Flash
+or implement
+a server-side proxy to attain access.&nbsp;&nbsp; The W3C is reviewing
+2 specification on how to address the cross-site XMLHttpRequests
+problem, but until then a workaround is required.&nbsp; Using a
+dynamically created script tag to retrieve data is currently the only
+way to communicate to another site so the resultant data can be
+injected into the page that is rendered from a different domain.&nbsp;
+This is sometimes referred to as the cross-domain communication problem.<br>
+<h3><br>
+</h3>
+<h3>Tagging</h3>
+<p>Tagging is implemented using the Lucene search engine.</p>
+<p>The "Add Tags" functionality uses a hidden form to capture the tag
+data. When the "Add Tags" button is clicked the form is made visible
+for the user to enter their tags. Once the "Save" button is clicked,
+an Ajax request is sent to the server with the added tag string. The
+response to the request will update the tag data field that is
+currently displayed to the user. If other users added a tag to the
+same item, the other users tags would also be displayed. This
+methodology of re-synchronizing the data helps prevent situations
+where the client data becomes out of sync with the server data when
+the same item is edited by different users.</p>
+<p>The tag page shows the top tags based on the number of items that
+reference the tag. CSS styles are used to change the font and color
+of the tag also based on the number of references. When a tag is
+clicked, an Ajax call in executed to retrieve the items that are
+reference by the tag and then displayed. This page also has the popup
+feature and a hyper-link in the name of the item that will forward the
+user to the specific item on the catalog page, showing its detail.<br>
+</p>
+<p><span style="font-weight: bold;">Updating Indexes in Lucene for
+Tagging:</span><br>
+One thing to keep in mind is that Lucene doesn't allow an index to be
+updated, the specific index has to be deleted then re-created.&nbsp;
+When adding a new tag to an item or updating a document index you have
+to
+be able to access all the data that was originally in the index before
+re-creating it.&nbsp; This sounds straightforward but there is on
+caveat.&nbsp; If you index items using an approach that doesn't allow
+retrieval of all the data in the index, you will have to read the data
+from a
+persistent store so the index can be completely re-created.&nbsp; You
+can get in this state when you create a
+org.apache.lucene.document.Field for the documents index utilizing the
+"UnStore" method or "Text" method with a Reader.&nbsp; When using these
+methods, the data can't be retrieve via the exposed APIs.&nbsp; This
+really isn't a big deal once you factor it in to your approach. Our
+tagging requirement came after the initial implementation was completed
+and it caused some problems that made us have to re-think our index
+scheme.<br>
+</p>
+<p><br>
+</p>
+<h3>Search</h3>
+<h4>Location based Search</h4>
+<p>This is implemented by using Google Maps API. Present implementation
+details.</p>
+<h4>Keyword Search</h4>
+<p>This is implemented by using Apache Lucene search engine. Present
+implementation details. </p>
+<p>In the petstore we used the Apache Lucence search engine to store
+our indexes. The name, description and tags are stored in the index
+and can be searched on. If the user only wants to search on the name
+and the description and not the tags, then the "Also Search Tags"
+checkbox can be unclicked. All the information that is contained in
+the indexes are also stored in the database, so if a corruption
+occurs, the indexes can be regenerated. Using the Lucene search
+engine gives the Petstore a faster response to queries and also
+supports advance search engine syntax which we would have to have
+coded if we only use a database search methodology.<br>
+</p>
+<p>Considering our needs and the fact that
+our Java EE 5 application's web interface is largely based on <a
+ href="http://en.wikipedia.org/wiki/Web_2.0" target="blog_window">Web
+2.0</a> that utilizes
+AJAX to present most page content.&nbsp; We decided to write our own
+interface that pulls data from the database to create the
+indexes.&nbsp; We found when serving page content using AJAX &amp;
+DHTML, the web crawling paradigm becomes convoluted.&nbsp; This is due
+to the fact that it is hard for the crawler to know the relevant
+content that is associated with a specific item.&nbsp; This is
+especially true when the content is retrieved through Javascript events
+that haven't been fired by the crawler, like a Javascript
+mouseover.&nbsp; This problem can be mitigated by methodical use of the
+<a href="http://en.wikipedia.org/wiki/Robots.txt" target="blog_window">robots.txt</a>
+file
+and meta tags in the HTML pages that are served to give the web crawler
+the correct pages with the correct data.&nbsp; Amazon uses this
+approach by including meta tags like "description" and "keywords"
+coupled with a restrictive robots.txt file to
+help companies like Google index their site correctly.&nbsp; <br>
+<br>
+We are using meta tags to help external web crawlers index our site
+properly, but thought our own search results should be as accurate as
+possible for the items we are offering.&nbsp; To store the data to be
+indexed it was easy to use the new persistence APIs in JavaEE5 based on
+<a href="http://en.wikipedia.org/wiki/POJO" target="blog_window">POJOs.</a>
+With our
+development environment consisting of <a
+ href="http://www.netbeans.info/downloads/index.php"
+ target="blog_window">Netbeans
+5.5</a> and <a href="https://glassfish.dev.java.net/"
+ target="blog_window">the Glassfish AppServer</a>
+development went very smooth.&nbsp; All that was required to make the
+Lucene APIs available was to package it with our application.&nbsp; One
+note, be careful where you store your indexes.&nbsp; If you store them
+under the deployed application directory, they will be removed when you
+redeploy/update your application.&nbsp; We decided to store the indexes
+under the domains lib directory (e.g.
+"/glassfish/domains/domain1/lib/indexDir"), which can be accessed using
+the Glassfish System.getProperty("com.sun.aas.instanceRoot") +
+"/lib/indexDir", but the location is totally up to you.</p>
+<p><br>
+</p>
+<p><br>
+</p>
+<h3>Validation</h3>
+The validation mechanism was necessary for items that a Seller
+could post for sale.&nbsp; The Seller item and information is
+uploaded&nbsp; through a form and is submitted using an Ajax
+call in multi-part mime format.&nbsp; The Ajax file upload uses the
+Dojo library to submit the form and I packaged all the functionality
+into and easy to use<a target="blog"
+ href="https://blueprints.dev.java.net/ajaxcomponents.html"> JSF 1.2
+component</a> available through the Java EE 5 version of the <a
+ target="blog" href="https://bpcatalog.dev.java.net/">Java Blueprints
+Solutions Catalog</a>&nbsp; <br>
+<br>
+The validation of the form has multiple facets which are as follows:<br>
+<ul>
+  <li>Are the required fields entered in the proper format before the
+form is submitted (client-side validation)<br>
+  </li>
+  <li>Is the Captchas value valid</li>
+  <li>Is the size of the uploaded image too large</li>
+  <li>Are the required fields entered in the proper format after the
+form is submitted (server-side validation)<br>
+  </li>
+</ul>
+<span style="font-weight: bold;"><br>
+Client Side Validation</span><br>
+The first part was completed using typical web techniques by coding
+Javascript to check the form's data before it is submitted.&nbsp; If
+any of the required fields weren't entered or not in the proper format
+a message is shown to the user and the form submission is
+terminated.&nbsp; I chose to show all the errors on the page to the
+user at one time versus showing the user one error at a time.&nbsp; I
+think this is a far better technique, so the user can try and fix all
+the errors at once, instead of fixing one at a time and then
+resubmitting the form to see if there are any other errors.&nbsp; Part
+of this validation included checking to make sure the uploaded file has
+the proper suffix (.jpg, .gif or .png) and that the description field
+didn't contain a script or link tag for security.&nbsp; If Javascript
+files were permitted to be uploaded or display fields where allowed to
+have script elements in them then there is a potential security hole
+that hackers could use to hijack the page or misuse your resources.
+Below is an example of the client-side validation message that could be
+presented to a user:<br>
+<br>
+<img alt="Seller Validation" src="validation.jpg"
+ style="width: 600px; height: 383px;"><br>
+<br>
+<p><span style="font-weight: bold;">Captchas Validation</span><br>
+The Captchas validation was implemented utilizing a
+servlet filter.&nbsp; The CaptchaValidateFilter checks the uploaded
+Captchas value that is sent in a cookie (so the multi-part mime stream
+doesn't have to be touched) and validates it against a corresponding
+string that is set in the session when the Seller upload page is
+rendered.&nbsp; If the case insensitive values matches, then the upload
+proceeds.&nbsp; If not, then a status object is set with the error so
+it can be read by the client and shown to the user, then the upload is
+discontinued.<br>
+<br>
+<br style="font-weight: bold;">
+<span style="font-weight: bold;">Upload Size Validation</span><br>
+For maintenance and security purposes, I put a limit on the upload size
+of approximately 100K.&nbsp; I didn't want the users to be able to
+upload monstrous images which could cause a maintenance problem in
+terms of disk space and put unnecessary load on the server, which could
+cause a form of denial of service attack.&nbsp; Since the upload is in
+multi-part mime format, allowances has to be made for accompanying data
+and multi-part mime overhead.&nbsp; I limited the overall upload to
+150K which should provide ample room for a 100K image to be
+uploaded.&nbsp; If the upload size was less than 150K,&nbsp; then the
+upload proceeds.&nbsp; If
+not, then a status object is set with the error so it can be read by
+the client and shown to the user, then the upload is
+discontinued.&nbsp; I added this validation check to the servlet filter
+so processing would stop as early as possible, if the upload was too
+large.<br>
+<br>
+<br>
+<span style="font-weight: bold;">Server Side Validation</span><br>
+On the server side the validation that was performed on the client is
+reimplemented.&nbsp; This functionality is necessary to catch cases
+where users disable Javascript on their browser or try to hack a
+submission by sending the request directly to the server using some
+alternate method.&nbsp; The risk of submissions being sent by the
+browser without Javascript turned on is mitigated by performing the
+actual submission of the form using Javascript, but utilizing other
+tools like plug ins, this preliminary defense can easily be
+overcome.&nbsp; With server-side validation you really must show all
+the errors for the upload at one time versus showing the user one error
+at a time. If you don't then the user must keep submitting the data and
+endure the propagation delay to see the next error.&nbsp; This
+functionality was implemented in each entity's specific class, for
+example, the Address class validates its own data, but since the Item
+class is a composite class, it validates is own data and calls the
+validation methods for any of the classes that it contains, like the
+Address class.<br>
+</p>
+<p><br>
+</p>
+<p><br>
+</p>
+<h3>Design of the Map Viewer</h3>
+<p>The Main Map page is another front-end map page that utilizes the
+database through the Java Persistence APIs to retrieve catalog items
+by category. This page leads into the Google Maps client-side mashup
+page and displays the catalog items on the map for the selected
+category. By entering an optional center-point address with a search
+area (in miles), the user can further restrict the category to show
+only the items in the specific area around the center point.<br>
+</p>
+<p><br>
+</p>
+<h3>Google Maps example of Client-side
+style mashup:</h3>
+To try a real world example, Google exposes their rich map interaction
+using a client side Javascript library that is included in the web page
+to facilitate its use.&nbsp; To retrieve the Google Maps' Javascript
+library , Google does require that you register the pages' domain that
+you will be serving the page from and attain a key to retrieve the
+Javascript library.&nbsp; You can attain you key from Googles' <a
+ target="bpcatalog" href="http://www.google.com/apis/maps/signup.html">Sign
+up for a Google Maps API key</a> registration page.<br>
+<br>
+To depict a very simple use case of displaying a map for a specific
+address' position, the HTML page would look like the following:<br>
+<pre><code>    &lt;html&gt;<br>    &lt;head&gt;<br>    <span
+ style="color: rgb(51, 51, 255);">&lt;!-- Include Google Maps Javascript Library --&gt;</span> 	    <br>    &lt;script type="text/javascript" src="http://maps.google.com/maps?file=api&amp;<br>        v=1&amp;key=ABQIAAAAyQYKk4__l80DyIsqLPvvuxTwM0brOpm-All5BF6PoaKBxRWWERSt2NPUufvDhWGdrb-pCzTZQ2vi2A"&gt;<br>    &lt;/script&gt;   <br><br>    &lt;script type="text/javascript"&gt;<br>        <br>        function load() {<br>            if (GBrowserIsCompatible()) {<br>                <span
+ style="color: rgb(51, 51, 255);">// create map component in div with the id = "map"</span><br>                var map = new GMap2(document.getElementById("map"));<br>                <span
+ style="color: rgb(51, 51, 255);">// create map components components</span><br>                map.addControl(new GSmallMapControl());<br>                map.addControl(new GMapTypeControl());<br>                <span
+ style="color: rgb(51, 51, 255);">// create center point when map is displayed</span><br>                map.setCenter(new GLatLng(</code><span
+ id="form1:found_latitude">37.395746</span><code>, </code><span
+ id="form1:found_longitude">-121.952234</span><code>), 13);<br></code><code>                <span
+ style="color: rgb(51, 51, 255);">// create information balloon for center point when map is displayed</span><br></code><code>                map.openInfoWindow(map.getCenter(), "&lt;b&gt;</code><code>Sun's Santa Clara Campus</code><code>&lt;/b&gt;&lt;br/&gt;4150 Network Circle, Santa Clara, CA 95054");              <br></code><code>                <span
+ style="color: rgb(51, 51, 255);">// create clickable point in the same place as the center point, so the user can </span><br
+ style="color: rgb(51, 51, 255);"><span style="color: rgb(51, 51, 255);">                // re-open the info balloon if they close it</span><br></code><code>                var point = new GLatLng(</code><span
+ id="form1:found_latitude">37.395746</span><code>, </code><span
+ id="form1:found_longitude">-121.952234</span><code>);<br>                map.addOverlay(createMarker(point, 1));<br>            }<br>        }<br><br></code><code>        function createMarker(point, number) {<br>            var marker = new GMarker(point);<br></code><code>            <span
+ style="color: rgb(51, 51, 255);">// create clickable point with title for address</span><br></code><code>            GEvent.addListener(marker, "click", function() {<br>                marker.openInfoWindowHtml("&lt;b&gt;Sun's Santa Clara Campus&lt;/b&gt;&lt;br/&gt;4150 Network Circle, Santa Clara, CA 95054");<br>            });<br>            return marker;<br>        }<br></code><br><code>    &lt;/script&gt;<br>    &lt;/head&gt;<br>    &lt;body onload="load()"&gt;<br></code><code>        <span
+ style="color: rgb(51, 51, 255);">&lt;!-- div to hold Google map --&gt;</span> 	    <br></code>        &lt;<span
+ class="start-tag">div</span><span class="attribute-name"> id</span>=<span
+ class="attribute-value">"map" </span><span class="attribute-name">style</span>=<span
+ class="attribute-value">"border-style:ridge; width:700px; height:500px"</span>&gt;&lt;/<span
+ class="end-tag">div</span>&gt;<br><code>    &lt;/body&gt;<br>    &lt;/html&gt;<br></code></pre>
+<br>
+The code above uses the Google Map key that is mapped to
+"http://localhost:8080" and will display a Google Map that looks like
+the follow:
+<p><img alt="Google Map Image" src="google-maps.jpg"
+ style="width: 705px; height: 503px;"><br>
+</p>
+<p><br>
+Here the latitude and longitude are pre-populated and were acquired
+when the title and address was captured and persisted in the
+database.&nbsp; If this doesn't apply in your case, you can use <a
+ target="bpcatalog"
+ href="http://www.google.com/apis/maps/documentation/#Geocoding_Examples">Google's
+GeoCode</a> to retrieve the latitude and longitude for the address you
+are trying to plot.</p>
+<p><br>
+<br>
+</p>
+<h3>Design of the Client Controller</h3>
+<p>The client controller is implemented with JavaScript and uses the
+Dojo toolkit library. It uses dojo.io.bind for making all the Ajax
+calls. </p>
+<p>The client controller generates action events that are then handled
+by handlers. </p>
+<p>The client controller also provides hooks (action handlers) to apply
+business logic, or GUI logic</p>
+<p>The model data is cached on the client-side</p>
+<p>We use View List Handler pattern to iterate over a large list of
+model data. </p>
+<p>&nbsp;</p>
+<h3>Design of the Web Controller</h3>
+<p>The controller is implemented as a set of action classes each of
+which implements the ControllerAction interface. </p>
+<p>
+<img alt="ControllerAction interface and Action classes"
+ src="controller-action.jpg" height="242" width="1038"></p>
+<p>The ControllerServlet creates a mapping of these action classes with
+different request URIs, and then invokes actions based on the incoming
+request URI.</p>
+<p>&nbsp;Controller Action classes are used to apply business logic for
+the incoming requests.&nbsp; </p>
+<h3>Design of the Model Tier</h3>
+Used Java Persistence APIs to build the model.
+<p>Object relational layer using Java Persistence API</p>
+<br>
+Used JTA. <br>
+<h4>Model Facade</h4>
+Used Facade pattern to:
+<ul>
+  <li>Encapsulate underlying model data</li>
+  <li>Provide simple persistence operations</li>
+  <li>Hides the implementation details of using an object relational
+layer. </li>
+  <li>Provides transactional access</li>
+</ul>
+<br>
+One model class per table. <br>
+Model classes validate data before it is saved in the database.
+</body>
+</html>

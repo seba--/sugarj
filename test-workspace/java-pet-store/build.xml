@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2006 Sun Microsystems, Inc.  All rights reserved.  You may not modify, use, reproduce, or distribute this software except in compliance with the terms of the License at: 
+ http://developer.sun.com/berkeley_license.html
+ $Id: build.xml,v 1.56 2007-03-16 15:29:15 basler Exp $ -->
+ 
+<project name="petstore" default="default" basedir=".">
+    <description>Builds, tests, and runs the project petstore.</description>
+    
+    <property name="is.war.module" value="true"/>
+    <property name="default.javac.target" value="1.5"/>
+    <property name="default.javac.source" value="1.5"/>
+    <import file="bp-project.xml" />
+
+    <available property="bp-ui-5-jar.exists" file="lib/bp-ui-5.jar"/>    
+    <target name="create-bp-ui-5-jar" depends="init" unless="bp-ui-5-jar.exists">
+        <ant dir="${bp-ui-5.home}" inheritAll="false" inheritRefs="false"/>
+        <!-- copy appropriate jars that are needed in petstore -->
+        <copy todir="lib/">
+            <fileset dir="${bp-ui-5.home}/dist"/> 
+        </copy>
+    </target>    
+    
+    <target name="-post-compile" depends="init">
+        <!-- copy property files into build directory -->
+        <copy todir="${build.classes.dir}" overwrite="true">
+            <fileset dir="src/java">
+                <include name="**/*.properties"/>
+            </fileset>
+        </copy>
+        <mkdir dir="${build.web.dir}/WEB-INF/lib"/>
+        <copy todir="${build.web.dir}/WEB-INF/lib">
+            <fileset file="./build/catalog-persistence.jar"/>
+            <fileset file="${file.reference.lucene-core-2.0.0.jar}"/>
+            <fileset file="${file.reference.bp-ui-5.jar}"/>
+            <fileset file="${file.reference.shale-remoting.jar}"/>
+            <fileset file="${file.reference.commons-fileupload-1.1.1.jar}"/>
+            <fileset file="${file.reference.commons-io-1.2.jar}"/>
+            <fileset file="${file.reference.commons-logging-1.1.jar}"/>
+            <fileset file="${file.reference.jdom.jar}"/>
+            <fileset file="${file.reference.rome-0.8.jar}"/>
+            <fileset file="${file.reference.rome-fetcher-0.7.jar}"/>
+        </copy>        
+        
+        <copy file="src/conf/persistence.xml" todir="${build.web.dir}/WEB-INF/classes/META-INF"/>
+    
+        <antcall target="insert-proxy-settings"/>
+    </target>
+    
+    <target name="insert-proxy-settings">
+        <copy todir="${build.web.dir}/WEB-INF/" file="web/WEB-INF/web.xml"/>
+        <concat destfile="${build.dir}/proxy.properties">proxy.host=${proxy.host}
+            proxy.port=${proxy.port}
+            <filterchain>
+                <expandproperties/>
+            </filterchain>
+        </concat>
+        <!-- Replace value of the proxy settings in web.xml for Google maps -->
+        <replace file="${build.web.dir}/WEB-INF/web.xml" propertyFile="${build.dir}/proxy.properties">          
+            <replacefilter token="@@proxy.host@@" property="proxy.host"/>
+            <replacefilter token="@@proxy.port@@" property="proxy.port"/>
+        </replace>        
+    </target>
+    
+    <target name="unzipIndexes">
+        <unzip src="lib/petstoreIndexes.zip" dest="${javaee.domaindir}/lib/petstore" overwrite="true"/>
+    </target>
+    
+    <target name="setup" depends="init, create-bp-ui-5-jar">
+        <mkdir dir="${javaee.domaindir}/lib/petstore/images"/>
+        <ant dir="." antfile="setup/setup.xml" target="setup" inheritAll="false" inheritRefs="false"/>
+        <antcall target="unzipIndexes"/>
+    </target>
+    
+    <target name="unsetup">
+        <ant dir="." antfile="setup/setup.xml" target="unsetup" inheritAll="false" inheritRefs="false"/>
+    </target>
+    
+    <target name="checkLines">
+        <fixcrlf srcdir="./src" tab="remove" tablength="4" eol="unix" includes="**/*.properties,**/*.jsp,**/*.html,**/*.sh,**/*.java,**/*.xml" excludes="**/ja/**" />
+    </target>
+</project>

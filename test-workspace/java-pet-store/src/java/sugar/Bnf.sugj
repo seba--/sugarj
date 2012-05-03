@@ -1,0 +1,131 @@
+package sugar;
+
+import org.sugarj.languages.Sdf2;
+
+public sugar Bnf {
+	lexical syntax
+		JavaID -> BnfSort
+		(~[\"\\\n\r])* -> BnfLit
+
+	context-free syntax
+		"{" BnfBodyElem* "}" -> SugarBody {cons("BnfSugarBody")}
+		SugarDefElem -> BnfBodyElem
+		BnfGrammar   -> BnfBodyElem
+
+		"bnf" "syntax" BnfProduction* -> BnfGrammar {cons("BnfGrammar")}
+
+		BnfSort "::=" BnfTNT -> BnfProduction {cons("BnfProduction")}
+		"\"" BnfLit "\""  -> BnfTNT {cons("BnfLiteral")}
+		BnfSort           -> BnfTNT {cons("BnfSort")}
+		BnfTNT "*"        -> BnfTNT {cons("BnfStar")}
+		"{" BnfTNT "}"    -> BnfTNT {cons("BnfGroup")}
+		BnfTNT BnfTNT     -> BnfTNT {right, cons("BnfSeq")}
+		"[" BnfTNT "]"    -> BnfTNT {cons("BnfOptional")}
+		BnfTNT "|" BnfTNT -> BnfTNT {right, cons("BnfAlternative")}
+
+	context-free priorities
+		BnfTNT "*"        -> BnfTNT {cons("BnfStar")}
+	  > BnfTNT BnfTNT     -> BnfTNT {cons("BnfSeq")}
+	  > BnfTNT "|" BnfTNT -> BnfTNT {right, cons("BnfAlternative")}
+
+    lexical syntax
+    	"desugarings" -> BnfSort {reject}
+		"strategies"  -> BnfSort {reject}
+		"rules"       -> BnfSort {reject}
+
+	desugarings
+		desugar-bnfbody
+
+//	rules desugar-bnfbody : BnfSugarBody(l) -> SugarBody([])
+
+	rules
+		desugar-bnfbody : BnfSugarBody(l)
+			-> SugarBody(<conc> (<desugar-bnfs> bnfs, nonbnfs))
+				where <partition(?BnfGrammar(_))> l
+					=> (bnfs, nonbnfs)
+
+	strategies
+		capitalize = explode-string; one(to-upper); implode-string
+        camel-case = string-tokenize(|['_', '-']); map(capitalize); concat-strings
+
+	strategies
+		extract-productions = map(\BnfGrammar(l) -> l\); concat
+		
+		translate-bnf2sdf = bottomup(try(bnfseq1 <+ bnfseq2 <+ unwrap-seq-in-production <+ bnf2sdf))
+		
+		desugar-bnfs
+			= extract-productions;
+		      map(remove-literals);
+		      map(\(s, n, l) -> (<translate-bnf2sdf> s, <map(gen-lex)> l)\);
+		      ?l;
+		      !(<map(\(a,_) -> a\)> l, <map(\(_,b) -> b\)> l);
+		      ?(translated, generated-lex);
+		      ![grammar-elem(context-free-syntax(translated)),
+		      	grammar-elem(lexical-syntax(<concat> generated-lex))]
+
+/* http://www.cs.uu.nl/research/techreps/UU-CS-2005-005.html
+	Dynamic rewrite rules - might be useful for rewriting literals to lexical syntax */
+
+	rules
+		unwrap-seq-in-production : BnfProduction(name, seq(a, b))
+			-> prod([a|b], sort(<camel-case> name), attrs([term(default(appl(unquoted("cons"), [fun(quoted(<concat-strings> ["\"", <camel-case> name, "\""]))])))]))
+		bnf2sdf : BnfProduction(name, symbols)
+			-> prod(symbols, sort(<camel-case> name), attrs([term(default(appl(unquoted("cons"), [fun(quoted(<concat-strings> ["\"", <camel-case> name, "\""]))])))]))
+
+//		bnf2sdf : BnfLiteral(l)        -> <debug>
+		bnf2sdf : BnfSort(s)           -> sort(<camel-case> s)
+		bnf2sdf : BnfStar(s)           -> iter-star(s)
+		bnf2sdf : BnfGroup(s)          -> s
+		bnf2sdf : BnfOptional(s)       -> opt(s)
+		bnf2sdf : BnfAlternative(a, b) -> alt(a, b)
+
+		bnfseq1 : BnfSeq(a, seq(b, c)) -> seq(a, [b|c])
+		bnfseq2 : BnfSeq(a, b)         -> seq(a, [b])
+
+	rules
+		sort-name : (name, n) -> <concat-strings>[name, "_literal_", <int-to-string> n]
+
+		remove-literals : BnfProduction(name, prod)
+			-> (BnfProduction(name, symbols), n, l) where <remove-literals(|name, 0, [])> prod => (symbols, n, l) 
+
+		remove-literals(|name, n, l) : BnfLiteral(s)
+			-> (BnfSort(sortname), <inc> n, [(s, sortname)|l])
+				where <sort-name>(name, n)
+					=> sortname
+
+		remove-literals(|name, n, l) : BnfSort(s)
+			-> (BnfSort(s), n, l)
+
+		remove-literals(|name, n, l) : BnfGroup(s)
+			-> (BnfGroup(s2), n2, l2)
+				where <remove-literals(|name, n, l)> s
+					=> (s2, n2, l2)
+		remove-literals(|name, n, l) : BnfOptional(s)
+			-> (BnfOptional(s2), n2, l2)
+				where <remove-literals(|name, n, l)> s
+					=> (s2, n2, l2)
+		remove-literals(|name, n, l) : BnfStar(s)
+			-> (BnfStar(s2), n2, l2)
+				where <remove-literals(|name, n, l)> s
+					=> (s2, n2, l2)
+		remove-literals(|name, n, l) : BnfAlternative(a,b)
+			-> (BnfAlternative(a2, b2), n2, l2)
+				where <remove-literals(|name, n, l)> a
+					=> (a2, n3, l3)
+						where <remove-literals(|name, n3, l3)> b
+						=> (b2, n2, l2)
+		remove-literals(|name, n, l) : BnfSeq(a,b)
+			-> (BnfSeq(a2, b2), n2, l2)
+				where <remove-literals(|name, n, l)> a
+					=> (a2, n3, l3)
+						where <remove-literals(|name, n3, l3)> b
+							=> (b2, n2, l2)
+
+	rules
+		gen-lex : (l, s) -> prod([lit(<double-quote> l)], <camel-case> s, no-attrs())
+
+		gen-cf : (_, s)
+			-> prod([sort(<camel-case> s)],
+			        sort(<camel-case> s),
+			        attrs([term(default(appl(unquoted("cons"), [fun(quoted(<double-quote>"Literal"))])))]))
+}

@@ -1,0 +1,32 @@
+package sugar;
+
+import sugar.JPQL;
+
+public editor services JPQLEditor {
+  colorer
+    _.SelectClause : 127 0 85 bold
+    _.FromClause : 127 0 85 bold
+    _.WhereClause : 127 0 85 bold
+    _.InExpression : 127 0 85 bold
+    _.OrderbyClause : 127 0 85 bold
+    _.ConditionalExpression : 127 0 85 bold
+    _.ConditionalFactor : 127 0 85 bold
+    _.ConditionalTerm : 127 0 85 bold
+    _.BetweenExpression : 127 0 85 bold
+    
+    _.NamedInputParameter: 44 114 99
+    _.Some : 127 0 85 bold
+
+  folding
+    SelectClause
+    FromClause
+    WhereClause
+  
+  completions
+    completion template : 
+       "SELECT " <id>
+    completion template :
+      "SELECT " <id> " FROM " <id>
+    completion template :
+      "SELECT " <id> " FROM " <id> " WHERE " <exp>
+}

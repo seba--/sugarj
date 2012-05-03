@@ -1,0 +1,27 @@
+/* Copyright 2006 Sun Microsystems, Inc. All rights reserved. You may not modify, use, reproduce, or distribute this software except in compliance with the terms of the License at: http://developer.sun.com/berkeley_license.html
+$Id: ZipLocation.java,v 1.4 2006-05-05 20:15:25 inder Exp $ */
+
+package com.sun.javaee.blueprints.petstore.model;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+import sugar.Accessors;
+
+/**
+ * This class represents the data used for autocomplete of a 
+ * user input for zipcode, city, state.
+*/
+@Entity
+public class ZipLocation implements java.io.Serializable {
+
+    private int zipCode {set};
+    private String city,state {get;set};
+         
+    public ZipLocation() { }   
+
+    @Id
+    public int getZipCode() {
+        return zipCode;
+    }
+  }
