@@ -101,6 +101,8 @@ public abstract class LanguageLib implements Serializable {
 
 	public abstract LanguageLibFactory getFactoryForLanguage();
 	
+	public abstract String getImportedModulePath(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException;
+	
 	
 	// from Result
 	public void compile(Path outFile, ISourceFileContent source, Path bin, List<Path> path,
@@ -154,4 +156,8 @@ public abstract class LanguageLib implements Serializable {
 
 	public abstract void compile(List<Path> outFiles, Path bin, List<Path> path, Set<? extends Path> generatedFiles, Map<Path, Integer> generatedFileHashes, boolean generateFiles) throws IOException;
 
+	
+	public abstract void addImportModule(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException;
+	public abstract void addCheckedImportModule(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException;
+	
 }

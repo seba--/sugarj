@@ -329,9 +329,6 @@ public class FileCommands {
     return file;
   }
 
-  public static String getRelativeModulePath(String module) {
-    return module.replace(".", Environment.sep);
-  }
 
   public static int fileHash(Path file) throws IOException {
     if (exists(file))

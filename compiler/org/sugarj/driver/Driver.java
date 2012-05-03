@@ -839,14 +839,15 @@ public class Driver{
     
     log.beginTask("processing", "PROCESS the desugared import declaration.");
     try {
-      String importModule = langLib.extractImportedModuleName(toplevelDecl, interp);
+      String importModuleName = langLib.extractImportedModuleName(toplevelDecl, interp);
 
       // TODO handle import declarations with asterisks, e.g. import foo.*;
+            
+      String modulePath = langLib.getImportedModulePath(toplevelDecl, interp);
       
-      String modulePath = FileCommands.getRelativeModulePath(importModule);
       boolean skipProcessImport = false;
-  
-      if (!modulePath.startsWith("org/sugarj")) {
+      
+      if (!modulePath.startsWith("org/sugarj")) { // module is in sugarj standard library
         Path dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
         Result res = null;
         RelativeSourceLocationPath importSourceFile = null;
@@ -869,7 +870,7 @@ public class Driver{
           if (!generateFiles) {
             // boolean b = res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment);
             // System.out.println(b);
-            setErrorMessage(toplevelDecl, "module outdated, compile first: " + importModule);
+            setErrorMessage(toplevelDecl, "module outdated, compile first: " + importModuleName);
           }
           else {
             log.log("Need to compile the imported module first ; processing it now.");
@@ -879,7 +880,8 @@ public class Driver{
    
               if (currentlyProcessing.contains(importSourceFile)) {
                 // assume source file does not provide syntactic sugar
-                langLib.getSource().addImport(importModule.replace('/', '.'));
+                //langLib.getSource().addImport(importModuleName.replace('/', '.'));
+                langLib.addImportModule(toplevelDecl, interp);
                 skipProcessImport = true;
                 delegateCompilation = importSourceFile;
               }
@@ -887,10 +889,10 @@ public class Driver{
                 res = compile(importSourceFile, monitor, langLib.getFactoryForLanguage());    // XXX: Think of a better way to handle this
                 initializeCaches(environment, true);
                 if (res.hasFailed())
-                  setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
+                  setErrorMessage(toplevelDecl, "problems while compiling " + importModuleName);
               }
             } catch (Exception e) {
-              setErrorMessage(toplevelDecl, "problems while compiling " + importModule);
+              setErrorMessage(toplevelDecl, "problems while compiling " + importModuleName);
             }
               
             log.log("CONTINUE PROCESSING'" + importSourceFile + "'.");
@@ -908,11 +910,11 @@ public class Driver{
         
         if (res != null && res.hasDelegatedCompilation(sourceFile)) {
           delegateCompilation = res.getSourceFile();
-          langLib.getSource().addImport(importModule.replace('/', '.'));
+          langLib.addImportModule(toplevelDecl, interp);
           skipProcessImport = true;
         }
         else if (driverResult.hasDelegatedCompilation(importSourceFile)) {
-          langLib.getSource().addImport(importModule.replace('/', '.'));
+          langLib.addImportModule(toplevelDecl, interp);
           skipProcessImport = true;
         }
       }
@@ -920,7 +922,7 @@ public class Driver{
       boolean success = skipProcessImport || processImport(modulePath, toplevelDecl);
       
       if (!success)
-        setErrorMessage(toplevelDecl, "module not found: " + importModule);
+        setErrorMessage(toplevelDecl, "module not found: " + importModuleName);
       
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -932,7 +934,8 @@ public class Driver{
   private boolean processImport(String modulePath, IStrategoTerm importTerm) throws IOException {
     boolean success = false;
     
-    success |= ModuleSystemCommands.importClass(modulePath, langLib.getSource(), environment, langLib);
+    //success |= ModuleSystemCommands.importClass(modulePath, langLib.getSource(), environment, langLib);
+    success |= ModuleSystemCommands.importClass(importTerm, interp, environment, langLib);
     ModuleSystemCommands.registerSearchedClassFiles(modulePath, driverResult, environment, langLib);
 
     Path sdf = ModuleSystemCommands.importSdf(modulePath, environment);

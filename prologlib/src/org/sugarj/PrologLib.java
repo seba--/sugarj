@@ -48,7 +48,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	private Path prologOutFile;
 
-	private ISourceFileContent prologSource;		// XXX: change to a prolog specific sourcefile
+	private PrologSourceFileContent prologSource;
 
 	private String relNamespaceName;
 	
@@ -382,6 +382,27 @@ public class PrologLib extends LanguageLib implements Serializable {
 			throws IOException {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public String getImportedModulePath(IStrategoTerm toplevelDecl,
+			HybridInterpreter interp) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void addImportModule(IStrategoTerm toplevelDecl,
+			HybridInterpreter interp) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addCheckedImportModule(IStrategoTerm toplevelDecl,
+			HybridInterpreter interp) throws IOException {
+		// TODO Auto-generated method stub
+		
 	}
 
 

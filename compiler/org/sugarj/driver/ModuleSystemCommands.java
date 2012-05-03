@@ -10,6 +10,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Set;
 
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.strategoxt.HybridInterpreter;
 import org.sugarj.LanguageLib;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
@@ -35,17 +37,18 @@ public class ModuleSystemCommands {
      * @return true iff a class file existed.
      * @throws IOException
      */
-    public static boolean importClass(String modulePath, ISourceFileContent source, Environment environment, LanguageLib langLib) throws IOException {
+    public static boolean importClass(IStrategoTerm toplevelDecl, HybridInterpreter interp, Environment environment, LanguageLib langLib) throws IOException {
       if (langLib.getBinFileExtension() == null)    // if language does not have bin files (e.g. for interpreted languages), return true
          return true;
       
-      RelativePath clazz = searchFile(modulePath, langLib.getBinFileExtension(), environment);
+      RelativePath clazz = searchFile(langLib.getImportedModulePath(toplevelDecl, interp), langLib.getBinFileExtension(), environment);
       if (clazz == null)
         return false;
       
       log.beginTask("Generate Java code");
       try {
-        source.addCheckedImport(modulePath.replace('/', '.'));
+        langLib.addCheckedImportModule(toplevelDecl, interp);
+        //source.addCheckedImport(modulePath.replace('/', '.'));
       } finally {
         log.endTask();
       }

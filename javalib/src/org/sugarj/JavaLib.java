@@ -50,8 +50,6 @@ public class JavaLib extends LanguageLib implements Serializable {
 
 	private String relPackageName;
 	
-	private static JavaCommands javaCommands;
-	
 	
 	@Override
 	public List<File> getGrammars() {
@@ -351,7 +349,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 
 	// was: processPackageDec
 	  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IErrorLogger errorLog, String packageName, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException {
-	    relPackageName = FileCommands.getRelativeModulePath(packageName);
+	    relPackageName = getRelativeModulePath(packageName);
 	
 	    log.log("The SDF / Stratego package name is '" + relPackageName + "'.");
 	
@@ -393,7 +391,31 @@ public class JavaLib extends LanguageLib implements Serializable {
 				generatedFileHashes.put(cl, FileCommands.fileHash(cl));
 		}
 	}
+
+	@Override
+	public String getImportedModulePath(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
+	      String importModule = extractImportedModuleName(toplevelDecl, interp);
+	      String modulePath = getRelativeModulePath(importModule);
+	      
+	      return getRelativeModulePath(modulePath);
+	}
 	
-	
+	  private String getRelativeModulePath(String module) {
+		    return module.replace(".", Environment.sep);
+		  }
+
+	  
+	@Override
+	public void addImportModule(IStrategoTerm toplevelDecl,
+			HybridInterpreter interp) throws IOException {
+		javaSource.addImport(extractImportedModuleName(toplevelDecl, interp).replace('/', '.'));
+	}
+
+	@Override
+	public void addCheckedImportModule(IStrategoTerm toplevelDecl,
+			HybridInterpreter interp) throws IOException {
+		javaSource.addCheckedImport(getImportedModulePath(toplevelDecl,  interp).replace('/', '.'));
+	}
+
 
 }
