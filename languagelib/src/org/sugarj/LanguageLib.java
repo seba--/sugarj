@@ -110,6 +110,7 @@ public abstract class LanguageLib implements Serializable {
 			Map<Path, Set<RelativePath>> availableGeneratedFilesForSourceFile,
 			Map<Path, Map<Path, ISourceFileContent>> deferredSourceFilesForSourceFile,
 			Map<Path, Integer> generatedFileHashes,
+			HybridInterpreter interp,
 			boolean generateFiles
 			) throws IOException, ClassNotFoundException {
 
@@ -134,7 +135,7 @@ public abstract class LanguageLib implements Serializable {
 						ISourceFileContent otherSource = (ISourceFileContent) currentSource.getValue();
 						try {
 							//result.writeToFile(source.getKey(), otherJavaSource.getCode(generatedClasses));
-							writeToFile(generateFiles, generatedFileHashes, currentSource.getKey(), otherSource.getCode(generatedClasses));
+							writeToFile(generateFiles, generatedFileHashes, currentSource.getKey(), otherSource.getCode(generatedClasses, interp));
 
 
 						} catch (ClassNotFoundException e) {
@@ -142,9 +143,9 @@ public abstract class LanguageLib implements Serializable {
 						}
 					}
 
-		writeToFile(generateFiles, generatedFileHashes, outFile, source.getCode(generatedClasses));
+		writeToFile(generateFiles, generatedFileHashes, outFile, source.getCode(generatedClasses, interp));
 		
-		this.compile(javaOutFiles, bin, path, generatedClasses, generatedFileHashes, generateFiles);
+		this.compile(javaOutFiles, bin, path, generatedClasses, generatedFileHashes, interp, generateFiles);
 	}
 
 	private void writeToFile(boolean generateFiles, Map<Path, Integer> generatedFileHashes, Path file, String content) throws IOException { 
@@ -154,7 +155,7 @@ public abstract class LanguageLib implements Serializable {
 		}
 	}
 
-	public abstract void compile(List<Path> outFiles, Path bin, List<Path> path, Set<? extends Path> generatedFiles, Map<Path, Integer> generatedFileHashes, boolean generateFiles) throws IOException;
+	public abstract void compile(List<Path> outFiles, Path bin, List<Path> path, Set<? extends Path> generatedFiles, Map<Path, Integer> generatedFileHashes, HybridInterpreter interp, boolean generateFiles) throws IOException;
 
 	
 	public abstract void addImportModule(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException;

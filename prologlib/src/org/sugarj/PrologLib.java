@@ -24,10 +24,17 @@ import org.eclipse.core.runtime.FileLocator;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
+import org.strategoxt.java_front.pp_java_string_0_0;
+import org.strategoxt.lang.Context;
+import org.strategoxt.stratego_gpp.abox2text_0_1;
+import org.strategoxt.stratego_gpp.ast2abox_0_1;
+import org.strategoxt.stratego_gpp.parse_pptable_file_0_0;
+import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.JavaCommands;
+import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
@@ -274,14 +281,59 @@ public class PrologLib extends LanguageLib implements Serializable {
 	    javaSource.addBodyDecl(prettyPrint(dec, interp));
 
  */
-		// XXX: IMPLEMENT THIS
+		
 	}
 
 	@Override
 	public String prettyPrint(IStrategoTerm term,
 			HybridInterpreter interp) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		
+		/*
+		 * parse_pptable_file_0_0.class  invoke(context, atermcommads.makeString(filename))
+ast2abox_0_1.class   invoke(context, term, table)
+abox2text_0_1.class    invoke(context, prolog-term, width integer)
+		 */
+		
+		
+		// XXX: This might need some fixing.
+		
+		System.err.println("+++++++++++++++++++++++ pretty-printing prolog");
+		Context ctx = interp.getCompiledContext();
+		
+		System.err.println("context: " + ctx);
+		
+		IStrategoTerm ppTable = parse_pptable_file_0_0.instance.invoke(ctx, ATermCommands.atermFromFile("Prolog.pp"));
+		
+		System.err.println("pptable: " + ppTable);
+		
+		IStrategoTerm ppAbox = ast2abox_0_1.instance.invoke(ctx,  term, ppTable);
+		
+		System.err.println("abox: " + ppAbox);
+		
+		IStrategoTerm ppText = abox2text_0_1.instance.invoke(ctx, ppAbox, ATermCommands.atermFromString("80"));
+
+		System.err.println("pptext: " + ppText);
+		
+		return ppText.toString();
+		
+		
+		/*
+		 * 		System.err.println("---\n prettyprint context:");
+		Context ctx = interp.getCompiledContext();
+		System.err.println(ctx);
+		System.err.println("prettyprint term:");
+		System.err.println(term);
+		//IStrategoTerm string = pp_java_string_0_0.instance.invoke(interp.getCompiledContext(), term);
+		IStrategoTerm string = pp_java_string_0_0.instance.invoke(ctx, term);
+		System.err.println("prettyprint string:");
+		System.err.println(string);
+	    if (string != null)
+	      return Term.asJavaString(string);
+	    
+	    throw new RuntimeException("pretty printing java AST failed: " + term);
+
+		 */
+		
 	}
 
 	@Override
@@ -327,8 +379,8 @@ public class PrologLib extends LanguageLib implements Serializable {
 		
  */
 		prologOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".pro");
-		prologSource = new PrologSourceFileContent();
-		// XXX: set optional import?
+		prologSource = new PrologSourceFileContent(this);
+		prologSource.setOptionalImport(false);
 		
 	}
 
@@ -349,26 +401,70 @@ public class PrologLib extends LanguageLib implements Serializable {
 	@Override
 	public void checkSourceOutFile(Environment environment,
 			RelativeSourceLocationPath sourceFile) {
-		// TODO Auto-generated method stub
-		
+		if (prologOutFile == null) 
+			prologOutFile = environment.createBinPath(getRelNamespaceSep() + FileCommands.fileName(sourceFile) + getSourceFileExtension());
 	}
 
 	@Override
 	public void checkNamespace(IStrategoTerm decl,
 			RelativeSourceLocationPath sourceFile, IErrorLogger errorLog) {
-		// TODO Auto-generated method stub
-		
+		if (relNamespaceName == null)
+			checkNamespaceName(decl, sourceFile, errorLog);
 	}
-
+	
+	private void checkNamespaceName(IStrategoTerm toplevelDecl, RelativeSourceLocationPath sourceFile, IErrorLogger errorLog) {
+		if (sourceFile != null) {
+			String namespaceName = relNamespaceName == null ? "" : relNamespaceName;
+			
+			String rel = FileCommands.dropExtension(sourceFile.getRelativePath());
+			int i = rel.lastIndexOf('/');
+			
+			String expectedNamespace = (i >= 0 ? rel.substring(0, i) : rel);
+			
+			if (!namespaceName.equals(expectedNamespace)) {
+				setErrorMessage(
+						toplevelDecl,
+						"The declared namespace '" + namespaceName + "'" +
+						" does not match the expected namespace '" + expectedNamespace + "'.", errorLog);
+			}
+		}
+	}
+	
 	@Override
 	public void processNamespaceDec(IStrategoTerm toplevelDecl,
 			Environment environment, HybridInterpreter interp,
 			IErrorLogger errorLog, String packageName,
 			RelativeSourceLocationPath sourceFile,
 			RelativeSourceLocationPath sourceFileFromResult) throws IOException {
-		// TODO Auto-generated method stub
+
+		relNamespaceName = getRelativeModulePath(packageName);
+		log.log("The SDF / Stratego package name is '" + relNamespaceName + "'.");
+		
+		checkNamespaceName(toplevelDecl, sourceFile, errorLog);
+		
+		if (prologOutFile == null) 
+			prologOutFile = environment.createBinPath(getRelNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + ".pro");
+		
+		prologSource.setNamespaceDecl(prettyPrint(toplevelDecl, interp));
 		
 	}
+	
+	
+	/*
+	 * 	  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IErrorLogger errorLog, String packageName, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException {
+	    relPackageName = getRelativeModulePath(packageName);
+	
+	    log.log("The SDF / Stratego package name is '" + relPackageName + "'.");
+	
+	    checkPackageName(toplevelDecl, sourceFile, errorLog);
+	
+	    if (javaOutFile == null)
+	      javaOutFile = environment.createBinPath(getRelNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + ".java");			// XXX: Can we just reuse sourceFile here?
+	
+	    // moved here before depOutFile==null check
+	    javaSource.setNamespaceDecl(prettyPrint(toplevelDecl, interp));
+
+	 */
 
 	@Override
 	public LanguageLibFactory getFactoryForLanguage() {
@@ -376,38 +472,87 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 
 	@Override
-	public void compile(List<Path> outFiles, Path bin, List<Path> path,
+	public void compile(List<Path> sourceFiles, Path bin, List<Path> path,	// 'path' is library path?
 			Set<? extends Path> generatedFiles,
-			Map<Path, Integer> generatedFileHashes, boolean generateFiles)
+			Map<Path, Integer> generatedFileHashes, HybridInterpreter interp,
+			boolean generateFiles)
 			throws IOException {
-		// TODO Auto-generated method stub
 
+		if (generateFiles) {
+			for (Path file : sourceFiles) {
+				String copiedFileName = bin.getFile().getAbsolutePath() + file.getFile().getName();
+				System.err.println("###################### file name: " + copiedFileName);
+				File destFile = new File(copiedFileName);
+				Path p2 = new AbsolutePath(destFile.getAbsolutePath());
+				FileCommands.copyFile(file, p2);
+			}
+			for (Path cl : generatedFiles) {
+				generatedFileHashes.put(cl, FileCommands.fileHash(cl));
+			}
+			//FileCommands.copyFile(from, to)
+
+		}
+/*
+ * 		if (generateFiles) {
+			JavaCommands.javac(javaOutFiles, bin, path);
+			for (Path cl : generatedJavaClasses)
+				generatedFileHashes.put(cl, FileCommands.fileHash(cl));
+		}
+
+ */
 	}
+	
+	/*private Path getFilenameForOtherDirectory(Path orig, Path moved) {
+		String fileName = orig.getFile().getName();
+		
+		File x = new File(fileName)
+	}*/
 
 	@Override
 	public String getImportedModulePath(IStrategoTerm toplevelDecl,
 			HybridInterpreter interp) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		String importModuleName = extractImportedModuleName(toplevelDecl, interp);
+		
+		return getRelativeModulePath(importModuleName);
+		
+	}
+	
+	private String getRelativeModulePath(String moduleName) {
+		return moduleName.replace("/", Environment.sep);
 	}
 
+	/**
+	 * 	@Override
+	public String getImportedModulePath(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
+	      String importModule = extractImportedModuleName(toplevelDecl, interp);
+	      String modulePath = getRelativeModulePath(importModule);
+	      
+	      return getRelativeModulePath(modulePath);
+	}
+	
+	  private String getRelativeModulePath(String module) {
+		    return module.replace(".", Environment.sep);
+		  }
+
+	 */
+	
 	@Override
 	public void addImportModule(IStrategoTerm toplevelDecl,
 			HybridInterpreter interp) throws IOException {
-		// TODO Auto-generated method stub
-		
+		prologSource.addImport(prologSource.getImport(extractImportedModuleName(toplevelDecl, interp), toplevelDecl));	
 	}
 
 	@Override
 	public void addCheckedImportModule(IStrategoTerm toplevelDecl,
 			HybridInterpreter interp) throws IOException {
-		// TODO Auto-generated method stub
-		
+		prologSource.addCheckedImport(prologSource.getImport(extractImportedModuleName(toplevelDecl, interp), toplevelDecl));	
 	}
-
-
-
-
+	
+	private void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IErrorLogger errorLog) {
+	    // XXX: Merge with setErrorMessage from Driver
+	    errorLog.logError(msg);
+	    ATermCommands.setErrorMessage(toplevelDecl, msg);
+	  }
 
 	
 }

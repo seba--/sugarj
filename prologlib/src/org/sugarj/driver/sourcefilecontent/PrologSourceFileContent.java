@@ -1,9 +1,13 @@
 package org.sugarj.driver.sourcefilecontent;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.strategoxt.HybridInterpreter;
+import org.sugarj.PrologLib;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.RelativePath;
@@ -13,9 +17,9 @@ public class PrologSourceFileContent implements ISourceFileContent {
 
 	private static final long serialVersionUID = -1793669825816782903L;
 	
-	private class PrologModuleImport {
+	public class PrologModuleImport {
 		String importName;
-		List<String> importedProductions;
+		IStrategoTerm productionDecl;
 	}
 	
 	String moduleDecl;
@@ -25,19 +29,22 @@ public class PrologSourceFileContent implements ISourceFileContent {
 	//List<String> checkedImports = new LinkedList<String>();
 	boolean importsOptional;
 	List<String> bodyDecls = new LinkedList<String>();
+	PrologLib pLib;
+	
 
-	public PrologSourceFileContent() {
+	public PrologSourceFileContent(PrologLib prologLib) {
+		pLib = prologLib;
 	}
 
 	public void setNamespaceDecl(String moduleDecl) {
 		this.moduleDecl = moduleDecl;
 	}
 
-	public void addImport(String imp) {
+	public void addImport(PrologModuleImport imp) {
 		imports.add(imp);
 	}
 
-	public void addCheckedImport(String imp) {
+	public void addCheckedImport(PrologModuleImport imp) {
 		checkedImports.add(imp);
 	}
 
@@ -49,24 +56,25 @@ public class PrologSourceFileContent implements ISourceFileContent {
 		bodyDecls.add(bodyDecl);
 	}
 
-	public String getCode(Set<RelativePath> generatedClasses) throws ClassNotFoundException {
+	public String getCode(Set<RelativePath> generatedFiles, HybridInterpreter interp) throws ClassNotFoundException, IOException {
 		// TODO: Add reexports!
-		List<String> classes = new LinkedList<String>();
-		for (RelativePath p : generatedClasses)
-			classes.add(FileCommands.dropExtension(p.getRelativePath()).replace(Environment.sep, "."));
+		List<String> files = new LinkedList<String>();
+		for (RelativePath p : generatedFiles)
+			files.add(FileCommands.dropExtension(p.getRelativePath()).replace(Environment.sep, "/"));
 
 		StringBuilder code = new StringBuilder();
 		code.append(moduleDecl);
 		code.append('\n');
 
-		for (String imp : checkedImports)									// XXX: What does this do?
-			code.append(":- use_module(").append(imp).append(").\n");
+		for (PrologModuleImport imp : checkedImports)									// XXX: What does this do?
+			code.append(":- use_module(").append(imp.importName).append(getImportedModulePredicateList(imp, interp)).append(").\n");
 
-		for (String imp : imports)
-			if (classes.contains(imp))
-				code.append(":- use_module( ").append(imp).append(",").append(arg0).append(").\n");
+		for (PrologModuleImport imp : imports)
+			if (files.contains(imp.importName))
+				//code.append(":- use_module(").append(imp).append(",").append(arg0).append(").\n");
+				code.append(":- use_module(").append(imp.importName).append(getImportedModulePredicateList(imp, interp)).append(").\n");
 			else if (!importsOptional)
-				throw new ClassNotFoundException(imp);
+				throw new ClassNotFoundException(imp.importName);
 
 		for (String bodyDecl : bodyDecls)
 			code.append(bodyDecl);
@@ -74,6 +82,25 @@ public class PrologSourceFileContent implements ISourceFileContent {
 		return code.toString();
 	}
 
+	private String getImportedModulePredicateList(PrologModuleImport module, HybridInterpreter interp) throws IOException {
+		if (module.productionDecl == null) 
+			return "";
+		
+		String code = ", " + pLib.prettyPrint(module.productionDecl, interp);
+		
+		// XXX: return something here (pretty-printed string!)
+		return code;
+	}
+	
+	public PrologModuleImport getImport(String importName, IStrategoTerm decl) {
+		PrologModuleImport imp = new PrologModuleImport();
+		imp.importName = importName;
+		imp.productionDecl = decl;
+		
+		return imp;
+	}
+	
+	
 	public int hashCode() {
 		return moduleDecl.hashCode() + imports.hashCode() + bodyDecls.hashCode();
 	}
@@ -88,4 +115,6 @@ public class PrologSourceFileContent implements ISourceFileContent {
 				other.importsOptional == importsOptional &&
 				other.bodyDecls.equals(bodyDecls);
 	}
+
+	
 }

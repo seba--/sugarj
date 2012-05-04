@@ -1,12 +1,10 @@
 package org.sugarj.driver.sourcefilecontent;
 // TODO: Think of a better package name
+import java.io.IOException;
 import java.io.Serializable;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
-import org.sugarj.common.Environment;
-import org.sugarj.common.FileCommands;
+import org.strategoxt.HybridInterpreter;
 import org.sugarj.common.path.RelativePath;
 
 /**
@@ -23,7 +21,7 @@ public interface ISourceFileContent extends Serializable {
   public void addCheckedImport(String imp);
   public void setOptionalImport(boolean isOptional);
   public void addBodyDecl(String bodyDecl); */
-  public String getCode(Set<RelativePath> generatedClasses) throws ClassNotFoundException;
+  public String getCode(Set<RelativePath> generatedClasses, HybridInterpreter interp) throws ClassNotFoundException, IOException;
   public int hashCode();
   public boolean equals(Object o);
 

@@ -38,7 +38,7 @@ exports
   context-free syntax       %% my additions
     
 	":-" "module" "(" Word "," List ")"	"." -> ModuleDec {prefer, cons("ModuleDec")}    %% module definition
-    ":-" "use_module" "(" Word "," List ")" "."  -> ModuleImport {prefer, cons("ModuleImport")}  %% module import
+    ":-" "use_module" "(" Word ("," List)? ")" "."  -> ModuleImport {prefer, cons("ModuleImport")}  %% module import
     ":-" "reexport"  "(" Word "," List ")" "."  -> ModuleReexport {prefer, cons("ModuleReexport")}  %% module reexport   
 
 %% ---

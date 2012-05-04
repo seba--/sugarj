@@ -384,7 +384,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 	}
 	
 	// from Result
-	public void compile(List<Path> javaOutFiles, Path bin, List<Path> path, Set<? extends Path> generatedJavaClasses, Map<Path, Integer> generatedFileHashes, boolean generateFiles) throws IOException {
+	public void compile(List<Path> javaOutFiles, Path bin, List<Path> path, Set<? extends Path> generatedJavaClasses, Map<Path, Integer> generatedFileHashes, HybridInterpreter interp, boolean generateFiles) throws IOException {
 		if (generateFiles) {
 			JavaCommands.javac(javaOutFiles, bin, path);
 			for (Path cl : generatedJavaClasses)

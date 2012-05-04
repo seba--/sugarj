@@ -415,7 +415,8 @@ public class Driver{
             environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), langLib.getGeneratedFiles(),
             driverResult.getAvailableGeneratedFiles().get(driverResult.getSourceFile()),
             driverResult.getDeferredSourceFiles().get(driverResult.getSourceFile()),
-            driverResult.getGeneratedFileHashes(), driverResult.isGenerateFiles());
+            driverResult.getGeneratedFileHashes(), interp, 
+            driverResult.isGenerateFiles());
       } catch (ClassNotFoundException e) {
         setErrorMessage(lastSugaredToplevelDecl, "Could not resolve imported class " + e.getMessage());
         // throw new RuntimeException(e);
