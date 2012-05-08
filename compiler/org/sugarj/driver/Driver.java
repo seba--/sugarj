@@ -42,7 +42,6 @@ import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoException;
 import org.strategoxt.permissivegrammars.make_permissive;
 import org.strategoxt.tools.tools;
-import org.sugarj.JavaLib;
 import org.sugarj.LanguageLib;
 import org.sugarj.LanguageLibFactory;
 import org.sugarj.common.ATermCommands;
@@ -650,7 +649,7 @@ public class Driver{
   
   private void processToplevelDeclaration(IStrategoTerm toplevelDecl)
       throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
-    if (isApplication(toplevelDecl, "PackageDec"))
+    if (langLib.isNamespaceDec(toplevelDecl))
       processPackageDec(toplevelDecl);
     else {
       langLib.checkNamespace(toplevelDecl, sourceFile, driverResult);   // XXX: check -> setup ?
@@ -760,11 +759,9 @@ public class Driver{
     log.beginTask("processing", "PROCESS the desugared package declaration.");
     try {
       sugaredPackageDecl = lastSugaredToplevelDecl;
-      
-      String packageName =
-          langLib.prettyPrint(
-          getApplicationSubterm(toplevelDecl, "PackageDec", 1), interp);
 
+      String packageName = langLib.extractNamespaceName(toplevelDecl, interp);
+      
       log.log("The Java package name is '" + packageName + "'.");
       // XXX: We have two sourcefiles here. Are they identical?
       langLib.processNamespaceDec(toplevelDecl, environment, interp, driverResult, packageName, sourceFile, driverResult.getSourceFile());    

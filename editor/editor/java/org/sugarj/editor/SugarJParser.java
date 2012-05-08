@@ -28,7 +28,6 @@ import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.spoofax.terms.attachments.ParentAttachment;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.imp.runtime.services.ContentProposer;
-import org.sugarj.JavaLib;
 import org.sugarj.LanguageLib;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.CommandExecution;

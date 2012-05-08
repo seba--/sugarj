@@ -1,6 +1,7 @@
 package org.sugarj.driver;
 
 import org.sugarj.JavaLib;
+import org.sugarj.PrologLib;
 import org.sugarj.LanguageLib;
 
 public class UsedLanguageLibrary {
@@ -8,5 +9,5 @@ public class UsedLanguageLibrary {
   /** This class is only used for development purposes and will be removed
    *  as soon as the editor supports multiple language in a more convenient way. 
    */
-  public static LanguageLib langLib = new JavaLib();
+  public static LanguageLib langLib = new PrologLib();
 }

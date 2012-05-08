@@ -104,7 +104,8 @@ public class Builder extends IncrementalProjectBuilder {
       class ShouldRebuildResourceDeltaVisitor implements IResourceDeltaVisitor {
         boolean rebuild = false;
         public boolean visit(IResourceDelta delta) {
-          if ("sugj".equals(delta.getFullPath().getFileExtension()))
+          //if ("sugj".equals(delta.getFullPath().getFileExtension()))
+          if (UsedLanguageLibrary.langLib.getSugarFileExtension().substring(1).equals(delta.getFullPath().getFileExtension()))
             rebuild = true;
           
           // continue rebuild has not been required so far
@@ -139,12 +140,15 @@ public class Builder extends IncrementalProjectBuilder {
                environment.getIncludePath().contains(new RelativePath(root, relPath.toString()))))
             return false;
           
-          if ("sugj".equals(resource.getFileExtension())) {
+          //if ("sugj".equals(resource.getFileExtension())) {
+          System.out.println("sugar file extension: " + UsedLanguageLibrary.langLib.getSugarFileExtension().substring(1) + " file extension: " + resource.getFileExtension() + "  ---- " + resource);
+          if (UsedLanguageLibrary.langLib.getSugarFileExtension().substring(1).equals(resource.getFileExtension())) {
             String path = getProject().getLocation().makeAbsolute() + "/" + relPath;
+            System.out.println("   ...found: " + path);
             final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(
                     FileCommands.dropExtension(path.toString()),
                     environment.getSourcePath(),
-                    new JavaLib()); // XXX: Replace this by languageLib to support more than java
+                    UsedLanguageLibrary.langLib.getFactoryForLanguage().createLanguageLibrary()); // XXX: Replace this by languageLib to support more than java
             
             if (sourceFile == null) {
               org.strategoxt.imp.runtime.Environment.logWarning("cannot locate source file for ressource " + resource.getFullPath());

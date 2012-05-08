@@ -269,6 +269,12 @@ public class JavaLib extends LanguageLib implements Serializable {
 	    return relPackageName;
 	  }
 
+	  public String extractNamespaceName(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
+	      String packageName = prettyPrint(getApplicationSubterm(toplevelDecl, "PackageDec", 1), interp);
+
+	      return packageName;
+	  }
+	  
 	public Path getOutFile() {
 	    return javaOutFile;
 	  }
@@ -310,6 +316,10 @@ public class JavaLib extends LanguageLib implements Serializable {
 	    return isApplication(decl, "SugarDec");
 	  }
 
+	public boolean isNamespaceDec(IStrategoTerm decl) {
+		return isApplication(decl, "PackageDec");
+	}
+	
 	/**
 	   * Pretty prints the content of a Java AST in some file.
 	   * 

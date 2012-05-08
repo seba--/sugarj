@@ -23,12 +23,17 @@ import java.util.Set;
 import org.eclipse.core.runtime.FileLocator;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.Term;
+import org.spoofax.terms.TermFactory;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.java_front.pp_java_string_0_0;
 import org.strategoxt.lang.Context;
 import org.strategoxt.stratego_gpp.abox2text_0_1;
 import org.strategoxt.stratego_gpp.ast2abox_0_1;
+import org.strategoxt.stratego_gpp.ast2box_0_1;
+import org.strategoxt.stratego_gpp.box2text_string_0_1;
 import org.strategoxt.stratego_gpp.parse_pptable_file_0_0;
+import org.strategoxt.stratego_lib.list_1_0;
+import org.strategoxt.stratego_sglr.tuple_2_0;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
@@ -59,6 +64,15 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	private String relNamespaceName;
 	
+	private IStrategoTerm pptable = null;
+	private File prettyPrint = null;
+	
+	private File getPrettyPrint() {
+		if (prettyPrint == null)
+			prettyPrint = ensureFile("org/sugarj/languages/Prolog.pp");
+		
+		return prettyPrint;
+	}
 	
 	@Override
 	public List<File> getGrammars() {
@@ -196,12 +210,21 @@ public class PrologLib extends LanguageLib implements Serializable {
 	  
 	  @Override
 	  public boolean isLanguageSpecificDec(IStrategoTerm decl) {
-	    return isApplication(decl, "Sentence");
+	    //return isApplication(decl, "Sentence");
+		return isApplication(decl, "NonUnitClause") || 
+				isApplication(decl, "UnitClause") ||
+				isApplication(decl, "Query") ||
+				isApplication(decl, "Command");
 	  }
 
 	  @Override
 	  public boolean isSugarDec(IStrategoTerm decl) {
 	    return isApplication(decl, "SugarDec");           
+	  }
+	  
+	  @Override
+	  public boolean isNamespaceDec(IStrategoTerm decl) {
+		  return isApplication(decl, "ModuleDec");
 	  }
 	  
 	  @Override
@@ -232,7 +255,8 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	@Override
 	public String getSugarFileExtension() {
-		return ".sugp";
+		//return ".sugp";		// XXX: CHANGE THIS BACK
+		return ".sugj";
 	}
 
 	@Override
@@ -260,15 +284,23 @@ public class PrologLib extends LanguageLib implements Serializable {
 	public void processLanguageSpecific(IStrategoTerm toplevelDecl,
 			Environment environment, HybridInterpreter interp)
 			throws IOException {
+		// XXX: What do I actually need to do here?
+		// XXX: No types, so probably nothing??
 		// :- module("foo", [bar/1, baz/2]).
 		
+		/*
 		IStrategoTerm dec = isApplication(toplevelDecl, "ModuleDec") ?
 				getApplicationSubterm(toplevelDecl, "ModuleDec", 0) : toplevelDecl;
-		
-		String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));	// XXX: asJavaString?
+
+		//String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));	// XXX: asJavaString?
+		String decName = dec.getSubterm(0).getSubterm(1).getSubterm(0).toString();
 		RelativePath moduleFile = environment.createBinPath(getRelNamespaceSep() + decName + ".pro");
 		generatedFiles.add(moduleFile);
+		*/
+		IStrategoTerm dec = toplevelDecl;
+		
 		prologSource.addBodyDecl(prettyPrint(dec, interp));
+		
 /*
  * 	    IStrategoTerm dec =  isApplication(toplevelDecl, "JavaTypeDec") ?
  *  getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0) : toplevelDecl;   // XXX: Extract JavaTypeDec stuff
@@ -284,6 +316,17 @@ public class PrologLib extends LanguageLib implements Serializable {
 		
 	}
 
+	
+	private IStrategoTerm initializePrettyPrinter(Context ctx) {
+		if (pptable == null) {
+			String x = getPrettyPrint().getAbsolutePath();
+			IStrategoTerm pptable_file = ATermCommands.makeString(getPrettyPrint().getAbsolutePath(), null);
+			pptable = parse_pptable_file_0_0.instance.invoke(ctx, pptable_file);
+		}
+		
+		return pptable;
+	}
+	
 	@Override
 	public String prettyPrint(IStrategoTerm term,
 			HybridInterpreter interp) throws IOException {
@@ -298,23 +341,17 @@ abox2text_0_1.class    invoke(context, prolog-term, width integer)
 		// XXX: This might need some fixing.
 		
 		System.err.println("+++++++++++++++++++++++ pretty-printing prolog");
-		Context ctx = interp.getCompiledContext();
-		
-		System.err.println("context: " + ctx);
-		
-		IStrategoTerm ppTable = parse_pptable_file_0_0.instance.invoke(ctx, ATermCommands.atermFromFile("Prolog.pp"));
-		
+		Context ctx = interp.getCompiledContext();		
+		IStrategoTerm ppTable = initializePrettyPrinter(ctx);
 		System.err.println("pptable: " + ppTable);
-		
-		IStrategoTerm ppAbox = ast2abox_0_1.instance.invoke(ctx,  term, ppTable);
-		
+		TermFactory tf = new TermFactory();
+		IStrategoTerm ppt_list = tf.makeList(ppTable);
+		IStrategoTerm ppAbox = ast2abox_0_1.instance.invoke(ctx, term, ppt_list);		
 		System.err.println("abox: " + ppAbox);
-		
-		IStrategoTerm ppText = abox2text_0_1.instance.invoke(ctx, ppAbox, ATermCommands.atermFromString("80"));
-
-		System.err.println("pptext: " + ppText);
-		
-		return ppText.toString();
+		IStrategoTerm ppText = box2text_string_0_1.instance.invoke(ctx, ppAbox, ATermCommands.atermFromString("80"));
+		String pretty = ATermCommands.getString(ppText);
+		System.err.println("pptext: " + pretty);
+		return pretty;
 		
 		
 		/*
@@ -480,7 +517,7 @@ abox2text_0_1.class    invoke(context, prolog-term, width integer)
 
 		if (generateFiles) {
 			for (Path file : sourceFiles) {
-				String copiedFileName = bin.getFile().getAbsolutePath() + file.getFile().getName();
+				String copiedFileName = bin.getFile().getAbsolutePath() + Environment.sep + file.getFile().getName();
 				System.err.println("###################### file name: " + copiedFileName);
 				File destFile = new File(copiedFileName);
 				Path p2 = new AbsolutePath(destFile.getAbsolutePath());
@@ -554,5 +591,16 @@ abox2text_0_1.class    invoke(context, prolog-term, width integer)
 	    ATermCommands.setErrorMessage(toplevelDecl, msg);
 	  }
 
+	@Override
+	public String extractNamespaceName(IStrategoTerm toplevelDecl,
+			HybridInterpreter interp) throws IOException {
+//	      String packageName = prettyPrint(getApplicationSubterm(toplevelDecl, "PackageDec", 1), interp);
+		
+		String moduleName = prettyPrint(getApplicationSubterm(toplevelDecl, "ModuleDec", 0), interp);
+		
+		return moduleName;
+	}
+
+	
 	
 }

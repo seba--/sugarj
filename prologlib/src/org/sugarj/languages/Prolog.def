@@ -163,6 +163,7 @@ exports
     Slash					-> FirstSymbolChar
     [\+\-\*\/\\\^\<\>\=\'\~\:\.\?\@\#\$\&] 	-> SymbolChar
     [\.]					-> Symbol {reject}
+    ":-"                    -> Symbol {reject}
   lexical restrictions
     Symbol 	-/- [\+\-\*\/\\\^\<\>\=\'\~\:\.\?\@\#\$\&]
     Slash 	-/- [\*]

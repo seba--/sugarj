@@ -65,7 +65,8 @@ public abstract class LanguageLib implements Serializable {
 	public abstract Path getOutFile();
 	public abstract Set<RelativePath> getGeneratedFiles();	// XXX: was: getGeneratedJavaClasses -- is getCompiledFiles a reasonably good name? Probably change to getGeneratedBinFiles?
 	  
-	  
+	
+	public abstract boolean isNamespaceDec(IStrategoTerm decl);
 	public abstract boolean isLanguageSpecificDec(IStrategoTerm decl);
 	public abstract boolean isSugarDec(IStrategoTerm decl);
 	public abstract boolean isEditorService(IStrategoTerm decl);
@@ -95,6 +96,8 @@ public abstract class LanguageLib implements Serializable {
 	
 	public abstract String getNamespace();
 	public abstract String getRelNamespaceSep();
+	
+	public abstract String extractNamespaceName(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException;
 	
 	public abstract void checkNamespace(IStrategoTerm decl, RelativeSourceLocationPath sourceFile, IErrorLogger errorLog);
 	public abstract void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IErrorLogger errorLog, String packageName, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException;
