@@ -37,16 +37,20 @@ exports
 
   context-free syntax       %% my additions
     
-	":-" "module" "(" Word "," List ")"	"." -> ModuleDec {prefer, cons("ModuleDec")}    %% module definition
-    ":-" "use_module" "(" Word ("," List)? ")" "."  -> ModuleImport {prefer, cons("ModuleImport")}  %% module import
-    ":-" "reexport"  "(" Word "," List ")" "."  -> ModuleReexport {prefer, cons("ModuleReexport")}  %% module reexport   
+	":-" "module" "(" Word "," List ")"	"."                -> ModuleDec {prefer, cons("ModuleDec")}    %% module definition
+    ":-" "reexport"  "(" Word "," List ")" "."             -> ModuleReexport {prefer, cons("ModuleReexport")}  %% module reexport   
+    ModulePath2 -> ModulePath {cons("ModulePath")}
+
+    ":-" "use_module" "(" ModulePath ")" "."                -> ModuleImport {cons("ModuleImport")}
+    ":-" "use_module" "(" ModulePath "," List ")" "."       -> ModuleImport {cons("ModuleImport")}  %% module import
+
 
 %% ---
 
   context-free syntax
     Head ":-" Body "." 		-> NonUnitClause {cons("NonUnitClause")}
     Head "."			-> UnitClause {cons("UnitClause")}
-    ":-" Body "."		-> Command {cons("Command")}
+    ":-" Body "."                                           -> Command {cons("Command")}
     "?-" Body "."		-> Query {cons("Query")}
 
     Module ":" Head 		-> Head {cons("ModuleHead")}
@@ -149,6 +153,8 @@ exports
     Word 			-> Name {cons("Word")}
   lexical syntax
     [a-z] Alpha* 		-> Word
+    "module"            -> Word {reject}
+    "use_module"        -> Word {reject} 
   lexical restrictions
     Word -/- [A-Za-z0-9\_]
 
@@ -195,6 +201,9 @@ exports
     "\"\""			-> StringItem 
     "\\" EscapeSequence		-> StringItem 
 
+    lexical syntax
+    ModulePathItem*         -> ModulePath2
+    ~[\,\)]              -> ModulePathItem
 
   lexical syntax
     "." 			-> FullStop 

@@ -190,13 +190,9 @@ public class JavaLib extends LanguageLib implements Serializable {
 		return javaCommands;
 	}
 */
-	@Override
-	public String getSourceFileExtension() {
-		return ".java";
-	}
 
 	@Override
-	public String getBinFileExtension() {
+	public String getGeneratedFileExtension() {
 		return ".class";
 	}
 
@@ -237,7 +233,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 
 	public void checkSourceOutFile(Environment environment, RelativeSourceLocationPath sourceFile) {
 	    if (javaOutFile == null)
-	      setJavaOutFile(environment.createBinPath(getRelNamespaceSep() + FileCommands.fileName(sourceFile) + getSourceFileExtension()));
+	      setJavaOutFile(environment.createBinPath(getRelNamespaceSep() + FileCommands.fileName(sourceFile) + ".java"));
 	  }
 
 	// XXX: move this to language driver?

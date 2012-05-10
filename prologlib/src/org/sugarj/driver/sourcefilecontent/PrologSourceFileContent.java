@@ -67,26 +67,41 @@ public class PrologSourceFileContent implements ISourceFileContent {
 		code.append('\n');
 
 		for (PrologModuleImport imp : checkedImports)									// XXX: What does this do?
-			code.append(":- use_module(").append(imp.importName).append(getImportedModulePredicateList(imp, interp)).append(").\n");
+			//code.append(":- use_module(").append(imp.importName).append(getImportedModulePredicateList(imp, interp)).append(").\n");
+			code.append(getImportedModuleString(imp, interp)).append("\n");
 
 		for (PrologModuleImport imp : imports)
 			if (files.contains(imp.importName))
 				//code.append(":- use_module(").append(imp).append(",").append(arg0).append(").\n");
-				code.append(":- use_module(").append(imp.importName).append(getImportedModulePredicateList(imp, interp)).append(").\n");
+				//code.append(":- use_module(").append(imp.importName).append(getImportedModulePredicateList(imp, interp)).append(").\n");
+				code.append(getImportedModuleString(imp, interp)).append("\n");
 			else if (!importsOptional)
 				throw new ClassNotFoundException(imp.importName);
 
-		for (String bodyDecl : bodyDecls)
+		for (String bodyDecl : bodyDecls) {
 			code.append(bodyDecl);
-
+			code.append("\n");
+		}
+			
 		return code.toString();
+	}
+	
+	private String getImportedModuleString(PrologModuleImport module, HybridInterpreter interp) throws IOException {
+		IStrategoTerm trm = module.productionDecl;
+		String importString = ":- use_module(";
+		importString += module.importName;
+		int cnt = trm.getSubtermCount();
+		if (trm.getSubtermCount() > 1) { 	// :- use_module(foo, bar/1).
+			importString += getImportedModulePredicateList(module, interp);
+		}
+		return importString + ").";
 	}
 
 	private String getImportedModulePredicateList(PrologModuleImport module, HybridInterpreter interp) throws IOException {
 		if (module.productionDecl == null) 
 			return "";
 		
-		String code = ", " + pLib.prettyPrint(module.productionDecl, interp);
+		String code = ", " + pLib.prettyPrint(module.productionDecl.getSubterm(1), interp);
 		
 		// XXX: return something here (pretty-printed string!)
 		return code;

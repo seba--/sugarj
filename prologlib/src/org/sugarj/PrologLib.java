@@ -94,12 +94,12 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	@Override
 	public File getInitTrans() {
-		return ensureFile("org/sugarj/prolog/init/initTrans.str");
+		return ensureFile("org/sugarj/prolog/init/InitTrans.str");
 	}
 
 	@Override
 	public String getInitTransModule() {
-		return "org/sugarj/prolog/init/initTrans";
+		return "org/sugarj/prolog/init/InitTrans";
 	}
 
 	@Override
@@ -243,14 +243,8 @@ public class PrologLib extends LanguageLib implements Serializable {
 	  }
 
 	@Override
-	public String getSourceFileExtension() {
+	public String getGeneratedFileExtension() {
 		return ".pro";
-	}
-
-	@Override
-	public String getBinFileExtension() {
-		// Return null, as swi prolog is an interpreted language.
-		return null;
 	}
 
 	@Override
@@ -319,9 +313,8 @@ public class PrologLib extends LanguageLib implements Serializable {
 	
 	private IStrategoTerm initializePrettyPrinter(Context ctx) {
 		if (pptable == null) {
-			String x = getPrettyPrint().getAbsolutePath();
 			IStrategoTerm pptable_file = ATermCommands.makeString(getPrettyPrint().getAbsolutePath(), null);
-			pptable = parse_pptable_file_0_0.instance.invoke(ctx, pptable_file);
+			pptable = parse_pptable_file_0_0.instance.invoke(org.strategoxt.stratego_gpp.stratego_gpp.init(), pptable_file);
 		}
 		
 		return pptable;
@@ -398,7 +391,7 @@ abox2text_0_1.class    invoke(context, prolog-term, width integer)
 		log.beginTask("Extracting", "Extract name of imported module");
 		try {
 			if (isApplication(toplevelDecl, "ModuleImport"))
-				name = prettyPrint(toplevelDecl.getSubterm(0), interp);
+				name = prettyPrint(toplevelDecl.getSubterm(0).getSubterm(0), interp);
 		} finally {
 			log.endTask(name);
 		}
@@ -439,7 +432,7 @@ abox2text_0_1.class    invoke(context, prolog-term, width integer)
 	public void checkSourceOutFile(Environment environment,
 			RelativeSourceLocationPath sourceFile) {
 		if (prologOutFile == null) 
-			prologOutFile = environment.createBinPath(getRelNamespaceSep() + FileCommands.fileName(sourceFile) + getSourceFileExtension());
+			prologOutFile = environment.createBinPath(getRelNamespaceSep() + FileCommands.fileName(sourceFile) + ".pro");
 	}
 
 	@Override
@@ -517,7 +510,7 @@ abox2text_0_1.class    invoke(context, prolog-term, width integer)
 
 		if (generateFiles) {
 			for (Path file : sourceFiles) {
-				String copiedFileName = bin.getFile().getAbsolutePath() + Environment.sep + file.getFile().getName();
+				String copiedFileName = bin.getFile().getAbsolutePath() + File.separator + file.getFile().getName();
 				System.err.println("###################### file name: " + copiedFileName);
 				File destFile = new File(copiedFileName);
 				Path p2 = new AbsolutePath(destFile.getAbsolutePath());
@@ -526,52 +519,25 @@ abox2text_0_1.class    invoke(context, prolog-term, width integer)
 			for (Path cl : generatedFiles) {
 				generatedFileHashes.put(cl, FileCommands.fileHash(cl));
 			}
-			//FileCommands.copyFile(from, to)
-
-		}
-/*
- * 		if (generateFiles) {
-			JavaCommands.javac(javaOutFiles, bin, path);
-			for (Path cl : generatedJavaClasses)
-				generatedFileHashes.put(cl, FileCommands.fileHash(cl));
 		}
 
- */
 	}
 	
-	/*private Path getFilenameForOtherDirectory(Path orig, Path moved) {
-		String fileName = orig.getFile().getName();
-		
-		File x = new File(fileName)
-	}*/
-
 	@Override
 	public String getImportedModulePath(IStrategoTerm toplevelDecl,
 			HybridInterpreter interp) throws IOException {
-		String importModuleName = extractImportedModuleName(toplevelDecl, interp);
+		//String importModuleName = extractImportedModuleName(toplevelDecl, interp);
+		String modulePath = prettyPrint(toplevelDecl.getSubterm(0).getSubterm(0), interp);
 		
-		return getRelativeModulePath(importModuleName);
+		return modulePath;
+		
+		//return getRelativeModulePath(importModuleName);
 		
 	}
 	
 	private String getRelativeModulePath(String moduleName) {
 		return moduleName.replace("/", Environment.sep);
 	}
-
-	/**
-	 * 	@Override
-	public String getImportedModulePath(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
-	      String importModule = extractImportedModuleName(toplevelDecl, interp);
-	      String modulePath = getRelativeModulePath(importModule);
-	      
-	      return getRelativeModulePath(modulePath);
-	}
-	
-	  private String getRelativeModulePath(String module) {
-		    return module.replace(".", Environment.sep);
-		  }
-
-	 */
 	
 	@Override
 	public void addImportModule(IStrategoTerm toplevelDecl,
@@ -594,10 +560,7 @@ abox2text_0_1.class    invoke(context, prolog-term, width integer)
 	@Override
 	public String extractNamespaceName(IStrategoTerm toplevelDecl,
 			HybridInterpreter interp) throws IOException {
-//	      String packageName = prettyPrint(getApplicationSubterm(toplevelDecl, "PackageDec", 1), interp);
-		
 		String moduleName = prettyPrint(getApplicationSubterm(toplevelDecl, "ModuleDec", 0), interp);
-		
 		return moduleName;
 	}
 

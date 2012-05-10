@@ -43,15 +43,10 @@ public abstract class LanguageLib implements Serializable {
 	
 	public abstract File getLibraryDirectory();
 	
-	protected abstract File ensureFile(String resource);
+	protected abstract File ensureFile(String resource);	
 	
 	
-	//public abstract ICompilerCommands getCompilerCommands();
-	
-	
-	
-	public abstract String getSourceFileExtension();
-	public abstract String getBinFileExtension();
+	public abstract String getGeneratedFileExtension();
 	public abstract String getSugarFileExtension();
 	
 	

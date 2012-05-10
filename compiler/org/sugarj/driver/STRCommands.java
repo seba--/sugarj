@@ -165,7 +165,7 @@ public class STRCommands {
       Path dir = FileCommands.newTempDir();
       FileCommands.createDir(new RelativePath(dir, "sugarj"));
       String javaFilename = FileCommands.fileName(str).replace("-", "_");
-      Path java = new RelativePath(dir, "sugarj" + Environment.sep + javaFilename + langLib.getSourceFileExtension());
+      Path java = new RelativePath(dir, "sugarj" + Environment.sep + javaFilename + ".java");
       log.log("calling STRJ");
       strj(str, java, main, strjContext, paths, langLib);
       

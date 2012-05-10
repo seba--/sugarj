@@ -38,14 +38,14 @@ public class ModuleSystemCommands {
      * @throws IOException
      */
     public static boolean importClass(IStrategoTerm toplevelDecl, HybridInterpreter interp, Environment environment, LanguageLib langLib) throws IOException {
-      if (langLib.getBinFileExtension() == null)    // if language does not have bin files (e.g. for interpreted languages), return true
+      if (langLib.getGeneratedFileExtension() == null)    // if language does not have bin files (e.g. for interpreted languages), return true
          return true;
       
-      RelativePath clazz = searchFile(langLib.getImportedModulePath(toplevelDecl, interp), langLib.getBinFileExtension(), environment);
+      RelativePath clazz = searchFile(langLib.getImportedModulePath(toplevelDecl, interp), langLib.getGeneratedFileExtension(), environment);
       if (clazz == null)
         return false;
       
-      log.beginTask("Generate Java code");
+      log.beginTask("Generate target code");
       try {
         langLib.addCheckedImportModule(toplevelDecl, interp);
         //source.addCheckedImport(modulePath.replace('/', '.'));
@@ -57,7 +57,7 @@ public class ModuleSystemCommands {
     }
     
     public static void registerSearchedClassFiles(String modulePath, Result driverResult, Environment environment, LanguageLib langLib) throws IOException {
-      registerSearchedFiles(modulePath, langLib.getBinFileExtension(), driverResult, environment);
+      registerSearchedFiles(modulePath, langLib.getGeneratedFileExtension(), driverResult, environment);
     }
 
   
@@ -147,10 +147,7 @@ public class ModuleSystemCommands {
       return null;
     
     RelativeSourceLocationPath result = searchFileInSourceLocationPath(modulePath, langLib.getSugarFileExtension(), sourcePath);
-    
-    if (result == null)
-      result = searchFileInSourceLocationPath(modulePath, langLib.getSourceFileExtension(), sourcePath);
-    
+        
     return result;
   }
   

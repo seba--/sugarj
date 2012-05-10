@@ -813,8 +813,7 @@ public class Driver{
     
       if (res != null &&
           term != null &&
-          (isApplication(term, "TypeImportDec") ||
-           isApplication(term, "TypeImportOnDemandDec"))) {
+          langLib.isImport(term)) {
         remainingInput = res.getRest();
         pendingImports.add(term);
       }
@@ -845,7 +844,7 @@ public class Driver{
       
       boolean skipProcessImport = false;
       
-      if (!modulePath.startsWith("org/sugarj")) { // module is in sugarj standard library
+      if (!modulePath.startsWith("org/sugarj")) { // module is not in sugarj standard library
         Path dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
         Result res = null;
         RelativeSourceLocationPath importSourceFile = null;
