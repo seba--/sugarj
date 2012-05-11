@@ -16,7 +16,6 @@ public transformation ModelSyntax {
            SugarCompilationUnit(id,ensure-imports(|metamodel),map(syntaxmodel-to-sugar))
            
      
- 
     metamodel-to-nothing :
       ModelDec(_, ModelBody(("Metamodel", _))) -> []
     
@@ -127,7 +126,7 @@ public transformation ModelSyntax {
       register-model-import(|path)
 
     register-model-import =
-      ?ModelTransImportDec(name, trans, _);
+      ?ModelTransImportDec(name, trans);
       path := <import-model-path-trans> (<import-model-path> name, trans);
       register-model-import(|path)
 
@@ -160,6 +159,6 @@ public transformation ModelSyntax {
     ensure-aux-import : imps -> <union> (imps, [auximp])
       where auximp := TypeImportDec(TypeName(PackageOrTypeName(Id("meta")), Id("ModelSyntaxAux")))
 
-    metamodel-signatures-import(|metamodel) : imp@ModelImportDec(type) -> TransImportDec(type, [TypeName(PackageOrTypeName(Id("meta")), Id("Signatures"))], None())
+    metamodel-signatures-import(|metamodel) : imp@ModelImportDec(type) -> TransImportDec(TransApp(type, [TypeName(PackageOrTypeName(Id("meta")), Id("Signatures"))]), None)
       where <?TypeName(_, Id(metamodel)) <+ ?TypeName(Id(metamodel))> type
 }

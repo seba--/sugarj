@@ -22,5 +22,5 @@ public syntax Syntax for Model {
 
   
 
-  Bogus ::= bad:Bogus
+  // Bogus ::= bad:Bogus
 }

@@ -1,44 +1,14 @@
 package statemachine.test;
 
 import statemachine.test.ATM<statemachine.ToJava>;
-import statemachine.test.ATM<statemachine.ToJavaIO> as ATM_IO;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
-
-public class ATMTest {
+public class ATMTest { 
   public static void main(String[] args) {
-    ATM machine = new ATM();
-    
-    BufferedReader inputReader = new BufferedReader(new InputStreamReader(System.in));
-    String in;
-    
-    System.out.println("Welcome. Possible events are:");
-    for (String s : ATM_IO.eventNames())
-      System.out.print(s + ", ");
-    System.out.println("reset, and exit.");
-
-    try {
-	  while ((in = inputReader.readLine()) != null) {
-	    if ("exit".equals(in))
-	      break;
-	    else if ("reset".equals(in))
-	      machine = new ATM();
-	    else {
-          try {
-	        ATM.Event e = ATM_IO.parseEvent(machine, in);
-	        if (e == null)
-	          throw new IllegalArgumentException("Unknown event " + in);
-		    machine.step(e);
-          } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage() + "; try again.");
-          }
-	    }
-        System.out.println("Current state is " + machine.currentState() + ". Next event?");
-	  }
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    ATM machine = new ATM(); 
+    machine.step(machine.event_DoWithdraw());
+    machine.step(machine.event_PinOK());
+    machine.step(machine.event_MoneyTaken());
+    machine.step(machine.event_CardTaken());
+    assert machine.currentState() == machine.state_Init();
   }
 }
