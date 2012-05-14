@@ -30,10 +30,10 @@ signature constructors
     grammar-elem               : Grammar -> SugarDefElem
     CompileError               : String * Any -> CompileError
     
-//    EditorServicesDec          : EditorServicesDecHead * EditorServicesDecBody -> SugarDec
-//    EditorServicesDecHead      : List(Annos) * JavaId -> EditorServicesDecHead
-//    EditorServicesBody         : List(EditorServicesSection) -> EditorServiceBody
-//    ChecksDec          : EditorServicesDecHead * EditorServicesDecBody -> SugarDec
-//    ChecksDecHead      : List(Annos) * JavaId -> EditorServicesDecHead
-//    ChecksBody         : List(EditorServicesSection) -> EditorServiceBody
+    EditorServicesDec          : EditorServicesDecHead * EditorServicesDecBody -> SugarDec
+    EditorServicesDecHead      : List(Annos) * JavaId -> EditorServicesDecHead
+    EditorServicesBody         : List(EditorServicesSection) -> EditorServiceBody
+    ChecksDec          : EditorServicesDecHead * EditorServicesDecBody -> SugarDec
+    ChecksDecHead      : List(Annos) * JavaId -> EditorServicesDecHead
+    ChecksBody         : List(EditorServicesSection) -> EditorServiceBody
     

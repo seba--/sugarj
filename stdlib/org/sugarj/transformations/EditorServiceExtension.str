@@ -18,7 +18,9 @@ signature
     RuleNoCond           : StrategoTerm() * StrategoTerm() -> CheckingRuleBody()
     Rule                 : StrategoTerm() * StrategoTerm() * StrategoStrategy() -> CheckingRuleBody()
     Rule                 : StrategoTerm() * StrategoTerm() * iter() -> CheckingRuleBody()
-
+    // hacky!
+    SugarDec             : workaroundA * workaroundB -> workaroundC
+    SugarDecHead         : workaroundA * workaroundB -> workaroundC
 
 rules
   

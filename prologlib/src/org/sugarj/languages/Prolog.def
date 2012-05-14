@@ -22,10 +22,7 @@ exports
   context-free start-symbols Program
   sorts Program Sentence
   context-free syntax
-    %%    Module ":" Sentence 	-> Sentence
-	
 	ModuleDec ModuleReexport* ModuleImport* Sentence*	-> Program {cons("Program"), prefer}       %% remove
-%%	Sentence*			-> Program {cons("Program")}               %% remove
 	
     Clause 			-> Sentence 
     Directive 			-> Sentence 
@@ -96,7 +93,7 @@ exports
     "[" {Term ","}+ "|" Term "]"-> List {cons("ListTl")}
   context-free priorities
     PrefixOp Term		-> Term 
-  > Term Op 			-> Term 
+  > Term PostfixOp 	    -> Term
   > Term Op Term 		-> Term 
 
   context-free syntax %% Operators, Constants, Functors

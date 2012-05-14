@@ -80,13 +80,13 @@ exports
   lexical restrictions
     "desugarings" -/- [a-zA-Z0-9\'\-\_]
 
-  sorts EditorServicesDecHead EditorServicesBody
+%%  sorts EditorServicesDecHead EditorServicesBody
 
-  context-free syntax
-    EditorServicesDecHead EditorServicesBody   -> SugarDec              {cons("EditorServicesDec")}
+%%  context-free syntax
+%%    EditorServicesDecHead EditorServicesBody   -> SugarDec              {cons("EditorServicesDec")}
     %%AnnoOrSugarMod* "editor" "services" JavaId -> EditorServicesDecHead {cons("EditorServicesDecHead")}
-    "editor_services" Name                      -> EditorServicesDecHead {cons("EditorServicesDecHead")}
-    ":-" EditorServiceSection* "."              -> EditorServicesBody    {cons("EditorServicesBody")}       %% replaced '{' and '}' by ':-' and '.'
+%%    "editor_services" Name                      -> EditorServicesDecHead {cons("EditorServicesDecHead")}
+%%    ":-" EditorServiceSection* "."              -> EditorServicesBody    {cons("EditorServicesBody")}       %% replaced '{' and '}' by ':-' and '.'
 
 %%  context-free syntax
 %%    ChecksDecHead ChecksBody   -> ToplevelDeclaration              {cons("ChecksDec")}              %% modify here
@@ -116,6 +116,7 @@ exports
     ModuleImport -> ToplevelDeclaration
     ModuleReexport -> ToplevelDeclaration       %% needed?
     Sentence -> ToplevelDeclaration
-    SugarDec -> ToplevelDeclaration
+    SugarModuleDec -> ToplevelDeclaration
+    SugarBody   -> ToplevelDeclaration
   
   
