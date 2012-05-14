@@ -88,9 +88,9 @@ public class STRCommands {
       }
 
     
-    for (String s : cmd) {  // XXX: debug output
-      System.out.println(s);
-    }
+//    for (String s : cmd) {  // XXX: debug output
+//      System.out.println(s);
+//    }
     
     
     final ByteArrayOutputStream log = new ByteArrayOutputStream();

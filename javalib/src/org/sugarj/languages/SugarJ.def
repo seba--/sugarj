@@ -179,9 +179,7 @@ exports
 
   )
 
-  %% from initgrammar
-  context-free start-symbols NextToplevelDeclaration
-  
+  %% moved from initgrammar  
   context-free syntax %% ToplevelDeclaration
     JavaPackageDec -> ToplevelDeclaration
     JavaImportDec -> ToplevelDeclaration

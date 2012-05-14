@@ -7,6 +7,7 @@ import java.util.Set;
 import org.strategoxt.HybridInterpreter;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
+import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 
 /**
@@ -45,7 +46,7 @@ public class JavaSourceFileContent implements ISourceFileContent {
     bodyDecls.add(bodyDecl);
   }
   
-  public String getCode(Set<RelativePath> generatedClasses, HybridInterpreter interp) throws ClassNotFoundException {
+  public String getCode(Set<RelativePath> generatedClasses, HybridInterpreter interp, Path outFile) throws ClassNotFoundException {
     List<String> classes = new LinkedList<String>();
     for (RelativePath p : generatedClasses)
       classes.add(FileCommands.dropExtension(p.getRelativePath()).replace(Environment.sep, "."));

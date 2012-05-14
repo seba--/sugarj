@@ -3,6 +3,8 @@ definition
 module org/sugarj/stdlib/Common
 exports
 
+  context-free start-symbols NextToplevelDeclaration
+
   context-free syntax %% NextToplevelDeclaration
     ToplevelDeclaration Rest -> NextToplevelDeclaration {cons("NextToplevelDeclaration")}
   

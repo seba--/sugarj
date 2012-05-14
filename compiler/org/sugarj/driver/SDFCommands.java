@@ -107,9 +107,9 @@ public class SDFCommands {
         cmd.add(path.getAbsolutePath());
       }
     
-    for (String s : cmd.toArray(new String[cmd.size()])) {  // XXX: debug output
-      System.out.println(s);
-    }
+//    for (String s : cmd.toArray(new String[cmd.size()])) {  // XXX: debug output
+//      System.out.println(s);
+//    }
     
     
     try {

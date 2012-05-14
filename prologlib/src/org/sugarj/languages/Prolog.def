@@ -17,7 +17,7 @@
 %% The equals sign = is forced to be an infix operator.
 %%
 definition
-module org/sugarj/languages/Prolog
+module org/sugarj/languages/PrologMain
 exports
   context-free start-symbols Program
   sorts Program Sentence
@@ -38,7 +38,7 @@ exports
   context-free syntax       %% my additions
     
 	":-" "module" "(" Word "," List ")"	"."                -> ModuleDec {prefer, cons("ModuleDec")}    %% module definition
-    ":-" "reexport"  "(" Word "," List ")" "."             -> ModuleReexport {prefer, cons("ModuleReexport")}  %% module reexport   
+    ":-" "reexport" "(" Word "," List ")" "."             -> ModuleReexport {prefer, cons("ModuleReexport")}  %% module reexport   
     ModulePath2 -> ModulePath {cons("ModulePath")}
 
     ":-" "use_module" "(" ModulePath ")" "."                -> ModuleImport {cons("ModuleImport")}
@@ -243,7 +243,6 @@ exports
 
 
   lexical syntax
-    LayoutText			-> LAYOUT
 
     LayoutTextItem+ 		-> LayoutText
     LayoutChar 			-> LayoutTextItem
@@ -260,3 +259,64 @@ exports
 
   lexical restrictions
     LayoutText -/- [\0-\32\127\%] | [\/].[\*]
+
+
+module org/sugarj/languages/Prolog
+imports org/sugarj/languages/PrologMain
+          [ Asterisk        => PrologAsterisk
+            CommChar        => PrologCommChar
+            Comment         => PrologComment
+            LayoutChar      => PrologLayoutChar
+            LayoutTextItem  => PrologLayoutTextItem
+            LayoutText      => PrologLayoutText
+            EscapeSequence  => PrologEscapeSequence
+            Alpha           => PrologAlpha
+            Char            => PrologChar
+            FullStop        => PrologFullStop
+            ModulePathItem  => PrologModulePathItem
+            ModulePath2     => PrologModulePath2
+            StringItem      => PrologStringItem
+            String          => PrologString
+            Variable        => PrologVariable
+            CharItem        => PrologCharItem
+            QuotedItem      => PrologQuotedItem
+            QuotedName      => PrologQuotedName
+            SymbolChar      => PrologSymbolChar
+            Slash           => PrologSlash
+            FirstSymbolChar => PrologFirstSymbolChar
+            Symbol          => PrologSymbol
+            Word            => PrologWord
+            Name            => PrologName
+            UnsignedNumber  => PrologUnsignedNumber
+            Number          => PrologNumber
+            Sign            => PrologSign
+            Exponent        => PrologExponent
+            SimpleFloat     => PrologSimpleFloat
+            UnsignedFloat   => PrologUnsignedFloat
+            Base            => PrologBase
+            NaturalNumber   => PrologNaturalNumber
+            Digit           => PrologDigit
+            PostfixOp       => PrologPostfixOp
+            PrefixOp        => PrologPrefixOp
+            Op              => PrologOp
+            Functor         => PrologFunctor
+            Atom            => PrologAtom
+            Constant        => PrologConstant
+            List            => PrologList
+            Goal            => PrologGoal
+            Module          => PrologModule
+            Head            => PrologHead
+            Query           => PrologQuery
+            Command         => PrologCommand
+            UnitClause      => PrologUnitClause
+            NonUnitClause   => PrologNonUnitClause
+            ModuleImport    => PrologModuleImport
+            ModulePath      => PrologModulePath
+            ModuleReexport  => PrologModuleReexport
+            ModuleDec       => PrologModuleDec
+            Directive       => PrologDirective
+            Clause          => PrologClause
+            Sentence        => PrologSentence
+            Program         => PrologProgram
+            Body            => PrologBody
+            Term            => PrologTerm ]

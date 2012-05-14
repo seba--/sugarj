@@ -8,8 +8,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.HybridInterpreter;
@@ -133,7 +133,7 @@ public abstract class LanguageLib implements Serializable {
 						ISourceFileContent otherSource = (ISourceFileContent) currentSource.getValue();
 						try {
 							//result.writeToFile(source.getKey(), otherJavaSource.getCode(generatedClasses));
-							writeToFile(generateFiles, generatedFileHashes, currentSource.getKey(), otherSource.getCode(generatedClasses, interp));
+							writeToFile(generateFiles, generatedFileHashes, currentSource.getKey(), otherSource.getCode(generatedClasses, interp, currentSource.getKey()));
 
 
 						} catch (ClassNotFoundException e) {
@@ -141,7 +141,7 @@ public abstract class LanguageLib implements Serializable {
 						}
 					}
 
-		writeToFile(generateFiles, generatedFileHashes, outFile, source.getCode(generatedClasses, interp));
+		writeToFile(generateFiles, generatedFileHashes, outFile, source.getCode(generatedClasses, interp, outFile));
 		
 		this.compile(javaOutFiles, bin, path, generatedClasses, generatedFileHashes, interp, generateFiles);
 	}

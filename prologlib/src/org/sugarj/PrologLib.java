@@ -510,11 +510,13 @@ abox2text_0_1.class    invoke(context, prolog-term, width integer)
 
 		if (generateFiles) {
 			for (Path file : sourceFiles) {
-				String copiedFileName = bin.getFile().getAbsolutePath() + File.separator + file.getFile().getName();
+				/*String copiedFileName = bin.getFile().getAbsolutePath() + File.separator + file.getFile().getName();
 				System.err.println("###################### file name: " + copiedFileName);
 				File destFile = new File(copiedFileName);
 				Path p2 = new AbsolutePath(destFile.getAbsolutePath());
-				FileCommands.copyFile(file, p2);
+				FileCommands.copyFile(file, p2);*/
+				// XXX: do nothing here?
+				System.err.println("prolog;     no compilation neccessary, file: " + file);
 			}
 			for (Path cl : generatedFiles) {
 				generatedFileHashes.put(cl, FileCommands.fileHash(cl));
