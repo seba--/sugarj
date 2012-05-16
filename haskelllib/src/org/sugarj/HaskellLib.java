@@ -1,16 +1,24 @@
 package org.sugarj;
 
+import static org.sugarj.common.ATermCommands.getApplicationSubterm;
+import static org.sugarj.common.ATermCommands.isApplication;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.sugarj.common.Environment;
+import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
@@ -27,8 +35,21 @@ public class HaskellLib extends LanguageLib {
 
   private transient File libDir;
   
-  private HaskellSourceFileContent haskellSource;
+  private HaskellSourceFileContent sourceContent;
+  private Path outFile;
+  private Set<RelativePath> generatedModules = new HashSet<RelativePath>();
+  
+  private String relNamespaceName;
+  private String moduleName;
 
+  @Override
+  public List<File> getGrammars() {
+    List<File> grammars = new LinkedList<File>(super.getGrammars());
+    grammars.add(ensureFile("org/sugarj/languages/SugarHaskell.def"));
+    grammars.add(ensureFile("org/sugarj/languages/Haskell.def"));
+    return Collections.unmodifiableList(grammars);
+  }
+  
   @Override
   public File getInitGrammar() {
     return ensureFile("org/sugarj/haskell/initGrammar.sdf");
@@ -96,61 +117,63 @@ public class HaskellLib extends LanguageLib {
 
   @Override
   public ISourceFileContent getSource() {
-    return haskellSource;
+    return sourceContent;
   }
 
   @Override
   public Path getOutFile() {
-    // TODO Auto-generated method stub
-    return null;
+    return outFile;
   }
 
   @Override
   public Set<RelativePath> getGeneratedFiles() {
-    // TODO Auto-generated method stub
-    return null;
+    return generatedModules;
   }
 
   @Override
   public boolean isNamespaceDec(IStrategoTerm decl) {
-    // TODO Auto-generated method stub
-    return false;
+    return isApplication(decl, "ModuleDec");
   }
 
   @Override
   public boolean isLanguageSpecificDec(IStrategoTerm decl) {
-    // TODO Auto-generated method stub
-    return false;
+    return isApplication(decl, "Topdecl");
   }
 
   @Override
   public boolean isSugarDec(IStrategoTerm decl) {
-    // TODO Auto-generated method stub
-    return false;
+    return isApplication(decl, "SugarBody");
   }
 
   @Override
   public boolean isEditorServiceDec(IStrategoTerm decl) {
-    // TODO Auto-generated method stub
-    return false;
+    return isApplication(decl, "EditorServicesDec");   
   }
 
   @Override
   public boolean isImportDec(IStrategoTerm decl) {
-    // TODO Auto-generated method stub
-    return false;
+    return isApplication(decl, "Import");   
   }
 
   @Override
   public boolean isPlainDec(IStrategoTerm decl) {
-    // TODO Auto-generated method stub
-    return false;
+    return isApplication(decl, "PlainDec");   
+  }
+
+  @Override
+  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IErrorLogger errorLog, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException {
+    moduleName = Term.asJavaString(getApplicationSubterm(toplevelDecl, "ModuleDec", 0));
+    relNamespaceName = FileCommands.dropFilename(sourceFile.getRelativePath());
+    
+    RelativePath clazz = environment.createBinPath(relNamespaceName + Environment.sep + moduleName + getGeneratedFileExtension());
+    generatedModules.add(clazz);
+    
+    sourceContent.setNamespaceDecl(prettyPrint(toplevelDecl, interp));
   }
 
   @Override
   public void processLanguageSpecific(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp) throws IOException {
-    // TODO Auto-generated method stub
-
+    sourceContent.addBodyDecl(prettyPrint(toplevelDecl, interp));
   }
 
   @Override
@@ -167,20 +190,12 @@ public class HaskellLib extends LanguageLib {
 
   @Override
   public String getRelativeNamespace() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IErrorLogger errorLog, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException {
-    // TODO Auto-generated method stub
-
+    return relNamespaceName;
   }
 
   @Override
   public LanguageLibFactory getFactoryForLanguage() {
-    // TODO Auto-generated method stub
-    return null;
+    return HaskellLibFactory.getInstance();
   }
 
   @Override
