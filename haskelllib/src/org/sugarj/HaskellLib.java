@@ -2,10 +2,12 @@ package org.sugarj;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.HybridInterpreter;
 import org.sugarj.common.Environment;
@@ -14,6 +16,7 @@ import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.driver.sourcefilecontent.ISourceFileContent;
+import org.sugarj.haskell.HaskellSourceFileContent;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -22,76 +25,78 @@ public class HaskellLib extends LanguageLib {
 
   private static final long serialVersionUID = -8916207157344649789L;
 
+  private transient File libDir;
+  
+  private HaskellSourceFileContent haskellSource;
+
   @Override
   public File getInitGrammar() {
-    // TODO Auto-generated method stub
-    return null;
+    return ensureFile("org/sugarj/haskell/initGrammar.sdf");
   }
 
   @Override
   public String getInitGrammarModule() {
-    // TODO Auto-generated method stub
-    return null;
+    return "org/sugarj/haskell/initGrammar";
   }
 
   @Override
   public File getInitTrans() {
-    // TODO Auto-generated method stub
-    return null;
+    return ensureFile("org/sugarj/haskell/initTrans.str");
   }
 
   @Override
   public String getInitTransModule() {
-    // TODO Auto-generated method stub
-    return null;
+    return "org/sugarj/haskell/initTrans";
   }
 
   @Override
   public File getInitEditor() {
-    // TODO Auto-generated method stub
-    return null;
+    return ensureFile("org/sugarj/haskell/initEditor.serv");
   }
 
   @Override
   public String getInitEditorModule() {
-    // TODO Auto-generated method stub
-    return null;
+    return "org/sugarj/haskell/initEditor";
   }
 
   @Override
   public File getLibraryDirectory() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  protected File ensureFile(String resource) {
-    // TODO Auto-generated method stub
-    return null;
+    if (libDir == null) { // set up directories first
+      String thisClassPath = "org/sugarj/HaskellLib.class";
+      URL thisClassURL = HaskellLib.class.getClassLoader().getResource(thisClassPath);
+      
+      System.out.println(thisClassURL);
+      
+      if (thisClassURL.getProtocol().equals("bundleresource"))
+        try {
+          thisClassURL = FileLocator.resolve(thisClassURL);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      
+      String classPath = thisClassURL.getPath();
+      String binPath = classPath.substring(0, classPath.length() - thisClassPath.length());
+      
+      libDir = new File(binPath);
+    }
+    
+    return libDir;
   }
 
   @Override
   public String getGeneratedFileExtension() {
-    // TODO Auto-generated method stub
-    return null;
+    return ".o";
   }
 
   @Override
   public String getSugarFileExtension() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public void init() {
-    // TODO Auto-generated method stub
-
+    //TODO should be ".sugh"
+    return ".sugj";
   }
 
   @Override
   public ISourceFileContent getSource() {
-    // TODO Auto-generated method stub
-    return null;
+    return haskellSource;
   }
 
   @Override
