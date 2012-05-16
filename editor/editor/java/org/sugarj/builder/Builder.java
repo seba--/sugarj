@@ -28,17 +28,20 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
-import org.sugarj.driver.CommandExecution;
+import org.sugarj.JavaLib;
+import org.sugarj.LanguageLib;
+import org.sugarj.common.CommandExecution;
+import org.sugarj.common.Environment;
+import org.sugarj.common.FileCommands;
+import org.sugarj.common.Log;
+import org.sugarj.common.path.AbsolutePath;
+import org.sugarj.common.path.Path;
+import org.sugarj.common.path.RelativePath;
+import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.driver.Driver;
-import org.sugarj.driver.Environment;
-import org.sugarj.driver.FileCommands;
-import org.sugarj.driver.Log;
 import org.sugarj.driver.ModuleSystemCommands;
 import org.sugarj.driver.Result;
-import org.sugarj.driver.path.AbsolutePath;
-import org.sugarj.driver.path.Path;
-import org.sugarj.driver.path.RelativePath;
-import org.sugarj.driver.path.RelativeSourceLocationPath;
+import org.sugarj.driver.UsedLanguageLibrary;
 import org.sugarj.editor.SugarJConsole;
 import org.sugarj.editor.SugarJParseController;
 import org.sugarj.util.ProcessingListener;
@@ -50,6 +53,9 @@ import org.sugarj.util.ProcessingListener;
  */
 public class Builder extends IncrementalProjectBuilder {
 
+  // XXX: Change language library here
+  LanguageLib langLib = UsedLanguageLibrary.langLib;
+  
   private class BuildInput {
     public IResource resource;
     public RelativeSourceLocationPath sourceFile;
@@ -98,7 +104,8 @@ public class Builder extends IncrementalProjectBuilder {
       class ShouldRebuildResourceDeltaVisitor implements IResourceDeltaVisitor {
         boolean rebuild = false;
         public boolean visit(IResourceDelta delta) {
-          if ("sugj".equals(delta.getFullPath().getFileExtension()))
+          //if ("sugj".equals(delta.getFullPath().getFileExtension()))
+          if (UsedLanguageLibrary.langLib.getSugarFileExtension().substring(1).equals(delta.getFullPath().getFileExtension()))
             rebuild = true;
           
           // continue rebuild has not been required so far
@@ -133,11 +140,15 @@ public class Builder extends IncrementalProjectBuilder {
                environment.getIncludePath().contains(new RelativePath(root, relPath.toString()))))
             return false;
           
-          if ("sugj".equals(resource.getFileExtension())) {
+          //if ("sugj".equals(resource.getFileExtension())) {
+          System.out.println("sugar file extension: " + UsedLanguageLibrary.langLib.getSugarFileExtension().substring(1) + " file extension: " + resource.getFileExtension() + "  ---- " + resource);
+          if (UsedLanguageLibrary.langLib.getSugarFileExtension().substring(1).equals(resource.getFileExtension())) {
             String path = getProject().getLocation().makeAbsolute() + "/" + relPath;
+            System.out.println("   ...found: " + path);
             final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(
                     FileCommands.dropExtension(path.toString()),
-                    environment.getSourcePath());
+                    environment.getSourcePath(),
+                    UsedLanguageLibrary.langLib.getFactoryForLanguage().createLanguageLibrary()); // XXX: Replace this by languageLib to support more than java
             
             if (sourceFile == null) {
               org.strategoxt.imp.runtime.Environment.logWarning("cannot locate source file for ressource " + resource.getFullPath());
@@ -179,7 +190,7 @@ public class Builder extends IncrementalProjectBuilder {
             RelativePath depFile = new RelativePath(environment.getBin(), FileCommands.dropExtension(input.sourceFile.getRelativePath()) + ".dep");
             Result res = Result.readDependencyFile(depFile, environment);
             if (res == null || !res.isUpToDate(input.sourceFile, environment))
-              res = Driver.compile(input.sourceFile, monitor);
+              res = Driver.compile(input.sourceFile, monitor, langLib.getFactoryForLanguage());
             
             IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
             for (IWorkbenchWindow workbenchWindow : workbenchWindows)

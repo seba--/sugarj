@@ -1,7 +1,7 @@
 module extraction
 imports
   libstratego-lib
-  org/sugarj/languages/SugarJ
+//  org/sugarj/languages/SugarJ
   org/sugarj/languages/Sdf2
   org/sugarj/languages/Stratego
 

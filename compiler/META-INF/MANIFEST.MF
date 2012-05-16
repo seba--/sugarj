@@ -12,14 +12,18 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jdt.core,
  org.strategoxt.strj,
  org.strategoxt.imp.runtime,
- org.strategoxt.imp.nativebundle
+ org.strategoxt.imp.nativebundle,
+ org.sugarj.java,
+ org.sugarj.common,
+ org.sugarj.languagelib,
+ org.sugarj.prolog
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.sugarj,
  org.sugarj.driver,
  org.sugarj.driver.caching,
- org.sugarj.driver.path,
  org.sugarj.driver.transformations,
+ org.sugarj.driver.transformations.extraction,
  org.sugarj.util
 Bundle-ClassPath: make_permissive.jar,
  .,

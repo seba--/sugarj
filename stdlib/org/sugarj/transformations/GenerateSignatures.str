@@ -2,10 +2,9 @@ module org/sugarj/transformations/GenerateSignatures
 
 imports org/sugarj/languages/Sdf2
         org/sugarj/languages/Stratego
-        org/sugarj/languages/SugarJ
-        org/sugarj/init/InitTrans
 
-
+// todo: Not really language independent:
+// "SugarBody"
 
 strategies
   desugar =

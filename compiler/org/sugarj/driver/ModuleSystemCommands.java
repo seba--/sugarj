@@ -1,7 +1,6 @@
 package org.sugarj.driver;
 
-import static org.sugarj.driver.ATermCommands.isApplication;
-import static org.sugarj.driver.Log.log;
+import static org.sugarj.common.Log.log;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -13,45 +12,54 @@ import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.HybridInterpreter;
-import org.sugarj.driver.path.Path;
-import org.sugarj.driver.path.RelativePath;
-import org.sugarj.driver.path.RelativeSourceLocationPath;
-import org.sugarj.driver.path.SourceLocation;
-import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
+import org.sugarj.LanguageLib;
+import org.sugarj.common.ATermCommands;
+import org.sugarj.common.Environment;
+import org.sugarj.common.path.Path;
+import org.sugarj.common.path.RelativePath;
+import org.sugarj.common.path.RelativeSourceLocationPath;
+import org.sugarj.common.path.SourceLocation;
+import org.sugarj.driver.sourcefilecontent.ISourceFileContent;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
 public class ModuleSystemCommands {
   
-  /**
-   * 
-   * @param modulePath
-   * @param importTerm
-   * @param javaOutFile
-   * @param interp
-   * @param driverResult
-   * @return true iff a class file existed.
-   * @throws IOException
-   */
-  public static boolean importClass(String modulePath, JavaSourceFileContent javaSource, Environment environment) throws IOException {
-    RelativePath clazz = searchFile(modulePath, ".class", environment);
-    if (clazz == null)
-      return false;
-    
-    log.beginTask("Generate Java code");
-    try {
-      javaSource.addCheckedImport(modulePath.replace('/', '.'));
-    } finally {
-      log.endTask();
+  
+    /**
+     * 
+     * @param modulePath
+     * @param importTerm
+     * @param javaOutFile
+     * @param interp
+     * @param driverResult
+     * @return true iff a class file existed.
+     * @throws IOException
+     */
+    public static boolean importClass(IStrategoTerm toplevelDecl, HybridInterpreter interp, Environment environment, LanguageLib langLib) throws IOException {
+      if (langLib.getGeneratedFileExtension() == null)    // if language does not have bin files (e.g. for interpreted languages), return true
+         return true;
+      
+      RelativePath clazz = searchFile(langLib.getImportedModulePath(toplevelDecl, interp), langLib.getGeneratedFileExtension(), environment);
+      if (clazz == null)
+        return false;
+      
+      log.beginTask("Generate target code");
+      try {
+        langLib.addCheckedImportModule(toplevelDecl, interp);
+        //source.addCheckedImport(modulePath.replace('/', '.'));
+      } finally {
+        log.endTask();
+      }
+      
+      return true;
     }
     
-    return true;
-  }
-  
-  public static void registerSearchedClassFiles(String modulePath, Result driverResult, Environment environment) throws IOException {
-    registerSearchedFiles(modulePath, ".class", driverResult, environment);
-  }
+    public static void registerSearchedClassFiles(String modulePath, Result driverResult, Environment environment, LanguageLib langLib) throws IOException {
+      registerSearchedFiles(modulePath, langLib.getGeneratedFileExtension(), driverResult, environment);
+    }
+
   
   /**
    * 
@@ -134,34 +142,18 @@ public class ModuleSystemCommands {
 
   
   
-  public static RelativeSourceLocationPath locateSourceFile(String modulePath, Set<SourceLocation> sourcePath) {
+  public static RelativeSourceLocationPath locateSourceFile(String modulePath, Set<SourceLocation> sourcePath, LanguageLib langLib) {
     if (modulePath.startsWith("org/sugarj"))
       return null;
     
-    RelativeSourceLocationPath result = searchFileInSourceLocationPath(modulePath, ".sugj", sourcePath);
-    
-    if (result == null)
-      result = searchFileInSourceLocationPath(modulePath, ".java", sourcePath);
-    
+    RelativeSourceLocationPath result = searchFileInSourceLocationPath(modulePath, langLib.getSugarFileExtension(), sourcePath);
+        
     return result;
   }
   
   
-  
-  public static String extractImportedModuleName(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
-    String name = null;
-    log.beginTask("Extracting", "Extract name of imported module");
-    try {
-      if (isApplication(toplevelDecl, "TypeImportDec"))
-        name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp);
-      
-      if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
-        name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp) + ".*";
-    } finally {
-      log.endTask(name);
-    }
-    return name;
-  }
+// moved this to languageDriver  
+//  public static String extractImportedModuleName(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
 
   
   /**
@@ -179,7 +171,7 @@ public class ModuleSystemCommands {
   }
 
   private static RelativePath searchBinFile(String relativePath, String extension, Environment environment) {
-    RelativePath result = environment.new RelativePathBin(relativePath + extension);
+    RelativePath result = environment.createBinPath(relativePath + extension);
     if (result.getFile().exists())
       return result;
     
@@ -239,7 +231,7 @@ public class ModuleSystemCommands {
    * @throws IOException
    */
   public static void registerSearchedFiles(String relativePath, String extension, Result driverResult, Environment environment) throws IOException {
-    RelativePath binFile = environment.new RelativePathBin(relativePath + extension);
+    RelativePath binFile = environment.createBinPath(relativePath + extension);
     driverResult.addFileDependency(binFile);
     
     for (Path searchPath : environment.getIncludePath()) {

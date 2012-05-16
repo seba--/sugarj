@@ -13,11 +13,11 @@ import org.strategoxt.imp.runtime.dynamicloading.BadDescriptorException;
 import org.strategoxt.imp.runtime.dynamicloading.Descriptor;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.imp.runtime.parser.SGLRParseController;
-import org.sugarj.driver.Environment;
-import org.sugarj.driver.path.AbsolutePath;
-import org.sugarj.driver.path.Path;
-import org.sugarj.driver.path.RelativePath;
-import org.sugarj.driver.path.SourceLocation;
+import org.sugarj.common.Environment;
+import org.sugarj.common.path.AbsolutePath;
+import org.sugarj.common.path.Path;
+import org.sugarj.common.path.RelativePath;
+import org.sugarj.common.path.SourceLocation;
 
 public class SugarJParseController extends SugarJParseControllerGenerated {
   

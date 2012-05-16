@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.sugarj.driver.FileCommands;
-import org.sugarj.driver.path.Path;
+import org.sugarj.common.FileCommands;
+import org.sugarj.common.path.Path;
 
 /**
  * The key of some SDF module as needed for caching.

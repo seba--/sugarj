@@ -1,0 +1,12 @@
+package pair.concrete;
+
+import pair.concrete.Syntax;
+import pair.concrete.Desugar;
+
+public class Test {
+  private static (String, Integer) p = ("12", 34);
+  
+  public static void main(String[] args) {
+    System.out.println(p);
+  } 
+}

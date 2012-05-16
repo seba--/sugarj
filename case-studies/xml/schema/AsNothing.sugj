@@ -1,0 +1,10 @@
+package xml.schema;
+
+import xml.schema.XmlSchemaJavaSyntax;
+
+public sugar AsNothing {
+  desugarings
+    \ XsdExtensionDec(head, body) -> ExtensionDec(head, body) \
+    \ XsdExtensionDecHead(mods, name) -> ExtensionDecHead(mods, name, None) \
+    \ XsdExtensionBody(xml) -> ExtensionBody([]) \
+}

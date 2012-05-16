@@ -1,8 +1,7 @@
 package org.sugarj.driver;
 
-import static org.sugarj.driver.Environment.sep;
-import static org.sugarj.driver.FileCommands.toWindowsPath;
-import static org.sugarj.driver.Log.log;
+import static org.sugarj.common.FileCommands.toWindowsPath;
+import static org.sugarj.common.Log.log;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,12 +31,18 @@ import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoException;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.strj.main_strj_0_0;
+import org.sugarj.LanguageLib;
+import org.sugarj.common.ATermCommands;
+import org.sugarj.common.CommandExecution;
+import org.sugarj.common.Environment;
+import org.sugarj.common.FileCommands;
+import org.sugarj.common.JavaCommands;
+import org.sugarj.common.path.Path;
+import org.sugarj.common.path.RelativePath;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
-import org.sugarj.driver.path.Path;
-import org.sugarj.driver.path.RelativePath;
+import org.sugarj.driver.transformations.extraction.extract_str_0_0;
 import org.sugarj.stdlib.StdLib;
-import org.sugarj.util.LoggingOutputStream;
 
 /**
  * This class provides methods for various SDF commands. Each
@@ -54,23 +59,27 @@ public class STRCommands {
   /**
    *  Compiles a {@code *.str} file to a single {@code *.java} file. 
    */
-  private static void strj(Path str, Path java, String main, Context strjContext, Collection<Path> paths) throws IOException {
+  private static void strj(Path str, Path java, String main, Context strjContext, Collection<Path> paths, LanguageLib langLib) throws IOException {
     
     /*
      * We can include as many paths as we want here, checking the
      * adequacy of the occurring imports is done elsewhere.
      */
-    
-    
+    // TODO: Make this pretty
     List<String> cmd = new ArrayList<String>(Arrays.asList(new String[] {
         "-i", toWindowsPath(str.getAbsolutePath()),
         "-o", toWindowsPath(java.getAbsolutePath()),
         "-m", main,
-        "-I", StdLib.stdLibDir.getPath(),
         "-p", "sugarj",
         "--library",
         "-O", "0"
     }));
+    
+    cmd.add("-I");
+    cmd.add(StdLib.stdLibDir.getPath());
+    cmd.add("-I");
+    cmd.add(langLib.getLibraryDirectory().getPath());
+
     
     for (Path path : paths)
       if (path.getFile().isDirectory()){
@@ -78,6 +87,12 @@ public class STRCommands {
         cmd.add(path.getAbsolutePath());
       }
 
+    
+//    for (String s : cmd) {  // XXX: debug output
+//      System.out.println(s);
+//    }
+    
+    
     final ByteArrayOutputStream log = new ByteArrayOutputStream();
 
     try {
@@ -116,12 +131,23 @@ public class STRCommands {
   }
   
   
-  public static Path compile(Path str, String main, Collection<Path> dependentFiles, JSGLRI strParser, Context strjContext, ModuleKeyCache<Path> strCache, Environment environment) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  public static Path compile(Path str,
+                              String main,
+                              Collection<Path> dependentFiles,
+                              JSGLRI strParser,
+                              Context strjContext,
+                              ModuleKeyCache<Path> strCache,
+                              Environment environment,
+                              LanguageLib langLib) throws IOException,
+                                                          InvalidParseTableException,
+                                                          TokenExpectedException,
+                                                          BadTokenException,
+                                                          SGLRException {
     ModuleKey key = getModuleKeyForAssimilation(str, main, dependentFiles, strParser);
     Path prog = lookupAssimilationInCache(strCache, key);
     
     if (prog == null) {
-      prog = generateAssimilator(key, str, main, strjContext, environment.getIncludePath());
+      prog = generateAssimilator(key, str, main, strjContext, environment.getIncludePath(), langLib);
       cacheAssimilator(strCache, key, prog, environment);
     }
     return prog;
@@ -131,16 +157,18 @@ public class STRCommands {
                                           Path str,
                                           String main,
                                           Context strjContext,
-                                          Collection<Path> paths) throws IOException {
+                                          Collection<Path> paths,
+                                          LanguageLib langLib) throws IOException {
     boolean success = false;
     log.beginTask("Generating", "Generate the assimilator");
     try {
       Path dir = FileCommands.newTempDir();
       FileCommands.createDir(new RelativePath(dir, "sugarj"));
       String javaFilename = FileCommands.fileName(str).replace("-", "_");
-      Path java = new RelativePath(dir, "sugarj" + sep + javaFilename + ".java");
+      Path java = new RelativePath(dir, "sugarj" + Environment.sep + javaFilename + ".java");
       log.log("calling STRJ");
-      strj(str, java, main, strjContext, paths);
+      strj(str, java, main, strjContext, paths, langLib);
+      
       
       if (!JavaCommands.javac(java, dir, paths))
         throw new RuntimeException("java compilation failed");
@@ -165,7 +193,7 @@ public class STRCommands {
 
     log.beginTask("Caching", "Cache assimilator");
     try {
-      Path cacheProg = environment.new RelativePathCache(prog.getFile().getName());
+      Path cacheProg = environment.createCachePath(prog.getFile().getName());
       FileCommands.copyFile(prog, cacheProg);
       
       if (!Environment.rocache) {
@@ -261,4 +289,26 @@ public class STRCommands {
       throw new RuntimeException("desugaring failed", e);
     }
   }
+  
+  /**
+   * Filters Stratego statements from the given term
+   * and compiles assimilation statements to Stratego.
+   * 
+   * @param term a file containing a list of SDF 
+   *             and Stratego statements.
+   * @param str result file
+   * @throws InvalidParseTableException 
+   */
+  public static IStrategoTerm extractSTR(IStrategoTerm term, Context context) throws IOException, InvalidParseTableException {
+    IStrategoTerm result = null;
+    try {
+      result = extract_str_0_0.instance.invoke(context, term);
+    }
+    catch (StrategoExit e) {
+      if (e.getValue() != 0 || result == null)
+        throw new RuntimeException("Stratego extraction failed", e);
+    }
+    return result;
+  }
+  
 }

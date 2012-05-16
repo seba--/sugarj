@@ -5,7 +5,13 @@ Bundle-SymbolicName: org.sugarj.stdlib;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.sugarj.stdlib.Activator
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ org.spoofax.jsglr,
+ org.spoofax.terms,
+ org.strategoxt.strj,
+ org.strategoxt.imp.runtime,
+ org.strategoxt.imp.nativebundle
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: org.sugarj.stdlib
+Export-Package: org.sugarj.languages,
+ org.sugarj.stdlib;uses:="org.eclipse.ui.plugin,org.osgi.framework"

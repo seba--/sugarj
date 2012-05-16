@@ -1,6 +1,10 @@
 package org.sugarj.editor;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,22 +32,33 @@ import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.spoofax.terms.attachments.ParentAttachment;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.imp.runtime.services.ContentProposer;
-import org.sugarj.driver.ATermCommands;
-import org.sugarj.driver.CommandExecution;
+import org.sugarj.LanguageLib;
+import org.sugarj.common.ATermCommands;
+import org.sugarj.common.CommandExecution;
+import org.sugarj.common.Environment;
+import org.sugarj.common.FileCommands;
+import org.sugarj.common.Log;
+import org.sugarj.common.path.AbsolutePath;
+import org.sugarj.common.path.Path;
+import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.driver.Driver;
-import org.sugarj.driver.Environment;
-import org.sugarj.driver.FileCommands;
-import org.sugarj.driver.Log;
 import org.sugarj.driver.ModuleSystemCommands;
 import org.sugarj.driver.Result;
 import org.sugarj.driver.RetractableTreeBuilder;
-import org.sugarj.driver.path.RelativeSourceLocationPath;
+import org.sugarj.driver.STRCommands;
+import org.sugarj.driver.UsedLanguageLibrary;
+import org.sugarj.driver.caching.ModuleKeyCache;
+import org.sugarj.stdlib.StdLib;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
 public class SugarJParser extends JSGLRI {
 
+  // XXX: Change language here:
+  LanguageLib langLib = UsedLanguageLibrary.langLib;
+  
+  
   private Environment environment;
   
   private static Map<String, Result> results = new HashMap<String, Result>();
@@ -113,7 +128,8 @@ public class SugarJParser extends JSGLRI {
   private synchronized void scheduleParse(final String input, final String filename) {
     SugarJParser.setPending(filename, true);
 
-    final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(filename), environment.getSourcePath());
+    // XXX: support non-java files in editor. (i.e. use actual language library here, not just JavaLib)
+    final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(filename), environment.getSourcePath(), UsedLanguageLibrary.langLib);
 
     
     Job parseJob = new Job("SugarJ parser: " + sourceFile.getRelativePath()) {
@@ -153,7 +169,7 @@ public class SugarJParser extends JSGLRI {
     SugarJConsole.activateConsoleOnce();
     
     try {
-      return Driver.parse(input, sourceFile, monitor);
+      return Driver.parse(input, sourceFile, monitor, langLib.getFactoryForLanguage());
     } catch (InterruptedException e) {
       throw e;
     } catch (Exception e) {
@@ -206,7 +222,7 @@ public class SugarJParser extends JSGLRI {
     }
   }
   
-  private Result parseFailureResult() {
+  private Result parseFailureResult() throws IOException, TokenExpectedException, BadTokenException, SGLRException {
     Tokenizer tokenizer = new Tokenizer(" ", " ", new KeywordRecognizer(null) {});
     Token tok = tokenizer.makeToken(0, IToken.TK_UNKNOWN, true);
     IStrategoTerm term = ATermCommands.makeList("SugarCompilationUnit", tok);
@@ -216,6 +232,7 @@ public class SugarJParser extends JSGLRI {
       public boolean isUpToDate(int h, Environment env) { return false; }
     };
     r.setSugaredSyntaxTree(term);
+    r.registerEditorDesugarings(getInitialTrans());
     return r;
   }
   
@@ -265,5 +282,38 @@ public class SugarJParser extends JSGLRI {
       treeBuilder.retract(remainingInputTerm);
       remainingInput = ((IStrategoString) remainingInputTerm).stringValue();
     }
+  }
+  
+  private Path initialTrans = null;
+
+  private Path getInitialTrans() throws TokenExpectedException,
+      BadTokenException, FileNotFoundException, IOException, SGLRException {
+    if (initialTrans != null && FileCommands.exists(initialTrans))
+      return initialTrans;
+    Path strCachePath = environment.createCachePath("strCache");
+    ModuleKeyCache<Path> strCache = null;
+    try {
+      strCache = (ModuleKeyCache<Path>) new ObjectInputStream(
+          new FileInputStream(strCachePath.getFile())).readObject();
+    } catch (Exception e) {
+      strCache = new ModuleKeyCache<Path>();
+      if (environment.getCacheDir().getFile() != null
+          && environment.getCacheDir().getFile().exists())
+        for (File f : environment.getCacheDir().getFile().listFiles())
+          if (f.getPath().endsWith(".jar"))
+            f.delete();
+    }
+    try {
+      initialTrans = STRCommands.compile(
+          new AbsolutePath(langLib.getInitTrans().getPath()),
+          "main",
+          new LinkedList<Path>(),
+          new JSGLRI(org.strategoxt.imp.runtime.Environment
+              .loadParseTable(StdLib.strategoTbl.getPath()), "StrategoModule"),
+          org.strategoxt.strj.strj.init(), strCache, environment, langLib);
+    } catch (InvalidParseTableException e) {
+      throw new RuntimeException(e);
+    }
+    return initialTrans;
   }
 }

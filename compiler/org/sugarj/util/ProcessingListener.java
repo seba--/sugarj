@@ -1,7 +1,7 @@
 package org.sugarj.util;
 
+import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.driver.Result;
-import org.sugarj.driver.path.RelativeSourceLocationPath;
 
 /**
  * 

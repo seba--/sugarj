@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,17 +17,25 @@ import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.shared.BadTokenException;
-import org.sugarj.driver.path.Path;
-import org.sugarj.driver.path.RelativePath;
-import org.sugarj.driver.path.RelativeSourceLocationPath;
+import org.sugarj.common.ATermCommands;
+import org.sugarj.common.Environment;
+import org.sugarj.common.IErrorLogger;
+import org.sugarj.common.FileCommands;
+import org.sugarj.common.path.Path;
+import org.sugarj.common.path.RelativePath;
+import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.driver.sourcefilecontent.ISourceFileContent;
-import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
 import org.sugarj.util.AppendableObjectOutputStream;
+
+
+// XXX: How to handle this?
+// XXX: Make Interface and implement separately in each language? Or make abstract and implement only language-specific stuff?
+
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
-public class Result {
+public class Result implements IErrorLogger {
   
   /**
    * Path and hash of the disk-stored version of this result.
@@ -83,21 +90,21 @@ public class Result {
     this.generateFiles = generateFiles;
   }
   
-  void addFileDependency(Path file) throws IOException {
+  public void addFileDependency(Path file) throws IOException {
     allDependentFiles.add(file);
     generatedFileHashes.put(file, FileCommands.fileHash(file));
   }
   
-  void addDependency(Path depFile, Environment env) throws IOException {
+  public void addDependency(Path depFile, Environment env) throws IOException {
     dependencies.put(depFile, FileCommands.fileHash(depFile));
     Result result = readDependencyFile(depFile, env);
     addDependency(result, env);
   }
   
-  void addDependency(Result result, Environment env) throws IOException {
+  public void addDependency(Result result, Environment env) throws IOException {
     allDependentFiles.addAll(result.getFileDependencies(env));
     
-    for (Entry<Path, Map<Path, Set<RelativePath>>> e : result.availableGeneratedFiles.entrySet())
+    for (Entry<Path, Map<Path, Set<RelativePath>>> e : result.getAvailableGeneratedFiles().entrySet())
       if (!availableGeneratedFiles.containsKey(e.getKey()))
         availableGeneratedFiles.put(e.getKey(), e.getValue());
       else {
@@ -124,7 +131,7 @@ public class Result {
 //        set.add((RelativePath) e.getKey());
     
     
-    for (Entry<Path, Map<Path, Map<Path, ISourceFileContent>>> e : result.deferredSourceFiles.entrySet())
+    for (Entry<Path, Map<Path, Map<Path, ISourceFileContent>>> e : result.getDeferredSourceFiles().entrySet())
       if (!deferredSourceFiles.containsKey(e.getKey()))
         deferredSourceFiles.put(e.getKey(), e.getValue());
       else {
@@ -147,15 +154,15 @@ public class Result {
     return allDependentFiles;
   }
   
-  void setGenerationLog(Path file) {
+  public void setGenerationLog(Path file) {
     this.generationLog = file;
   }
   
-  Path getGenerationLog() {
+  public Path getGenerationLog() {
     return generationLog;
   }
   
-  void generateFile(Path file, String content) throws IOException {
+  public void generateFile(Path file, String content) throws IOException {
     if (generateFiles) {
       FileCommands.writeToFile(file, content);
       generatedFileHashes.put(file, FileCommands.fileHash(file));
@@ -179,21 +186,15 @@ public class Result {
     }
   }
   
-  void writeToFile(Path file, String content) throws IOException {
-    if (generateFiles) {
-      FileCommands.writeToFile(file, content);
-      generatedFileHashes.put(file, FileCommands.fileHash(file));
-    }
-  }
   
-  void appendToFile(Path file, String content) throws IOException {
+  public void appendToFile(Path file, String content) throws IOException {
     if (generateFiles) {
       FileCommands.appendToFile(file, content);
       generatedFileHashes.put(file, FileCommands.fileHash(file));
     }
   }
   
-  void addEditorService(IStrategoTerm service) {
+  public void addEditorService(IStrategoTerm service) {
     editorServices.add(service);
   }
   
@@ -258,7 +259,7 @@ public class Result {
     return true;
   }
   
-  void logError(String error) {
+  public void logError(String error) {
     collectedErrors.add(error);
   }
   
@@ -266,7 +267,7 @@ public class Result {
     return collectedErrors;
   }
   
-  void logParseError(BadTokenException e) {
+  public void logParseError(BadTokenException e) {
     parseErrors.add(e);  
   }
   
@@ -282,47 +283,14 @@ public class Result {
     return sugaredSyntaxTree;
   }
 
-  void compileJava(Path javaOutFile, JavaSourceFileContent javaSource, Path bin, List<Path> path, Set<RelativePath> generatedJavaClasses) throws IOException, ClassNotFoundException {
-    Map<Path, Set<RelativePath>> generatedFiles = availableGeneratedFiles.get(sourceFile);
-    Set<RelativePath> generatedClasses = new HashSet<RelativePath>(generatedJavaClasses);
-    
-    if (generatedFiles != null) {
-      for (Set<RelativePath> files: generatedFiles.values())
-        for (RelativePath file : files)
-          if ("class".equals(FileCommands.getExtension(file)))
-            generatedClasses.add(file);
-    }
-
-    Map<Path, Map<Path, ISourceFileContent>> sourceFiles = deferredSourceFiles.get(sourceFile);
-    List<Path> javaOutFiles = new ArrayList<Path>();
-    javaOutFiles.add(javaOutFile);
-
-    if (sourceFiles != null)
-      for (Entry<Path, Map<Path, ISourceFileContent>> sources : sourceFiles.entrySet())
-        for (Entry<Path, ISourceFileContent> source : sources.getValue().entrySet())
-          if (source.getValue() instanceof JavaSourceFileContent) {
-            JavaSourceFileContent otherJavaSource = (JavaSourceFileContent) source.getValue();
-            try {
-              writeToFile(source.getKey(), otherJavaSource.getCode(generatedClasses));
-            } catch (ClassNotFoundException e) {
-              throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + source.getKey());
-            }
-          }
-    
-    writeToFile(javaOutFile, javaSource.getCode(generatedClasses));
-    
-    compileJava(javaOutFiles, bin, path, generatedClasses);
-  }
+  // XXX: Made this abstract so it can be implemented by each language library
+//  protected abstract void compileLanguage(Path langOutFile, ISourceFileContent langSource, Path bin, List<Path> path, Set<RelativePath> generatedFiles) throws IOException, ClassNotFoundException;
   
-  private void compileJava(List<Path> javaOutFiles, Path bin, List<Path> path, Set<? extends Path> generatedJavaClasses) throws IOException {
-    if (generateFiles) {
-      JavaCommands.javac(javaOutFiles, bin, path);
-      for (Path cl : generatedJavaClasses)
-        generatedFileHashes.put(cl, FileCommands.fileHash(cl));
-    }
-  }
+  // TODO: move to languagelib
+//  protected abstract void compileLanguage(List<Path> langOutFiles, Path bin, List<Path> path, Set<? extends Path> generatedFiles) throws IOException;
   
-  void delegateCompilation(Path delegate, Path compileFile, ISourceFileContent fileContent, Set<RelativePath> generatedFiles) {
+  
+  public void delegateCompilation(Path delegate, Path compileFile, ISourceFileContent fileContent, Set<RelativePath> generatedFiles) {
     Map<Path, Set<RelativePath>> myGeneratedFiles = availableGeneratedFiles.get(delegate);
     if (myGeneratedFiles == null)
       myGeneratedFiles = new HashMap<Path, Set<RelativePath>>();
@@ -348,11 +316,11 @@ public class Result {
     deferredSourceFiles.put(delegate, sourceFiles);
   }
   
-  boolean hasDelegatedCompilation(Path compileFile) {
+  public boolean hasDelegatedCompilation(Path compileFile) {
     return deferredSourceFiles.containsKey(sourceFile) && deferredSourceFiles.get(sourceFile).containsKey(compileFile);
   }
   
-  void registerParseTable(Path tbl) {
+  public void registerParseTable(Path tbl) {
     this.parseTableFile = tbl;
   }
   
@@ -360,7 +328,7 @@ public class Result {
     return parseTableFile;
   }
   
-  void registerEditorDesugarings(Path jarfile) throws IOException {
+  public void registerEditorDesugarings(Path jarfile) throws IOException {
     desugaringsFile = jarfile;
     editorServices = new HashSet<IStrategoTerm>(ATermCommands.registerSemanticProvider(editorServices, jarfile));
   }
@@ -412,6 +380,8 @@ public class Result {
     setPersistentPath(dep);
   }
   
+  // XXX: THis is a factory!
+  // We need an interface for Result to use Results in language-specific drivers (e.g. JavaDriver)  
   @SuppressWarnings("unchecked")
   public static Result readDependencyFile(Path dep, Environment env) throws IOException {
     Result result = new Result(true);
@@ -471,7 +441,7 @@ public class Result {
     persistentHash = FileCommands.fileHash(dep);
   }
   
-  void setSourceFile(RelativeSourceLocationPath sourceFile, int sourceFileHash) {
+  public void setSourceFile(RelativeSourceLocationPath sourceFile, int sourceFileHash) {
     this.sourceFile = sourceFile;
     this.sourceFileHash = sourceFileHash;
   }
@@ -487,4 +457,28 @@ public class Result {
   public void setFailed(boolean hasFailed) {
     this.failed = hasFailed;
   }
+
+
+  public Map<Path, Map<Path, Set<RelativePath>>> getAvailableGeneratedFiles() {
+    return availableGeneratedFiles;
+  }
+
+  public Map<Path, Map<Path, Map<Path, ISourceFileContent>>> getDeferredSourceFiles() {
+    return deferredSourceFiles;
+  }
+
+  public Map<Path, Integer> getGeneratedFileHashes() {
+    return generatedFileHashes;
+  }
+
+  public boolean isGenerateFiles() {
+    return generateFiles;
+  }
+  
+  
+  
+  
+  
+  
+
 }

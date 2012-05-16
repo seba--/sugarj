@@ -3,6 +3,7 @@ package org.sugarj.driver;
 import org.spoofax.interpreter.terms.ISimpleTerm;
 import org.spoofax.jsglr.client.imploder.TermTreeFactory;
 import org.spoofax.jsglr.client.imploder.TreeBuilder;
+import org.sugarj.common.ATermCommands;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>

@@ -1,8 +1,9 @@
 package org.sugarj.driver;
 
-import static org.sugarj.driver.FileCommands.toCygwinPath;
-import static org.sugarj.driver.Log.log;
+import static org.sugarj.common.FileCommands.toCygwinPath;
+import static org.sugarj.common.Log.log;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,9 +39,16 @@ import org.strategoxt.stratego_sdf.pp_sdf_string_0_0;
 import org.strategoxt.stratego_xtc.stratego_xtc;
 import org.strategoxt.strc.pp_stratego_string_0_0;
 import org.strategoxt.tools.main_pack_sdf_0_0;
+import org.sugarj.LanguageLib;
+import org.sugarj.common.ATermCommands;
+import org.sugarj.common.CommandExecution;
+import org.sugarj.common.Environment;
+import org.sugarj.common.FileCommands;
+import org.sugarj.common.Log;
+import org.sugarj.common.path.Path;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
-import org.sugarj.driver.path.Path;
+import org.sugarj.driver.transformations.extraction.extract_sdf_0_0;
 import org.sugarj.stdlib.StdLib;
 
 /**
@@ -69,30 +77,40 @@ public class SDFCommands {
     }
   }
   
-  private static void packSdf(Path sdf, Path def, Context sdfContext, Collection<Path> paths) throws IOException {
+  private static void packSdf(Path sdf, Path def, Context sdfContext, Collection<Path> paths, LanguageLib langLib) throws IOException {
     
     /*
      * We can include as many paths as we want here, checking the
      * adequacy of the occurring imports is done elsewhere.
      */
-    List<String> cmd = new ArrayList<String>(Arrays.asList(new String[] {
-//      PACK_SDF,
-      "-i", sdf.getAbsolutePath(),
-      "-o", def.getAbsolutePath(),
-      "-Idef", StdLib.sugarjDef.getPath(),
-      "-Idef", StdLib.javaDef.getPath(),
-      "-Idef", StdLib.sdfDef.getPath(),
-      "-Idef", StdLib.strategoDef.getPath(),
-      "-Idef", StdLib.editorServicesDef.getPath(),
-      "-Idef", StdLib.plainDef.getPath(),
-      "-I", StdLib.stdLibDir.getPath(),
+    // TODO: Make this pretty
+    
+    List<String> cmd = new ArrayList<String>(Arrays.asList(new String[]{
+        "-i", sdf.getAbsolutePath(),
+        "-o", def.getAbsolutePath()
     }));
     
+    for (File grammarFile : langLib.getGrammars()) {
+      cmd.add("-Idef");
+      cmd.add(grammarFile.getPath());
+    }
+    
+    cmd.add("-I");
+    cmd.add(langLib.getLibraryDirectory().getPath());
+    cmd.add("-I");
+    cmd.add(StdLib.stdLibDir.getPath());
+    
+   
     for (Path path : paths) 
       if (path.getFile().isDirectory()){
         cmd.add("-I");
         cmd.add(path.getAbsolutePath());
       }
+    
+//    for (String s : cmd.toArray(new String[cmd.size()])) {  // XXX: debug output
+//      System.out.println(s);
+//    }
+    
     
     try {
       sdfContext.invokeStrategyCLI(main_pack_sdf_0_0.instance, "pack-sdf", cmd.toArray(new String[cmd.size()]));
@@ -145,9 +163,9 @@ public class SDFCommands {
     FileCommands.deleteTempFiles(tbl);
   }
   
-  public static void check(Path sdf, String module, Context sdfContext, Collection<Path> paths) throws IOException {
+  public static void check(Path sdf, String module, Context sdfContext, Collection<Path> paths, LanguageLib langLib) throws IOException {
     Path def = FileCommands.newTempFile("def");
-    packSdf(sdf, def, sdfContext, paths);
+    packSdf(sdf, def, sdfContext, paths, langLib);
     normalizeTable(def, module);
     FileCommands.deleteTempFiles(def);
   }
@@ -161,12 +179,23 @@ public class SDFCommands {
    * @throws BadTokenException 
    * @throws TokenExpectedException 
    */
-  public static Path compile(Path sdf, String module, Collection<Path> dependentFiles, JSGLRI sdfParser, Context sdfContext, Context makePermissiveContext, ModuleKeyCache<Path> sdfCache, Environment environment) throws IOException,
-      InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  public static Path compile(Path sdf,
+                              String module, 
+                              Collection<Path> dependentFiles, 
+                              JSGLRI sdfParser, 
+                              Context sdfContext, 
+                              Context makePermissiveContext, 
+                              ModuleKeyCache<Path> sdfCache, 
+                              Environment environment,
+                              LanguageLib langLib) throws IOException,
+                                                          InvalidParseTableException, 
+                                                          TokenExpectedException, 
+                                                          BadTokenException, 
+                                                          SGLRException {
     ModuleKey key = getModuleKeyForGrammar(sdf, module, dependentFiles, sdfParser);
     Path tbl = lookupGrammarInCache(sdfCache, key);
     if (tbl == null) {
-      tbl = generateParseTable(key, sdf, module, sdfContext, makePermissiveContext, environment.getIncludePath());
+      tbl = generateParseTable(key, sdf, module, sdfContext, makePermissiveContext, environment.getIncludePath(), langLib);
       cacheParseTable(sdfCache, key, tbl, environment);
     }
     
@@ -183,7 +212,7 @@ public class SDFCommands {
     
     log.beginTask("Caching", "Cache parse table");
     try {
-      Path cacheTbl = environment.new RelativePathCache(tbl.getFile().getName());
+      Path cacheTbl = environment.createCachePath(tbl.getFile().getName());
       FileCommands.copyFile(tbl, cacheTbl);
       
       if (!Environment.rocache) {
@@ -248,7 +277,8 @@ public class SDFCommands {
                                          String module,
                                          Context sdfContext,
                                          Context makePermissiveContext,
-                                         Collection<Path> paths)
+                                         Collection<Path> paths,
+                                         LanguageLib langLib)
       throws IOException, InvalidParseTableException {
     log.beginTask("Generating", "Generate the parse table");
     try {
@@ -257,7 +287,7 @@ public class SDFCommands {
       tblFile = FileCommands.newTempFile("tbl");
 
       Path def = FileCommands.newTempFile("def");
-      packSdf(sdf, def, sdfContext, paths);
+      packSdf(sdf, def, sdfContext, paths, langLib);
       sdf2Table(def, tblFile, module);
       FileCommands.deleteTempFiles(def);
       return tblFile;
@@ -381,19 +411,7 @@ public class SDFCommands {
     return result;
   }
   
-  /**
-   * Pretty prints the content of a Java AST in some file.
-   * 
-   * @param aterm the name of a file which contains an aterm which encodes a Java AST
-   * @throws IOException 
-   */
-  public static String prettyPrintJava(IStrategoTerm term, HybridInterpreter interp) throws IOException {
-    IStrategoTerm string = pp_java_string_0_0.instance.invoke(interp.getCompiledContext(), term);
-    if (string != null)
-      return Term.asJavaString(string);
-    
-    throw new RuntimeException("pretty printing java AST failed: " + term);
-  }
+// moved prettyPrintJava to JavaDriver
 
   /**
    * Pretty prints the content of the given SDF file. 
@@ -431,5 +449,27 @@ public class SDFCommands {
   
   private static String defToSdf(String def) {
     return def.substring(11);
+  }
+  
+  
+  /**
+   * Filters SDF statements from the given term and
+   * compiles assimilation statements to SDF.
+   * 
+   * @param term a file containing a list of SDF 
+   *             and Stratego statements.
+   * @param sdf result file
+   * @throws InvalidParseTableException 
+   */
+  public static IStrategoTerm extractSDF(IStrategoTerm term, Context context) throws IOException, InvalidParseTableException {
+    IStrategoTerm result = null;
+    try {
+      result = extract_sdf_0_0.instance.invoke(context, term);
+    }
+    catch (StrategoExit e) {
+      if (e.getValue() != 0 || result == null)
+        throw new RuntimeException("Stratego extraction failed", e);
+    }
+    return result;
   }
 }
