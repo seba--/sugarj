@@ -71,7 +71,7 @@ public class JavaSourceFileContent implements ISourceFileContent {
   }
   
   public int hashCode() {
-    return packageDecl.hashCode() + imports.hashCode() + bodyDecls.hashCode();
+    return packageDecl.hashCode() + checkedImports.hashCode() + imports.hashCode() + bodyDecls.hashCode();
   }
   
   public boolean equals(Object o) {
@@ -80,6 +80,7 @@ public class JavaSourceFileContent implements ISourceFileContent {
     
     JavaSourceFileContent other = (JavaSourceFileContent) o;
     return other.packageDecl.equals(packageDecl) &&
+    	   other.checkedImports.equals(checkedImports) &&
            other.imports.equals(imports) &&
            other.importsOptional == importsOptional &&
            other.bodyDecls.equals(bodyDecls);

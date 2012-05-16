@@ -2,14 +2,10 @@ package org.sugarj;
 
 import static org.sugarj.common.ATermCommands.getApplicationSubterm;
 import static org.sugarj.common.ATermCommands.isApplication;
-import static org.sugarj.common.Environment.sep;
 import static org.sugarj.common.Log.log;
 
-
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -22,24 +18,16 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.terms.Term;
 import org.spoofax.terms.TermFactory;
 import org.strategoxt.HybridInterpreter;
-import org.strategoxt.java_front.pp_java_string_0_0;
 import org.strategoxt.lang.Context;
-import org.strategoxt.stratego_gpp.abox2text_0_1;
 import org.strategoxt.stratego_gpp.ast2abox_0_1;
-import org.strategoxt.stratego_gpp.ast2box_0_1;
 import org.strategoxt.stratego_gpp.box2text_string_0_1;
 import org.strategoxt.stratego_gpp.parse_pptable_file_0_0;
-import org.strategoxt.stratego_lib.list_1_0;
-import org.strategoxt.stratego_sglr.tuple_2_0;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
-import org.sugarj.common.JavaCommands;
-import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
@@ -53,8 +41,6 @@ public class PrologLib extends LanguageLib implements Serializable {
 	 */
 	private static final long serialVersionUID = 6271882490466636509L;
 	private transient File libDir;
-	private transient File libTmpDir;
-	
 	
 	private Set<RelativePath> generatedFiles = new HashSet<RelativePath>();
 
@@ -142,53 +128,6 @@ public class PrologLib extends LanguageLib implements Serializable {
 		return libDir;
 	}
 	
-	private File getTmpLibraryDirectory() {
-		if (libTmpDir == null)
-			try {
-				File f = File.createTempFile("org.sugarj.prologlib", "");
-				f.delete();
-				f.mkdir();
-				libTmpDir = f;
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		
-		return libTmpDir;
-	}
-
-	@Override
-	public File ensureFile(String resource) {
-		// XXX: Do we need this in the language library? -> Extract
-		File f = new File(getLibraryDirectory().getPath() + File.separator + resource);
-		
-		System.out.println("prologlib ensure file: " + f);
-		
-		if (f.exists())
-			return f;
-
-		f = new File(getTmpLibraryDirectory().getPath() + "/" + resource);
-		System.out.println("f does not exist, making temp file " + f);
-		f.getParentFile().mkdirs();
-
-		try {
-			InputStream in = LanguageLib.class.getClassLoader().getResourceAsStream(resource);
-			if (in == null)
-				return  new File(getLibraryDirectory().getPath() + File.separator + resource);
-
-			FileOutputStream fos = new FileOutputStream(f);
-			byte[] bs = new byte[256];
-			while (in.read(bs) >= 0)
-				fos.write(bs);
-			fos.close();
-			in.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return f;
-	}
-
-	
 	  public static void main(String args[]) throws URISyntaxException {
 		PrologLib pl = new PrologLib();
 		
@@ -255,12 +194,6 @@ public class PrologLib extends LanguageLib implements Serializable {
 	public String getSugarFileExtension() {
 		//return ".sugp";		// XXX: CHANGE THIS BACK
 		return ".sugj";
-	}
-
-	@Override
-	public void init() {
-		prologOutFile = null;
-		prologSource = null;
 	}
 
 	@Override

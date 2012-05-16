@@ -7,9 +7,7 @@ import static org.sugarj.common.Environment.sep;
 import static org.sugarj.common.Log.log;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -28,8 +26,8 @@ import org.strategoxt.java_front.pp_java_string_0_0;
 import org.strategoxt.lang.Context;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
-import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.FileCommands;
+import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.JavaCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
@@ -41,8 +39,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 	private static final long serialVersionUID = 1817193221140795776L;
 	
 	private transient File libDir;
-	private transient File libTmpDir;
-
+	
 	private Set<RelativePath> generatedJavaClasses = new HashSet<RelativePath>();
 
 	private Path javaOutFile;
@@ -116,51 +113,6 @@ public class JavaLib extends LanguageLib implements Serializable {
 		return libDir;
 	}
 	
-	private File getTmpLibraryDirectory() {
-		if (libTmpDir == null)
-			try {
-				File f = File.createTempFile("org.sugarj.javalib", "");
-				f.delete();
-				f.mkdir();
-				libTmpDir = f;
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		
-		return libTmpDir;
-	}
-	
-	public File ensureFile(String resource) {
-		File f = new File(getLibraryDirectory().getPath() + File.separator + resource);
-		
-		System.out.println("javalib ensure file: " + f);
-		
-		if (f.exists())
-			return f;
-
-		f = new File(getTmpLibraryDirectory().getPath() + "/" + resource);
-		System.out.println("f does not exist, making temp file " + f);
-		f.getParentFile().mkdirs();
-
-		try {
-			InputStream in = LanguageLib.class.getClassLoader().getResourceAsStream(resource);
-			if (in == null)
-				return  new File(getLibraryDirectory().getPath() + File.separator + resource);
-
-			FileOutputStream fos = new FileOutputStream(f);
-			byte[] bs = new byte[256];
-			while (in.read(bs) >= 0)
-				fos.write(bs);
-			fos.close();
-			in.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return f;
-	}
-
-	
 	  public static void main(String args[]) throws URISyntaxException {
 		JavaLib jl = new JavaLib();
 		
@@ -205,12 +157,6 @@ public class JavaLib extends LanguageLib implements Serializable {
 	// --------------------
 	// stuff from javaDriver here
 
-	public void init() {
-	    javaOutFile = null;
-	    javaSource = null;   
-	  }
-
-	
 	private void checkPackageName(IStrategoTerm toplevelDecl, RelativeSourceLocationPath sourceFile, IErrorLogger errorLog) {
 	    if (sourceFile != null) {
 	      String packageName = relPackageName == null ? "" : relPackageName.replace('/', '.');

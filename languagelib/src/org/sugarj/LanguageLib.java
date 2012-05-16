@@ -1,7 +1,9 @@
 package org.sugarj;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,7 +45,47 @@ public abstract class LanguageLib implements Serializable {
 	
 	public abstract File getLibraryDirectory();
 	
-	protected abstract File ensureFile(String resource);	// TODO: put somewhere else
+	private transient File libTmpDir;
+	
+	protected File ensureFile(String resource) {
+		File f = new File(getLibraryDirectory().getPath() + File.separator + resource);
+		
+		System.out.println("javalib ensure file: " + f);
+		
+		if (f.exists())
+			return f;
+
+		if (libTmpDir == null) {
+			try {
+				libTmpDir = File.createTempFile(FileCommands.fileName(getLibraryDirectory().getAbsolutePath()), "");
+				libTmpDir.delete();
+				libTmpDir.mkdir();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		f = new File(libTmpDir.getPath() + "/" + resource);
+		System.out.println("f does not exist, making temp file " + f);
+		f.getParentFile().mkdirs();
+
+		try {
+			InputStream in = LanguageLib.class.getClassLoader().getResourceAsStream(resource);
+			if (in == null)
+				return  new File(getLibraryDirectory().getPath() + File.separator + resource);
+
+			FileOutputStream fos = new FileOutputStream(f);
+			byte[] bs = new byte[256];
+			while (in.read(bs) >= 0)
+				fos.write(bs);
+			fos.close();
+			in.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return f;
+	}
 	
 	
 	public abstract String getGeneratedFileExtension();
@@ -53,9 +95,6 @@ public abstract class LanguageLib implements Serializable {
 	// ----------------
 	// stuff from LanguageDriver here:
 
-	public abstract void init();
-		  
-	  
 	public abstract ISourceFileContent getSource();
 	public abstract Path getOutFile();
 	public abstract Set<RelativePath> getGeneratedFiles();	// XXX: was: getGeneratedJavaClasses -- is getCompiledFiles a reasonably good name? Probably change to getGeneratedBinFiles?
