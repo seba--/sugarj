@@ -68,7 +68,7 @@ import org.sugarj.util.ProcessingListener;
  */
 public class Driver{
   
-  public final static String CACHE_VERSION = "editor-base-0.16";
+  public final static String CACHE_VERSION = "prologlib06";
   
   private final static int PENDING_TIMEOUT = 30000;
 

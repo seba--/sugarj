@@ -219,7 +219,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	  @Override
 	  public boolean isSugarDec(IStrategoTerm decl) {
-	    return isApplication(decl, "SugarDec");           
+	    return isApplication(decl, "SugarBody");           
 	  }
 	  
 	  @Override
