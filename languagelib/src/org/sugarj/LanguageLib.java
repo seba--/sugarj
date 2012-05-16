@@ -24,6 +24,9 @@ import org.sugarj.stdlib.StdLib;
 
 
 public abstract class LanguageLib implements Serializable {
+	
+	public final static int PUBLIC_SUGAR = 1;
+	public final static int PRIVATE_SUGAR = 2;
 
   private static final long serialVersionUID = -6712835686318143995L;
 
@@ -158,5 +161,14 @@ public abstract class LanguageLib implements Serializable {
 	
 	public abstract void addImportModule(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException;
 	public abstract void addCheckedImportModule(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException;
+	
+	
+	
+	public abstract String getSugarName(IStrategoTerm decl, HybridInterpreter interp) throws IOException;
+	public abstract int getSugarAccessibility(IStrategoTerm decl);
+	public abstract IStrategoTerm getSugarBody(IStrategoTerm decl);
+	
+
+	
 	
 }

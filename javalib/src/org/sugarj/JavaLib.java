@@ -1,6 +1,7 @@
 package org.sugarj;
 
 import static org.sugarj.common.ATermCommands.getApplicationSubterm;
+import static org.sugarj.common.ATermCommands.getList;
 import static org.sugarj.common.ATermCommands.isApplication;
 import static org.sugarj.common.Environment.sep;
 import static org.sugarj.common.Log.log;
@@ -421,6 +422,36 @@ public class JavaLib extends LanguageLib implements Serializable {
 	public void addCheckedImportModule(IStrategoTerm toplevelDecl,
 			HybridInterpreter interp) throws IOException {
 		javaSource.addCheckedImport(getImportedModulePath(toplevelDecl,  interp).replace('/', '.'));
+	}
+
+	@Override
+	public String getSugarName(IStrategoTerm decl, HybridInterpreter interp) throws IOException {
+		IStrategoTerm head = getApplicationSubterm(decl, "SugarDec", 0);
+        String extName =
+                prettyPrint(
+                getApplicationSubterm(head, "SugarDecHead", 1), interp);    
+
+        return extName;
+	}
+
+	@Override
+	public int getSugarAccessibility(IStrategoTerm decl) {
+		IStrategoTerm head = getApplicationSubterm(decl, "SugarDec", 0);
+		IStrategoTerm mods = getApplicationSubterm(head, "SugarDecHead", 0);
+		
+        for (IStrategoTerm t : getList(mods))
+        	if (isApplication(t, "Public")) 
+        		return LanguageLib.PUBLIC_SUGAR;
+        
+        return LanguageLib.PRIVATE_SUGAR;
+	}
+
+	@Override
+	public IStrategoTerm getSugarBody(IStrategoTerm decl) {
+		IStrategoTerm body= getApplicationSubterm(decl, "SugarDec", 1);
+		IStrategoTerm sugarBody = getApplicationSubterm(body, "SugarBody", 0);
+		
+		return sugarBody;
 	}
 
 

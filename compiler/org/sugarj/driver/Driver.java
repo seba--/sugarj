@@ -988,46 +988,38 @@ public class Driver{
         sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
 
       
-      boolean isNative;         // TODO: Remove native
+//      boolean isNative;         // TODO: Remove native
       String extName = null;
       String fullExtName = null;
       boolean isPublic = false;
-
-      IStrategoTerm head = getApplicationSubterm(toplevelDecl, "SugarDec", 0);
-      IStrategoTerm body= getApplicationSubterm(toplevelDecl, "SugarDec", 1);
       
       log.beginTask("Extracting name and accessibility of the sugar.");
       try {
-        isNative = isApplication(head, "NativeSugarDecHead");
+//        isNative = isApplication(head, "NativeSugarDecHead");
+//        
+//        if (isNative) {   // TODO: remove native
+//          extName =
+//            langLib.prettyPrint(
+//            getApplicationSubterm(head, "NativeSugarDecHead", 2), interp);
+//          
+//          IStrategoTerm mods = getApplicationSubterm(head, "NativeSugarDecHead", 0);
+//          
+//          for (IStrategoTerm t : getList(mods))
+//            if (isApplication(t, "Public"))
+//            {
+//              isPublic = true;
+//              break;
+//            }
+//        }
+//        else {
         
-        if (isNative) {   // TODO: remove native
-          extName =
-            langLib.prettyPrint(
-            getApplicationSubterm(head, "NativeSugarDecHead", 2), interp);
+          extName = langLib.getSugarName(toplevelDecl, interp);
+                            
+          if (langLib.getSugarAccessibility(toplevelDecl) == LanguageLib.PUBLIC_SUGAR) {
+            isPublic = true;
+          }
           
-          IStrategoTerm mods = getApplicationSubterm(head, "NativeSugarDecHead", 0);
-          
-          for (IStrategoTerm t : getList(mods))
-            if (isApplication(t, "Public"))
-            {
-              isPublic = true;
-              break;
-            }
-        }
-        else {
-          extName =
-            langLib.prettyPrint(
-            getApplicationSubterm(head, "SugarDecHead", 1), interp);    
-          
-          IStrategoTerm mods = getApplicationSubterm(head, "SugarDecHead", 0);
-          
-          for (IStrategoTerm t : getList(mods))
-            if (isApplication(t, "Public"))
-            {
-              isPublic = true;
-              break;
-            }
-        }
+//        }
         
         
         
@@ -1041,12 +1033,6 @@ public class Driver{
         else
           log.log("The sugar is not public.");
         
-        if (isNative)
-          log.log("The sugar is native.");
-        else
-          log.log("The sugar is not native.");
-
-
       } finally {
         log.endTask();
       }
@@ -1057,34 +1043,35 @@ public class Driver{
       String sdfImports = " imports " + StringCommands.printListSeparated(availableSDFImports, " ") + "\n";
       String strImports = " imports " + StringCommands.printListSeparated(availableSTRImports, " ") + "\n";
       
-      if (isNative) {
-        String nativeModule = getString(getApplicationSubterm(body, "NativeSugarBody", 0)); 
-        
-        if (nativeModule.length() > 1)
-            // remove quotes
-          nativeModule = nativeModule.substring(1, nativeModule.length() - 1);
-          
-        if (FileCommands.exists(ModuleSystemCommands.searchFile(nativeModule, ".sdf", environment))) {
-          availableSDFImports.add(nativeModule);
-          driverResult.generateFile(
-              sdfExtension, 
-              "module " + fullExtName + "\n" 
-              + sdfImports 
-              + "imports " + nativeModule);
-        }
-
-        if (FileCommands.exists(ModuleSystemCommands.searchFile(nativeModule, ".str", environment))) {
-          availableSTRImports.add(nativeModule);
-          driverResult.generateFile(
-              strExtension, 
-              "module " + fullExtName + "\n" 
-              + strImports
-              + "imports " + nativeModule);
-        }
-      }
-      else {
+//      if (isNative) {
+//        String nativeModule = getString(getApplicationSubterm(body, "NativeSugarBody", 0)); 
+//        
+//        if (nativeModule.length() > 1)
+//            // remove quotes
+//          nativeModule = nativeModule.substring(1, nativeModule.length() - 1);
+//          
+//        if (FileCommands.exists(ModuleSystemCommands.searchFile(nativeModule, ".sdf", environment))) {
+//          availableSDFImports.add(nativeModule);
+//          driverResult.generateFile(
+//              sdfExtension, 
+//              "module " + fullExtName + "\n" 
+//              + sdfImports 
+//              + "imports " + nativeModule);
+//        }
+//
+//        if (FileCommands.exists(ModuleSystemCommands.searchFile(nativeModule, ".str", environment))) {
+//          availableSTRImports.add(nativeModule);
+//          driverResult.generateFile(
+//              strExtension, 
+//              "module " + fullExtName + "\n" 
+//              + strImports
+//              + "imports " + nativeModule);
+//        }
+//      }
+//      else {
         // this is a list of SDF and Stratego statements
-        IStrategoTerm sugarBody = getApplicationSubterm(body, "SugarBody", 0);
+        
+        IStrategoTerm sugarBody = langLib.getSugarBody(toplevelDecl);
   
         IStrategoTerm sdfExtract = fixSDF(extractSDF(sugarBody, extractionContext), interp);
         IStrategoTerm strExtract = extractSTR(sugarBody, extractionContext);
@@ -1126,7 +1113,7 @@ public class Driver{
         
         if (CommandExecution.FULL_COMMAND_LINE && generateFiles)
           log.log("Wrote Stratego file to '" + strExtension.getAbsolutePath() + "'.");
-      }
+//      }
       
       /*
        * adapt current grammar

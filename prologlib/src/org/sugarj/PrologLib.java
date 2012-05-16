@@ -74,6 +74,8 @@ public class PrologLib extends LanguageLib implements Serializable {
 		return prettyPrint;
 	}
 	
+	private IStrategoTerm sugarHead = null;
+	
 	@Override
 	public List<File> getGrammars() {
 		List<File> grammars = new LinkedList<File>(super.getGrammars());
@@ -214,7 +216,9 @@ public class PrologLib extends LanguageLib implements Serializable {
 		return isApplication(decl, "NonUnitClause") || 
 				isApplication(decl, "UnitClause") ||
 				isApplication(decl, "Query") ||
-				isApplication(decl, "Command");
+				isApplication(decl, "Command") ||
+				
+				isApplication(decl, "SugarModuleDec");	// not really language specific, but the existing sugarj system only allows sugar declarations immediately followed by a sugar body, whereas in prolog, sugar is declared with a sugar_module, then prolog imports, then sugar body.
 	  }
 
 	  @Override
@@ -292,6 +296,17 @@ public class PrologLib extends LanguageLib implements Serializable {
 		generatedFiles.add(moduleFile);
 		*/
 		IStrategoTerm dec = toplevelDecl;
+		
+		
+		if (isApplication(toplevelDecl, "SugarModuleDec")) {
+			// not really language specific, but the existing sugarj system only 
+			// allows sugar declarations immediately followed by a sugar body, 
+			// whereas in prolog, sugar is declared with a sugar_module, then prolog imports, then sugar body.
+			sugarHead = toplevelDecl;
+		}
+
+		
+		
 		
 		prologSource.addBodyDecl(prettyPrint(dec, interp));
 		
@@ -564,6 +579,29 @@ abox2text_0_1.class    invoke(context, prolog-term, width integer)
 			HybridInterpreter interp) throws IOException {
 		String moduleName = prettyPrint(getApplicationSubterm(toplevelDecl, "ModuleDec", 0), interp);
 		return moduleName;
+	}
+
+	@Override
+	public String getSugarName(IStrategoTerm decl, HybridInterpreter interp)
+			throws IOException {
+        String extName =
+                prettyPrint(
+                getApplicationSubterm(sugarHead, "SugarModuleDec", 0), interp);    
+
+        return extName;
+	}
+
+	@Override
+	public int getSugarAccessibility(IStrategoTerm decl) {
+		return LanguageLib.PUBLIC_SUGAR;	// XXX: implemented only public sugar in prolog
+	}
+
+	@Override
+	public IStrategoTerm getSugarBody(IStrategoTerm decl) {
+		IStrategoTerm sugarBody = getApplicationSubterm(decl, "SugarBody", 0);
+		
+		return sugarBody;
+
 	}
 
 	
