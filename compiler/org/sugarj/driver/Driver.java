@@ -851,7 +851,7 @@ public class Driver{
             log.logErr("could not read dependency file " + dep);
           }
           
-          if (res != null && res.getSourceFile() != null && res.getSourceFile().getBasePath().equals(environment.getRoot()))
+          if (res != null && res.getSourceFile() != null)
             importSourceFile = res.getSourceFile();
         }
         

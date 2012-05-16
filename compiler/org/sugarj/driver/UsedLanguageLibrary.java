@@ -9,5 +9,5 @@ public class UsedLanguageLibrary {
   /** This class is only used for development purposes and will be removed
    *  as soon as the editor supports multiple language in a more convenient way. 
    */
-  public static LanguageLib langLib = new PrologLib();
+  public static LanguageLib langLib = new JavaLib();
 }
