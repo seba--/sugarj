@@ -36,9 +36,6 @@ public abstract class LanguageLib implements Serializable {
 	
 	public abstract File getInitGrammar();   
 	public abstract String getInitGrammarModule();
-	// public abstract File getInitGrammarAtomicImports();           // TODO: remove
-	// public abstract String getInitGrammarAtomicImportsModule();   // TODO: remove
-	// public abstract File getInitGrammarXTBL();                    // TODO: remove
 	public abstract File getInitTrans();
 	public abstract String getInitTransModule();
 	public abstract File getInitEditor();
@@ -46,7 +43,7 @@ public abstract class LanguageLib implements Serializable {
 	
 	public abstract File getLibraryDirectory();
 	
-	protected abstract File ensureFile(String resource);	
+	protected abstract File ensureFile(String resource);	// TODO: put somewhere else
 	
 	
 	public abstract String getGeneratedFileExtension();
@@ -67,9 +64,9 @@ public abstract class LanguageLib implements Serializable {
 	public abstract boolean isNamespaceDec(IStrategoTerm decl);
 	public abstract boolean isLanguageSpecificDec(IStrategoTerm decl);
 	public abstract boolean isSugarDec(IStrategoTerm decl);
-	public abstract boolean isEditorService(IStrategoTerm decl);
-	public abstract boolean isImport(IStrategoTerm decl);
-	public abstract boolean isPlain(IStrategoTerm decl); // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
+	public abstract boolean isEditorServiceDec(IStrategoTerm decl);
+	public abstract boolean isImportDec(IStrategoTerm decl);
+	public abstract boolean isPlainDec(IStrategoTerm decl); // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
 	
 	public abstract void processLanguageSpecific(IStrategoTerm toplevelDecl,
 	                                              Environment environment, 
@@ -84,21 +81,18 @@ public abstract class LanguageLib implements Serializable {
 	public abstract String prettyPrint(IStrategoTerm term, HybridInterpreter interp) throws IOException;
 	
 	  
-	// XXX: think of a good name
-	public abstract String extractImportedModuleName(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException;
 	
 	
 	public abstract void setupSourceFile(RelativePath sourceFile, Environment environment);
-	public abstract void checkSourceOutFile(Environment environment, RelativeSourceLocationPath sourceFile);
+//	public abstract void checkSourceOutFile(Environment environment, RelativeSourceLocationPath sourceFile);
 	
 	
-	public abstract String getNamespace();
-	public abstract String getRelNamespaceSep();
+
+	public abstract String getRelativeNamespace();
 	
-	public abstract String extractNamespaceName(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException;
 	
-	public abstract void checkNamespace(IStrategoTerm decl, RelativeSourceLocationPath sourceFile, IErrorLogger errorLog);
-	public abstract void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IErrorLogger errorLog, String packageName, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException;
+//	public abstract void checkNamespace(IStrategoTerm decl, RelativeSourceLocationPath sourceFile, IErrorLogger errorLog);
+	public abstract void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IErrorLogger errorLog, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException;
 
 	public abstract LanguageLibFactory getFactoryForLanguage();
 	

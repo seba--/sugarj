@@ -210,11 +210,6 @@ public class JavaLib extends LanguageLib implements Serializable {
 	    javaSource = null;   
 	  }
 
-	// was: checkPackage
-	  public void checkNamespace(IStrategoTerm decl, RelativeSourceLocationPath sourceFile, IErrorLogger errorLog) {
-	    if (relPackageName == null)
-	      checkPackageName(decl, sourceFile, errorLog);
-	  }
 	
 	private void checkPackageName(IStrategoTerm toplevelDecl, RelativeSourceLocationPath sourceFile, IErrorLogger errorLog) {
 	    if (sourceFile != null) {
@@ -232,10 +227,10 @@ public class JavaLib extends LanguageLib implements Serializable {
 	    }
 	  }
 
-	public void checkSourceOutFile(Environment environment, RelativeSourceLocationPath sourceFile) {
-	    if (javaOutFile == null)
-	      setJavaOutFile(environment.createBinPath(getRelNamespaceSep() + FileCommands.fileName(sourceFile) + ".java"));
-	  }
+//	public void checkSourceOutFile(Environment environment, RelativeSourceLocationPath sourceFile) {
+//	    if (javaOutFile == null)
+//	      setJavaOutFile(environment.createBinPath(getRelativeNamespace() + FileCommands.fileName(sourceFile) + ".java"));
+//	  }
 
 	// XXX: move this to language driver?
 	  // XXX: Think of a good name -- what does this actually do?
@@ -278,7 +273,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 
 	// was: getRelPackageNameSep
 	  // XXX: Think of a better name
-	  public String getRelNamespaceSep() {
+	  public String getRelativeNamespace() {
 	    if (relPackageName == null || relPackageName.isEmpty())
 	      return "";
 	    
@@ -289,11 +284,11 @@ public class JavaLib extends LanguageLib implements Serializable {
 	    return javaSource;
 	  }
 
-	public boolean isEditorService(IStrategoTerm decl) {
+	public boolean isEditorServiceDec(IStrategoTerm decl) {
 	    return isApplication(decl, "EditorServicesDec");
 	  }
 
-	public boolean isImport(IStrategoTerm decl) {
+	public boolean isImportDec(IStrategoTerm decl) {
 	    return isApplication(decl, "TypeImportDec") || isApplication(decl, "TypeImportOnDemandDec");
 	  }
 
@@ -305,7 +300,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 	            isApplication(decl, "AnnoDec");
 	  }
 
-	public boolean isPlain(IStrategoTerm decl) {
+	public boolean isPlainDec(IStrategoTerm decl) {
 	    return isApplication(decl, "PlainDec");         // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
 	  }
 
@@ -348,25 +343,28 @@ public class JavaLib extends LanguageLib implements Serializable {
 	    
 	    String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
 	    
-	    RelativePath clazz = environment.createBinPath(getRelNamespaceSep() + decName + ".class");
+	    RelativePath clazz = environment.createBinPath(getRelativeNamespace() + decName + ".class");
 	    
 	    generatedJavaClasses.add(clazz);
 	    javaSource.addBodyDecl(prettyPrint(dec, interp));
 	  }
 
 	// was: processPackageDec
-	  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IErrorLogger errorLog, String packageName, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException {
-	    relPackageName = getRelativeModulePath(packageName);
+	  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IErrorLogger errorLog, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException {
+	    String packageName = extractNamespaceName(toplevelDecl, interp);
+		  
+		relPackageName = getRelativeModulePath(packageName);
 	
 	    log.log("The SDF / Stratego package name is '" + relPackageName + "'.");
 	
 	    checkPackageName(toplevelDecl, sourceFile, errorLog);
 	
 	    if (javaOutFile == null)
-	      javaOutFile = environment.createBinPath(getRelNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + ".java");			// XXX: Can we just reuse sourceFile here?
+	      javaOutFile = environment.createBinPath(getRelativeNamespace() + FileCommands.fileName(sourceFileFromResult) + ".java");			// XXX: Can we just reuse sourceFile here?
 	
 	    // moved here before depOutFile==null check
 	    javaSource.setNamespaceDecl(prettyPrint(toplevelDecl, interp));
+	    checkPackageName(toplevelDecl, sourceFileFromResult, errorLog);
 	  }
 
 	private void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IErrorLogger errorLog) {
@@ -404,7 +402,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 	      String importModule = extractImportedModuleName(toplevelDecl, interp);
 	      String modulePath = getRelativeModulePath(importModule);
 	      
-	      return getRelativeModulePath(modulePath);
+	      return modulePath;
 	}
 	
 	  private String getRelativeModulePath(String module) {

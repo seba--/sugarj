@@ -136,7 +136,10 @@ public class FileCommands {
   }
   
   public static String fileName(Path file_doof) {
-    String file = toCygwinPath(file_doof.getAbsolutePath());
+	  return fileName(toCygwinPath(file_doof.getAbsolutePath()));
+  }
+  
+  public static String fileName(String file) {
     int index = file.lastIndexOf(Environment.sep);
 
     if (index >= 0)
@@ -329,6 +332,13 @@ public class FileCommands {
     return file;
   }
 
+  public static String dropFilename(String file) {
+	  int i = file.lastIndexOf(Environment.sep);
+	  if (i > 0) 
+		  return file.substring(0,i);
+	  
+	  return file;
+  }
 
   public static int fileHash(Path file) throws IOException {
     if (exists(file))

@@ -68,7 +68,7 @@ import org.sugarj.util.ProcessingListener;
  */
 public class Driver{
   
-  public final static String CACHE_VERSION = "prologlib06";
+  public final static String CACHE_VERSION = "prologlib09";
   
   private final static int PENDING_TIMEOUT = 30000;
 
@@ -539,7 +539,7 @@ public class Driver{
             break;
           }
         
-        fullExtName = langLib.getRelNamespaceSep() + extName;
+        fullExtName = langLib.getRelativeNamespace() + extName;
 
         log.log("The name of the editor services is '" + extName + "'.");
         log.log("The full name of the editor services is '" + fullExtName + "'.");
@@ -559,7 +559,7 @@ public class Driver{
         // XXX if (currentTransProg != null)
         editorServices = ATermCommands.registerSemanticProvider(editorServices, currentTransProg);
   
-        Path editorServicesFile = environment.createBinPath(langLib.getRelNamespaceSep() + extName + ".serv");
+        Path editorServicesFile = environment.createBinPath(langLib.getRelativeNamespace() + extName + ".serv");
         
         log.log("writing editor services to " + editorServicesFile);
         
@@ -620,7 +620,7 @@ public class Driver{
             break;
           }
         
-        fullExtName = langLib.getRelNamespaceSep() + extName + (extension == null ? "" : ("." + extension));
+        fullExtName = langLib.getRelativeNamespace() + extName + (extension == null ? "" : ("." + extension));
 
         log.log("The name is '" + extName + "'.");
         log.log("The full name is '" + fullExtName + "'.");
@@ -633,7 +633,7 @@ public class Driver{
         String plainContent = Term.asJavaString(ATermCommands.getApplicationSubterm(body, "PlainBody", 0));
         
         String ext = extension == null ? "" : ("." + extension);
-        Path plainFile = environment.createBinPath(langLib.getRelNamespaceSep() + extName + ext);
+        Path plainFile = environment.createBinPath(langLib.getRelativeNamespace() + extName + ext);
         FileCommands.createFile(plainFile);
   
         log.log("writing plain content to " + plainFile);
@@ -652,12 +652,12 @@ public class Driver{
     if (langLib.isNamespaceDec(toplevelDecl))
       processPackageDec(toplevelDecl);
     else {
-      langLib.checkNamespace(toplevelDecl, sourceFile, driverResult);   // XXX: check -> setup ?
-      langLib.checkSourceOutFile(environment, driverResult.getSourceFile());
+//      langLib.checkNamespace(toplevelDecl, sourceFile, driverResult);   // XXX: check -> setup ?
+//      langLib.checkSourceOutFile(environment, driverResult.getSourceFile());
       if (depOutFile == null)
-        depOutFile = environment.createBinPath(langLib.getRelNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
+        depOutFile = environment.createBinPath(langLib.getRelativeNamespace() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       try {
-        if (langLib.isImport(toplevelDecl)) {
+        if (langLib.isImportDec(toplevelDecl)) {
           if (!environment.isAtomicImportParsing())
             processImportDec(toplevelDecl);
           else 
@@ -667,9 +667,9 @@ public class Driver{
           processJavaTypeDec(toplevelDecl);
         else if (langLib.isSugarDec(toplevelDecl))
           processSugarDec(toplevelDecl);
-        else if (langLib.isEditorService(toplevelDecl)) 
+        else if (langLib.isEditorServiceDec(toplevelDecl)) 
           processEditorServicesDec(toplevelDecl);
-        else if (langLib.isPlain(toplevelDecl))   // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
+        else if (langLib.isPlainDec(toplevelDecl))   // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
           processPlainDec(toplevelDecl);
         else if (ATermCommands.isList(toplevelDecl))
           /* 
@@ -760,15 +760,10 @@ public class Driver{
     try {
       sugaredPackageDecl = lastSugaredToplevelDecl;
 
-      String packageName = langLib.extractNamespaceName(toplevelDecl, interp);
-      
-      log.log("The Java package name is '" + packageName + "'.");
-      // XXX: We have two sourcefiles here. Are they identical?
-      langLib.processNamespaceDec(toplevelDecl, environment, interp, driverResult, packageName, sourceFile, driverResult.getSourceFile());    
+      langLib.processNamespaceDec(toplevelDecl, environment, interp, driverResult, sourceFile, driverResult.getSourceFile());    
       if (depOutFile == null)
-        depOutFile = environment.createBinPath(langLib.getRelNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
+        depOutFile = environment.createBinPath(langLib.getRelativeNamespace() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       
-//      javaSource.setPackageDecl(SDFCommands.prettyPrintJava(toplevelDecl, interp));
     } finally {
       log.endTask();
     }
@@ -813,7 +808,7 @@ public class Driver{
     
       if (res != null &&
           term != null &&
-          langLib.isImport(term)) {
+          langLib.isImportDec(term)) {
         remainingInput = res.getRest();
         pendingImports.add(term);
       }
@@ -836,11 +831,11 @@ public class Driver{
     
     log.beginTask("processing", "PROCESS the desugared import declaration.");
     try {
-      String importModuleName = langLib.extractImportedModuleName(toplevelDecl, interp);
 
       // TODO handle import declarations with asterisks, e.g. import foo.*;
             
       String modulePath = langLib.getImportedModulePath(toplevelDecl, interp);
+      String importModuleName = FileCommands.fileName(modulePath);
       
       boolean skipProcessImport = false;
       
@@ -1023,7 +1018,7 @@ public class Driver{
         
         
         
-        fullExtName = langLib.getRelNamespaceSep() + extName;
+        fullExtName = langLib.getRelativeNamespace() + extName;
 
         log.log("The name of the sugar is '" + extName + "'.");
         log.log("The full name of the sugar is '" + fullExtName + "'.");
@@ -1037,8 +1032,8 @@ public class Driver{
         log.endTask();
       }
       
-      Path sdfExtension = environment.createBinPath(langLib.getRelNamespaceSep() + extName + ".sdf");
-      Path strExtension = environment.createBinPath(langLib.getRelNamespaceSep() + extName + ".str");
+      Path sdfExtension = environment.createBinPath(langLib.getRelativeNamespace() + extName + ".sdf");
+      Path strExtension = environment.createBinPath(langLib.getRelativeNamespace() + extName + ".str");
       
       String sdfImports = " imports " + StringCommands.printListSeparated(availableSDFImports, " ") + "\n";
       String strImports = " imports " + StringCommands.printListSeparated(availableSTRImports, " ") + "\n";
