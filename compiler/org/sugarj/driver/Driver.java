@@ -1311,7 +1311,6 @@ public class Driver{
       } 
       catch (Exception e) {
         sdfCache = new ModuleKeyCache<Path>();
-        e.printStackTrace();
         for (File f : environment.getCacheDir().getFile().listFiles())
           if (f.getPath().endsWith(".tbl"))
             f.delete();
@@ -1328,7 +1327,6 @@ public class Driver{
       } 
       catch (Exception e) {
         strCache = new ModuleKeyCache<Path>();
-        e.printStackTrace();
         for (File f : environment.getCacheDir().getFile().listFiles())
           if (f.getPath().endsWith(".jar"))
             f.delete();
