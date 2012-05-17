@@ -1,17 +1,13 @@
 module org/sugarj/transformations/EditorServiceExtension
 
-imports org/sugarj/languages/EditorServices 
-
-// todo: Not really language independent:
-// "ChecksDec"
+imports
+  org/sugarj/languages/EditorServices
+  org/sugarj/languages/Stratego 
+  org/sugarj/languages/SugarJ 
 
 signature
   constructors
     Checking : lexEditorServiceSectionName() * cfiter-star() -> cfEditorServiceSection()
-
-
-signature
-  constructors
     CheckingRuleErrors   : CheckingRuleBody() -> CheckingRule()
     CheckingRuleWarnings : CheckingRuleBody() -> CheckingRule()
     CheckingRuleNotes    : CheckingRuleBody() -> CheckingRule()

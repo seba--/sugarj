@@ -2,14 +2,18 @@ module org/sugarj/transformations/GenerateSignatures
 
 imports org/sugarj/languages/Sdf2
         org/sugarj/languages/Stratego
-
-// todo: Not really language independent:
-// "SugarBody"
+        org/sugarj/stdlib/StdTrans
 
 strategies
   desugar =
     changed-tree(gen-signature)
 
+
+signature constructors
+  SugarBody : A -> B
+  grammar-elem : G -> G
+  transformation-elem : T -> T
+  
 
 rules
 

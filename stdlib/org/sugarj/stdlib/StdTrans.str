@@ -2,7 +2,6 @@ module org/sugarj/stdlib/StdTrans
 imports libstrategolib
 
 imports org/sugarj/transformations/GenerateSignatures
-        org/sugarj/transformations/EditorServiceExtension
 
 signature constructors
   NextToplevelDeclaration : ToplevelDeclaration * Rest -> NextToplevelDeclaration
@@ -43,6 +42,7 @@ strategies
 signature
   constructors
     Locked : a -> a
+    CompileError : A * B -> C
 
 signature
   constructors
