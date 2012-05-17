@@ -143,17 +143,17 @@ public class HaskellLib extends LanguageLib {
 
   @Override
   public boolean isLanguageSpecificDec(IStrategoTerm decl) {
-    return isApplication(decl, "Topdecl");
+    return isApplication(decl, "HaskellTopdecl");
   }
 
   @Override
   public boolean isSugarDec(IStrategoTerm decl) {
-    return isApplication(decl, "SugarBody");
+    return isApplication(decl, "SugarElem");
   }
 
   @Override
   public boolean isEditorServiceDec(IStrategoTerm decl) {
-    return isApplication(decl, "EditorServicesDec");   
+    return isApplication(decl, "EditorSection");   
   }
 
   @Override
