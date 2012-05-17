@@ -47,7 +47,7 @@ public class ModuleSystemCommands {
       
       log.beginTask("Generate target code");
       try {
-        langLib.addCheckedImportModule(toplevelDecl, interp);
+        langLib.addImportModule(toplevelDecl, interp, true);
         //source.addCheckedImport(modulePath.replace('/', '.'));
       } finally {
         log.endTask();

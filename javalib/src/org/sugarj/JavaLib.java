@@ -358,14 +358,12 @@ public class JavaLib extends LanguageLib implements Serializable {
 	  
 	@Override
 	public void addImportModule(IStrategoTerm toplevelDecl,
-			HybridInterpreter interp) throws IOException {
-		javaSource.addImport(extractImportedModuleName(toplevelDecl, interp).replace('/', '.'));
-	}
-
-	@Override
-	public void addCheckedImportModule(IStrategoTerm toplevelDecl,
-			HybridInterpreter interp) throws IOException {
-		javaSource.addCheckedImport(getImportedModulePath(toplevelDecl,  interp).replace('/', '.'));
+			HybridInterpreter interp, boolean checked) throws IOException {
+		String imp = extractImportedModuleName(toplevelDecl, interp).replace('/', '.');
+		if (checked)
+			javaSource.addCheckedImport(imp);
+		else
+			javaSource.addImport(imp);
 	}
 
 	@Override

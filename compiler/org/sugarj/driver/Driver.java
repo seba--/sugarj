@@ -873,7 +873,7 @@ public class Driver{
               if (currentlyProcessing.contains(importSourceFile)) {
                 // assume source file does not provide syntactic sugar
                 //langLib.getSource().addImport(importModuleName.replace('/', '.'));
-                langLib.addImportModule(toplevelDecl, interp);
+                langLib.addImportModule(toplevelDecl, interp, false);
                 skipProcessImport = true;
                 delegateCompilation = importSourceFile;
               }
@@ -902,11 +902,11 @@ public class Driver{
         
         if (res != null && res.hasDelegatedCompilation(sourceFile)) {
           delegateCompilation = res.getSourceFile();
-          langLib.addImportModule(toplevelDecl, interp);
+          langLib.addImportModule(toplevelDecl, interp, false);
           skipProcessImport = true;
         }
         else if (driverResult.hasDelegatedCompilation(importSourceFile)) {
-          langLib.addImportModule(toplevelDecl, interp);
+          langLib.addImportModule(toplevelDecl, interp, false);
           skipProcessImport = true;
         }
       }
@@ -1193,7 +1193,6 @@ public class Driver{
   }
   
   private void init(RelativePath sourceFile, boolean generateFiles) throws FileNotFoundException, IOException, InvalidParseTableException {
-    langLib.init();
     environment.getIncludePath().add(new AbsolutePath(langLib.getLibraryDirectory().getAbsolutePath()));
     //     includePath.add(new AbsolutePath(StdLib.stdLibDir.getAbsolutePath()));
 

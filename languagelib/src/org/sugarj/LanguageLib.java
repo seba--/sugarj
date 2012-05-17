@@ -192,9 +192,7 @@ public abstract class LanguageLib implements Serializable {
 	public abstract void compile(List<Path> outFiles, Path bin, List<Path> path, Set<? extends Path> generatedFiles, Map<Path, Integer> generatedFileHashes, HybridInterpreter interp, boolean generateFiles) throws IOException;
 
 	
-	public abstract void addImportModule(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException;
-	public abstract void addCheckedImportModule(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException;
-	
+	public abstract void addImportModule(IStrategoTerm toplevelDecl, HybridInterpreter interp, boolean checked) throws IOException;
 	
 	
 	public abstract String getSugarName(IStrategoTerm decl, HybridInterpreter interp) throws IOException;

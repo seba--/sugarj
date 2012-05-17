@@ -19,7 +19,7 @@ public class HaskellSourceFileContent implements ISourceFileContent {
   private String moduleDecl;
   private List<SourceImport> imports = new LinkedList<SourceImport>();
   private List<SourceImport> checkedImports = new LinkedList<SourceImport>();
-  private boolean importsOptional;
+  private boolean importsOptional = false;
   private List<String> bodyDecls = new LinkedList<String>();
  
   public HaskellSourceFileContent() {

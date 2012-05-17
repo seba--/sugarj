@@ -33,6 +33,7 @@ import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.driver.sourcefilecontent.ISourceFileContent;
 import org.sugarj.driver.sourcefilecontent.PrologSourceFileContent;
+import org.sugarj.driver.sourcefilecontent.PrologSourceFileContent.PrologModuleImport;
 
 public class PrologLib extends LanguageLib implements Serializable {
 
@@ -468,20 +469,15 @@ abox2text_0_1.class    invoke(context, prolog-term, width integer)
 	
 	@Override
 	public void addImportModule(IStrategoTerm toplevelDecl,
-			HybridInterpreter interp) throws IOException {
+			HybridInterpreter interp, boolean checked) throws IOException {
 		
 		String importedModuleName = prettyPrint(toplevelDecl.getSubterm(0).getSubterm(0), interp);
-
+		PrologModuleImport imp = prologSource.getImport(importedModuleName, toplevelDecl);
 		
-		prologSource.addImport(prologSource.getImport(importedModuleName, toplevelDecl));	
-	}
-
-	@Override
-	public void addCheckedImportModule(IStrategoTerm toplevelDecl,
-			HybridInterpreter interp) throws IOException {
-		String importedModuleName = prettyPrint(toplevelDecl.getSubterm(0).getSubterm(0), interp);
-
-		prologSource.addCheckedImport(prologSource.getImport(importedModuleName, toplevelDecl));	
+		if (checked)
+			prologSource.addCheckedImport(imp);
+		else
+			prologSource.addImport(imp);	
 	}
 	
 	private void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IErrorLogger errorLog) {

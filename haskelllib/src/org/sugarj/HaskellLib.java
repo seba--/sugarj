@@ -24,6 +24,7 @@ import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.driver.sourcefilecontent.ISourceFileContent;
+import org.sugarj.driver.sourcefilecontent.SourceImport;
 import org.sugarj.haskell.HaskellSourceFileContent;
 
 /**
@@ -129,6 +130,11 @@ public class HaskellLib extends LanguageLib {
   public Set<RelativePath> getGeneratedFiles() {
     return generatedModules;
   }
+  
+  @Override
+  public String getRelativeNamespace() {
+    return relNamespaceName;
+  }
 
   @Override
   public boolean isNamespaceDec(IStrategoTerm decl) {
@@ -159,6 +165,23 @@ public class HaskellLib extends LanguageLib {
   public boolean isPlainDec(IStrategoTerm decl) {
     return isApplication(decl, "PlainDec");   
   }
+  
+  @Override
+  public LanguageLibFactory getFactoryForLanguage() {
+    return HaskellLibFactory.getInstance();
+  }
+
+
+  
+  /*
+   * processing stuff follows here
+   */
+  
+  @Override
+  public void setupSourceFile(RelativePath sourceFile, Environment environment) {
+    outFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".hs");
+    sourceContent = new HaskellSourceFileContent();
+  }
 
   @Override
   public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IErrorLogger errorLog, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException {
@@ -177,47 +200,29 @@ public class HaskellLib extends LanguageLib {
   }
 
   @Override
+  public String getImportedModulePath(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
+    return Term.asJavaString(getApplicationSubterm(toplevelDecl, "Import", 2)).replace('.', '/');
+  }
+  
+  @Override
+  public void addImportModule(IStrategoTerm toplevelDecl, HybridInterpreter interp, boolean checked) throws IOException {
+    SourceImport imp = new SourceImport(getImportedModulePath(toplevelDecl, interp), prettyPrint(toplevelDecl, interp));
+    if (checked)
+      sourceContent.addCheckedImport(imp);
+    else
+      sourceContent.addImport(imp);
+  }
+
+  @Override
   public String prettyPrint(IStrategoTerm term, HybridInterpreter interp) throws IOException {
     // TODO Auto-generated method stub
     return null;
   }
 
-  @Override
-  public void setupSourceFile(RelativePath sourceFile, Environment environment) {
-    // TODO Auto-generated method stub
 
-  }
-
-  @Override
-  public String getRelativeNamespace() {
-    return relNamespaceName;
-  }
-
-  @Override
-  public LanguageLibFactory getFactoryForLanguage() {
-    return HaskellLibFactory.getInstance();
-  }
-
-  @Override
-  public String getImportedModulePath(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
-    // TODO Auto-generated method stub
-    return null;
-  }
 
   @Override
   public void compile(List<Path> outFiles, Path bin, List<Path> path, Set<? extends Path> generatedFiles, Map<Path, Integer> generatedFileHashes, HybridInterpreter interp, boolean generateFiles) throws IOException {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void addImportModule(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void addCheckedImportModule(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
     // TODO Auto-generated method stub
 
   }
