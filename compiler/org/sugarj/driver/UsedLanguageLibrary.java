@@ -1,6 +1,6 @@
 package org.sugarj.driver;
 
-import org.sugarj.JavaLib;
+import org.sugarj.HaskellLib;
 import org.sugarj.LanguageLib;
 
 public class UsedLanguageLibrary {
@@ -12,6 +12,6 @@ public class UsedLanguageLibrary {
    *   This is implemented as a method to enable switching the language library while debugging.
    */
   public static LanguageLib getFreshLanguageLibrary() {
-    return new JavaLib();
+    return new HaskellLib();
   }
 }
