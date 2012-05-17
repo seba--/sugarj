@@ -1,3 +1,0 @@
-module org/sugarj/haskell/InitTrans
-imports org/sugarj/stdlib/StdTrans
-        org/sugarj/languages/SugarHaskell
