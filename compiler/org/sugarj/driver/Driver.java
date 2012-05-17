@@ -1240,7 +1240,7 @@ public class Driver{
    */
   public static void main(String[] args) {
     // XXX: change language Library here:
-    LanguageLib langLib = UsedLanguageLibrary.langLib;
+    LanguageLib langLib = UsedLanguageLibrary.getFreshLanguageLibrary();
     
     // log.log("This is the extensible java compiler.");
     Environment environment = new Environment();

@@ -55,9 +55,7 @@ import org.sugarj.stdlib.StdLib;
  */
 public class SugarJParser extends JSGLRI {
 
-  // XXX: Change language here:
-  LanguageLib langLib = UsedLanguageLibrary.langLib;
-  
+  private final LanguageLib langLib = UsedLanguageLibrary.getFreshLanguageLibrary();
   
   private Environment environment;
   
@@ -129,7 +127,7 @@ public class SugarJParser extends JSGLRI {
     SugarJParser.setPending(filename, true);
 
     // XXX: support non-java files in editor. (i.e. use actual language library here, not just JavaLib)
-    final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(filename), environment.getSourcePath(), UsedLanguageLibrary.langLib);
+    final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(filename), environment.getSourcePath(), langLib);
 
     
     Job parseJob = new Job("SugarJ parser: " + sourceFile.getRelativePath()) {

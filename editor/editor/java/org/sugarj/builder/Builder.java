@@ -28,7 +28,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
-import org.sugarj.JavaLib;
 import org.sugarj.LanguageLib;
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.Environment;
@@ -54,7 +53,7 @@ import org.sugarj.util.ProcessingListener;
 public class Builder extends IncrementalProjectBuilder {
 
   // XXX: Change language library here
-  LanguageLib langLib = UsedLanguageLibrary.langLib;
+  LanguageLib langLib = UsedLanguageLibrary.getFreshLanguageLibrary();
   
   private class BuildInput {
     public IResource resource;
@@ -100,12 +99,13 @@ public class Builder extends IncrementalProjectBuilder {
 
   private void incrementalBuild(IResourceDelta delta, IProgressMonitor monitor) {
     boolean rebuild = true;
+    final String ext = UsedLanguageLibrary.getFreshLanguageLibrary().getSugarFileExtension().substring(1);
     try {
       class ShouldRebuildResourceDeltaVisitor implements IResourceDeltaVisitor {
         boolean rebuild = false;
         public boolean visit(IResourceDelta delta) {
           //if ("sugj".equals(delta.getFullPath().getFileExtension()))
-          if (UsedLanguageLibrary.langLib.getSugarFileExtension().substring(1).equals(delta.getFullPath().getFileExtension()))
+          if (ext.equals(delta.getFullPath().getFileExtension()))
             rebuild = true;
           
           // continue rebuild has not been required so far
@@ -125,6 +125,8 @@ public class Builder extends IncrementalProjectBuilder {
   }
 
   private void fullBuild(IProgressMonitor monitor) {
+    final String ext = UsedLanguageLibrary.getFreshLanguageLibrary().getSugarFileExtension().substring(1);
+    
     final LinkedList<BuildInput> resources = new LinkedList<BuildInput>();
     try {
       getProject().accept(new IResourceVisitor() {
@@ -141,14 +143,14 @@ public class Builder extends IncrementalProjectBuilder {
             return false;
           
           //if ("sugj".equals(resource.getFileExtension())) {
-          System.out.println("sugar file extension: " + UsedLanguageLibrary.langLib.getSugarFileExtension().substring(1) + " file extension: " + resource.getFileExtension() + "  ---- " + resource);
-          if (UsedLanguageLibrary.langLib.getSugarFileExtension().substring(1).equals(resource.getFileExtension())) {
+          System.out.println("sugar file extension: " + ext + " file extension: " + resource.getFileExtension() + "  ---- " + resource);
+          if (ext.equals(resource.getFileExtension())) {
             String path = getProject().getLocation().makeAbsolute() + "/" + relPath;
             System.out.println("   ...found: " + path);
             final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(
                     FileCommands.dropExtension(path.toString()),
                     environment.getSourcePath(),
-                    UsedLanguageLibrary.langLib.getFactoryForLanguage().createLanguageLibrary()); // XXX: Replace this by languageLib to support more than java
+                    UsedLanguageLibrary.getFreshLanguageLibrary()); // XXX: Replace this by languageLib to support more than java
             
             if (sourceFile == null) {
               org.strategoxt.imp.runtime.Environment.logWarning("cannot locate source file for ressource " + resource.getFullPath());
