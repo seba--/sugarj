@@ -212,6 +212,23 @@ public class HaskellLib extends LanguageLib {
     else
       sourceContent.addImport(imp);
   }
+  
+  @Override
+  public String getSugarName(IStrategoTerm decl, HybridInterpreter interp) throws IOException {
+    return moduleName;
+  }
+
+  @Override
+  public int getSugarAccessibility(IStrategoTerm decl) {
+    return PUBLIC_SUGAR;
+  }
+
+  @Override
+  public IStrategoTerm getSugarBody(IStrategoTerm decl) {
+    return getApplicationSubterm(decl, "SugarBody", 0);
+  }
+
+
 
   @Override
   public String prettyPrint(IStrategoTerm term, HybridInterpreter interp) throws IOException {
@@ -219,30 +236,9 @@ public class HaskellLib extends LanguageLib {
     return null;
   }
 
-
-
   @Override
   public void compile(List<Path> outFiles, Path bin, List<Path> path, Set<? extends Path> generatedFiles, Map<Path, Integer> generatedFileHashes, HybridInterpreter interp, boolean generateFiles) throws IOException {
     // TODO Auto-generated method stub
 
   }
-
-  @Override
-  public String getSugarName(IStrategoTerm decl, HybridInterpreter interp) throws IOException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public int getSugarAccessibility(IStrategoTerm decl) {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  @Override
-  public IStrategoTerm getSugarBody(IStrategoTerm decl) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
 }
