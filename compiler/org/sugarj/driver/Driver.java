@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.InvalidParseTableException;
 import org.spoofax.jsglr.client.ParseTable;
+import org.spoofax.jsglr.client.SGLR;
 import org.spoofax.jsglr.client.imploder.IToken;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.spoofax.jsglr.shared.BadTokenException;
@@ -60,6 +61,7 @@ import org.sugarj.driver.cli.CLIError;
 import org.sugarj.driver.cli.DriverCLI;
 import org.sugarj.driver.transformations.extraction.extraction;
 import org.sugarj.stdlib.StdLib;
+import org.sugarj.util.Pair;
 import org.sugarj.util.ProcessingListener;
 
 
@@ -117,7 +119,7 @@ public class Driver{
   private JSGLRI strParser;
   private JSGLRI editorServicesParser;
   private HybridInterpreter interp;
-  private JSGLRI parser;
+  private SGLR parser;
   private Context sdfContext;
   private Context makePermissiveContext;
   private Context extractionContext;
@@ -461,7 +463,7 @@ public class Driver{
       String rest = getString(restTerm);
 
       if (input.equals(rest))
-        throw new SGLRException(parser.getParser(), "empty toplevel declaration parse rule");
+        throw new SGLRException(parser, "empty toplevel declaration parse rule");
       
       try {
         if (!rest.isEmpty())
@@ -483,7 +485,7 @@ public class Driver{
       return new IncrementalParseResult(toplevelDecl, rest);
     } catch (Exception e) {
       if (!recovery)
-        throw new SGLRException(parser.getParser(), "parsing failed", e);
+        throw new SGLRException(parser, "parsing failed", e);
       
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
       
@@ -687,7 +689,7 @@ public class Driver{
             sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
         }
         else
-          throw new IllegalArgumentException("unexpected toplevel declaration, desugaring probably failed: " + toplevelDecl.toString(5));
+          throw new IllegalArgumentException("unexpected toplevel declaration, desugaring probably failed: " + toplevelDecl.toString(20));
       } catch (Exception e) {
         String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
         
@@ -712,27 +714,29 @@ public class Driver{
 //    driverResult.setLastParseTable(currentGrammarTBL);
     ParseTable table = org.strategoxt.imp.runtime.Environment.loadParseTable(currentGrammarTBL.getAbsolutePath());
     
-    IStrategoTerm parseResult = null;
+    Pair<SGLR, IStrategoTerm> parseResult = null;
 
-    parser.setUseRecovery(recovery);
-    
     // read next toplevel decl and stop if that fails
     try {
       parseResult = SDFCommands.parseImplode(
           table,
           remainingInput,
           "NextToplevelDeclaration",
-          false,
-          inputTreeBuilder,
-          parser);
+          recovery,
+          inputTreeBuilder);
+    } catch (SGLRException e) {
+      this.parser = e.getParser();
     } finally {
+      if (parseResult != null)
+        this.parser = parseResult.a;
+      
       if (recovery) {
         for (BadTokenException e : parser.getCollectedErrors())
           driverResult.logParseError(e);
       }
     }
     
-    return parseResult;
+    return parseResult.b;
   }
 
   private IStrategoTerm currentDesugar(IStrategoTerm term) throws IOException,
@@ -1223,9 +1227,6 @@ public class Driver{
     availableSTRImports.add(langLib.getInitTransModule());
 
     inputTreeBuilder = new RetractableTreeBuilder();
-    
-    // XXX need to load ANY parse table, preferably an empty one.
-    parser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.sdfTbl.getPath()), "Sdf2Module");
     
     sdfParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.sdfTbl.getPath()), "Sdf2Module");
     strParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.strategoTbl.getPath()), "StrategoModule");

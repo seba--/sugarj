@@ -24,6 +24,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.ITreeBuilder;
 import org.spoofax.jsglr.client.InvalidParseTableException;
 import org.spoofax.jsglr.client.ParseTable;
+import org.spoofax.jsglr.client.SGLR;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
@@ -31,7 +32,6 @@ import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.nativebundle.SDFBundleCommand;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
-import org.strategoxt.java_front.pp_java_string_0_0;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.permissivegrammars.make_permissive;
@@ -50,6 +50,7 @@ import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.transformations.extraction.extract_sdf_0_0;
 import org.sugarj.stdlib.StdLib;
+import org.sugarj.util.Pair;
 
 /**
  * This class provides methods for various SDF commands. Each
@@ -339,63 +340,44 @@ public class SDFCommands {
    * @throws BadTokenException 
    * @throws TokenExpectedException 
    */
-  private static IStrategoTerm jsglri(ParseTable table, final String source, String start, ITreeBuilder treeBuilder, final JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
-    parser.setParseTable(table);
-    parser.setStartSymbol(start);
-    
+  private static Pair<SGLR, IStrategoTerm> sglr(ParseTable table, final String source, final String start, boolean useRecovery, ITreeBuilder treeBuilder) throws SGLRException {
     if (treeBuilder instanceof RetractableTreeBuilder && ((RetractableTreeBuilder) treeBuilder).isInitialized())
-      ((RetractableTokenizer) treeBuilder.getTokenizer()).setKeywordRecognizer(parser.getParseTable().getKeywordRecognizer());
+      ((RetractableTokenizer) treeBuilder.getTokenizer()).setKeywordRecognizer(table.getKeywordRecognizer());
     
-    parser.getParser().setTreeBuilder(treeBuilder);
+    final SGLR parser = new SGLR(treeBuilder, table);
+    parser.setUseStructureRecovery(useRecovery);
 
     Callable<IStrategoTerm> parseCallable = new Callable<IStrategoTerm>() {
       @Override
       public IStrategoTerm call() throws Exception {
-        return parser.parse(source, "in-file declaration");
+        return (IStrategoTerm) parser.parse(source, "toplevel declaration", start, true, Integer.MAX_VALUE);
     }};
     
     try {
       Future<IStrategoTerm> res = parseExecutorService.submit(parseCallable);
-      return res.get(PARSE_TIMEOUT, TimeUnit.MILLISECONDS);
+      IStrategoTerm term = res.get(PARSE_TIMEOUT, TimeUnit.MILLISECONDS);
+      return Pair.create(parser, term);
     } catch (ExecutionException e) {
       if (e.getCause() instanceof SGLRException)
         throw (SGLRException) e.getCause();
       throw new RuntimeException("unexpected execution error", e);
     } catch (InterruptedException e) {
-      throw new SGLRException(parser.getParser(), "parser was interrupted", e);
+      throw new SGLRException(parser, "parser was interrupted", e);
     } catch (TimeoutException e) {
-      throw new SGLRException(parser.getParser(), "parser timed out, timeout at " + PARSE_TIMEOUT + "ms", e);
+      throw new SGLRException(parser, "parser timed out, timeout at " + PARSE_TIMEOUT + "ms", e);
     }
   }
   
-//  /**
-//   * Parses the given source using the given table and implodes the resulting parse tree.
-//   * 
-//   * @param tbl
-//   * @param source
-//   * @param target
-//   * @param start
-//   * @return
-//   * @throws IOException
-//   * @throws InvalidParseTableException
-//   * @throws SGLRException 
-//   * @throws BadTokenException 
-//   * @throws TokenExpectedException 
-//   */
-//  public static boolean parseImplode(String tbl, String source, String target, String start, boolean binary, ITreeBuilder treeBuilder, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
-//    return parseImplode(org.strategoxt.imp.runtime.Environment.loadParseTable(tbl), tbl, source, target, start, binary, treeBuilder, parser);
-//  }
-  
-  public static IStrategoTerm parseImplode(ParseTable table, String source, String start, boolean binary, ITreeBuilder treeBuilder, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
-    return parseImplode(table, null, source, start, binary, treeBuilder, parser);
+  public static Pair<SGLR, IStrategoTerm> parseImplode(ParseTable table, String source, String start, boolean useRecovery, ITreeBuilder treeBuilder) throws IOException, SGLRException {
+    return parseImplode(table, null, source, start, useRecovery, treeBuilder);
   }
   
-  private static IStrategoTerm parseImplode(ParseTable table, Path tbl, String source, String start, boolean binary, ITreeBuilder treeBuilder, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  private static Pair<SGLR, IStrategoTerm> parseImplode(ParseTable table, Path tbl, String source, String start, boolean useRecovery, ITreeBuilder treeBuilder) throws IOException, SGLRException {
     log.beginExecution("parsing", "parsing source using table " + tbl);
 
-    IStrategoTerm result = null;
+    Pair<SGLR, IStrategoTerm> result = null;
     try {
-      result = jsglri(table, source, start, treeBuilder, parser);
+      result = sglr(table, source, start, useRecovery, treeBuilder);
     }
     finally {
       if (result != null)
