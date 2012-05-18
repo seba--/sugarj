@@ -66,7 +66,7 @@ public class SDFCommands {
   /*
    * timeout for parsing files (in milliseconds)
    */
-  private static long PARSE_TIMEOUT = 5000;
+  public static long PARSE_TIMEOUT = 5000;
   
   static {
     try {
@@ -378,7 +378,7 @@ public class SDFCommands {
       result = sglr(table, source, start, useRecovery, treeBuilder);
     }
     finally {
-      if (result != null)
+      if (result != null && result.b != null)
         log.endTask();
       else {
         Path sourceFile = FileCommands.newTempFile("");

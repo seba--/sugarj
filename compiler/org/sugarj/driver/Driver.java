@@ -726,11 +726,13 @@ public class Driver{
           inputTreeBuilder);
     } catch (SGLRException e) {
       this.parser = e.getParser();
+      log.logErr(e.getMessage());
+      return null;
     } finally {
       if (parseResult != null)
         this.parser = parseResult.a;
       
-      if (recovery) {
+      if (recovery && parser != null) {
         for (BadTokenException e : parser.getCollectedErrors())
           driverResult.logParseError(e);
       }
