@@ -3,9 +3,7 @@ package org.sugarj.driver;
 import static org.sugarj.common.FileCommands.toWindowsPath;
 import static org.sugarj.common.Log.log;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -20,13 +18,13 @@ import java.util.regex.Pattern;
 import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.InvalidParseTableException;
+import org.spoofax.jsglr.client.SGLR;
 import org.spoofax.jsglr.client.imploder.IToken;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.strategoxt.HybridInterpreter;
-import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoException;
 import org.strategoxt.lang.StrategoExit;
@@ -134,7 +132,7 @@ public class STRCommands {
   public static Path compile(Path str,
                               String main,
                               Collection<Path> dependentFiles,
-                              JSGLRI strParser,
+                              SGLR strParser,
                               Context strjContext,
                               ModuleKeyCache<Path> strCache,
                               Environment environment,
@@ -232,10 +230,10 @@ public class STRCommands {
   }
 
 
-  private static ModuleKey getModuleKeyForAssimilation(Path str, String main, Collection<Path> dependentFiles, JSGLRI strParser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  private static ModuleKey getModuleKeyForAssimilation(Path str, String main, Collection<Path> dependentFiles, SGLR strParser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     log.beginTask("Generating", "Generate module key for current assimilation");
     try {
-      IStrategoTerm aterm = strParser.parse(new BufferedInputStream(new FileInputStream(str.getFile())), str.getAbsolutePath());
+      IStrategoTerm aterm = (IStrategoTerm) strParser.parse(FileCommands.readFileAsString(str), str.getAbsolutePath(), "StrategoModule");
 
       aterm = ATermCommands.getApplicationSubterm(aterm, "Module", 1);
 
@@ -246,7 +244,7 @@ public class STRCommands {
       
       return new ModuleKey(depList, aterm);
     } catch (Exception e) {
-      throw new SGLRException(strParser.getParser(), "could not parse STR file " + str, e);
+      throw new SGLRException(strParser, "could not parse STR file " + str, e);
     } finally {
       log.endTask();
     }

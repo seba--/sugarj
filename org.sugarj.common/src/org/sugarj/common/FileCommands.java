@@ -111,6 +111,10 @@ public class FileCommands {
     fos.close();
   }
 
+  public static String readFileAsString(File file) throws IOException {
+    return readFileAsString(new AbsolutePath(file.getAbsolutePath()));
+  }
+  
   // from http://snippets.dzone.com/posts/show/1335
   // Author: http://snippets.dzone.com/user/daph2001
   public static String readFileAsString(Path filePath) throws IOException {

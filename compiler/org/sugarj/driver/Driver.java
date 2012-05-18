@@ -6,8 +6,8 @@ import static org.sugarj.common.ATermCommands.getList;
 import static org.sugarj.common.ATermCommands.getString;
 import static org.sugarj.common.ATermCommands.isApplication;
 import static org.sugarj.common.Log.log;
-import static org.sugarj.driver.STRCommands.extractSTR;
 import static org.sugarj.driver.SDFCommands.extractSDF;
+import static org.sugarj.driver.STRCommands.extractSTR;
 
 import java.io.EOFException;
 import java.io.File;
@@ -33,12 +33,12 @@ import org.spoofax.jsglr.client.ParseTable;
 import org.spoofax.jsglr.client.SGLR;
 import org.spoofax.jsglr.client.imploder.IToken;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+import org.spoofax.jsglr.client.imploder.TreeBuilder;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
-import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoException;
 import org.strategoxt.permissivegrammars.make_permissive;
@@ -115,9 +115,9 @@ public class Driver{
   private IStrategoTerm lastSugaredToplevelDecl;
   
   private RetractableTreeBuilder inputTreeBuilder;
-  private JSGLRI sdfParser;
-  private JSGLRI strParser;
-  private JSGLRI editorServicesParser;
+  private SGLR sdfParser;
+  private SGLR strParser;
+  private SGLR editorServicesParser;
   private HybridInterpreter interp;
   private SGLR parser;
   private Context sdfContext;
@@ -1189,7 +1189,7 @@ public class Driver{
   }
   
   private void initEditorServices() throws IOException, TokenExpectedException, BadTokenException, SGLRException {
-    IStrategoTerm initEditor = editorServicesParser.parse(new FileInputStream(langLib.getInitEditor()), langLib.getInitEditor().getPath());
+    IStrategoTerm initEditor = (IStrategoTerm) editorServicesParser.parse(FileCommands.readFileAsString(langLib.getInitEditor()), langLib.getInitEditor().getPath(), "Module");
 
     IStrategoTerm services = ATermCommands.getApplicationSubterm(initEditor, "Module", 2);
     
@@ -1228,9 +1228,9 @@ public class Driver{
 
     inputTreeBuilder = new RetractableTreeBuilder();
     
-    sdfParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.sdfTbl.getPath()), "Sdf2Module");
-    strParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.strategoTbl.getPath()), "StrategoModule");
-    editorServicesParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.editorServicesTbl.getPath()), "Module");
+    sdfParser = new SGLR(new TreeBuilder(), org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.sdfTbl.getPath()));
+    strParser = new SGLR(new TreeBuilder(), org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.strategoTbl.getPath()));
+    editorServicesParser = new SGLR(new TreeBuilder(), org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.editorServicesTbl.getPath()));
 
     interp = new HybridInterpreter(); //TODO (ATermCommands.factory);
     sdfContext = tools.init();

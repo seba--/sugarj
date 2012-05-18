@@ -4,7 +4,6 @@ import static org.sugarj.common.FileCommands.toCygwinPath;
 import static org.sugarj.common.Log.log;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +30,6 @@ import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.nativebundle.SDFBundleCommand;
-import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.permissivegrammars.make_permissive;
@@ -183,7 +181,7 @@ public class SDFCommands {
   public static Path compile(Path sdf,
                               String module, 
                               Collection<Path> dependentFiles, 
-                              JSGLRI sdfParser, 
+                              SGLR sdfParser, 
                               Context sdfContext, 
                               Context makePermissiveContext, 
                               ModuleKeyCache<Path> sdfCache, 
@@ -251,10 +249,10 @@ public class SDFCommands {
     }
   }
   
-  private static ModuleKey getModuleKeyForGrammar(Path sdf, String module, Collection<Path> dependentFiles, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  private static ModuleKey getModuleKeyForGrammar(Path sdf, String module, Collection<Path> dependentFiles, SGLR parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     log.beginTask("Generating", "Generate module key for current grammar");
     try {
-      IStrategoTerm aterm = parser.parse(new FileInputStream(sdf.getFile()), sdf.getAbsolutePath());
+      IStrategoTerm aterm = (IStrategoTerm) parser.parse(FileCommands.readFileAsString(sdf), sdf.getAbsolutePath(), "Sdf2Module");
 
       IStrategoTerm imports = ATermCommands.getApplicationSubterm(aterm, "module", 1);
       IStrategoTerm body = ATermCommands.getApplicationSubterm(aterm, "module", 2);
@@ -267,7 +265,7 @@ public class SDFCommands {
       
       return new ModuleKey(depList, term);
     } catch (Exception e) {
-      throw new SGLRException(parser.getParser(), "could not parse SDF file " + sdf, e);
+      throw new SGLRException(parser, "could not parse SDF file " + sdf, e);
     } finally {
       log.endTask();
     }
