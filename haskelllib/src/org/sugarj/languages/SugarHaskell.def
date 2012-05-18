@@ -11,7 +11,7 @@ exports
   context-free syntax
     HaskellModuleDec HaskellImportdecl* SugarHaskellTopdecl* -> SugarCompilationUnit {prefer, cons("CompilationUnit")}
 
-    "module" HaskellModid HaskellExports? -> HaskellModuleDec {cons("ModuleDec")}
+    "module" HaskellModid HaskellExports? "where" -> HaskellModuleDec {cons("ModuleDec")}
 
     HaskellTopdecl       -> SugarHaskellTopdecl {cons("HaskellTopdecl")}
     SugarDefElem         -> SugarHaskellTopdecl {cons("SugarElem")}

@@ -196,7 +196,7 @@ public class HaskellLib extends LanguageLib {
 
   @Override
   public void processLanguageSpecific(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp) throws IOException {
-    sourceContent.addBodyDecl(prettyPrint(toplevelDecl, interp));
+    sourceContent.addBodyDecl(prettyPrint(getApplicationSubterm(toplevelDecl, "HaskellTopdecl", 0), interp));
   }
 
   @Override
