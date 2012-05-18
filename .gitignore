@@ -26,3 +26,4 @@ update-site/plugins/
 
 # compiler classpath
 compiler/.classpath
+.classpath

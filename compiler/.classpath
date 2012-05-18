@@ -7,6 +7,5 @@
 	<classpathentry exported="true" kind="lib" path="commons-cli-1.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="commons-collections-3.2.1.jar"/>
 	<classpathentry kind="lib" path="strategoxt.jar"/>
-	<classpathentry kind="lib" path="/Users/seba/Library/eclipse-sugarhaskell/plugins/org.strategoxt.imp.nativebundle_0.1.1.201202141159"/>
-	<classpathentry kind="output" path="bin"/>
+    <classpathentry kind="lib" path="C:/Users/Felix Rieger/Documents/uni/sugarj/eclipse-SDK-4.1.1-win32/eclipse/plugins/org.strategoxt.imp.nativebundle_0.1.1.201112071331"/>	<classpathentry kind="output" path="bin"/>
 </classpath>
