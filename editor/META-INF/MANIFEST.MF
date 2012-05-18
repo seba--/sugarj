@@ -24,7 +24,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui.editors,
  org.eclipse.ui.workbench.texteditor,
  org.strategoxt.imp.runtime,
- org.spoofax.jsglr,
  org.strategoxt.strj,
  org.sugarj.compiler,
  org.sugarj.stdlib,
@@ -33,7 +32,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui.console,
  org.eclipse.ui.ide,
  org.sugarj.common,
- org.spoofax.jsglr_layout
+ org.spoofax.jsglr_layout,
+ org.spoofax.jsglr
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: org.spoofax.terms.attachments
