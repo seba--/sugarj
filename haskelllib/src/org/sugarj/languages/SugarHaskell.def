@@ -18,9 +18,12 @@ exports
     EditorServiceSection -> SugarHaskellTopdecl {cons("EditorSection")}
 
   context-free syntax
-    HaskellModuleDec -> ToplevelDeclaration
-    HaskellImportdecl -> ToplevelDeclaration
-    SugarHaskellTopdecl -> ToplevelDeclaration
+    HaskellModuleDec LAYOUT?    -> LayoutedToplevelDeclaration {enforce-newline, layout(gt(col(left(1)), col(first(1))))}
+    HaskellImportdecl LAYOUT?   -> LayoutedToplevelDeclaration {enforce-newline, layout(gt(col(left(1)), col(first(1))))}
+    SugarHaskellTopdecl LAYOUT? -> LayoutedToplevelDeclaration {enforce-newline, layout(gt(col(left(1)), col(first(1))))}
+
+    LayoutedToplevelDeclaration Rest
+      -> NextToplevelDeclaration {cons("NextToplevelDeclaration"), layout(eq(col(first(1)), col(first(2))))}
 
   context-free syntax
     Grammar        -> SugarDefElem {cons("grammar-elem")}
