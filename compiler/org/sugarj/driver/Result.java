@@ -16,7 +16,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.jsglr.shared.BadTokenException;
+import org.spoofax.jsglr_layout.shared.BadTokenException;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.IErrorLogger;

@@ -1,12 +1,12 @@
 package org.sugarj.driver;
 
-import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getTokenizer;
+import static org.spoofax.jsglr_layout.client.imploder.ImploderAttachment.getTokenizer;
 
 import org.spoofax.interpreter.terms.ISimpleTerm;
-import org.spoofax.jsglr.client.KeywordRecognizer;
-import org.spoofax.jsglr.client.imploder.IToken;
-import org.spoofax.jsglr.client.imploder.ImploderAttachment;
-import org.spoofax.jsglr.client.imploder.Tokenizer;
+import org.spoofax.jsglr_layout.client.KeywordRecognizer;
+import org.spoofax.jsglr_layout.client.imploder.IToken;
+import org.spoofax.jsglr_layout.client.imploder.ImploderAttachment;
+import org.spoofax.jsglr_layout.client.imploder.Tokenizer;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>

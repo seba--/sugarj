@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -21,16 +22,16 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.jsglr.client.InvalidParseTableException;
-import org.spoofax.jsglr.client.KeywordRecognizer;
-import org.spoofax.jsglr.client.SGLR;
-import org.spoofax.jsglr.client.imploder.IToken;
-import org.spoofax.jsglr.client.imploder.Token;
-import org.spoofax.jsglr.client.imploder.Tokenizer;
-import org.spoofax.jsglr.client.imploder.TreeBuilder;
-import org.spoofax.jsglr.shared.BadTokenException;
-import org.spoofax.jsglr.shared.SGLRException;
-import org.spoofax.jsglr.shared.TokenExpectedException;
+import org.spoofax.jsglr_layout.client.InvalidParseTableException;
+import org.spoofax.jsglr_layout.client.KeywordRecognizer;
+import org.spoofax.jsglr_layout.client.ParseTable;
+import org.spoofax.jsglr_layout.client.SGLR;
+import org.spoofax.jsglr_layout.client.imploder.IToken;
+import org.spoofax.jsglr_layout.client.imploder.Token;
+import org.spoofax.jsglr_layout.client.imploder.Tokenizer;
+import org.spoofax.jsglr_layout.client.imploder.TreeBuilder;
+import org.spoofax.jsglr_layout.shared.BadTokenException;
+import org.spoofax.jsglr_layout.shared.SGLRException;
 import org.spoofax.terms.attachments.ParentAttachment;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.imp.runtime.services.ContentProposer;
@@ -74,8 +75,7 @@ public class SugarJParser extends JSGLRI {
   
   
   @Override
-  protected IStrategoTerm doParse(String input, String filename)
-      throws TokenExpectedException, BadTokenException, SGLRException, IOException {
+  protected IStrategoTerm doParse(String input, String filename) throws IOException {
     
     assert environment != null;
     
@@ -184,9 +184,14 @@ public class SugarJParser extends JSGLRI {
   }
   
   @Override
-  public Set<BadTokenException> getCollectedErrors() {
-    final Set<BadTokenException> empty = Collections.emptySet();
-    return result == null ? empty : result.getParseErrors();
+  public Set<org.spoofax.jsglr.shared.BadTokenException> getCollectedErrors() {
+    if (result == null)
+      return Collections.emptySet();
+    
+    Set<org.spoofax.jsglr.shared.BadTokenException> res = new TreeSet<org.spoofax.jsglr.shared.BadTokenException>();
+    for (BadTokenException e : result.getParseErrors())
+      res.add(new org.spoofax.jsglr.shared.BadTokenException(null, e.getToken(), e.getOffset(), e.getLineNumber(), e.getColumnNumber()));
+    return res;
   }
 
 
@@ -222,7 +227,7 @@ public class SugarJParser extends JSGLRI {
     }
   }
   
-  private Result parseFailureResult() throws IOException, TokenExpectedException, BadTokenException, SGLRException {
+  private Result parseFailureResult() throws FileNotFoundException, IOException {
     Tokenizer tokenizer = new Tokenizer(" ", " ", new KeywordRecognizer(null) {});
     Token tok = tokenizer.makeToken(0, IToken.TK_UNKNOWN, true);
     IStrategoTerm term = ATermCommands.makeList("SugarCompilationUnit", tok);
@@ -236,31 +241,35 @@ public class SugarJParser extends JSGLRI {
     return r;
   }
   
-  private IStrategoTerm parseCompletionTree(String input, String filename, Result result) throws IOException, TokenExpectedException, BadTokenException, SGLRException {
-    JSGLRI jsglri = null;
-    try {
-      jsglri = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(result.getParseTable().getAbsolutePath()), "NextToplevelDeclaration");
-    } catch (InvalidParseTableException e) {
-      e.printStackTrace();
-    }
-    
-    if (jsglri == null)
-      return null;
-    
-    jsglri.setUseRecovery(true);
-    jsglri.getParser().setUseStructureRecovery(true);
+  private IStrategoTerm parseCompletionTree(String input, String filename, Result result) throws IOException {
+
     RetractableTreeBuilder treeBuilder = new RetractableTreeBuilder();
-    jsglri.getParser().setTreeBuilder(treeBuilder);
-    
-    
+    ParseTable table;
+    try {
+      table = ATermCommands.parseTableManager.loadFromFile(result.getParseTable().getAbsolutePath());
+    } catch (InvalidParseTableException e) {
+      Log.log.logErr(e.getMessage());
+      return null;
+    }
+    SGLR parser = new SGLR(treeBuilder, table);
+    parser.setUseStructureRecovery(true);
+
     String remainingInput = input;
     List<IStrategoTerm> list = new LinkedList<IStrategoTerm>();
     
     while (true) {
-      if (remainingInput.isEmpty())
+      if (remainingInput == null || remainingInput.isEmpty())
         return null;
 
-      IStrategoTerm term = jsglri.parse(remainingInput, filename);
+      IStrategoTerm term;
+      try {
+        term = (IStrategoTerm) parser.parse(remainingInput, filename, "NextToplevelDeclaration");
+      } catch (SGLRException e) {
+        return null;
+      } catch (InterruptedException e) {
+        return null;
+      }
+      
       if (!ATermCommands.isApplication(term, "NextToplevelDeclaration"))
         return null;
       
@@ -286,8 +295,8 @@ public class SugarJParser extends JSGLRI {
   
   private Path initialTrans = null;
 
-  private Path getInitialTrans() throws TokenExpectedException,
-      BadTokenException, FileNotFoundException, IOException, SGLRException {
+  @SuppressWarnings("unchecked")
+  private Path getInitialTrans() throws FileNotFoundException, IOException {
     if (initialTrans != null && FileCommands.exists(initialTrans))
       return initialTrans;
     Path strCachePath = environment.createCachePath("strCache");
@@ -308,9 +317,9 @@ public class SugarJParser extends JSGLRI {
           new AbsolutePath(langLib.getInitTrans().getPath()),
           "main",
           new LinkedList<Path>(),
-          new SGLR(new TreeBuilder(), org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.strategoTbl.getPath())),
+          new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.strategoTbl.getPath())),
           org.strategoxt.strj.strj.init(), strCache, environment, langLib);
-    } catch (InvalidParseTableException e) {
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
     return initialTrans;

@@ -257,7 +257,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 	
 	private IStrategoTerm initializePrettyPrinter(Context ctx) {
 		if (pptable == null) {
-			IStrategoTerm pptable_file = ATermCommands.makeString(getPrettyPrint().getAbsolutePath(), null);
+			IStrategoTerm pptable_file = ATermCommands.makeString(getPrettyPrint().getAbsolutePath());
 			pptable = parse_pptable_file_0_0.instance.invoke(org.strategoxt.stratego_gpp.stratego_gpp.init(), pptable_file);
 		}
 		

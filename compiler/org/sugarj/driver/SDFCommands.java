@@ -20,13 +20,13 @@ import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.jsglr.client.ITreeBuilder;
-import org.spoofax.jsglr.client.InvalidParseTableException;
-import org.spoofax.jsglr.client.ParseTable;
-import org.spoofax.jsglr.client.SGLR;
-import org.spoofax.jsglr.shared.BadTokenException;
-import org.spoofax.jsglr.shared.SGLRException;
-import org.spoofax.jsglr.shared.TokenExpectedException;
+import org.spoofax.jsglr_layout.client.ITreeBuilder;
+import org.spoofax.jsglr_layout.client.InvalidParseTableException;
+import org.spoofax.jsglr_layout.client.ParseTable;
+import org.spoofax.jsglr_layout.client.SGLR;
+import org.spoofax.jsglr_layout.shared.BadTokenException;
+import org.spoofax.jsglr_layout.shared.SGLRException;
+import org.spoofax.jsglr_layout.shared.TokenExpectedException;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.nativebundle.SDFBundleCommand;
@@ -348,7 +348,7 @@ public class SDFCommands {
     Callable<IStrategoTerm> parseCallable = new Callable<IStrategoTerm>() {
       @Override
       public IStrategoTerm call() throws Exception {
-        return (IStrategoTerm) parser.parse(source, "toplevel declaration", start, true, Integer.MAX_VALUE);
+        return (IStrategoTerm) parser.parse(source, "toplevel declaration", start);
     }};
     
     try {

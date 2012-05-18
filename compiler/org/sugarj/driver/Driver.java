@@ -28,15 +28,15 @@ import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.jsglr.client.InvalidParseTableException;
-import org.spoofax.jsglr.client.ParseTable;
-import org.spoofax.jsglr.client.SGLR;
-import org.spoofax.jsglr.client.imploder.IToken;
-import org.spoofax.jsglr.client.imploder.ImploderAttachment;
-import org.spoofax.jsglr.client.imploder.TreeBuilder;
-import org.spoofax.jsglr.shared.BadTokenException;
-import org.spoofax.jsglr.shared.SGLRException;
-import org.spoofax.jsglr.shared.TokenExpectedException;
+import org.spoofax.jsglr_layout.client.InvalidParseTableException;
+import org.spoofax.jsglr_layout.client.ParseTable;
+import org.spoofax.jsglr_layout.client.SGLR;
+import org.spoofax.jsglr_layout.client.imploder.IToken;
+import org.spoofax.jsglr_layout.client.imploder.ImploderAttachment;
+import org.spoofax.jsglr_layout.client.imploder.TreeBuilder;
+import org.spoofax.jsglr_layout.shared.BadTokenException;
+import org.spoofax.jsglr_layout.shared.SGLRException;
+import org.spoofax.jsglr_layout.shared.TokenExpectedException;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.lang.Context;
@@ -712,7 +712,7 @@ public class Driver{
     currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfContext, makePermissiveContext, sdfCache, environment, langLib);
 //    FileCommands.deleteTempFiles(driverResult.getLastParseTable());
 //    driverResult.setLastParseTable(currentGrammarTBL);
-    ParseTable table = org.strategoxt.imp.runtime.Environment.loadParseTable(currentGrammarTBL.getAbsolutePath());
+    ParseTable table = ATermCommands.parseTableManager.loadFromFile(currentGrammarTBL.getAbsolutePath());
     
     Pair<SGLR, IStrategoTerm> parseResult = null;
 
@@ -1188,7 +1188,7 @@ public class Driver{
     }
   }
   
-  private void initEditorServices() throws IOException, TokenExpectedException, BadTokenException, SGLRException {
+  private void initEditorServices() throws IOException, TokenExpectedException, BadTokenException, SGLRException, InterruptedException {
     IStrategoTerm initEditor = (IStrategoTerm) editorServicesParser.parse(FileCommands.readFileAsString(langLib.getInitEditor()), langLib.getInitEditor().getPath(), "Module");
 
     IStrategoTerm services = ATermCommands.getApplicationSubterm(initEditor, "Module", 2);
@@ -1228,9 +1228,9 @@ public class Driver{
 
     inputTreeBuilder = new RetractableTreeBuilder();
     
-    sdfParser = new SGLR(new TreeBuilder(), org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.sdfTbl.getPath()));
-    strParser = new SGLR(new TreeBuilder(), org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.strategoTbl.getPath()));
-    editorServicesParser = new SGLR(new TreeBuilder(), org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.editorServicesTbl.getPath()));
+    sdfParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.sdfTbl.getPath()));
+    strParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.strategoTbl.getPath()));
+    editorServicesParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.editorServicesTbl.getPath()));
 
     interp = new HybridInterpreter(); //TODO (ATermCommands.factory);
     sdfContext = tools.init();

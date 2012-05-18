@@ -15,10 +15,11 @@ import org.spoofax.interpreter.terms.IStrategoReal;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
-import org.spoofax.jsglr.client.InvalidParseTableException;
-import org.spoofax.jsglr.client.imploder.IToken;
-import org.spoofax.jsglr.client.imploder.ImploderAttachment;
-import org.spoofax.jsglr.client.imploder.Token;
+import org.spoofax.jsglr_layout.client.InvalidParseTableException;
+import org.spoofax.jsglr_layout.client.imploder.IToken;
+import org.spoofax.jsglr_layout.client.imploder.ImploderAttachment;
+import org.spoofax.jsglr_layout.client.imploder.Token;
+import org.spoofax.jsglr_layout.io.ParseTableManager;
 import org.spoofax.terms.StrategoListIterator;
 import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.attachments.ParentAttachment;
@@ -71,7 +72,8 @@ public class ATermCommands {
     }
   }
   
-  public static ITermFactory factory = new ParentTermFactory(new TermFactory());
+  public static ITermFactory factory = new ParentTermFactory(new TermFactory().getFactoryWithStorageType(IStrategoTerm.MUTABLE));
+  public static ParseTableManager parseTableManager = new ParseTableManager(factory, false);
 
   public static IStrategoTerm atermFromFile(String filename) throws IOException {
     IStrategoTerm term = Environment.terms.get(filename);
@@ -164,7 +166,13 @@ public class ATermCommands {
     
     return makeAppl("None", "Some", 0, noneToken);
   }
-  
+
+  public static IStrategoTerm makeString(String s) {
+    IStrategoTerm t = factory.makeString(s);
+    setAttachment(t, "String", null);
+    return t;
+  }
+
   public static IStrategoTerm makeString(String s, IToken token) {
     IStrategoTerm t = factory.makeString(s);
     setAttachment(t, "String", token);

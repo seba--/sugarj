@@ -1,8 +1,8 @@
 package org.sugarj.driver;
 
 import org.spoofax.interpreter.terms.ISimpleTerm;
-import org.spoofax.jsglr.client.imploder.TermTreeFactory;
-import org.spoofax.jsglr.client.imploder.TreeBuilder;
+import org.spoofax.jsglr_layout.client.imploder.TermTreeFactory;
+import org.spoofax.jsglr_layout.client.imploder.TreeBuilder;
 import org.sugarj.common.ATermCommands;
 
 /**
