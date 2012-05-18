@@ -51,7 +51,7 @@ public class ATermCommands {
     }
 
     public MatchError(IStrategoTerm scrutinee, String kind) {
-      super("Error while matching " + kind);
+      super("Error while matching " + kind + " against " + scrutinee.toString());
       
       this.scrutinee = scrutinee;
       this.kind = kind;
@@ -333,5 +333,38 @@ public class ATermCommands {
       default :
         throw new UnsupportedOperationException();
     }
+  }
+
+
+  public static IStrategoTerm pushAmbiguities(IStrategoTerm term) {
+    if (isApplication(term, "amb") && term.getSubterm(0).isList() && term.getSubterm(0).getSubtermCount() == 2) {
+      IStrategoTerm left = pushAmbiguities(term.getSubterm(0).getSubterm(0));
+      IStrategoTerm right = pushAmbiguities(term.getSubterm(0).getSubterm(1));
+      
+      if (left.getTermType() == IStrategoTerm.APPL &&
+          right.getTermType() == IStrategoTerm.APPL &&
+          left.getSubtermCount() == right.getSubtermCount() &&
+          ((IStrategoAppl) left).getConstructor().equals(((IStrategoAppl) right).getConstructor())) {
+        
+        IStrategoTerm[] ambKids = new IStrategoTerm[left.getSubtermCount()];
+        
+        for (int i = 0; i < left.getSubtermCount(); i++)
+          ambKids[i] = makeAppl("amb", 
+                                ImploderAttachment.getElementSort(left.getSubterm(i)), 
+                                2, 
+                                makeList(ImploderAttachment.getElementSort(term.getSubterm(0)), 
+                                         left.getSubterm(i), right.getSubterm(i)));
+        
+        return makeAppl(
+            ((IStrategoAppl) left).getConstructor().getName(), 
+            ImploderAttachment.getElementSort(left),
+            left.getSubtermCount(), 
+            ambKids);
+      }
+      
+      return term;
+    }
+    
+    return term;
   }
 }

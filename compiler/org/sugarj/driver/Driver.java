@@ -449,11 +449,15 @@ public class Driver{
         throw new ParseException("could not parse toplevel declaration in:\n"
             + input, -1);
 
+      remainingInputTerm = ATermCommands.pushAmbiguities(remainingInputTerm);
+      
       if (!isApplication(remainingInputTerm, "NextToplevelDeclaration"))
         throw new ATermCommands.MatchError(remainingInputTerm, "NextToplevelDeclaration");
       
       IStrategoTerm toplevelDecl = getApplicationSubterm(remainingInputTerm, "NextToplevelDeclaration", 0);
       IStrategoTerm restTerm = getApplicationSubterm(remainingInputTerm, "NextToplevelDeclaration", 1);
+      if (isApplication(restTerm, "amb"))
+        restTerm = restTerm.getSubterm(0).getSubterm(0);
       String rest = getString(restTerm);
 
       if (input.equals(rest))
