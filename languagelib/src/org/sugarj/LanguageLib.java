@@ -29,7 +29,7 @@ public abstract class LanguageLib implements Serializable {
 	
 	public final static int PUBLIC_SUGAR = 1;
 	public final static int PRIVATE_SUGAR = 2;
-
+	
   private static final long serialVersionUID = -6712835686318143995L;
 
   public List<File> getGrammars() {
@@ -47,10 +47,12 @@ public abstract class LanguageLib implements Serializable {
 	
 	private transient File libTmpDir;
 	
+	public abstract String getLanguageName();
+	
 	protected File ensureFile(String resource) {
 		File f = new File(getLibraryDirectory().getPath() + File.separator + resource);
 		
-		System.out.println("javalib ensure file: " + f);
+		System.out.println(this.getLanguageName() + " library ensure file: " + f);
 		
 		if (f.exists())
 			return f;
@@ -97,8 +99,7 @@ public abstract class LanguageLib implements Serializable {
 
 	public abstract ISourceFileContent getSource();
 	public abstract Path getOutFile();
-	public abstract Set<RelativePath> getGeneratedFiles();	// XXX: was: getGeneratedJavaClasses -- is getCompiledFiles a reasonably good name? Probably change to getGeneratedBinFiles?
-	  
+	public abstract Set<RelativePath> getGeneratedFiles();	
 	
 	public abstract boolean isNamespaceDec(IStrategoTerm decl);
 	public abstract boolean isLanguageSpecificDec(IStrategoTerm decl);

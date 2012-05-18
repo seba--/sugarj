@@ -26,10 +26,9 @@ public class PrologSourceFileContent implements ISourceFileContent {
 	String moduleDecl;
 	List<PrologModuleImport> imports = new LinkedList<PrologModuleImport>();
 	List<PrologModuleImport> checkedImports = new LinkedList<PrologModuleImport>();
-	//List<String> imports = new LinkedList<String>();
-	//List<String> checkedImports = new LinkedList<String>();
 	boolean importsOptional;
 	List<String> bodyDecls = new LinkedList<String>();
+	List<String> reexports = new LinkedList<String>();
 	PrologLib pLib;
 	
 
@@ -37,7 +36,7 @@ public class PrologSourceFileContent implements ISourceFileContent {
 		pLib = prologLib;
 	}
 
-	public void setNamespaceDecl(String moduleDecl) {
+	public void setModuleDecl(String moduleDecl) {
 		this.moduleDecl = moduleDecl;
 	}
 
@@ -57,8 +56,11 @@ public class PrologSourceFileContent implements ISourceFileContent {
 		bodyDecls.add(bodyDecl);
 	}
 
+	public void addReexport(String reexport) {
+		reexports.add(reexport);
+	}
+	
 	public String getCode(Set<RelativePath> generatedFiles, HybridInterpreter interp, Path outFile) throws ClassNotFoundException, IOException {
-		// TODO: Add reexports!
 		List<String> files = new LinkedList<String>();
 		for (RelativePath p : generatedFiles)
 			files.add(FileCommands.dropExtension(p.getRelativePath()).replace(Environment.sep, "/"));
@@ -66,27 +68,22 @@ public class PrologSourceFileContent implements ISourceFileContent {
 		StringBuilder code = new StringBuilder();
 		code.append(moduleDecl);
 		code.append('\n');
-
+		
+		for (String reexport : reexports) {
+			code.append(reexport);
+			code.append("\n");
+		}
+		
 		for (PrologModuleImport imp : checkedImports)									// XXX: What does this do?
-			//code.append(":- use_module(").append(imp.importName).append(getImportedModulePredicateList(imp, interp)).append(").\n");
 			code.append(getImportedModuleString(imp, interp)).append("\n");
 
 		for (PrologModuleImport imp : imports)
 			if (files.contains(imp.importName))
-				//code.append(":- use_module(").append(imp).append(",").append(arg0).append(").\n");
-				//code.append(":- use_module(").append(imp.importName).append(getImportedModulePredicateList(imp, interp)).append(").\n");
 				code.append(getImportedModuleString(imp, interp)).append("\n");
 			else if (!importsOptional)
 				throw new ClassNotFoundException(imp.importName);
 
 		for (String bodyDecl : bodyDecls) {
-			// swi prolog will not accept "foo ( X )." , needs to be "foo( X )."
-			/*int firstOpenParen = bodyDecl.indexOf("(");
-			if (firstOpenParen != -1) {
-				String head = bodyDecl.substring(0, firstOpenParen);
-				head = head.replace(" ", "");
-				bodyDecl = head + bodyDecl.substring(firstOpenParen);
-			} */
 			code.append(bodyDecl);
 			code.append("\n");
 		}
@@ -115,7 +112,7 @@ public class PrologSourceFileContent implements ISourceFileContent {
 	
 	public PrologModuleImport getImport(String importName, IStrategoTerm decl) {
 		PrologModuleImport imp = new PrologModuleImport();
-		imp.importName = importName.substring(importName.indexOf("/") + 1);	// XXX: hacky, remove first directory
+		imp.importName = importName.substring(importName.indexOf("/") + 1);	// XXX: hacky, remove first directory. Should be replaced by a more robust implementation.
 		imp.productionDecl = decl;
 		
 		return imp;

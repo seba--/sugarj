@@ -105,12 +105,7 @@ public class SDFCommands {
       if (path.getFile().isDirectory()){
         cmd.add("-I");
         cmd.add(path.getAbsolutePath());
-      }
-    
-//    for (String s : cmd.toArray(new String[cmd.size()])) {  // XXX: debug output
-//      System.out.println(s);
-//    }
-    
+      }    
     
     try {
       sdfContext.invokeStrategyCLI(main_pack_sdf_0_0.instance, "pack-sdf", cmd.toArray(new String[cmd.size()]));

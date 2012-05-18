@@ -151,6 +151,8 @@ exports
     [a-z] Alpha* 		-> Word
     "module"            -> Word {reject}
     "use_module"        -> Word {reject} 
+    "reexport"          -> Word {reject}
+
   lexical restrictions
     Word -/- [A-Za-z0-9\_]
 

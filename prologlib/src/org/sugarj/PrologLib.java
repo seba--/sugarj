@@ -61,9 +61,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 		
 		return prettyPrint;
 	}
-	
-	private IStrategoTerm sugarHead = null;
-	
+		
 	@Override
 	public List<File> getGrammars() {
 		List<File> grammars = new LinkedList<File>(super.getGrammars());
@@ -157,7 +155,8 @@ public class PrologLib extends LanguageLib implements Serializable {
 		return isApplication(decl, "NonUnitClause") || 
 				isApplication(decl, "UnitClause") ||
 				isApplication(decl, "Query") ||
-				isApplication(decl, "Command");				
+				isApplication(decl, "Command") ||
+				isApplication(decl, "ModuleReexport");				
 	  }
 
 	  @Override
@@ -216,42 +215,15 @@ public class PrologLib extends LanguageLib implements Serializable {
 	public void processLanguageSpecific(IStrategoTerm toplevelDecl,
 			Environment environment, HybridInterpreter interp)
 			throws IOException {
-		// XXX: What do I actually need to do here?
-		// XXX: No types, so probably nothing??
-		// :- module("foo", [bar/1, baz/2]).
-		
-		/*
-		IStrategoTerm dec = isApplication(toplevelDecl, "ModuleDec") ?
-				getApplicationSubterm(toplevelDecl, "ModuleDec", 0) : toplevelDecl;
-
-		//String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));	// XXX: asJavaString?
-		String decName = dec.getSubterm(0).getSubterm(1).getSubterm(0).toString();
-		RelativePath moduleFile = environment.createBinPath(getRelNamespaceSep() + decName + ".pro");
-		generatedFiles.add(moduleFile);
-		*/
+		// Nothing to do here for prolog
 		IStrategoTerm dec = toplevelDecl;
 		
+		// TODO: Implement reexport handling in a more sensible way
 		
-
-
-		
-		
-		
-		prologSource.addBodyDecl(prettyPrint(dec, interp));
-		
-/*
- * 	    IStrategoTerm dec =  isApplication(toplevelDecl, "JavaTypeDec") ?
- *  getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0) : toplevelDecl;   // XXX: Extract JavaTypeDec stuff
-	    
-	    String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
-	    
-	    RelativePath clazz = environment.createBinPath(getRelNamespaceSep() + decName + ".class");
-	    
-	    generatedJavaClasses.add(clazz);
-	    javaSource.addBodyDecl(prettyPrint(dec, interp));
-
- */
-		
+		if (isApplication(dec, "ModuleReexport")) 
+			prologSource.addReexport(prettyPrint(dec, interp));
+		else 
+			prologSource.addBodyDecl(prettyPrint(dec, interp));
 	}
 
 	
@@ -268,14 +240,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 	public String prettyPrint(IStrategoTerm term,
 			HybridInterpreter interp) throws IOException {
 		
-		/*
-		 * parse_pptable_file_0_0.class  invoke(context, atermcommads.makeString(filename))
-ast2abox_0_1.class   invoke(context, term, table)
-abox2text_0_1.class    invoke(context, prolog-term, width integer)
-		 */
-		
-		
-		// XXX: This might need some fixing.
+		// XXX: Debug
 		
 		System.err.println("+++++++++++++++++++++++ pretty-printing prolog");
 		Context ctx = interp.getCompiledContext();		
@@ -290,23 +255,6 @@ abox2text_0_1.class    invoke(context, prolog-term, width integer)
 		System.err.println("pptext: " + pretty);
 		return pretty;
 		
-		
-		/*
-		 * 		System.err.println("---\n prettyprint context:");
-		Context ctx = interp.getCompiledContext();
-		System.err.println(ctx);
-		System.err.println("prettyprint term:");
-		System.err.println(term);
-		//IStrategoTerm string = pp_java_string_0_0.instance.invoke(interp.getCompiledContext(), term);
-		IStrategoTerm string = pp_java_string_0_0.instance.invoke(ctx, term);
-		System.err.println("prettyprint string:");
-		System.err.println(string);
-	    if (string != null)
-	      return Term.asJavaString(string);
-	    
-	    throw new RuntimeException("pretty printing java AST failed: " + term);
-
-		 */
 		
 	}
 
@@ -365,22 +313,9 @@ abox2text_0_1.class    invoke(context, prolog-term, width integer)
 	public String getRelativeNamespace() {
 		// XXX: Is there a namespace separator in prolog? Or even any notion of compound namespaces?
 		// XXX: From swi prolog doc: Modules are organised in a single and flat namespace and therefore module names must be chosen with some care to avoid conflicts.
+		// XXX: SugarProlog will implement different namespace handling.
 		return relNamespaceName + "/";
-	}
-
-//	@Override
-//	public void checkSourceOutFile(Environment environment,
-//			RelativeSourceLocationPath sourceFile) {
-//		if (prologOutFile == null) 
-//			prologOutFile = environment.createBinPath(getRelativeNamespace() + FileCommands.fileName(sourceFile) + ".pro");
-//	}
-//
-//	@Override
-//	public void checkNamespace(IStrategoTerm decl,
-//			RelativeSourceLocationPath sourceFile, IErrorLogger errorLog) {
-//		
-//	}
-	
+	}	
 	
 	@Override
 	public void processNamespaceDec(IStrategoTerm toplevelDecl,
@@ -392,9 +327,10 @@ abox2text_0_1.class    invoke(context, prolog-term, width integer)
 		String moduleName = null;
 		if (isApplication(toplevelDecl, "ModuleDec")) {
 			moduleName = prettyPrint(getApplicationSubterm(toplevelDecl, "ModuleDec", 0), interp);
-			prologSource.setNamespaceDecl(prettyPrint(toplevelDecl, interp));
+			prologSource.setModuleDecl(prettyPrint(toplevelDecl, interp));
 		} else if (isApplication(toplevelDecl, "SugarModuleDec")) {
 			moduleName = prettyPrint(getApplicationSubterm(toplevelDecl, "SugarModuleDec", 0), interp);
+			prologSource.setModuleDecl(":-module(" + moduleName + ", []).");	// XXX: Ideally, a module only used for defining sugar should not be generated nor imported at all
 		}
 		relNamespaceName = FileCommands.dropFilename(sourceFile.getRelativePath());
 		decName = getRelativeModulePath(moduleName);
@@ -454,13 +390,9 @@ abox2text_0_1.class    invoke(context, prolog-term, width integer)
 	@Override
 	public String getImportedModulePath(IStrategoTerm toplevelDecl,
 			HybridInterpreter interp) throws IOException {
-		//String importModuleName = extractImportedModuleName(toplevelDecl, interp);
 		String modulePath = prettyPrint(toplevelDecl.getSubterm(0).getSubterm(0), interp);
 		
-		return modulePath;
-		
-		//return getRelativeModulePath(importModuleName);
-		
+		return modulePath;		
 	}
 	
 	private String getRelativeModulePath(String moduleName) {
@@ -480,12 +412,6 @@ abox2text_0_1.class    invoke(context, prolog-term, width integer)
 			prologSource.addImport(imp);	
 	}
 	
-	private void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IErrorLogger errorLog) {
-	    // XXX: Merge with setErrorMessage from Driver
-	    errorLog.logError(msg);
-	    ATermCommands.setErrorMessage(toplevelDecl, msg);
-	  }
-
 //	@Override
 //	public String extractNamespaceName(IStrategoTerm toplevelDecl,
 //			HybridInterpreter interp) throws IOException {
@@ -496,16 +422,12 @@ abox2text_0_1.class    invoke(context, prolog-term, width integer)
 	@Override
 	public String getSugarName(IStrategoTerm decl, HybridInterpreter interp)
 			throws IOException {
-/*        String extName =
-                prettyPrint(
-                getApplicationSubterm(sugarHead, "SugarModuleDec", 0), interp);    */
-
         return decName;
 	}
 
 	@Override
 	public int getSugarAccessibility(IStrategoTerm decl) {
-		return LanguageLib.PUBLIC_SUGAR;	//implemented only public sugar in prolog
+		return LanguageLib.PUBLIC_SUGAR;	//XXX: implemented only public sugar in prolog
 	}
 
 	@Override
@@ -515,6 +437,13 @@ abox2text_0_1.class    invoke(context, prolog-term, width integer)
 		return sugarBody;
 
 	}
+	
+	
+	@Override
+	public String getLanguageName() {
+		return "Prolog";
+	}
+
 
 	
 	
