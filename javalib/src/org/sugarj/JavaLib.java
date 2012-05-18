@@ -133,16 +133,6 @@ public class JavaLib extends LanguageLib implements Serializable {
 	      System.err.println(file.getPath() + " does not exist.");
 	  }
 
-/*	@Override
-	public ICompilerCommands getCompilerCommands() {
-		// singleton pattern. 
-		// XXX: Also integrate compiler commands into language library or keep it separate to support pluggable compilers more easily?
-		if (javaCommands == null)
-			javaCommands = new JavaCommands();
-
-		return javaCommands;
-	}
-*/
 
 	@Override
 	public String getGeneratedFileExtension() {
@@ -178,7 +168,6 @@ public class JavaLib extends LanguageLib implements Serializable {
 //	      setJavaOutFile(environment.createBinPath(getRelativeNamespace() + FileCommands.fileName(sourceFile) + ".java"));
 //	  }
 
-	// XXX: move this to language driver?
 	  // XXX: Think of a good name -- what does this actually do?
 	  // from ModuleSystemCommands
 	  public String extractImportedModuleName(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
@@ -196,8 +185,6 @@ public class JavaLib extends LanguageLib implements Serializable {
 	    return name;
 	  }
 
-	// was: getGeneratedJavaClasses
-	  // XXX: think of a better name (classes -> binary files? compiled files?)
 	  public Set<RelativePath> getGeneratedFiles() {
 	    return generatedJavaClasses;
 	  }
@@ -217,8 +204,6 @@ public class JavaLib extends LanguageLib implements Serializable {
 	    return javaOutFile;
 	  }
 
-	// was: getRelPackageNameSep
-	  // XXX: Think of a better name
 	  public String getRelativeNamespace() {
 	    if (relPackageName == null || relPackageName.isEmpty())
 	      return "";
@@ -264,9 +249,6 @@ public class JavaLib extends LanguageLib implements Serializable {
 	   * @param aterm the name of a file which contains an aterm which encodes a Java AST
 	   * @throws IOException 
 	   */
-	  // XXX: This should be abstracted and moved to the language implementation
-	  // Where to get pp_java_string_0_0 ? What should be changed to allow other languages' pretty printers?
-	  // What to do with Term.asJavaString ?
 	  public String prettyPrint(IStrategoTerm term, HybridInterpreter interp) throws IOException {
 		System.err.println("---\n prettyprint context:");
 		Context ctx = interp.getCompiledContext();
@@ -285,7 +267,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 
 	@Override
 	  public void processLanguageSpecific(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp) throws IOException {
-	    IStrategoTerm dec =  isApplication(toplevelDecl, "JavaTypeDec") ? getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0) : toplevelDecl;   // XXX: Extract JavaTypeDec stuff
+	    IStrategoTerm dec =  isApplication(toplevelDecl, "JavaTypeDec") ? getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0) : toplevelDecl;
 	    
 	    String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
 	    
@@ -314,7 +296,6 @@ public class JavaLib extends LanguageLib implements Serializable {
 	  }
 
 	private void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IErrorLogger errorLog) {
-	    // XXX: Merge with setErrorMessage from Driver
 	    errorLog.logError(msg);
 	    ATermCommands.setErrorMessage(toplevelDecl, msg);
 	  }
@@ -394,6 +375,11 @@ public class JavaLib extends LanguageLib implements Serializable {
 		IStrategoTerm sugarBody = getApplicationSubterm(body, "SugarBody", 0);
 		
 		return sugarBody;
+	}
+
+	@Override
+	public String getLanguageName() {
+		return "Java";
 	}
 
 

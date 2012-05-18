@@ -150,7 +150,7 @@ public class Builder extends IncrementalProjectBuilder {
             final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(
                     FileCommands.dropExtension(path.toString()),
                     environment.getSourcePath(),
-                    UsedLanguageLibrary.getFreshLanguageLibrary()); // XXX: Replace this by languageLib to support more than java
+                    UsedLanguageLibrary.getFreshLanguageLibrary()); 
             
             if (sourceFile == null) {
               org.strategoxt.imp.runtime.Environment.logWarning("cannot locate source file for ressource " + resource.getFullPath());

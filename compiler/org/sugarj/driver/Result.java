@@ -27,11 +27,6 @@ import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.driver.sourcefilecontent.ISourceFileContent;
 import org.sugarj.util.AppendableObjectOutputStream;
 
-
-// XXX: How to handle this?
-// XXX: Make Interface and implement separately in each language? Or make abstract and implement only language-specific stuff?
-
-
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
@@ -282,13 +277,6 @@ public class Result implements IErrorLogger {
   public IStrategoTerm getSugaredSyntaxTree() {
     return sugaredSyntaxTree;
   }
-
-  // XXX: Made this abstract so it can be implemented by each language library
-//  protected abstract void compileLanguage(Path langOutFile, ISourceFileContent langSource, Path bin, List<Path> path, Set<RelativePath> generatedFiles) throws IOException, ClassNotFoundException;
-  
-  // TODO: move to languagelib
-//  protected abstract void compileLanguage(List<Path> langOutFiles, Path bin, List<Path> path, Set<? extends Path> generatedFiles) throws IOException;
-  
   
   public void delegateCompilation(Path delegate, Path compileFile, ISourceFileContent fileContent, Set<RelativePath> generatedFiles) {
     Map<Path, Set<RelativePath>> myGeneratedFiles = availableGeneratedFiles.get(delegate);
@@ -380,7 +368,6 @@ public class Result implements IErrorLogger {
     setPersistentPath(dep);
   }
   
-  // XXX: THis is a factory!
   // We need an interface for Result to use Results in language-specific drivers (e.g. JavaDriver)  
   @SuppressWarnings("unchecked")
   public static Result readDependencyFile(Path dep, Environment env) throws IOException {

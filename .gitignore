@@ -25,4 +25,4 @@ update-site/features/
 update-site/plugins/
 
 # compiler classpath
-compiler/.classpath
+/compiler/.classpath

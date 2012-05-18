@@ -84,11 +84,6 @@ public class STRCommands {
         cmd.add("-I");
         cmd.add(path.getAbsolutePath());
       }
-
-    
-//    for (String s : cmd) {  // XXX: debug output
-//      System.out.println(s);
-//    }
     
     
     final ByteArrayOutputStream log = new ByteArrayOutputStream();

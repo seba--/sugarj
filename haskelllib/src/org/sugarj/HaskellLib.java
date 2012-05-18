@@ -241,4 +241,10 @@ public class HaskellLib extends LanguageLib {
     // TODO Auto-generated method stub
 
   }
+  
+  @Override
+  public String getLanguageName() {
+    return "Haskell";
+  }
+
 }

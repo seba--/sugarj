@@ -143,7 +143,7 @@ public class Driver{
   
   public Driver(Environment env, LanguageLibFactory langLibFactory) {
     this.environment=env;
-    this.langLib = langLibFactory.createLanguageLibrary();   // XXX: Generate new languagelib here. (Maybe use a factory?)
+    this.langLib = langLibFactory.createLanguageLibrary();
     
     try {      
       if (environment.getCacheDir() != null)
@@ -373,8 +373,6 @@ public class Driver{
       if (delegateCompilation == null)
         compileGeneratedJavaFiles();
       else {
-        //driverResult.delegateCompilation(delegateCompilation, javaOutFile, javaSource, generatedJavaClasses);
-        // XXX: Maybe implement this in Driver_Java
         driverResult.delegateCompilation(delegateCompilation, langLib.getOutFile(), langLib.getSource(), langLib.getGeneratedFiles());
       }
         
@@ -407,11 +405,9 @@ public class Driver{
 
   private void compileGeneratedJavaFiles() throws IOException {
     boolean good = false;
-    log.beginTask("compilation", "COMPILE the generated java file");
+    log.beginTask("compilation", "COMPILE the generated " + langLib.getLanguageName() + " file");
     try {
       try {
-        //driverResult.compileJava(javaOutFile, javaSource, environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), generatedJavaClasses);
-        //XXX: change this after reintegrating compile into language library
         langLib.compile(langLib.getOutFile(), langLib.getSource(),
             environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), langLib.getGeneratedFiles(),
             driverResult.getAvailableGeneratedFiles().get(driverResult.getSourceFile()),
@@ -658,7 +654,7 @@ public class Driver{
     if (langLib.isNamespaceDec(toplevelDecl))
       processPackageDec(toplevelDecl);
     else {
-//      langLib.checkNamespace(toplevelDecl, sourceFile, driverResult);   // XXX: check -> setup ?
+//      langLib.checkNamespace(toplevelDecl, sourceFile, driverResult);   
 //      langLib.checkSourceOutFile(environment, driverResult.getSourceFile());
       if (depOutFile == null)
         depOutFile = environment.createBinPath(langLib.getRelativeNamespace() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
@@ -965,14 +961,14 @@ public class Driver{
   private void processJavaTypeDec(IStrategoTerm toplevelDecl) throws IOException {
     log.beginTask(
         "processing",
-        "PROCESS the desugared Java type declaration.");
+        "PROCESS the desugared " + langLib.getLanguageName() + " type declaration.");
     try {
       
       if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
         sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
 
       
-      log.beginTask("Generate Java code.");
+      log.beginTask("Generate " + langLib.getLanguageName() + " code.");
       try {
         langLib.processLanguageSpecific(toplevelDecl, environment, interp);
       } finally {
@@ -993,41 +989,19 @@ public class Driver{
         sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
 
       
-//      boolean isNative;         // TODO: Remove native
       String extName = null;
       String fullExtName = null;
       boolean isPublic = false;
       
       log.beginTask("Extracting name and accessibility of the sugar.");
-      try {
-//        isNative = isApplication(head, "NativeSugarDecHead");
-//        
-//        if (isNative) {   // TODO: remove native
-//          extName =
-//            langLib.prettyPrint(
-//            getApplicationSubterm(head, "NativeSugarDecHead", 2), interp);
-//          
-//          IStrategoTerm mods = getApplicationSubterm(head, "NativeSugarDecHead", 0);
-//          
-//          for (IStrategoTerm t : getList(mods))
-//            if (isApplication(t, "Public"))
-//            {
-//              isPublic = true;
-//              break;
-//            }
-//        }
-//        else {
-        
-          extName = langLib.getSugarName(toplevelDecl, interp);
-                            
-          if (langLib.getSugarAccessibility(toplevelDecl) == LanguageLib.PUBLIC_SUGAR) {
-            isPublic = true;
-          }
-          
-//        }
-        
-        
-        
+      try {        
+        extName = langLib.getSugarName(toplevelDecl, interp);
+
+        if (langLib.getSugarAccessibility(toplevelDecl) == LanguageLib.PUBLIC_SUGAR) {
+          isPublic = true;
+        }
+
+
         fullExtName = langLib.getRelativeNamespace() + extName;
 
         log.log("The name of the sugar is '" + extName + "'.");
@@ -1048,32 +1022,6 @@ public class Driver{
       String sdfImports = " imports " + StringCommands.printListSeparated(availableSDFImports, " ") + "\n";
       String strImports = " imports " + StringCommands.printListSeparated(availableSTRImports, " ") + "\n";
       
-//      if (isNative) {
-//        String nativeModule = getString(getApplicationSubterm(body, "NativeSugarBody", 0)); 
-//        
-//        if (nativeModule.length() > 1)
-//            // remove quotes
-//          nativeModule = nativeModule.substring(1, nativeModule.length() - 1);
-//          
-//        if (FileCommands.exists(ModuleSystemCommands.searchFile(nativeModule, ".sdf", environment))) {
-//          availableSDFImports.add(nativeModule);
-//          driverResult.generateFile(
-//              sdfExtension, 
-//              "module " + fullExtName + "\n" 
-//              + sdfImports 
-//              + "imports " + nativeModule);
-//        }
-//
-//        if (FileCommands.exists(ModuleSystemCommands.searchFile(nativeModule, ".str", environment))) {
-//          availableSTRImports.add(nativeModule);
-//          driverResult.generateFile(
-//              strExtension, 
-//              "module " + fullExtName + "\n" 
-//              + strImports
-//              + "imports " + nativeModule);
-//        }
-//      }
-//      else {
         // this is a list of SDF and Stratego statements
         
         IStrategoTerm sugarBody = langLib.getSugarBody(toplevelDecl);
@@ -1118,7 +1066,6 @@ public class Driver{
         
         if (CommandExecution.FULL_COMMAND_LINE && generateFiles)
           log.log("Wrote Stratego file to '" + strExtension.getAbsolutePath() + "'.");
-//      }
       
       /*
        * adapt current grammar
@@ -1246,8 +1193,7 @@ public class Driver{
    * @throws IOException
    */
   public static void main(String[] args) {
-    // XXX: change language Library here:
-    LanguageLib langLib = UsedLanguageLibrary.getFreshLanguageLibrary();
+        LanguageLib langLib = UsedLanguageLibrary.getFreshLanguageLibrary();
     
     // log.log("This is the extensible java compiler.");
     Environment environment = new Environment();
@@ -1260,7 +1206,6 @@ public class Driver{
       
       for (String source : sources)
       {
-        // XXX: Properly replace JavaLib by LanguageLib
         RelativeSourceLocationPath p = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(source), environment.getSourcePath(), langLib);
         
         allInputFiles.add(p);
@@ -1467,7 +1412,6 @@ public class Driver{
   }
   
   private void setErrorMessage(IStrategoTerm toplevelDecl, String msg) {
-    //XXX: Merge with setErrorMessage from Driver_Java
     driverResult.logError(msg);
     ATermCommands.setErrorMessage(toplevelDecl, msg);
   }
