@@ -154,17 +154,17 @@ public class HaskellLib extends LanguageLib {
 
   @Override
   public boolean isLanguageSpecificDec(IStrategoTerm decl) {
-    return isApplication(decl, "HaskellTopdecl");
+    return isApplication(decl, "HaskellBody");
   }
 
   @Override
   public boolean isSugarDec(IStrategoTerm decl) {
-    return isApplication(decl, "SugarElem");
+    return isApplication(decl, "SugarBody");
   }
 
   @Override
   public boolean isEditorServiceDec(IStrategoTerm decl) {
-    return isApplication(decl, "EditorSection");   
+    return isApplication(decl, "EditorBody");   
   }
 
   @Override
@@ -215,7 +215,7 @@ public class HaskellLib extends LanguageLib {
 
   @Override
   public void processLanguageSpecific(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp) throws IOException {
-    sourceContent.addBodyDecl(prettyPrint(getApplicationSubterm(toplevelDecl, "HaskellTopdecl", 0), interp));
+    sourceContent.addBodyDecl(prettyPrint(getApplicationSubterm(toplevelDecl, "HaskellBody", 0), interp));
   }
 
   @Override

@@ -9,7 +9,10 @@ exports
     ToplevelDeclaration Rest -> NextToplevelDeclaration {cons("NextToplevelDeclaration")}
   
   lexical syntax %% Rest
-    ~[]* -> Rest
+    LAYOUT? ~[]* -> Rest
+    -> EOF
   
   lexical restrictions
     Rest -/- ~[]
+    EOF -/- ~[]
+

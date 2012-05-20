@@ -9,21 +9,25 @@ exports
   	SugarCompilationUnit
 
   context-free syntax
-    HaskellModuleDec HaskellImportdecl* SugarHaskellTopdecl* -> SugarCompilationUnit {prefer, cons("CompilationUnit")}
+    HaskellModuleDec HaskellImportdecl* SugarHaskellBody -> SugarCompilationUnit {cons("CompilationUnit")}
 
     "module" HaskellModid HaskellExports? "where" -> HaskellModuleDec {cons("ModuleDec")}
 
-    HaskellTopdecl       -> SugarHaskellTopdecl {cons("HaskellTopdecl")}
-    SugarDefElem         -> SugarHaskellTopdecl {cons("SugarElem")}
-    EditorServiceSection -> SugarHaskellTopdecl {cons("EditorSection")}
+    HaskellOffsideTopdeclList  -> SugarHaskellBody {cons("HaskellBody")}
+    SugarDefElem*              -> SugarHaskellBody {cons("SugarBody")}
+    EditorServiceSection*      -> SugarHaskellBody {cons("EditorBody")}
+
+  context-free restrictions
+    SugarHaskellBody -/- ~[]
 
   context-free syntax
-    HaskellModuleDec LAYOUT?    -> LayoutedToplevelDeclaration {enforce-newline, layout(gt(col(left(1)), col(first(1))))}
+    HaskellModuleDec LAYOUT?    -> LayoutedToplevelDeclaration
     HaskellImportdecl LAYOUT?   -> LayoutedToplevelDeclaration {enforce-newline, layout(gt(col(left(1)), col(first(1))))}
-    SugarHaskellTopdecl LAYOUT? -> LayoutedToplevelDeclaration {enforce-newline, layout(gt(col(left(1)), col(first(1))))}
+    SugarHaskellBody LAYOUT?    -> LayoutedToplevelDeclaration
 
     LayoutedToplevelDeclaration Rest
       -> NextToplevelDeclaration {cons("NextToplevelDeclaration"), layout(eq(col(first(1)), col(first(2))))}
+
 
   context-free syntax
     Grammar        -> SugarDefElem {cons("grammar-elem")}

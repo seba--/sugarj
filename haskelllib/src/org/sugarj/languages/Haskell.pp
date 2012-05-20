@@ -228,9 +228,6 @@
    CompilationUnit.3:iter-star     -- _1,
    ModuleDec                       -- H[KW["module"] _1 _2 KW["where"]],
    ModuleDec.2:opt                 -- _1,
-   HaskellTopdecl                  -- H[_1 KW[";"]],
-   SugarElem                       -- _1,
-   EditorSection                   -- _1,
    NextToplevelDeclaration         -- _1 _2,
    grammar-elem                    -- _1,
    transformation-elem             -- _1,
@@ -260,5 +257,6 @@
    PureDesugaring                  -- _1,
    InjectDesugaring                -- _1 KW[":"] _2 KW["->"] _3 _4,
    Some                            -- _1,
-   None                            -- KW[""]
+   None                            -- KW[""],
+   amb                             -- KW["amb"] KW["("] _1 KW[")"]
 ]
