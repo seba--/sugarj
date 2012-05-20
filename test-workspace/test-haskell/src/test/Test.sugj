@@ -1,5 +1,12 @@
 module Test where
 
 a = 3
-b = 7
+b = do a <- return 5
+       b <- do c <- return 7
+               return 9
 
+c = d 9
+  where d x = 17 + x
+
+
+e = test
