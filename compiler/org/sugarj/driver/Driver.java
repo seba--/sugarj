@@ -405,7 +405,7 @@ public class Driver{
 
   private void compileGeneratedJavaFiles() throws IOException {
     boolean good = false;
-    log.beginTask("compilation", "COMPILE the generated " + langLib.getLanguageName() + " file");
+    log.beginTask("compilation", "COMPILE the generated " + langLib.getLanguageName() + " files");
     try {
       try {
         langLib.compile(langLib.getOutFile(), langLib.getSource(),

@@ -53,8 +53,6 @@ public abstract class LanguageLib implements Serializable {
 	protected File ensureFile(String resource) {
 		File f = new File(getLibraryDirectory().getPath() + File.separator + resource);
 		
-		System.out.println(this.getLanguageName() + " library ensure file: " + f);
-		
 		if (f.exists())
 			return f;
 
@@ -181,7 +179,10 @@ public abstract class LanguageLib implements Serializable {
 
 		writeToFile(generateFiles, generatedFileHashes, outFile, source.getCode(generatedClasses, interp, outFile));
 		
-		this.compile(javaOutFiles, bin, path, generatedClasses, generatedFileHashes, interp, generateFiles);
+		this.compile(javaOutFiles, bin, path, interp, generateFiles);
+		for (Path cl : generatedClasses)
+			generatedFileHashes.put(cl, FileCommands.fileHash(cl));
+
 	}
 
 	private void writeToFile(boolean generateFiles, Map<Path, Integer> generatedFileHashes, Path file, String content) throws IOException { 
@@ -191,7 +192,7 @@ public abstract class LanguageLib implements Serializable {
 		}
 	}
 
-	public abstract void compile(List<Path> outFiles, Path bin, List<Path> path, Set<? extends Path> generatedFiles, Map<Path, Integer> generatedFileHashes, HybridInterpreter interp, boolean generateFiles) throws IOException;
+	protected abstract void compile(List<Path> outFiles, Path bin, List<Path> path, HybridInterpreter interp, boolean generateFiles) throws IOException;
 
 	
 	public abstract void addImportModule(IStrategoTerm toplevelDecl, HybridInterpreter interp, boolean checked) throws IOException;

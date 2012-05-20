@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.FileLocator;
@@ -310,12 +309,9 @@ public class JavaLib extends LanguageLib implements Serializable {
 	}
 	
 	// from Result
-	public void compile(List<Path> javaOutFiles, Path bin, List<Path> path, Set<? extends Path> generatedJavaClasses, Map<Path, Integer> generatedFileHashes, HybridInterpreter interp, boolean generateFiles) throws IOException {
-		if (generateFiles) {
+	protected void compile(List<Path> javaOutFiles, Path bin, List<Path> path, HybridInterpreter interp, boolean generateFiles) throws IOException {
+		if (generateFiles)
 			JavaCommands.javac(javaOutFiles, bin, path);
-			for (Path cl : generatedJavaClasses)
-				generatedFileHashes.put(cl, FileCommands.fileHash(cl));
-		}
 	}
 
 	@Override

@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.FileLocator;
@@ -345,9 +344,8 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 
 	@Override
-	public void compile(List<Path> sourceFiles, Path bin, List<Path> path,	// 'path' is library path?
-			Set<? extends Path> generatedFiles,
-			Map<Path, Integer> generatedFileHashes, HybridInterpreter interp,
+	protected void compile(List<Path> sourceFiles, Path bin, List<Path> path,	// 'path' is library path?
+			HybridInterpreter interp,
 			boolean generateFiles)
 			throws IOException {
 
@@ -360,9 +358,6 @@ public class PrologLib extends LanguageLib implements Serializable {
 				FileCommands.copyFile(file, p2);*/
 				// XXX: do nothing here?
 				System.err.println("prolog;     no compilation neccessary, file: " + file);
-			}
-			for (Path cl : generatedFiles) {
-				generatedFileHashes.put(cl, FileCommands.fileHash(cl));
 			}
 		}
 

@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.FileLocator;
@@ -19,6 +18,7 @@ import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.stratego_gpp.parse_pptable_file_0_0;
 import org.sugarj.common.ATermCommands;
+import org.sugarj.common.CommandExecution;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
@@ -35,6 +35,8 @@ import org.sugarj.haskell.HaskellSourceFileContent;
 public class HaskellLib extends LanguageLib {
 
   private static final long serialVersionUID = -8916207157344649789L;
+  
+  private final String GHC_COMMAND = "ghc";
 
   private transient File libDir;
   
@@ -46,6 +48,11 @@ public class HaskellLib extends LanguageLib {
   private String moduleName;
 
   private IStrategoTerm ppTable;
+
+  @Override
+  public String getLanguageName() {
+    return "Haskell";
+  }
 
   @Override
   public List<File> getGrammars() {
@@ -251,14 +258,14 @@ public class HaskellLib extends LanguageLib {
   }
   
   @Override
-  public void compile(List<Path> outFiles, Path bin, List<Path> path, Set<? extends Path> generatedFiles, Map<Path, Integer> generatedFileHashes, HybridInterpreter interp, boolean generateFiles) throws IOException {
-    // TODO Auto-generated method stub
-
+  protected void compile(List<Path> outFiles, Path bin, List<Path> path, HybridInterpreter interp, boolean generateFiles) throws IOException {
+    if (generateFiles) {
+      List<String> cmds = new LinkedList<String>();
+      cmds.add(GHC_COMMAND);
+      for (Path outFile : outFiles)
+        cmds.add(outFile.getAbsolutePath());
+      
+      CommandExecution.execute(cmds.toArray(new String[cmds.size()]));
+    }
   }
-  
-  @Override
-  public String getLanguageName() {
-    return "Haskell";
-  }
-
 }
