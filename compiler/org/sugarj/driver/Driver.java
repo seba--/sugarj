@@ -447,7 +447,7 @@ public class Driver{
         throw new ParseException("could not parse toplevel declaration in:\n"
             + input, -1);
 
-      remainingInputTerm = ATermCommands.pushAmbiguities(remainingInputTerm);
+//      remainingInputTerm = ATermCommands.pushAmbiguities(remainingInputTerm);
       
       if (!isApplication(remainingInputTerm, "NextToplevelDeclaration"))
         throw new ATermCommands.MatchError(remainingInputTerm, "NextToplevelDeclaration");
