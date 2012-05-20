@@ -1,0 +1,18 @@
+module Sugar.UndefinedBlock where
+
+import org.sugarj.languages.Haskell
+
+context-free syntax
+  UndefinedBlock -> HaskellValdef
+  "undefined" HaskellVar+ -> UndefinedBlock {cons("UndefinedBlock")} 
+
+rules
+  desugar-undefined-block =
+    ?UndefinedBlock(<id>);
+    map(!Valdef(<id>, Var("undefined"), Where(DeclList(Empty()))));
+    foldr1(id, TopdeclSeq)
+
+sorts
+  A
+
+
