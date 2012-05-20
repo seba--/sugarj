@@ -1,0 +1,8 @@
+module Test.TestWithSugar where
+
+import Sugar.Simple
+
+simple example
+
+a = 5
+

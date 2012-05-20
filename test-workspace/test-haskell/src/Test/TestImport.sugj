@@ -1,0 +1,5 @@
+module Test.TestImport where
+
+import Test.Test
+
+foo = process

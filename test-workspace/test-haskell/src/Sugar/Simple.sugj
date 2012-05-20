@@ -1,0 +1,14 @@
+module Sugar.Simple where
+
+import org.sugarj.languages.Haskell
+
+context-free syntax
+  "simple" "example" -> HaskellTopdecl {cons("Simple")}
+
+desugarings
+  desugar-simple
+
+rules
+  desugar-simple :
+    Simple() -> 
+    Valdef(Var("simple"), Lit(Int("17")), Where(DeclList(Empty())))
