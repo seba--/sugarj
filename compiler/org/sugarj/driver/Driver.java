@@ -541,7 +541,7 @@ public class Driver{
             break;
           }
         
-        fullExtName = langLib.getRelativeNamespace() + extName;
+        fullExtName = langLib.getRelativeNamespaceSep() + extName;
 
         log.log("The name of the editor services is '" + extName + "'.");
         log.log("The full name of the editor services is '" + fullExtName + "'.");
@@ -561,7 +561,7 @@ public class Driver{
         // XXX if (currentTransProg != null)
         editorServices = ATermCommands.registerSemanticProvider(editorServices, currentTransProg);
   
-        Path editorServicesFile = environment.createBinPath(langLib.getRelativeNamespace() + extName + ".serv");
+        Path editorServicesFile = environment.createBinPath(langLib.getRelativeNamespaceSep() + extName + ".serv");
         
         log.log("writing editor services to " + editorServicesFile);
         
@@ -622,7 +622,7 @@ public class Driver{
             break;
           }
         
-        fullExtName = langLib.getRelativeNamespace() + extName + (extension == null ? "" : ("." + extension));
+        fullExtName = langLib.getRelativeNamespaceSep() + extName + (extension == null ? "" : ("." + extension));
 
         log.log("The name is '" + extName + "'.");
         log.log("The full name is '" + fullExtName + "'.");
@@ -635,7 +635,7 @@ public class Driver{
         String plainContent = Term.asJavaString(ATermCommands.getApplicationSubterm(body, "PlainBody", 0));
         
         String ext = extension == null ? "" : ("." + extension);
-        Path plainFile = environment.createBinPath(langLib.getRelativeNamespace() + extName + ext);
+        Path plainFile = environment.createBinPath(langLib.getRelativeNamespaceSep() + extName + ext);
         FileCommands.createFile(plainFile);
   
         log.log("writing plain content to " + plainFile);
@@ -656,8 +656,11 @@ public class Driver{
     else {
 //      langLib.checkNamespace(toplevelDecl, sourceFile, driverResult);   
 //      langLib.checkSourceOutFile(environment, driverResult.getSourceFile());
-      if (depOutFile == null)
-        depOutFile = environment.createBinPath(langLib.getRelativeNamespace() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
+      if (depOutFile == null) {
+        // does this ever occur?
+        assert false;
+        depOutFile = environment.createBinPath(langLib.getRelativeNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
+      }
       try {
         if (langLib.isImportDec(toplevelDecl)) {
           if (!environment.isAtomicImportParsing())
@@ -768,7 +771,7 @@ public class Driver{
 
       langLib.processNamespaceDec(toplevelDecl, environment, interp, driverResult, sourceFile, driverResult.getSourceFile());    
       if (depOutFile == null)
-        depOutFile = environment.createBinPath(langLib.getRelativeNamespace() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
+        depOutFile = environment.createBinPath(langLib.getRelativeNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       
     } finally {
       log.endTask();
@@ -1002,7 +1005,7 @@ public class Driver{
         }
 
 
-        fullExtName = langLib.getRelativeNamespace() + extName;
+        fullExtName = langLib.getRelativeNamespaceSep() + extName;
 
         log.log("The name of the sugar is '" + extName + "'.");
         log.log("The full name of the sugar is '" + fullExtName + "'.");
@@ -1016,8 +1019,8 @@ public class Driver{
         log.endTask();
       }
       
-      Path sdfExtension = environment.createBinPath(langLib.getRelativeNamespace() + extName + ".sdf");
-      Path strExtension = environment.createBinPath(langLib.getRelativeNamespace() + extName + ".str");
+      Path sdfExtension = environment.createBinPath(langLib.getRelativeNamespaceSep() + extName + ".sdf");
+      Path strExtension = environment.createBinPath(langLib.getRelativeNamespaceSep() + extName + ".str");
       
       String sdfImports = " imports " + StringCommands.printListSeparated(availableSDFImports, " ") + "\n";
       String strImports = " imports " + StringCommands.printListSeparated(availableSTRImports, " ") + "\n";

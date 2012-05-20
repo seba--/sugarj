@@ -244,7 +244,7 @@ public class HaskellLib extends LanguageLib {
 
   @Override
   public IStrategoTerm getSugarBody(IStrategoTerm decl) {
-    return getApplicationSubterm(decl, "SugarBody", 0);
+    return ATermCommands.factory.makeList(decl);
   }
 
   @Override

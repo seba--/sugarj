@@ -6,10 +6,10 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.sugarj.haskell.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.sugarj.common;bundle-version="1.0.0",
- org.sugarj.languagelib;bundle-version="1.0.0",
- org.spoofax.terms;bundle-version="1.0.0",
- org.strategoxt.strj;bundle-version="0.17.92"
+ org.sugarj.common,
+ org.sugarj.languagelib,
+ org.spoofax.terms,
+ org.strategoxt.strj
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.sugarj

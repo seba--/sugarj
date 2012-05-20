@@ -129,6 +129,13 @@ public abstract class LanguageLib implements Serializable {
 
 	public abstract String getRelativeNamespace();
 	
+	public String getRelativeNamespaceSep() {
+		String rel = getRelativeNamespace();
+		if (rel.isEmpty())
+			return rel;
+		return rel + Environment.sep;
+	}
+	
 	
 //	public abstract void checkNamespace(IStrategoTerm decl, RelativeSourceLocationPath sourceFile, IErrorLogger errorLog);
 	public abstract void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IErrorLogger errorLog, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException;

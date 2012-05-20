@@ -318,7 +318,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 		
 		
 		if (prologOutFile == null) 
-			prologOutFile = environment.createBinPath(getRelativeNamespace() + FileCommands.fileName(sourceFileFromResult) + ".pro");
+			prologOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + ".pro");
 	}
 	
 	

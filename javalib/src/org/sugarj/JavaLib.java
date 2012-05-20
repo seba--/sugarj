@@ -269,7 +269,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 	    
 	    String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
 	    
-	    RelativePath clazz = environment.createBinPath(getRelativeNamespace() + decName + ".class");
+	    RelativePath clazz = environment.createBinPath(getRelativeNamespaceSep() + decName + ".class");
 	    
 	    generatedJavaClasses.add(clazz);
 	    javaSource.addBodyDecl(prettyPrint(dec, interp));
@@ -286,7 +286,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 	    checkPackageName(toplevelDecl, sourceFile, errorLog);
 	
 	    if (javaOutFile == null)
-	      javaOutFile = environment.createBinPath(getRelativeNamespace() + FileCommands.fileName(sourceFileFromResult) + ".java");			// XXX: Can we just reuse sourceFile here?
+	      javaOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + ".java");			// XXX: Can we just reuse sourceFile here?
 	
 	    // moved here before depOutFile==null check
 	    javaSource.setNamespaceDecl(prettyPrint(toplevelDecl, interp));
