@@ -4,6 +4,8 @@ a = 3
 b = do a <- return 5
        b <- do c <- return 7
                return 9
+       c <- a + b
+       return c
 
 c = d 9
   where d x = 17 + x
