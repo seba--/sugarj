@@ -1,8 +1,5 @@
 package org.sugarj.common;
 
-import static org.spoofax.jsglr_layout.client.imploder.ImploderAttachment.getLeftToken;
-import static org.spoofax.jsglr_layout.client.imploder.ImploderAttachment.getRightToken;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.spoofax.interpreter.terms.ISimpleTerm;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoInt;
@@ -21,7 +17,6 @@ import org.spoofax.interpreter.terms.IStrategoReal;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
-import org.spoofax.jsglr_layout.client.imploder.ITokenizer;
 import org.spoofax.jsglr_layout.client.InvalidParseTableException;
 import org.spoofax.jsglr_layout.client.imploder.IToken;
 import org.spoofax.jsglr_layout.client.imploder.ImploderAttachment;
@@ -35,7 +30,10 @@ import org.spoofax.terms.attachments.ParentTermFactory;
 import org.spoofax.terms.io.InlinePrinter;
 import org.spoofax.terms.io.TAFTermReader;
 import org.strategoxt.HybridInterpreter;
+import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
+import org.strategoxt.stratego_gpp.ast2abox_0_1;
+import org.strategoxt.stratego_gpp.box2text_string_0_1;
 import org.strategoxt.tools.sdf_desugar_0_0;
 import org.sugarj.common.path.Path;
 
@@ -420,5 +418,14 @@ public class ATermCommands {
     }
     
     return term;
+  }
+
+  public static String prettyPrint(IStrategoTerm ppTable, IStrategoTerm term, HybridInterpreter interp) {
+    Context ctx = interp.getCompiledContext();
+    IStrategoTerm ppt_list = makeList("PPTable", ppTable);
+    IStrategoTerm aboxTerm = ast2abox_0_1.instance.invoke(ctx, term, ppt_list);   
+    IStrategoTerm textTerm = box2text_string_0_1.instance.invoke(ctx, aboxTerm, factory.makeInt(80));
+    return ATermCommands.getString(textTerm);
+
   }
 }

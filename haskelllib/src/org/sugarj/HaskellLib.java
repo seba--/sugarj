@@ -16,7 +16,13 @@ import java.util.Set;
 import org.eclipse.core.runtime.FileLocator;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.Term;
+import org.spoofax.terms.TermFactory;
 import org.strategoxt.HybridInterpreter;
+import org.strategoxt.lang.Context;
+import org.strategoxt.stratego_gpp.ast2abox_0_1;
+import org.strategoxt.stratego_gpp.box2text_string_0_1;
+import org.strategoxt.stratego_gpp.parse_pptable_file_0_0;
+import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
@@ -42,6 +48,8 @@ public class HaskellLib extends LanguageLib {
   
   private String relNamespaceName;
   private String moduleName;
+
+  private IStrategoTerm ppTable;
 
   @Override
   public List<File> getGrammars() {
@@ -236,14 +244,16 @@ public class HaskellLib extends LanguageLib {
     return getApplicationSubterm(decl, "SugarBody", 0);
   }
 
-
-
   @Override
   public String prettyPrint(IStrategoTerm term, HybridInterpreter interp) throws IOException {
-    // TODO Auto-generated method stub
-    return null;
+    if (ppTable == null) {
+      IStrategoTerm ppTableFile = ATermCommands.makeString(ensureFile("org/sugarj/languages/Haskell.pp").getAbsolutePath());
+      ppTable = parse_pptable_file_0_0.instance.invoke(org.strategoxt.stratego_gpp.stratego_gpp.init(), ppTableFile);
+    }
+    
+    return ATermCommands.prettyPrint(ppTable, term, interp);
   }
-
+  
   @Override
   public void compile(List<Path> outFiles, Path bin, List<Path> path, Set<? extends Path> generatedFiles, Map<Path, Integer> generatedFileHashes, HybridInterpreter interp, boolean generateFiles) throws IOException {
     // TODO Auto-generated method stub

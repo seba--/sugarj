@@ -18,11 +18,8 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.terms.TermFactory;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.lang.Context;
-import org.strategoxt.stratego_gpp.ast2abox_0_1;
-import org.strategoxt.stratego_gpp.box2text_string_0_1;
 import org.strategoxt.stratego_gpp.parse_pptable_file_0_0;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
@@ -237,25 +234,9 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 	
 	@Override
-	public String prettyPrint(IStrategoTerm term,
-			HybridInterpreter interp) throws IOException {
-		
-		// XXX: Debug
-		
-		System.err.println("+++++++++++++++++++++++ pretty-printing prolog");
-		Context ctx = interp.getCompiledContext();		
-		IStrategoTerm ppTable = initializePrettyPrinter(ctx);
-		System.err.println("pptable: " + ppTable);
-		TermFactory tf = new TermFactory();
-		IStrategoTerm ppt_list = tf.makeList(ppTable);
-		IStrategoTerm ppAbox = ast2abox_0_1.instance.invoke(ctx, term, ppt_list);		
-		System.err.println("abox: " + ppAbox);
-		IStrategoTerm ppText = box2text_string_0_1.instance.invoke(ctx, ppAbox, ATermCommands.atermFromString("80"));
-		String pretty = ATermCommands.getString(ppText);
-		System.err.println("pptext: " + pretty);
-		return pretty;
-		
-		
+	public String prettyPrint(IStrategoTerm term, HybridInterpreter interp) throws IOException {
+		IStrategoTerm ppTable = initializePrettyPrinter(interp.getCompiledContext());
+		return ATermCommands.prettyPrint(ppTable, term, interp);
 	}
 
 //	@Override

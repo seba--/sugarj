@@ -25,26 +25,27 @@ exports
   	CONID -/- [\#]
 
   lexical syntax
-    Decimal "#"              -> INTEGER-HASH
-    [0] [Oo] Octal "#"       -> INTEGER-HASH
-    [0] [Xx] Hexadecimal "#" -> INTEGER-HASH
+    Decimal              -> INTEGER-HASH
+    [0] [Oo] Octal       -> INTEGER-HASH
+    [0] [Xx] Hexadecimal -> INTEGER-HASH
     
-    Decimal "." Decimal "#"          -> FLOAT-HASH
-    Decimal Exponent "#"             -> RATIONAL-HASH
-    Decimal "." Decimal Exponent "#" -> RATIONAL-HASH
+    Decimal "." Decimal           -> FLOAT-HASH
+    Decimal Exponent              -> RATIONAL-HASH
+    Decimal "." Decimal Exponent  -> RATIONAL-HASH
 
   syntax
-    "'" CharChar "'" "#"       -> <Char-HASH-CF> {cons("Char")}
-    "\"" StringChar* "\"" "#"  -> <String-HASH-CF> {cons("String")}
+    "'" CharChar "'" "#"       -> <Char-HASH-CF> {cons("CharHash")}
+    "\"" StringChar* "\"" "#"  -> <String-HASH-CF> {cons("StringHash")}
+    <INTEGER-HASH-LEX> "#" -> <Integer-HASH-CF> {cons("IntegerHash")}
+    <FLOAT-HASH-LEX> "#" -> <Float-HASH-CF> {cons("FloatHash")}
+    <RATIONAL-HASH-LEX> "#" -> <Float-HASH-CF> {cons("FloatHash")}
     
   context-free syntax
-    INTEGER-HASH  -> Literal {cons("Int")}
-    FLOAT-HASH    -> Literal {cons("Float")}
-    RATIONAL-HASH -> Literal {cons("Float")}
-    
     Char-HASH   -> Literal
     String-HASH -> Literal
-
+    Integer-HASH  -> Literal
+    Float-HASH    -> Literal
+    
   lexical restrictions
     INTEGER -/- [\#]
     FLOAT -/- [\#]
@@ -959,12 +960,13 @@ exports
   sorts Module
 
 
-
 module org/sugarj/languages/Haskell
 imports 
         Haskell
           [ GDerive                      => HaskellGDerive
             GeneralizedDeriving          => HaskellGeneralizedDeriving
+            Float-HASH                   => HaskellFloat-HASH
+            Integer-HASH                 => HaskellInteger-HASH
             String-HASH                  => HaskellString-HASH
             Char-HASH                    => HaskellChar-HASH
             RATIONAL-HASH                => HaskellRATIONAL-HASH
