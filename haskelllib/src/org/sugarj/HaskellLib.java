@@ -220,7 +220,7 @@ public class HaskellLib extends LanguageLib {
 
   @Override
   public String getImportedModulePath(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
-    return Term.asJavaString(getApplicationSubterm(toplevelDecl, "Import", 2)).replace('.', '/');
+    return prettyPrint(getApplicationSubterm(toplevelDecl, "Import", 2), interp).replace('.', '/');
   }
   
   @Override
@@ -244,7 +244,7 @@ public class HaskellLib extends LanguageLib {
 
   @Override
   public IStrategoTerm getSugarBody(IStrategoTerm decl) {
-    return ATermCommands.factory.makeList(decl);
+    return getApplicationSubterm(decl, "SugarBody", 0);
   }
 
   @Override
