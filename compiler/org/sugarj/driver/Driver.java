@@ -1358,7 +1358,7 @@ public class Driver{
       ATermCommands.makeList("TypeOrSugarDec*", ImploderAttachment.getRightToken(imports), sugaredTypeOrSugarDecls);
     
     IStrategoTerm term =
-      ATermCommands.makeAppl("SugarCompilationUnit", "SugarCompilationUnit", 3,
+      ATermCommands.makeAppl("CompilationUnit", "SugarCompilationUnit", 3,
         packageDecl,
         imports,
         body);
