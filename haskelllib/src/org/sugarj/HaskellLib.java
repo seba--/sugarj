@@ -16,11 +16,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.FileLocator;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.Term;
-import org.spoofax.terms.TermFactory;
 import org.strategoxt.HybridInterpreter;
-import org.strategoxt.lang.Context;
-import org.strategoxt.stratego_gpp.ast2abox_0_1;
-import org.strategoxt.stratego_gpp.box2text_string_0_1;
 import org.strategoxt.stratego_gpp.parse_pptable_file_0_0;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
@@ -196,7 +192,7 @@ public class HaskellLib extends LanguageLib {
     String qualifiedModuleName = prettyPrint(getApplicationSubterm(toplevelDecl, "ModuleDec", 0), interp);
     String qualifiedModulePath = qualifiedModuleName.replace('.', '/');
     moduleName = FileCommands.fileName(qualifiedModulePath);
-    String declaredRelNamespaceName = FileCommands.dropExtension(qualifiedModulePath);
+    String declaredRelNamespaceName = FileCommands.dropFilename(qualifiedModulePath);
     relNamespaceName = FileCommands.dropFilename(sourceFile.getRelativePath());
     
     RelativePath objectFile = environment.createBinPath(relNamespaceName + Environment.sep + moduleName + getGeneratedFileExtension());
