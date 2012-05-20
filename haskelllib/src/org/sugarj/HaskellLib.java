@@ -185,13 +185,21 @@ public class HaskellLib extends LanguageLib {
 
   @Override
   public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IErrorLogger errorLog, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException {
-    moduleName = Term.asJavaString(getApplicationSubterm(toplevelDecl, "ModuleDec", 0));
+    String qualifiedModuleName = prettyPrint(getApplicationSubterm(toplevelDecl, "ModuleDec", 0), interp);
+    String qualifiedModulePath = qualifiedModuleName.replace('.', '/');
+    moduleName = FileCommands.fileName(qualifiedModulePath);
+    String declaredRelNamespaceName = FileCommands.dropExtension(qualifiedModulePath);
     relNamespaceName = FileCommands.dropFilename(sourceFile.getRelativePath());
     
-    RelativePath clazz = environment.createBinPath(relNamespaceName + Environment.sep + moduleName + getGeneratedFileExtension());
-    generatedModules.add(clazz);
+    RelativePath objectFile = environment.createBinPath(relNamespaceName + Environment.sep + moduleName + getGeneratedFileExtension());
+    generatedModules.add(objectFile);
     
     sourceContent.setNamespaceDecl(prettyPrint(toplevelDecl, interp));
+    
+    if (!declaredRelNamespaceName.equals(relNamespaceName))
+      setErrorMessage(toplevelDecl,
+                      "The declared package '" + declaredRelNamespaceName + "'" +
+                      " does not match the expected package '" + relNamespaceName + "'.", errorLog);
   }
 
   @Override
