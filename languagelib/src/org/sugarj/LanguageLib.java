@@ -15,6 +15,7 @@ import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.HybridInterpreter;
+import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
@@ -201,6 +202,10 @@ public abstract class LanguageLib implements Serializable {
 	public abstract IStrategoTerm getSugarBody(IStrategoTerm decl);
 	
 
-	
-	
+
+	protected void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IErrorLogger errorLog) {
+	  errorLog.logError(msg);
+	  ATermCommands.setErrorMessage(toplevelDecl, msg);
+    }
+
 }

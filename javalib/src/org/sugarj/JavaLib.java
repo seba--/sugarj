@@ -24,7 +24,6 @@ import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.java_front.pp_java_string_0_0;
 import org.strategoxt.lang.Context;
-import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
@@ -293,11 +292,6 @@ public class JavaLib extends LanguageLib implements Serializable {
 	    // moved here before depOutFile==null check
 	    javaSource.setNamespaceDecl(prettyPrint(toplevelDecl, interp));
 	    checkPackageName(toplevelDecl, sourceFileFromResult, errorLog);
-	  }
-
-	private void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IErrorLogger errorLog) {
-	    errorLog.logError(msg);
-	    ATermCommands.setErrorMessage(toplevelDecl, msg);
 	  }
 
 	public void setJavaOutFile(Path javaOutFile) {
