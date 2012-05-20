@@ -98,29 +98,6 @@ public class SugarJParser extends JSGLRI {
     
     if (!isPending(filename)) 
       scheduleParse(input, filename);
-        
-//    Path lastParseTable;
-//    
-//    if (result instanceof PendingResult)
-//      lastParseTable = ((PendingResult) result).getResult().getLastParseTable();
-//    else
-//      lastParseTable = result.getLastParseTable();
-//  
-//    if (lastParseTable != null && lastParseTable.equals(parserTable))
-//      return parser.parse(input, filename);
-//    
-//    if (lastParseTable != null) {
-//      try {
-//        ParseTable parseTable = org.strategoxt.imp.runtime.Environment.loadParseTable(lastParseTable.getAbsolutePath());
-//        ITreeBuilder builder = new TreeBuilder(new TermTreeFactory(ATermCommands.factory));
-//        
-//        parser = new JSGLRI(parseTable, "SugarCompilationUnit");
-//        parserTable = lastParseTable;
-//        parser.getParser().setTreeBuilder(builder);
-//        return parser.parse(input, filename);
-//      } catch (Exception e) {
-//      }
-//    }
     
     return result.getSugaredSyntaxTree();
   }
@@ -207,6 +184,7 @@ public class SugarJParser extends JSGLRI {
   }
   
   public static void putResult(String file, Result result) {
+    result.setSugaredSyntaxTree(ATermCommands.fixTokenizer(result.getSugaredSyntaxTree()));
     synchronized (results) {
       results.put(file, result);
     }
