@@ -184,7 +184,8 @@ public class SugarJParser extends JSGLRI {
   }
   
   public static void putResult(String file, Result result) {
-    result.setSugaredSyntaxTree(ATermCommands.fixTokenizer(result.getSugaredSyntaxTree()));
+    if (result != null)
+      result.setSugaredSyntaxTree(ATermCommands.fixTokenizer(result.getSugaredSyntaxTree()));
     synchronized (results) {
       results.put(file, result);
     }

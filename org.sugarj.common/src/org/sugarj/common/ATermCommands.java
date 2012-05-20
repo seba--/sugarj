@@ -254,6 +254,9 @@ public class ATermCommands {
 
   
   public static IStrategoTerm fixSDF(IStrategoTerm term, HybridInterpreter interp) throws IOException, InvalidParseTableException {
+    if (term == null)
+      return null;
+    
     IStrategoTerm result = null;
     try {
       result = sdf_desugar_0_0.instance.invoke(interp.getCompiledContext(), term);
