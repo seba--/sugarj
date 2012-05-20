@@ -1,14 +1,14 @@
-module Test where
+module Test.Test where
 
-a = 3
-b = do a <- return 5
-       b <- do c <- return 7
-               return 9
-       c <- a + b
-       return c
+process =
+  do inp <- readInput
+     case inp of
+       Just txt -> 
+         do putStrLn "thank you"
+            sendToServer txt
+            return True
+       Nothing ->
+         return False                     
 
-c = d 9
-  where d x = 17 + x
-
-
-e = test
+readInput = undefined
+sendToServer = undefined
