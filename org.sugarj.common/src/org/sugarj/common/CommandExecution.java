@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -68,7 +69,7 @@ public class CommandExecution {
         String line = null;
         while ((line = reader.readLine()) != null)
           if (!SILENT_EXECUTION && !SUB_SILENT_EXECUTION)
-            log.log(prefix + line);
+            log.logErr(prefix + line);
           else  
             msg.add(prefix + line);
       } catch (IOException ioe) {
@@ -138,6 +139,8 @@ public class CommandExecution {
   public static void executeWithPrefix(String prefix, String... cmds) {
     int exitValue;
     
+    StreamLogger errStreamLogger = null;
+    StreamLogger outStreamLogger = null;
     try {
       Runtime rt = Runtime.getRuntime();
 
@@ -147,8 +150,8 @@ public class CommandExecution {
 
       Process p = rt.exec(cmds);
 
-      StreamLogger errStreamLogger = new StreamLogger(p.getErrorStream(), "");
-      StreamLogger outStreamLogger = new StreamLogger(p.getInputStream(), "");
+      errStreamLogger = new StreamLogger(p.getErrorStream(), "");
+      outStreamLogger = new StreamLogger(p.getInputStream(), "");
 
       // We need to start these threads even if we don't care for
       // the output, because the process will block if we don't
@@ -166,7 +169,9 @@ public class CommandExecution {
           + t.getMessage(), cmds, t);
     }
     
-    if (exitValue != 0)
-      throw new ExecutionError("problems while executing", cmds);
+    if (exitValue != 0) {
+      String detail = Arrays.toString(errStreamLogger.getUnloggedMsg()) + ", " + Arrays.toString(outStreamLogger.getUnloggedMsg());
+      throw new ExecutionError("problems while executing: " + detail, cmds);
+    }
   }
 }
