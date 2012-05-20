@@ -14,7 +14,6 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.stratego_gpp.parse_pptable_file_0_0;
 import org.sugarj.common.ATermCommands;
@@ -198,7 +197,8 @@ public class HaskellLib extends LanguageLib {
   public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IErrorLogger errorLog, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException {
     String qualifiedModuleName = prettyPrint(getApplicationSubterm(toplevelDecl, "ModuleDec", 0), interp);
     String qualifiedModulePath = qualifiedModuleName.replace('.', '/');
-    moduleName = FileCommands.fileName(qualifiedModulePath);
+    String declaredModuleName = FileCommands.fileName(qualifiedModulePath);
+    moduleName = FileCommands.dropExtension(FileCommands.fileName(sourceFile.getRelativePath()));
     String declaredRelNamespaceName = FileCommands.dropFilename(qualifiedModulePath);
     relNamespaceName = FileCommands.dropFilename(sourceFile.getRelativePath());
     
@@ -211,11 +211,24 @@ public class HaskellLib extends LanguageLib {
       setErrorMessage(toplevelDecl,
                       "The declared package '" + declaredRelNamespaceName + "'" +
                       " does not match the expected package '" + relNamespaceName + "'.", errorLog);
+    
+    if (!declaredModuleName.equals(moduleName))
+      setErrorMessage(toplevelDecl,
+                      "The declared package '" + declaredModuleName + "'" +
+                      " does not match the expected package '" + moduleName + "'.", errorLog);
   }
 
   @Override
   public void processLanguageSpecific(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp) throws IOException {
-    sourceContent.addBodyDecl(prettyPrint(getApplicationSubterm(toplevelDecl, "HaskellBody", 0), interp));
+    IStrategoTerm term = getApplicationSubterm(toplevelDecl, "HaskellBody", 0);
+    String text = null;
+    try {
+      text = prettyPrint(term, interp);
+    } catch (NullPointerException e) {
+      ATermCommands.setErrorMessage(toplevelDecl, "pretty printing Haskell failed");
+    }
+    if (text != null)
+      sourceContent.addBodyDecl(text);
   }
 
   @Override
