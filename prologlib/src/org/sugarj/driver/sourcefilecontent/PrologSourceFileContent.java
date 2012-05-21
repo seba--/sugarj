@@ -96,16 +96,16 @@ public class PrologSourceFileContent implements ISourceFileContent {
 		String importString = ":- use_module(";
 		importString += module.importName;
 		if (trm.getSubtermCount() > 1) { 	// :- use_module(foo, bar/1).
-			importString += getImportedModulePredicateList(module, interp);
+			importString += getImportedModulePredicateList(module);
 		}
 		return importString + ").";
 	}
 
-	private String getImportedModulePredicateList(PrologModuleImport module, HybridInterpreter interp) throws IOException {
+	private String getImportedModulePredicateList(PrologModuleImport module) throws IOException {
 		if (module.productionDecl == null) 
 			return "";
 		
-		String code = ", " + pLib.prettyPrint(module.productionDecl.getSubterm(1), interp);
+		String code = ", " + pLib.prettyPrint(module.productionDecl.getSubterm(1));
 		
 		return code;
 	}

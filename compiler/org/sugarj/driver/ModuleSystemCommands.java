@@ -37,17 +37,17 @@ public class ModuleSystemCommands {
      * @return true iff a class file existed.
      * @throws IOException
      */
-    public static boolean importClass(IStrategoTerm toplevelDecl, HybridInterpreter interp, Environment environment, LanguageLib langLib) throws IOException {
+    public static boolean importClass(IStrategoTerm toplevelDecl, Environment environment, LanguageLib langLib) throws IOException {
       if (langLib.getGeneratedFileExtension() == null)    // if language does not have bin files (e.g. for interpreted languages), return true
          return true;
       
-      RelativePath clazz = searchFile(langLib.getImportedModulePath(toplevelDecl, interp), langLib.getGeneratedFileExtension(), environment);
+      RelativePath clazz = searchFile(langLib.getImportedModulePath(toplevelDecl), langLib.getGeneratedFileExtension(), environment);
       if (clazz == null)
         return false;
       
       log.beginTask("Generate target code");
       try {
-        langLib.addImportModule(toplevelDecl, interp, true);
+        langLib.addImportModule(toplevelDecl, true);
         //source.addCheckedImport(modulePath.replace('/', '.'));
       } finally {
         log.endTask();
