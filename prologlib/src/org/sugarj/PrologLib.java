@@ -292,7 +292,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 		// XXX: Is there a namespace separator in prolog? Or even any notion of compound namespaces?
 		// XXX: From swi prolog doc: Modules are organised in a single and flat namespace and therefore module names must be chosen with some care to avoid conflicts.
 		// XXX: SugarProlog will implement different namespace handling.
-		return relNamespaceName + "/";
+		return relNamespaceName;
 	}	
 	
 	@Override
