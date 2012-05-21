@@ -6,6 +6,7 @@ import static org.sugarj.common.ATermCommands.isApplication;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -17,9 +18,11 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.stratego_gpp.parse_pptable_file_0_0;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.CommandExecution;
+import org.sugarj.common.CommandExecution.ExecutionError;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
+import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
@@ -288,7 +291,30 @@ public class HaskellLib extends LanguageLib {
         cmds.add(searchPath.toString());
       }
       
-      CommandExecution.execute(cmds.toArray(new String[cmds.size()]));
+      new CommandExecution(false).execute(cmds.toArray(new String[cmds.size()]));
     }
+  }
+
+  @Override
+  public boolean isModuleResolvable(String relModulePath) {
+    boolean oldSilent = CommandExecution.SILENT_EXECUTION;
+    CommandExecution.SILENT_EXECUTION = true;
+    String[] cmds = new String[]{
+      "ghc-pkg", 
+      "find-module", relModulePath.replace('/', '.'),
+      "--simple-output"
+    };
+    
+    String[][] msg;
+    try {
+       msg = new CommandExecution(true).execute(cmds);
+    } catch (ExecutionError e) {
+      Log.log.logErr("Command execution failed: " + Arrays.toString(e.getCmds()));
+      return false;
+    } finally {
+      CommandExecution.SILENT_EXECUTION = oldSilent;
+    }
+    
+    return msg.length > 0 && msg[0].length > 0;
   }
 }
