@@ -6,6 +6,9 @@ context-free syntax
   UndefinedBlock -> HaskellValdef
   "undefined" HaskellVar+ -> UndefinedBlock {cons("UndefinedBlock")} 
 
+desugarings
+  desugar-undefined-block
+
 rules
   desugar-undefined-block =
     ?UndefinedBlock(<id>);
