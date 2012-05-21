@@ -39,12 +39,21 @@ language
   block comment                          : "/*" * "*/"
 
 folding
+  _.CompilationUnit
   ToplevelDeclaration
   EditorServiceSection
   SugarDefElem
+  _.Valdef
+  HaskellExp.Do
+  HaskellExp.Case
+  HaskellAlt
+  HaskellWhere
+  
 
 outliner
   ToplevelDeclaration
+  _.ModuleDec
+  _.Valdef
 
   completions SDF
     completion template : SugarDefElem =
