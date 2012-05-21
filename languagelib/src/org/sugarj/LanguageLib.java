@@ -223,4 +223,5 @@ public abstract class LanguageLib implements Serializable {
 	  ATermCommands.setErrorMessage(toplevelDecl, msg);
     }
 
+	public abstract boolean isModuleResolvable(String relModulePath);
 }

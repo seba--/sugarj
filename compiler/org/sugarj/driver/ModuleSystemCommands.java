@@ -11,7 +11,6 @@ import java.net.URLClassLoader;
 import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.strategoxt.HybridInterpreter;
 import org.sugarj.LanguageLib;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
@@ -19,7 +18,6 @@ import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.common.path.SourceLocation;
-import org.sugarj.driver.sourcefilecontent.ISourceFileContent;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -37,12 +35,14 @@ public class ModuleSystemCommands {
      * @return true iff a class file existed.
      * @throws IOException
      */
-    public static boolean importClass(IStrategoTerm toplevelDecl, Environment environment, LanguageLib langLib) throws IOException {
-      if (langLib.getGeneratedFileExtension() == null)    // if language does not have bin files (e.g. for interpreted languages), return true
-         return true;
-      
-      RelativePath clazz = searchFile(langLib.getImportedModulePath(toplevelDecl), langLib.getGeneratedFileExtension(), environment);
-      if (clazz == null)
+    public static boolean importClass(String modulePath, IStrategoTerm toplevelDecl, Environment environment, LanguageLib langLib) throws IOException {
+// if language does not have bin files (e.g. for interpreted languages), return true
+// <- NOPE: interpreted languages generate desugared source files instead of compiled files
+//      if (langLib.getGeneratedFileExtension() == null)
+//         return true;
+
+      RelativePath clazz = searchFile(modulePath, langLib.getGeneratedFileExtension(), environment);
+      if (clazz == null && !langLib.isModuleResolvable(modulePath))
         return false;
       
       log.beginTask("Generate target code");
