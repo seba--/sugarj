@@ -1,0 +1,31 @@
+module Control.Applicative.IdiomBrackets where
+
+import org.sugarj.languages.Haskell
+
+context-free syntax
+  "(|" PurePart EffectfulPart* "|)" -> HaskellExp {cons("IdiomBrackets")}
+  "(|" HaskellExp HaskellQop HaskellExp "|)" -> HaskellExp {cons("InfixIdiomBrackets")}
+
+  HaskellExp -> PurePart
+  HaskellExp -> EffectfulPart
+
+context-free priorities
+{ HaskellExp -> PurePart
+  HaskellExp -> EffectfulPart }
+> HaskellQvar "@" HaskellExp -> HaskellExp 
+
+desugarings
+  desugar-idiom-brackets
+
+rules
+  desugar-idiom-brackets :
+    IdiomBrackets(f, args) ->
+    <apply-effectful> (AppBin(Var("pure"), f), args)
+  desugar-idiom-brackets :
+    InfixIdiomBrackets(e1, op, e2) ->
+    IdiomBrackets(BinCon(op), [e1, e2])
+
+  apply-effectful :
+    (f,[]) -> f
+  apply-effectful :
+    (f,[x|xs]) -> <apply-effectful> (OpApp(f, ConsOp("<*>"), x), xs)
