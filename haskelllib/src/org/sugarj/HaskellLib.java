@@ -6,6 +6,7 @@ import static org.sugarj.common.ATermCommands.isApplication;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -21,6 +22,7 @@ import org.sugarj.common.CommandExecution;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
+import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
@@ -271,12 +273,23 @@ public class HaskellLib extends LanguageLib {
   }
   
   @Override
-  protected void compile(List<Path> outFiles, Path bin, List<Path> path, HybridInterpreter interp, boolean generateFiles) throws IOException {
+  protected void compile(List<Path> outFiles, Path bin, List<Path> includePaths, HybridInterpreter interp, boolean generateFiles) throws IOException {
     if (generateFiles) {
       List<String> cmds = new LinkedList<String>();
       cmds.add(GHC_COMMAND);
+      
       for (Path outFile : outFiles)
         cmds.add(outFile.getAbsolutePath());
+      
+      cmds.add("-i");
+      if (!includePaths.isEmpty()) {
+        StringBuilder searchPath = new StringBuilder("-i");
+        for (Path path : includePaths)
+          if (new File(path.getAbsolutePath()).isDirectory())
+            searchPath.append(path.getAbsolutePath()).append(":");
+        searchPath.deleteCharAt(searchPath.length() - 1);
+        cmds.add(searchPath.toString());
+      }
       
       CommandExecution.execute(cmds.toArray(new String[cmds.size()]));
     }
