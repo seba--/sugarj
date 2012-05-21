@@ -5,7 +5,7 @@ import org.sugarj.languages.Haskell
 context-free syntax
   UndefinedBlock -> HaskellValdef
   "undefined" HaskellVar+ -> UndefinedBlock {cons("UndefinedBlock"),
-                                             layout(all(0,"x",eq(col(first("x")), col(first(0)))))} 
+                                             layout(all(2,"x",eq(col(first("x")), col(first(2)))))} 
 
 desugarings
   desugar-undefined-block
