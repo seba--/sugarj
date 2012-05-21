@@ -208,18 +208,16 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 
 	@Override
-	public void processLanguageSpecific(IStrategoTerm toplevelDecl,
-			Environment environment, HybridInterpreter interp)
-			throws IOException {
+	public void processLanguageSpecific(IStrategoTerm toplevelDecl,	Environment environment) throws IOException {
 		// Nothing to do here for prolog
 		IStrategoTerm dec = toplevelDecl;
 		
 		// TODO: Implement reexport handling in a more sensible way
 		
 		if (isApplication(dec, "ModuleReexport")) 
-			prologSource.addReexport(prettyPrint(dec, interp));
+			prologSource.addReexport(prettyPrint(dec));
 		else 
-			prologSource.addBodyDecl(prettyPrint(dec, interp));
+			prologSource.addBodyDecl(prettyPrint(dec));
 	}
 
 	
@@ -233,7 +231,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 	
 	@Override
-	public String prettyPrint(IStrategoTerm term, HybridInterpreter interp) throws IOException {
+	public String prettyPrint(IStrategoTerm term) throws IOException {
 		IStrategoTerm ppTable = initializePrettyPrinter(interp.getCompiledContext());
 		return ATermCommands.prettyPrint(ppTable, term, interp);
 	}
@@ -299,17 +297,17 @@ public class PrologLib extends LanguageLib implements Serializable {
 	
 	@Override
 	public void processNamespaceDec(IStrategoTerm toplevelDecl,
-			Environment environment, HybridInterpreter interp,
+			Environment environment,
 			IErrorLogger errorLog,
 			RelativeSourceLocationPath sourceFile,
 			RelativeSourceLocationPath sourceFileFromResult) throws IOException {
 		
 		String moduleName = null;
 		if (isApplication(toplevelDecl, "ModuleDec")) {
-			moduleName = prettyPrint(getApplicationSubterm(toplevelDecl, "ModuleDec", 0), interp);
-			prologSource.setModuleDecl(prettyPrint(toplevelDecl, interp));
+			moduleName = prettyPrint(getApplicationSubterm(toplevelDecl, "ModuleDec", 0));
+			prologSource.setModuleDecl(prettyPrint(toplevelDecl));
 		} else if (isApplication(toplevelDecl, "SugarModuleDec")) {
-			moduleName = prettyPrint(getApplicationSubterm(toplevelDecl, "SugarModuleDec", 0), interp);
+			moduleName = prettyPrint(getApplicationSubterm(toplevelDecl, "SugarModuleDec", 0));
 			prologSource.setModuleDecl(":-module(" + moduleName + ", []).");	// XXX: Ideally, a module only used for defining sugar should not be generated nor imported at all
 		}
 		relNamespaceName = FileCommands.dropFilename(sourceFile.getRelativePath());
@@ -345,7 +343,6 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	@Override
 	protected void compile(List<Path> sourceFiles, Path bin, List<Path> path,	// 'path' is library path?
-			HybridInterpreter interp,
 			boolean generateFiles)
 			throws IOException {
 
@@ -364,9 +361,8 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 	
 	@Override
-	public String getImportedModulePath(IStrategoTerm toplevelDecl,
-			HybridInterpreter interp) throws IOException {
-		String modulePath = prettyPrint(toplevelDecl.getSubterm(0).getSubterm(0), interp);
+	public String getImportedModulePath(IStrategoTerm toplevelDecl) throws IOException {
+		String modulePath = prettyPrint(toplevelDecl.getSubterm(0).getSubterm(0));
 		
 		return modulePath;		
 	}
@@ -376,10 +372,9 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 	
 	@Override
-	public void addImportModule(IStrategoTerm toplevelDecl,
-			HybridInterpreter interp, boolean checked) throws IOException {
+	public void addImportModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
 		
-		String importedModuleName = prettyPrint(toplevelDecl.getSubterm(0).getSubterm(0), interp);
+		String importedModuleName = prettyPrint(toplevelDecl.getSubterm(0).getSubterm(0));
 		PrologModuleImport imp = prologSource.getImport(importedModuleName, toplevelDecl);
 		
 		if (checked)
@@ -396,8 +391,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 //	}
 
 	@Override
-	public String getSugarName(IStrategoTerm decl, HybridInterpreter interp)
-			throws IOException {
+	public String getSugarName(IStrategoTerm decl) throws IOException {
         return decName;
 	}
 

@@ -194,8 +194,8 @@ public class HaskellLib extends LanguageLib {
   }
 
   @Override
-  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IErrorLogger errorLog, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException {
-    String qualifiedModuleName = prettyPrint(getApplicationSubterm(toplevelDecl, "ModuleDec", 0), interp);
+  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException {
+    String qualifiedModuleName = prettyPrint(getApplicationSubterm(toplevelDecl, "ModuleDec", 0));
     String qualifiedModulePath = qualifiedModuleName.replace('.', '/');
     String declaredModuleName = FileCommands.fileName(qualifiedModulePath);
     moduleName = FileCommands.dropExtension(FileCommands.fileName(sourceFile.getRelativePath()));
@@ -205,7 +205,7 @@ public class HaskellLib extends LanguageLib {
     RelativePath objectFile = environment.createBinPath(relNamespaceName + Environment.sep + moduleName + getGeneratedFileExtension());
     generatedModules.add(objectFile);
     
-    sourceContent.setNamespaceDecl(prettyPrint(toplevelDecl, interp));
+    sourceContent.setNamespaceDecl(prettyPrint(toplevelDecl));
     
     if (!declaredRelNamespaceName.equals(relNamespaceName))
       setErrorMessage(toplevelDecl,
@@ -219,11 +219,11 @@ public class HaskellLib extends LanguageLib {
   }
 
   @Override
-  public void processLanguageSpecific(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp) throws IOException {
+  public void processLanguageSpecific(IStrategoTerm toplevelDecl, Environment environment) throws IOException {
     IStrategoTerm term = getApplicationSubterm(toplevelDecl, "HaskellBody", 0);
     String text = null;
     try {
-      text = prettyPrint(term, interp);
+      text = prettyPrint(term);
     } catch (NullPointerException e) {
       ATermCommands.setErrorMessage(toplevelDecl, "pretty printing Haskell failed");
     }
@@ -232,13 +232,13 @@ public class HaskellLib extends LanguageLib {
   }
 
   @Override
-  public String getImportedModulePath(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
-    return prettyPrint(getApplicationSubterm(toplevelDecl, "Import", 2), interp).replace('.', '/');
+  public String getImportedModulePath(IStrategoTerm toplevelDecl) throws IOException {
+    return prettyPrint(getApplicationSubterm(toplevelDecl, "Import", 2)).replace('.', '/');
   }
   
   @Override
-  public void addImportModule(IStrategoTerm toplevelDecl, HybridInterpreter interp, boolean checked) throws IOException {
-    SourceImport imp = new SourceImport(getImportedModulePath(toplevelDecl, interp), prettyPrint(toplevelDecl, interp));
+  public void addImportModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
+    SourceImport imp = new SourceImport(getImportedModulePath(toplevelDecl), prettyPrint(toplevelDecl));
     if (checked)
       sourceContent.addCheckedImport(imp);
     else
@@ -246,7 +246,7 @@ public class HaskellLib extends LanguageLib {
   }
   
   @Override
-  public String getSugarName(IStrategoTerm decl, HybridInterpreter interp) throws IOException {
+  public String getSugarName(IStrategoTerm decl) throws IOException {
     return moduleName;
   }
 
@@ -261,7 +261,7 @@ public class HaskellLib extends LanguageLib {
   }
 
   @Override
-  public String prettyPrint(IStrategoTerm term, HybridInterpreter interp) throws IOException {
+  public String prettyPrint(IStrategoTerm term) throws IOException {
     if (ppTable == null) {
       IStrategoTerm ppTableFile = ATermCommands.makeString(ensureFile("org/sugarj/languages/Haskell.pp").getAbsolutePath());
       ppTable = parse_pptable_file_0_0.instance.invoke(org.strategoxt.stratego_gpp.stratego_gpp.init(), ppTableFile);
@@ -271,7 +271,7 @@ public class HaskellLib extends LanguageLib {
   }
   
   @Override
-  protected void compile(List<Path> outFiles, Path bin, List<Path> path, HybridInterpreter interp, boolean generateFiles) throws IOException {
+  protected void compile(List<Path> outFiles, Path bin, List<Path> path, boolean generateFiles) throws IOException {
     if (generateFiles) {
       List<String> cmds = new LinkedList<String>();
       cmds.add(GHC_COMMAND);

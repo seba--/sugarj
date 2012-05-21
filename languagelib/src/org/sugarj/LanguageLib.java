@@ -31,6 +31,15 @@ public abstract class LanguageLib implements Serializable {
 	public final static int PUBLIC_SUGAR = 1;
 	public final static int PRIVATE_SUGAR = 2;
 	
+	protected HybridInterpreter interp;
+	public void setInterpreter(HybridInterpreter interp) {
+		this.interp = interp;
+	}
+	
+	public HybridInterpreter getInterpreter() {
+		return interp;
+	}
+	
   private static final long serialVersionUID = -6712835686318143995L;
 
   public List<File> getGrammars() {
@@ -108,8 +117,7 @@ public abstract class LanguageLib implements Serializable {
 	public abstract boolean isPlainDec(IStrategoTerm decl); // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
 	
 	public abstract void processLanguageSpecific(IStrategoTerm toplevelDecl,
-	                                              Environment environment, 
-	                                              HybridInterpreter interp) throws IOException;
+	                                              Environment environment) throws IOException;
 	  
 	/**
 	 * Pretty prints the content of an AST in some file.
@@ -117,7 +125,7 @@ public abstract class LanguageLib implements Serializable {
 	 * @param aterm the name of a file which contains an aterm which encodes an AST
 	 * @throws IOException 
 	 */
-	public abstract String prettyPrint(IStrategoTerm term, HybridInterpreter interp) throws IOException;
+	public abstract String prettyPrint(IStrategoTerm term) throws IOException;
 	
 	  
 	
@@ -138,11 +146,11 @@ public abstract class LanguageLib implements Serializable {
 	
 	
 //	public abstract void checkNamespace(IStrategoTerm decl, RelativeSourceLocationPath sourceFile, IErrorLogger errorLog);
-	public abstract void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IErrorLogger errorLog, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException;
+	public abstract void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException;
 
 	public abstract LanguageLibFactory getFactoryForLanguage();
 	
-	public abstract String getImportedModulePath(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException;
+	public abstract String getImportedModulePath(IStrategoTerm toplevelDecl) throws IOException;
 	
 	
 	// from Result
@@ -151,7 +159,6 @@ public abstract class LanguageLib implements Serializable {
 			Map<Path, Set<RelativePath>> availableGeneratedFilesForSourceFile,
 			Map<Path, Map<Path, ISourceFileContent>> deferredSourceFilesForSourceFile,
 			Map<Path, Integer> generatedFileHashes,
-			HybridInterpreter interp,
 			boolean generateFiles
 			) throws IOException, ClassNotFoundException {
 
@@ -186,7 +193,7 @@ public abstract class LanguageLib implements Serializable {
 
 		writeToFile(generateFiles, generatedFileHashes, outFile, source.getCode(generatedClasses, interp, outFile));
 		
-		this.compile(javaOutFiles, bin, path, interp, generateFiles);
+		this.compile(javaOutFiles, bin, path, generateFiles);
 		for (Path cl : generatedClasses)
 			generatedFileHashes.put(cl, FileCommands.fileHash(cl));
 
@@ -199,13 +206,13 @@ public abstract class LanguageLib implements Serializable {
 		}
 	}
 
-	protected abstract void compile(List<Path> outFiles, Path bin, List<Path> path, HybridInterpreter interp, boolean generateFiles) throws IOException;
+	protected abstract void compile(List<Path> outFiles, Path bin, List<Path> path, boolean generateFiles) throws IOException;
 
 	
-	public abstract void addImportModule(IStrategoTerm toplevelDecl, HybridInterpreter interp, boolean checked) throws IOException;
+	public abstract void addImportModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException;
 	
 	
-	public abstract String getSugarName(IStrategoTerm decl, HybridInterpreter interp) throws IOException;
+	public abstract String getSugarName(IStrategoTerm decl) throws IOException;
 	public abstract int getSugarAccessibility(IStrategoTerm decl);
 	public abstract IStrategoTerm getSugarBody(IStrategoTerm decl);
 	

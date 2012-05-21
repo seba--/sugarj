@@ -118,7 +118,6 @@ public class Driver{
   private SGLR sdfParser;
   private SGLR strParser;
   private SGLR editorServicesParser;
-  private HybridInterpreter interp;
   private SGLR parser;
   private Context sdfContext;
   private Context makePermissiveContext;
@@ -412,7 +411,7 @@ public class Driver{
             environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), langLib.getGeneratedFiles(),
             driverResult.getAvailableGeneratedFiles().get(driverResult.getSourceFile()),
             driverResult.getDeferredSourceFiles().get(driverResult.getSourceFile()),
-            driverResult.getGeneratedFileHashes(), interp, 
+            driverResult.getGeneratedFileHashes(), 
             driverResult.isGenerateFiles());
       } catch (ClassNotFoundException e) {
         setErrorMessage(lastSugaredToplevelDecl, "Could not resolve imported class " + e.getMessage());
@@ -528,7 +527,7 @@ public class Driver{
       try {
         extName =
           langLib.prettyPrint(
-          getApplicationSubterm(head, "EditorServicesDecHead", 1), interp);    
+          getApplicationSubterm(head, "EditorServicesDecHead", 1));    
         
         
         
@@ -604,7 +603,7 @@ public class Driver{
       try {
         extName =
           langLib.prettyPrint(
-          getApplicationSubterm(head, "PlainDecHead", 1), interp);    
+          getApplicationSubterm(head, "PlainDecHead", 1));    
 
         String extension = null;
         if (head.getSubtermCount() >= 3 && isApplication(getApplicationSubterm(head, "PlainDecHead", 2), "Some"))
@@ -751,7 +750,7 @@ public class Driver{
       FileCommands.deleteTempFiles(currentTransProg);
       currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment, langLib);
 
-      return STRCommands.assimilate(currentTransProg, term, interp);
+      return STRCommands.assimilate(currentTransProg, term, langLib.getInterpreter());
     } catch (StrategoException e) {
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
       
@@ -769,7 +768,7 @@ public class Driver{
     try {
       sugaredPackageDecl = lastSugaredToplevelDecl;
 
-      langLib.processNamespaceDec(toplevelDecl, environment, interp, driverResult, sourceFile, driverResult.getSourceFile());    
+      langLib.processNamespaceDec(toplevelDecl, environment, driverResult, sourceFile, driverResult.getSourceFile());    
       if (depOutFile == null)
         depOutFile = environment.createBinPath(langLib.getRelativeNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       
@@ -843,7 +842,7 @@ public class Driver{
 
       // TODO handle import declarations with asterisks, e.g. import foo.*;
             
-      String modulePath = langLib.getImportedModulePath(toplevelDecl, interp);
+      String modulePath = langLib.getImportedModulePath(toplevelDecl);
       String importModuleName = FileCommands.fileName(modulePath);
       
       boolean skipProcessImport = false;
@@ -882,7 +881,7 @@ public class Driver{
               if (currentlyProcessing.contains(importSourceFile)) {
                 // assume source file does not provide syntactic sugar
                 //langLib.getSource().addImport(importModuleName.replace('/', '.'));
-                langLib.addImportModule(toplevelDecl, interp, false);
+                langLib.addImportModule(toplevelDecl, false);
                 skipProcessImport = true;
                 delegateCompilation = importSourceFile;
               }
@@ -911,11 +910,11 @@ public class Driver{
         
         if (res != null && res.hasDelegatedCompilation(sourceFile)) {
           delegateCompilation = res.getSourceFile();
-          langLib.addImportModule(toplevelDecl, interp, false);
+          langLib.addImportModule(toplevelDecl, false);
           skipProcessImport = true;
         }
         else if (driverResult.hasDelegatedCompilation(importSourceFile)) {
-          langLib.addImportModule(toplevelDecl, interp, false);
+          langLib.addImportModule(toplevelDecl, false);
           skipProcessImport = true;
         }
       }
@@ -936,7 +935,7 @@ public class Driver{
     boolean success = false;
     
     //success |= ModuleSystemCommands.importClass(modulePath, langLib.getSource(), environment, langLib);
-    success |= ModuleSystemCommands.importClass(importTerm, interp, environment, langLib);
+    success |= ModuleSystemCommands.importClass(importTerm, environment, langLib);
     ModuleSystemCommands.registerSearchedClassFiles(modulePath, driverResult, environment, langLib);
 
     Path sdf = ModuleSystemCommands.importSdf(modulePath, environment);
@@ -973,7 +972,7 @@ public class Driver{
       
       log.beginTask("Generate " + langLib.getLanguageName() + " code.");
       try {
-        langLib.processLanguageSpecific(toplevelDecl, environment, interp);
+        langLib.processLanguageSpecific(toplevelDecl, environment);
       } finally {
         log.endTask();
       }
@@ -998,7 +997,7 @@ public class Driver{
       
       log.beginTask("Extracting name and accessibility of the sugar.");
       try {        
-        extName = langLib.getSugarName(toplevelDecl, interp);
+        extName = langLib.getSugarName(toplevelDecl);
 
         if (langLib.getSugarAccessibility(toplevelDecl) == LanguageLib.PUBLIC_SUGAR) {
           isPublic = true;
@@ -1029,7 +1028,7 @@ public class Driver{
         
         IStrategoTerm sugarBody = langLib.getSugarBody(toplevelDecl);
   
-        IStrategoTerm sdfExtract = fixSDF(extractSDF(sugarBody, extractionContext), interp);
+        IStrategoTerm sdfExtract = fixSDF(extractSDF(sugarBody, extractionContext), langLib.getInterpreter());
         IStrategoTerm strExtract = extractSTR(sugarBody, extractionContext);
         
         
@@ -1039,7 +1038,7 @@ public class Driver{
           + (isPublic ? "exports " : "hiddens ") + "\n"
           + "  (/)" + "\n";
 
-        String sdfExtensionContent = SDFCommands.prettyPrintSDF(sdfExtract, interp);
+        String sdfExtensionContent = SDFCommands.prettyPrintSDF(sdfExtract, langLib.getInterpreter());
 
         String sdfSource = SDFCommands.makePermissiveSdf(sdfExtensionHead + sdfExtensionContent, makePermissiveContext);
         driverResult.generateFile(sdfExtension, sdfSource);
@@ -1052,7 +1051,7 @@ public class Driver{
             "Module(" + "\"" + fullExtName+ "\"" + ", " 
                       + strExtract + ")" + "\n";
 
-        String strExtensionContent = SDFCommands.prettyPrintSTR(ATermCommands.atermFromString(strExtensionTerm), interp);
+        String strExtensionContent = SDFCommands.prettyPrintSTR(ATermCommands.atermFromString(strExtensionTerm), langLib.getInterpreter());
         
         int index = strExtensionContent.indexOf('\n');
         if (index >= 0)
@@ -1184,7 +1183,8 @@ public class Driver{
     strParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.strategoTbl.getPath()));
     editorServicesParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.editorServicesTbl.getPath()));
 
-    interp = new HybridInterpreter(); //TODO (ATermCommands.factory);
+    //interp = new HybridInterpreter(); //TODO (ATermCommands.factory);
+    langLib.setInterpreter(new HybridInterpreter());
     sdfContext = tools.init();
     makePermissiveContext = make_permissive.init();
     extractionContext = extraction.init();
