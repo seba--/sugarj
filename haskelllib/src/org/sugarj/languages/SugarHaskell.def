@@ -13,9 +13,9 @@ exports
 
     "module" HaskellModid HaskellExports? "where" -> HaskellModuleDec {cons("ModuleDec")}
 
-    HaskellOffsideTopdeclList  -> SugarHaskellBody {cons("HaskellBody")}
-    SugarDefElem*              -> SugarHaskellBody {cons("SugarBody")}
-    EditorServiceSection*      -> SugarHaskellBody {cons("EditorBody")}
+    HaskellOffsideTopdeclList LAYOUT?  -> SugarHaskellBody {cons("HaskellBody")}
+    SugarDefElem*             LAYOUT? -> SugarHaskellBody {cons("SugarBody")}
+    EditorServiceSection*     LAYOUT? -> SugarHaskellBody {cons("EditorBody")}
 
   context-free restrictions
     SugarHaskellBody -/- ~[]
@@ -76,5 +76,3 @@ exports
   lexical restrictions
     "desugarings" -/- [a-zA-Z0-9\'\-\_]
 
-  lexical syntax
-         -> "}" {recover, reject}
