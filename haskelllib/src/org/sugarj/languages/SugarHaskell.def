@@ -3,6 +3,8 @@ module org/sugarj/languages/SugarHaskell
 imports org/sugarj/languages/Haskell
         org/sugarj/languages/Sdf2
         org/sugarj/languages/Stratego
+        org/sugarj/languages/EditorServices
+        org/sugarj/languages/Plain
 
 exports
   context-free start-symbols
