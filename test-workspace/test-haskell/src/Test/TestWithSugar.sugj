@@ -1,8 +1,17 @@
 module Test.TestWithSugar where
 
-import Sugar.Simple
+import Sugar.UndefinedBlock
 
-simple example
+process =
+  do inp <- readInput
+     case inp of
+       Just txt -> 
+         do putStrLn "thank you"
+            sendToServer txt
+            return True
+       Nothing ->
+         return False                     
 
-a = 5
-
+undefined
+  readInput
+  sendToServer

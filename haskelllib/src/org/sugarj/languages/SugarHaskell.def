@@ -3,6 +3,8 @@ module org/sugarj/languages/SugarHaskell
 imports org/sugarj/languages/Haskell
         org/sugarj/languages/Sdf2
         org/sugarj/languages/Stratego
+        org/sugarj/languages/EditorServices
+        org/sugarj/languages/Plain
 
 exports
   context-free start-symbols
@@ -13,9 +15,9 @@ exports
 
     "module" HaskellModid HaskellExports? "where" -> HaskellModuleDec {cons("ModuleDec")}
 
-    HaskellOffsideTopdeclList  -> SugarHaskellBody {cons("HaskellBody")}
-    SugarDefElem*              -> SugarHaskellBody {cons("SugarBody")}
-    EditorServiceSection*      -> SugarHaskellBody {cons("EditorBody")}
+    HaskellOffsideTopdeclList LAYOUT?  -> SugarHaskellBody {cons("HaskellBody")}
+    SugarDefElem*             LAYOUT? -> SugarHaskellBody {cons("SugarBody")}
+    EditorServiceSection*     LAYOUT? -> SugarHaskellBody {cons("EditorBody")}
 
   context-free restrictions
     SugarHaskellBody -/- ~[]
@@ -76,5 +78,3 @@ exports
   lexical restrictions
     "desugarings" -/- [a-zA-Z0-9\'\-\_]
 
-  lexical syntax
-         -> "}" {recover, reject}

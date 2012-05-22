@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr_layout.client.InvalidParseTableException;
@@ -278,8 +279,11 @@ public class STRCommands {
       else
         throw new RuntimeException("hybrid interpreter failed");
     }
+    catch (InterpreterException e) {
+      throw new StrategoException("desugaring failed: " + e.getCause().getMessage(), e);
+    }
     catch (Exception e) {
-      throw new RuntimeException("desugaring failed", e);
+      throw new StrategoException("desugaring failed", e);
     }
   }
   

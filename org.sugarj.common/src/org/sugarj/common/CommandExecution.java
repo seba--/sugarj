@@ -44,43 +44,6 @@ public class CommandExecution {
    */
   public static boolean CACHE_INFO = true;
 
-  /**
-   * A thread that forwards the stream in to the stream out,
-   * prepending a prefix to each line. See
-   * http://www.javaworld.com
-   * /javaworld/jw-12-2000/jw-1229-traps.html to understand why
-   * we need this.
-   */
-  private static class StreamLogger extends Thread {
-    private final InputStream in;
-    private String prefix;
-
-    private List<String> msg = new ArrayList<String>();
-    
-    public StreamLogger(InputStream in, String prefix) {
-      this.in = in;
-      this.prefix = prefix;
-    }
-
-    @Override
-    public void run() {
-      try {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-        String line = null;
-        while ((line = reader.readLine()) != null)
-          if (!SILENT_EXECUTION && !SUB_SILENT_EXECUTION)
-            log.logErr(prefix + line);
-          else  
-            msg.add(prefix + line);
-      } catch (IOException ioe) {
-        ioe.printStackTrace();
-      }
-    }
-    
-    public String[] getUnloggedMsg() {
-      return msg.toArray(new String[] {});
-    }
-  }
 
   public static class ExecutionError extends Error {
     private static final long serialVersionUID = -4924660269220590175L;
@@ -100,6 +63,53 @@ public class CommandExecution {
       return cmds;
     }
   }
+  
+  
+  
+  private boolean silent;
+  
+  public CommandExecution(boolean silent) {
+    this.silent = silent;
+  }
+  
+  /**
+   * A thread that forwards the stream in to the stream out,
+   * prepending a prefix to each line. See
+   * http://www.javaworld.com
+   * /javaworld/jw-12-2000/jw-1229-traps.html to understand why
+   * we need this.
+   */
+  private class StreamLogger extends Thread {
+    private final InputStream in;
+    private String prefix;
+
+    private List<String> msg = new ArrayList<String>();
+    
+    public StreamLogger(InputStream in, String prefix) {
+      this.in = in;
+      this.prefix = prefix;
+    }
+
+    @Override
+    public void run() {
+      try {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        String line = null;
+        while ((line = reader.readLine()) != null) {
+          msg.add(prefix + line);
+          if (!silent)
+            log.logErr(prefix + line);
+        }
+      } catch (IOException ioe) {
+        ioe.printStackTrace();
+      }
+    }
+    
+    public String[] getMsg() {
+      return msg.toArray(new String[] {});
+    }
+  }
+
 
   /**
    * Executes the given command.
@@ -117,8 +127,8 @@ public class CommandExecution {
    * @throws IOException
    *         when something goes wrong
    */
-  public static void execute(String... cmds) {
-    executeWithPrefix(cmds[0], cmds);
+  public String[][] execute(String... cmds) {
+    return executeWithPrefix(cmds[0], cmds);
   }
 
   /**
@@ -136,7 +146,7 @@ public class CommandExecution {
    * @throws IOException
    *         when something goes wrong
    */
-  public static void executeWithPrefix(String prefix, String... cmds) {
+  public String[][] executeWithPrefix(String prefix, String... cmds) {
     int exitValue;
     
     StreamLogger errStreamLogger = null;
@@ -162,6 +172,8 @@ public class CommandExecution {
 
       // Wait for the process to finish
       exitValue = p.waitFor();
+      errStreamLogger.join();
+      outStreamLogger.join();
 
 //      log.endExecution(exitValue, errStreamLogger.getUnloggedMsg());
     } catch (Throwable t) {
@@ -170,8 +182,10 @@ public class CommandExecution {
     }
     
     if (exitValue != 0) {
-      String detail = Arrays.toString(errStreamLogger.getUnloggedMsg()) + ", " + Arrays.toString(outStreamLogger.getUnloggedMsg());
+      String detail = Arrays.toString(errStreamLogger.getMsg()) + ", " + Arrays.toString(outStreamLogger.getMsg());
       throw new ExecutionError("problems while executing: " + detail, cmds);
     }
+    
+    return new String[][]{outStreamLogger.getMsg(), errStreamLogger.getMsg()};
   }
 }

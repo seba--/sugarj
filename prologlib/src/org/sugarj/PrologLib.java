@@ -415,6 +415,12 @@ public class PrologLib extends LanguageLib implements Serializable {
 		return "Prolog";
 	}
 
+	@Override
+	public boolean isModuleResolvable(String relModulePath) {
+		// look for pre-installed SWI libraries?
+		return false;
+	}
+
 
 	
 	

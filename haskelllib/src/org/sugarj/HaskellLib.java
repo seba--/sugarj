@@ -6,6 +6,7 @@ import static org.sugarj.common.ATermCommands.isApplication;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -14,13 +15,14 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.strategoxt.HybridInterpreter;
 import org.strategoxt.stratego_gpp.parse_pptable_file_0_0;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.CommandExecution;
+import org.sugarj.common.CommandExecution.ExecutionError;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
+import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
@@ -122,7 +124,7 @@ public class HaskellLib extends LanguageLib {
 
   @Override
   public String getSugarFileExtension() {
-    //TODO should be ".sugh"
+    //TODO should be ".sughs"
     return ".sugj";
   }
 
@@ -271,14 +273,48 @@ public class HaskellLib extends LanguageLib {
   }
   
   @Override
-  protected void compile(List<Path> outFiles, Path bin, List<Path> path, boolean generateFiles) throws IOException {
+  protected void compile(List<Path> outFiles, Path bin, List<Path> includePaths, boolean generateFiles) throws IOException {
     if (generateFiles) {
       List<String> cmds = new LinkedList<String>();
       cmds.add(GHC_COMMAND);
+      
       for (Path outFile : outFiles)
         cmds.add(outFile.getAbsolutePath());
       
-      CommandExecution.execute(cmds.toArray(new String[cmds.size()]));
+      cmds.add("-i");
+      if (!includePaths.isEmpty()) {
+        StringBuilder searchPath = new StringBuilder("-i");
+        for (Path path : includePaths)
+          if (new File(path.getAbsolutePath()).isDirectory())
+            searchPath.append(path.getAbsolutePath()).append(":");
+        searchPath.deleteCharAt(searchPath.length() - 1);
+        cmds.add(searchPath.toString());
+      }
+      
+      new CommandExecution(false).execute(cmds.toArray(new String[cmds.size()]));
     }
+  }
+
+  @Override
+  public boolean isModuleResolvable(String relModulePath) {
+    boolean oldSilent = CommandExecution.SILENT_EXECUTION;
+    CommandExecution.SILENT_EXECUTION = true;
+    String[] cmds = new String[]{
+      "ghc-pkg", 
+      "find-module", relModulePath.replace('/', '.'),
+      "--simple-output"
+    };
+    
+    String[][] msg;
+    try {
+       msg = new CommandExecution(true).execute(cmds);
+    } catch (ExecutionError e) {
+      Log.log.logErr("Command execution failed: " + Arrays.toString(e.getCmds()));
+      return false;
+    } finally {
+      CommandExecution.SILENT_EXECUTION = oldSilent;
+    }
+    
+    return msg.length > 0 && msg[0].length > 0;
   }
 }

@@ -483,10 +483,10 @@ exports
 
     Qvar 			-> Export
     Gtycon 			-> Export
-    Gtycon "(" ".." ")" 	-> Export
-    Gtycon "(" ")" 		-> Export
-    Gtycon "("{Qcname ","}+ ")" -> Export
-    "module" Modid 		-> Export
+    Gtycon "(" ".." ")" 	-> Export {cons("ExportAllSub")}
+    Gtycon "(" ")" 		-> Export {cons("ExportNoSub")}
+    Gtycon "("{Qcname ","}+ ")" -> Export {cons("ExportSomeSub")}
+    "module" Modid 		-> Export {cons("ExportModule")}
 
     Qvar 			-> Qcname
     Gcon 			-> Qcname
@@ -497,7 +497,7 @@ exports
     "{-# SOURCE" "#-}" 		-> Src 		{cons("SOURCE")}
     "qualified" 		-> Qualified 	{cons("Qualified")}
     "as" Modid 			-> As 		{cons("As")}
-    "(" Exportlist ")" 		-> Impspec
+    "(" Exportlist ")" 		-> Impspec {cons("Impspec")}
     "hiding" "(" Exportlist ")" -> Impspec 	{cons("Hiding")}
 
 module Haskell-Modules
