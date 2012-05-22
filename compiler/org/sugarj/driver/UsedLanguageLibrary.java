@@ -2,6 +2,7 @@ package org.sugarj.driver;
 
 import org.sugarj.HaskellLib;
 import org.sugarj.LanguageLib;
+import org.sugarj.PrologLib;
 
 public class UsedLanguageLibrary {
   // TODO: Remove this class
@@ -12,6 +13,6 @@ public class UsedLanguageLibrary {
    *   This is implemented as a method to enable switching the language library while debugging.
    */
   public static LanguageLib getFreshLanguageLibrary() {
-    return new HaskellLib();
+    return new PrologLib();
   }
 }

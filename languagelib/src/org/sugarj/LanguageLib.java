@@ -162,6 +162,7 @@ public abstract class LanguageLib implements Serializable {
 			boolean generateFiles
 			) throws IOException, ClassNotFoundException {
 
+		
 		Map<Path, Set<RelativePath>> generatedFiles = availableGeneratedFilesForSourceFile; //result.getAvailableGeneratedFiles().get(result.getSourceFile());
 		Set<RelativePath> generatedClasses = new HashSet<RelativePath>(generatedBinFiles);
 
@@ -191,6 +192,10 @@ public abstract class LanguageLib implements Serializable {
 						}
 					}
 
+		
+		if (source.isEmpty())	// if empty flag ist set, do not compile source
+			return;
+		
 		writeToFile(generateFiles, generatedFileHashes, outFile, source.getCode(generatedClasses, interp, outFile));
 		
 		this.compile(javaOutFiles, bin, path, generateFiles);

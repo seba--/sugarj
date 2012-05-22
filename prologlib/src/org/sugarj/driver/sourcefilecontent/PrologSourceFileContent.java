@@ -15,7 +15,6 @@ import org.sugarj.common.path.RelativePath;
 
 public class PrologSourceFileContent implements ISourceFileContent {
   
-
 	private static final long serialVersionUID = -1793669825816782903L;
 	
 	public class PrologModuleImport {
@@ -31,6 +30,18 @@ public class PrologSourceFileContent implements ISourceFileContent {
 	List<String> reexports = new LinkedList<String>();
 	PrologLib pLib;
 	
+	
+	private boolean empty = false;
+
+	@Override
+	public boolean isEmpty() {
+		return empty;
+	}
+	
+	@Override
+	public void setEmpty(boolean empty) {
+		this.empty = empty;
+	}
 
 	public PrologSourceFileContent(PrologLib prologLib) {
 		pLib = prologLib;

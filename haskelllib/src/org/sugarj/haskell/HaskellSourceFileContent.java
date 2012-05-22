@@ -22,6 +22,19 @@ public class HaskellSourceFileContent implements ISourceFileContent {
   private boolean importsOptional = false;
   private List<String> bodyDecls = new LinkedList<String>();
  
+  private boolean empty;
+
+  @Override
+  public boolean isEmpty() {
+    return empty;
+  }
+  
+  @Override
+  public void setEmpty(boolean empty) {
+    this.empty = empty;
+  }
+  
+  
   public HaskellSourceFileContent() {
   }
 

@@ -17,5 +17,7 @@ public interface ISourceFileContent extends Serializable {
   public String getCode(Set<RelativePath> generatedClasses, HybridInterpreter interp, Path outFile) throws ClassNotFoundException, IOException;
   public int hashCode();
   public boolean equals(Object o);
+  public boolean isEmpty();
+  public void setEmpty(boolean empty);
   
 }
