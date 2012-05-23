@@ -1,0 +1,60 @@
+module Control.Arrow.Syntax.Command where
+
+context-free syntax
+  "proc" HaskellAPat "->" ArrCommand -> HaskellExp {cons("ArrProcedure")}
+
+  HaskellExp "-<" HaskellExp -> ArrCommand {cons("ArrFirst")}
+  HaskellExp "-<<" HaskellExp -> ArrCommand {cons("ArrHigher")}
+  
+  "\\" HaskellFargs "->" ArrCommand -> ArrCommand {cons("ArrAbs")}
+  "let" HaskellDeclbinds "in" ArrCommand -> ArrCommand {cons("ArrLet")} 
+  "if" HaskellExp "then" ArrCommand "else" ArrCommand -> ArrCommand {cons("ArrIf")}
+  "case" HaskellExp "of" AltList -> ArrCommand	{cons("ArrCase"), longest-match}
+  "do" ArrStmtList -> ArrCommand {cons("ArrDo"), longest-match}
+
+  "(" ArrCommand ")" -> ArrCommand {bracket}
+  "(|" HaskellExp ArrCommand+ "|)" -> ArrCommand {cons("ArrForm")}
+ 
+context-free priorities
+    ArrCommand HaskellExp -> ArrCommand {cons("ArrAppBin"),left}
+  > ArrCommand "::" HaskellType -> ArrCommand {cons("ArrTyped")}
+  > "-" ArrCommand -> ArrCommand {cons("ArrNegation")}
+  > ArrCommand HaskellQop ArrCommand -> ArrCommand {cons("ArrOpApp"), right}
+
+
+
+
+-- remainder of file declares priorities for disambiguation
+context-free priorities
+    ArrCommand HaskellExp -> ArrCommand
+  	> {
+        "\\" HaskellFargs "->" ArrCommand -> ArrCommand
+        "let" HaskellDeclbinds "in" ArrCommand -> ArrCommand 
+        "if" HaskellExp "then" ArrCommand "else" ArrCommand -> ArrCommand
+        "case" HaskellExp "of" AltList -> ArrCommand
+        "do" ArrCommandList -> ArrCommand
+      }
+
+context-free priorities
+    ArrCommand HaskellQop ArrCommand -> ArrCommand
+  <0>
+  > {
+        "\\" HaskellFargs "->" ArrCommand -> ArrCommand
+        "let" HaskellDeclbinds "in" ArrCommand -> ArrCommand 
+        "if" HaskellExp "then" ArrCommand "else" ArrCommand -> ArrCommand
+    }
+ 
+context-free priorities
+  	"-" ArrCommand -> ArrCommand {cons("ArrNegation")}
+    >
+  	ArrCommand HaskellQop ArrCommand -> ArrCommand
+
+context-free priorities
+  	HaskellExp HaskellExp -> HaskellExp
+  	> 
+    "proc" HaskellAPat "->" ArrCommand -> HaskellExp {cons("ArrProcedure")}
+
+context-free priorities
+    HaskellExp HaskellQop HaskellExp -> HaskellExp
+  <0> >
+    "proc" HaskellAPat "->" ArrCommand -> HaskellExp {cons("ArrProcedure")}

@@ -1,0 +1,6 @@
+module Test.Arrow where
+
+import Control.Arrow.Syntax
+
+
+foo f = proc x -> f -< x+1

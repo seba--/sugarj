@@ -1,0 +1,45 @@
+module Control.Arrow.Syntax.Statement where
+
+
+context-free syntax
+  "let" HaskellDeclbinds -> ArrStmt {cons("ArrLetStmt")}
+  HaskellPat "<-" ArrCommand -> ArrStmt {cons("ArrBindStmt")}
+  ArrCommand -> ArrStmt {cons("ArrCmdStmt")}
+
+context-free syntax
+  ArrNoOffsideStmtBlock -> ArrStmtList {cons("ArrStmtList")}
+  ArrOffsideStmtList   -> ArrStmtListStmtList {cons("ArrStmtList")}
+
+  "{" ArrNoOffsideStmtList "}"  -> ArrNoOffsideStmtBlock {bracket, ignore-indent}
+
+context-free priorities
+  ArrStmt -> ArrNoOffsideStmt
+  >
+  ArrNoOffsideStmt ";" -> ArrNoOffsideStmt {prefer}
+  >
+  ";" ArrNoOffsideStmt -> ArrNoOffsideStmt
+
+context-free syntax
+  ArrNoOffsideStmt -> ArrNoOffsideStmtList
+  ArrNoOffsideStmt ";" ArrNoOffsideStmtList -> ArrNoOffsideStmtList {cons("ArrStmtSeq")}
+
+
+context-free priorities
+  ArrStmt -> ArrOffsideStmt {layout(gt(col(left(1)), col(first(1))))}
+  >
+  ArrOffsideStmt ";" -> ArrOffsideStmt {prefer,layout(gt(col(first(2)), col(first(1))))}
+  >
+  ";" ArrOffsideStmt -> ArrOffsideStmt {layout(gt(col(first(2)), col(first(1))))}
+  >
+  ArrStmt ";" ArrOffsideStmt -> ArrOffsideStmt
+        {cons("ArrStmtSeq"),
+         layout(and(gt(col(left(1)), col(first(1))),
+                and(gt(col(first(2)), col(first(1))),
+                    gt(col(first(3)), col(first(1))))))}
+
+context-free syntax
+  ArrOffsideStmt -> ArrOffsideStmtList
+  ArrOffsideStmtNEWLINE ArrOffsideStmtList -> ArrOffsideStmtList
+    {cons("ArrStmtSeq"), layout(eq(col(first(1)), col(first(2))))}
+
+  ArrOffsideStmt LAYOUT? -> ArrOffsideStmtNEWLINE {enforce-newline}

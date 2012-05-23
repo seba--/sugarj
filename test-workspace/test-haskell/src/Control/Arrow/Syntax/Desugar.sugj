@@ -1,0 +1,32 @@
+module Control.Arrow.Syntax.Desugar where
+
+import org.sugarj.languages.Haskell
+
+import Control.Arrow.Syntax.Command
+import Control.Arrow.Syntax.Statement
+
+
+desugarings
+  desugar-arrow
+
+rules
+  desugar-arrow :
+    ArrProcedure(pat, cmd) ->
+    OpApp(
+      AppBin(Var("arr"),
+             Abs([pat], Product(pat-vars))),
+      ">>>",
+      <desugar-arrow(|pat-vars)> cmd)
+  where <free-pat-vars> pat => pat-vars
+
+
+  desugar-arrow(|vars) :
+    ArrFirst(f, e) ->
+    OpApp(
+      AppBin(Var("arr"),
+             Abs(vars, e)),
+      ">>>",
+      f)
+
+rules
+  free-pat-vars = collect-all(?Var(<id>))
