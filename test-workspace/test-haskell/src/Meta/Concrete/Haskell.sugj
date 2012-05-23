@@ -1,0 +1,26 @@
+module Meta.Concrete.Haskell where
+
+import org.sugarj.languages.Haskell
+import org.sugarj.languages.Stratego
+
+import Meta.Concrete.MetaExplode
+
+context-free syntax
+  "|[" HaskellExp "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+
+syntax
+  "$"  <StrategoTerm-CF> -> <HaskellExp-CF> {cons("FromMetaExpr")}
+
+  "$"  <StrategoTerm-CF> -> <HaskellAPat-CF> {cons("FromMetaExpr")}
+  "$*" <StrategoTerm-CF> -> <HaskellFargs-CF> {cons("FromMetaExpr")}
+
+  "$*" <StrategoTerm-CF> -> <HaskellDeclList-CF> {cons("FromMetaExpr")}
+
+
+lexical syntax
+  "$" -> NOVARSYM
+  NOVARSYM -> HaskellVARSYM {reject}
+
+lexical restrictions
+  NOVARSYM -/- [\ \t\r\n] \/ [\!\#\$\%\&\*\+\.\/] \/ [\<\=\>\?\@\\\^\|\-\~] \/ [\:]

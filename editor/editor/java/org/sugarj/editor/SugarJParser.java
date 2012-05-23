@@ -13,7 +13,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -165,7 +164,7 @@ public class SugarJParser extends JSGLRI {
     if (result == null)
       return Collections.emptySet();
     
-    Set<org.spoofax.jsglr.shared.BadTokenException> res = new TreeSet<org.spoofax.jsglr.shared.BadTokenException>();
+    Set<org.spoofax.jsglr.shared.BadTokenException> res = new HashSet<org.spoofax.jsglr.shared.BadTokenException>();
     for (BadTokenException e : result.getParseErrors())
       res.add(new org.spoofax.jsglr.shared.BadTokenException(null, e.getToken(), e.getOffset(), e.getLineNumber(), e.getColumnNumber()));
     return res;

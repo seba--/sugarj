@@ -2,6 +2,8 @@ module Control.Arrow.Syntax.Desugar where
 
 import org.sugarj.languages.Haskell
 
+import Meta.Concrete.Haskell
+
 import Control.Arrow.Syntax.Command
 import Control.Arrow.Syntax.Statement
 
@@ -12,21 +14,62 @@ desugarings
 rules
   desugar-arrow :
     ArrProcedure(pat, cmd) ->
-    OpApp(
-      AppBin(Var("arr"),
-             Abs([pat], Product(pat-vars))),
-      ">>>",
-      <desugar-arrow(|pat-vars)> cmd)
+    |[ arr (\$pat -> $(Product(pat-vars))) >>> $(<desugar-arrow(|pat-vars)> cmd) ]|
   where <free-pat-vars> pat => pat-vars
 
 
   desugar-arrow(|vars) :
     ArrFirst(f, e) ->
-    OpApp(
-      AppBin(Var("arr"),
-             Abs(vars, e)),
-      ">>>",
-      f)
+    |[ arr (\$(<tuple> vars) -> $e) >>> $f ]|
+
+  desugar-arrow(|vars) :
+    ArrHigher(f, e) ->
+    |[ arr (\$(<tuple> vars) -> ($f, $e)) >>> app ]|
+
+  desugar-arrow(|vars) :
+    ArrIf(e, c1, c2) ->
+    |[ arr (\$(<tuple> vars) -> 
+            if $e 
+              then Left $(Product(vars))
+              else Right $(Product(vars)))
+       >>> ($(<desugar-arrow(|vars)> c1) ||| $(<desugar-arrow(|vars)> c2)) ]|
+
+  desugar-arrow(|vars) :
+    ArrLet(decls, c) ->
+    |[ arr (\$(<tuple> vars) -> let $*decls in $(Product(all-vars)))
+       >>> $(<desugar-arrow(|all-vars)> c) ]|
+  where <free-decls-vars> decls => decls-vars;
+        <conc> (vars, decls-vars) => all-vars
+
+  desugar-arrow(|vars) :
+    ArrAbs(p, c) ->
+    |[ arr (\($(<tuple> vars), p) -> $(Product(all-vars)))
+       >>> $(<desugar-arrow(|all-vars)> c) ]|
+  where <free-pat-vars> p => pat-vars;
+        <conc> (vars, pat-vars) => all-vars
+        
+  desugar-arrow(|vars) :
+    ArrAppBin(c, e) ->
+    |[ arr (\$(<tuple> vars) -> ($(Product(vars)), $e))
+       >>> $(<desugar-arrow(|vars)> c) ]|
+
+  desugar-arrow(|vars) :
+    ArrForm(e, cs) ->
+    <apply-all(|k)> (e, cs)
+  where k := |[ \$(<tuple> vars) -> $(Product(vars)) ]|
+
 
 rules
-  free-pat-vars = collect-all(?Var(<id>))
+  tuple : [p] -> p
+  tuple : [p|ps] -> Tuple(p,ps)
+
+  free-pat-vars = collect-all(?Var(_))
+
+  free-decls-vars = 
+    collect-all(?Var(_), union, \VarFunLHS(v,_) -> v\)
+
+  apply-all(|k) : (e, []) -> e
+  apply-all(|k) :
+    (e, [c|cs]) ->
+    <apply-all(|k)> (|[ e (arr $k >>> $c) ]|, cs) 
+

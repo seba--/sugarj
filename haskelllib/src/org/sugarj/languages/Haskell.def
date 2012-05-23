@@ -714,7 +714,7 @@ exports
   context-free syntax
     "(" ")"        	-> Gcon 	{cons("Unit")}
     "[" "]"        	-> Gcon		{cons("EmptyList")}
-    "(" ","+ ")"   	-> Gcon		{cons("Product")}
+    "(" ","+ ")"   	-> Gcon		{cons("ProductCon")}
     Qcon           	-> Gcon		
 
   %% The following portion can be put into module Haskell-Infix

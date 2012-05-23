@@ -9,18 +9,21 @@ context-free syntax
   "\\" HaskellFargs "->" ArrCommand -> ArrCommand {cons("ArrAbs")}
   "let" HaskellDeclbinds "in" ArrCommand -> ArrCommand {cons("ArrLet")} 
   "if" HaskellExp "then" ArrCommand "else" ArrCommand -> ArrCommand {cons("ArrIf")}
-  "case" HaskellExp "of" AltList -> ArrCommand	{cons("ArrCase"), longest-match}
+--  "case" HaskellExp "of" AltList -> ArrCommand	{cons("ArrCase"), longest-match}
   "do" ArrStmtList -> ArrCommand {cons("ArrDo"), longest-match}
 
   "(" ArrCommand ")" -> ArrCommand {bracket}
   "(|" HaskellExp ArrCommand+ "|)" -> ArrCommand {cons("ArrForm")}
  
-context-free priorities
+-- context-free priorities
     ArrCommand HaskellExp -> ArrCommand {cons("ArrAppBin"),left}
-  > ArrCommand "::" HaskellType -> ArrCommand {cons("ArrTyped")}
-  > "-" ArrCommand -> ArrCommand {cons("ArrNegation")}
-  > ArrCommand HaskellQop ArrCommand -> ArrCommand {cons("ArrOpApp"), right}
+-- don't know how to desugar these:
+--  > ArrCommand "::" HaskellType -> ArrCommand {cons("ArrTyped")}
+--  > "-" ArrCommand -> ArrCommand {cons("ArrNegation")}
+--  > ArrCommand HaskellQop ArrCommand -> ArrCommand {cons("ArrOpApp"), right}
 
+syntax
+  "$"  <StrategoTerm-CF> -> <ArrCommand-CF> {cons("FromMetaExpr")}
 
 
 
@@ -58,3 +61,15 @@ context-free priorities
     HaskellExp HaskellQop HaskellExp -> HaskellExp
   <0> >
     "proc" HaskellAPat "->" ArrCommand -> HaskellExp {cons("ArrProcedure")}
+
+context-free priorities
+      {
+        HaskellExp "-<" HaskellExp -> ArrCommand
+        HaskellExp "-<<" HaskellExp -> ArrCommand
+      }
+    <0>
+  	> {
+        "\\" HaskellFargs "->" HaskellExp -> HaskellExp
+       "let" HaskellDeclbinds "in" HaskellExp -> HaskellExp 
+       "if" HaskellAnyExp "then" HaskellAnyExp "else" HaskellExp -> HaskellExp
+      }
