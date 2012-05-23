@@ -13,4 +13,8 @@ baz f1 f2 =
               then f1 -< x+1
               else f2 -<< x+2
 
+exprTail = proc e -> 
+   (symbol PLUS -< ()) 
+  <+>
+   (symbol MINUS -< ())
 

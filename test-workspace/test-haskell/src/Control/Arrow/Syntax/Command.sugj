@@ -12,15 +12,17 @@ context-free syntax
 --  "case" HaskellExp "of" AltList -> ArrCommand	{cons("ArrCase"), longest-match}
   "do" ArrStmtList -> ArrCommand {cons("ArrDo"), longest-match}
 
+  ArrCommand HaskellExp -> ArrCommand {cons("ArrAppBin"),left}
+  
   "(" ArrCommand ")" -> ArrCommand {bracket}
   "(|" HaskellExp ArrCommand+ "|)" -> ArrCommand {cons("ArrForm")}
+  ArrCommand HaskellQop ArrCommand -> ArrCommand {cons("ArrOpApp"), right}
+
  
--- context-free priorities
-    ArrCommand HaskellExp -> ArrCommand {cons("ArrAppBin"),left}
--- don't know how to desugar these:
---  > ArrCommand "::" HaskellType -> ArrCommand {cons("ArrTyped")}
---  > "-" ArrCommand -> ArrCommand {cons("ArrNegation")}
---  > ArrCommand HaskellQop ArrCommand -> ArrCommand {cons("ArrOpApp"), right}
+context-free priorities
+    ArrCommand HaskellExp -> ArrCommand
+  > ArrCommand HaskellQop ArrCommand -> ArrCommand
+
 
 syntax
   "$"  <StrategoTerm-CF> -> <ArrCommand-CF> {cons("FromMetaExpr")}
@@ -46,11 +48,6 @@ context-free priorities
         "let" HaskellDeclbinds "in" ArrCommand -> ArrCommand 
         "if" HaskellExp "then" ArrCommand "else" ArrCommand -> ArrCommand
     }
- 
-context-free priorities
-  	"-" ArrCommand -> ArrCommand {cons("ArrNegation")}
-    >
-  	ArrCommand HaskellQop ArrCommand -> ArrCommand
 
 context-free priorities
   	HaskellExp HaskellExp -> HaskellExp

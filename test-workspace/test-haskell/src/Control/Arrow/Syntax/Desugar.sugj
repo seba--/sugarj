@@ -55,8 +55,12 @@ rules
 
   desugar-arrow(|vars) :
     ArrForm(e, cs) ->
-    <apply-all(|k)> (e, cs)
+    <apply-all(|k)> (e, <map(desugar-arrow(|vars))> cs)
   where k := |[ \$(<tuple> vars) -> $(Product(vars)) ]|
+
+  desugar-arrow(|vars) :
+    ArrOpApp(c1, op, c2) ->
+    <desugar-arrow(|vars)> ArrForm(BinCon(op), [c1, c2])
 
 
 rules
