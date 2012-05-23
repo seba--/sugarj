@@ -79,6 +79,9 @@ exports
                           	   %% if subterm starts with a (,
                          	   %% op must be followed by layout-text
     Term Op Term 		-> Term {cons("Infix"),left,prefer}
+    Variable "is" Term        -> Term {cons("Assign"),left,prefer}
+    
+
     Functor "(" {Term ","}+ ")" -> Term {cons("Func")}  
 				   %% provided there is no layout-text between 
 				   %% the functor and the ( }
@@ -88,12 +91,17 @@ exports
     String			-> Term {cons("String")}
     Constant 			-> Term 
     Variable			-> Term {cons("Var")}
+    "!"                 -> Term {cons("Cut")}
     "[" {Term ","}* "]"		-> List {cons("List")}
     "[" {Term ","}+ "|" Term "]"-> List {cons("ListTl")}
   context-free priorities
     PrefixOp Term		-> Term 
   > Term PostfixOp 	    -> Term
   > Term Op Term 		-> Term 
+  > Variable "is" Term  -> Term
+
+    lexical syntax
+    "is"                -> Op {reject}
 
   context-free syntax %% Operators, Constants, Functors
     Atom 			-> Constant
