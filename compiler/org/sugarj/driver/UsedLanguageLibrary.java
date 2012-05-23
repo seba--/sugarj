@@ -13,6 +13,6 @@ public class UsedLanguageLibrary {
    *   This is implemented as a method to enable switching the language library while debugging.
    */
   public static LanguageLib getFreshLanguageLibrary() {
-    return new PrologLib();
+    return new HaskellLib();
   }
 }

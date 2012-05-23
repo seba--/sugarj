@@ -17,7 +17,6 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.strategoxt.HybridInterpreter;
 import org.strategoxt.lang.Context;
 import org.strategoxt.stratego_gpp.parse_pptable_file_0_0;
 import org.sugarj.common.ATermCommands;
@@ -308,7 +307,6 @@ public class PrologLib extends LanguageLib implements Serializable {
 			prologSource.setModuleDecl(prettyPrint(toplevelDecl));
 		} else if (isApplication(toplevelDecl, "SugarModuleDec")) {
 			moduleName = prettyPrint(getApplicationSubterm(toplevelDecl, "SugarModuleDec", 0));
-			prologSource.setEmpty(true);
 			prologSource.setModuleDecl(":-module(" + moduleName + ", []).");	// XXX: Ideally, a module only used for defining sugar should not be generated nor imported at all
 		}
 		relNamespaceName = FileCommands.dropFilename(sourceFile.getRelativePath());

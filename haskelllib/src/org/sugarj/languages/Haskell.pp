@@ -54,7 +54,7 @@
    OpFunLHS                        -- _1 _2 _3,
    NestedFunLHS                    -- KW["("] _1 KW[")"] _2,
    NestedFunLHS.2:iter             -- _1,
-   Where                           -- KW["where"] _1,
+   Where                           -- KW[" where"] _1,
    DeclList                        -- KW["{"] _1 KW["}"],
    DeclList.1:alt                  -- _1 _2,
    DeclSeq                         -- V[H[_1 KW[";"]] H[_2]],

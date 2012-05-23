@@ -30,19 +30,12 @@ public class PrologSourceFileContent implements ISourceFileContent {
 	List<String> reexports = new LinkedList<String>();
 	PrologLib pLib;
 	
-	
-	private boolean empty = false;
 
 	@Override
 	public boolean isEmpty() {
-		return empty;
+		return true;
 	}
 	
-	@Override
-	public void setEmpty(boolean empty) {
-		this.empty = empty;
-	}
-
 	public PrologSourceFileContent(PrologLib prologLib) {
 		pLib = prologLib;
 	}

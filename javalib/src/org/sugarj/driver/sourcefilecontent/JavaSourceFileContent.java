@@ -26,16 +26,9 @@ public class JavaSourceFileContent implements ISourceFileContent {
   public JavaSourceFileContent() {
   }
   
-	private boolean empty;
-
 	@Override
 	public boolean isEmpty() {
-		return empty;
-	}
-	
-	@Override
-	public void setEmpty(boolean empty) {
-		this.empty = empty;
+		return bodyDecls.isEmpty();
 	}
   
   public void setNamespaceDecl(String packageDecl) {

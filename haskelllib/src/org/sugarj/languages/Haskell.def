@@ -77,7 +77,6 @@ exports
     Pat "<-" Exp 	-> Stmt 	{cons("BindStmt")}
     Exp               	-> Stmt 	{cons("ExpStmt")}
     "let" Declbinds   	-> Stmt 	{cons("LetStmt")}
-    Qvar "=" Exp 	-> Fbind	{cons("FBind")}
 
   context-free syntax
   	NoOffsideStmtBlock -> StmtList {cons("StmtList")}
@@ -313,6 +312,7 @@ exports
     Qop -> QopNoNeg    
     "-" -> QopNoNeg {reject}
  
+    Qvar "=" Exp 	-> Fbind	{cons("FBind")}
     "{" {Fbind ","}* "}" -> LabelBinds {cons("LabelBinds"), ignore-indent}
 
   context-free priorities

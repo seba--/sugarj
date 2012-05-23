@@ -18,6 +18,5 @@ public interface ISourceFileContent extends Serializable {
   public int hashCode();
   public boolean equals(Object o);
   public boolean isEmpty();
-  public void setEmpty(boolean empty);
   
 }
