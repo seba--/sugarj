@@ -44,7 +44,7 @@ rules
 
   gen-signature-from-grammar :
     context-free-priorities(productions) -> Signature([Constructors(opdecls)])
-    where <(map(ensure-list(gen-opdecl-from-prod)) ; concat)> productions => opdecls
+    where <collect-all(?prod(_,_,_)); map(ensure-list(gen-opdecl-from-prod)) ; concat> productions => opdecls
 
 
 rules
