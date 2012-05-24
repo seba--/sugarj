@@ -3,6 +3,7 @@ module Test.Arrow where
 import Control.Arrow
 import Control.Arrow.Syntax
 
+import Text.ParserCombinators.PArrow
 
 foo f = proc x -> f -< x+1
 
@@ -13,8 +14,29 @@ baz f1 f2 =
               then f1 -< x+1
               else f2 -<< x+2
 
-exprTail = proc e -> 
-   (symbol PLUS -< ()) 
-  <+>
-   (symbol MINUS -< ())
+
+symbol = undefined
+term = undefined
+data Sign = PLUS | MINUS
+data ParseArrow a b = ParseArrow a b
+
+-- copied from http://www.haskell.org/haskellwiki/Arrow
+data Expr = Plus Expr Expr | Minus Expr Expr
+
+expr :: ParseArrow () Expr
+expr = proc () -> do
+        t <- term -< ()
+        exprTail -< t
+
+exprTail :: ParseArrow Expr Expr
+exprTail = proc e -> do
+        symbol PLUS -< ()
+        t <- term   -< ()
+        exprTail -< Plus e t
+   <+> do
+        symbol MINUS -< ()
+        t <- term    -< ()
+        exprTail -< Minus e t
+   <+> returnA -< e
+
 

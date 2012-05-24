@@ -288,11 +288,12 @@ exports
     Qvar 				 -> Exp 	{cons("Var")}
     Gcon 				 -> Exp 	{cons("Constr")}
     Literal 				 -> Exp 	{cons("Lit")}
-    "(" Exp "," {Exp ","}+ ")" 			 -> Exp 	{cons("Product")}
+    "(" Exps2 ")" 			 -> Exp 	{cons("Product")}
 %%    "(#" Exps "#)" 			 -> Exp 	{cons("Unboxed?")}
     "(" Exp ")" 			 -> Exp 	{bracket}
 
     {Exp ","}+ 				 -> Exps
+    Exp "," {Exp ","}+ 			 -> Exps2 	{cons("Cons")}
     APat+				 -> Fargs
 
 
@@ -408,7 +409,7 @@ exports
     "deriving" "(" {Qtycls ","}+ ")" 	-> Deriving {cons("Derive")}
     				     	-> Deriving {cons("NoDeriving")}
   context-free syntax
-    {Constr "|"}+                        -> Constrs {cons("ConstrDecls")}
+    {Constr "|"}+                        -> Constrs
 
     Conid Satype*       -> Constr {cons("ConstrDecl")}
     Sbtype Conop Sbtype -> Constr {cons("InfixConstr")}
@@ -447,13 +448,14 @@ exports
 
   context-free syntax
     {Type ","}+ 	   -> Types
+    Type "," {Type ","}+   -> Types2 	{cons("Cons")}
     
   context-free syntax
     Gtycon 		   -> AType 	{cons("TCon")}
     Tyvar 		   -> AType 	{cons("TVar")}
     "(" Type ")" 	   -> AType 	{bracket}
     "[" Type "]" 	   -> AType 	{cons("TList")}
-    "(" Type "," {Type ","}+ ")" 	   -> AType 	{cons("TProd")}
+    "(" Types2 ")" 	   -> AType 	{cons("TProd")}
 
     AType -> Type
     Type Type 	   	   -> Type 	{cons("TAppBin"),left}
@@ -712,7 +714,7 @@ exports
   context-free syntax
     "(" ")"        	-> Gcon 	{cons("Unit")}
     "[" "]"        	-> Gcon		{cons("EmptyList")}
-    "(" ","+ ")"   	-> Gcon		{cons("ProductCon")}
+    "(" ","+ ")"   	-> Gcon		{cons("Product")}
     Qcon           	-> Gcon		
 
   %% The following portion can be put into module Haskell-Infix
@@ -1016,6 +1018,7 @@ imports
             Prec                         => HaskellPrec
             Infix                        => HaskellInfix
             Fargs                        => HaskellFargs
+            Exps2                        => HaskellExps2
             Exps                         => HaskellExps
             AnyExp                       => HaskellAnyExp
             Signdecl                     => HaskellSigndecl
@@ -1037,6 +1040,7 @@ imports
             RecordFields                 => HaskellRecordFields
             Constr                       => HaskellConstr
             AType                        => HaskellAType
+            Types2                       => HaskellTypes2
             Types                        => HaskellTypes
             Gtycon                       => HaskellGtycon
             OptSig                       => HaskellOptSig

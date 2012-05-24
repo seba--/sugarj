@@ -99,7 +99,6 @@ signature
     InfixL           : HaskellInfix
     Infix            : HaskellInfix
                      : List(HaskellAPat) -> HaskellFargs
-    Cons             : HaskellExp * List(HaskellExp) -> HaskellExps2
     OpApp            : HaskellExp * HaskellQop * HaskellExp -> HaskellExp
     Typed            : HaskellExp * HaskellType -> HaskellExp
     AppBin           : HaskellExp * HaskellExp -> HaskellExp
@@ -114,7 +113,7 @@ signature
     Abs              : HaskellFargs * HaskellExp -> HaskellExp
     RSection         : HaskellQopNoNeg * HaskellExp -> HaskellExp
     LSection         : HaskellExp * HaskellQop -> HaskellExp
-    Product          : HaskellExps2 -> HaskellExp
+    Product          : HaskellExp * HaskellExps -> HaskellExp
     Lit              : HaskellLiteral -> HaskellExp
     Constr           : HaskellGcon -> HaskellExp
     Var              : HaskellQvar -> HaskellExp
@@ -148,12 +147,11 @@ signature
     TFunBin          : HaskellType * HaskellType -> HaskellType
     TAppBin          : HaskellType * HaskellType -> HaskellType
                      : HaskellAType -> HaskellType
-    TProd            : HaskellTypes2 -> HaskellAType
+    TProd            : HaskellType * HaskellTypes -> HaskellAType
     TList            : HaskellType -> HaskellAType
                      : HaskellType -> HaskellAType
     TVar             : HaskellTyvar -> HaskellAType
     TCon             : HaskellGtycon -> HaskellAType
-    Cons             : HaskellType * List(HaskellType) -> HaskellTypes2
     TList            : HaskellGtycon
     TUnit            : HaskellGtycon
     TArrow           : HaskellGtycon

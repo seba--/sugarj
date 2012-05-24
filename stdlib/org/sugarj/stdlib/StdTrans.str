@@ -16,7 +16,8 @@ strategies
   unlocked-bottomup(s) = ?Locked(t) < id + all(unlocked-bottomup(s)); s
   traverse(s) = compile-error <+ unlocked-bottomup(try(s; traverse(s)))
   unlock = bottomup(try(?Locked(<id>)))
-  
+
+  desugar-main = internal-main
   internal-main = traverse(desugar); unlock
   main = io-wrap(internal-main)
 
