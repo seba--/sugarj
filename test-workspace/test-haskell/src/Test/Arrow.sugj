@@ -3,6 +3,8 @@ module Test.Arrow where
 import Control.Arrow
 import Control.Arrow.Syntax
 
+import Control.Category
+
 import Text.ParserCombinators.PArrow
 
 foo f = proc x -> f -< x+1
@@ -18,7 +20,19 @@ baz f1 f2 =
 symbol = undefined
 term = undefined
 data Sign = PLUS | MINUS
-data ParseArrow a b = ParseArrow a b
+data ParseArrow a b = ParseArrow
+
+instance Category ParseArrow where
+  id = ParseArrow
+  f . g = ParseArrow
+instance Arrow ParseArrow where
+  arr _ = ParseArrow
+  first _ = ParseArrow
+instance ArrowZero ParseArrow where
+  zeroArrow = ParseArrow
+instance ArrowPlus ParseArrow where
+  _ <+> _ = ParseArrow
+
 
 -- copied from http://www.haskell.org/haskellwiki/Arrow
 data Expr = Plus Expr Expr | Minus Expr Expr
