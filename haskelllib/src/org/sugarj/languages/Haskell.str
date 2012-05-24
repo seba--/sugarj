@@ -139,6 +139,8 @@ signature
                      : HaskellType -> HaskellSbtype
                      : HaskellAType -> HaskellSatype
     InfixConstr      : HaskellSbtype * HaskellConop * HaskellSbtype -> HaskellConstr
+    NoConstrDecls    : HaskellConstrs
+    ConstrDecls      : List(HaskellConstr) -> HaskellConstrs
     ConstrDecl       : HaskellConid * List(HaskellSatype) -> HaskellConstr
                      : List(HaskellConstr) -> HaskellConstrs
     Derive           : List(HaskellQtycls) -> HaskellDeriving

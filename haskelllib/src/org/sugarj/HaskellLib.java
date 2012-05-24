@@ -211,13 +211,13 @@ public class HaskellLib extends LanguageLib {
     
     if (!declaredRelNamespaceName.equals(relNamespaceName))
       setErrorMessage(toplevelDecl,
-                      "The declared package '" + declaredRelNamespaceName + "'" +
-                      " does not match the expected package '" + relNamespaceName + "'.", errorLog);
+                      "The declared namespace '" + declaredRelNamespaceName + "'" +
+                      " does not match the expected namespace '" + relNamespaceName + "'.", errorLog);
     
     if (!declaredModuleName.equals(moduleName))
       setErrorMessage(toplevelDecl,
-                      "The declared package '" + declaredModuleName + "'" +
-                      " does not match the expected package '" + moduleName + "'.", errorLog);
+                      "The declared module name '" + declaredModuleName + "'" +
+                      " does not match the expected module name '" + moduleName + "'.", errorLog);
   }
 
   @Override
