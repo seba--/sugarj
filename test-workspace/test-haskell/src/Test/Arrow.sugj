@@ -52,5 +52,3 @@ exprTail = proc e -> do
         t <- term    -< ()
         exprTail -< Minus e t
    <+> returnA -< e
-
-

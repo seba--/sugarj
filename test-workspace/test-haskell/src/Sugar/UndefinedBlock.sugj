@@ -14,4 +14,4 @@ rules
   desugar-undefined-block =
     ?UndefinedBlock(<id>);
     map(!Valdef(<id>, Var("undefined"), Where(DeclList(Empty()))));
-    foldr1(debug;?[<id>], debug; \(x,y) -> TopdeclSeq(x,y)\)
+    foldr1(?[<id>], \(x,y) -> TopdeclSeq(x,y)\)

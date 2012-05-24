@@ -2,14 +2,15 @@ module Test.Test where
 
 process =
   do inp <- readInput
-     case inp of
+     ok <- case inp of
        Just txt -> 
          do putStrLn "thank you"
             sendToServer txt
             return True
        Nothing ->
          return False        
-     abc
+     logResult ok
 
 readInput = undefined
 sendToServer = undefined
+logResult res = undefined

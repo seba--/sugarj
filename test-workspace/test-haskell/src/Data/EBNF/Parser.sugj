@@ -1,0 +1,116 @@
+module Data.EBNF.Parser where
+
+import Data.EBNF.Syntax
+
+import Meta.Concrete.Haskell
+
+rules
+  ebnf-parser :
+    EBNFDecl(name, rulez) ->
+    |[ $parserName = $(<ebnf-parser-rules(|name, all-fails)> rulez) 
+                   :: ParsecT String () Identity $(TCon(name)) ]|
+  where <ebnf-parser-name> name => parserName;
+        <collect-all(?EBNFTerminal(<id>))> rulez => terminals;
+        <ebnf-parser-fails; debug> terminals => all-fails
+
+  ebnf-parser-rules(|name, all-fails) :
+    [] -> |[ fail $ "Could not parse " ++ $(String([name])) ]|
+  ebnf-parser-rules(|name, all-fails) :
+    [r|rs] -> |[ $(<ebnf-parser-rule(|all-fails); debug> r) <|> $(<debug;ebnf-parser-rules(|name, all-fails)> rs) ]|
+
+  ebnf-parser-rule(|all-fails) :
+    r@EBNFRule([EBNFNonterminal(_)|_],_) ->
+    |[ $all-fails >> $(<ebnf-parser-rule> r) ]|
+  ebnf-parser-rule(|all-fails) : e -> <ebnf-parser-rule> e
+
+  ebnf-parser-rule :
+    EBNFRule(symbols, None) ->
+    <ebnf-parser-symbols(|None, [], None)> symbols
+  ebnf-parser-rule :
+    EBNFRule(symbols, Some(EBNFCons(name))) ->
+    <ebnf-parser-symbols(|name, [], None)> symbols
+
+ebnf-parser-symbols(|name, vars, prev) = debug;fail
+
+  ebnf-parser-symbols(|name, vars, prev) :
+    [] -> 
+    |[ return $(Var(var)) ]|
+  where <?None> name;
+        <?[<id>]> vars => var
+
+  ebnf-parser-symbols(|name, vars, prev) :
+    [] -> 
+    |[ return $(<foldl(\(x,y) -> AppBin(x,y)\ | Constr(name))> vars) ]|
+
+  ebnf-parser-symbols(|name, vars, prev) :
+    [s|ss] -> 
+    <ebnf-parser-compose> (p', rest, var)
+  where <ebnf-parser-symbol(|vars)> s => (p, var, newvars);
+        <ebnf-parser-requires-space 
+           < !|[many1 space >> $p]|
+           + !|[many space >> $p]|> (prev, s) => p';
+        <ebnf-parser-symbols(|name, newvars, s)> ss => rest
+
+
+  ebnf-parser-compose :
+    (p, rest, None()) ->
+    |[ $p >> $rest ]|
+  ebnf-parser-compose :
+    (p, rest, var) ->
+    |[ $p >>= \$var -> $rest ]|
+
+
+  ebnf-parser-symbol(|vars) :
+    EBNFTerminal(s) ->
+    (|[ string $s ]|, None, vars)
+  ebnf-parser-symbol(|vars) :
+    EBNFNonterminal("String") ->
+    (|[ many1 alphaNum ]|, x, newvars)
+  where <next-var> vars => x;
+        <conc> (vars, [x]) => newvars
+  ebnf-parser-symbol(|vars) :
+    EBNFNonterminal(t) ->
+    (p, x, newvars)
+  where <ebnf-parser-name> t => p;
+        <next-var> vars => x;
+        <conc> (vars, [x]) => newvars
+
+  ebnf-parser-requires-space :
+    (EBNFTerminal(s1), EBNFTerminal(s2)) -> ()
+  where
+    <string-as-chars(last; is-alphanum)> s1;
+    <string-as-chars(?[<id>|_]; is-alphanum)> s2
+
+  ebnf-parser-requires-space :
+    (EBNFTerminal(s1), EBNFNonterminal(_)) -> ()
+  where
+    <string-as-chars(last; is-alphanum)> s1
+
+  ebnf-parser-requires-space :
+    (EBNFNonterminal(_), EBNFTerminal(s2)) -> ()
+  where
+    <string-as-chars(?[<id>|_]; is-alphanum)> s2
+
+  ebnf-parser-fails :
+    [] ->
+    |[ return () ]|
+  ebnf-parser-fails :
+    [s|ss] ->
+    |[ try ((string $s >> fail ("prohibitted " ++ $s)) <|> return ()) >> $rest ]|
+  where <ebnf-parser-fails> ss => rest
+
+  ebnf-parser-name = !Var(<conc-strings> ("parse", <id>))
+
+  next-var = next-var(|"gensym")
+  next-var(|name) = next-var(|name, 0)
+  next-var(|name, num) =
+    ?vars;
+    <conc-strings> (name, <int-to-string> num) => var;
+    if <elem> (var, vars)
+      then next-var(|name, <inc> num)
+      else !var
+    end
+
+  foldl(c|n) : [] -> n
+  foldl(c|n) : [x|xs] -> <foldl(c| <c> (n, x))> xs
+ 

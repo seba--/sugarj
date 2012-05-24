@@ -1,0 +1,19 @@
+module Data.EBNF.Data where
+
+import org.sugarj.languages.Haskell
+import Data.EBNF.Syntax
+
+rules
+  ebnf-data :
+    EBNFDecl(name, rulez) ->
+    Data(None, TCon(name), 
+      <if ?[] 
+         then !NoConstrDecls 
+         else !ConstrDecls(<id>)
+       end> constrs,
+      Derive("Show"))
+  where <filter(ebnf-data-constr)> rulez => constrs
+
+  ebnf-data-constr :
+    EBNFRule(symbols, Some(EBNFCons(cname))) ->
+    ConstrDecl(cname, <filter(?EBNFNonterminal(<id>))> symbols)
