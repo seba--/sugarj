@@ -1,0 +1,13 @@
+module Meta.Concrete.SDF where
+
+import org.sugarj.languages.Sdf2
+import org.sugarj.languages.Stratego
+
+import Meta.Concrete.MetaExplode
+
+context-free syntax
+  "|[" Sdf2Production "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+  "$" StrategoTerm -> Sdf2Symbol {cons("FromMetaExpr")}
+  "$*" StrategoTerm -> Sdf2Symbols {cons("FromMetaExpr")}
+  "$" StrategoTerm -> Sdf2ATerm {cons("FromMetaExpr")}

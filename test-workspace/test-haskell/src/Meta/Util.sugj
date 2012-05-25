@@ -1,0 +1,6 @@
+module Meta.Util where
+
+rules
+  foldl(c|n) : [] -> n
+  foldl(c|n) : [x|xs] -> <foldl(c| <c> (n, x))> xs
+ 

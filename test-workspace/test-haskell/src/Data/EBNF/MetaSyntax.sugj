@@ -1,0 +1,104 @@
+module Data.EBNF.MetaSyntax where
+
+import Meta.LiftSugar
+import Meta.Concrete.SDF
+import Meta.Util
+
+import Data.EBNF.Syntax
+import Data.EBNF.Data
+
+desugarings
+  ebnf-meta-explode
+
+rules
+  ebnf-metasyntax :
+    EBNFDecl(name, rulez) ->
+    SugarBody([grammar-elem(context-free-syntax(<concat> [starts, prods])), grammar-elem(prios)])
+  where <ebnf-metasyntax-name> name => nt;
+        <map(ebnf-to-sdf(|nt))> rulez => prods;
+        ebnf-start-prods(|name, nt) => starts;
+        ebnf-Exp-prios(|name, nt) => prios
+
+  ebnf-start-prods(|name, nt) =
+    where (<conc-strings> (name, "$") => name-dollar); 
+    ![
+      |[ "|[" $sort(nt) "]|" -> HaskellExp {cons("ToHaskellExp")} ]|,
+      |[ "|[" $sort(nt) "]|" -> HaskellAPat {cons("ToHaskellAPat")} ]|,
+      |[ "|[" $lit(name) "|" $sort(nt) "]|" -> HaskellExp {prefer, cons("ToHaskellExp")} ]|,
+      |[ "|[" $lit(name) "|" $sort(nt) "]|" -> HaskellAPat {prefer, cons("ToHaskellAPat")} ]|,
+
+      |[ "$" HaskellExp -> ($sort(nt)) {prefer, cons("FromHaskellExp")} ]|,
+      |[ $lit(name-dollar) HaskellExp -> ($sort(nt)) {prefer, cons("FromHaskellExp")} ]|
+    ]
+
+    ebnf-Exp-prios(|name, nt) =
+    where (<conc-strings> (name, "$") => name-dollar);
+    !|[HaskellExp HaskellExp -> HaskellExp]| => smaller; 
+    ![
+      |[ "$" HaskellExp -> ($sort(nt)) ]|,
+      |[ $lit(name-dollar) HaskellExp -> ($sort(nt)) ]|
+    ] => biggers;
+    !context-free-priorities(chain([prods-group(biggers), simple-group(smaller)]))
+  
+  
+  ebnf-to-sdf(|nt) :
+    EBNFRule(symbols, None()) ->
+    |[ $*sdf-symbols -> ($sort(nt)) {cons("NoConstr")} ]| 
+  where <map(ebnf-to-sdf-symbol)> symbols => sdf-symbols
+
+  ebnf-to-sdf(|nt) :
+    EBNFRule(symbols, Some(EBNFCons(cons))) ->
+    |[ $*sdf-symbols -> $sort(nt) {cons($(fun(quoted(cons-name))))} ]|
+  where <map(ebnf-to-sdf-symbol)> symbols => sdf-symbols;
+        <ebnf-metasyntax-name> cons => cons-name
+
+  ebnf-to-sdf-symbol :
+    EBNFTerminal(String(ss)) -> lit(<concat-strings> ss)
+  ebnf-to-sdf-symbol :
+    EBNFNonterminal("String") -> alt(sort("HaskellVARID"), sort("HaskellCONID"))
+  ebnf-to-sdf-symbol :
+    EBNFNonterminal(t) -> sort(<ebnf-metasyntax-name> t)
+
+  ebnf-metasyntax-name : cons -> <conc-strings> ("MetaSyntax-", cons)
+
+signature constructors
+  ToHaskellExp : StrategpTerm -> HaskellExp
+  ToHaskellAPat : StrategpTerm -> HaskellExp
+  FromHaskellExp : HaskellExp -> StrategpTerm
+
+
+rules
+  ebnf-meta-explode :
+    ToHaskellExp(e) -> <ebnf-meta-explode-exp> e
+  ebnf-meta-explode :
+    ToHaskellAPat(p) -> <ebnf-meta-explode-pat> p
+
+rules
+  ebnf-meta-explode-exp :
+    c#(xs) -> <foldl(\(x,y) -> AppBin(x,y)\ | Constr(c'))> xs'
+  where
+    <string-starts-with(|"MetaSyntax-")> c;
+    <string-as-chars(drop(|11))> c => c';
+    <map(ebnf-meta-explode-exp)> xs => xs'
+
+  ebnf-meta-explode-exp :
+    s -> String([s])
+  where <is-string> s
+
+  ebnf-meta-explode-exp :
+    FromHaskellExp(e) -> e
+
+rules
+  ebnf-meta-explode-pat :
+    c#(xs) -> ConstrApp(c', xs')
+  where
+    <string-starts-with(|"MetaSyntax-")> c;
+    <string-as-chars(drop(|11))> c => c';
+    <map(ebnf-meta-explode-pat)> xs => xs'
+
+  ebnf-meta-explode-pat :
+    s -> String([s])
+  where <is-string> s
+
+  ebnf-meta-explode-pat :
+    FromHaskellExp(e) -> e

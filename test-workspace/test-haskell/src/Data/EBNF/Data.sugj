@@ -11,7 +11,7 @@ rules
          then !NoConstrDecls 
          else !ConstrDecls(<id>)
        end> constrs,
-      Derive("Show"))
+      Derive(["Show", "Eq"]))
   where <filter(ebnf-data-constr)> rulez => constrs
 
   ebnf-data-constr :

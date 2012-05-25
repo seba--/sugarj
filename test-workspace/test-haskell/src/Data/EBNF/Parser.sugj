@@ -3,6 +3,7 @@ module Data.EBNF.Parser where
 import Data.EBNF.Syntax
 
 import Meta.Concrete.Haskell
+import Meta.Util
 
 rules
   ebnf-parser :
@@ -11,12 +12,12 @@ rules
                    :: ParsecT String () Identity $(TCon(name)) ]|
   where <ebnf-parser-name> name => parserName;
         <collect-all(?EBNFTerminal(<id>))> rulez => terminals;
-        <ebnf-parser-fails; debug> terminals => all-fails
+        <ebnf-parser-fails> terminals => all-fails
 
   ebnf-parser-rules(|name, all-fails) :
     [] -> |[ fail $ "Could not parse " ++ $(String([name])) ]|
   ebnf-parser-rules(|name, all-fails) :
-    [r|rs] -> |[ $(<ebnf-parser-rule(|all-fails); debug> r) <|> $(<debug;ebnf-parser-rules(|name, all-fails)> rs) ]|
+    [r|rs] -> |[ $(<ebnf-parser-rule(|all-fails)> r) <|> $(<ebnf-parser-rules(|name, all-fails)> rs) ]|
 
   ebnf-parser-rule(|all-fails) :
     r@EBNFRule([EBNFNonterminal(_)|_],_) ->
@@ -29,8 +30,6 @@ rules
   ebnf-parser-rule :
     EBNFRule(symbols, Some(EBNFCons(name))) ->
     <ebnf-parser-symbols(|name, [], None)> symbols
-
-ebnf-parser-symbols(|name, vars, prev) = debug;fail
 
   ebnf-parser-symbols(|name, vars, prev) :
     [] -> 
@@ -107,10 +106,7 @@ ebnf-parser-symbols(|name, vars, prev) = debug;fail
     ?vars;
     <conc-strings> (name, <int-to-string> num) => var;
     if <elem> (var, vars)
-      then next-var(|name, <inc> num)
+      then <next-var(|name, <inc> num)> vars
       else !var
     end
-
-  foldl(c|n) : [] -> n
-  foldl(c|n) : [x|xs] -> <foldl(c| <c> (n, x))> xs
  

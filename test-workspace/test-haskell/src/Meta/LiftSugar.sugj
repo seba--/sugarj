@@ -1,0 +1,47 @@
+module Meta.LiftSugar where
+
+import org.sugarj.languages.Haskell
+
+desugarings
+  lift-sugar
+
+rules
+  lift-sugar = 
+    ?HaskellBody(<id>);
+    debug;extract-sugar;debug => (h,s);
+    <not(?[])> s;
+    ![HaskellBody(h), <concat-sugar> s]
+
+  extract-sugar :
+    b@SugarBody(_) ->
+    (Empty, [b])
+
+  extract-sugar :
+    TopdeclSeq(b@SugarBody(_), ds) ->
+    (ds', [b|bs])
+  where <extract-sugar> ds => (ds', bs)
+
+  extract-sugar :
+    TopdeclSeq(ds, b@SugarBody(_)) ->
+    (ds', [b|bs])
+  where <extract-sugar> ds => (ds', bs)
+
+  extract-sugar :
+    TopdeclSeq(ds1, ds2) ->
+    (ds', <conc> (bs1,bs2))
+  where <extract-sugar> ds1 => (ds1', bs1);
+        <extract-sugar> ds2 => (ds2', bs2);
+        <?(Empty,Empty) < 
+           !Empty + 
+           ?(Empty,<id>) <+
+           ?(<id>,Empty) <+
+           !TopdeclSeq(ds1', ds2')> (ds1',ds2') => ds' 
+
+  extract-sugar :
+    d -> (d, []) 
+
+
+  concat-sugar =
+    map(?SugarBody(<id>));
+    concat;
+    !SugarBody(<id>) 

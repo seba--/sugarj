@@ -25,9 +25,12 @@ desugarings
 rules
   desugar-ebnf :
     e@EBNFDecl(_,_) ->
-    <filter(not(?None)); foldr(id, \(x,y) -> TopdeclSeq(x, y)\)> [data, parser]
+    <filter(not(?None)); foldr(id, \(x,y) -> TopdeclSeq(x, y)\)> [data, parser, metasyntax]
     where <ebnf-data <+ !None> e => data;
-          <ebnf-parser <+ !None> e => parser
+          <ebnf-parser <+ !None> e => parser;
+          <ebnf-metasyntax <+ !None> e => metasyntax
 
   ebnf-data = fail
   ebnf-parser = fail
+  ebnf-metasyntax = fail
+
