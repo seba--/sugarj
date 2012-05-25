@@ -34,7 +34,10 @@ import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.stratego_gpp.ast2abox_0_1;
 import org.strategoxt.stratego_gpp.box2text_string_0_1;
+import org.strategoxt.stratego_gpp.parse_pptable_file_0_0;
+import org.strategoxt.tools.core_sdf2parenthesize_0_0;
 import org.strategoxt.tools.sdf_desugar_0_0;
+import org.strategoxt.tools.sdf_ensugar_0_0;
 import org.sugarj.common.path.Path;
 
 /**
@@ -260,6 +263,8 @@ public class ATermCommands {
     IStrategoTerm result = null;
     try {
       result = sdf_desugar_0_0.instance.invoke(interp.getCompiledContext(), term);
+//      result = sdf_ensugar_0_0.instance.invoke(interp.getCompiledContext(), result);
+//      result = sdf_desugar_0_0.instance.invoke(interp.getCompiledContext(), result);
     }
     catch (StrategoExit e) {
       if (e.getValue() != 0 || result == null)
@@ -421,6 +426,11 @@ public class ATermCommands {
     }
     
     return term;
+  }
+  
+  public static IStrategoTerm readPrettyPrintTable(String p) {
+    IStrategoTerm ppTableFile = ATermCommands.makeString(p);
+    return parse_pptable_file_0_0.instance.invoke(org.strategoxt.stratego_gpp.stratego_gpp.init(), ppTableFile);
   }
 
   public static String prettyPrint(IStrategoTerm ppTable, IStrategoTerm term, HybridInterpreter interp) {
