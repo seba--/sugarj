@@ -66,7 +66,7 @@ public class SDFCommands {
   /*
    * timeout for parsing files (in milliseconds)
    */
-  public static long PARSE_TIMEOUT = 50000;
+  public static long PARSE_TIMEOUT = 10000;
   
   static {
     try {
@@ -346,8 +346,8 @@ public class SDFCommands {
         return (IStrategoTerm) parser.parse(source, "toplevel declaration", start);
     }};
     
+    Future<IStrategoTerm> res = parseExecutorService.submit(parseCallable);
     try {
-      Future<IStrategoTerm> res = parseExecutorService.submit(parseCallable);
       IStrategoTerm term = res.get(PARSE_TIMEOUT, TimeUnit.MILLISECONDS);
       return Pair.create(parser, term);
     } catch (ExecutionException e) {
@@ -357,6 +357,7 @@ public class SDFCommands {
     } catch (InterruptedException e) {
       throw new SGLRException(parser, "parser was interrupted", e);
     } catch (TimeoutException e) {
+      res.cancel(true);
       throw new SGLRException(parser, "parser timed out, timeout at " + PARSE_TIMEOUT + "ms", e);
     }
   }
