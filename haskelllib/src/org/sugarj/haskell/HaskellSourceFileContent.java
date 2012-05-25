@@ -22,9 +22,15 @@ public class HaskellSourceFileContent implements ISourceFileContent {
   private boolean importsOptional = false;
   private List<String> bodyDecls = new LinkedList<String>();
  
+  private boolean hasNonhaskellDecl;
+  
   @Override
   public boolean isEmpty() {
-    return bodyDecls.isEmpty();
+    return bodyDecls.isEmpty() && hasNonhaskellDecl;
+  }
+  
+  public void setHasNonhaskellDecl(boolean hasNonhaskellDecl) {
+    this.hasNonhaskellDecl = hasNonhaskellDecl;
   }
   
   public HaskellSourceFileContent() {

@@ -15,7 +15,6 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.strategoxt.stratego_gpp.parse_pptable_file_0_0;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.CommandExecution.ExecutionError;
@@ -160,12 +159,20 @@ public class HaskellLib extends LanguageLib {
 
   @Override
   public boolean isSugarDec(IStrategoTerm decl) {
-    return isApplication(decl, "SugarBody");
+    if (isApplication(decl, "SugarBody")) {
+      sourceContent.setHasNonhaskellDecl(true);
+      return true;
+    }
+    return false;
   }
 
   @Override
   public boolean isEditorServiceDec(IStrategoTerm decl) {
-    return isApplication(decl, "EditorBody");   
+    if (isApplication(decl, "EditorBody")) {   
+      sourceContent.setHasNonhaskellDecl(true);
+      return true;
+    }
+    return false;
   }
 
   @Override
@@ -175,7 +182,11 @@ public class HaskellLib extends LanguageLib {
 
   @Override
   public boolean isPlainDec(IStrategoTerm decl) {
-    return isApplication(decl, "PlainDec");   
+    if (isApplication(decl, "PlainDec")) {   
+      sourceContent.setHasNonhaskellDecl(true);
+      return true;
+    }
+    return false;
   }
   
   @Override
@@ -264,10 +275,8 @@ public class HaskellLib extends LanguageLib {
 
   @Override
   public String prettyPrint(IStrategoTerm term) throws IOException {
-    if (ppTable == null) {
-      IStrategoTerm ppTableFile = ATermCommands.makeString(ensureFile("org/sugarj/languages/Haskell.pp").getAbsolutePath());
-      ppTable = parse_pptable_file_0_0.instance.invoke(org.strategoxt.stratego_gpp.stratego_gpp.init(), ppTableFile);
-    }
+    if (ppTable == null) 
+      ppTable = ATermCommands.readPrettyPrintTable(ensureFile("org/sugarj/languages/Haskell.pp").getAbsolutePath());
     
     return ATermCommands.prettyPrint(ppTable, term, interp);
   }
