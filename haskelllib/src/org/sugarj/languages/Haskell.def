@@ -118,26 +118,20 @@ exports
 module Haskell-List-Comprehensions
 exports
   context-free syntax
-    "[" List "]" 	 -> Exp {cons("List")}
-    Exp 		 -> List
-    Lexps 		 -> List
-    Exp ".." 		 -> List
-    Exp "," Exp ".." 	 -> List
-    Exp ".." Exp 	 -> List
-    Exp "," Exp ".." Exp -> List
-    Exp "|" Quals        -> List
+    "[" List "]" 	 -> Exp {bracket}
+    {Exp ","}+ 		 -> List {cons("List")}
+    Exp ".." 		 -> List {cons("ListFrom")}
+    Exp "," Exp ".." 	 -> List {cons("ListFirstFrom")}
+    Exp ".." Exp 	 -> List {cons("ListFromTo")}
+    Exp "," Exp ".." Exp -> List {cons("ListFirstFromTo")}
+    Exp "|" {Qual ","}+  -> List {cons("ListCompr")}
    
-    Lexps "," Exp 	 -> Lexps
-    Exp "," Exp   	 -> Lexps
-     
-
 
 module Haskell-Qualifiers
 exports
   context-free syntax
-    {Qual ","}+ 	 -> Quals
     Pat "<-" Exp 	 -> Qual {cons("QualBind")}
-    Exp 	      	 -> Qual
+    Exp 	      	 -> Qual {cons("QualExp")}
     "let" Declbinds   	 -> Qual {cons("QualLet")}
 
 module Haskell-Patterns
@@ -983,10 +977,8 @@ imports
             StmtList                     => HaskellStmtList
             Fbind                        => HaskellFbind
             Stmt                         => HaskellStmt
-            Lexps                        => HaskellLexps
             List                         => HaskellList
             Qual                         => HaskellQual
-            Quals                        => HaskellQuals
             FPat                         => HaskellFPat
             LabeledPat                   => HaskellLabeledPat
             APat                         => HaskellAPat
