@@ -1,0 +1,22 @@
+module Control.Arrow.Syntax.Alternatives where
+
+
+context-free syntax
+  HaskellPat "->" ArrCommand HaskellMaybeWhere -> ArrAlt {cons("ArrAlt")}
+
+context-free syntax
+  ArrNoOffsideAltBlock -> ArrAltList {cons("AltList")}
+  ArrOffsideAltList   -> ArrAltList {cons("AltList")}
+
+  "{" ArrNoOffsideAltList "}"  -> ArrNoOffsideAltBlock {bracket, ignore-indent}
+
+context-free syntax
+  ArrAlt -> ArrNoOffsideAltList
+  ArrAlt ";" ArrNoOffsideAltList -> ArrNoOffsideAltList {cons("ArrAltSeq")}
+
+  ArrAlt -> ArrOffsideAlt {layout(gt(col(left(1)), col(first(1))))}
+
+  ArrOffsideAlt -> ArrOffsideAltList
+  ArrOffsideAlt ArrOffsideAltList -> ArrOffsideAltList
+   {cons("ArrAltSeq"), layout(eq(col(first(1)), col(first(2))))}
+

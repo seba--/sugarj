@@ -1,8 +1,6 @@
 module Control.Arrow.Syntax where
 
 import Control.Arrow.Syntax.Command
-import Control.Arrow.Syntax.Statement
-
 import Control.Arrow.Syntax.Desugar
 
 

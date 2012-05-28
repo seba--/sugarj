@@ -1,5 +1,9 @@
 module Control.Arrow.Syntax.Command where
 
+import Control.Arrow.Syntax.Alternatives
+import Control.Arrow.Syntax.Statement
+
+
 context-free syntax
   "proc" HaskellAPat "->" ArrCommand -> HaskellExp {cons("ArrProcedure")}
 
@@ -9,7 +13,7 @@ context-free syntax
   "\\" HaskellFargs "->" ArrCommand -> ArrCommand {cons("ArrAbs")}
   "let" HaskellDeclbinds "in" ArrCommand -> ArrCommand {cons("ArrLet")} 
   "if" HaskellExp "then" ArrCommand "else" ArrCommand -> ArrCommand {cons("ArrIf")}
---  "case" HaskellExp "of" AltList -> ArrCommand	{cons("ArrCase"), longest-match}
+  "case" HaskellExp "of" ArrAltList -> ArrCommand	{cons("ArrCase"), longest-match}
   "do" ArrStmtList -> ArrCommand {cons("ArrDo"), longest-match}
 
   ArrCommand HaskellExp -> ArrCommand {cons("ArrAppBin"),left}
