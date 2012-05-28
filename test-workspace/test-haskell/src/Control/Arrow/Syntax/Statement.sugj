@@ -1,24 +1,21 @@
 module Control.Arrow.Syntax.Statement where
 
-
 context-free syntax
   "let" HaskellDeclbinds -> ArrStmt {cons("ArrLetStmt")}
   HaskellPat "<-" ArrCommand -> ArrStmt {cons("ArrBindStmt")}
   ArrCommand -> ArrStmt {cons("ArrCmdStmt")}
 
 context-free syntax
-  ArrNoOffsideStmtBlock -> ArrStmtList {cons("ArrStmtList")}
-  ArrOffsideStmtList   -> ArrStmtList {cons("ArrStmtList")}
-
-  "{" ArrNoOffsideStmtList "}"  -> ArrNoOffsideStmtBlock {bracket, ignore-indent}
+  "{" ArrExplStmtList "}" -> ArrStmtList {cons("ArrStmtList"), ignore-layout}
+  ArrImplStmtList   -> ArrStmtList {cons("ArrStmtList")}
 
 context-free syntax
-  ArrStmt -> ArrNoOffsideStmtList
-  ArrStmt ";" ArrNoOffsideStmtList -> ArrNoOffsideStmtList {cons("ArrStmtSeq")}
+  ArrStmt -> ArrExplStmtList
+  ArrStmt ";" ArrExplStmtList -> ArrExplStmtList {cons("ArrStmtSeq")}
 
-  ArrStmt -> ArrOffsideStmt {layout(gt(col(left(1)), col(first(1))))}
+  ArrStmt -> ArrImplStmt {layout(gt(col(left(1)), col(first(1))))}
 
-  ArrOffsideStmt -> ArrOffsideStmtList
-  ArrOffsideStmt ArrOffsideStmtList -> ArrOffsideStmtList
+  ArrImplStmt -> ArrImplStmtList
+  ArrImplStmt ArrImplStmtList -> ArrImplStmtList
    {cons("ArrStmtSeq"), layout(eq(col(first(1)), col(first(2))))}
 

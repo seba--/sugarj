@@ -8,6 +8,6 @@ context-free syntax
 syntax
   "$"  <StrategoTerm-CF> -> <ArrCommand-CF> {cons("FromMetaExpr")}
 
-  "$*" <StrategoTerm-CF> -> <ArrOffsideStmtList-CF> {cons("FromMetaExpr")}
-  "$*" <StrategoTerm-CF> -> <ArrNoOffsideStmtList-CF> {cons("FromMetaExpr")}
+  "$*" <StrategoTerm-CF> -> <ArrImplStmtList-CF> {cons("FromMetaExpr")}
+  "$*" <StrategoTerm-CF> -> <ArrExplStmtList-CF> {cons("FromMetaExpr")}
 
