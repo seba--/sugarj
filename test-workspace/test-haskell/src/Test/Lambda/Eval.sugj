@@ -27,7 +27,8 @@ reduce |[ ((lambda $v. $b) $e) ]|
   | isVal e = subst v e b
 reduce |[ ($e1 $e2) ]|
   | not $ isVal e1 = |[ ($(reduce e1) $e2) ]|
-  | not $ isVal e2 = |[ ($e1 $(reduce e2)) ]| 
+  | not $ isVal e2 = |[ ($e1 $(reduce e2)) ]|
+reduce |[ Exp | Var$v ]| = error $ "free variable " ++ show v
 
 drive e 
   | isVal e   = e
@@ -57,11 +58,11 @@ nextFreeVar (Var v) vs
   | otherwise         = next v 0
       where next v n
               | Var (v ++ show n) `elem` vs = next v (n + 1)
-              | otherwise               = Var $ v ++ show n
+              | otherwise                   = Var $ v ++ show n
 
 var = |[ Exp | v ]|
 ident = |[ lambda x. x ]|
 zero = |[ lambda s. lambda z. z ]|
 succ = |[ lambda n. lambda s. lambda z. (s ((n s) z)) ]|
 
-const x = |[ lambda c. Exp$x ]|
+const x = |[ lambda c. $x ]|
