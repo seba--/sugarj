@@ -21,15 +21,15 @@ rules
 
   ebnf-parser-rule(|all-fails) :
     r@EBNFRule([EBNFNonterminal(_)|_],_) ->
-    |[ $all-fails >> $(<ebnf-parser-rule> r) ]|
+    |[ try $ $all-fails >> $(<ebnf-parser-rule> r) ]|
   ebnf-parser-rule(|all-fails) : e -> <ebnf-parser-rule> e
 
   ebnf-parser-rule :
     EBNFRule(symbols, None) ->
-    <ebnf-parser-symbols(|None, [], None)> symbols
+    |[ try $(<ebnf-parser-symbols(|None, [], None)> symbols) ]|
   ebnf-parser-rule :
     EBNFRule(symbols, Some(EBNFCons(name))) ->
-    <ebnf-parser-symbols(|name, [], None)> symbols
+    |[ try $(<ebnf-parser-symbols(|name, [], None)> symbols) ]|
 
   ebnf-parser-symbols(|name, vars, prev) :
     [] -> 

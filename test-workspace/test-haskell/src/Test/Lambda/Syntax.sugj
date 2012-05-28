@@ -15,6 +15,7 @@ Var ::= String {Var}
 Exp ::= Var                  {EVar}
       | "(" Exp Exp ")"      {EApp}
       | "lambda" Var "." Exp {EAbs}
+      | "(" Exp ")"
 
 Env ::= "nil"               {Nil}
       | Var "=" Val ":" Env {Cons}

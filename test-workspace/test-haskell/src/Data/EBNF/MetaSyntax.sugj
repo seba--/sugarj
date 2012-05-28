@@ -39,8 +39,8 @@ rules
       |[ $lit(name-dollar) HaskellExp -> ($sort(nt)) ]|
     ] => biggers;
     !context-free-priorities(chain([prods-group(biggers), simple-group(smaller)]))
-  
-  
+
+
   ebnf-to-sdf(|nt) :
     EBNFRule(symbols, None()) ->
     |[ $*sdf-symbols -> ($sort(nt)) {cons("NoConstr")} ]| 
@@ -63,8 +63,10 @@ rules
 
 signature constructors
   ToHaskellExp : StrategpTerm -> HaskellExp
-  ToHaskellAPat : StrategpTerm -> HaskellExp
+  ToHaskellAPat : StrategpTerm -> HaskellAPat
   FromHaskellExp : HaskellExp -> StrategpTerm
+  NoConstr : StrategoTerm -> HaskellTerm
+
 
 
 rules
@@ -82,6 +84,9 @@ rules
     <map(ebnf-meta-explode-exp)> xs => xs'
 
   ebnf-meta-explode-exp :
+    NoConstr(e) -> <ebnf-meta-explode-exp> e
+
+  ebnf-meta-explode-exp :
     s -> String([s])
   where <is-string> s
 
@@ -95,6 +100,9 @@ rules
     <string-starts-with(|"MetaSyntax-")> c;
     <string-as-chars(drop(|11))> c => c';
     <map(ebnf-meta-explode-pat)> xs => xs'
+
+  ebnf-meta-explode-pat :
+    NoConstr(p) -> <ebnf-meta-explode-pat> p
 
   ebnf-meta-explode-pat :
     s -> String([s])
