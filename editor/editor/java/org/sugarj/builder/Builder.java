@@ -201,7 +201,8 @@ public class Builder extends IncrementalProjectBuilder {
                   IEditorPart editor = editorRef.getEditor(false);
                   if (editor != null && 
                       editor instanceof UniversalEditor && 
-                      editor.getEditorInput() instanceof FileEditorInput) {
+                      editor.getEditorInput() instanceof FileEditorInput &&
+                      !Thread.currentThread().isInterrupted()) {
                     IFile file = ((FileEditorInput) editor.getEditorInput()).getFile();
                     if (file.getLocation().toString().equals(input.sourceFile.toString()))
                       ((UniversalEditor) editor).fParserScheduler.schedule();
