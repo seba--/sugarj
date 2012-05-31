@@ -159,12 +159,15 @@ signature
     TArrow           : HaskellGtycon
                      : HaskellQtycon -> HaskellGtycon
     Hiding           : HaskellExportlist -> HaskellImpspec
+    Impspec          : HaskellExportlist -> HaskellImpspec
     As               : HaskellModid -> HaskellAs
     Qualified        : HaskellQualified
     SOURCE           : HaskellSrc
     Import           : Option(HaskellSrc) * Option(HaskellQualified) * HaskellModid * Option(HaskellAs) * Option(HaskellImpspec) -> HaskellImportdecl
-                     : HaskellGtycon -> HaskellExport
-                     : HaskellQvar -> HaskellExport
+    ExportAllSub     : HaskellGtycon -> HaskellExport
+    ExportNoSub      : HaskellGtycon -> HaskellExport
+    ExportSomeSub    : HaskellGtycon * List(Qcname) -> Qcname
+    ExportModule     : HaskellModid -> HaskellExport
     Exportlist       : List(HaskellExport) -> HaskellExportlist
                      : HaskellOffsideTopdecl -> HaskellOffsideTopdeclList
                      : HaskellOffsideImportdecl -> HaskellOffsideImportdeclList
