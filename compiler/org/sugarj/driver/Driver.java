@@ -20,6 +20,8 @@ import java.io.ObjectOutputStream;
 import java.text.ParseException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -135,7 +137,7 @@ public class Driver{
   private boolean generateFiles;
   private Path delegateCompilation = null;
   
-  
+  private boolean inDesugaredDeclList;
   
   private LanguageLib langLib;
   
@@ -662,7 +664,7 @@ public class Driver{
       }
       try {
         if (langLib.isImportDec(toplevelDecl)) {
-          if (!environment.isAtomicImportParsing())
+          if (inDesugaredDeclList || !environment.isAtomicImportParsing())
             processImportDec(toplevelDecl);
           else 
             processImportDecs(toplevelDecl);
@@ -675,13 +677,23 @@ public class Driver{
           processEditorServicesDec(toplevelDecl);
         else if (langLib.isPlainDec(toplevelDecl))   // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
           processPlainDec(toplevelDecl);
-        else if (ATermCommands.isList(toplevelDecl))
+        else if (ATermCommands.isList(toplevelDecl)) {
           /* 
-           * Desugarings may generate lists of toplevel declarations. These declarations,
-           * however, may not depend on one another.
+           * Desugarings may generate lists of toplevel declarations.
            */
-          for (IStrategoTerm term : ATermCommands.getList(toplevelDecl))
-            processToplevelDeclaration(term);
+          List<IStrategoTerm> list = ATermCommands.getList(toplevelDecl);
+          sortForImports(list);
+
+          boolean old = inDesugaredDeclList;
+          inDesugaredDeclList = true;
+          
+          try {
+            for (IStrategoTerm term : list)
+              processToplevelDeclaration(term);
+          } finally {
+            inDesugaredDeclList = old;
+          }
+        }
         else if (ATermCommands.isString(toplevelDecl)) {
           if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
             sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
@@ -835,7 +847,8 @@ public class Driver{
 
   private void processImportDec(IStrategoTerm toplevelDecl) {
     
-    sugaredImportDecls.add(lastSugaredToplevelDecl);
+    if (!inDesugaredDeclList && !sugaredImportDecls.contains(lastSugaredToplevelDecl))
+      sugaredImportDecls.add(lastSugaredToplevelDecl);
     
     log.beginTask("processing", "PROCESS the desugared import declaration.");
     try {
@@ -1417,5 +1430,18 @@ public class Driver{
   private void setErrorMessage(IStrategoTerm toplevelDecl, String msg) {
     driverResult.logError(msg);
     ATermCommands.setErrorMessage(toplevelDecl, msg);
+  }
+  
+  private void sortForImports(List<IStrategoTerm> list) {
+    Collections.sort(list, new Comparator<IStrategoTerm>() {
+      @Override
+      public int compare(IStrategoTerm o1, IStrategoTerm o2) {
+        boolean imp1 = langLib.isImportDec(o1);
+        boolean imp2 = langLib.isImportDec(o2);
+        if (imp1 && imp2 || !imp1 && !imp2)
+          return 0;
+        return imp1 ? -1 : 1;
+      }
+    });
   }
 }
