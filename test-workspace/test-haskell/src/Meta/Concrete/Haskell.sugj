@@ -7,16 +7,18 @@ import Meta.Concrete.MetaExplode
 
 context-free syntax
   "|[" HaskellExp "]|" -> StrategoTerm {cons("ToMetaExpr")}
-  "|[" HaskellDecl "]|" -> StrategoTerm {cons("ToMetaExpr")}
+  "|[" HaskellTopdecl "]|" -> StrategoTerm {cons("ToMetaExpr")}
 
 syntax
   "$"  <StrategoTerm-CF> -> <HaskellExp-CF> {cons("FromMetaExpr")}
   "$"  <StrategoTerm-CF> -> <HaskellType-CF> {cons("FromMetaExpr")}
+  "$" <StrategoTerm-CF> -> <HaskellInst-CF> {cons("FromMetaExpr")}
 
   "$"  <StrategoTerm-CF> -> <HaskellAPat-CF> {cons("FromMetaExpr")}
   "$*" <StrategoTerm-CF> -> <HaskellFargs-CF> {cons("FromMetaExpr")}
 
   "$*" <StrategoTerm-CF> -> <HaskellDeclList-CF> {cons("FromMetaExpr")}
+
 
 
 lexical syntax

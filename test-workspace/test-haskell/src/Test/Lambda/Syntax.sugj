@@ -1,7 +1,5 @@
 module Test.Lambda.Syntax where
 
-import Prelude hiding (succ)
-
 import Data.EBNF.Syntax
 import Data.EBNF.Data
 import Data.EBNF.Parser
@@ -14,6 +12,9 @@ Exp ::= Var                  {EVar}
       | "lambda" Var "." Exp {EAbs}
       | "(" Exp ")"
 
+
+
 Env ::= "nil"               {Nil}
       | Var "=" Val ":" Env {Cons}
 Val ::= "(" "lambda" Var "." Exp "," Env ")" {Closure}
+

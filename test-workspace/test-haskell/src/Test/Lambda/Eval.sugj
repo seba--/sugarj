@@ -66,3 +66,5 @@ zero = |[ lambda s. lambda z. z ]|
 succ = |[ lambda n. lambda s. lambda z. (s ((n s) z)) ]|
 
 const x = |[ lambda c. $x ]|
+
+app = |[ lambda f. lambda x. (f x) ]|

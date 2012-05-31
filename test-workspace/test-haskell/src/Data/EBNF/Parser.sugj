@@ -11,12 +11,24 @@ rules
     EBNFDecl(name, rulez) ->
     LiftToTop(Import(None(), None(), QModId("Text", "Parsec"), None(), None()),
     LiftToTop(Import(None(), None(), QModId("Control", QModId("Monad", "Identity")), None(), None()),
-    |[ $parserName = $(<ebnf-parser-rules(|name, all-fails)> rulez) 
-                   :: ParsecT String () Identity $(TCon(name)) ]|
-    ))
+    LiftToTop(Import(None(), None(), QModId("Text", "Parse"), None(),
+              Some(Impspec(Exportlist([ExportAllSub("Parse"), ExportAllSub("Result"), ExportAllSub("Parser")])))),
+    TopdeclSeq(
+    |[ $parserName = $parser :: ParsecT String () Identity $(TCon(name)) ]|,
+    |[ instance Parse $(InstCons(name)) where
+         parse = P p
+           where 
+             p input = 
+               case runParser ($parserName >>= \x -> eof >> return x) () "inline" input of
+                 Left e -> Failure [] $ show e
+                 Right res -> Success [] res
+    ]|
+    ))))
   where <ebnf-parser-name> name => parserName;
         <collect-all(?EBNFTerminal(<id>))> rulez => terminals;
-        <ebnf-parser-fails> terminals => all-fails
+        <ebnf-parser-fails> terminals => all-fails;
+        <ebnf-parser-rules(|name, all-fails)> rulez => parser 
+                   
 
   ebnf-parser-rules(|name, all-fails) :
     [] -> |[ fail $ "Could not parse " ++ $(String([name])) ]|
