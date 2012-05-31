@@ -1,6 +1,5 @@
 module Data.EBNF.MetaSyntax where
 
-import Meta.LiftSugar
 import Meta.Concrete.SDF
 import Meta.Util
 

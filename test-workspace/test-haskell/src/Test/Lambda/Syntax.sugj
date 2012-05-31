@@ -7,9 +7,6 @@ import Data.EBNF.Data
 import Data.EBNF.Parser
 import Data.EBNF.MetaSyntax
 
-import Control.Monad.Identity
-import Text.Parsec
-
 Var ::= String {Var}
 
 Exp ::= Var                  {EVar}

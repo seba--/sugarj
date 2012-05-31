@@ -2,6 +2,8 @@ module Data.EBNF.Syntax where
 
 import org.sugarj.languages.Haskell
 
+import Meta.LiftToTop
+
 context-free syntax
   EBNFDecl -> HaskellTopdecl
 
@@ -25,10 +27,12 @@ desugarings
 rules
   desugar-ebnf :
     e@EBNFDecl(_,_) ->
-    <filter(not(?None)); foldr(id, \(x,y) -> TopdeclSeq(x, y)\)> [data, parser, metasyntax]
+    <<?None> metasyntax < id + !LiftToTop(metasyntax, <id>)> topdecls
     where <ebnf-data <+ !None> e => data;
           <ebnf-parser <+ !None> e => parser;
-          <ebnf-metasyntax <+ !None> e => metasyntax
+          ![data, parser] => decls;
+          <ebnf-metasyntax <+ !None> e => metasyntax;
+          <filter(not(?None)); foldr(id, \(x,y) -> TopdeclSeq(x, y)\)> decls => topdecls
 
   ebnf-data = fail
   ebnf-parser = fail

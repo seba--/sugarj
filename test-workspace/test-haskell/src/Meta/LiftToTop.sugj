@@ -1,0 +1,63 @@
+module Meta.LiftToTop where
+
+import org.sugarj.languages.Haskell
+
+signature constructors
+  LiftToTop : a -> Empty
+  LiftToTop : a * b -> b
+
+desugarings
+  lift-to-top
+
+rules
+  lift-to-top = 
+    (?HaskellBody(_) + ?SugarBody(_) + ?EditorBody(_));
+    rules( CollectedLiftToTop := [] );
+    bottomup(try(lift-to-top')) => code;
+    CollectedLiftToTop => lifted;
+    if <?[]> lifted
+      then fail
+      else ![code|lifted]; 
+           make-set; 
+           concat-haskell-body; concat-sugar-body; concat-editor-body
+    end
+
+  lift-to-top' : 
+    LiftToTop(lift, e) -> e
+    with rules ( CollectedLiftToTop := [lift | <CollectedLiftToTop>] )
+
+  lift-to-top' =
+    is-list;
+    partition(lift-to-top-solo);
+    if ?([],_)
+      then fail
+      else ?(_,<id>)
+    end
+  
+  lift-to-top-solo : 
+    LiftToTop(lift) -> lift
+    with rules ( CollectedLiftToTop := [lift | <CollectedLiftToTop>] )
+
+  concat-haskell-body =
+    partition(?HaskellBody(<id>)) => (xs, ys);
+    if <?[]> xs
+      then !ys
+      else <foldr(id,\(x,y) -> TopdeclSeq(x,y)\)> xs => xs';
+           ![HaskellBody(xs')|ys]
+    end
+
+  concat-sugar-body =
+    partition(?SugarBody(<id>)) => (xs, ys);
+    if <?[]> xs
+      then !ys
+      else <concat> xs => xs';
+           ![SugarBody(xs')|ys]
+    end
+
+  concat-editor-body =
+    partition(?EditorBody(<id>)) => (xs, ys);
+    if <?[]> xs
+      then !ys
+      else <concat> xs => xs';
+           ![EditorBody(xs')|ys]
+    end
