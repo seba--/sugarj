@@ -5,6 +5,8 @@ import Data.EBNF.Data
 import Data.EBNF.Parser
 import Data.EBNF.MetaSyntax
 
+import Prelude hiding (succ)
+
 Var ::= String {Var}
 
 Exp ::= Var                  {EVar}
@@ -18,3 +20,8 @@ Env ::= "nil"               {Nil}
       | Var "=" Val ":" Env {Cons}
 Val ::= "(" "lambda" Var "." Exp "," Env ")" {Closure}
 
+var = read "v" :: Var 
+ident = read "lambda x. x" :: Exp
+zero = read "lambda s. lambda z. z" :: Exp
+succ =  read "lambda n. lambda s. lambda z. (s ((n s) z))" :: Exp
+app = read "lambda f. lambda x. (f x)" :: Exp

@@ -1,6 +1,7 @@
 module Data.EBNF.Parser where
 
 import Data.EBNF.Syntax
+import Data.EBNF.Data
 
 import Meta.Concrete.Haskell
 import Meta.LiftToTop
@@ -11,19 +12,15 @@ rules
     EBNFDecl(name, rulez) ->
     LiftToTop(Import(None(), None(), QModId("Text", "Parsec"), None(), None()),
     LiftToTop(Import(None(), None(), QModId("Control", QModId("Monad", "Identity")), None(), None()),
-    LiftToTop(Import(None(), None(), QModId("Text", "Parse"), None(),
-              Some(Impspec(Exportlist([ExportAllSub("Parse"), ExportAllSub("Result"), ExportAllSub("Parser")])))),
     TopdeclSeq(
     |[ $parserName = $parser :: ParsecT String () Identity $(TCon(name)) ]|,
-    |[ instance Parse $(InstCons(name)) where
-         parse = P p
-           where 
-             p input = 
-               case runParser ($parserName >>= \x -> eof >> return x) () "inline" input of
-                 Left e -> Failure [] $ show e
-                 Right res -> Success [] res
+    |[ instance Read $(InstCons(name)) where
+         readsPrec _ input = 
+           case runParser ($parserName >>= \x -> eof >> return x) () "inline" input of
+                 Left e -> error $ show e
+                 Right res -> [(res,"")]
     ]|
-    ))))
+    )))
   where <ebnf-parser-name> name => parserName;
         <collect-all(?EBNFTerminal(<id>))> rulez => terminals;
         <ebnf-parser-fails> terminals => all-fails;
@@ -126,3 +123,8 @@ rules
       else !var
     end
  
+
+rules
+  constraint-error =
+    ?EBNFDecl(name, <id>);
+    collect-all(?EBNFRule([n@EBNFNonterminal(name)|_],_); !(n, "left-recursive reference breaks generated parser"))

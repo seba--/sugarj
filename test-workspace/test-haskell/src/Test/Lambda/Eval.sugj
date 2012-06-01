@@ -2,7 +2,7 @@ module Test.Lambda.Eval where
 
 import Data.List((\\))
 
-import Test.Lambda.Syntax
+import Test.Lambda.Syntax hiding (var,ident,zero,succ,app)
 
 lookupEnv _ Nil = Nothing
 lookupEnv v (Cons v' val env) =
@@ -60,7 +60,7 @@ nextFreeVar (Var v) vs
               | Var (v ++ show n) `elem` vs = next v (n + 1)
               | otherwise                   = Var $ v ++ show n
 
-var = |[ Exp | v ]|
+var = |[ Var | v ]|
 ident = |[ lambda x. x ]|
 zero = |[ lambda s. lambda z. z ]|
 succ = |[ lambda n. lambda s. lambda z. (s ((n s) z)) ]|
@@ -68,3 +68,5 @@ succ = |[ lambda n. lambda s. lambda z. (s ((n s) z)) ]|
 const x = |[ lambda c. $x ]|
 
 app = |[ lambda f. lambda x. (f x) ]|
+
+identEta = |[ lambda x. ($ident x) ]|

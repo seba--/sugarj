@@ -27,6 +27,7 @@ context-free priorities
   > ArrCommand HaskellQop ArrCommand -> ArrCommand
 
 lexical syntax
+  "proc" -> HaskellVARID {reject}
   "-<" -> HaskellVARSYM {reject}
   "-<<" -> HaskellVARSYM {reject}
 
