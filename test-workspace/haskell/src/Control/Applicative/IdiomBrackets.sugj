@@ -2,6 +2,7 @@ module Control.Applicative.IdiomBrackets where
 
 import org.sugarj.languages.Haskell
 
+import Meta.Concrete.Haskell
 import Meta.LiftToTop
 
 context-free syntax
@@ -22,7 +23,8 @@ desugarings
 rules
   desugar-idiom-brackets :
     IdiomBrackets(f, args) ->
-    <apply-effectful; ensure-import(|["Control","Applicative"])> (AppBin(Var("pure"), f), args)
+    <apply-effectful; ensure-import(|["Control","Applicative"])>
+      (|[ Control.Applicative.pure $f ]|, args)
   desugar-idiom-brackets :
     InfixIdiomBrackets(e1, op, e2) ->
     IdiomBrackets(BinCon(op), [e1, e2])
@@ -30,4 +32,4 @@ rules
   apply-effectful :
     (f,[]) -> f
   apply-effectful :
-    (f,[x|xs]) -> <apply-effectful> (OpApp(f, ConsOp("<*>"), x), xs)
+    (f,[x|xs]) -> <apply-effectful> (|[ $f Control.Applicative.<*> $x ]|, xs)
