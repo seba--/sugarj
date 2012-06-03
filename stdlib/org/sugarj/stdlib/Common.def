@@ -1,6 +1,7 @@
 definition
 
 module org/sugarj/stdlib/Common
+imports org/sugarj/stdlib/LayoutSugar
 exports
 
   context-free start-symbols NextToplevelDeclaration
@@ -16,3 +17,38 @@ exports
     Rest -/- ~[]
     EOF -/- ~[]
 
+
+module org/sugarj/stdlib/LayoutSugar
+imports org/sugarj/languages/Sdf2
+exports
+  lexical syntax
+    %% Lexical insertion recovery rules             
+                                        -> ")"      {recover, cons("INSERTION")}
+                                        -> "layout" {recover, cons("INSERTION")}
+
+
+  context-free syntax
+    "layout" "(" LayoutConstraint ")" -> Sdf2ATermAttribute {avoid, cons("LayoutConstraint")}
+    Sdf2IntCon                        -> LayoutConstraint   {cons("LayoutInt")}
+
+  context-free priorities
+    LayoutConstraint "." Sdf2AFun -> LayoutConstraint {cons("LayoutSelect")} >
+    {right:
+      LayoutConstraint ">" LayoutConstraint -> LayoutConstraint
+      {cons("LayoutGT")}
+      LayoutConstraint ">=" LayoutConstraint -> LayoutConstraint
+      {cons("LayoutGE")}
+      LayoutConstraint "==" LayoutConstraint -> LayoutConstraint
+      {cons("LayoutEQ")}
+      LayoutConstraint "<=" LayoutConstraint -> LayoutConstraint
+      {cons("LayoutLE")}
+      LayoutConstraint "<" LayoutConstraint -> LayoutConstraint
+      {cons("LayoutLT")}
+    } >
+    {right:
+      LayoutConstraint "&&" LayoutConstraint -> LayoutConstraint
+      {cons("LayoutAnd")}
+      LayoutConstraint "||" LayoutConstraint -> LayoutConstraint
+      {cons("LayoutOr")}
+      "!" LayoutConstraint -> LayoutConstraint {cons("LayoutNot")}
+    }

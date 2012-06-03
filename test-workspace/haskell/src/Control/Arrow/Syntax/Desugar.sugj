@@ -7,7 +7,6 @@ import Control.Arrow.Syntax.Concrete
 
 import Control.Arrow.Syntax.Command
 
-
 desugarings
   desugar-arrow
 

@@ -1,0 +1,59 @@
+module Meta.LayoutSugar where
+
+import org.sugarj.languages.Sdf2
+
+context-free syntax
+  "layout" "(" LayoutConstraint ")" -> Sdf2ATermAttribute {avoid,cons("LayoutConstraint")}
+  
+  Sdf2IntCon -> LayoutConstraint {cons("LayoutInt")}
+
+context-free priorities
+  LayoutConstraint "." Sdf2AFun -> LayoutConstraint {cons("LayoutSelect")}
+ >
+  {right:
+    LayoutConstraint ">" LayoutConstraint -> LayoutConstraint {cons("LayoutGT")}
+    LayoutConstraint ">=" LayoutConstraint -> LayoutConstraint {cons("LayoutGE")}
+    LayoutConstraint "==" LayoutConstraint -> LayoutConstraint {cons("LayoutEQ")}
+    LayoutConstraint "<=" LayoutConstraint -> LayoutConstraint {cons("LayoutLE")}
+    LayoutConstraint "<" LayoutConstraint -> LayoutConstraint {cons("LayoutLT")}
+  } >
+  {right:
+    LayoutConstraint "&&" LayoutConstraint -> LayoutConstraint {cons("LayoutAnd")}
+    LayoutConstraint "||" LayoutConstraint -> LayoutConstraint {cons("LayoutOr")}
+    "!" LayoutConstraint -> LayoutConstraint {cons("LayoutNot")}
+  }
+
+
+desugarings
+  desugar-layout
+
+rules
+  desugar-layout : 
+    LayoutConstraint(c) ->
+    default(appl(unquoted("layout"), [<layout-to-aterm> c]))
+
+  layout-to-aterm :
+     LayoutInt(i) ->
+     int(i)
+
+  layout-to-aterm :
+    LayoutSelect(c, f) ->
+    appl(f, <layout-to-aterm> c)
+
+  layout-to-aterm :
+    LayoutNot(c) ->
+    appl(unquoted("not"), <layout-to-aterm> c)
+
+  layout-to-aterm :
+    op#([l,r]) ->
+    appl(unquoted(fun), [<layout-to-aterm> l, <layout-to-aterm> r])
+  where
+    <layout-binop-to-funname> op => fun
+
+  layout-binop-to-funname : "LayoutGT" -> "gt"
+  layout-binop-to-funname : "LayoutGE" -> "ge"
+  layout-binop-to-funname : "LayoutEQ" -> "eq"
+  layout-binop-to-funname : "LayoutLE" -> "le"
+  layout-binop-to-funname : "LayoutLT" -> "lt"
+  layout-binop-to-funname : "LayoutAnd" -> "and"
+  layout-binop-to-funname : "LayoutOr" -> "or"
