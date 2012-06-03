@@ -2,6 +2,8 @@ module Control.Applicative.IdiomBrackets where
 
 import org.sugarj.languages.Haskell
 
+import Meta.LiftToTop
+
 context-free syntax
   "(|" PurePart EffectfulPart* "|)" -> HaskellExp {cons("IdiomBrackets")}
   "(|" HaskellExp HaskellQop HaskellExp "|)" -> HaskellExp {cons("InfixIdiomBrackets")}
@@ -20,7 +22,7 @@ desugarings
 rules
   desugar-idiom-brackets :
     IdiomBrackets(f, args) ->
-    <apply-effectful> (AppBin(Var("pure"), f), args)
+    <apply-effectful; ensure-import(|["Control","Applicative"])> (AppBin(Var("pure"), f), args)
   desugar-idiom-brackets :
     InfixIdiomBrackets(e1, op, e2) ->
     IdiomBrackets(BinCon(op), [e1, e2])

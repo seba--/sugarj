@@ -61,3 +61,10 @@ rules
       else <concat> xs => xs';
            ![EditorBody(xs')|ys]
     end
+
+
+  ensure-import(|imp) : e -> LiftToTop(<qualified-import> imp, e)
+
+  qualified-import =
+    foldr1(id, \(x,y) -> QModId(x,y)\);
+    !Import(None(), Some(Qualified()), <id>, None(), None())
