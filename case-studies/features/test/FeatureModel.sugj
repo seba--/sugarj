@@ -1,8 +1,0 @@
-package features.test;
-
-import features.Features;
-
-featuremodel FeatureModel {
-  feature A;
-  feature B implies A;
-}

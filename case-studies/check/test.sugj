@@ -1,6 +1,0 @@
-package check;
-
-import check.Naming;
-
-public class test {
-}
