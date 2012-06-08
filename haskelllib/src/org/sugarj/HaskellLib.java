@@ -326,4 +326,19 @@ public class HaskellLib extends LanguageLib {
     
     return msg.length > 0 && msg[0].length > 0;
   }
+
+  @Override
+  public String getEditorName(IStrategoTerm decl) throws IOException {
+    return moduleName;
+  }
+
+  @Override
+  public int getEditorAccessibility(IStrategoTerm decl) {
+    return PUBLIC_SUGAR;
+  }
+
+  @Override
+  public IStrategoTerm getEditorServices(IStrategoTerm decl) {
+    return getApplicationSubterm(decl, "EditorBody", 0);
+  }
 }

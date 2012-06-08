@@ -419,6 +419,21 @@ public class PrologLib extends LanguageLib implements Serializable {
 		return false;
 	}
 
+	@Override
+	public String getEditorName(IStrategoTerm decl) throws IOException {
+		throw new UnsupportedOperationException("SugarProlog does currently not support editor libraries.");
+	}
+
+	@Override
+	public int getEditorAccessibility(IStrategoTerm decl) {
+		throw new UnsupportedOperationException("SugarProlog does currently not support editor libraries.");
+	}
+
+	@Override
+	public IStrategoTerm getEditorServices(IStrategoTerm decl) {
+		throw new UnsupportedOperationException("SugarProlog does currently not support editor libraries.");
+	}
+
 
 	
 	

@@ -23,6 +23,7 @@ import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.java_front.pp_java_string_0_0;
 import org.strategoxt.lang.Context;
+import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
@@ -391,6 +392,30 @@ public class JavaLib extends LanguageLib implements Serializable {
 		} catch (ClassNotFoundException e) {
 			return false;
 		}
+	}
+
+	@Override
+	public String getEditorName(IStrategoTerm decl) throws IOException {
+		IStrategoTerm head = getApplicationSubterm(decl, "EditorServicesDec", 0);
+		return prettyPrint(getApplicationSubterm(head, "EditorServicesDecHead", 1));
+	}
+
+	@Override
+	public int getEditorAccessibility(IStrategoTerm decl) {
+		IStrategoTerm head = getApplicationSubterm(decl, "EditorServicesDec", 0);
+		IStrategoTerm mods = getApplicationSubterm(head, "EditorServicesDecHead", 0);
+		
+        for (IStrategoTerm t : getList(mods))
+        	if (isApplication(t, "Public")) 
+        		return LanguageLib.PUBLIC_SUGAR;
+        
+        return LanguageLib.PRIVATE_SUGAR;
+	}
+
+	@Override
+	public IStrategoTerm getEditorServices(IStrategoTerm decl) {
+		IStrategoTerm body = getApplicationSubterm(decl, "EditorServicesDec", 1);
+		return ATermCommands.getApplicationSubterm(body, "EditorServicesBody", 0);
 	}
 
 

@@ -522,26 +522,12 @@ public class Driver{
       String fullExtName = null;
       boolean isPublic = false;
 
-      IStrategoTerm head = getApplicationSubterm(toplevelDecl, "EditorServicesDec", 0);
-      IStrategoTerm body= getApplicationSubterm(toplevelDecl, "EditorServicesDec", 1);
-      
       log.beginTask("Extracting name and accessibility of the editor services.");
       try {
-        extName =
-          langLib.prettyPrint(
-          getApplicationSubterm(head, "EditorServicesDecHead", 1));    
-        
-        
-        
-        IStrategoTerm mods = getApplicationSubterm(head, "EditorServicesDecHead", 0);
-        
-        for (IStrategoTerm t : getList(mods))
-          if (isApplication(t, "Public"))
-          {
-            isPublic = true;
-            break;
-          }
-        
+        extName = langLib.getEditorName(toplevelDecl);
+        if (langLib.getEditorAccessibility(toplevelDecl) == LanguageLib.PUBLIC_SUGAR)
+          isPublic = true;
+
         fullExtName = langLib.getRelativeNamespaceSep() + extName;
 
         log.log("The name of the editor services is '" + extName + "'.");
@@ -552,7 +538,7 @@ public class Driver{
         else
           log.log("The editor services is not public.");
       
-        IStrategoTerm services = ATermCommands.getApplicationSubterm(body, "EditorServicesBody", 0);
+        IStrategoTerm services = langLib.getEditorServices(toplevelDecl);
         
         if (!ATermCommands.isList(services))
           throw new IllegalStateException("editor services are not a list: " + services);

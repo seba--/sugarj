@@ -221,7 +221,9 @@ public abstract class LanguageLib implements Serializable {
 	public abstract int getSugarAccessibility(IStrategoTerm decl);
 	public abstract IStrategoTerm getSugarBody(IStrategoTerm decl);
 	
-
+	public abstract String getEditorName(IStrategoTerm decl) throws IOException;
+	public abstract int getEditorAccessibility(IStrategoTerm decl);
+	public abstract IStrategoTerm getEditorServices(IStrategoTerm decl);
 
 	protected void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IErrorLogger errorLog) {
 	  errorLog.logError(msg);
