@@ -3,12 +3,8 @@
    <description name="SugarJ" url="sugarj.org/update">
       SugarJ
    </description>
-   <feature url="features/org.sugarj.editor_1.4.0.201202081130.jar" id="org.sugarj.editor" version="1.4.0.201202081130">
-      <category name="SugarJ"/>
+   <feature url="features/org.sugarj.haskell_1.0.0.201206161219.jar" id="org.sugarj.haskell" version="1.0.0.201206161219">
+      <category name="SugarHaskell"/>
    </feature>
-   <category-def name="SugarJ" label="SugarJ">
-      <description>
-         SugarJ plugin
-      </description>
-   </category-def>
+   <category-def name="SugarHaskell" label="SugarHaskell"/>
 </site>

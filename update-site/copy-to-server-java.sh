@@ -1,0 +1,6 @@
+#!/bin/sh
+
+SERVER=login.mathematik.uni-marburg.de
+DIR=public_html/projects/sugarj/update
+
+rsync -av . $SERVER:$DIR
