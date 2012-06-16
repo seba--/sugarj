@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.sugarj.editor"
-      label="Sugarclipse"
-      version="1.4.0.qualifier"
+      id="org.sugarj.haskell"
+      label="SugarHaskell"
+      version="1.0.0.qualifier"
       provider-name="sugarj.org">
 
    <description url="http://sugarj.org">
@@ -19,7 +19,7 @@ The SugarJ standard library is released under the GNU GENERAL PUBLIC LICENSE, Ve
    </license>
 
    <url>
-      <update label="SugarJ" url="http://sugarj.org/update"/>
+      <update label="SugarHaskell" url="http://github.com/seba--/sugarj/raw/haskell/update-site"/>
    </url>
 
    <includes
@@ -27,42 +27,24 @@ The SugarJ standard library is released under the GNU GENERAL PUBLIC LICENSE, Ve
          version="0.0.0"/>
 
    <requires>
+      <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.spoofax.terms"/>
+      <import plugin="org.eclipse.jdt.core" version="3.5.0" match="greaterOrEqual"/>
+      <import plugin="org.strategoxt.strj"/>
+      <import plugin="org.strategoxt.imp.runtime"/>
+      <import plugin="org.strategoxt.imp.nativebundle"/>
+      <import plugin="org.spoofax.jsglr_layout"/>
       <import plugin="org.eclipse.core.resources"/>
-      <import plugin="org.junit"/>
-      <import plugin="org.eclipse.swt"/>
-      <import plugin="org.eclipse.jface"/>
+      <import plugin="org.eclipse.imp.runtime"/>
+      <import plugin="lpg.runtime"/>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.ui.editors"/>
-      <import plugin="org.eclipse.ui.workbench"/>
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
       <import plugin="org.eclipse.ant.core"/>
       <import plugin="org.eclipse.ui.console"/>
-      <import plugin="org.eclipse.debug.ui"/>
-      <import plugin="org.junit4"/>
-      <import plugin="org.eclipse.compare"/>
-      <import plugin="org.eclipse.core.filesystem"/>
-      <import plugin="org.eclipse.debug.core"/>
-      <import plugin="org.eclipse.help"/>
-      <import plugin="org.eclipse.ltk.core.refactoring"/>
-      <import plugin="org.eclipse.ltk.ui.refactoring"/>
-      <import plugin="org.eclipse.ui.navigator"/>
-      <import plugin="org.eclipse.ui.views"/>
-      <import plugin="org.eclipse.ui.workbench.texteditor"/>
-      <import plugin="org.eclipse.jdt.core" version="3.5.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.osgi"/>
-      <import plugin="org.eclipse.jdt.ui" version="3.5.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.pde.ui"/>
-      <import plugin="org.eclipse.ui.forms"/>
-      <import plugin="org.eclipse.search"/>
-      <import plugin="org.eclipse.pde"/>
-      <import plugin="org.eclipse.ui.cheatsheets"/>
-      <import plugin="org.eclipse.pde.core"/>
-      <import plugin="org.eclipse.help.ui"/>
-      <import plugin="org.eclipse.jdt.debug" version="3.5.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jdt.launching" version="3.5.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.core.variables"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.spoofax.jsglr"/>
    </requires>
 
    <plugin
@@ -83,5 +65,26 @@ The SugarJ standard library is released under the GNU GENERAL PUBLIC LICENSE, Ve
          download-size="0"
          install-size="0"
          version="0.0.0"/>
+
+   <plugin
+         id="org.sugarj.common"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.sugarj.haskell"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.sugarj.languagelib"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>

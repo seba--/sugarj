@@ -2,7 +2,6 @@ package org.sugarj.driver;
 
 import org.sugarj.HaskellLib;
 import org.sugarj.LanguageLib;
-import org.sugarj.PrologLib;
 
 public class UsedLanguageLibrary {
   // TODO: Remove this class

@@ -12,10 +12,8 @@ Require-Bundle: org.eclipse.ui,
  org.strategoxt.strj,
  org.strategoxt.imp.runtime,
  org.strategoxt.imp.nativebundle,
- org.sugarj.java,
  org.sugarj.common,
  org.sugarj.languagelib,
- org.sugarj.prolog,
  org.sugarj.haskell,
  org.spoofax.jsglr_layout
 Bundle-ActivationPolicy: lazy
