@@ -319,10 +319,14 @@ public class FileCommands {
   }
 
   public static String getExtension(File infile) {
-    int i = infile.getName().lastIndexOf('.');
+    return getExtension(infile.getName());
+  }
+  
+  public static String getExtension(String infile) {
+    int i = infile.lastIndexOf('.');
     
     if (i > 0)
-      return infile.getName().substring(i+1, infile.getName().length());
+      return infile.substring(i+1, infile.length());
     
     return null;
   }

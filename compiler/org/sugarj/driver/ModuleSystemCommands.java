@@ -14,6 +14,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.sugarj.LanguageLib;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
+import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
@@ -140,7 +141,24 @@ public class ModuleSystemCommands {
     registerSearchedFiles(modulePath, ".serv", driverResult, environment);
   }
 
-  
+
+  public static RelativeSourceLocationPath locateSourceFile(String path, Set<SourceLocation> sourcePath) {
+    if (path.startsWith("org/sugarj"))
+      return null;
+    
+    RelativeSourceLocationPath result = searchFileInSourceLocationPath(FileCommands.dropExtension(path), FileCommands.getExtension(path), sourcePath);
+        
+    return result;
+  }
+
+  public static RelativeSourceLocationPath locateSourceFile(String modulePath, String extension, Set<SourceLocation> sourcePath) {
+    if (modulePath.startsWith("org/sugarj"))
+      return null;
+    
+    RelativeSourceLocationPath result = searchFileInSourceLocationPath(modulePath, extension, sourcePath);
+        
+    return result;
+  }
   
   public static RelativeSourceLocationPath locateSourceFile(String modulePath, Set<SourceLocation> sourcePath, LanguageLib langLib) {
     if (modulePath.startsWith("org/sugarj"))
@@ -171,7 +189,7 @@ public class ModuleSystemCommands {
   }
 
   private static RelativePath searchBinFile(String relativePath, String extension, Environment environment) {
-    RelativePath result = environment.createBinPath(relativePath + extension);
+    RelativePath result = environment.createBinPath(relativePath + "." + extension);
     if (result.getFile().exists())
       return result;
     
@@ -204,14 +222,14 @@ public class ModuleSystemCommands {
       relativePath = relativePath.substring(base.getAbsolutePath().length() + sepOffset);
     }
     
-    RelativePath p = new RelativePath(base, relativePath + extension);
+    RelativePath p = new RelativePath(base, relativePath + "." + extension);
     if (p.getFile().exists())
       return p;
     
     try {
       ClassLoader cl = new URLClassLoader(new URL[] {base.getFile().toURI().toURL()}, null);
-      if (cl.getResource(relativePath + extension) != null)
-        return new RelativePath(base, relativePath + extension);
+      if (cl.getResource(relativePath + "." + extension) != null)
+        return new RelativePath(base, relativePath + "." + extension);
     } catch (MalformedURLException e) {
       e.printStackTrace();
     }
@@ -231,7 +249,7 @@ public class ModuleSystemCommands {
    * @throws IOException
    */
   public static void registerSearchedFiles(String relativePath, String extension, Result driverResult, Environment environment) throws IOException {
-    RelativePath binFile = environment.createBinPath(relativePath + extension);
+    RelativePath binFile = environment.createBinPath(relativePath + "." + extension);
     driverResult.addFileDependency(binFile);
     
     for (Path searchPath : environment.getIncludePath()) {
@@ -241,7 +259,7 @@ public class ModuleSystemCommands {
         relPath = relPath.substring(searchPath.getAbsolutePath().length() + sepOffset);
       }
       
-      RelativePath p = new RelativePath(searchPath, relPath + extension);
+      RelativePath p = new RelativePath(searchPath, relPath + "." + extension);
       driverResult.addFileDependency(p);
     }
   }

@@ -35,6 +35,8 @@ import org.spoofax.terms.attachments.ParentAttachment;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.imp.runtime.services.ContentProposer;
 import org.sugarj.LanguageLib;
+import org.sugarj.LanguageLibFactory;
+import org.sugarj.LanguageLibRegistry;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.Environment;
@@ -48,7 +50,6 @@ import org.sugarj.driver.ModuleSystemCommands;
 import org.sugarj.driver.Result;
 import org.sugarj.driver.RetractableTreeBuilder;
 import org.sugarj.driver.STRCommands;
-import org.sugarj.driver.UsedLanguageLibrary;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.stdlib.StdLib;
 
@@ -57,8 +58,6 @@ import org.sugarj.stdlib.StdLib;
  */
 public class SugarJParser extends JSGLRI {
 
-  private final LanguageLib langLib = UsedLanguageLibrary.getFreshLanguageLibrary();
-  
   private Environment environment;
   
   private static Map<String, Result> results = new HashMap<String, Result>();
@@ -78,12 +77,14 @@ public class SugarJParser extends JSGLRI {
     
     assert environment != null;
     
+    if (!LanguageLibRegistry.getInstance().isRegistered(FileCommands.getExtension(filename)))
+      return null;
 
     this.result = null;
     Result result = getResult(filename);
 
     if (result == null)
-      result = parseFailureResult();
+      result = parseFailureResult(filename);
 
     if (input.contains(ContentProposer.COMPLETION_TOKEN) && result != null && result.getParseTable() != null) {
       this.result = result;
@@ -104,9 +105,8 @@ public class SugarJParser extends JSGLRI {
   private synchronized void scheduleParse(final String input, final String filename) {
     SugarJParser.setPending(filename, true);
 
-    // XXX: support non-java files in editor. (i.e. use actual language library here, not just JavaLib)
-    final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(filename), environment.getSourcePath(), langLib);
-
+    final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(filename, environment.getSourcePath());
+    final LanguageLibFactory factory = LanguageLibRegistry.getInstance().getLanguageLib(FileCommands.getExtension(filename));
     
     Job parseJob = new Job("SugarJ parser: " + sourceFile.getRelativePath()) {
       @Override
@@ -115,7 +115,7 @@ public class SugarJParser extends JSGLRI {
         Result result = null;
         boolean ok = false;
         try {
-          result = runParser(input, sourceFile, monitor);
+          result = runParser(input, sourceFile, factory, monitor);
           ok = true;
         } catch (InterruptedException e) {
           result = null;
@@ -135,7 +135,7 @@ public class SugarJParser extends JSGLRI {
     parseJob.schedule();
   }
   
-  private Result runParser(String input, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor) throws InterruptedException {
+  private Result runParser(String input, RelativeSourceLocationPath sourceFile, LanguageLibFactory factory, IProgressMonitor monitor) throws InterruptedException {
     CommandExecution.SILENT_EXECUTION = false;
     CommandExecution.SUB_SILENT_EXECUTION = false;
     CommandExecution.FULL_COMMAND_LINE = true;
@@ -145,7 +145,7 @@ public class SugarJParser extends JSGLRI {
     SugarJConsole.activateConsoleOnce();
     
     try {
-      return Driver.parse(input, sourceFile, monitor, langLib.getFactoryForLanguage());
+      return Driver.parse(input, sourceFile, monitor, factory);
     } catch (InterruptedException e) {
       throw e;
     } catch (Exception e) {
@@ -205,7 +205,7 @@ public class SugarJParser extends JSGLRI {
     }
   }
   
-  private Result parseFailureResult() throws FileNotFoundException, IOException {
+  private Result parseFailureResult(String filename) throws FileNotFoundException, IOException {
     Tokenizer tokenizer = new Tokenizer(" ", " ", new KeywordRecognizer(null) {});
     Token tok = tokenizer.makeToken(0, IToken.TK_UNKNOWN, true);
     IStrategoTerm term = ATermCommands.makeList("SugarCompilationUnit", tok);
@@ -215,7 +215,7 @@ public class SugarJParser extends JSGLRI {
       public boolean isUpToDate(int h, Environment env) { return false; }
     };
     r.setSugaredSyntaxTree(term);
-    r.registerEditorDesugarings(getInitialTrans());
+    r.registerEditorDesugarings(getInitialTrans(LanguageLibRegistry.getInstance().getLanguageLib(FileCommands.getExtension(filename))));
     return r;
   }
   
@@ -274,7 +274,8 @@ public class SugarJParser extends JSGLRI {
   private Path initialTrans = null;
 
   @SuppressWarnings("unchecked")
-  private Path getInitialTrans() throws FileNotFoundException, IOException {
+  private Path getInitialTrans(LanguageLibFactory factory) throws FileNotFoundException, IOException {
+    LanguageLib langLib = factory.createLanguageLibrary();
     if (initialTrans != null && FileCommands.exists(initialTrans))
       return initialTrans;
     Path strCachePath = environment.createCachePath("strCache");

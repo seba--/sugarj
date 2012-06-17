@@ -59,8 +59,6 @@ import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.common.path.SourceLocation;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
-import org.sugarj.driver.cli.CLIError;
-import org.sugarj.driver.cli.DriverCLI;
 import org.sugarj.driver.transformations.extraction.extraction;
 import org.sugarj.stdlib.StdLib;
 import org.sugarj.util.Pair;
@@ -79,7 +77,6 @@ public class Driver{
   private static Map<Path, Result> resultCache = new HashMap<Path, Result>(); // new LRUMap(50);
   private static Map<Path, Entry<String, Driver>> pendingRuns = new HashMap<Path, Map.Entry<String,Driver>>();
 
-  private static List<RelativeSourceLocationPath> allInputFiles = new ArrayList<RelativeSourceLocationPath>();
   private static List<Path> pendingInputFiles = new ArrayList<Path>();
 
   private static List<Path> currentlyProcessing = new ArrayList<Path>();
@@ -93,8 +90,6 @@ public class Driver{
   
   private Result driverResult;
   
-//  private Path javaOutFile;
-//  private JavaSourceFileContent javaSource;
   private Path depOutFile;
 
   private RelativeSourceLocationPath sourceFile;
@@ -105,8 +100,6 @@ public class Driver{
   private String currentTransModule;
   private String remainingInput;
   
-  // private Collection<String> dependentFiles;
-
   private List<String> availableSDFImports;
   private List<String> availableSTRImports;
   
@@ -156,10 +149,7 @@ public class Driver{
     } catch (IOException e) {
       throw new RuntimeException("error while initializing driver", e);
     }
-    
-    
   }  
-  
   
   private static synchronized Result getResult(Path file) {
     return (Result) resultCache.get(file);
@@ -227,10 +217,6 @@ public class Driver{
   private static Result run(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     if (generateFiles)
       synchronized (currentlyProcessing) {
-        // TODO we need better circular dependency handling
-        if (currentlyProcessing.contains(sourceFile))
-          ;
-          // throw new IllegalStateException("circular processing");
         currentlyProcessing.add(sourceFile);
       }
 
@@ -1190,53 +1176,7 @@ public class Driver{
     strjContext = org.strategoxt.strj.strj.init();
   }
   
-  /**
-   * @param args
-   * @throws IOException
-   */
-  public static void main(String[] args) {
-        LanguageLib langLib = UsedLanguageLibrary.getFreshLanguageLibrary();
-    
-    // log.log("This is the extensible java compiler.");
-    Environment environment = new Environment();
-    
-    try {
-      String[] sources = DriverCLI.handleOptions(args, environment);
 
-      if (environment.getSourcePath().isEmpty())
-        environment.getSourcePath().add(new SourceLocation(new AbsolutePath("."), environment));
-      
-      for (String source : sources)
-      {
-        RelativeSourceLocationPath p = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(source), environment.getSourcePath(), langLib);
-        
-        allInputFiles.add(p);
-        pendingInputFiles.add(p);
-      }
-      
-      IProgressMonitor monitor = new PrintProgressMonitor(System.out);
-      
-      for (final RelativeSourceLocationPath sourceFile : allInputFiles) {
-        monitor.beginTask("compile " + sourceFile, IProgressMonitor.UNKNOWN);
-        Result res = compile(sourceFile, monitor, langLib.getFactoryForLanguage());
-        if (!DriverCLI.processResultCLI(res, sourceFile, new File(".").getAbsolutePath()))
-          throw new RuntimeException("compilation of " + sourceFile + " failed");
-      }
-      
-    } catch (Exception e) {
-      e.printStackTrace();
-    } catch (CLIError e) {
-      Log.log.log(e.getMessage());
-      Log.log.log("");
-      e.showUsage();
-    }
-
-    // kills all remaining subprocesses, if any
-    // log.log("The extensible java compiler has done its job and says 'good bye'.");
-    System.exit(0);
-  }
-  
-  
   @SuppressWarnings("unchecked")
   private void initializeCaches(Environment environment, boolean force) throws IOException {
     if (environment.getCacheDir() == null)

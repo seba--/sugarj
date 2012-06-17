@@ -11,7 +11,6 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
@@ -28,7 +27,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
-import org.sugarj.LanguageLib;
+import org.sugarj.LanguageLibFactory;
+import org.sugarj.LanguageLibRegistry;
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
@@ -40,7 +40,6 @@ import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.driver.Driver;
 import org.sugarj.driver.ModuleSystemCommands;
 import org.sugarj.driver.Result;
-import org.sugarj.driver.UsedLanguageLibrary;
 import org.sugarj.editor.SugarJConsole;
 import org.sugarj.editor.SugarJParseController;
 import org.sugarj.util.ProcessingListener;
@@ -52,14 +51,14 @@ import org.sugarj.util.ProcessingListener;
  */
 public class Builder extends IncrementalProjectBuilder {
 
-  // XXX: Change language library here
-  LanguageLib langLib = UsedLanguageLibrary.getFreshLanguageLibrary();
-  
   private class BuildInput {
-    public IResource resource;
-    public RelativeSourceLocationPath sourceFile;
-    public BuildInput(IResource resource, RelativeSourceLocationPath path) {
-      this.resource = resource; this.sourceFile = path;
+    public final IResource resource;
+    public final RelativeSourceLocationPath sourceFile;
+    public final LanguageLibFactory langLibFactory;
+    public BuildInput(IResource resource, RelativeSourceLocationPath path, LanguageLibFactory langLibFactory) {
+      this.resource = resource; 
+      this.sourceFile = path;
+      this.langLibFactory = langLibFactory;
     }
   }
 
@@ -99,35 +98,35 @@ public class Builder extends IncrementalProjectBuilder {
 
   private void incrementalBuild(IResourceDelta delta, IProgressMonitor monitor) {
     boolean rebuild = true;
-    final String ext = UsedLanguageLibrary.getFreshLanguageLibrary().getSugarFileExtension().substring(1);
-    try {
-      class ShouldRebuildResourceDeltaVisitor implements IResourceDeltaVisitor {
-        boolean rebuild = false;
-        public boolean visit(IResourceDelta delta) {
-          //if ("sugj".equals(delta.getFullPath().getFileExtension()))
-          if (ext.equals(delta.getFullPath().getFileExtension()))
-            rebuild = true;
-          
-          // continue rebuild has not been required so far
-          return !rebuild;
-        }
-      };
-      
-      ShouldRebuildResourceDeltaVisitor visitor = new ShouldRebuildResourceDeltaVisitor();
-      delta.accept(visitor);
-      rebuild = visitor.rebuild;
-    } catch (CoreException e) {
-      e.printStackTrace();
-    }
+
+//    final LanguageLibRegistry libReg = LanguageLibRegistry.getInstance();
+//    try {
+//      class ShouldRebuildResourceDeltaVisitor implements IResourceDeltaVisitor {
+//        boolean rebuild = false;
+//        public boolean visit(IResourceDelta delta) {
+//          if (libReg.isRegistered(delta.getFullPath().getFileExtension()))
+//            rebuild = true;
+//          
+//          // continue rebuild has not been required so far
+//          return !rebuild;
+//        }
+//      };
+//      
+//      ShouldRebuildResourceDeltaVisitor visitor = new ShouldRebuildResourceDeltaVisitor();
+//      delta.accept(visitor);
+//      rebuild = visitor.rebuild;
+//    } catch (CoreException e) {
+//      e.printStackTrace();
+//    }
     
     if (rebuild)
       fullBuild(monitor);
   }
 
   private void fullBuild(IProgressMonitor monitor) {
-    final String ext = UsedLanguageLibrary.getFreshLanguageLibrary().getSugarFileExtension().substring(1);
-    
+    final LanguageLibRegistry libReg = LanguageLibRegistry.getInstance();
     final LinkedList<BuildInput> resources = new LinkedList<BuildInput>();
+
     try {
       getProject().accept(new IResourceVisitor() {
         Environment environment = SugarJParseController.makeProjectEnvironment(JavaCore.create(getProject()));
@@ -142,22 +141,19 @@ public class Builder extends IncrementalProjectBuilder {
                environment.getIncludePath().contains(new RelativePath(root, relPath.toString()))))
             return false;
           
-          //if ("sugj".equals(resource.getFileExtension())) {
-          System.out.println("sugar file extension: " + ext + " file extension: " + resource.getFileExtension() + "  ---- " + resource);
-          if (ext.equals(resource.getFileExtension())) {
+          if (libReg.isRegistered(resource.getFileExtension())) {
             String path = getProject().getLocation().makeAbsolute() + "/" + relPath;
             System.out.println("   ...found: " + path);
             final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(
-                    FileCommands.dropExtension(path.toString()),
-                    environment.getSourcePath(),
-                    UsedLanguageLibrary.getFreshLanguageLibrary()); 
+                    path.toString(),
+                    environment.getSourcePath()); 
             
             if (sourceFile == null) {
               org.strategoxt.imp.runtime.Environment.logWarning("cannot locate source file for ressource " + resource.getFullPath());
               return false;
             }
               
-            resources.addFirst(new BuildInput(resource, sourceFile));
+            resources.addFirst(new BuildInput(resource, sourceFile, libReg.getLanguageLib(resource.getFileExtension())));
           }
           return true;
         }
@@ -192,7 +188,7 @@ public class Builder extends IncrementalProjectBuilder {
             RelativePath depFile = new RelativePath(environment.getBin(), FileCommands.dropExtension(input.sourceFile.getRelativePath()) + ".dep");
             Result res = Result.readDependencyFile(depFile, environment);
             if (res == null || !res.isUpToDate(input.sourceFile, environment))
-              res = Driver.compile(input.sourceFile, monitor, langLib.getFactoryForLanguage());
+              res = Driver.compile(input.sourceFile, monitor, input.langLibFactory);
             
             IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
             for (IWorkbenchWindow workbenchWindow : workbenchWindows)

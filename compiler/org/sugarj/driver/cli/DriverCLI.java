@@ -33,6 +33,7 @@ import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.runtime.Environment;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.CommandExecution;
+import org.sugarj.common.Log;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.SourceLocation;
@@ -396,12 +397,35 @@ public class DriverCLI {
   
     if (line.hasOption("no-checking"))
       environment.setNoChecking(true);
+    
+    if (line.hasOption("language-lib")) {
+      String[] libNames = line.getOptionValues("language-lib");
+      if (libNames == null || libNames.length == 0)
+        libNames = new String[] {"Java"};
+      
+      activateLanguageLibs(libNames);
+    }
   
     String[] sources = line.getArgs();
     if (sources.length < 1)
       throw new CLIError("No source files specified.", options);
   
     return sources;
+  }
+
+  private static void activateLanguageLibs(String[] libNames) {
+    for (String libName : libNames) {
+      try {
+        Class<?> activator = DriverCLI.class.getClassLoader().loadClass("org.sugarj." + libName.toLowerCase() + ".Activator");
+        activator.newInstance();
+      } catch (ClassNotFoundException e) {
+        Log.log.logErr("Could not find language library " + libName);
+      } catch (InstantiationException e) {
+        Log.log.logErr("Could not instantiate language library " + libName);
+      } catch (IllegalAccessException e) {
+        Log.log.logErr("Could not access language library " + libName);
+      }
+    }
   }
 
   private static CommandLine parseOptions(Options options, String[] args) throws org.apache.commons.cli.ParseException {
@@ -501,6 +525,12 @@ public class DriverCLI {
         "no-checking",
         false,
         "Do not check resulting SDF and Stratego files.");
+    
+    options.addOption(
+        "lib",
+        "language-lib",
+        true,
+        "Specify a language library to activate.");
     
     return options;
   }
