@@ -2,6 +2,8 @@ package org.sugarj.haskell;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.sugarj.HaskellLibFactory;
+import org.sugarj.LanguageLibRegistry;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -18,6 +20,7 @@ public class Activator extends AbstractUIPlugin {
 	 * The constructor
 	 */
 	public Activator() {
+	  LanguageLibRegistry.getInstance().registerLanguageLib(HaskellLibFactory.getInstance());
 	}
 
 	/*

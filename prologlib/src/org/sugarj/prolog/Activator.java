@@ -1,6 +1,8 @@
 package org.sugarj.prolog;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.sugarj.LanguageLibRegistry;
+import org.sugarj.PrologLibFactory;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -17,6 +19,7 @@ public class Activator extends AbstractUIPlugin {
 	 * The constructor
 	 */
 	public Activator() {
+	  LanguageLibRegistry.getInstance().registerLanguageLib(PrologLibFactory.getInstance());
 	}
 
 	/*
