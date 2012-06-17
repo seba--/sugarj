@@ -132,12 +132,12 @@ public class JavaLib extends LanguageLib implements Serializable {
 
   @Override
   public String getGeneratedFileExtension() {
-    return ".class";
+    return "class";
   }
 
   @Override
   public String getSugarFileExtension() {
-    return ".sugj";
+    return "sugj";
   }
 
   // --------------------

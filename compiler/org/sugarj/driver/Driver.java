@@ -920,7 +920,7 @@ public class Driver{
     boolean success = false;
     
     //success |= ModuleSystemCommands.importClass(modulePath, langLib.getSource(), environment, langLib);
-    success |= ModuleSystemCommands.importClass(modulePath, importTerm, environment, langLib);
+    success |= ModuleSystemCommands.importBinFile(modulePath, importTerm, environment, langLib);
     ModuleSystemCommands.registerSearchedClassFiles(modulePath, driverResult, environment, langLib);
 
     Path sdf = ModuleSystemCommands.importSdf(modulePath, environment);

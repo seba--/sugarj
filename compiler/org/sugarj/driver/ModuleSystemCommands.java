@@ -36,11 +36,9 @@ public class ModuleSystemCommands {
      * @return true iff a class file existed.
      * @throws IOException
      */
-    public static boolean importClass(String modulePath, IStrategoTerm toplevelDecl, Environment environment, LanguageLib langLib) throws IOException {
+    public static boolean importBinFile(String modulePath, IStrategoTerm toplevelDecl, Environment environment, LanguageLib langLib) throws IOException {
 // if language does not have bin files (e.g. for interpreted languages), return true
 // <- NOPE: interpreted languages generate desugared source files instead of compiled files
-//      if (langLib.getGeneratedFileExtension() == null)
-//         return true;
 
       RelativePath clazz = searchFile(modulePath, langLib.getGeneratedFileExtension(), environment);
       if (clazz == null && !langLib.isModuleResolvable(modulePath))
@@ -49,7 +47,6 @@ public class ModuleSystemCommands {
       log.beginTask("Generate target code");
       try {
         langLib.addImportModule(toplevelDecl, true);
-        //source.addCheckedImport(modulePath.replace('/', '.'));
       } finally {
         log.endTask();
       }

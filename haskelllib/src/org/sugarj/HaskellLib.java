@@ -118,13 +118,12 @@ public class HaskellLib extends LanguageLib {
 
   @Override
   public String getGeneratedFileExtension() {
-    return ".o";
+    return "o";
   }
 
   @Override
   public String getSugarFileExtension() {
-    //TODO should be ".sughs"
-    return ".sugj";
+    return "shs";
   }
 
   @Override
@@ -215,7 +214,7 @@ public class HaskellLib extends LanguageLib {
     String declaredRelNamespaceName = FileCommands.dropFilename(qualifiedModulePath);
     relNamespaceName = FileCommands.dropFilename(sourceFile.getRelativePath());
     
-    RelativePath objectFile = environment.createBinPath(relNamespaceName + Environment.sep + moduleName + getGeneratedFileExtension());
+    RelativePath objectFile = environment.createBinPath(relNamespaceName + Environment.sep + moduleName + Environment.sep + getGeneratedFileExtension());
     generatedModules.add(objectFile);
     
     sourceContent.setNamespaceDecl(prettyPrint(toplevelDecl));

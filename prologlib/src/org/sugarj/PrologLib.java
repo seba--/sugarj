@@ -182,13 +182,12 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	@Override
 	public String getGeneratedFileExtension() {
-		return ".pro";
+		return "pro";
 	}
 
 	@Override
 	public String getSugarFileExtension() {
-		//return ".sugp";		// XXX: CHANGE THIS BACK
-		return ".sugj";
+		return "sugp";
 	}
 
 	@Override
@@ -277,7 +276,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 	    javaSource.setOptionalImport(false);
 		
  */
-		prologOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".pro");
+		prologOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + getGeneratedFileExtension());
 		prologSource = new PrologSourceFileContent(this);
 		prologSource.setOptionalImport(false);
 		
@@ -315,7 +314,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 		
 		
 		if (prologOutFile == null) 
-			prologOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + ".pro");
+			prologOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + getGeneratedFileExtension());
 	}
 	
 	
