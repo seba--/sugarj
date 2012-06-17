@@ -31,7 +31,7 @@ import org.sugarj.common.JavaCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
-import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
+import org.sugarj.java.JavaSourceFileContent;
 
 public class JavaLib extends LanguageLib implements Serializable {
 

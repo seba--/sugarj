@@ -17,6 +17,5 @@ Require-Bundle: org.eclipse.ui,
  org.sugarj.common,
  org.eclipse.jdt.core
 Export-Package: org.sugarj,
- org.sugarj.driver.sourcefilecontent,
  org.sugarj.languages,
  org.sugarj.prolog.init

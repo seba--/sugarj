@@ -9,8 +9,8 @@ import org.strategoxt.HybridInterpreter;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.driver.sourcefilecontent.ISourceFileContent;
-import org.sugarj.driver.sourcefilecontent.SourceImport;
+import org.sugarj.languagelib.ISourceFileContent;
+import org.sugarj.languagelib.SourceImport;
 
 public class HaskellSourceFileContent implements ISourceFileContent {
 

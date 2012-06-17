@@ -1,4 +1,4 @@
-package org.sugarj.driver.sourcefilecontent;
+package org.sugarj.java;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -9,6 +9,7 @@ import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
+import org.sugarj.languagelib.ISourceFileContent;
 
 /**
  * @author seba

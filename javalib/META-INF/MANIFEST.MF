@@ -4,7 +4,6 @@ Bundle-Name: org.sugarj.java
 Bundle-SymbolicName: org.sugarj.java;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Export-Package: org.sugarj,
- org.sugarj.driver.sourcefilecontent,
  org.sugarj.java.init,
  org.sugarj.languages
 Bundle-ActivationPolicy: lazy

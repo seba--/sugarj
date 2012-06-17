@@ -14,4 +14,4 @@ Require-Bundle: org.eclipse.core.runtime,
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.sugarj,
- org.sugarj.driver.sourcefilecontent
+ org.sugarj.languagelib

@@ -22,7 +22,7 @@ import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
-import org.sugarj.driver.sourcefilecontent.ISourceFileContent;
+import org.sugarj.languagelib.ISourceFileContent;
 import org.sugarj.stdlib.StdLib;
 
 

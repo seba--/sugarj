@@ -1,4 +1,4 @@
-package org.sugarj.driver.sourcefilecontent;
+package org.sugarj.languagelib;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
