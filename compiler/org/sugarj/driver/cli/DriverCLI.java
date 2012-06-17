@@ -31,9 +31,9 @@ import org.spoofax.jsglr_layout.shared.TokenExpectedException;
 import org.spoofax.terms.TermVisitor;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.runtime.Environment;
-import org.sugarj.LanguageLibRegistry;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.CommandExecution;
+import org.sugarj.common.Log;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.SourceLocation;
@@ -416,7 +416,12 @@ public class DriverCLI {
   private static void activateLanguageLibs(String[] libNames) {
     for (String libName : libNames) {
       String clName = "org.sugarj." + libName.toLowerCase() + ".Activator";
-      LanguageLibRegistry.getInstance().loadExtension(clName);
+      try {
+        Class<?> cl = DriverCLI.class.getClassLoader().loadClass(clName);
+        cl.newInstance();
+      } catch (Exception e) {
+        Log.log.logErr("Could not load language plugin " + libName + ": " + e.getMessage());
+      }
     }
   }
 

@@ -17,6 +17,9 @@
          </appinfo>
       </annotation>
       <complexType>
+         <sequence>
+            <element ref="languagePlugin"/>
+         </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
                <documentation>
@@ -41,13 +44,18 @@
                </appinfo>
             </annotation>
          </attribute>
-         <attribute name="activator" type="string" use="required">
+      </complexType>
+   </element>
+
+   <element name="languagePlugin">
+      <complexType>
+         <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn="org.eclipse.core.runtime.Plugin:"/>
+                  <meta.attribute kind="identifier"/>
                </appinfo>
             </annotation>
          </attribute>

@@ -2,10 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         id="org.sugarj.haskell"
-         name="HaskellLib"
-         point="org.sugarj.language"
-         activator="org.sugarj.haskell.Activator">
+         point="org.sugarj.language">
+      <languagePlugin id="org.sugarj.haskell" />
    </extension>
-
 </plugin>

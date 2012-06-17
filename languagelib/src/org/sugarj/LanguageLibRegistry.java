@@ -7,6 +7,8 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
 import org.sugarj.common.Log;
 
 /**
@@ -31,52 +33,52 @@ public class LanguageLibRegistry {
     return instance;
   }
 
-  public void registerLanguageLib(LanguageLibFactory lib) {
+  public synchronized void registerLanguageLib(LanguageLibFactory lib) {
     languageLibs.put(lib.createLanguageLibrary().getSugarFileExtension(), lib);
   }
 
-  public void unregisterLanguageLib(LanguageLibFactory lib) {
+  public synchronized void unregisterLanguageLib(LanguageLibFactory lib) {
     String ext = lib.createLanguageLibrary().getSugarFileExtension();
     LanguageLibFactory reg = languageLibs.get(ext);
     if (reg != null && reg.equals(lib))
       languageLibs.remove(ext);
   }
   
-  public LanguageLibFactory getLanguageLib(String extension) {
+  public synchronized LanguageLibFactory getLanguageLib(String extension) {
     if (!extensionsLoaded)
       loadExtensions();
     
     return languageLibs.get(extension);
   }
   
-  public boolean isRegistered(String extension) {
+  public synchronized boolean isRegistered(String extension) {
     if (!extensionsLoaded)
       loadExtensions();
 
     return languageLibs.containsKey(extension);
   }
   
-  private void loadExtensions() {
+  private synchronized void loadExtensions() {
     extensionsLoaded = true;
     IExtensionRegistry registry = Platform.getExtensionRegistry();
     IExtensionPoint extensionPoint = registry.getExtensionPoint("org.sugarj.language");
     IConfigurationElement[] members = extensionPoint.getConfigurationElements();
-    for (IConfigurationElement conf : members) {
-      String clName = conf.getAttribute("activator");
-      loadExtension(clName);
+    for (IConfigurationElement activatorConf : members) {
+      String pluginId = activatorConf.getAttribute("id");
+      loadLanguagePlugin(pluginId);
     }
   }
   
-  public void loadExtension(String activatorClass) {
-    try {
-      Class<?> activator = getClass().getClassLoader().loadClass(activatorClass);
-      activator.newInstance();
-    } catch (ClassNotFoundException e) {
-      Log.log.logErr("Could not find language library " + activatorClass);
-    } catch (InstantiationException e) {
-      Log.log.logErr("Could not instantiate language library " + activatorClass);
-    } catch (IllegalAccessException e) {
-      Log.log.logErr("Could not access language library " + activatorClass);
-    }
+  public synchronized Bundle loadLanguagePlugin(String pluginId) {
+    Bundle bundle = Platform.getBundle(pluginId);
+    if (bundle == null)
+      Log.log.logErr("Could not load language plugin " + pluginId);
+    else
+      try {
+        bundle.start();
+      } catch (BundleException e) {
+        Log.log.logErr("Could not start language plugin " + pluginId);
+      }
+    return bundle;
   }
 }
