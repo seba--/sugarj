@@ -35,388 +35,388 @@ import org.sugarj.driver.sourcefilecontent.JavaSourceFileContent;
 
 public class JavaLib extends LanguageLib implements Serializable {
 
-	private static final long serialVersionUID = 1817193221140795776L;
-	
-	private transient File libDir;
-	
-	private Set<RelativePath> generatedJavaClasses = new HashSet<RelativePath>();
+  private static final long serialVersionUID = 1817193221140795776L;
 
-	private Path javaOutFile;
+  private transient File libDir;
 
-	private JavaSourceFileContent javaSource;
+  private Set<RelativePath> generatedJavaClasses = new HashSet<RelativePath>();
 
-	private String relPackageName;
-	
-	
-	@Override
-	public List<File> getGrammars() {
-		List<File> grammars = new LinkedList<File>(super.getGrammars());
-		grammars.add(ensureFile("org/sugarj/languages/SugarJ.def"));
-		grammars.add(ensureFile("org/sugarj/languages/Java-15.def"));
-		return Collections.unmodifiableList(grammars);
-	}
-	
-	@Override
-	public File getInitGrammar() {
-		return ensureFile("org/sugarj/java/init/initGrammar.sdf");
-		//return ensureFile("org/sugarj/languages/SugarJ.def");
-	}
+  private Path javaOutFile;
 
-	@Override
-	public String getInitGrammarModule() {
-		return "org/sugarj/java/init/initGrammar";
-		//return "org/sugarj/languages/sugarJ";
-	}
+  private JavaSourceFileContent javaSource;
 
-	@Override
-	public File getInitTrans() {
-		return ensureFile("org/sugarj/java/init/InitTrans.str");
-	}
-	
-	@Override
-	public String getInitTransModule() {
-		return "org/sugarj/java/init/InitTrans";
-	}
+  private String relPackageName;
 
-	@Override
-	public File getInitEditor() {
-		return ensureFile("org/sugarj/java/init/initEditor.serv");
-	}
+  @Override
+  public List<File> getGrammars() {
+    List<File> grammars = new LinkedList<File>(super.getGrammars());
+    grammars.add(ensureFile("org/sugarj/languages/SugarJ.def"));
+    grammars.add(ensureFile("org/sugarj/languages/Java-15.def"));
+    return Collections.unmodifiableList(grammars);
+  }
 
-	@Override
-	public String getInitEditorModule() {
-		return "org/sugarj/java/init/initEditor";
-	}
-	
-	@Override
-	public File getLibraryDirectory() {
-		if (libDir == null) {	// set up directories first
-			String thisClassPath = "org/sugarj/JavaLib.class";
-			URL thisClassURL = JavaLib.class.getClassLoader().getResource(thisClassPath);
-			
-			System.out.println(thisClassURL);
-			
-			if (thisClassURL.getProtocol().equals("bundleresource"))
-			  try {
-			    thisClassURL = FileLocator.resolve(thisClassURL);
-			  } catch (IOException e) {
-			    e.printStackTrace();
-			  }
-			
-			String classPath = thisClassURL.getPath();
-			String binPath = classPath.substring(0, classPath.length() - thisClassPath.length());
-			
-			libDir = new File(binPath);
-		}
-		
-		return libDir;
-	}
-	
-	  public static void main(String args[]) throws URISyntaxException {
-		JavaLib jl = new JavaLib();
-		
-		for (File file : jl.getGrammars()) 
-			exists(file);
+  @Override
+  public File getInitGrammar() {
+    return ensureFile("org/sugarj/java/init/initGrammar.sdf");
+    // return ensureFile("org/sugarj/languages/SugarJ.def");
+  }
 
+  @Override
+  public String getInitGrammarModule() {
+    return "org/sugarj/java/init/initGrammar";
+    // return "org/sugarj/languages/sugarJ";
+  }
 
-	    exists(jl.getInitGrammar());
-	    exists(jl.getInitTrans());
-	    exists(jl.getInitEditor());
-	    exists(jl.libDir);
-	  }
-	  
-	  private static void exists(File file) {
-	    if (file.exists())
-	      System.out.println(file.getPath() + " exists.");
-	    else
-	      System.err.println(file.getPath() + " does not exist.");
-	  }
+  @Override
+  public File getInitTrans() {
+    return ensureFile("org/sugarj/java/init/InitTrans.str");
+  }
 
+  @Override
+  public String getInitTransModule() {
+    return "org/sugarj/java/init/InitTrans";
+  }
 
-	@Override
-	public String getGeneratedFileExtension() {
-		return ".class";
-	}
+  @Override
+  public File getInitEditor() {
+    return ensureFile("org/sugarj/java/init/initEditor.serv");
+  }
 
-	@Override
-	public String getSugarFileExtension() {
-		return ".sugj";
-	}
-	
-	// --------------------
-	// stuff from javaDriver here
+  @Override
+  public String getInitEditorModule() {
+    return "org/sugarj/java/init/initEditor";
+  }
 
-	private void checkPackageName(IStrategoTerm toplevelDecl, RelativeSourceLocationPath sourceFile, IErrorLogger errorLog) {
-	    if (sourceFile != null) {
-	      String packageName = relPackageName == null ? "" : relPackageName.replace('/', '.');
-	      
-	      String rel = FileCommands.dropExtension(sourceFile.getRelativePath());
-	      int i = rel.lastIndexOf('/');
-	      String expectedPackage = i >= 0 ? rel.substring(0, i) : rel;
-	      expectedPackage = expectedPackage.replace('/', '.');
-	      if (!packageName.equals(expectedPackage))
-	        setErrorMessage(
-	            toplevelDecl,
-	            "The declared package '" + packageName + "'" +
-	            " does not match the expected package '" + expectedPackage + "'.", errorLog);
-	    }
-	  }
+  @Override
+  public File getLibraryDirectory() {
+    if (libDir == null) { // set up directories first
+      String thisClassPath = "org/sugarj/JavaLib.class";
+      URL thisClassURL = JavaLib.class.getClassLoader().getResource(thisClassPath);
 
-//	public void checkSourceOutFile(Environment environment, RelativeSourceLocationPath sourceFile) {
-//	    if (javaOutFile == null)
-//	      setJavaOutFile(environment.createBinPath(getRelativeNamespace() + FileCommands.fileName(sourceFile) + ".java"));
-//	  }
+      System.out.println(thisClassURL);
 
-	  // XXX: Think of a good name -- what does this actually do?
-	  // from ModuleSystemCommands
-	  public String extractImportedModuleName(IStrategoTerm toplevelDecl) throws IOException {
-	    String name = null;
-	    log.beginTask("Extracting", "Extract name of imported module");
-	    try {
-	      if (isApplication(toplevelDecl, "TypeImportDec"))
-	        name = prettyPrint(toplevelDecl.getSubterm(0));
-	      
-	      if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
-	        name = prettyPrint(toplevelDecl.getSubterm(0)) + ".*";
-	    } finally {
-	      log.endTask(name);
-	    }
-	    return name;
-	  }
+      if (thisClassURL.getProtocol().equals("bundleresource"))
+        try {
+          thisClassURL = FileLocator.resolve(thisClassURL);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
 
-	  public Set<RelativePath> getGeneratedFiles() {
-	    return generatedJavaClasses;
-	  }
+      String classPath = thisClassURL.getPath();
+      String binPath = classPath.substring(0, classPath.length() - thisClassPath.length());
 
-	// was: getRelPackageName
-	  public String getNamespace() {
-	    return relPackageName;
-	  }
+      libDir = new File(binPath);
+    }
 
-	  public String extractNamespaceName(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
-	      String packageName = prettyPrint(getApplicationSubterm(toplevelDecl, "PackageDec", 1));
+    return libDir;
+  }
 
-	      return packageName;
-	  }
-	  
-	  @Override
-	public Path getOutFile() {
-	    return javaOutFile;
-	  }
+  public static void main(String args[]) throws URISyntaxException {
+    JavaLib jl = new JavaLib();
 
-	  @Override
-	  public String getRelativeNamespace() {
-	    if (relPackageName == null || relPackageName.isEmpty())
-	      return "";
-	    
-	    return relPackageName + sep;
-	  }
+    for (File file : jl.getGrammars())
+      exists(file);
 
-	  @Override
-	public JavaSourceFileContent getSource() {
-	    return javaSource;
-	  }
+    exists(jl.getInitGrammar());
+    exists(jl.getInitTrans());
+    exists(jl.getInitEditor());
+    exists(jl.libDir);
+  }
 
-	  @Override
-	public boolean isEditorServiceDec(IStrategoTerm decl) {
-	    return isApplication(decl, "EditorServicesDec");
-	  }
+  private static void exists(File file) {
+    if (file.exists())
+      System.out.println(file.getPath() + " exists.");
+    else
+      System.err.println(file.getPath() + " does not exist.");
+  }
 
-	  @Override
-	public boolean isImportDec(IStrategoTerm decl) {
-	    return isApplication(decl, "TypeImportDec") || isApplication(decl, "TypeImportOnDemandDec");
-	  }
+  @Override
+  public String getGeneratedFileExtension() {
+    return ".class";
+  }
 
-	// ----------------
-	  @Override
-	  public boolean isLanguageSpecificDec(IStrategoTerm decl) {
-	    return  isApplication(decl, "ClassDec") ||
-	            isApplication(decl, "InterfaceDec") ||
-	            isApplication(decl, "EnumDec") ||
-	            isApplication(decl, "AnnoDec");
-	  }
+  @Override
+  public String getSugarFileExtension() {
+    return ".sugj";
+  }
 
-	@Override
-	public boolean isPlainDec(IStrategoTerm decl) {
-	    return isApplication(decl, "PlainDec");         // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
-	  }
+  // --------------------
+  // stuff from javaDriver here
 
-	@Override
-	public boolean isSugarDec(IStrategoTerm decl) {
-	    return isApplication(decl, "SugarDec");
-	  }
-	
-	@Override
-	public boolean isNamespaceDec(IStrategoTerm decl) {
-		return isApplication(decl, "PackageDec");
-	}
-	
-	/**
-	   * Pretty prints the content of a Java AST in some file.
-	   * 
-	   * @param aterm the name of a file which contains an aterm which encodes a Java AST
-	   * @throws IOException 
-	   */
-	@Override
-	  public String prettyPrint(IStrategoTerm term) throws IOException {
-		System.err.println("---\n prettyprint context:");
-		Context ctx = interp.getCompiledContext();
-		System.err.println(ctx);
-		System.err.println("prettyprint term:");
-		System.err.println(term);
-		//IStrategoTerm string = pp_java_string_0_0.instance.invoke(interp.getCompiledContext(), term);
-		IStrategoTerm string = pp_java_string_0_0.instance.invoke(ctx, term);
-		System.err.println("prettyprint string:");
-		System.err.println(string);
-	    if (string != null)
-	      return Term.asJavaString(string);
-	    
-	    throw new RuntimeException("pretty printing java AST failed: " + term);
-	  }
+  private void checkPackageName(IStrategoTerm toplevelDecl, RelativeSourceLocationPath sourceFile, IErrorLogger errorLog) {
+    if (sourceFile != null) {
+      String packageName = relPackageName == null ? "" : relPackageName.replace('/', '.');
 
-	@Override
-	  public void processLanguageSpecific(IStrategoTerm toplevelDecl, Environment environment) throws IOException {
-	    IStrategoTerm dec =  isApplication(toplevelDecl, "JavaTypeDec") ? getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0) : toplevelDecl;
-	    
-	    String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
-	    
-	    RelativePath clazz = environment.createBinPath(getRelativeNamespaceSep() + decName + ".class");
-	    
-	    generatedJavaClasses.add(clazz);
-	    javaSource.addBodyDecl(prettyPrint(dec));
-	  }
+      String rel = FileCommands.dropExtension(sourceFile.getRelativePath());
+      int i = rel.lastIndexOf('/');
+      String expectedPackage = i >= 0 ? rel.substring(0, i) : rel;
+      expectedPackage = expectedPackage.replace('/', '.');
+      if (!packageName.equals(expectedPackage))
+        setErrorMessage(toplevelDecl, "The declared package '" + packageName + "'" + " does not match the expected package '" + expectedPackage + "'.", errorLog);
+    }
+  }
 
-	// was: processPackageDec
-	@Override
-	  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException {
-	    String packageName = extractNamespaceName(toplevelDecl, interp);
-		  
-		relPackageName = getRelativeModulePath(packageName);
-	
-	    log.log("The SDF / Stratego package name is '" + relPackageName + "'.");
-	
-	    checkPackageName(toplevelDecl, sourceFile, errorLog);
-	
-	    if (javaOutFile == null)
-	      javaOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + ".java");			// XXX: Can we just reuse sourceFile here?
-	
-	    // moved here before depOutFile==null check
-	    javaSource.setNamespaceDecl(prettyPrint(toplevelDecl));
-	    checkPackageName(toplevelDecl, sourceFileFromResult, errorLog);
-	  }
+  // public void checkSourceOutFile(Environment environment,
+  // RelativeSourceLocationPath sourceFile) {
+  // if (javaOutFile == null)
+  // setJavaOutFile(environment.createBinPath(getRelativeNamespace() +
+  // FileCommands.fileName(sourceFile) + ".java"));
+  // }
 
-	public void setJavaOutFile(Path javaOutFile) {
-	    this.javaOutFile = javaOutFile;
-	  }
+  // XXX: Think of a good name -- what does this actually do?
+  // from ModuleSystemCommands
+  public String extractImportedModuleName(IStrategoTerm toplevelDecl) throws IOException {
+    String name = null;
+    log.beginTask("Extracting", "Extract name of imported module");
+    try {
+      if (isApplication(toplevelDecl, "TypeImportDec"))
+        name = prettyPrint(toplevelDecl.getSubterm(0));
 
-	@Override
-	public void setupSourceFile(RelativePath sourceFile, Environment environment) {
-	    javaOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".java");
-	    javaSource = new JavaSourceFileContent();
-	    javaSource.setOptionalImport(false);
-	  }
+      if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
+        name = prettyPrint(toplevelDecl.getSubterm(0)) + ".*";
+    } finally {
+      log.endTask(name);
+    }
+    return name;
+  }
 
-	@Override
-	public LanguageLibFactory getFactoryForLanguage() {
-		return new JavaLibFactory();
-	}
-	
-	// from Result
-	@Override
-	protected void compile(List<Path> javaOutFiles, Path bin, List<Path> path, boolean generateFiles) throws IOException {
-		if (generateFiles)
-			JavaCommands.javac(javaOutFiles, bin, path);
-	}
+  public Set<RelativePath> getGeneratedFiles() {
+    return generatedJavaClasses;
+  }
 
-	@Override
-	public String getImportedModulePath(IStrategoTerm toplevelDecl) throws IOException {
-	      String importModule = extractImportedModuleName(toplevelDecl);
-	      String modulePath = getRelativeModulePath(importModule);
-	      
-	      return modulePath;
-	}
-	
-	  private String getRelativeModulePath(String module) {
-		    return module.replace(".", Environment.sep);
-		  }
+  // was: getRelPackageName
+  public String getNamespace() {
+    return relPackageName;
+  }
 
-	  
-	@Override
-	public void addImportModule(IStrategoTerm toplevelDecl,	boolean checked) throws IOException {
-		String imp = extractImportedModuleName(toplevelDecl).replace('/', '.');
-		if (checked)
-			javaSource.addCheckedImport(imp);
-		else
-			javaSource.addImport(imp);
-	}
+  public String extractNamespaceName(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
+    String packageName = prettyPrint(getApplicationSubterm(toplevelDecl, "PackageDec", 1));
 
-	@Override
-	public String getSugarName(IStrategoTerm decl) throws IOException {
-		IStrategoTerm head = getApplicationSubterm(decl, "SugarDec", 0);
-        String extName =
-                prettyPrint(
-                getApplicationSubterm(head, "SugarDecHead", 1));    
+    return packageName;
+  }
 
-        return extName;
-	}
+  @Override
+  public Path getOutFile() {
+    return javaOutFile;
+  }
 
-	@Override
-	public int getSugarAccessibility(IStrategoTerm decl) {
-		IStrategoTerm head = getApplicationSubterm(decl, "SugarDec", 0);
-		IStrategoTerm mods = getApplicationSubterm(head, "SugarDecHead", 0);
-		
-        for (IStrategoTerm t : getList(mods))
-        	if (isApplication(t, "Public")) 
-        		return LanguageLib.PUBLIC_SUGAR;
-        
-        return LanguageLib.PRIVATE_SUGAR;
-	}
+  @Override
+  public String getRelativeNamespace() {
+    if (relPackageName == null || relPackageName.isEmpty())
+      return "";
 
-	@Override
-	public IStrategoTerm getSugarBody(IStrategoTerm decl) {
-		IStrategoTerm body= getApplicationSubterm(decl, "SugarDec", 1);
-		IStrategoTerm sugarBody = getApplicationSubterm(body, "SugarBody", 0);
-		
-		return sugarBody;
-	}
+    return relPackageName + sep;
+  }
 
-	@Override
-	public String getLanguageName() {
-		return "Java";
-	}
+  @Override
+  public JavaSourceFileContent getSource() {
+    return javaSource;
+  }
 
-	@Override
-	public boolean isModuleResolvable(String relModulePath) {
-		try {
-			return getClass().getClassLoader().loadClass(relModulePath.replace('/', '.')) != null;
-		} catch (ClassNotFoundException e) {
-			return false;
-		}
-	}
+  @Override
+  public boolean isEditorServiceDec(IStrategoTerm decl) {
+    return isApplication(decl, "EditorServicesDec");
+  }
 
-	@Override
-	public String getEditorName(IStrategoTerm decl) throws IOException {
-		IStrategoTerm head = getApplicationSubterm(decl, "EditorServicesDec", 0);
-		return prettyPrint(getApplicationSubterm(head, "EditorServicesDecHead", 1));
-	}
+  @Override
+  public boolean isImportDec(IStrategoTerm decl) {
+    return isApplication(decl, "TypeImportDec") || isApplication(decl, "TypeImportOnDemandDec");
+  }
 
-	@Override
-	public int getEditorAccessibility(IStrategoTerm decl) {
-		IStrategoTerm head = getApplicationSubterm(decl, "EditorServicesDec", 0);
-		IStrategoTerm mods = getApplicationSubterm(head, "EditorServicesDecHead", 0);
-		
-        for (IStrategoTerm t : getList(mods))
-        	if (isApplication(t, "Public")) 
-        		return LanguageLib.PUBLIC_SUGAR;
-        
-        return LanguageLib.PRIVATE_SUGAR;
-	}
+  // ----------------
+  @Override
+  public boolean isLanguageSpecificDec(IStrategoTerm decl) {
+    return isApplication(decl, "ClassDec") || isApplication(decl, "InterfaceDec") || isApplication(decl, "EnumDec") || isApplication(decl, "AnnoDec");
+  }
 
-	@Override
-	public IStrategoTerm getEditorServices(IStrategoTerm decl) {
-		IStrategoTerm body = getApplicationSubterm(decl, "EditorServicesDec", 1);
-		return ATermCommands.getApplicationSubterm(body, "EditorServicesBody", 0);
-	}
+  @Override
+  public boolean isPlainDec(IStrategoTerm decl) {
+    return isApplication(decl, "PlainDec"); // XXX: Decide what to do with
+                                            // "Plain"--leave in the language or
+                                            // create a new "Plain" language
+  }
 
+  @Override
+  public boolean isSugarDec(IStrategoTerm decl) {
+    return isApplication(decl, "SugarDec");
+  }
+
+  @Override
+  public boolean isNamespaceDec(IStrategoTerm decl) {
+    return isApplication(decl, "PackageDec");
+  }
+
+  /**
+   * Pretty prints the content of a Java AST in some file.
+   * 
+   * @param aterm
+   *          the name of a file which contains an aterm which encodes a Java
+   *          AST
+   * @throws IOException
+   */
+  @Override
+  public String prettyPrint(IStrategoTerm term) throws IOException {
+    System.err.println("---\n prettyprint context:");
+    Context ctx = interp.getCompiledContext();
+    System.err.println(ctx);
+    System.err.println("prettyprint term:");
+    System.err.println(term);
+    // IStrategoTerm string =
+    // pp_java_string_0_0.instance.invoke(interp.getCompiledContext(), term);
+    IStrategoTerm string = pp_java_string_0_0.instance.invoke(ctx, term);
+    System.err.println("prettyprint string:");
+    System.err.println(string);
+    if (string != null)
+      return Term.asJavaString(string);
+
+    throw new RuntimeException("pretty printing java AST failed: " + term);
+  }
+
+  @Override
+  public void processLanguageSpecific(IStrategoTerm toplevelDecl, Environment environment) throws IOException {
+    IStrategoTerm dec = isApplication(toplevelDecl, "JavaTypeDec") ? getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0) : toplevelDecl;
+
+    String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
+
+    RelativePath clazz = environment.createBinPath(getRelativeNamespaceSep() + decName + ".class");
+
+    generatedJavaClasses.add(clazz);
+    javaSource.addBodyDecl(prettyPrint(dec));
+  }
+
+  // was: processPackageDec
+  @Override
+  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException {
+    String packageName = extractNamespaceName(toplevelDecl, interp);
+
+    relPackageName = getRelativeModulePath(packageName);
+
+    log.log("The SDF / Stratego package name is '" + relPackageName + "'.");
+
+    checkPackageName(toplevelDecl, sourceFile, errorLog);
+
+    if (javaOutFile == null)
+      javaOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + ".java"); // XXX:
+                                                                                                                                  // Can
+                                                                                                                                  // we
+                                                                                                                                  // just
+                                                                                                                                  // reuse
+                                                                                                                                  // sourceFile
+                                                                                                                                  // here?
+
+    // moved here before depOutFile==null check
+    javaSource.setNamespaceDecl(prettyPrint(toplevelDecl));
+    checkPackageName(toplevelDecl, sourceFileFromResult, errorLog);
+  }
+
+  public void setJavaOutFile(Path javaOutFile) {
+    this.javaOutFile = javaOutFile;
+  }
+
+  @Override
+  public void setupSourceFile(RelativePath sourceFile, Environment environment) {
+    javaOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".java");
+    javaSource = new JavaSourceFileContent();
+    javaSource.setOptionalImport(false);
+  }
+
+  @Override
+  public LanguageLibFactory getFactoryForLanguage() {
+    return JavaLibFactory.getInstance();
+  }
+
+  // from Result
+  @Override
+  protected void compile(List<Path> javaOutFiles, Path bin, List<Path> path, boolean generateFiles) throws IOException {
+    if (generateFiles)
+      JavaCommands.javac(javaOutFiles, bin, path);
+  }
+
+  @Override
+  public String getImportedModulePath(IStrategoTerm toplevelDecl) throws IOException {
+    String importModule = extractImportedModuleName(toplevelDecl);
+    String modulePath = getRelativeModulePath(importModule);
+
+    return modulePath;
+  }
+
+  private String getRelativeModulePath(String module) {
+    return module.replace(".", Environment.sep);
+  }
+
+  @Override
+  public void addImportModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
+    String imp = extractImportedModuleName(toplevelDecl).replace('/', '.');
+    if (checked)
+      javaSource.addCheckedImport(imp);
+    else
+      javaSource.addImport(imp);
+  }
+
+  @Override
+  public String getSugarName(IStrategoTerm decl) throws IOException {
+    IStrategoTerm head = getApplicationSubterm(decl, "SugarDec", 0);
+    String extName = prettyPrint(getApplicationSubterm(head, "SugarDecHead", 1));
+
+    return extName;
+  }
+
+  @Override
+  public int getSugarAccessibility(IStrategoTerm decl) {
+    IStrategoTerm head = getApplicationSubterm(decl, "SugarDec", 0);
+    IStrategoTerm mods = getApplicationSubterm(head, "SugarDecHead", 0);
+
+    for (IStrategoTerm t : getList(mods))
+      if (isApplication(t, "Public"))
+        return LanguageLib.PUBLIC_SUGAR;
+
+    return LanguageLib.PRIVATE_SUGAR;
+  }
+
+  @Override
+  public IStrategoTerm getSugarBody(IStrategoTerm decl) {
+    IStrategoTerm body = getApplicationSubterm(decl, "SugarDec", 1);
+    IStrategoTerm sugarBody = getApplicationSubterm(body, "SugarBody", 0);
+
+    return sugarBody;
+  }
+
+  @Override
+  public String getLanguageName() {
+    return "Java";
+  }
+
+  @Override
+  public boolean isModuleResolvable(String relModulePath) {
+    try {
+      return getClass().getClassLoader().loadClass(relModulePath.replace('/', '.')) != null;
+    } catch (ClassNotFoundException e) {
+      return false;
+    }
+  }
+
+  @Override
+  public String getEditorName(IStrategoTerm decl) throws IOException {
+    IStrategoTerm head = getApplicationSubterm(decl, "EditorServicesDec", 0);
+    return prettyPrint(getApplicationSubterm(head, "EditorServicesDecHead", 1));
+  }
+
+  @Override
+  public int getEditorAccessibility(IStrategoTerm decl) {
+    IStrategoTerm head = getApplicationSubterm(decl, "EditorServicesDec", 0);
+    IStrategoTerm mods = getApplicationSubterm(head, "EditorServicesDecHead", 0);
+
+    for (IStrategoTerm t : getList(mods))
+      if (isApplication(t, "Public"))
+        return LanguageLib.PUBLIC_SUGAR;
+
+    return LanguageLib.PRIVATE_SUGAR;
+  }
+
+  @Override
+  public IStrategoTerm getEditorServices(IStrategoTerm decl) {
+    IStrategoTerm body = getApplicationSubterm(decl, "EditorServicesDec", 1);
+    return ATermCommands.getApplicationSubterm(body, "EditorServicesBody", 0);
+  }
 
 }

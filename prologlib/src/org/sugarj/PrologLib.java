@@ -337,7 +337,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	@Override
 	public LanguageLibFactory getFactoryForLanguage() {
-		return new PrologLibFactory();
+		return PrologLibFactory.getInstance();
 	}
 
 	@Override

@@ -1,10 +1,18 @@
 package org.sugarj;
 
 public class JavaLibFactory extends LanguageLibFactory {
-	// XXX: How to ensure that only one JavaLibFactory exists?	
-	@Override
-	public LanguageLib createLanguageLibrary() {
-		return new JavaLib();
-	}
+
+  private JavaLibFactory() { }
+  
+  private static JavaLibFactory instance = new JavaLibFactory();
+  
+  public static JavaLibFactory getInstance() {
+    return instance;
+  }
+  
+  @Override
+  public LanguageLib createLanguageLibrary() {
+    return new JavaLib();
+  }
 
 }
