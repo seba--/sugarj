@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.sugarj.haskell
-Bundle-SymbolicName: org.sugarj.haskell
+Bundle-SymbolicName: org.sugarj.haskell;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.sugarj.haskell.Activator
 Require-Bundle: org.eclipse.ui,

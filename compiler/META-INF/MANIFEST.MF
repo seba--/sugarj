@@ -14,8 +14,7 @@ Require-Bundle: org.eclipse.ui,
  org.strategoxt.imp.nativebundle,
  org.sugarj.common,
  org.sugarj.languagelib,
- org.spoofax.jsglr_layout,
- org.sugarj.java
+ org.spoofax.jsglr_layout
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.sugarj,
