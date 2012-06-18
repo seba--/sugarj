@@ -19,6 +19,7 @@ import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
+import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
@@ -76,18 +77,20 @@ public abstract class LanguageLib implements Serializable {
 		}
 		
 		f = new File(libTmpDir.getPath() + "/" + resource);
-		System.out.println("f does not exist, making temp file " + f);
 		f.getParentFile().mkdirs();
 
 		try {
-			InputStream in = LanguageLib.class.getClassLoader().getResourceAsStream(resource);
-			if (in == null)
-				return  new File(getLibraryDirectory().getPath() + File.separator + resource);
+			InputStream in = this.getClass().getClassLoader().getResourceAsStream(resource);
+			if (in == null) {
+			  Log.log.logErr("Could not load resource " + resource);
+				return new File(getLibraryDirectory().getPath() + File.separator + resource);
+			}
 
 			FileOutputStream fos = new FileOutputStream(f);
+			int len = -1;
 			byte[] bs = new byte[256];
-			while (in.read(bs) >= 0)
-				fos.write(bs);
+			while ((len = in.read(bs)) >= 0)
+				fos.write(bs, 0, len);
 			fos.close();
 			in.close();
 		} catch (IOException e) {

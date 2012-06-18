@@ -56,9 +56,10 @@ public class StdLib {
         return  new File(stdLibDir.getPath() + File.separator + resource);
       
       FileOutputStream fos = new FileOutputStream(f);
+      int len = -1;
       byte[] bs = new byte[256];
-      while (in.read(bs) >= 0)
-        fos.write(bs);
+      while ((len = in.read(bs)) >= 0)
+        fos.write(bs, 0, len);
       fos.close();
       in.close();
     } catch (IOException e) {
