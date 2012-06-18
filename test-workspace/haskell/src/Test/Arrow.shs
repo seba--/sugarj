@@ -4,7 +4,6 @@ import Control.Arrow
 import Control.Arrow.Syntax
 
 import Control.Category
-
 import Text.ParserCombinators.PArrow
 
 foo f = proc x -> f -< x+1

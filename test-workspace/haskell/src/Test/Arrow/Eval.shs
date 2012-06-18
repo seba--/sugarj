@@ -3,11 +3,10 @@ module Test.Arrow.Eval where
 -- Toy lambda-calculus interpreter from John Hughes's arrows paper (s5)
 -- copied from http://www.haskell.org/arrows/examples/Eval.as
 
-import Maybe(fromJust)
+import Data.Maybe(fromJust)
 
 import Control.Arrow
 import Control.Arrow.Syntax
-
 
 type Id = String
 data Val a = Num Int | Bl Bool | Fun (a (Val a) (Val a))
