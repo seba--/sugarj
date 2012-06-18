@@ -142,7 +142,7 @@ public abstract class LanguageLib implements Serializable {
 	
 	public String getRelativeNamespaceSep() {
 		String rel = getRelativeNamespace();
-		if (rel.isEmpty())
+		if (rel == null || rel.isEmpty())
 			return rel;
 		return rel + Environment.sep;
 	}

@@ -202,10 +202,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 
   @Override
   public String getRelativeNamespace() {
-    if (relPackageName == null || relPackageName.isEmpty())
-      return "";
-
-    return relPackageName + sep;
+    return relPackageName;
   }
 
   @Override
