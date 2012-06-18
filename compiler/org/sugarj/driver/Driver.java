@@ -833,7 +833,7 @@ public class Driver{
       boolean skipProcessImport = false;
       
       if (!modulePath.startsWith("org/sugarj")) { // module is not in sugarj standard library
-        Path dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
+        Path dep = ModuleSystemCommands.searchFile(modulePath, "dep", environment);
         Result res = null;
         RelativeSourceLocationPath importSourceFile = null;
         
@@ -885,7 +885,7 @@ public class Driver{
         }
         
         if (dep == null)
-          dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
+          dep = ModuleSystemCommands.searchFile(modulePath, "dep", environment);
         
         if (res == null && dep != null)
           res = Result.readDependencyFile(dep, environment);
