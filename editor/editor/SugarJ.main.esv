@@ -9,8 +9,8 @@ language General properties
   extends       : Root
                   
   description   : "Spoofax/IMP-generated editor for the SugarJ language"
-  url           : http://strategoxt.org
+  url           : http://sugarj.org
                   
-  extensions    : sugj
+  extensions    : sugj,shs,sugp
   table         : include/SugarJ.tbl
   start symbols : SugarCompilationUnit

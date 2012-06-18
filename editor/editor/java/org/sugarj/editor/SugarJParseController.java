@@ -44,6 +44,11 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
     return result;
   }
   
+  public static synchronized Descriptor getDescriptor() { 
+    initDescriptor();
+    return descriptor;
+  }
+
   public static synchronized Descriptor initDescriptor() {
     try {
       if (descriptor == null) {

@@ -3,7 +3,13 @@
 
 <plugin>
        <extension point="org.eclipse.imp.runtime.languageDescription">
-          <language extensions="sugj" description="SugarJ" language="SugarJ" derivedFrom="DynamicRoot" validator="org.sugarj.editor.SugarJValidator" validatorClass="org.sugarj.editor.SugarJValidator"></language>
+          <language
+                derivedFrom="DynamicRoot"
+                description="SugarJ"
+                extensions="sugj,shs,sugp"
+                language="SugarJ"
+                validator="org.sugarj.editor.SugarJValidator"
+                validatorClass="org.sugarj.editor.SugarJValidator"></language>
        </extension>
        <extension id="org.sugarj.editor.parser" name="SugarJ Parser" point="org.eclipse.imp.runtime.parser">
           <parser class="org.sugarj.editor.SugarJParseController" language="SugarJ">
@@ -13,7 +19,8 @@
              id="SugarJBuilder"
              name="SugarJ builder"
              point="org.eclipse.core.resources.builders">
-          <builder>
+          <builder
+                callOnEmptyDelta="true">
 	         <run class="org.sugarj.builder.Builder">
 	            <parameter name="optimize" value="true"/>
 	            <parameter name="comment" value="SugarJ Builder"/>
