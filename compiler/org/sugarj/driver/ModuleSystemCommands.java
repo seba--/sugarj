@@ -69,7 +69,7 @@ public class ModuleSystemCommands {
    * @throws IOException 
    */
   public static RelativePath importSdf(String modulePath, Environment environment) throws IOException {
-    RelativePath sdf = searchFile(modulePath, ".sdf", environment);
+    RelativePath sdf = searchFile(modulePath, "sdf", environment);
     
     if (sdf == null)
       return null;
@@ -79,7 +79,7 @@ public class ModuleSystemCommands {
   }
   
   public static void registerSearchedSdfFiles(String modulePath, Result driverResult, Environment environment) throws IOException {
-    registerSearchedFiles(modulePath, ".sdf", driverResult, environment);
+    registerSearchedFiles(modulePath, "sdf", driverResult, environment);
   }
 
   
@@ -93,7 +93,7 @@ public class ModuleSystemCommands {
    * @throws IOException 
    */
   public static RelativePath importStratego(String modulePath, Environment environment) throws IOException {
-    RelativePath str = searchFile(modulePath, ".str", environment);
+    RelativePath str = searchFile(modulePath, "str", environment);
     
     if (str == null)
       return null;
@@ -103,7 +103,7 @@ public class ModuleSystemCommands {
   }
   
   public static void registerSearchedStrategoFiles(String modulePath, Result driverResult, Environment environment) throws IOException {
-    registerSearchedFiles(modulePath, ".str", driverResult, environment);
+    registerSearchedFiles(modulePath, "str", driverResult, environment);
   }
 
   
@@ -115,7 +115,7 @@ public class ModuleSystemCommands {
    * @throws IOException
    */
   public static boolean importEditorServices(String modulePath, Result driverResult, Environment environment) throws IOException {
-    RelativePath serv = searchFile(modulePath, ".serv", environment);
+    RelativePath serv = searchFile(modulePath, "serv", environment);
     
     if (serv == null)
       return false;
@@ -135,7 +135,7 @@ public class ModuleSystemCommands {
   }
   
   public static void registerSearchedEditorServicesFiles(String modulePath, Result driverResult, Environment environment) throws IOException {
-    registerSearchedFiles(modulePath, ".serv", driverResult, environment);
+    registerSearchedFiles(modulePath, "serv", driverResult, environment);
   }
 
 
