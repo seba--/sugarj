@@ -1,6 +1,8 @@
 package org.sugarj;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -80,5 +82,12 @@ public class LanguageLibRegistry {
         Log.log.logErr("Could not start language plugin " + pluginId);
       }
     return bundle;
+  }
+  
+  public synchronized List<String> getRegisteredFileExtensions() {
+    List<String> list = new LinkedList<String>();
+    for (LanguageLibFactory fact : languageLibs.values())
+      list.add(fact.createLanguageLibrary().getSugarFileExtension());
+    return list;
   }
 }
