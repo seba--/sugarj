@@ -64,7 +64,6 @@ public class STRCommands {
      * We can include as many paths as we want here, checking the
      * adequacy of the occurring imports is done elsewhere.
      */
-    // TODO: Make this pretty
     List<String> cmd = new ArrayList<String>(Arrays.asList(new String[] {
         "-i", toWindowsPath(str.getAbsolutePath()),
         "-o", toWindowsPath(java.getAbsolutePath()),

@@ -412,7 +412,6 @@ public class Result implements IErrorLogger {
     } catch (ClassNotFoundException e) {
       throw new IOException(e);
     } catch (Exception e) {
-//      e.printStackTrace();
       return OUTDATED_RESULT;
     } finally {
       if (ois != null)

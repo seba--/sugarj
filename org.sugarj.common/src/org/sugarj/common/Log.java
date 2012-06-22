@@ -174,7 +174,6 @@ public class Log {
   }
 
   private void indent() {
-    // out.print("$$$");
     for (int i = tasks.size(); i > 0; i--)
       out.print("  ");
   }

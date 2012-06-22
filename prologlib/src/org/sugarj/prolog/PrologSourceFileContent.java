@@ -79,7 +79,7 @@ public class PrologSourceFileContent implements ISourceFileContent {
 			code.append("\n");
 		}
 		
-		for (PrologModuleImport imp : checkedImports)									// XXX: What does this do?
+		for (PrologModuleImport imp : checkedImports)									
 			code.append(getImportedModuleString(imp, interp)).append("\n");
 
 		for (PrologModuleImport imp : imports)

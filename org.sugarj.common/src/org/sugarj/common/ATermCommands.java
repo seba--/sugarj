@@ -263,8 +263,6 @@ public class ATermCommands {
     IStrategoTerm result = null;
     try {
       result = sdf_desugar_0_0.instance.invoke(interp.getCompiledContext(), term);
-//      result = sdf_ensugar_0_0.instance.invoke(interp.getCompiledContext(), result);
-//      result = sdf_desugar_0_0.instance.invoke(interp.getCompiledContext(), result);
     }
     catch (StrategoExit e) {
       if (e.getValue() != 0 || result == null)

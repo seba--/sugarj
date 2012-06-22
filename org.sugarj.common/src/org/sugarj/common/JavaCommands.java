@@ -23,8 +23,6 @@ import org.sugarj.common.path.RelativePath;
  *
  */
 public class JavaCommands {
-  // move this to java language library
-
 
   public static boolean javac(Path sourceFile, Path dir, Collection<Path> cp) throws IOException {
     ArrayList<Path> sourceFiles = new ArrayList<Path>();

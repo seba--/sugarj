@@ -58,13 +58,11 @@ public class JavaLib extends LanguageLib implements Serializable {
   @Override
   public File getInitGrammar() {
     return ensureFile("org/sugarj/java/init/initGrammar.sdf");
-    // return ensureFile("org/sugarj/languages/SugarJ.def");
   }
 
   @Override
   public String getInitGrammarModule() {
     return "org/sugarj/java/init/initGrammar";
-    // return "org/sugarj/languages/sugarJ";
   }
 
   @Override
@@ -92,8 +90,6 @@ public class JavaLib extends LanguageLib implements Serializable {
     if (libDir == null) { // set up directories first
       String thisClassPath = "org/sugarj/JavaLib.class";
       URL thisClassURL = JavaLib.class.getClassLoader().getResource(thisClassPath);
-
-      System.out.println(thisClassURL);
 
       if (thisClassURL.getProtocol().equals("bundleresource"))
         try {
@@ -140,8 +136,6 @@ public class JavaLib extends LanguageLib implements Serializable {
     return "sugj";
   }
 
-  // --------------------
-  // stuff from javaDriver here
 
   private void checkPackageName(IStrategoTerm toplevelDecl, RelativeSourceLocationPath sourceFile, IErrorLogger errorLog) {
     if (sourceFile != null) {
@@ -156,15 +150,6 @@ public class JavaLib extends LanguageLib implements Serializable {
     }
   }
 
-  // public void checkSourceOutFile(Environment environment,
-  // RelativeSourceLocationPath sourceFile) {
-  // if (javaOutFile == null)
-  // setJavaOutFile(environment.createBinPath(getRelativeNamespace() +
-  // FileCommands.fileName(sourceFile) + ".java"));
-  // }
-
-  // XXX: Think of a good name -- what does this actually do?
-  // from ModuleSystemCommands
   public String extractImportedModuleName(IStrategoTerm toplevelDecl) throws IOException {
     String name = null;
     log.beginTask("Extracting", "Extract name of imported module");
@@ -220,17 +205,14 @@ public class JavaLib extends LanguageLib implements Serializable {
     return isApplication(decl, "TypeImportDec") || isApplication(decl, "TypeImportOnDemandDec");
   }
 
-  // ----------------
-  @Override
+    @Override
   public boolean isLanguageSpecificDec(IStrategoTerm decl) {
     return isApplication(decl, "ClassDec") || isApplication(decl, "InterfaceDec") || isApplication(decl, "EnumDec") || isApplication(decl, "AnnoDec");
   }
 
   @Override
   public boolean isPlainDec(IStrategoTerm decl) {
-    return isApplication(decl, "PlainDec"); // XXX: Decide what to do with
-                                            // "Plain"--leave in the language or
-                                            // create a new "Plain" language
+    return isApplication(decl, "PlainDec"); 
   }
 
   @Override
@@ -258,8 +240,6 @@ public class JavaLib extends LanguageLib implements Serializable {
     System.err.println(ctx);
     System.err.println("prettyprint term:");
     System.err.println(term);
-    // IStrategoTerm string =
-    // pp_java_string_0_0.instance.invoke(interp.getCompiledContext(), term);
     IStrategoTerm string = pp_java_string_0_0.instance.invoke(ctx, term);
     System.err.println("prettyprint string:");
     System.err.println(string);
@@ -281,7 +261,6 @@ public class JavaLib extends LanguageLib implements Serializable {
     javaSource.addBodyDecl(prettyPrint(dec));
   }
 
-  // was: processPackageDec
   @Override
   public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException {
     String packageName = extractNamespaceName(toplevelDecl, interp);
@@ -294,13 +273,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 
     if (javaOutFile == null)
       javaOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + ".java"); // XXX:
-                                                                                                                                  // Can
-                                                                                                                                  // we
-                                                                                                                                  // just
-                                                                                                                                  // reuse
-                                                                                                                                  // sourceFile
-                                                                                                                                  // here?
-
+                                              
     // moved here before depOutFile==null check
     javaSource.setNamespaceDecl(prettyPrint(toplevelDecl));
     checkPackageName(toplevelDecl, sourceFileFromResult, errorLog);
@@ -322,7 +295,6 @@ public class JavaLib extends LanguageLib implements Serializable {
     return JavaLibFactory.getInstance();
   }
 
-  // from Result
   @Override
   protected void compile(List<Path> javaOutFiles, Path bin, List<Path> path, boolean generateFiles) throws IOException {
     if (generateFiles)

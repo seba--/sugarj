@@ -44,11 +44,6 @@ public abstract class Path implements Serializable {
   }
 
   
-//  /**
-//   * @throws IllegalArgumentException if this is not a descendant of p
-//   */
-//  public abstract RelativePath makeRelativeTo(Path p);
-
   public static Path readPath(ObjectInputStream ois, Environment env) throws IOException, ClassNotFoundException {
     return readPath(ois, env, true);
   }
