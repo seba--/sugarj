@@ -331,18 +331,6 @@ public class JavaLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  public int getSugarAccessibility(IStrategoTerm decl) {
-    IStrategoTerm head = getApplicationSubterm(decl, "SugarDec", 0);
-    IStrategoTerm mods = getApplicationSubterm(head, "SugarDecHead", 0);
-
-    for (IStrategoTerm t : getList(mods))
-      if (isApplication(t, "Public"))
-        return LanguageLib.PUBLIC_SUGAR;
-
-    return LanguageLib.PRIVATE_SUGAR;
-  }
-
-  @Override
   public IStrategoTerm getSugarBody(IStrategoTerm decl) {
     IStrategoTerm body = getApplicationSubterm(decl, "SugarDec", 1);
     IStrategoTerm sugarBody = getApplicationSubterm(body, "SugarBody", 0);
@@ -368,18 +356,6 @@ public class JavaLib extends LanguageLib implements Serializable {
   public String getEditorName(IStrategoTerm decl) throws IOException {
     IStrategoTerm head = getApplicationSubterm(decl, "EditorServicesDec", 0);
     return prettyPrint(getApplicationSubterm(head, "EditorServicesDecHead", 1));
-  }
-
-  @Override
-  public int getEditorAccessibility(IStrategoTerm decl) {
-    IStrategoTerm head = getApplicationSubterm(decl, "EditorServicesDec", 0);
-    IStrategoTerm mods = getApplicationSubterm(head, "EditorServicesDecHead", 0);
-
-    for (IStrategoTerm t : getList(mods))
-      if (isApplication(t, "Public"))
-        return LanguageLib.PUBLIC_SUGAR;
-
-    return LanguageLib.PRIVATE_SUGAR;
   }
 
   @Override

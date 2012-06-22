@@ -508,11 +508,9 @@ public class Driver{
       String fullExtName = null;
       boolean isPublic = false;
 
-      log.beginTask("Extracting name and accessibility of the editor services.");
+      log.beginTask("Extracting name of the editor services.");
       try {
         extName = langLib.getEditorName(toplevelDecl);
-        if (langLib.getEditorAccessibility(toplevelDecl) == LanguageLib.PUBLIC_SUGAR)
-          isPublic = true;
 
         fullExtName = langLib.getRelativeNamespaceSep() + extName;
 
@@ -957,15 +955,11 @@ public class Driver{
       
       String extName = null;
       String fullExtName = null;
-      boolean isPublic = false;
       
       log.beginTask("Extracting name and accessibility of the sugar.");
       try {        
         extName = langLib.getSugarName(toplevelDecl);
 
-        if (langLib.getSugarAccessibility(toplevelDecl) == LanguageLib.PUBLIC_SUGAR) {
-          isPublic = true;
-        }
 
 
         fullExtName = langLib.getRelativeNamespaceSep() + extName;
@@ -973,11 +967,6 @@ public class Driver{
         log.log("The name of the sugar is '" + extName + "'.");
         log.log("The full name of the sugar is '" + fullExtName + "'.");
 
-        if (isPublic)
-          log.log("The sugar is public.");
-        else
-          log.log("The sugar is not public.");
-        
       } finally {
         log.endTask();
       }
@@ -999,7 +988,7 @@ public class Driver{
         String sdfExtensionHead =
           "module " + fullExtName + "\n" 
           + sdfImports
-          + (isPublic ? "exports " : "hiddens ") + "\n"
+          + "hiddens " + "\n"
           + "  (/)" + "\n";
 
         String sdfExtensionContent = SDFCommands.prettyPrintSDF(sdfExtract, langLib.getInterpreter());

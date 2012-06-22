@@ -28,10 +28,7 @@ import org.sugarj.stdlib.StdLib;
 
 
 public abstract class LanguageLib implements Serializable {
-	
-	public final static int PUBLIC_SUGAR = 1;
-	public final static int PRIVATE_SUGAR = 2;
-	
+		
 	protected HybridInterpreter interp;
 	public void setInterpreter(HybridInterpreter interp) {
 		this.interp = interp;
@@ -212,11 +209,9 @@ public abstract class LanguageLib implements Serializable {
 	
 	
 	public abstract String getSugarName(IStrategoTerm decl) throws IOException;
-	public abstract int getSugarAccessibility(IStrategoTerm decl);
 	public abstract IStrategoTerm getSugarBody(IStrategoTerm decl);
 	
 	public abstract String getEditorName(IStrategoTerm decl) throws IOException;
-	public abstract int getEditorAccessibility(IStrategoTerm decl);
 	public abstract IStrategoTerm getEditorServices(IStrategoTerm decl);
 
 	protected void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IErrorLogger errorLog) {

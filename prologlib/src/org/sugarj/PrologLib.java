@@ -316,10 +316,6 @@ public class PrologLib extends LanguageLib implements Serializable {
         return decName;
 	}
 
-	@Override
-	public int getSugarAccessibility(IStrategoTerm decl) {
-		return LanguageLib.PUBLIC_SUGAR;	//XXX: implemented only public sugar in prolog
-	}
 
 	@Override
 	public IStrategoTerm getSugarBody(IStrategoTerm decl) {
@@ -342,11 +338,6 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	@Override
 	public String getEditorName(IStrategoTerm decl) throws IOException {
-		throw new UnsupportedOperationException("SugarProlog does currently not support editor libraries.");
-	}
-
-	@Override
-	public int getEditorAccessibility(IStrategoTerm decl) {
 		throw new UnsupportedOperationException("SugarProlog does currently not support editor libraries.");
 	}
 

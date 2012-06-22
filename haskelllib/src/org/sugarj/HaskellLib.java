@@ -263,11 +263,6 @@ public class HaskellLib extends LanguageLib {
   }
 
   @Override
-  public int getSugarAccessibility(IStrategoTerm decl) {
-    return PUBLIC_SUGAR;
-  }
-
-  @Override
   public IStrategoTerm getSugarBody(IStrategoTerm decl) {
     return getApplicationSubterm(decl, "SugarBody", 0);
   }
@@ -329,11 +324,6 @@ public class HaskellLib extends LanguageLib {
   @Override
   public String getEditorName(IStrategoTerm decl) throws IOException {
     return moduleName;
-  }
-
-  @Override
-  public int getEditorAccessibility(IStrategoTerm decl) {
-    return PUBLIC_SUGAR;
   }
 
   @Override
