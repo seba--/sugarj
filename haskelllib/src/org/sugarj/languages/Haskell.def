@@ -800,7 +800,6 @@ exports
 
   lexical syntax
     CONID -> Modid
-    VARID -> Modid
 
   syntax
     <Modid-LEX> -> Modid
@@ -812,8 +811,6 @@ exports
   syntax
     <CONID-LEX> "." <Modid-LEX> -> QModid {cons("QModId")}
     <CONID-LEX> "." QModid -> QModid {cons("QModId")}
-    <VARID-LEX> "." <Modid-LEX> -> QModid {cons("QModId")}
-    <VARID-LEX> "." QModid -> QModid {cons("QModId")}
     QModid -> Modid
     QModid -> <Modid-CF>
 
