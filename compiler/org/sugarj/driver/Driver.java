@@ -338,8 +338,7 @@ public class Driver{
         stepped();
         
         // PARSE the next top-level declaration
-        IncrementalParseResult parseResult =
-            parseNextToplevelDeclaration(remainingInput, true);
+        IncrementalParseResult parseResult = parseNextToplevelDeclaration(remainingInput, true);
         lastSugaredToplevelDecl = parseResult.getToplevelDecl();
         remainingInput = parseResult.getRest();
         
@@ -995,11 +994,10 @@ public class Driver{
         IStrategoTerm sdfExtract = fixSDF(extractSDF(sugarBody, extractionContext), langLib.getInterpreter());
         IStrategoTerm strExtract = extractSTR(sugarBody, extractionContext);
         
-        
         String sdfExtensionHead =
           "module " + fullExtName + "\n" 
           + sdfImports
-          + "hiddens " + "\n"
+          + "exports " + "\n"
           + "  (/)" + "\n";
 
         String sdfExtensionContent = SDFCommands.prettyPrintSDF(sdfExtract, langLib.getInterpreter());
