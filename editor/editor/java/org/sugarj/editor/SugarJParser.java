@@ -1,10 +1,7 @@
 package org.sugarj.editor;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -273,31 +270,21 @@ public class SugarJParser extends JSGLRI {
   
   private Path initialTrans = null;
 
-  @SuppressWarnings("unchecked")
   private Path getInitialTrans(LanguageLibFactory factory) throws FileNotFoundException, IOException {
     LanguageLib langLib = factory.createLanguageLibrary();
     if (initialTrans != null && FileCommands.exists(initialTrans))
       return initialTrans;
-    Path strCachePath = environment.createCachePath("strCache");
-    ModuleKeyCache<Path> strCache = null;
-    try {
-      strCache = (ModuleKeyCache<Path>) new ObjectInputStream(
-          new FileInputStream(strCachePath.getFile())).readObject();
-    } catch (Exception e) {
-      strCache = new ModuleKeyCache<Path>();
-      if (environment.getCacheDir().getFile() != null
-          && environment.getCacheDir().getFile().exists())
-        for (File f : environment.getCacheDir().getFile().listFiles())
-          if (f.getPath().endsWith(".jar"))
-            f.delete();
-    }
+    
     try {
       initialTrans = STRCommands.compile(
           new AbsolutePath(langLib.getInitTrans().getPath()),
           "main",
           new LinkedList<Path>(),
           new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.strategoTbl.getPath())),
-          org.strategoxt.strj.strj.init(), strCache, environment, langLib);
+          org.strategoxt.strj.strj.init(), 
+          new ModuleKeyCache<Path>(new Object()), 
+          environment, 
+          langLib);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

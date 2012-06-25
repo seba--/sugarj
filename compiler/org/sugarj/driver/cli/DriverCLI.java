@@ -383,12 +383,6 @@ public class DriverCLI {
     if (line.hasOption("cache"))
       environment.setCacheDir(new AbsolutePath(line.getOptionValue("cache")));
   
-    if (line.hasOption("read-only-cache"))
-      org.sugarj.common.Environment.rocache = true;
-    
-    if (line.hasOption("write-only-cache"))
-      org.sugarj.common.Environment.wocache = true;
-    
     if (line.hasOption("gen-java"))
       environment.setGenerateJavaFile(true);
     

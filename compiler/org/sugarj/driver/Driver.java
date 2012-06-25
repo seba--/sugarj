@@ -57,7 +57,6 @@ import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.common.path.SourceLocation;
-import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.transformations.extraction.extraction;
 import org.sugarj.stdlib.StdLib;
@@ -69,8 +68,6 @@ import org.sugarj.util.ProcessingListener;
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
 public class Driver{
-  
-  public final static String CACHE_VERSION = "langlib_0.1";
   
   private final static int PENDING_TIMEOUT = 30000;
 
@@ -119,8 +116,11 @@ public class Driver{
   private Context extractionContext;
   private Context strjContext;
   
-  private ModuleKeyCache<Path> sdfCache = null;
-  private ModuleKeyCache<Path> strCache = null;
+  private static Map<String,ModuleKeyCache<Path>> sdfCaches;
+  private static Map<String,ModuleKeyCache<Path>> strCaches;
+  
+  private ModuleKeyCache<Path> sdfCache;
+  private ModuleKeyCache<Path> strCache;
   
   private Path currentGrammarTBL;
   private Path currentTransProg;
@@ -146,6 +146,21 @@ public class Driver{
       FileCommands.createDir(environment.getBin());
       
       initializeCaches(environment, false);
+      sdfCache = sdfCaches.get(langLib.getLanguageName() + "#" + langLib.getVersion());
+      if (sdfCache == null) {
+        sdfCache = new ModuleKeyCache<Path>(sdfCaches);
+        synchronized (sdfCaches) {
+          sdfCaches.put(langLib.getLanguageName() + "#" + langLib.getVersion(), sdfCache);
+        }
+      }
+      
+      strCache = strCaches.get(langLib.getLanguageName() + "#" + langLib.getVersion());
+      if (strCache == null) {
+        strCache = new ModuleKeyCache<Path>(strCaches);
+        synchronized (strCaches) {
+          strCaches.put(langLib.getLanguageName() + "#" + langLib.getVersion(), strCache);
+        }
+      }
     } catch (IOException e) {
       throw new RuntimeException("error while initializing driver", e);
     }
@@ -269,8 +284,7 @@ public class Driver{
       }
     
       driver.process(source, sourceFile, monitor, generateFiles);
-      if (!Environment.rocache)
-        driver.storeCaches(sourceFile.getSourceLocation().getEnvironment());
+      Driver.storeCaches(sourceFile.getSourceLocation().getEnvironment());
     
       synchronized (processingListener) {
         for (ProcessingListener listener : processingListener)
@@ -840,8 +854,6 @@ public class Driver{
             log.log("Need to compile the imported module first ; processing it now.");
             
             try {
-              storeCaches(environment);
-   
               if (currentlyProcessing.contains(importSourceFile)) {
                 // assume source file does not provide syntactic sugar
                 langLib.addImportModule(toplevelDecl, false);
@@ -850,7 +862,6 @@ public class Driver{
               }
               else {
                 res = compile(importSourceFile, monitor, langLib.getFactoryForLanguage());    // XXX: Think of a better way to handle this
-                initializeCaches(environment, true);
                 if (res.hasFailed())
                   setErrorMessage(toplevelDecl, "problems while compiling " + importModuleName);
               }
@@ -1144,79 +1155,57 @@ public class Driver{
   
 
   @SuppressWarnings("unchecked")
-  private void initializeCaches(Environment environment, boolean force) throws IOException {
+  private static synchronized void initializeCaches(Environment environment, boolean force) throws IOException {
     if (environment.getCacheDir() == null)
       return;
     
-    Path cacheVersion = environment.createCachePath("version");
-    
-    if (!cacheVersion.getFile().exists() ||
-        !FileCommands.readFileAsString(cacheVersion).equals(CACHE_VERSION)) {
-
+    Path stdlibVersion = environment.createCachePath("version");
+    if (!stdlibVersion.getFile().exists() || !FileCommands.readFileAsString(stdlibVersion).equals(StdLib.VERSION)) {
       for (File f : environment.getCacheDir().getFile().listFiles())
         f.delete();
-      
-      FileCommands.writeToFile(cacheVersion, CACHE_VERSION);
+      FileCommands.writeToFile(stdlibVersion, StdLib.VERSION);
     }
     
-    Path sdfCachePath = environment.createCachePath("sdfCache");
-    Path strCachePath = environment.createCachePath("strCache");
+    Path sdfCachePath = environment.createCachePath("sdfCaches");
+    Path strCachePath = environment.createCachePath("strCaches");
     
-    if (sdfCache == null || force)
-      try {
-        // log.log("load sdf cache from " + sdfCachePath);
-          sdfCache = reallocate(
-              (ModuleKeyCache<Path>) new ObjectInputStream(new FileInputStream(sdfCachePath.getFile())).readObject(),
-              environment);
-      } 
-      catch (Exception e) {
-        sdfCache = new ModuleKeyCache<Path>();
-        for (File f : environment.getCacheDir().getFile().listFiles())
-          if (f.getPath().endsWith(".tbl"))
-            f.delete();
-      }
-    else if (sdfCache == null)
-      sdfCache = new ModuleKeyCache<Path>();
-    
-    if (strCache == null || force)
-      try {
-        // log.log("load str cache from " + strCachePath);
-        strCache = reallocate(
-            (ModuleKeyCache<Path>) new ObjectInputStream(new FileInputStream(strCachePath.getFile())).readObject(),
-            environment);
-      } 
-      catch (Exception e) {
-        strCache = new ModuleKeyCache<Path>();
-        for (File f : environment.getCacheDir().getFile().listFiles())
-          if (f.getPath().endsWith(".jar"))
-            f.delete();
-      }
-    else if (strCache == null)
-      strCache = new ModuleKeyCache<Path>();
+    try{
+      if (sdfCaches == null || force)
+        sdfCaches = (Map<String, ModuleKeyCache<Path>>) new ObjectInputStream(new FileInputStream(sdfCachePath.getFile())).readObject();
+      if (strCaches == null || force)
+        strCaches = (Map<String, ModuleKeyCache<Path>>) new ObjectInputStream(new FileInputStream(strCachePath.getFile())).readObject();
+    } catch (Exception e) {
+      sdfCaches = new HashMap<String, ModuleKeyCache<Path>>();
+      strCaches = new HashMap<String, ModuleKeyCache<Path>>();
+      for (File f : environment.getCacheDir().getFile().listFiles())
+        if (f.getPath().endsWith(".tbl"))
+          f.delete();
+    }
   }
 
   
-  private static ModuleKeyCache<Path> reallocate(ModuleKeyCache<Path> cache, Environment env) {
-    ModuleKeyCache<Path> res = new ModuleKeyCache<Path>();
-    
-    for (Entry<ModuleKey, Path> e : cache.entrySet()) {
-      Map<Path, Integer> imports = new HashMap<Path, Integer>();
-      for (Entry<Path, Integer> e2 : e.getKey().imports.entrySet())
-        imports.put(Path.reallocate(e2.getKey(), env), e2.getValue());
-      
-      res.put(new ModuleKey(imports, e.getKey().body), Path.reallocate(e.getValue(), env));
-    }
-    
-    return res;
-  }
+//TODO is this needed?
+//  private static ModuleKeyCache<Path> reallocate(ModuleKeyCache<Path> cache, Environment env) {
+//    ModuleKeyCache<Path> res = new ModuleKeyCache<Path>();
+//    
+//    for (Entry<ModuleKey, Path> e : cache.entrySet()) {
+//      Map<Path, Integer> imports = new HashMap<Path, Integer>();
+//      for (Entry<Path, Integer> e2 : e.getKey().imports.entrySet())
+//        imports.put(Path.reallocate(e2.getKey(), env), e2.getValue());
+//      
+//      res.put(new ModuleKey(imports, e.getKey().body), Path.reallocate(e.getValue(), env));
+//    }
+//    
+//    return res;
+//  }
 
 
-  private void storeCaches(Environment environment) throws IOException {
+  private static synchronized void storeCaches(Environment environment) throws IOException {
     if (environment.getCacheDir() == null)
       return;
     
     Path cacheVersion = environment.createCachePath("version");
-    FileCommands.writeToFile(cacheVersion, CACHE_VERSION);
+    FileCommands.writeToFile(cacheVersion, StdLib.VERSION);
     
     Path sdfCachePath = environment.createCachePath("sdfCache");
     Path strCachePath = environment.createCachePath("strCache");
@@ -1227,24 +1216,19 @@ public class Driver{
     if (!strCachePath.getFile().exists())
       FileCommands.createFile(strCachePath);
     
-    if (sdfCache != null) {
-//      log.log("store sdf cache in " + sdfCachePath);
-//      log.log("sdf cache size: " + sdfCache.size());
-      FileCommands.createFile(sdfCachePath);
+    if (sdfCaches != null) {
       ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(sdfCachePath.getFile()));
       try {
-        oos.writeObject(sdfCache);
+        oos.writeObject(sdfCaches);
       } finally {
         oos.close();
       }
     }
     
-    if (strCache != null) {
-//      log.log("store str cache in " + strCachePath);
-//      log.log("str cache size: " + strCache.size());
+    if (strCaches != null) {
       ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(strCachePath.getFile()));
       try {
-        oos.writeObject(strCache);
+        oos.writeObject(strCaches);
       } finally {
         oos.close();
       }

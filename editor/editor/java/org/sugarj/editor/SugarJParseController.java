@@ -121,9 +121,6 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
   }
   
   private static void setDefaultEnvironmentOptions(Environment environment) {
-    // set this to true to temporarily deactivate caching
-    Environment.wocache = false;
-
     if (environment.getCacheDir() == null)
       environment.setCacheDir(new RelativePath(environment.getRoot(), ".sugarjcache"));
     

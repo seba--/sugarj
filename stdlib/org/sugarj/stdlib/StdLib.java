@@ -13,6 +13,8 @@ import org.eclipse.core.runtime.FileLocator;
  */
 public class StdLib {
 
+  public static final String VERSION = "stdlib-0.1";
+  
   public static File stdLibDir;
   private static String stdLibTmpDir;
   static {

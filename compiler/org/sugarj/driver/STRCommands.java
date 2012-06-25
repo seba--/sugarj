@@ -189,10 +189,8 @@ public class STRCommands {
       Path cacheProg = environment.createCachePath(prog.getFile().getName());
       FileCommands.copyFile(prog, cacheProg);
       
-      if (!Environment.rocache) {
-        Path oldProg = strCache.putGet(key, cacheProg);
-        FileCommands.delete(oldProg);
-      }
+      Path oldProg = strCache.putGet(key, cacheProg);
+      FileCommands.delete(oldProg);
 
       if (CommandExecution.CACHE_INFO)
         log.log("Cache Location: " + cacheProg);
@@ -209,8 +207,7 @@ public class STRCommands {
     
     log.beginTask("Searching", "Search assimilator in cache");
     try {
-      if (!Environment.wocache)
-        result = strCache.get(key);
+      result = strCache.get(key);
       
       if (result == null || !result.getFile().exists())
         return null;

@@ -63,12 +63,6 @@ public class Environment implements Serializable {
   }
 
   
-  /*
-   * read-only/write-only cache flags.
-   */
-  public static boolean rocache = false;
-  public static boolean wocache = false;  
-  
   private Path cacheDir = null;
   
   private Path root = new AbsolutePath(".");

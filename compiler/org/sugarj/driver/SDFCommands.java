@@ -208,10 +208,8 @@ public class SDFCommands {
       Path cacheTbl = environment.createCachePath(tbl.getFile().getName());
       FileCommands.copyFile(tbl, cacheTbl);
       
-      if (!Environment.rocache) {
-        Path oldTbl = sdfCache.putGet(key, cacheTbl);
-        FileCommands.delete(oldTbl);
-      }
+      Path oldTbl = sdfCache.putGet(key, cacheTbl);
+      FileCommands.delete(oldTbl);
 
       if (CommandExecution.CACHE_INFO)
         log.log("Cache Location: " + cacheTbl);
@@ -228,8 +226,7 @@ public class SDFCommands {
     
     log.beginTask("Searching", "Search parse table in cache");
     try {
-      if (!Environment.wocache)
-        result = sdfCache.get(key);
+      result = sdfCache.get(key);
       
       if (result == null || !result.getFile().exists())
         return null;
@@ -366,7 +363,7 @@ public class SDFCommands {
   }
   
   private static Pair<SGLR, IStrategoTerm> parseImplode(ParseTable table, Path tbl, String source, String start, boolean useRecovery, ITreeBuilder treeBuilder) throws IOException, SGLRException {
-    log.beginExecution("parsing", "parsing source using table " + tbl);
+    log.beginExecution("parsing");
 
     Pair<SGLR, IStrategoTerm> result = null;
     try {
