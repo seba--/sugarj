@@ -80,9 +80,10 @@ public class StdLib {
   public static File editorServicesTbl = ensureFile("org/sugarj/languages/EditorServices.tbl");
   public static File plainDef = ensureFile("org/sugarj/languages/Plain.def");
   public static File commonDef = ensureFile("org/sugarj/stdlib/Common.def");
-  
+  public static File failureTrans = ensureFile("failure-trans.jar");
 
   public static void main(String args[]) {
+    exists(stdLibDir);
     exists(sdfDef);
     exists(sdfTbl);
     exists(strategoDef);
@@ -90,7 +91,8 @@ public class StdLib {
     exists(editorServicesDef);
     exists(editorServicesTbl);
     exists(plainDef);
-    exists(stdLibDir);
+    exists(commonDef);
+    exists(failureTrans);
   }
   
   private static void exists(File file) {
