@@ -3,7 +3,6 @@ package org.sugarj;
 import static org.sugarj.common.ATermCommands.getApplicationSubterm;
 import static org.sugarj.common.ATermCommands.getList;
 import static org.sugarj.common.ATermCommands.isApplication;
-import static org.sugarj.common.Environment.sep;
 import static org.sugarj.common.Log.log;
 
 import java.io.File;
@@ -46,6 +45,10 @@ public class JavaLib extends LanguageLib implements Serializable {
   private JavaSourceFileContent javaSource;
 
   private String relPackageName;
+
+  public String getVersion() {
+    return "java-0.1";
+  }
 
   @Override
   public List<File> getGrammars() {

@@ -28,8 +28,11 @@ import org.sugarj.stdlib.StdLib;
 
 
 public abstract class LanguageLib implements Serializable {
-		
-	protected HybridInterpreter interp;
+
+  private static final long serialVersionUID = -6712835686318143995L;
+
+  protected HybridInterpreter interp;
+	
 	public void setInterpreter(HybridInterpreter interp) {
 		this.interp = interp;
 	}
@@ -38,12 +41,12 @@ public abstract class LanguageLib implements Serializable {
 		return interp;
 	}
 	
-  private static final long serialVersionUID = -6712835686318143995L;
-
   public List<File> getGrammars() {
 		return Arrays.asList(new File[]{StdLib.sdfDef, StdLib.strategoDef, StdLib.editorServicesDef, StdLib.plainDef, StdLib.commonDef});
 	}
 	
+  public abstract String getVersion();
+  
 	public abstract File getInitGrammar();   
 	public abstract String getInitGrammarModule();
 	public abstract File getInitTrans();

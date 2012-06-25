@@ -45,7 +45,11 @@ public class PrologLib extends LanguageLib implements Serializable {
 		
 	private IStrategoTerm pptable = null;
 	private File prettyPrint = null;
-	
+
+  public String getVersion() {
+    return "prolog-0.1";
+  }
+
 	private File getPrettyPrint() {
 		if (prettyPrint == null)
 			prettyPrint = ensureFile("org/sugarj/languages/Prolog.pp");
