@@ -1207,8 +1207,8 @@ public class Driver{
     Path cacheVersion = environment.createCachePath("version");
     FileCommands.writeToFile(cacheVersion, StdLib.VERSION);
     
-    Path sdfCachePath = environment.createCachePath("sdfCache");
-    Path strCachePath = environment.createCachePath("strCache");
+    Path sdfCachePath = environment.createCachePath("sdfCaches");
+    Path strCachePath = environment.createCachePath("strCaches");
 
     if (!sdfCachePath.getFile().exists())
       FileCommands.createFile(sdfCachePath);
