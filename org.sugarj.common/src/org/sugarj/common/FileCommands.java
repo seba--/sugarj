@@ -345,7 +345,7 @@ public class FileCommands {
 	  if (i > 0) 
 		  return file.substring(0,i);
 	  
-	  return file;
+	  return "";
   }
 
   public static int fileHash(Path file) throws IOException {
