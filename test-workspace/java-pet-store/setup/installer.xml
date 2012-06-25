@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+
+<!-- Copyright 2006 Sun Microsystems, Inc.  All rights reserved.  You may not modify, use, reproduce, or distribute this software except in compliance with the terms of the License at: 
+ http://developer.sun.com/berkeley_license.html
+ $Id: installer.xml,v 1.2 2006-05-03 22:03:20 inder Exp $ -->
+
+<project name="installer" default="create-installer" basedir="..">
+
+  <property file="${user.home}/build.properties"/>
+  <property file="setup/dist.properties"/>
+
+  <!-- The directory from where to get the libraries that the installer needs -->
+  <property name="poormans-installer.home" value="."/>
+
+  <taskdef name="installerBuilder" classname="org.jvnet.poormans_installer.builder.BuilderTask">
+    <classpath>
+      <fileset dir="${poormans-installer.home}" includes="*.jar"/>
+    </classpath>
+  </taskdef>
+
+  <target name="create-installer">
+    <mkdir dir="dist/classes"/>
+    <echo message="Creating an installer..."/>
+    <installerBuilder
+      licenseFile="../../../www/LICENSE.txt"
+      zipFile="${release.zipfile}"
+      classFile="dist/classes/petstore.class"/>
+    <jar jarfile="dist/${release.fullname}-installer.jar" basedir="dist/classes" manifest="setup/manifest.mf"/>
+  </target>
+</project>

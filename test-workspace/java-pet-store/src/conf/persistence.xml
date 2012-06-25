@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Copyright 2006 Sun Microsystems, Inc.  All rights reserved.  You may not modify, use, reproduce, or distribute this software except in compliance with the terms of the License at: 
+ http://developer.sun.com/berkeley_license.html
+ $Id: persistence.xml,v 1.7 2007-04-18 19:26:07 smitha Exp $ -->
+
+<persistence version="1.0" xmlns="http://java.sun.com/xml/ns/persistence" 
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd"> 
+    <persistence-unit name="PetstorePu">
+        <description>Petstore Persistence Unit
+        </description>
+        <jta-data-source>jdbc/PetstoreDB</jta-data-source>
+        <non-jta-data-source>jdbc/PetstoreDB</non-jta-data-source>
+    </persistence-unit>
+</persistence>
+
+

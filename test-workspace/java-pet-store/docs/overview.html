@@ -1,0 +1,314 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <title>Java Pet Store Reference Application Overview</title>
+</head>
+<body>
+<hr noshade="noshade">
+<h1>Java Pet Store 2.0 Reference Application Overview</h1>
+The Java Pet Store 2.0 Reference Application is a sample application
+brought to
+you by the <a href="http://blueprints.dev.java.net/">Java
+BluePrints</a>
+program at <a href="http://sun.com">Sun Microsystems</a>.
+This application is designed to illustrate how the Java EE 5 Platform
+can be used to develop an AJAX-enabled Web 2.0 application. The
+application comes with full source-code available under a&nbsp;
+BSD-style license, so you can experiment with it and use it in your own
+applications. <br>
+<br>
+The Java Pet Store 2.0 is the reference application for building AJAX
+web applications on Java EE 5. It illustrates BluePrints for using AJAX
+with Java, building AJAX-enabled JSF component libraries, using Java
+Persistence APIs, applying MVC and other design patterns in an AJAX web
+app, using Mashups such as Google Maps service for location specific
+searches of pets and PayPal service for purchases, using an RSS feed as
+a data&nbsp; source, and lots more.<br>
+<br>
+<a href="#learn">Learn more about features and use cases in Java Pet
+Store</a><br>
+<a href="#under_hood">Learn about the technologies, design guidelines,
+tips and tricks, etc used to build the application.</a><br>
+<a href="#contributors"></a><a href="file:///petstore/faces/index.jsp"><br>
+</a>
+<h2><a name="learn"></a>Learn More About
+Features in Java Petstore</h2>
+<p>The application provides a
+meeting ground for
+buyers and sellers of pets, as well as pet lovers just wanting to
+look.&nbsp;The application allows a user to
+add a
+pet for sale or adoption(free) on the Website. The
+petstore has many features and use cases that one can easily overlook,
+so lets take a look at the application to see what is there when you
+click through it.</p>
+<p>Here are some of the features and use cases&nbsp;of this
+application, broken down by application pages</p>
+<p>General Pages</p>
+<ul>
+  <li>Ajax UI. This site uses Ajax in various places to provide a
+richer user experience. With Ajax, you don't need to do a whole page
+refresh in the browser for each user action, instead just a portion of
+the page can be updated which gives users a more desktop-like
+experience. Ajax does this by asynchronously going out to fetch
+&nbsp;more data and process requests at the server behind the scenes,
+while the user interacts with the browser UI and is unaware of the
+behind
+the scenes interactions of browser and server. Note, some user actions
+will require a whole page reload as the application is composed of
+several main pages. But within each of those main pages, just portions
+of the page are updated as the user interacts with the UI.</li>
+  <li>Common Banner: It has a common banner that is shown on each
+page. This banner is a news bar/ticker which rotates the top four
+headlines from the live blueprints project RSS feed on java.net. The
+user can click on a headline and go directly to the RSS item on
+java.net. Or the user can click on the "News" and go to the news page.
+This banner also lists some links to the other main pages on
+petstore, such as Seller, Catalog, Maps,&nbsp; </li>
+</ul>
+Home Page<br>
+This is the first page of petstore
+<ul>
+  <li>Tag Cloud: On the Home page there is a tag cloud which shows
+the most popular tags. This application allows community based tagging
+where users can tag pets with tags such as "awesome" or whatever. This
+results in the pets being browseable by this community user-driven
+categorization of the content (pets in this case).</li>
+  <li>Fish-eye: On the home page you can see a fun example of Ajax and
+Javascript used
+to make the page more lively. Of course, lively pages can also be
+annoying, so this is a somewhat gratuitous usage of Ajax, but is useful
+to highlight the ability to have some life on&nbsp;your pages.</li>
+</ul>
+News Page: <br>
+There is a news page which allows users to read through
+several of the top stories from the blueprints live announcement RSS
+feed on java.net. <br>
+<ul>
+  <li>To get to this page, on the banner of any page, just click on the
+"news" link of the news bar. This page is easy to miss.</li>
+  <li>Users can choose the next and previous buttons to
+get more stories. Notice the use of Ajax to avoid a whole page refresh,
+and instead just the news items are replaced but the page template
+stays the same. This is an in the page RSS reader.</li>
+</ul>
+Seller Page <br>
+This is where users can upload pets to share and
+sell to other people. It is a series of form fragments that a user
+fills out to provide info and description about the pet that is being
+added to the site.
+<ul>
+  <li>In the page multi-step form. The user adds different information
+about the pet in each step. This is like an Ajax
+enabled multi-page form which does not require the user to see a page
+reload for each form fragment.</li>
+  <li>Rich Text Editor on client side: On seller page, a rich text
+editor is embedded in the form to allow users to add nicer looking
+descriptions of their pets.</li>
+  <li>Image file upload. On the seller page, the user can upload an
+image from their desktop to the petstore server where is can be viewed
+by other users.</li>
+  <li>CAPTCHA(see http://en.wikipedia.org/wiki/Captcha):&nbsp;Using
+Captchas to discourage spam in the community
+created
+content: Whenever a website allows its users to add content, it needs
+to build mechanisms to discourage placement of spurious content on its
+Website through automated mechanisms. We demonstrate how captchas can
+be used for this purpose. The CAPTCHA is presented to the user before
+fileupload is completed when a new pet is being added in the seller
+page.</li>
+  <li>This page uses the Solutions Catalog's <a target="blog"
+ href="https://blueprints.dev.java.net/complib/v2/file-upload.html">AJAX
+Fileupload and Progress Bar component</a>. This component upload's the
+entire HTML form through AJAX utilizing <a target="blog"
+ href="http://dojotoolkit.org/">Dojo's</a> <a target="blog"
+ href="http://manual.dojotoolkit.org/io.html">dojo.io.bind form node</a>
+functionality.&nbsp; The uploaded stream is parsed and stored on the
+server using <a target="blog"
+ href="http://jakarta.apache.org/commons/fileupload/">Apache's Commons
+FileUpload </a>and <a target="blog"
+ href="http://jakarta.apache.org/commons/io/">IO</a> libraries.&nbsp;
+The optional Progress Bar that shows status of the upload to the user
+is refreshed using a second AJAX call to retrieve information from the
+server.</li>
+  <li>This page uses the Solutions Catalog's <a target="blog"
+ href="https://blueprints.dev.java.net/complib/v2/auto-complete.html">Auto-Complete
+component</a> provides a list of cities and states that are populated
+from the database through the Java Persistence APIs.&nbsp; This list is
+retrieved through an AJAX call and is narrowed as the user types <br>
+  </li>
+  <li>The <a target="blog"
+ href="http://lucene.apache.org/java/docs/index.html">Apache's Lucene
+Search
+Engine</a> indexes are updated once the fileupload is completed
+successfully.<br>
+  </li>
+</ul>
+<br>
+Catalog Browsing and scrolling page. <br>
+This is where users can browse for pets by categories of cats, dogs,
+etc and by pictures.
+<ul>
+  <li>Continuous Ajax scroller of images. It asynchronously goes and
+fetches chucks of the list of images in a category, so as you scroll
+through it gives the appearance of a continuous list</li>
+  <li>Master/Detail up/down shadow pane. &nbsp;This is a common Ajax UI
+use case.</li>
+  <li>Accordian of categories. The categories of Cats, Dogs, Birds,
+Reptiles, and Fish, each of those categories has sub-categories. For
+example, under cats there is a Hairy Cat sub-category and a GroomedCat
+sub-category. As the user scrolls over a category name, the list of its
+sub-categories expands while the other categories contract, sort of
+like an accordian. This is a common Ajax UI use case.</li>
+  <li>This page uses the Solutions Catalog's <a target="blog"
+ href="https://blueprints.dev.java.net/complib/v2/ratings.html">AJAX
+Rating component</a>.&nbsp; This component uses a GUI 5 star display
+and updates the database with the user selected rating through an AJAX
+call.&nbsp; The user value is then averaged with the other user ratings
+that
+already exist.&nbsp;</li>
+  <li>User policing of content: On he catalog browsing page, users can
+flag an item as inappropriate so it is removed. This is to handle the
+case of malicious users who post bad images and content.</li>
+  <li>This page uses the Solutions Catalog's <a target="blog"
+ href="https://blueprints.dev.java.net/complib/v2/buy-now.html">PayPal
+client-side mashup component</a>. The application uses the PayPal
+service to
+allow sellers to accept payments.&nbsp; Currently the request is
+forwarded to the PayPal Developer Sandbox for testing purposes.<br>
+  </li>
+</ul>
+Maps Page <br>
+This page is the front-end map page that utilizes the database through
+the Java Persistence APIs to retrieve catalog items by category.&nbsp;
+This page leads into the <a target="blog"
+ href="http://maps.google.com/">Google Maps</a>
+client-side mashup page and displays the catalog items on the map for
+the selected category.&nbsp; By entering an optional center-point
+address with
+a search area (in miles), the user can further restrict the category to
+show only the items in
+the specific area around the center point.<br>
+<ul>
+  <li>Mashup&nbsp;with Yahoo's Geo-coder service to get mapping
+coordinates in longitude and latitude for the center point
+address.&nbsp;</li>
+  <li>Mashup with
+Google's Map service to display pets by locations on Google Maps and
+displays a list of hyper-linked catalog items that activates the
+correlated points on the Google Map.</li>
+  <li>Pop ups for more details. On a long list of pets on the maps
+page, a pop up balloon will show you the details about a pet so you
+know if you are interested.</li>
+</ul>
+<br>
+Tagging Page<br>
+The tag page shows the top tags based on the number of items that
+reference the tag.&nbsp; CSS styles are used to change the font and
+color of the tag also based on the number of references.&nbsp; When a
+tag is clicked, an Ajax call in executed to retrieve the items that are
+reference by the tag and then displayed.&nbsp; The tags are stored both
+in the indexes for quick retrival and in the database so the indexes
+can be recreated if they get corrupted.<br>
+<ul>
+  <li>Tagging Page: This page displays a list of popular tags from
+users. You can click a tag to see how other users categorize the pets.</li>
+</ul>
+Custom Search Page <br>
+This page is the front-end search page that utilizes the <a
+ target="blog" href="http://lucene.apache.org/java/docs/index.html">Apache's
+Lucene
+Search Engine</a> on the server.&nbsp; This page searches the indexes
+and displays a list of results that matches all the entered words in
+the search string.&nbsp;&nbsp; This page is also a lead- in to the <a
+ target="blog" href="http://maps.google.com/">Google Maps</a>
+client-side mash-up
+page.&nbsp; The user can select the items that they want shown on the
+map and by entering an optional center-point address with a search area
+(in miles), can further restrict the map to show only the items in the
+specific area around the center point.
+<ul>
+  <li>Users can enter a keyword and see a list of pets in the
+petstore&nbsp; that match their search criteria.</li>
+  <li>Community tagging of content: On the Custom search Page you can
+add a tag to an item being searched</li>
+  <li>The <a target="blog"
+ href="https://blueprints.dev.java.net/complib/v2/popup-balloon.html">AJAX
+Popup Balloon component</a> that shows more detailed information is
+triggered when the user mouses-over the name for more than a
+second.</li>
+</ul>
+<br>
+Are you curious about how any of those features was built?
+<h2><a name="under_hood"></a>What are some of the Technologies and
+Designs Illustrated in the Petstore Code</h2>
+<p>What can you learn by taking &nbsp;a peek under the hood of the
+petstore? The application itself is not so important, it is the code
+and the
+design guidelines illustrated in the code that matter. You can use the
+petstore to learn and also reuse any of the code you might like.</p>
+<p>Here is a list of some of the key things you can learn and that are
+illustrated in the petstore design and code:</p>
+<ol>
+  <li>Here are some of the technologies use in petstore: Java EE 5,
+Ajax, DHTML, database</li>
+  <li>Here are some of the Java EE 5 technologies used : Java Server
+Faces, JSP pages, Servlets , Java EE annotations, Java EE dependency
+injection, Java Persistence APIs, Java Transactions APIs,&nbsp;</li>
+  <li>Here are some of the open source toolkits and other utilities we
+used: DOJO Toolkit, DOJO widgets, Rome for RSS reader, Apache file
+upload, Lucene Search, </li>
+  <li>Using AJAX for single-page interactive Web applications:
+The
+application is designed to be a single-page application where the user
+never leaves the page. Different sections of the page are dynamically
+loaded based on the user actions. These sections are loaded
+asynchronously to avoid any browser refreshes, and to give a richer
+interactive user-experience.&nbsp;</li>
+  <li>Page is the application architecture </li>
+  <li>Mash-ups with Google maps: shows a client side mashup.</li>
+  <li>Mashup with Yahoo Geo-coder thru proxy servlet.</li>
+  <li>File upload, using Apache plus DOJO plus plus storage of the
+content in a database for description and meta data and files for images</li>
+  <li>Integration of an RSS feed: The website integrates an RSS
+feed of news items coming out the Java BluePrints website. The RSS feed
+is presented in a user-friendly way by on-the-fly formatting.</li>
+  <li>Integration of &nbsp;a search engine: The application
+integrates Apache Lucene search engine to handle all website searches.</li>
+  <li>Using a set of Ajax JSF components in a component library.</li>
+  <li>Exception handling and error handling for Ajax calls and
+server-side exceptions.</li>
+  <li>Validation</li>
+  <li>Client-side caching with Ajax</li>
+  <li>Use of Java Persistence APIs for domain model</li>
+  <li>Transaction management</li>
+</ol>
+This application also demonstrate the use of various features
+of&nbsp; the Java EE 5 platform such as: <br>
+<ol>
+  <li>JavaServer Faces: Many of the AJAX features are implemented
+as reusable JavaServer Faces components.&nbsp;</li>
+  <li>Java Persistence API: The application uses Java Persistence
+APIs to create an object/relational mapping layer.&nbsp;</li>
+  <li>Dependency Injection: The application uses dependency
+injection instead of deployment descriptors.</li>
+</ol>
+<br>
+<hr>
+<h2>About Java BluePrints</h2>
+<p>The Java BluePrints program defines the application
+programming
+model for the Java EE™ platform. It provides best practice
+guidelines and
+architectural recommendations for real-world application scenarios to
+enable developers to build portable, scalable, and robust applications
+using the Java EE technologies.<br>
+<br>
+<br>
+</p>
+<hr noshade="noshade">Copyright © 2007 Sun
+Microsystems,
+Inc. All Rights Reserved.
+</body>
+</html>

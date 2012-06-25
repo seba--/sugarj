@@ -1,0 +1,326 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta content="text/html;charset=ISO-8859-1" http-equiv="Content-Type">
+  <title>Java BluePrints</title>
+  <style type="text/css">
+
+body,th,td,p,div,span,a,ul,ul li, ol, ol li, ol li b, dl,h1,h2,h3,h4,h5,h6,li
+
+{font-family:geneva,helvetica,arial,"lucida sans",sans-serif; font-size:10pt}
+
+h1 {font-size:18pt}
+
+h2 {font-size:14pt}
+
+h3 {font-size:12pt}
+
+code,kbd,tt,pre {font-family:monaco,courier,"courier new";font-size:10pt;color:#666}
+
+li {padding-bottom: 8px}
+
+p.copy, p.copy a {font-family:geneva,helvetica,arial,"lucida sans",sans-serif; font-size:8pt}
+
+p.copy {text-align: center}
+
+  </style><!-- Copyright 2006 Sun Microsystems, Inc. All rights reserved. You may not modify, use, reproduce, or distribute this software except in compliance with the terms of the License at: http://developer.sun.com/berkeley_license.html
+$Id: index.html,v 1.13 2007-04-19 18:23:31 smitha Exp $ -->
+</head>
+<body style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);"
+ alink="#333366" link="#594fbf" marginwidth="10" vlink="#1005fb">
+<table border="0" cellpadding="2" cellspacing="4" width="100%">
+  <tbody>
+    <tr>
+      <td align="right" bgcolor="#587993" valign="top"> <font
+ color="#ffffff" size="-1"><b>Java
+BluePrints</b></font>&nbsp; </td>
+    </tr>
+  </tbody>
+</table>
+<!---- Don't modify anything above this line, except for the title tag -------->
+<h1>Java Pet Store Reference Application<span
+ style="font-style: italic;"></span></h1>
+The Java Pet Store Reference application is created by the Java
+BluePrints team at Sun Microsystems to illustrate how AJAX-enabled Web
+2.0 applications can be written with Java EE 5 platform. The Java
+BluePrints program defines the application programming model for
+end-to-end
+solutions using Java technology. It publishes guidelines, patterns,
+and code for real-world application scenarios, enabling you to build
+robust, scalable, and portable solutions.&nbsp; <br>
+<br>
+Another popular project from Java BluePrints&nbsp;is the <a
+ href="http://blueprints.dev.java.net/bpcatalog/">Java
+BluePrints Solutions Catalog</a> which has smaller mini-applications
+and problem/solutions documents.<br>
+<br>
+The rest of this document describes how to setup and use the Java Pet
+Store Reference application with the Java EE 5 SDK. For a detailed
+description of&nbsp; the features in the Java Pet
+Store Reference application, please&nbsp; refer to the article at <a
+ href="http://java.sun.com/developer/technicalArticles/J2EE/petstore/">http://java.sun.com/developer/technicalArticles/J2EE/petstore/</a><b><br>
+</b><br>
+<h2>Download and Install a Java EE 5 Application Server.</h2>
+The first step to using the Java Petstore 2.0 is to download and
+install a Java EE 5 Application Server. We have tested on the GlassFish
+project and on the Java EE 5 SDK so recommend installing one of those
+application servers. Choose one of these options:<br>
+<br>
+<b>Option 1) The Java Pet Store can be deployed on the Java EE 5
+SDK </b><br>
+<br>
+<ol>
+  <li><a href="http://java.sun.com/javaee/5/downloads/">Download</a>
+and
+install the Java EE 5 SDK at a convenient location on your
+computer. &nbsp;Note, the Java EE 5 SDK already has a version of
+Petstore 2.0 bundled with it, but this version of Petstore 2.0 is the
+newest version. Note: This release of the Java Pestore has been
+tested
+on the <a href="http://java.sun.com/javaee/downloads/ea/">Java EE 5
+SDK Update 3 Preview </a><br>
+  </li>
+</ol>
+<b>Option 2) The Java Pet Store can also be deployed on the
+promoted builds of
+the <a href="https://glassfish.dev.java.net/">GlassFish</a></b><a
+ href="https://glassfish.dev.java.net/"><span style="font-weight: bold;">
+project</span></a><b><span style="font-weight: bold;">.</span><br>
+</b>
+<div style="text-align: left;">
+<ol>
+  <li><a
+ href="https://glassfish.dev.java.net/public/downloadsindex.html"
+ target="bpcatalog">Download a promoted build</a> of
+the GlassFish
+project.&nbsp; Note: This release of the Java Pestore has been
+tested
+on the <a href="https://glassfish.dev.java.net/downloads/v2-b33e.html">Glassfish
+V2 Beta 1 build </a>of
+GlassFish.</li>
+  <li>Install GlassFish by following these steps:&nbsp;</li>
+</ol>
+<ol>
+  <ol>
+    <li>Change to a directory where you want to install GlassFish</li>
+    <li>Run:<br>
+      <code>java -Xmx256m -jar filename.jar</code></li>
+    <li>change to the <code>glassfish/</code>
+directory</li>
+    <li>&nbsp;Run:<br>
+      <code>ant -f setup.xml</code></li>
+  </ol>
+</ol>
+</div>
+<h2>
+Using the Java Pet Store with NetBeans&nbsp;</h2>
+The Java Pet Store is NetBeans-ready! This download includes a NetBeans
+project which you can load into NetBeans to build and deploy the Java
+Pet Store. See the document for <a
+ href="https://blueprints.dev.java.net/petstore/netbeans.html">Using
+the Java Pet Store with NetBeans</a> for more detail.<br>
+<br>
+If you do not use NetBeans, you can also build, deploy, and run the
+Petstore from the command line using ant. See the instructions below.
+<h2><a name="building-deploying-running"></a>Building,
+Deploying, and Running from the Command Line</h2>
+<ol>
+  <li>We will refer to the installation location of your
+application server, GlassFish or the Java EE 5 SDK, as <code>&lt;javaeesdk.home&gt;</code>
+hereafter in this document.&nbsp;</li>
+  <li>Download and install the Java Pet Store Reference
+application at a convenient location on your computer. We will refer to
+this location&nbsp;as <code>&lt;petstore.home&gt;</code>
+hereafter in this document.&nbsp;&nbsp;</li>
+  <li>Ensure that&nbsp;<code>ant</code> is
+available in your path. You can use <code>&lt;javaeesdk.home&gt;/lib/ant/bin/</code>
+or you can use your own ant installation as long as it is ant version
+1.6.5 or later.</li>
+  <li>Add <code>&lt;javaeesdk.home&gt;/bin</code> to your path.</li>
+  <li>Edit <code>&lt;petstore.home&gt;/bp-project/build.properties</code>
+and ensure
+that the following properties match your Java EE 5 SDK
+installation.&nbsp;<br>
+    <table border="1" cellpadding="5" cellspacing="0" width="80%">
+      <tbody>
+        <tr>
+          <td style="text-align: center; font-weight: bold;"
+ valign="top" width="20%">Property
+Name</td>
+          <td style="font-weight: bold;" align="center" valign="top"
+ width="50%">Description</td>
+          <td style="font-weight: bold; text-align: center;"
+ valign="top" width="30%">Examples</td>
+        </tr>
+        <tr>
+          <td style="text-align: center;"><code>javaee.home</code></td>
+          <td>The installation
+directory of the Java EE 5 SDK or GlassFish</td>
+          <td style="text-align: center;"><code>c:/Sun/AppServer</code></td>
+        </tr>
+        <tr align="left">
+          <td style="text-align: center;" valign="top"><code>javaee.server.name</code></td>
+          <td valign="top">Host
+name of the server where the Java EE 5 SDK
+is installed</td>
+          <td style="text-align: center;" valign="top"><code>localhost</code></td>
+        </tr>
+        <tr align="left">
+          <td style="text-align: center;" valign="top"><code>javaee.server.port</code></td>
+          <td valign="top">The
+port number for the server you chose
+while
+installing Java EE 5 SDK</td>
+          <td style="text-align: center;" valign="top"><code>8080</code></td>
+        </tr>
+        <tr align="left">
+          <td style="text-align: center;" valign="top"><code>javaee.server.username</code></td>
+          <td valign="top">The
+administrator username specified for the server while installing Java
+EE
+5 SDK</td>
+          <td style="text-align: center;" valign="top"><code>admin</code></td>
+        </tr>
+        <tr align="left">
+          <td style="text-align: center;" valign="top"><code>javaee.server.passwordfile</code></td>
+          <td valign="top">The
+path to a file containing the admin
+password for the Java EE 5 SDK. The password file needs to be in the
+following format:
+          <p><code>AS_ADMIN_PASSWORD=&lt;javaeesdk-admin-password&gt;</code>
+          </p>
+          <p>Where you will
+replace &lt;javaeesdk-admin-password&gt; with
+the admin password for the Java EE 5 SDK.</p>
+          </td>
+          <td style="text-align: center;" valign="top"><code>/path/to/passwordfile</code></td>
+        </tr>
+        <tr valign="top">
+          <td style="text-align: center;" valign="top"><code>javaee.adminserver.port</code></td>
+          <td valign="top">The
+port number for admin server you chose
+while installing the Java EE 5 SDK</td>
+          <td style="text-align: center;" valign="top"><code>4848</code></td>
+        </tr>
+        <tr>
+          <td style="text-align: center;"><code>proxy.host</code></td>
+          <td>The host name of your HTTP proxy server, if the
+server
+running Java EE SDK is behind a firewall. Leave blank otherwise</td>
+          <td style="text-align: center;"><code>myproxy.mydomain</code></td>
+        </tr>
+        <tr>
+          <td style="text-align: center;"><code>proxy.port</code></td>
+          <td>The port number of your HTTP proxy server, if the
+server
+running Java EE SDK is behind a firewall. Leave blank otherwise</td>
+          <td style="text-align: center;"><code>8080</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>Start the Sun Java System Application Server and the JavaDB
+database. To do so, open a command prompt&nbsp;and change
+directory to <code>&lt;javaeesdk.home&gt;/bin</code>
+and issue the following
+commands:<br>
+    <code></code><code>asadmin start-database</code><code></code><br>
+    <code>asadmin start-domain</code></li>
+  <li>Change directory to &lt;petstore.home&gt; and enter
+the following commands<code></code><br>
+    <code style="font-weight: bold;">ant setup</code><br
+ style="font-weight: bold;">
+    <code style="font-weight: bold;">ant run</code><br>
+This will setup, build and deploy the petstore on the application
+server, and then launch the application homepage in your default
+browser. <br>
+  </li>
+</ol>
+<h2>Uninstalling&nbsp;</h2>
+To uninstall the Java Pet Store Reference application from the
+application
+server, follow these steps: <br>
+<ol>
+  <li>Start the Sun Java System Application Server and the JavaDB
+database. To do so, open a command prompt&nbsp;and change
+directory to <code>&lt;javaeesdk.home&gt;/bin</code>
+and issue the following
+commands:<br>
+    <code>asadmin start-domain<br>
+asadmin start-database</code><br>
+  </li>
+  <li>Change directory to&nbsp;<span style="font-style: italic;"></span><code>&lt;petstore.home&gt;
+    </code>and enter the command:<br>
+    <code>ant undeploy</code><br>
+    <code>ant unsetup</code><br>
+This will uninstall the petstore application
+from the application server and remove all the database tables from the
+JavaDB database.</li>
+</ol>
+<h2>Troubleshooting</h2>
+<p>If you have problems when running the application, try the
+following:
+</p>
+<ul>
+  <li>Make sure the application server and the database are
+running</li>
+  <li>Make sure the build environment under the bp-project/
+directory is correctly
+setup <br>
+  </li>
+  <li>Make sure you have run "<span style="font-weight: bold;">ant
+setup</span>"
+to setup the application's resources</li>
+  <li>Review the output produced by the <code
+ style="font-weight: bold;">"ant run"</code>
+command. Often an error here contains the clue for what went wrong</li>
+  <li>Review the application server log files for any errors</li>
+  <li>If the sample application is accessed through a URL other
+than
+"http://localhost:8080/" then a new map KEY will have to
+be generated to access the Google map service (this is not our
+restiction, it is Googles).&nbsp; The key is currently
+free and can be generated from
+http://www.google.com/apis/maps/.&nbsp;
+The resultant key can be placed in the Map Viewer component's key"
+attribute in the WEB-INF/web.xml deployment descriptor under
+the param-name com.sun.j2ee.blueprints.ui.mapviewer.KEY.&nbsp; For
+example:</li>
+</ul>
+<div style="margin-left: 40px;">&lt;param-name&gt;com.sun.j2ee.blueprints.ui.mapviewer.KEY&lt;/param-name&gt;&nbsp;&nbsp;&nbsp;
+&lt;param-value&gt;ABQIAAAAyQYKk4__l80DyIsqLPvvuxTRFLl8Tcq3arEgFHYFeOMvEMiJ8RQehhrYXPIDrf1muScWAd1MXrlVkQ&lt;/param-value&gt;</div>
+<ul>
+</ul>
+<br>
+<h2>Other Resources</h2>
+<ul>
+  <li>If you have any questions or suggestions,
+please use the<b><b> <a
+ href="https://blueprints.dev.java.net/feedback.html" target="bpcatalog">feedback
+page</a>.</b></b></li>
+  <li>Another popular project from Java BluePrints&nbsp;is the <a
+ href="http://blueprints.dev.java.net/bpcatalog/">Java
+BluePrints Solutions Catalog</a> for Java EE 5 which has smaller
+mini-applications and problem/solutions documents.</li>
+  <li>For some Java BluePrints Projects for J2EE 1.4, check out<b><b> </b></b>&nbsp;
+    <a target="_blank"
+ href="https://blueprints.dev.java.net/adventurebuilder/">Java
+Adventure Builder Reference</a> application,&nbsp;<a target="_blank"
+ href="http://java.sun.com/blueprints/guidelines/designing_webservices/">Designing
+Web Services with the J2EE(TM) 1.4 Platform : JAX-RPC, SOAP, and XML
+Technologies</a> book, and the <a target="_blank"
+ href="http://java.sun.com/blueprints/guidelines/designing_enterprise_applications_2e/index.html"><span
+ class="body"><span class="title">Designing
+Enterprise Applications with the J2EE Platform, Second Edition</span></span></a>
+book.&nbsp;</li>
+  <li>You can access these projects and other content from Java
+BluePrints by visiting the <a target="_blank"
+ href="http://java.sun.com/reference/blueprints/index.html">Java
+BluePrints website</a>. </li>
+</ul>
+<hr noshade="noshade" size="1">
+<p class="copy"> Copyright &copy; 2007 <a href="http://sun.com">Sun
+Microsystems, Inc.</a>
+All rights reserved. </p>
+</body>
+</html>
