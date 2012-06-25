@@ -143,7 +143,6 @@ public class Builder extends IncrementalProjectBuilder {
           
           if (libReg.isRegistered(resource.getFileExtension())) {
             String path = getProject().getLocation().makeAbsolute() + "/" + relPath;
-            System.out.println("   ...found: " + path);
             final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(
                     path.toString(),
                     environment.getSourcePath()); 
