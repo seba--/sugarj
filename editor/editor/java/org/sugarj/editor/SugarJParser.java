@@ -25,13 +25,11 @@ import org.spoofax.jsglr_layout.client.SGLR;
 import org.spoofax.jsglr_layout.client.imploder.IToken;
 import org.spoofax.jsglr_layout.client.imploder.Token;
 import org.spoofax.jsglr_layout.client.imploder.Tokenizer;
-import org.spoofax.jsglr_layout.client.imploder.TreeBuilder;
 import org.spoofax.jsglr_layout.shared.BadTokenException;
 import org.spoofax.jsglr_layout.shared.SGLRException;
 import org.spoofax.terms.attachments.ParentAttachment;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.imp.runtime.services.ContentProposer;
-import org.sugarj.LanguageLib;
 import org.sugarj.LanguageLibFactory;
 import org.sugarj.LanguageLibRegistry;
 import org.sugarj.common.ATermCommands;
@@ -40,14 +38,11 @@ import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.AbsolutePath;
-import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.driver.Driver;
 import org.sugarj.driver.ModuleSystemCommands;
 import org.sugarj.driver.Result;
 import org.sugarj.driver.RetractableTreeBuilder;
-import org.sugarj.driver.STRCommands;
-import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.stdlib.StdLib;
 
 /**
@@ -212,7 +207,7 @@ public class SugarJParser extends JSGLRI {
       public boolean isUpToDate(int h, Environment env) { return false; }
     };
     r.setSugaredSyntaxTree(term);
-    r.registerEditorDesugarings(getInitialTrans(LanguageLibRegistry.getInstance().getLanguageLib(FileCommands.getExtension(filename))));
+    r.registerEditorDesugarings(new AbsolutePath(StdLib.failureTrans.getAbsolutePath()));
     return r;
   }
   
@@ -268,26 +263,40 @@ public class SugarJParser extends JSGLRI {
     }
   }
   
-  private Path initialTrans = null;
-
-  private Path getInitialTrans(LanguageLibFactory factory) throws FileNotFoundException, IOException {
-    LanguageLib langLib = factory.createLanguageLibrary();
-    if (initialTrans != null && FileCommands.exists(initialTrans))
-      return initialTrans;
-    
-    try {
-      initialTrans = STRCommands.compile(
-          new AbsolutePath(langLib.getInitTrans().getPath()),
-          "main",
-          new LinkedList<Path>(),
-          new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.strategoTbl.getPath())),
-          org.strategoxt.strj.strj.init(), 
-          new ModuleKeyCache<Path>(new Object()), 
-          environment, 
-          langLib);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-    return initialTrans;
-  }
+//  private Path initialTrans = null;
+//
+//  private Path getInitialTrans(LanguageLibFactory factory) throws FileNotFoundException, IOException {
+//    LanguageLib langLib = factory.createLanguageLibrary();
+//    if (initialTrans != null && FileCommands.exists(initialTrans))
+//      return initialTrans;
+//    
+//    ModuleKeyCache<Path> cache = null;
+//    try {
+//      Path strCachePath = environment.createCachePath("strCaches");
+//      @SuppressWarnings("unchecked")
+//      Map<String, ModuleKeyCache<Path>> strCaches = (Map<String, ModuleKeyCache<Path>>) new ObjectInputStream(new FileInputStream(strCachePath.getFile())).readObject();
+//      if (strCaches == null)
+//        strCaches = new HashMap<String, ModuleKeyCache<Path>>();
+//      cache = strCaches.get(langLib.getLanguageName() + "#" + langLib.getVersion());
+//    } catch (Exception e) {
+//    }
+//    
+//    if (cache == null)
+//      cache = new ModuleKeyCache<Path>(new Object());
+//
+//    try {
+//      initialTrans = STRCommands.compile(
+//          new AbsolutePath(langLib.getInitTrans().getPath()),
+//          "main",
+//          new LinkedList<Path>(),
+//          new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.strategoTbl.getPath())),
+//          org.strategoxt.strj.strj.init(), 
+//          new ModuleKeyCache<Path>(new Object()), 
+//          environment, 
+//          langLib);
+//    } catch (Exception e) {
+//      throw new RuntimeException(e);
+//    }
+//    return initialTrans;
+//  }
 }
