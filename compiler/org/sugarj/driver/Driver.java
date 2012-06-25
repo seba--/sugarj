@@ -111,10 +111,10 @@ public class Driver{
   private SGLR strParser;
   private SGLR editorServicesParser;
   private SGLR parser;
-  private static Context sdfContext = tools.init();
-  private static Context makePermissiveContext = make_permissive.init();;
-  private static Context extractionContext = extraction.init();;
-  private static Context strjContext = org.strategoxt.strj.strj.init();
+  private Context sdfContext;
+  private Context makePermissiveContext;
+  private Context extractionContext;
+  private Context strjContext;
   
   private static Map<String,ModuleKeyCache<Path>> sdfCaches;
   private static Map<String,ModuleKeyCache<Path>> strCaches;
@@ -1143,6 +1143,12 @@ public class Driver{
     sdfParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.sdfTbl.getPath()));
     strParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.strategoTbl.getPath()));
     editorServicesParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.editorServicesTbl.getPath()));
+    
+    sdfContext = tools.init();
+    makePermissiveContext = make_permissive.init();;
+    extractionContext = extraction.init();;
+    strjContext = org.strategoxt.strj.strj.init();
+
   }
   
 
