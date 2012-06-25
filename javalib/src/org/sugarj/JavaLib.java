@@ -1,7 +1,6 @@
 package org.sugarj;
 
 import static org.sugarj.common.ATermCommands.getApplicationSubterm;
-import static org.sugarj.common.ATermCommands.getList;
 import static org.sugarj.common.ATermCommands.isApplication;
 import static org.sugarj.common.Log.log;
 
@@ -238,14 +237,8 @@ public class JavaLib extends LanguageLib implements Serializable {
    */
   @Override
   public String prettyPrint(IStrategoTerm term) throws IOException {
-    System.err.println("---\n prettyprint context:");
     Context ctx = interp.getCompiledContext();
-    System.err.println(ctx);
-    System.err.println("prettyprint term:");
-    System.err.println(term);
     IStrategoTerm string = pp_java_string_0_0.instance.invoke(ctx, term);
-    System.err.println("prettyprint string:");
-    System.err.println(string);
     if (string != null)
       return Term.asJavaString(string);
 
