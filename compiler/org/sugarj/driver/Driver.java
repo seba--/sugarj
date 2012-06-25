@@ -111,10 +111,10 @@ public class Driver{
   private SGLR strParser;
   private SGLR editorServicesParser;
   private SGLR parser;
-  private Context sdfContext;
-  private Context makePermissiveContext;
-  private Context extractionContext;
-  private Context strjContext;
+  private static Context sdfContext = tools.init();
+  private static Context makePermissiveContext = make_permissive.init();;
+  private static Context extractionContext = extraction.init();;
+  private static Context strjContext = org.strategoxt.strj.strj.init();
   
   private static Map<String,ModuleKeyCache<Path>> sdfCaches;
   private static Map<String,ModuleKeyCache<Path>> strCaches;
@@ -138,7 +138,8 @@ public class Driver{
   public Driver(Environment env, LanguageLibFactory langLibFactory) {
     this.environment=env;
     this.langLib = langLibFactory.createLanguageLibrary();
-    
+    langLib.setInterpreter(new HybridInterpreter(ATermCommands.factory));
+
     try {      
       if (environment.getCacheDir() != null)
         FileCommands.createDir(environment.getCacheDir());
@@ -1142,13 +1143,6 @@ public class Driver{
     sdfParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.sdfTbl.getPath()));
     strParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.strategoTbl.getPath()));
     editorServicesParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.editorServicesTbl.getPath()));
-
-    //interp = new HybridInterpreter(); //TODO (ATermCommands.factory);
-    langLib.setInterpreter(new HybridInterpreter());
-    sdfContext = tools.init();
-    makePermissiveContext = make_permissive.init();
-    extractionContext = extraction.init();
-    strjContext = org.strategoxt.strj.strj.init();
   }
   
 
