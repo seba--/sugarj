@@ -82,7 +82,6 @@ public class SDFCommands {
      * We can include as many paths as we want here, checking the
      * adequacy of the occurring imports is done elsewhere.
      */
-    // TODO: Make this pretty
     
     List<String> cmd = new ArrayList<String>(Arrays.asList(new String[]{
         "-i", sdf.getAbsolutePath(),
@@ -387,7 +386,6 @@ public class SDFCommands {
     return result;
   }
   
-// moved prettyPrintJava to JavaDriver
 
   /**
    * Pretty prints the content of the given SDF file. 

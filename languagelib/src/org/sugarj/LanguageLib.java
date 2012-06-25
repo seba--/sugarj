@@ -28,10 +28,7 @@ import org.sugarj.stdlib.StdLib;
 
 
 public abstract class LanguageLib implements Serializable {
-	
-	public final static int PUBLIC_SUGAR = 1;
-	public final static int PRIVATE_SUGAR = 2;
-	
+		
 	protected HybridInterpreter interp;
 	public void setInterpreter(HybridInterpreter interp) {
 		this.interp = interp;
@@ -105,8 +102,6 @@ public abstract class LanguageLib implements Serializable {
 	public abstract String getSugarFileExtension();
 	
 	
-	// ----------------
-	// stuff from LanguageDriver here:
 
 	public abstract ISourceFileContent getSource();
 	public abstract Path getOutFile();
@@ -117,8 +112,7 @@ public abstract class LanguageLib implements Serializable {
 	public abstract boolean isSugarDec(IStrategoTerm decl);
 	public abstract boolean isEditorServiceDec(IStrategoTerm decl);
 	public abstract boolean isImportDec(IStrategoTerm decl);
-	public abstract boolean isPlainDec(IStrategoTerm decl); // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
-	
+	public abstract boolean isPlainDec(IStrategoTerm decl); 
 	public abstract void processLanguageSpecific(IStrategoTerm toplevelDecl,
 	                                              Environment environment) throws IOException;
 	  
@@ -134,9 +128,6 @@ public abstract class LanguageLib implements Serializable {
 	
 	
 	public abstract void setupSourceFile(RelativePath sourceFile, Environment environment);
-//	public abstract void checkSourceOutFile(Environment environment, RelativeSourceLocationPath sourceFile);
-	
-	
 
 	public abstract String getRelativeNamespace();
 	
@@ -148,7 +139,6 @@ public abstract class LanguageLib implements Serializable {
 	}
 	
 	
-//	public abstract void checkNamespace(IStrategoTerm decl, RelativeSourceLocationPath sourceFile, IErrorLogger errorLog);
 	public abstract void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException;
 
 	public abstract LanguageLibFactory getFactoryForLanguage();
@@ -156,7 +146,6 @@ public abstract class LanguageLib implements Serializable {
 	public abstract String getImportedModulePath(IStrategoTerm toplevelDecl) throws IOException;
 	
 	
-	// from Result
 	public void compile(Path outFile, ISourceFileContent source, Path bin, List<Path> path,
 			Set<RelativePath> generatedBinFiles,
 			Map<Path, Set<RelativePath>> availableGeneratedFilesForSourceFile,
@@ -186,7 +175,6 @@ public abstract class LanguageLib implements Serializable {
 					if (currentSource.getValue() instanceof ISourceFileContent) {
 						ISourceFileContent otherSource = (ISourceFileContent) currentSource.getValue();
 						try {
-							//result.writeToFile(source.getKey(), otherJavaSource.getCode(generatedClasses));
 							writeToFile(generateFiles, generatedFileHashes, currentSource.getKey(), otherSource.getCode(generatedClasses, interp, currentSource.getKey()));
 
 
@@ -221,11 +209,9 @@ public abstract class LanguageLib implements Serializable {
 	
 	
 	public abstract String getSugarName(IStrategoTerm decl) throws IOException;
-	public abstract int getSugarAccessibility(IStrategoTerm decl);
 	public abstract IStrategoTerm getSugarBody(IStrategoTerm decl);
 	
 	public abstract String getEditorName(IStrategoTerm decl) throws IOException;
-	public abstract int getEditorAccessibility(IStrategoTerm decl);
 	public abstract IStrategoTerm getEditorServices(IStrategoTerm decl);
 
 	protected void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IErrorLogger errorLog) {

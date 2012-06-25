@@ -31,10 +31,6 @@ import org.sugarj.prolog.PrologSourceFileContent;
 import org.sugarj.prolog.PrologSourceFileContent.PrologModuleImport;
 
 public class PrologLib extends LanguageLib implements Serializable {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 6271882490466636509L;
 	private transient File libDir;
 	
@@ -87,19 +83,16 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	@Override
 	public File getInitEditor() {
-		// TODO Create a real prolog editor
 		return ensureFile("org/sugarj/prolog/init/initEditor.serv");
 	}
 
 	@Override
 	public String getInitEditorModule() {
-		// TODO Create a real prolog editor
 		return "org/sugarj/prolog/init/initEditor";
 	}
 
 	@Override
 	public File getLibraryDirectory() {
-		// XXX: Do we need this in a language library? Just setup code, extract?
 		if (libDir == null) {	// set up directories first
 			String thisClassPath = "org/sugarj/PrologLib.class";
 			URL thisClassURL = PrologLib.class.getClassLoader().getResource(thisClassPath);
@@ -142,11 +135,9 @@ public class PrologLib extends LanguageLib implements Serializable {
 	      System.err.println(file.getPath() + " does not exist.");
 	  }
 	  
-	  // ---
 	  
 	  @Override
 	  public boolean isLanguageSpecificDec(IStrategoTerm decl) {
-	    //return isApplication(decl, "Sentence");
 		return isApplication(decl, "NonUnitClause") || 
 				isApplication(decl, "UnitClause") ||
 				isApplication(decl, "Query") ||
@@ -234,48 +225,8 @@ public class PrologLib extends LanguageLib implements Serializable {
 		return ATermCommands.prettyPrint(ppTable, term, interp);
 	}
 
-//	@Override
-//	public String extractImportedModuleName(IStrategoTerm toplevelDecl, HybridInterpreter interp)
-//			throws IOException {
-///*
-// * 	    String name = null;
-//	    log.beginTask("Extracting", "Extract name of imported module");
-//	    try {
-//	      if (isApplication(toplevelDecl, "TypeImportDec"))
-//	        name = prettyPrint(toplevelDecl.getSubterm(0), interp);
-//	      
-//	      if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
-//	        name = prettyPrint(toplevelDecl.getSubterm(0), interp) + ".*";
-//	    } finally {
-//	      log.endTask(name);
-//	    }
-//	    return name;
-//
-// */
-//		// java implementation above
-//		// only one kind of import in prolog
-//		
-//		String name = null;
-//		log.beginTask("Extracting", "Extract name of imported module");
-//		try {
-//			if (isApplication(toplevelDecl, "ModuleImport"))
-//				name = prettyPrint(toplevelDecl.getSubterm(0).getSubterm(0), interp);
-//		} finally {
-//			log.endTask(name);
-//		}
-//		
-//		return name;
-//	}
-
 	@Override
 	public void setupSourceFile(RelativePath sourceFile, Environment environment) {
-
-/*
- * 	    javaOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".java");
-	    javaSource = new JavaSourceFileContent();
-	    javaSource.setOptionalImport(false);
-		
- */
 		prologOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + getGeneratedFileExtension());
 		prologSource = new PrologSourceFileContent(this);
 		prologSource.setOptionalImport(false);
@@ -306,7 +257,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 			prologSource.setModuleDecl(prettyPrint(toplevelDecl));
 		} else if (isApplication(toplevelDecl, "SugarModuleDec")) {
 			moduleName = prettyPrint(getApplicationSubterm(toplevelDecl, "SugarModuleDec", 0));
-			prologSource.setModuleDecl(":-module(" + moduleName + ", []).");	// XXX: Ideally, a module only used for defining sugar should not be generated nor imported at all
+			prologSource.setModuleDecl(":-module(" + moduleName + ", []).");
 		}
 		relNamespaceName = FileCommands.dropFilename(sourceFile.getRelativePath());
 		decName = getRelativeModulePath(moduleName);
@@ -317,22 +268,6 @@ public class PrologLib extends LanguageLib implements Serializable {
 			prologOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + getGeneratedFileExtension());
 	}
 	
-	
-	/*
-	 * 	  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, HybridInterpreter interp, IErrorLogger errorLog, String packageName, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException {
-	    relPackageName = getRelativeModulePath(packageName);
-	
-	    log.log("The SDF / Stratego package name is '" + relPackageName + "'.");
-	
-	    checkPackageName(toplevelDecl, sourceFile, errorLog);
-	
-	    if (javaOutFile == null)
-	      javaOutFile = environment.createBinPath(getRelNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + ".java");			// XXX: Can we just reuse sourceFile here?
-	
-	    // moved here before depOutFile==null check
-	    javaSource.setNamespaceDecl(prettyPrint(toplevelDecl, interp));
-
-	 */
 
 	@Override
 	public LanguageLibFactory getFactoryForLanguage() {
@@ -340,17 +275,12 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 
 	@Override
-	protected void compile(List<Path> sourceFiles, Path bin, List<Path> path,	// 'path' is library path?
+	protected void compile(List<Path> sourceFiles, Path bin, List<Path> path,
 			boolean generateFiles)
 			throws IOException {
 
 		if (generateFiles) {
 			for (Path file : sourceFiles) {
-				/*String copiedFileName = bin.getFile().getAbsolutePath() + File.separator + file.getFile().getName();
-				System.err.println("###################### file name: " + copiedFileName);
-				File destFile = new File(copiedFileName);
-				Path p2 = new AbsolutePath(destFile.getAbsolutePath());
-				FileCommands.copyFile(file, p2);*/
 				// XXX: do nothing here?
 				System.err.println("prolog;     no compilation neccessary, file: " + file);
 			}
@@ -380,23 +310,12 @@ public class PrologLib extends LanguageLib implements Serializable {
 		else
 			prologSource.addImport(imp);	
 	}
-	
-//	@Override
-//	public String extractNamespaceName(IStrategoTerm toplevelDecl,
-//			HybridInterpreter interp) throws IOException {
-//		String moduleName = prettyPrint(getApplicationSubterm(toplevelDecl, "ModuleDec", 0), interp);
-//		return moduleName;
-//	}
 
 	@Override
 	public String getSugarName(IStrategoTerm decl) throws IOException {
         return decName;
 	}
 
-	@Override
-	public int getSugarAccessibility(IStrategoTerm decl) {
-		return LanguageLib.PUBLIC_SUGAR;	//XXX: implemented only public sugar in prolog
-	}
 
 	@Override
 	public IStrategoTerm getSugarBody(IStrategoTerm decl) {
@@ -406,7 +325,6 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	}
 	
-	
 	@Override
 	public String getLanguageName() {
 		return "Prolog";
@@ -414,17 +332,12 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	@Override
 	public boolean isModuleResolvable(String relModulePath) {
-		// look for pre-installed SWI libraries?
+		// TODO: look for pre-installed SWI libraries?
 		return false;
 	}
 
 	@Override
 	public String getEditorName(IStrategoTerm decl) throws IOException {
-		throw new UnsupportedOperationException("SugarProlog does currently not support editor libraries.");
-	}
-
-	@Override
-	public int getEditorAccessibility(IStrategoTerm decl) {
 		throw new UnsupportedOperationException("SugarProlog does currently not support editor libraries.");
 	}
 

@@ -37,9 +37,6 @@ public class ModuleSystemCommands {
      * @throws IOException
      */
     public static boolean importBinFile(String modulePath, IStrategoTerm toplevelDecl, Environment environment, LanguageLib langLib) throws IOException {
-// if language does not have bin files (e.g. for interpreted languages), return true
-// <- NOPE: interpreted languages generate desugared source files instead of compiled files
-
       RelativePath clazz = searchFile(modulePath, langLib.getGeneratedFileExtension(), environment);
       if (clazz == null && !langLib.isModuleResolvable(modulePath))
         return false;
@@ -166,10 +163,6 @@ public class ModuleSystemCommands {
     return result;
   }
   
-  
-// moved this to languageDriver  
-//  public static String extractImportedModuleName(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
-
   
   /**
    * 

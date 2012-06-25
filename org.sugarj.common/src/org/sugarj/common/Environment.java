@@ -96,7 +96,6 @@ public class Environment implements Serializable {
   
   public Environment() {
     includePath.add(bin);
-    //includePath.add(new AbsolutePath(StdLib.stdLibDir.getPath()));
     includePath.add(new AbsolutePath(StdLib.stdLibDir.getAbsolutePath()));
   }
   

@@ -508,11 +508,9 @@ public class Driver{
       String fullExtName = null;
       boolean isPublic = false;
 
-      log.beginTask("Extracting name and accessibility of the editor services.");
+      log.beginTask("Extracting name of the editor services.");
       try {
         extName = langLib.getEditorName(toplevelDecl);
-        if (langLib.getEditorAccessibility(toplevelDecl) == LanguageLib.PUBLIC_SUGAR)
-          isPublic = true;
 
         fullExtName = langLib.getRelativeNamespaceSep() + extName;
 
@@ -627,8 +625,6 @@ public class Driver{
     if (langLib.isNamespaceDec(toplevelDecl))
       processPackageDec(toplevelDecl);
     else {
-//      langLib.checkNamespace(toplevelDecl, sourceFile, driverResult);   
-//      langLib.checkSourceOutFile(environment, driverResult.getSourceFile());
       if (depOutFile == null) {
         // does this ever occur?
         assert false;
@@ -760,22 +756,7 @@ public class Driver{
       log.endTask();
     }
   }
-  
-//  private void checkPackageName(IStrategoTerm toplevelDecl) {
-//    if (sourceFile != null) {
-//      String packageName = relPackageName == null ? "" : relPackageName.replace('/', '.');
-//      
-//      String rel = FileCommands.dropExtension(sourceFile.getRelativePath());
-//      int i = rel.lastIndexOf('/');
-//      String expectedPackage = i >= 0 ? rel.substring(0, i) : rel;
-//      expectedPackage = expectedPackage.replace('/', '.');
-//      if (!packageName.equals(expectedPackage))
-//        setErrorMessage(
-//            toplevelDecl,
-//            "The declared package '" + packageName + "'" +
-//            " does not match the expected package '" + expectedPackage + "'.");
-//    }
-//  }
+
   
   private void processImportDecs(IStrategoTerm toplevelDecl) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
     List<IStrategoTerm> pendingImports = new ArrayList<IStrategoTerm>();
@@ -853,8 +834,6 @@ public class Driver{
 
         if (importSourceFile != null && (res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment))) {
           if (!generateFiles) {
-            // boolean b = res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment);
-            // System.out.println(b);
             setErrorMessage(toplevelDecl, "module outdated, compile first: " + importModuleName);
           }
           else {
@@ -865,7 +844,6 @@ public class Driver{
    
               if (currentlyProcessing.contains(importSourceFile)) {
                 // assume source file does not provide syntactic sugar
-                //langLib.getSource().addImport(importModuleName.replace('/', '.'));
                 langLib.addImportModule(toplevelDecl, false);
                 skipProcessImport = true;
                 delegateCompilation = importSourceFile;
@@ -919,7 +897,6 @@ public class Driver{
   private boolean processImport(String modulePath, IStrategoTerm importTerm) throws IOException {
     boolean success = false;
     
-    //success |= ModuleSystemCommands.importClass(modulePath, langLib.getSource(), environment, langLib);
     success |= ModuleSystemCommands.importBinFile(modulePath, importTerm, environment, langLib);
     ModuleSystemCommands.registerSearchedClassFiles(modulePath, driverResult, environment, langLib);
 
@@ -978,15 +955,11 @@ public class Driver{
       
       String extName = null;
       String fullExtName = null;
-      boolean isPublic = false;
       
       log.beginTask("Extracting name and accessibility of the sugar.");
       try {        
         extName = langLib.getSugarName(toplevelDecl);
 
-        if (langLib.getSugarAccessibility(toplevelDecl) == LanguageLib.PUBLIC_SUGAR) {
-          isPublic = true;
-        }
 
 
         fullExtName = langLib.getRelativeNamespaceSep() + extName;
@@ -994,11 +967,6 @@ public class Driver{
         log.log("The name of the sugar is '" + extName + "'.");
         log.log("The full name of the sugar is '" + fullExtName + "'.");
 
-        if (isPublic)
-          log.log("The sugar is public.");
-        else
-          log.log("The sugar is not public.");
-        
       } finally {
         log.endTask();
       }
@@ -1020,7 +988,7 @@ public class Driver{
         String sdfExtensionHead =
           "module " + fullExtName + "\n" 
           + sdfImports
-          + (isPublic ? "exports " : "hiddens ") + "\n"
+          + "hiddens " + "\n"
           + "  (/)" + "\n";
 
         String sdfExtensionContent = SDFCommands.prettyPrintSDF(sdfExtract, langLib.getInterpreter());
@@ -1138,10 +1106,8 @@ public class Driver{
   
   private void init(RelativePath sourceFile, boolean generateFiles) throws FileNotFoundException, IOException, InvalidParseTableException {
     environment.getIncludePath().add(new AbsolutePath(langLib.getLibraryDirectory().getAbsolutePath()));
-    //     includePath.add(new AbsolutePath(StdLib.stdLibDir.getAbsolutePath()));
 
     depOutFile = null;
-    // FileCommands.createFile(tmpOutdir, relModulePath + ".java");
 
     this.sourceFile = new RelativeSourceLocationPath(new SourceLocation(sourceFile.getBasePath(), environment), sourceFile);
     this.generateFiles = generateFiles;
