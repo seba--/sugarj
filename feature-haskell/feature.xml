@@ -22,19 +22,12 @@ The SugarJ standard library is released under the GNU GENERAL PUBLIC LICENSE, Ve
       <update label="SugarJ" url="http://update.sugarj.org"/>
    </url>
 
-   <includes
-         id="org.strategoxt.imp"
-         version="0.0.0"/>
-
-   <includes
-         id="org.sugarj.base"
-         version="0.0.0"/>
-
    <requires>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.spoofax.terms"/>
       <import plugin="org.strategoxt.strj"/>
+      <import feature="org.sugarj.base" version="1.0.0.qualifier"/>
       <import plugin="org.sugarj.common"/>
       <import plugin="org.sugarj.languagelib"/>
    </requires>

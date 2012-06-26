@@ -34,7 +34,6 @@ The SugarJ standard library is released under the GNU GENERAL PUBLIC LICENSE, Ve
       <import plugin="org.strategoxt.strj"/>
       <import plugin="org.strategoxt.imp.runtime"/>
       <import plugin="org.strategoxt.imp.nativebundle"/>
-      <import plugin="org.spoofax.jsglr_layout"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.imp.runtime"/>
       <import plugin="lpg.runtime"/>
@@ -45,6 +44,7 @@ The SugarJ standard library is released under the GNU GENERAL PUBLIC LICENSE, Ve
       <import plugin="org.eclipse.ui.console"/>
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.spoofax.jsglr"/>
+      <import plugin="org.junit"/>
    </requires>
 
    <plugin
