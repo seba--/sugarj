@@ -389,7 +389,8 @@ public class Driver{
         driverResult.registerEditorDesugarings(currentTransProg);
       }
 
-      driverResult.writeDependencyFile(depOutFile);
+      if (generateFiles)
+        driverResult.writeDependencyFile(depOutFile);
 
       success = true;
     } 
@@ -880,7 +881,7 @@ public class Driver{
           res = Result.readDependencyFile(dep, environment);
         
         if (res != null && !skipProcessImport)
-          driverResult.addDependency(res, environment);
+          driverResult.addDependency(dep, environment);
         
         if (res != null && res.hasDelegatedCompilation(sourceFile)) {
           delegateCompilation = res.getSourceFile();

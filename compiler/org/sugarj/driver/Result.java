@@ -96,7 +96,7 @@ public class Result implements IErrorLogger {
     addDependency(result, env);
   }
   
-  public void addDependency(Result result, Environment env) throws IOException {
+  private void addDependency(Result result, Environment env) throws IOException {
     allDependentFiles.addAll(result.getFileDependencies(env));
     
     for (Entry<Path, Map<Path, Set<RelativePath>>> e : result.getAvailableGeneratedFiles().entrySet())
