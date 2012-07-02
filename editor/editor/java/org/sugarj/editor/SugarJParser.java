@@ -98,6 +98,11 @@ public class SugarJParser extends JSGLRI {
   private synchronized void scheduleParse(final String input, final String filename) {
     SugarJParser.setPending(filename, true);
 
+    if (environment == null) {
+      getController().scheduleParserUpdate(200, false);
+      return;
+    }
+    
     final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(filename, environment.getSourcePath());
     final LanguageLibFactory factory = LanguageLibRegistry.getInstance().getLanguageLib(FileCommands.getExtension(filename));
     
