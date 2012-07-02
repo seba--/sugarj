@@ -6,12 +6,12 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.sugarj.common.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.spoofax.terms,
  org.strategoxt.strj,
  org.spoofax.jsglr,
  org.sugarj.stdlib,
  org.eclipse.jdt.core,
- org.spoofax.jsglr_layout
+ org.spoofax.jsglr_layout,
+ org.spoofax.terms
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.sugarj.common,
