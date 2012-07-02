@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="src/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="D:/glassfish/glassfish/lib/javaee.jar"/>
-	<classpathentry kind="lib" path="D:/Sun/SDK/lib/j2ee.jar"/>
-	<classpathentry kind="lib" path="C:/Users/fehrenbach.INFORMATIK/Desktop/sugarj/test-workspace/java-pet-store/lib/bp-ui-5.jar"/>
-	<classpathentry kind="lib" path="C:/Users/fehrenbach.INFORMATIK/Desktop/sugarj/test-workspace/java-pet-store/lib/commons-fileupload-1.1.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/fehrenbach.INFORMATIK/Desktop/sugarj/test-workspace/java-pet-store/lib/commons-io-1.2.jar"/>
-	<classpathentry kind="lib" path="C:/Users/fehrenbach.INFORMATIK/Desktop/sugarj/test-workspace/java-pet-store/lib/commons-logging-1.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/fehrenbach.INFORMATIK/Desktop/sugarj/test-workspace/java-pet-store/lib/jdom.jar"/>
-	<classpathentry kind="lib" path="C:/Users/fehrenbach.INFORMATIK/Desktop/sugarj/test-workspace/java-pet-store/lib/lucene-core-2.0.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/fehrenbach.INFORMATIK/Desktop/sugarj/test-workspace/java-pet-store/lib/rome-0.8.jar"/>
-	<classpathentry kind="lib" path="C:/Users/fehrenbach.INFORMATIK/Desktop/sugarj/test-workspace/java-pet-store/lib/rome-fetcher-0.7.jar"/>
-	<classpathentry kind="lib" path="C:/Users/fehrenbach.INFORMATIK/Desktop/sugarj/test-workspace/java-pet-store/lib/shale-remoting.jar"/>
+	<classpathentry kind="lib" path="lib/bp-ui-5.jar"/>
+	<classpathentry kind="lib" path="lib/commons-fileupload-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/commons-io-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/javaee.jar"/>
+	<classpathentry kind="lib" path="lib/jdom.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-core-2.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/rome-0.8.jar"/>
+	<classpathentry kind="lib" path="lib/rome-fetcher-0.7.jar"/>
+	<classpathentry kind="lib" path="lib/shale-remoting.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
