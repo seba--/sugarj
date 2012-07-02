@@ -24,6 +24,4 @@ update-site/content.jar
 update-site/features/
 update-site/plugins/
 
-# classpath
-compiler/.classpath
-.classpath
+
