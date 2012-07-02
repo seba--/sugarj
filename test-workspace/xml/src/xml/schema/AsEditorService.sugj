@@ -51,14 +51,12 @@ public sugar AsEditorService {
       |[  completions
             completion trigger : "<"
             ~completion
-            ~completion2
        ]|
       where
         <xml-attr-value2string> attval1 => element;
         <xml-attr-value2string> attval2 => type;
 
         <concat-strings> ["<", "{", namespace, "}", element] => prefix;
-        !"\n" => content;
         <concat-strings> ["</", "{", namespace, "}", element, ">"] => suffix;
 
         <lookup> (type, types) => attributes;
@@ -66,16 +64,9 @@ public sugar AsEditorService {
         !CompletionTemplateWithSort(
            Sort("Content"), 
            String(prefix),
-           <conc> (attributes, [String(">"), String(content), String(suffix)]),
+           <conc> (attributes, [String(">"), Placeholder("<content>"), String(suffix)]),
            None())
-        => completion;
-
-        !CompletionTemplateWithSort(
-           Sort("CharData"),  // HACK to fix SGLR's misleading candidate sorts
-           String(prefix),
-           <conc> (attributes, [String(">"), String(content), String(suffix)]),
-           None())
-        => completion2
+        => completion
 
     
     schema-editor-type-completion :
