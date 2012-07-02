@@ -13,7 +13,9 @@ public editor services XmlEditor {
     Element
   outliner XmlOutliner
     Element
-} public checks XmlEditor {
+}
+
+public checks XmlEditor {
     errors Element(lname, attrs, content, rname) = 
             [(lname, "element start and end tag need to coincide"),
              (rname, "element start and end tag need to coincide")]
