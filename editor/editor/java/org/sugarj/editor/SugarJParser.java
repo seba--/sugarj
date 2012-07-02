@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.jsglr_layout.client.InvalidParseTableException;
 import org.spoofax.jsglr_layout.client.KeywordRecognizer;
 import org.spoofax.jsglr_layout.client.ParseTable;
@@ -80,7 +81,7 @@ public class SugarJParser extends JSGLRI {
 
     if (input.contains(ContentProposer.COMPLETION_TOKEN) && result != null && result.getParseTable() != null) {
       this.result = result;
-      return parseCompletionTree(input, filename, result);
+      return ATermCommands.fixTokenizer(parseCompletionTree(input, filename, result));
     }
 
     if (result.isUpToDateShallow(input.hashCode(), environment)) {
@@ -176,7 +177,7 @@ public class SugarJParser extends JSGLRI {
   
   public static void putResult(String file, Result result) {
     if (result != null)
-      result.setSugaredSyntaxTree(ATermCommands.fixTokenizer(result.getSugaredSyntaxTree()));
+      result.setSugaredSyntaxTree(result.getSugaredSyntaxTree());
     synchronized (results) {
       results.put(file, result);
     }
@@ -198,7 +199,25 @@ public class SugarJParser extends JSGLRI {
   }
   
   private Result parseFailureResult(String filename) throws FileNotFoundException, IOException {
-    Tokenizer tokenizer = new Tokenizer(" ", " ", new KeywordRecognizer(null) {});
+    ITermFactory f = ATermCommands.factory;
+    IStrategoTerm tbl =
+      f.makeAppl(f.makeConstructor("parse-table", 5), 
+          f.makeInt(6),
+          f.makeInt(0),
+          f.makeList(),
+          f.makeAppl(f.makeConstructor("states", 1), f.makeList()),
+          f.makeAppl(f.makeConstructor("priorities", 1), 
+                     f.makeList(f.makeAppl(f.makeConstructor("arg-gtr-prio", 3), 
+                                           f.makeInt(257), f.makeInt(1), f.makeInt(257))))); // XXX
+
+    ParseTable pt = null; 
+    try {
+      pt = new ParseTable(tbl, f);
+    } catch (InvalidParseTableException e) {
+      throw new RuntimeException(e);
+    }
+
+    Tokenizer tokenizer = new Tokenizer(" ", " ", new KeywordRecognizer(pt) {});
     Token tok = tokenizer.makeToken(0, IToken.TK_UNKNOWN, true);
     IStrategoTerm term = ATermCommands.makeList("SugarCompilationUnit", tok);
     

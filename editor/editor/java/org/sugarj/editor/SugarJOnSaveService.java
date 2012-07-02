@@ -1,6 +1,7 @@
 package org.sugarj.editor;
 
 import org.eclipse.jface.text.DocumentEvent;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.imp.runtime.EditorState;
 import org.strategoxt.imp.runtime.dynamicloading.IOnSaveService;
 
@@ -32,5 +33,10 @@ public class SugarJOnSaveService implements IOnSaveService {
   public void documentChanged(DocumentEvent event) {
     baseService.documentChanged(event);
     // descriptor.reloadAllEditors(0);
+  }
+
+  @Override
+  public void invokeOnSave(IStrategoTerm ast) {
+    // TODO Auto-generated method stub
   }
 }

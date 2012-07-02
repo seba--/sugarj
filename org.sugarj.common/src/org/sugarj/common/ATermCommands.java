@@ -35,9 +35,7 @@ import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.stratego_gpp.ast2abox_0_1;
 import org.strategoxt.stratego_gpp.box2text_string_0_1;
 import org.strategoxt.stratego_gpp.parse_pptable_file_0_0;
-import org.strategoxt.tools.core_sdf2parenthesize_0_0;
 import org.strategoxt.tools.sdf_desugar_0_0;
-import org.strategoxt.tools.sdf_ensugar_0_0;
 import org.sugarj.common.path.Path;
 
 /**
