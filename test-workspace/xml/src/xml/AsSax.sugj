@@ -28,51 +28,51 @@ public sugar AsSax {
 	    alltd(explode-write; meta-explode-sax)
 	
 	  explode-write : 
-	    ToMetaStm(WriteDoc(Id(x), c)) -> java_bstm |[ { java_bstm* } ]|
-	      where < content-to-stm(|x)
-	            ; concat-content
-	            ; flatten-list
-	            > c => java_bstm*
+	    ToMetaStm(WriteDoc(Id(x), c)) -> java_bstm |[ java_block ]|
+	      where < content-to-block(|x) > c => java_block
 	
-	  content-to-stm(|java_x) :
+	  content-to-block(|java_x) =
+        map(content-to-block(|java_x)); !Block(<id>)
+
+	  content-to-block(|java_x) :
 	    Document(_,c,_) -> 
-	      java_bstm* |[
+	      java_block |[
 	         java_x.startDocument();
-	         java_bstm*;
+	         java_block
 	         java_x.endDocument();
 	      ]|
-	      where <content-to-stms(|java_x)> c => java_bstm*
+	      where <content-to-block(|java_x)> c => java_block
 	
 	  /**
 	   * @todo  Support namespaces
 	   */
-	  content-to-stm(|java_x) :
+	  content-to-block(|java_x) :
 	    Element(ElemName(QName(pref, n)), atts, children, ElemName(QName(pref', n'))) ->
-	      java_bstm* |[
+	      java_block |[
 	         org.xml.sax.helpers.AttributesImpl java_y = new org.xml.sax.helpers.AttributesImpl();
-	         java_bstm1*;
+	         java_block1
 	         java_x.startElement(~<java-string-prefix> pref, ~<java-string-expr> n, ~<java-string-qname> (pref,n), java_y);
-	         java_bstm2*;
+	         java_block2
 	         java_x.endElement(~<java-string-prefix> pref', ~<java-string-expr> n', ~<java-string-qname> (pref,n));
 	      ]|
-	      where <map(content-to-stms(|java_x))> children => java_bstm2*
+	      where <content-to-block(|java_x)> children => java_block2
 	          ; new => java_y
-	          ; <map(attribute-to-stm(|java_y))> atts => java_bstm1*
+	          ; <attribute-to-block(|java_y)> atts => java_block1
 	
-	   content-to-stm(|java_x) :
+	   content-to-block(|java_x) :
       EmptyElement(ElemName(QName(pref, n)), atts) ->
-        java_bstm* |[
+        java_block |[
            org.xml.sax.helpers.AttributesImpl java_y = new org.xml.sax.helpers.AttributesImpl();
-           java_bstm1*;
+           java_block
            java_x.startElement(~<java-string-prefix> pref, ~<java-string-expr> n, ~<java-string-qname> (pref, n), java_y);
            java_x.endElement(~<java-string-prefix> pref, ~<java-string-expr> n, ~<java-string-qname> (pref, n));
         ]|
         where new => java_y
-            ; <map(attribute-to-stm(|java_y))> atts => java_bstm1*
+            ; <attribute-to-block(|java_y)> atts => java_block
 	
-	  content-to-stm(|java_x) :
+	  content-to-block(|java_x) :
 	    TextFromMetaExpr(java_e) ->
-	    java_bstm |[
+	    java_block |[
 	      {|
           String java_y = java_e;
          |
@@ -81,12 +81,17 @@ public sugar AsSax {
 	    ]|
 	      where new => java_y
 	
+
+      attribute-to-block(|java_y) =
+        map(attribute-to-stm(|java_y)); !Block(<id>)
+
 	  /**
 	   * @todo  Escape the special characters in the String.
 	   * @todo  Support namespaces
 	   */
 	  attribute-to-stm(|java_y) :
-	    Attribute(AttrName(QName(pref, n)), v) -> java_bstm |[ java_y.addAttribute(~<java-string-prefix> pref, ~<java-string-expr> n, ~<java-string-qname> (pref, n), "CDATA", java_e); ]|
+	    Attribute(AttrName(QName(pref, n)), v) ->
+        java_bstm |[ java_y.addAttribute(~<java-string-prefix> pref, ~<java-string-expr> n, ~<java-string-qname> (pref, n), "CDATA", java_e); ]|
 	      where <attribute-value-to-expr> v => java_e
 	
 	  attribute-value-to-expr :
@@ -102,10 +107,10 @@ public sugar AsSax {
 	  /**
 	   * @todo  Handle all escaped characters
 	   */
-	  content-to-stm(|java_x) :
+	  content-to-block(|java_x) :
 	    Text(s) ->
-	      java_bstm* |[
-	        java_x.characters(new char[]{java_e*}, 0, java_i);
+	      java_block |[
+	        java_x.characters(new char[]~init, 0, java_i);
 	      ]|
 	      where <chardata2string; explode-string> Text(s) => cs
 	          ; <length; int-to-string> cs => java_i
@@ -113,18 +118,16 @@ public sugar AsSax {
 	                \ '\n' -> |[ '\n' ]| \
 	             <+ \ '\r' -> |[ '\r' ]| \
 	             <+ \ c    -> <java-char-expr> c \)
-	             > cs => java_e*
-	
-	  content-to-stms(|x) =
-	    content-to-stm(|x); (is-list <+ ![<id>])
+	             > cs => es
+              ; <!ArrayInit(<id>)> es => init
 	
 	  concat-content =
 	    bottomup( try( \ Conc(l1, l2) -> <conc> (l1, l2) \ ))
     
     
-    content-to-stm(|java_x) :
+    content-to-block(|java_x) :
       Comment(_) ->
-        java_bstm* |[
+        java_block |[
           ;
         ]|
 
