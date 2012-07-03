@@ -811,6 +811,8 @@ exports
   syntax
     <CONID-LEX> "." <Modid-LEX> -> QModid {cons("QModId")}
     <CONID-LEX> "." QModid -> QModid {cons("QModId")}
+    <VARID-LEX> "." <Modid-LEX> -> QModid {cons("QModId")}
+    <VARID-LEX> "." QModid -> QModid {cons("QModId")}
     QModid -> Modid
     QModid -> <Modid-CF>
 
@@ -853,9 +855,6 @@ exports
     [a-z][A-Za-z0-9\'\_]*       -> VARID
     [\_][A-Za-z0-9\'\_]+ -> VARID
     [A-Z][A-Za-z0-9\'\_]*       -> CONID
-
-    %% Question: underscore in identifiers according to standard???
-    %% Answer: Underscore, ý_ý, is treated as a lowercase letter, and can occur wherever a lowercase letter can. However, ý_ý all by itself is a reserved identifier, used as wild card in patterns.
 
     [\!\#\$\%\&\*\+\.\/]
     \/ [\<\=\>\?\@\\\^\|\-\~] -> Symbol
