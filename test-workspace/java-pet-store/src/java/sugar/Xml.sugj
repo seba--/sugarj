@@ -1,10 +1,8 @@
 package sugar;
 
-
 import sugar.XmlSyntax;
 import org.sugarj.languages.Java;
 import concretesyntax.Java;
-
 
 public sugar Xml {
 	/*signature constructors
