@@ -432,7 +432,9 @@ public class ATermCommands {
   public static String prettyPrint(IStrategoTerm ppTable, IStrategoTerm term, HybridInterpreter interp) {
     Context ctx = interp.getCompiledContext();
     IStrategoTerm ppt_list = makeList("PPTable", ppTable);
-    IStrategoTerm aboxTerm = ast2abox_0_1.instance.invoke(ctx, term, ppt_list);   
+    IStrategoTerm aboxTerm = ast2abox_0_1.instance.invoke(ctx, term, ppt_list);
+    if (aboxTerm == null)
+      return null;
     IStrategoTerm textTerm = box2text_string_0_1.instance.invoke(ctx, aboxTerm, factory.makeInt(80));
     return ATermCommands.getString(textTerm);
 

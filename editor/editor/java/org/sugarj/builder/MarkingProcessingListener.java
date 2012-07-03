@@ -52,6 +52,8 @@ public class MarkingProcessingListener implements ProcessingListener {
   public void processingDone(Result result) {
     try {
       IResource resource = getResource(result.getSourceFile());
+      if (resource == null)
+        return;
       
       for (String error : result.getCollectedErrors()) {
         IMarker marker = resource.createMarker(IMarker.PROBLEM);

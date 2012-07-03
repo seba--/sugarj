@@ -299,7 +299,7 @@ public class FileCommands {
   }
 
   public static boolean exists(Path file) {
-    return file.getFile().exists();
+    return file != null && file.getFile().exists();
   }
   
   public static boolean exists(URI file) {

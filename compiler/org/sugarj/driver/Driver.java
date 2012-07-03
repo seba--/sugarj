@@ -880,7 +880,7 @@ public class Driver{
         if (res == null && dep != null)
           res = Result.readDependencyFile(dep, environment);
         
-        if (res != null && !skipProcessImport)
+        if (dep != null && res != null && !skipProcessImport)
           driverResult.addDependency(dep, environment);
         
         if (res != null && res.hasDelegatedCompilation(sourceFile)) {
