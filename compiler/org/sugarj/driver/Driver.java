@@ -1268,7 +1268,7 @@ public class Driver{
     if (interrupt || monitor.isCanceled()) {
       monitor.setCanceled(true);
       log.log("interrupted " + sourceFile);
-      throw new InterruptedException();
+      throw new InterruptedException("Compilation interrupted");
     }
   }
 
