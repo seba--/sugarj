@@ -181,6 +181,12 @@ public class Builder extends IncrementalProjectBuilder {
 //        getLock(getProject()).acquire();
         for (BuildInput input : inputs)
           try {
+            if (Thread.currentThread().isInterrupted()) {
+              monitor.setCanceled(true);
+              monitor.done();
+              return Status.CANCEL_STATUS;
+            }
+              
             monitor.beginTask("compile " + input.sourceFile.getRelativePath(), IProgressMonitor.UNKNOWN);
 
             Environment environment = input.sourceFile.getSourceLocation().getEnvironment();
