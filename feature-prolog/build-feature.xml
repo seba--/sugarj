@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="feature_export" name="build">
+	<target name="feature_export">
+		<pde.exportFeatures destination="/Users/seba/projects/SugarHaskell/update-site" exportSource="false" exportType="directory" features="org.sugarj.prolog" useJARFormat="true"/>
+	</target>
+</project>
