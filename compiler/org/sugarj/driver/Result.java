@@ -411,7 +411,7 @@ public class Result implements IErrorLogger {
     } catch (FileNotFoundException e) {
       return OUTDATED_RESULT;
     } catch (ClassNotFoundException e) {
-      throw new IOException(e);
+      return OUTDATED_RESULT;
     } catch (Exception e) {
       return OUTDATED_RESULT;
     } finally {
