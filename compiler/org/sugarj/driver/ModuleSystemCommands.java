@@ -41,13 +41,7 @@ public class ModuleSystemCommands {
       if (clazz == null && !langLib.isModuleResolvable(modulePath))
         return false;
       
-      log.beginTask("Generate target code");
-      try {
-        langLib.addImportModule(toplevelDecl, true);
-      } finally {
-        log.endTask();
-      }
-      
+      langLib.addImportModule(toplevelDecl, true);
       return true;
     }
     
