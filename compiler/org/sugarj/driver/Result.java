@@ -1,3 +1,4 @@
+
 package org.sugarj.driver;
 
 import java.io.FileInputStream;
@@ -19,12 +20,12 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr_layout.shared.BadTokenException;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
-import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.FileCommands;
+import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
-import org.sugarj.languagelib.ISourceFileContent;
+import org.sugarj.languagelib.SourceFileContent;
 import org.sugarj.util.AppendableObjectOutputStream;
 
 /**
@@ -67,7 +68,7 @@ public class Result implements IErrorLogger {
    * deferred source files (*.sugj) -> 
    * to-be-compiled source files (e.g., *.java + JavaSourceFileContent) 
    */
-  private Map<Path, Map<Path, Map<Path, ISourceFileContent>>> deferredSourceFiles = new HashMap<Path, Map<Path, Map<Path, ISourceFileContent>>>();
+  private Map<Path, Map<Path, Map<Path, SourceFileContent>>> deferredSourceFiles = new HashMap<Path, Map<Path, Map<Path, SourceFileContent>>>();
   
   private final static Result OUTDATED_RESULT = new Result(true) {
     @Override
@@ -126,12 +127,12 @@ public class Result implements IErrorLogger {
 //        set.add((RelativePath) e.getKey());
     
     
-    for (Entry<Path, Map<Path, Map<Path, ISourceFileContent>>> e : result.getDeferredSourceFiles().entrySet())
+    for (Entry<Path, Map<Path, Map<Path, SourceFileContent>>> e : result.getDeferredSourceFiles().entrySet())
       if (!deferredSourceFiles.containsKey(e.getKey()))
         deferredSourceFiles.put(e.getKey(), e.getValue());
       else {
-        Map<Path, Map<Path, ISourceFileContent>> deferred = deferredSourceFiles.get(e.getKey());
-        for (Entry<Path, Map<Path, ISourceFileContent>> e2 : e.getValue().entrySet())
+        Map<Path, Map<Path, SourceFileContent>> deferred = deferredSourceFiles.get(e.getKey());
+        for (Entry<Path, Map<Path, SourceFileContent>> e2 : e.getValue().entrySet())
           if (deferred.containsKey(e2.getKey()) && !deferred.get(e2.getKey()).equals(e2.getValue()))
             throw new IllegalStateException("Deferred source files differ.");
           else
@@ -279,7 +280,7 @@ public class Result implements IErrorLogger {
     return sugaredSyntaxTree;
   }
   
-  public void delegateCompilation(Path delegate, Path compileFile, ISourceFileContent fileContent, Set<RelativePath> generatedFiles) {
+  public void delegateCompilation(Path delegate, Path compileFile, SourceFileContent fileContent, Set<RelativePath> generatedFiles) {
     Map<Path, Set<RelativePath>> myGeneratedFiles = availableGeneratedFiles.get(delegate);
     if (myGeneratedFiles == null)
       myGeneratedFiles = new HashMap<Path, Set<RelativePath>>();
@@ -290,12 +291,12 @@ public class Result implements IErrorLogger {
 
     availableGeneratedFiles.put(delegate, myGeneratedFiles);
     
-    Map<Path, Map<Path, ISourceFileContent>> sourceFiles = deferredSourceFiles.get(delegate);
+    Map<Path, Map<Path, SourceFileContent>> sourceFiles = deferredSourceFiles.get(delegate);
     if (sourceFiles == null)
-      sourceFiles = new HashMap<Path, Map<Path,ISourceFileContent>>();
-    Map<Path, ISourceFileContent> sources = sourceFiles.get(sourceFile);
+      sourceFiles = new HashMap<Path, Map<Path,SourceFileContent>>();
+    Map<Path, SourceFileContent> sources = sourceFiles.get(sourceFile);
     if (sources == null)
-      sources = new HashMap<Path, ISourceFileContent>();
+      sources = new HashMap<Path, SourceFileContent>();
     sources.put(compileFile, fileContent);
     sourceFiles.put(sourceFile, sources);
     
@@ -369,7 +370,6 @@ public class Result implements IErrorLogger {
     setPersistentPath(dep);
   }
   
-  // We need an interface for Result to use Results in language-specific drivers (e.g. JavaDriver)  
   @SuppressWarnings("unchecked")
   public static Result readDependencyFile(Path dep, Environment env) throws IOException {
     Result result = new Result(true);
@@ -399,7 +399,7 @@ public class Result implements IErrorLogger {
       }
       
       result.availableGeneratedFiles = (Map<Path, Map<Path, Set<RelativePath>>>) ois.readObject();
-      result.deferredSourceFiles = (Map<Path, Map<Path, Map<Path, ISourceFileContent>>>) ois.readObject();
+      result.deferredSourceFiles = SourceFileContent.readSourceFileContents(ois);
       
 //      result.sugaredSyntaxTree = new TermReader(ATermCommands.factory).parseFromStream(ois);
 //      result.failed = ois.readBoolean();
@@ -411,7 +411,8 @@ public class Result implements IErrorLogger {
     } catch (FileNotFoundException e) {
       return OUTDATED_RESULT;
     } catch (ClassNotFoundException e) {
-      return OUTDATED_RESULT;
+      e.printStackTrace();
+      throw new IOException(e);
     } catch (Exception e) {
       return OUTDATED_RESULT;
     } finally {
@@ -450,7 +451,7 @@ public class Result implements IErrorLogger {
     return availableGeneratedFiles;
   }
 
-  public Map<Path, Map<Path, Map<Path, ISourceFileContent>>> getDeferredSourceFiles() {
+  public Map<Path, Map<Path, Map<Path, SourceFileContent>>> getDeferredSourceFiles() {
     return deferredSourceFiles;
   }
 

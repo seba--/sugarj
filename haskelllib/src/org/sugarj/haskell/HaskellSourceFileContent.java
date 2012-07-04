@@ -9,10 +9,10 @@ import org.strategoxt.HybridInterpreter;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.languagelib.ISourceFileContent;
+import org.sugarj.languagelib.SourceFileContent;
 import org.sugarj.languagelib.SourceImport;
 
-public class HaskellSourceFileContent implements ISourceFileContent {
+public class HaskellSourceFileContent extends SourceFileContent {
 
   private static final long serialVersionUID = -1793669825816782903L;
 

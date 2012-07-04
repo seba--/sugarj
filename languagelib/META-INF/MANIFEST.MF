@@ -15,3 +15,4 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.sugarj,
  org.sugarj.languagelib
+Eclipse-BuddyPolicy: registered

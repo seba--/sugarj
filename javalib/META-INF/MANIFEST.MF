@@ -19,3 +19,4 @@ Require-Bundle: org.eclipse.ui,
  org.sugarj.languagelib,
  org.sugarj.common,
  org.eclipse.jdt.core
+Eclipse-RegisterBuddy: org.sugarj.languagelib

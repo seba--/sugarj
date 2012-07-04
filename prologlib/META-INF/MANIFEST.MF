@@ -19,3 +19,4 @@ Require-Bundle: org.eclipse.ui,
 Export-Package: org.sugarj,
  org.sugarj.languages,
  org.sugarj.prolog.init
+Eclipse-RegisterBuddy: org.sugarj.languagelib

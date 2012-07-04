@@ -23,7 +23,7 @@ import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
-import org.sugarj.languagelib.ISourceFileContent;
+import org.sugarj.languagelib.SourceFileContent;
 import org.sugarj.stdlib.StdLib;
 
 
@@ -106,7 +106,7 @@ public abstract class LanguageLib implements Serializable {
 	
 	
 
-	public abstract ISourceFileContent getSource();
+	public abstract SourceFileContent getSource();
 	public abstract Path getOutFile();
 	public abstract Set<RelativePath> getGeneratedFiles();	
 	
@@ -149,10 +149,10 @@ public abstract class LanguageLib implements Serializable {
 	public abstract String getImportedModulePath(IStrategoTerm toplevelDecl) throws IOException;
 	
 	
-	public void compile(Path outFile, ISourceFileContent source, Path bin, List<Path> path,
+	public void compile(Path outFile, SourceFileContent source, Path bin, List<Path> path,
 			Set<RelativePath> generatedBinFiles,
 			Map<Path, Set<RelativePath>> availableGeneratedFilesForSourceFile,
-			Map<Path, Map<Path, ISourceFileContent>> deferredSourceFilesForSourceFile,
+			Map<Path, Map<Path, SourceFileContent>> deferredSourceFilesForSourceFile,
 			Map<Path, Integer> generatedFileHashes,
 			boolean generateFiles
 			) throws IOException, ClassNotFoundException {
@@ -168,15 +168,15 @@ public abstract class LanguageLib implements Serializable {
 						generatedClasses.add(file);
 		}
 
-		Map<Path, Map<Path, ISourceFileContent>> sourceFiles = deferredSourceFilesForSourceFile; //result.getDeferredSourceFiles().get(result.getSourceFile());
+		Map<Path, Map<Path, SourceFileContent>> sourceFiles = deferredSourceFilesForSourceFile; //result.getDeferredSourceFiles().get(result.getSourceFile());
 		List<Path> javaOutFiles = new ArrayList<Path>();
 		javaOutFiles.add(outFile);
 
 		if (sourceFiles != null)
-			for (Entry<Path, Map<Path, ISourceFileContent>> sources : sourceFiles.entrySet())
-				for (Entry<Path, ISourceFileContent> currentSource : sources.getValue().entrySet())
-					if (currentSource.getValue() instanceof ISourceFileContent) {
-						ISourceFileContent otherSource = (ISourceFileContent) currentSource.getValue();
+			for (Entry<Path, Map<Path, SourceFileContent>> sources : sourceFiles.entrySet())
+				for (Entry<Path, SourceFileContent> currentSource : sources.getValue().entrySet())
+					if (currentSource.getValue() instanceof SourceFileContent) {
+						SourceFileContent otherSource = (SourceFileContent) currentSource.getValue();
 						try {
 							writeToFile(generateFiles, generatedFileHashes, currentSource.getKey(), otherSource.getCode(generatedClasses, interp, currentSource.getKey()));
 

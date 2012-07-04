@@ -26,7 +26,7 @@ import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.haskell.HaskellSourceFileContent;
-import org.sugarj.languagelib.ISourceFileContent;
+import org.sugarj.languagelib.SourceFileContent;
 import org.sugarj.languagelib.SourceImport;
 
 /**
@@ -131,7 +131,7 @@ public class HaskellLib extends LanguageLib {
   }
 
   @Override
-  public ISourceFileContent getSource() {
+  public SourceFileContent getSource() {
     return sourceContent;
   }
 

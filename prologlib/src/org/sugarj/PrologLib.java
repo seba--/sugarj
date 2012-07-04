@@ -26,7 +26,7 @@ import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
-import org.sugarj.languagelib.ISourceFileContent;
+import org.sugarj.languagelib.SourceFileContent;
 import org.sugarj.prolog.PrologSourceFileContent;
 import org.sugarj.prolog.PrologSourceFileContent.PrologModuleImport;
 
@@ -186,7 +186,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 
 	@Override
-	public ISourceFileContent getSource() {
+	public SourceFileContent getSource() {
 		return prologSource;
 	}
 

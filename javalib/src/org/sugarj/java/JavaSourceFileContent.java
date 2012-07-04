@@ -9,13 +9,13 @@ import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.languagelib.ISourceFileContent;
+import org.sugarj.languagelib.SourceFileContent;
 
 /**
  * @author seba
  * 
  */
-public class JavaSourceFileContent implements ISourceFileContent {
+public class JavaSourceFileContent extends SourceFileContent {
   private static final long serialVersionUID = -3684457648615950708L;
 
   String packageDecl;

@@ -12,9 +12,9 @@ import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.languagelib.ISourceFileContent;
+import org.sugarj.languagelib.SourceFileContent;
 
-public class PrologSourceFileContent implements ISourceFileContent {
+public class PrologSourceFileContent extends SourceFileContent {
   
 	private static final long serialVersionUID = -1793669825816782903L;
 	
