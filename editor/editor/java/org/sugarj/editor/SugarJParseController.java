@@ -98,12 +98,17 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
       IPath path = fragment.getPath();
       boolean externalPath = fragment.getResource() == null;
       String p = externalPath ? path.toString() : path.makeRelativeTo(fullPath).toString();
-      if (fragment.getKind() == IPackageFragmentRoot.K_SOURCE && fullPath.isPrefixOf(path)) {
-        Path relPath = p.isEmpty() ? root : new RelativePath(root, p);
-        env.getSourcePath().add(new SourceLocation(relPath, env));
-      }
+
+      Path includePath; 
+      if (fullPath.isPrefixOf(path))
+        includePath = p.isEmpty() ? root : new RelativePath(root, p);
+      else
+        includePath = new AbsolutePath(p);
+      
+      if (fragment.getKind() == IPackageFragmentRoot.K_SOURCE)
+        env.getSourcePath().add(new SourceLocation(includePath, env));
       else if (fragment.getKind() == IPackageFragmentRoot.K_BINARY)
-        env.getIncludePath().add(new AbsolutePath(p));
+        env.getIncludePath().add(includePath);
     }
     
     for (String reqProject : project.getRequiredProjectNames()) {
