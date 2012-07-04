@@ -4,7 +4,6 @@ $Id: Item.java,v 1.24 2007-01-17 18:00:07 basler Exp $ */
 package com.sun.javaee.blueprints.petstore.model;
 
 import com.sun.javaee.blueprints.petstore.util.PetstoreUtil;
-
 import com.sun.javaee.blueprints.petstore.model.Address;
 import com.sun.javaee.blueprints.petstore.model.SellerContactInfo;
 import com.sun.javaee.blueprints.petstore.model.Tag;
@@ -26,21 +25,22 @@ import javax.persistence.NamedQuery;
 import javax.persistence.TableGenerator;
 
 import sugar.Accessors;
+import sugar.JPQL;
+import sugar.JPQLEditor;
 
 @NamedQueries(
  {  @NamedQuery(
       name="Item.getItemsPerProductCategory",
-      query="SELECT i FROM Item i WHERE i.productID = :pID and i.disabled = 0"
+      query=SELECT i FROM Item i WHERE i.productID = :pID AND i.disabled = 0
     ), 
     @NamedQuery(
       name="Item.getAllZipCityState",
-      query="SELECT z FROM ZipLocation z"       
+      query=SELECT z FROM ZipLocation z
     )
   }
 ) 
 @Entity
 public class Item implements java.io.Serializable {
-
     private String itemID {set};
     private String productID, name, description, imageURL, imageThumbURL {get; set; con};
     private BigDecimal price {con; get; set};
