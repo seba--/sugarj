@@ -16,8 +16,7 @@ public class Test {
          <student name="Jane Doe">
            <scoring course="PLT" score="80">
            </scoring>
-           <scoring course="Computability" score="62">
-           </scoring>
+           <scoring course="Computability" score="62"/>
          </student> 
         	 
          <student name="John Dee">

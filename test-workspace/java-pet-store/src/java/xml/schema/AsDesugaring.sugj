@@ -11,7 +11,6 @@ import xml.schema.AsEditorService;
 import xml.schema.SharedStrategies;
 import xml.schema.Syntax;
 
-
 public sugar AsDesugaring {
 
   // validating XML schemas
@@ -30,22 +29,23 @@ public sugar AsDesugaring {
     
   // validating a document against a schema 
     constraint-error :
-      ValidatedDoc(Document(pre, root, post)) -> <check-xml-document(|None)> root
+      ValidatedDoc(Document(pre, root, post)) -> <check-xml-document> root
     constraint-error :
-      ValidatedDocNamed(ns, Document(pre, root, post)) -> <check-xml-document(|ns)> root
+      ValidatedDocNamed(ns, Document(pre, root, post)) -> <inject-namespace(|ns); check-xml-document> root
 
-    check-xml-document(|ns) = 
-      !(ns,<id>);
+    check-xml-document = 
       xml-validate
         <+ !(<id>, "no schema for this namespace found")
+
+    xml-validate = fail
+    xml-schema-validate = inject-namespace(|"http://www.w3.org/2001/XMLSchema"); xml-validate
     
+    inject-namespace(|ns) = 
+      bottomup(try(\ElemName(QName(None, n)) -> ElemName(QName(Some(URIPrefix(ns)), n))\))
+
   desugarings
     xsdDec
-  
-  rules
-    xml-validate = fail
-    xml-schema-validate = !("http://www.w3.org/2001/XMLSchema", <id>); xml-validate
-    
+
   rules
     xsdDec : 
       XsdSugarDec(XsdSugarDecHead(mods, name), doc) 
@@ -95,10 +95,11 @@ public sugar AsDesugaring {
       ]|
       -> 
       |[ rules 
-           xml-validate = strategy~elem-match ]|
+           xml-validate = strategy~namespace-match; strategy~elem-match ]|
       where
 	     <xml-attr-value2string> attval1 => ncname ;
 	     <xml-attr-value2string> attval2 => typename;
+	     <match-namespace> namespace => namespace-match;
 	     <match-element> (namespace, ncname, typename) => elem-match
     
     
@@ -113,9 +114,9 @@ public sugar AsDesugaring {
       [ |[
         rules
           ~(<val-type> typename) :
-            (ns,Element(name1,attrs,cs,name2)) -> <conc> (err1, err2)
+            Element(name1,attrs,cs,name2) -> <conc> (err1, err2)
             where <strategy~attcheck> attrs => err1;
-                  <strategy~contentcheck-all> (ns,cs) => err2
+                  <strategy~contentcheck-all> cs => err2
       ]| ]
       where
         <xml-attr-value2string> attval => typename ;
@@ -328,48 +329,43 @@ public sugar AsDesugaring {
   rules
     match-namespace :
       namespace -> 
-      stratego |[ {name1, name2, attributes,contents:
-        ((id,!string~namespace); equal)
-        <+ 
+      stratego |[
         ?Element(
           ElemName(QName(Some(URIPrefix(string~namespace)), name1)),
           attributes,
           contents,
           ElemName(QName(Some(URIPrefix(string~namespace)), name2)))
-        <+
-        ?EmptyElement(ElemName(QName(Some(URIPrefix(string~namespace)), name1)), attrbutes)
-        } ]|
+        +
+        ?EmptyElement(ElemName(QName(Some(URIPrefix(string~namespace)), name1)), attrbutes2)
+        ]|
 
     match-element :
       (namespace,ncname,typename) -> 
       stratego |[
-        where(<match-namespace> namespace);
-
-        ({err, ns, doc, attributes, contents, name2 :
-         \  (ns,
-              doc @ Element(
-				        ElemName(QName(_, string~ncname)),
+        {err, doc, attributes, contents, name2 :
+         \  doc @
+              Element(
+				        ElemName(QName(Some(URIPrefix(string~namespace)), string~ncname)),
 				        attributes,
 				        contents,
-				        name2))
+				        name2)
             -> err
             where
-              <id~(<val-type> typename) <+ ![(doc, <concat-strings>["no type definition ", string~typename, " for element ", string~ncname, " found"])]> (ns,doc) => err
+              <id~(<val-type> typename) <+ ![(doc, <concat-strings>["no type definition ", string~typename, " for element ", string~ncname, " found"])]> doc => err
          \
          }
          <+
-         {err, ns, edoc, doc, attributes, name :
-         \  (ns, edoc@EmptyElement(
-                name@ElemName(QName(_, string~ncname)),
-                attributes))
+         {err, edoc, doc, attributes, name :
+         \  edoc@EmptyElement(
+                name@ElemName(QName(Some(URIPrefix(string~namespace)), string~ncname)),
+                attributes)
             -> err
             where
               !Element(name, attributes, [], name) => doc;
-              <id~(<val-type> typename) <+ ![(edoc, <concat-strings>["no type definition ", string~typename, " for element ", string~ncname, " found"])]> (ns,doc) => err
+              <id~(<val-type> typename) <+ ![(edoc, <concat-strings>["no type definition ", string~typename, " for element ", string~ncname, " found"])]> doc => err
          \
          }
-         <+ ![(<id>, <concat-strings> ["expected element ", string~ncname, " of namespace ", string~namespace])]
-        )  
+         <+ ![(<id>, <concat-strings> ["expected element ", string~ncname, " of namespace ", string~namespace])]  
         ]|
     
     match-attribute :
