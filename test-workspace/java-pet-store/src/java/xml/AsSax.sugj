@@ -1,0 +1,156 @@
+package xml;
+
+import concretesyntax.Java;
+
+import eblock.EBlock;
+
+import org.sugarj.languages.Java;
+
+import xml.XmlJavaSyntax;
+import xml.XmlSyntax;
+import xml.XmlTextTools;
+
+
+/*
+ * https://svn.strategoxt.org/repos/StrategoXT/java-borg/trunk/trans/java-xml/meta-explode-sax.str
+ */
+public sugar AsSax {
+
+  desugarings
+    meta-explode-sax
+
+	%%  module meta-explode-sax
+	
+	strategies
+	
+	  
+	  meta-explode-sax =
+	    alltd(explode-write; meta-explode-sax)
+	
+	  explode-write : 
+	    ToMetaStm(WriteDoc(Id(x), c)) -> java_bstm |[ java_block ]|
+	      where < content-to-block(|x) > c => java_block
+	
+	  content-to-block(|java_x) =
+        map(content-to-block(|java_x)); !Block(<id>)
+
+	  content-to-block(|java_x) :
+	    Document(_,c,_) -> 
+	      java_block |[
+	         java_x.startDocument();
+	         java_block
+	         java_x.endDocument();
+	      ]|
+	      where <content-to-block(|java_x)> c => java_block
+	
+	  /**
+	   * @todo  Support namespaces
+	   */
+	  content-to-block(|java_x) :
+	    Element(ElemName(QName(pref, n)), atts, children, ElemName(QName(pref', n'))) ->
+	      java_block |[
+	         org.xml.sax.helpers.AttributesImpl java_y = new org.xml.sax.helpers.AttributesImpl();
+	         java_block1
+	         java_x.startElement(~<java-string-prefix> pref, ~<java-string-expr> n, ~<java-string-qname> (pref,n), java_y);
+	         java_block2
+	         java_x.endElement(~<java-string-prefix> pref', ~<java-string-expr> n', ~<java-string-qname> (pref,n));
+	      ]|
+	      where <content-to-block(|java_x)> children => java_block2
+	          ; new => java_y
+	          ; <attribute-to-block(|java_y)> atts => java_block1
+	
+	   content-to-block(|java_x) :
+      EmptyElement(ElemName(QName(pref, n)), atts) ->
+        java_block |[
+           org.xml.sax.helpers.AttributesImpl java_y = new org.xml.sax.helpers.AttributesImpl();
+           java_block
+           java_x.startElement(~<java-string-prefix> pref, ~<java-string-expr> n, ~<java-string-qname> (pref, n), java_y);
+           java_x.endElement(~<java-string-prefix> pref, ~<java-string-expr> n, ~<java-string-qname> (pref, n));
+        ]|
+        where new => java_y
+            ; <attribute-to-block(|java_y)> atts => java_block
+	
+	  content-to-block(|java_x) :
+	    TextFromMetaExpr(java_e) ->
+	    java_block |[
+	      {|
+          String java_y = java_e;
+         |
+	        java_x.characters( java_y.toCharArray(), 0, java_y.length())
+	      |};
+	    ]|
+	      where new => java_y
+	
+
+      attribute-to-block(|java_y) =
+        map(attribute-to-stm(|java_y)); !Block(<id>)
+
+	  /**
+	   * @todo  Escape the special characters in the String.
+	   * @todo  Support namespaces
+	   */
+	  attribute-to-stm(|java_y) :
+	    Attribute(AttrName(QName(pref, n)), v) ->
+        java_bstm |[ java_y.addAttribute(~<java-string-prefix> pref, ~<java-string-expr> n, ~<java-string-qname> (pref, n), "CDATA", java_e); ]|
+	      where <attribute-value-to-expr> v => java_e
+	
+	  attribute-value-to-expr :
+	    v -> <java-string-exprs> s
+	      where <xml-attr-value2strings> v => s
+	
+	  /**
+	   * Anti-quotation of attribute value to Java.
+	   */
+	  attribute-value-to-expr :
+	    FromMetaExpr(e) -> e
+	
+	  /**
+	   * @todo  Handle all escaped characters
+	   */
+	  content-to-block(|java_x) :
+	    Text(s) ->
+	      java_block |[
+	        java_x.characters(new char[]~init, 0, java_i);
+	      ]|
+	      where <chardata2string; explode-string> Text(s) => cs
+	          ; <length; int-to-string> cs => java_i
+	          ; <map(
+	                \ '\n' -> |[ '\n' ]| \
+	             <+ \ '\r' -> |[ '\r' ]| \
+	             <+ \ c    -> <java-char-expr> c \)
+	             > cs => es
+              ; <!ArrayInit(<id>)> es => init
+	
+	  concat-content =
+	    bottomup( try( \ Conc(l1, l2) -> <conc> (l1, l2) \ ))
+    
+    
+    content-to-block(|java_x) :
+      Comment(_) ->
+        java_block |[
+          ;
+        ]|
+
+
+  rules
+    java-string-prefix :
+      None -> <java-string-expr> ""
+    
+    java-string-prefix :
+      Some(Prefix(pref)) -> <java-string-expr> ""
+
+    java-string-prefix :
+      Some(URIPrefix(pref)) -> <java-string-expr> pref
+  
+  rules
+    java-string-qname :
+      (None, name) -> <java-string-expr> name
+    
+    java-string-qname :
+      (Some(Prefix(pref)), name) -> <concat-strings; java-string-expr> [pref, ":", name]
+    
+    java-string-qname :
+      (Some(URIPrefix(pref)), name) -> <concat-strings; java-string-expr> ["{", pref, "}", name] 
+      
+      
+}

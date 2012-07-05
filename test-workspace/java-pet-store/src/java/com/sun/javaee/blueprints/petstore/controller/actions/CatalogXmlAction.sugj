@@ -17,8 +17,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import sugar.Xml;
-import sugar.XmlEditor;
+import xml.Sugar;
 
 /**
  * This action class serves up XML data for catalog.

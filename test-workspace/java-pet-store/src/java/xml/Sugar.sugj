@@ -1,6 +1,8 @@
 package sugar;
 
-import sugar.XmlSyntax;
+import xml.Syntax;
+import xml.Editor;
+
 import org.sugarj.languages.Java;
 import concretesyntax.Java;
 

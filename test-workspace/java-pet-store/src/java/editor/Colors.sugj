@@ -1,4 +1,4 @@
-package sugar;
+package editor;
 
 public editor services Colors {
   colorer System colors
@@ -22,4 +22,5 @@ public editor services Colors {
 
   colorer More colors
     darkorange = 200 100 0
+    keyword = 127 0 85 bold
 }

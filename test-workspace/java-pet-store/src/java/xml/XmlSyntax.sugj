@@ -1,11 +1,11 @@
-package sugar;
+package xml;
+
+import editor.Editor;
+
+/*
+ * https://svn.strategoxt.org/repos/StrategoXT/strategoxt/trunk/xml-front/syn/xml/
+ */
 public sugar XmlSyntax {
-  rules
-    constraint-error :
-      Element(lname, attrs, content, rname) -> 
-      [(lname, "element start and end tag need to coincide"),
-       (rname, "element start and end tag need to coincide")]
-      where <not(equal)> (lname, rname) 
   context-free syntax
     AttrName "=" AttValue -> Attribute {cons("Attribute")}
     QName -> AttrName {cons("AttrName")}
