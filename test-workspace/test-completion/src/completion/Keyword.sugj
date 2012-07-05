@@ -1,0 +1,6 @@
+package completion;
+
+public editor services Keyword {
+  completions
+    completion keyword : "foo rocks"
+}

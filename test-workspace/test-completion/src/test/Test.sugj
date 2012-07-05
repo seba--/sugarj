@@ -1,0 +1,9 @@
+package test;
+
+import completion.Keyword;
+import completion.Template;
+
+public class Test {
+  private String completeMe = "SugarJ rocks";
+
+}
