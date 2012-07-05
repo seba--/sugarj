@@ -1,6 +1,8 @@
 SugarJ Eclipse plugin (recommended)
 ===================================
 
+Visit the SugarJ web site http://sugarj.org
+
 Installation
 ------------
 
