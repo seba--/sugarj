@@ -36,6 +36,7 @@ import org.sugarj.common.CommandExecution;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.JavaCommands;
+import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.driver.caching.ModuleKey;
@@ -140,9 +141,18 @@ public class STRCommands {
     Path prog = lookupAssimilationInCache(strCache, key);
     
     if (prog == null) {
-      prog = generateAssimilator(key, str, main, strjContext, environment.getIncludePath(), langLib);
-      cacheAssimilator(strCache, key, prog, environment);
+      try {
+        prog = generateAssimilator(key, str, main, strjContext, environment.getIncludePath(), langLib);
+      } catch (StrategoException e) {
+        prog = new AbsolutePath("error: " +e.getMessage());
+      } finally {
+        cacheAssimilator(strCache, key, prog, environment);
+      }
     }
+    
+    if (prog.getAbsolutePath().startsWith("error:"))
+      throw new StrategoException(prog.getAbsolutePath());
+    
     return prog;
   }
     
@@ -187,7 +197,10 @@ public class STRCommands {
     log.beginTask("Caching", "Cache assimilator");
     try {
       Path cacheProg = environment.createCachePath(prog.getFile().getName());
-      FileCommands.copyFile(prog, cacheProg);
+      if (FileCommands.exists(prog))
+        FileCommands.copyFile(prog, cacheProg);
+      else
+        cacheProg = prog;
       
       Path oldProg = strCache.putGet(key, cacheProg);
       FileCommands.delete(oldProg);
