@@ -1,0 +1,36 @@
+package xml.schema;
+import xml.schema.XmlSchema;
+
+public xmlschema CategorySchema {
+  <{http://www.w3.org/2001/XMLSchema}schema targetNamespace="jps">
+    
+    <{http://www.w3.org/2001/XMLSchema}element name="category" type="Category">
+    </{http://www.w3.org/2001/XMLSchema}element>
+
+    <{http://www.w3.org/2001/XMLSchema}complexType name="Category">
+      <{http://www.w3.org/2001/XMLSchema}choice maxOccurs="unbounded">
+        <{http://www.w3.org/2001/XMLSchema}element name="id" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+
+        <{http://www.w3.org/2001/XMLSchema}element name="cat-id" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+        
+        <{http://www.w3.org/2001/XMLSchema}element name="name" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+
+        <{http://www.w3.org/2001/XMLSchema}element name="cat-name" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+      
+        <{http://www.w3.org/2001/XMLSchema}element name="items" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+
+        <{http://www.w3.org/2001/XMLSchema}element name="description" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+
+        <{http://www.w3.org/2001/XMLSchema}element name="image-url" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+	  </{http://www.w3.org/2001/XMLSchema}choice>
+      
+    </{http://www.w3.org/2001/XMLSchema}complexType>  
+  </{http://www.w3.org/2001/XMLSchema}schema>
+}

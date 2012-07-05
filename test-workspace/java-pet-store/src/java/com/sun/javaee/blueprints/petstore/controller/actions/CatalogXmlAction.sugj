@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import xml.Sugar;
+import xml.schema.CategorySchema;
 
 /**
  * This action class serves up XML data for catalog.
@@ -240,7 +241,8 @@ public class CatalogXmlAction implements ControllerAction {
                 <image-url>${i.getImageURL()}</image-url>
               </item>);
         }
-        return <category>
+        return @Validate{jps}
+               <category>
                  <cat-id>${categoryId}</cat-id>
                  <cat-name>${cf.getCategory(categoryId).getName()}</cat-name>
                  <items>${allItemsFromCategory}</items>
@@ -325,7 +327,8 @@ public class CatalogXmlAction implements ControllerAction {
 
             sb.append("<categories>\n");
             for (Category c : cf.getCategories()) {
-                sb.append(<category>
+                sb.append(@Validate{jps}
+                          <category>
                 			<id>${c.getCategoryID()}</id>
                 			<cat-id>${c.getCategoryID()}</cat-id>
                 			<name>${c.getName()}</name>
