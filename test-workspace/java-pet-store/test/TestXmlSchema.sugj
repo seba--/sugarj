@@ -3,17 +3,15 @@ package xml.schema;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
-import xml.AsSax;
-import xml.XmlJavaSyntax;
-
+import xml.Sugar;
 import xml.schema.XmlSchema;
 
-public class TestXmlSchema extends xml.Test {
+public class TestXmlSchema {
 	public static void main(String[] args) throws SAXException {
-    ContentHandler ch = new TestXmlSchema();
     
-    @Validate
-    ch.<{http://www.w3.org/2001/XMLSchema}schema
+    String s = 
+      @Validate
+      <{http://www.w3.org/2001/XMLSchema}schema
 		    targetNamespace="http://www.w3.org/2001/XMLSchema">
 		   	
 		   	
@@ -164,5 +162,7 @@ public class TestXmlSchema extends xml.Test {
 		    </{http://www.w3.org/2001/XMLSchema}simpleType>
 		    
 		  </{http://www.w3.org/2001/XMLSchema}schema>;
+
+    System.out.println(s);
   }
 }

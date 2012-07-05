@@ -1,16 +1,12 @@
-package sugar;
+package xml;
 
-import xml.Syntax;
+import xml.XmlSyntax;
 import xml.Editor;
 
 import org.sugarj.languages.Java;
 import concretesyntax.Java;
 
-public sugar Xml {
-	/*signature constructors
-    	Lit  : s -> lit
-		String : l -> s
-		Chars : s -> c*/
+public sugar Sugar {
 	context-free syntax
 		Document -> JavaExpr {cons("XMLExpr")}
 		"$" "{" JavaExpr "}" -> Element {cons("JavaEscape"), prefer}
@@ -19,19 +15,14 @@ public sugar Xml {
 		desugar-xml : Document -> JavaExpr
 	strategies
 		arglist = ?p1#(<id>)
-		/*
-		desugar-xml : d@XMLDocument(_) ->
-			Invoke(Method(MethodName(AmbName(Id("String")), Id("format"))),
-				[Lit(String([Chars(<xml-to-string> d)]))
-				 | <extract-java-escapes> d
-				 ])*/
+
 		desugar-xml: XMLExpr(doc) -> 
-			|[String.format(~xml-string, ~*java-escapes)]|
+			|[ String.format(~xml-string, ~java-escapes) ]|
 			where <xml-to-string> doc => xml-string;
 			      <xml-java-escapes> doc => java-escapes
 				
 		
-		xml-java-escapes = collect-all(\JavaEscape(code) -> code\)
+		xml-java-escapes = collect-all(\JavaEscape(code) -> code\); !NewArray(TypeName(Id("Object")), [Dim()], ArrayInit(<id>))
 		xml-to-string = !Lit(String([Chars(<xml-to-string-lit>)]))
         xml-to-string-lit = pprint <+ arglist; map(xml-to-string-lit); concat-strings <+ !""
 		pprint : Element(ElemName(QName(None(), open_name)), attributes, body, ElemName(QName(None(), close_name)))

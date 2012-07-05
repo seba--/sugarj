@@ -1,0 +1,41 @@
+package xml.schema;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
+import xml.Sugar;
+import xml.schema.TestSchema;
+
+public class Test {
+	public static void main(String[] args) throws SAXException {
+      String s =    
+       @Validate{http://www.informatik.uni-marburg.de/fb12/ps/students}
+       <students>
+         <student name="Jane Doe">
+           <scoring course="PLT" score="80">
+           </scoring>
+           <scoring course="Computability" score="62">
+           </scoring>
+         </student> 
+        	 
+         <student name="John Dee">
+           <scoring course="Maths" score="80">
+           </scoring>
+           <scoring course="Language processing II" score="12">
+           </scoring>
+         </student>
+        	
+         <student name="April November">
+           <scoring course="PLT" score="18">
+           </scoring>
+           <scoring course="Advanced advancement" score="100">
+           </scoring>
+         </student>
+         	
+      </students>;
+
+    System.out.println(s);
+  }
+}

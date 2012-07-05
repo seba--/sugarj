@@ -1,7 +1,7 @@
 package xml.schema;
 
 import xml.schema.AsDesugaring;
-import xml.schema.XmlSchemaJavaSyntax;
+import xml.schema.Syntax;
 
 import xml.schema.AsEditorService;
 import xml.schema.SharedStrategies;   

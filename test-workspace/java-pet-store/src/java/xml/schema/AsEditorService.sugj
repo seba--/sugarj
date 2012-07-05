@@ -4,7 +4,7 @@ import concretesyntax.EditorServices;
 
 import xml.XmlSyntax;
 import xml.XmlTextTools;
-import xml.schema.XmlSchemaJavaSyntax;
+import xml.schema.Syntax;
 import xml.ConcreteXml;
 import xml.Editor;
 

@@ -1,7 +1,7 @@
 package xml.schema;
 
 import xml.Editor;
-import xml.schema.XmlSchemaJavaSyntax;
+import xml.schema.Syntax;
 
 public editor services Editor {
   outliner

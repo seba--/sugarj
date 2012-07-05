@@ -3,13 +3,13 @@ package xml.schema;
 import concretesyntax.Stratego;
 
 import xml.ConcreteXml;
-import xml.XmlJavaSyntax;
+import xml.Sugar;
 import xml.XmlTextTools;
 import xml.Editor;
 
 import xml.schema.AsEditorService;
 import xml.schema.SharedStrategies;
-import xml.schema.XmlSchemaJavaSyntax;
+import xml.schema.Syntax;
 
  
 public sugar AsDesugaring {

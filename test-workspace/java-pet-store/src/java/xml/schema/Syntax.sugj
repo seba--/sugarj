@@ -1,0 +1,29 @@
+package xml.schema;
+
+import org.sugarj.languages.Java;
+
+public sugar Syntax {
+  
+  context-free syntax
+    "@Validate" Document -> Document {cons("ValidatedDoc")}
+    "@Validate" "{" NamespaceURI "}" Document -> Document {cons("ValidatedDocNamed")}
+  
+  desugarings
+    \ ValidatedDoc(doc) -> doc \
+    \ ValidatedDocNamed(ns, doc) -> doc \
+  
+  context-free syntax
+    XsdSugarDecHead XsdSugarBody
+      -> XsdSugarDec {cons("XsdSugarDec")}
+    
+    XsdSugarDec -> SugarDec
+
+    AnnoOrSugarMod* "xmlschema" JavaId 
+      -> XsdSugarDecHead {cons("XsdSugarDecHead")}
+
+    "{" XsdDefinition  "}" -> XsdSugarBody {cons("XsdSugarBody")}
+    Document -> XsdDefinition {cons("XMLSchemaDoc")}
+
+  lexical restrictions
+    "xmlschema" -/-  [a-zA-Z0-9\'\-\_]
+}
