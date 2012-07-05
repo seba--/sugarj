@@ -140,13 +140,16 @@ public sugar AsDesugaring {
       [ |[
         rules
           ~(<val-type> typename) :
+            Element(name1,attrs,[JavaEscape(e)],name2) -> []
+          
+          ~(<val-type> typename) :
             Element(name1,attrs,[c],name2) -> err
             where
               <chardata2string> c => cstring;
               <strategy~simplecheck> (c,cstring) => err
-          
+
           ~(<val-type> typename) :
-            Element(name1,attrs,cs,name2) -> [(c, <concat-strings>["type mismatch: expected character data, found ", <write-to-string> cs])]
+            Element(name1,attrs,cs,name2) -> [(cs, <concat-strings>["type mismatch: expected character data, found ", <write-to-string> cs])]
             where
               <not(?[c]) + (?[c]; not(chardata2string))> cs
 
@@ -156,20 +159,19 @@ public sugar AsDesugaring {
               <xml-attr-value2string> attr => attrstring ;
               <strategy~simplecheck> (attr,attrstring) => err
           
-          // generate a warning instead (see below)
           ~(<val-type-attval> typename) :
-            FromMetaExpr(e) -> []
+            JavaEscape(e) -> []
       ]| ]
       where <xml-attr-value2string> attval => typename;
             <simpleType2stratego(|typename)> content => simplecheck
-            
+/*            
   constraint-warning :
     valdoc -> warns
     where
       <?ValidatedDoc(<id>) + ?ValidatedDocNamed(_,<id>)> valdoc => doc;
       !"skipping validation of quoted attribute value" => msg;
       <collect-all(\ Attribute(_, e@FromMetaExpr(_)) -> [(e, msg)] \)> doc => warns
-    
+*/  
     
    
   // complex types to stratego
