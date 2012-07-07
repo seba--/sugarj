@@ -1,0 +1,47 @@
+package xml.schema;
+import xml.schema.XmlSchema;
+
+public xmlschema ItemSchema {
+  <{http://www.w3.org/2001/XMLSchema}schema targetNamespace="jpsi">
+    
+	<{http://www.w3.org/2001/XMLSchema}element name="item" type="Item">
+    </{http://www.w3.org/2001/XMLSchema}element>
+
+    <{http://www.w3.org/2001/XMLSchema}complexType name="Item">
+      <{http://www.w3.org/2001/XMLSchema}choice maxOccurs="unbounded">
+        <{http://www.w3.org/2001/XMLSchema}element name="id" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+        
+        <{http://www.w3.org/2001/XMLSchema}element name="prod-id" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+      
+        <{http://www.w3.org/2001/XMLSchema}element name="cat-id" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+
+        <{http://www.w3.org/2001/XMLSchema}element name="name" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+
+        <{http://www.w3.org/2001/XMLSchema}element name="price" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+
+        <{http://www.w3.org/2001/XMLSchema}element name="description" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+
+        <{http://www.w3.org/2001/XMLSchema}element name="image-url" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+
+        <{http://www.w3.org/2001/XMLSchema}element name="item-id" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+
+        <{http://www.w3.org/2001/XMLSchema}element name="image-tb-url" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+
+		<{http://www.w3.org/2001/XMLSchema}element name="rating" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+
+		<{http://www.w3.org/2001/XMLSchema}element name="product-id" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+	  </{http://www.w3.org/2001/XMLSchema}choice>
+    </{http://www.w3.org/2001/XMLSchema}complexType>
+  </{http://www.w3.org/2001/XMLSchema}schema>
+}
