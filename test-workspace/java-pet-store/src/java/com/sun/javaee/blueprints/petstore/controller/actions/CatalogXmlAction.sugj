@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import xml.Sugar;
 import xml.schema.CategorySchema;
+import xml.schema.ItemSchema;
 
 /**
  * This action class serves up XML data for catalog.
@@ -210,7 +211,8 @@ public class CatalogXmlAction implements ControllerAction {
             sb.append("<items>\n");
             if(bDebug) System.out.println("**** Items length=" + items.size());
             for (Item i : items) {
-                sb.append(<item>
+                sb.append(@Validate{jpsi}
+                          <item>
 							<id>${i.getItemID()}</id>
 							<product-id>${i.getProductID()}</product-id>
 							<rating>${i.checkAverageRating()}</rating>
@@ -231,6 +233,7 @@ public class CatalogXmlAction implements ControllerAction {
         StringBuffer allItemsFromCategory = new StringBuffer();
         for (Item i : cf.getAllItemsFromCategory(categoryId)) {
             allItemsFromCategory.append(
+			  @Validate{jpsi}
               <item>
                 <id>${i.getItemID()}</id>
                 <prod-id>${i.getProductID()}</prod-id>
@@ -241,7 +244,7 @@ public class CatalogXmlAction implements ControllerAction {
                 <image-url>${i.getImageURL()}</image-url>
               </item>);
         }
-        return @Validate{jps}
+        return @Validate{jpsc}
                <category>
                  <cat-id>${categoryId}</cat-id>
                  <cat-name>${cf.getCategory(categoryId).getName()}</cat-name>
@@ -251,7 +254,8 @@ public class CatalogXmlAction implements ControllerAction {
     
     private String handleItem(String targetId){
         Item i = cf.getItem(targetId);
-        return <item>
+        return @Validate{jpsi}
+				<item>
 					<id>${i.getItemID()}</id>
 					<cat-id>${i.getProductID()}</cat-id>
 					<name>${i.getName()}</name>
@@ -327,7 +331,7 @@ public class CatalogXmlAction implements ControllerAction {
 
             sb.append("<categories>\n");
             for (Category c : cf.getCategories()) {
-                sb.append(@Validate{jps}
+                sb.append(@Validate{jpsc}
                           <category>
                 			<id>${c.getCategoryID()}</id>
                 			<cat-id>${c.getCategoryID()}</cat-id>

@@ -2,7 +2,7 @@ package xml.schema;
 import xml.schema.XmlSchema;
 
 public xmlschema CategorySchema {
-  <{http://www.w3.org/2001/XMLSchema}schema targetNamespace="jps">
+  <{http://www.w3.org/2001/XMLSchema}schema targetNamespace="jpsc">
     
     <{http://www.w3.org/2001/XMLSchema}element name="category" type="Category">
     </{http://www.w3.org/2001/XMLSchema}element>
@@ -29,8 +29,7 @@ public xmlschema CategorySchema {
 
         <{http://www.w3.org/2001/XMLSchema}element name="image-url" type="string">
         </{http://www.w3.org/2001/XMLSchema}element>
-	  </{http://www.w3.org/2001/XMLSchema}choice>
-      
-    </{http://www.w3.org/2001/XMLSchema}complexType>  
+	  </{http://www.w3.org/2001/XMLSchema}choice>      
+    </{http://www.w3.org/2001/XMLSchema}complexType>
   </{http://www.w3.org/2001/XMLSchema}schema>
 }
