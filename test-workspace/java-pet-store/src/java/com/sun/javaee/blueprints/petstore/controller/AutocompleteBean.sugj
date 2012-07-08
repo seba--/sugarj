@@ -12,12 +12,13 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 
+import sugar.Accessors;
+
 public class AutocompleteBean {
     
     static final boolean bDebug=false;
     private static final int ITEMCOUNT = 10;
-    private String[] cities = null;
-    private String[] zips = null;
+    private String[] cities, zips {get};
     private String[] states =
         new String[] {
             "AK", "AL", "AR", "AZ", "CA", "CO", "CT", "DC", "DE", "FL", "GA", "HI", "IA", "ID", "IL",
@@ -68,14 +69,6 @@ public class AutocompleteBean {
             i++;
         }
         return decodedStr;
-    }
-    
-    public String[] getCities() {
-        return cities;
-    }
-    
-    public String[] getZips() {
-        return zips;
     }
     
     public String[] getStates() {

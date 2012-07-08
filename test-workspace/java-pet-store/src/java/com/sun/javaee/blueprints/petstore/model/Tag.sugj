@@ -16,7 +16,7 @@ import javax.persistence.TableGenerator;
 
 import sugar.Accessors;
 import com.sun.javaee.blueprints.petstore.model.Address;
-
+import com.sun.javaee.blueprints.petstore.model.Item;
 
 @Entity
 public class Tag implements java.io.Serializable {
