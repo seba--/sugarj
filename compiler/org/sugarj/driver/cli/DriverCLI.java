@@ -392,11 +392,8 @@ public class DriverCLI {
     if (line.hasOption("no-checking"))
       environment.setNoChecking(true);
     
-    if (line.hasOption("language-lib")) {
-      String[] libNames = line.getOptionValues("language-lib");
-      if (libNames == null || libNames.length == 0)
-        libNames = new String[] {"Java"};
-      
+    if (line.hasOption("language")) {
+      String[] libNames = line.getOptionValues("language");
       activateLanguageLibs(libNames);
     }
   
@@ -518,8 +515,8 @@ public class DriverCLI {
         "Do not check resulting SDF and Stratego files.");
     
     options.addOption(
-        "lib",
-        "language-lib",
+        "l",
+        "language",
         true,
         "Specify a language library to activate.");
     
