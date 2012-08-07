@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>usecases</title>
+</head>
+<body>
+<h2>Use Cases in Petstore 2.0</h2>
+<br>
+This document describes some of the features, functionalities, and use
+cases shown in Petstore. We can add a more simple UML diagram later
+also.<br>
+now add some more <br>
+This section will describe the use cases from users point of view. This
+is modelling a Web 2.0 application, where we connect the buyer and
+seller of pets and dont ourselves have inventory for sale. All the
+goods for sale are offered by users. The users have the ability to add
+content to the site, in terms of adding ratings of items for sale,
+tagging to create some user taxonomy, etc.
+We are not modelling a traditional web app use case, which would be a
+web app version of a brick and mortar store. In the traditional type of
+app, its use cases mirror what customers do in the store, browse the
+aisles, put stuff in their cart, when doing shopping go to the counter
+to purchase their stuff, enter ATM or credit card and hit submit. We
+are not creating a web version of this brick and mortar business model.
+<p>Note, there are two main user roles, one is for people who want to
+buy a pet and another is for people who want to sell a pet. Also, if
+pets are free, this can also be used to adopt a pet. Lets look at those
+two broad users and the associated use cases
+</p>
+
+<ol>
+  <li>Home Page
+    <ol>
+      <li>First there is a home page, displaying the petstore logo with fisheye
+      </li>
+      <li>directs users to selling or buying and other activities
+      </li>
+    </ol>
+
+  </li>
+  <li>Seller
+    <ol>
+      <li>Main use case is the ability to upload images and information to sell a pet, uses AJAX file upload
+      </li>
+      <li>AJAX Progress Bar to indicate file upload status
+      </li>
+      <li>Seller provides images for pet being sold
+      </li>
+      <li>Seller provides description, price, location, contact info for purchase, etc in web page
+      </li>
+      <li>Seller provides category info
+      </li>
+      <li>Later, may add abiltity to let seller choose a number of tags to associate with pet for sale
+      </li>
+      <li>Captcha required to avoid automated graffiti to site
+      </li>
+      <li>Supplier assigned unique page address for item being sold.
+      </li>
+      <li>Suppliers can update the item for sale at later time, including removal of SOLD items
+      </li>
+      <li>Later, may allow sellers to create an Identity, and have an associated account, to manage multiple items they might be selling.
+      </li>
+    </ol>
+
+  </li>
+  <li>Buyers
+    <ol>
+      <li>Browse pets for sale, when clicking a category will see ...
+        <ol>
+          <li>an accordian for category listings on left,
+          </li>
+          <li> a slider on bottom to allow continuous viewing of images from long list, showing all pets in a category for sale
+          </li>
+          <li> a bigger box in middle for details about a pet, default to firts pet in slider list
+          </li>
+          <li>we supply a default taxonomy for browsing by categories of animals
+          </li>
+        </ol>
+
+      </li>
+      <li>Search of pets using Lucene search in app. Keyword based search of our DB.
+      </li>
+      <li>Location-based Search for pets, using Google maps. So all the pets
+will show up in balloons on google maps in our app, so shows mashup.
+One of the "add ons" we may want to consider for the Map component is a
+direction/distance service - maybe something that shows you
+direction/distance to pet store locations from a starting location.
+      </li>
+      <li>buyer can see other user-tagged items page and browse tagged items, such as all dogs tagged as hot, for hot dogs
+      </li>
+      <li>buyer can tag items that are for sale, so that there is a user defined taxonomy for the site
+      </li>
+      <li>user can click check announcements for latest blueprints
+announcement, which will read from our RSS feed on java.net, so will
+show how to integrate RSS feed in mash up
+      </li>
+      <li>buyer can Rate items for sale. Can choose among 1 to 5 stars, so other users can share in the rating.
+      </li>
+      <li>buyer can make a purchase, which means they connect to a seller.
+They are expected to buy one pet(not a shopping cart model). Initially,
+sort of like Craigslist.
+      </li>
+      <li>allow purchase to be done using PayPal mashup
+      </li>
+      <li>Later, users can get alerts while they are browsing for pets when simultaneously a supplier enters a new item for sale</li>
+    </ol>
+
+  </li>
+</ol>
+
+
+Now lets look at the use cases on each page<br>
+<ul>
+  <li>HOME PAGE
+    <ul>
+      <li>Fish eye on petstore image, is image clickable, what happens when click - 
+      </li>
+      <li>Common Header, foot accross app? 
+      </li>
+      <li>determine links/flow to other pages
+      </li>
+    </ul>
+
+  </li>
+  <li>Upload User content to pets for sale</li>
+  <ul>
+    <li>allow users to step thru a wizard and upload content.</li>
+  </ul>
+  <li>BROWSE
+    <ul>
+      <li>Added to show some text along with Master image?
+        <ul>
+          <li>Data Slides up as text
+          </li>
+        </ul>
+
+      </li>
+    </ul>
+
+  </li>
+  <li>MAP
+    <ul>
+      <li>Mashup with google maps o show all pets for sale by location.
+      </li>
+      <li>google map&nbsp; get data from DB&nbsp; 
+      </li>
+    </ul>
+
+  </li>
+  <li>Search</li>
+  <ul>
+    <li>allow people to do a custom search on PS data</li>
+  </ul>
+  <li>Tag</li>
+  <ul>
+    <li>users can tag the data with their own tags</li>
+    <li>users can also broiwse by viewing tags</li>
+  </ul>
+  <li>ANNOUNCEMENTs and news
+    <ul>
+      <li>news bar and news page</li>
+      <li>displays blueprints RSS feed for announcements
+      </li>
+      <li> RSS feed at https://blueprints.dev.java.net/servlets/ProjectRSS?type=news
+      </li>
+      <li> Can just diplay most recent announcements, top ones in list of RSS feed
+      </li>
+      <li> also takes you to news page or item when clicking
+      </li>
+      <li> Consider server side RSS reader, returning just formatted data chunk to client
+      </li>
+    </ul>
+
+  </li>
+</ul>
+</body>
+</html>

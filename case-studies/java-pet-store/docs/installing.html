@@ -1,0 +1,232 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>Developer Readme for builds</title>
+
+
+</head>
+
+
+<body>
+
+<h2>Installing Java BluePrints Petstore</h2>
+
+This doc will explain how to install and use the petstore, including the<br>
+
+<ul>
+
+  <li><a href="#command-line">Installing the
+petstore
+application from the command line with ant</a><br>
+
+  </li>
+
+  <li><a href="#using-netbeans-module">Using
+the
+NetBeans module</a>, whats needed
+for NB support builds(TBD)</li>
+
+</ul>
+
+<h3><a name="command-line"></a>Installing the
+petstore from the command lne using ant</h3>
+
+Here are the instructions for building all the applications in the
+project under the ee5/ directory<br>
+
+These are the intructions for users of ant based builds. NetBeans users
+will have separate instructions.<br>
+
+<ol>
+
+  <li>Download and install Java
+1.5.x or later</li>
+
+  <li>&nbsp;Download the latest public
+release(promoted binary bundle) of GlassFish app server, the Java EE 5
+app server SDK</li>
+
+  <li>Download Ant version 1.6.5</li>
+
+  <li>Copy the petstore/ws/apps/petstore/build.properties.sample
+file to the user
+directory such as
+C:\DocumentsandSettings\myusername\build.properties&nbsp;
+and <br>
+
+  </li>
+
+  <li>Setup build.properties file.
+Copy <code>build.properties.sample</code>
+to the user
+directory such as
+C:\DocumentsandSettings\myusername\build.properties . Note the
+".samples" extension is removed. Now Edit <code>build.properties</code>
+and change the following properties in <code>build.properties</code>:
+    <table border="1" cellpadding="5" cellspacing="0" width="80%">
+
+      <tbody>
+
+        <tr>
+
+          <td align="center" valign="top" width="20%"><tt>Property
+Name</tt></td>
+
+          <td align="center" valign="top" width="50%"><tt>Description</tt></td>
+
+          <td align="center" valign="top" width="30%"><tt>Examples</tt></td>
+
+        </tr>
+
+        <tr align="left">
+
+          <td valign="top">javaee.home</td>
+
+          <td valign="top">The
+directory where the GlassFish, the Java EE 5 SDK, is
+installed.</td>
+
+          <td valign="top"><code>c:/Sun/AppServer</code>
+for windows,
+and <code>/home/username/SUNWappserver</code>
+for unix</td>
+
+        </tr>
+
+        <tr align="left">
+
+          <td valign="top">javaee.server.name</td>
+
+          <td valign="top">Host
+name of the server where the J2EE SDK
+is installed</td>
+
+          <td valign="top">localhost</td>
+
+        </tr>
+
+        <tr align="left">
+
+          <td valign="top">javaee.server.port</td>
+
+          <td valign="top">The
+port number for the server you chose
+while installing GlassFish, the Java EE 5 SDK</td>
+
+          <td valign="top">8080</td>
+
+        </tr>
+
+        <tr align="left">
+
+          <td valign="top">javaee.server.username</td>
+
+          <td valign="top">The administrator username
+specified for the
+serve while installing GlassFish, the Java EE 5 SDK</td>
+
+          <td valign="top">admin</td>
+
+        </tr>
+
+        <tr align="left">
+
+          <td valign="top">javaee.server.passwordfile</td>
+
+          <td valign="top">The
+path to a file containing the admin
+password for the J2EE SDK. The password file needs to be in the
+following format:
+          <p><code>AS_ADMIN_PASSWORD=&lt;j2eesdk-admin-password&gt;</code>
+          </p>
+
+          <p>Where you will
+replace &lt;j2eesdk-admin-password&gt; with
+the admin password for the GlassFish, the Java EE 5 SDK. We recommend
+you use adminadmin as the password since it is the default for
+glassfish app server.<br>
+
+          </p>
+
+          </td>
+
+          <td valign="top">/path/to/passwordfile</td>
+
+        </tr>
+
+        <tr valign="top">
+
+          <td valign="top">javaee.adminserver.port</td>
+
+          <td valign="top">The
+port number for admin server you chose
+while installing GlassFish, the Java EE 5 SDK</td>
+
+          <td valign="top">4848</td>
+
+        </tr>
+
+      </tbody>
+    </table>
+
+  </li>
+
+  <li>Set ANT_HOME and path to use ant version 1.6.5 and put
+ANT_HOME\bin in PATH</li>
+
+  <li>Set JAVA_HOME and JAVA_HOME\bin in PATH</li>
+
+  <li>Build the petstore application. Go to the directory
+petstore/ws/apps/petstore/&nbsp; and
+run "ant".</li>
+
+  <li>Start the database that comes with GlassFish app server,
+the Java EE 5 SDK app server. Go
+to&nbsp;javaee_home/bin and run "asadmin start-database"</li>
+
+  <li>Start the GlassFish application server, the Java EE 5 SDK
+app server. Go
+to javaee_home/bin and run "asadmin start-domain domain1"<br>
+
+  </li>
+
+  <li>Run setup to set up the data sources and to create and
+populate the database tables with data.
+Go to petstore/ws/apps/petstore and run "ant setup"</li>
+
+  <li>Deploy and test the app
+onto the GlassFish, the Java EE 5 SDK app server. Go to the directory
+petstore/ws/apps/petstore/ and run "ant deploy"</li>
+
+  <li>Using the Petstore. Open
+your browser to:http://localhost:8080/petstore/ OR go to
+petstore/ws/apps/petstore/ and run "ant launch"&nbsp;</li>
+</ol>
+After you are done using the petstore, you can clean up by following these steps
+<ol>
+
+  <li>To clean the workspace. Go
+to&nbsp;&nbsp;petstore/ws/apps/petstore/&nbsp; and
+type&nbsp; "ant clean"</li>
+
+  <li>To undeploy go
+to&nbsp;&nbsp;petstore/ws/apps/petstore/ and type "ant undeploy"</li>
+
+  <li>To clean up the app server and the database DB and remove
+all the
+petstore data, go to the directory petstore/ws/apps/petstore/ and run
+"ant
+unsetup"</li>
+
+  <li>To stop the database, go to javaee_home/bin and run
+"asadmin stop-database"</li>
+
+  <li>To stop the Java EE 5 app server, go
+to javaee_home/bin and run "asadmin stop-domain domain1"</li>
+
+</ol>
+
+</body>
+</html>

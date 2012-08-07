@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>technologyfeatures</title>
+</head>
+<body>
+<h2>Petstore 2.0 Technology Features</h2>
+<br>
+This document outlines some of the technical features demontsrated in petstore<br>
+<br>
+Here are some of the technologies and issues covered. Note, this is
+just a partial brief list. Overall, the goal
+is to provide a reference app for blueprints for building a web
+application on Java EE 5.
+<ul>
+  <li>Using Java Persistence in a web application. Designing your model
+tier. Packaging choices. Conventions such as naming conventions
+  </li>
+  <li> Using transactions in a web app. When to choose JTA, local,
+defaults. Patterns for hiding the transaction demarcation code, maybe
+with a filter </li>
+  <li> Resource Injection best practices. 
+  </li>
+  <li> Managing session state in a web application
+  </li>
+  <li> Using a set of JSF components to build a web application.
+  </li>
+  <li> Designing a set of JSF components.
+  </li>
+  <li> AJAX-enabling the client interface
+  </li>
+  <li> Project Conventions
+  </li>
+  <li> Using XML APIs for serving data in an AJAX interaction. 
+  </li>
+  <li> Accessing mash-up web services in an web application. Petstore will access Google maps, possibly paypay.
+  </li>
+  <li> Consuming an RSS feed as part of mash up. (BluePrints RSS feed is live and will serve some data to web app)
+  </li>
+  <li> Security issues. Designing a captcha service. Dealing with proxies
+and mashups. Handling JavaScript/AJAX security model with Java EE
+security model.
+  </li>
+  <li> Patterns to clean up and refactor and organize design of app.</li>
+</ul>
+Here are some other technology feautres<br>
+This is an overview of some Pet store features that we currently cover. This also covers some of the problems and solutions
+we cover.&nbsp;
+<ul>
+  <li> AJAX-enabled UI
+    <ul>
+      <li>single page architecture
+        <ul>
+          <li>Example, seler multi-step from in single page
+          </li>
+          <li>Browsing VLH pattern in a single page
+          </li>
+        </ul>
+
+      </li>
+      <li>not really just one page
+      </li>
+    </ul>
+
+  </li>
+  <li>Integrate RSS into a web app
+    <ul>
+      <li>News feed on web app
+      </li>
+      <li>Consume an external RSS feed, and display it in your web app
+      </li>
+    </ul>
+
+  </li>
+  <li>Proxy style mashups
+    <ul>
+      <li>need to access an external resource on another web app, dont want ot use client directly</li>
+      <li>JS security model</li>
+      <li>introduce proxy
+      </li>
+    </ul>
+
+  </li>
+  <li>Validation to prevent malicious code from user
+    <ul>
+      <li>User contributed content is part of web 2.0, but sometimes users can update code fragment
+      </li>
+      <li> for example, either JS code entered into a rich text editor, that
+is stored in DB, and then displayed in your web app UI, and does some
+bad things to your UI.
+      </li>
+      <li> for example, SQL injection
+      </li>
+      <li>introduce layers of validation that prevent this.
+      </li>
+    </ul>
+
+  </li>
+  <li> Using a Captcha for security. 
+    <ul>
+      <li> User content can have graffitti or spam, need a way to at least prevent *automated* graffiti. So introduce a catcha.
+      </li>
+      <li> Does not require user identity, so more social and friendly
+      </li>
+    </ul>
+
+  </li>
+  <li> Securing some resources
+    <ul>
+      <li>web 2.0 makes many resources easily available thru HTTP, but still some urls in your app you want to protect.
+      </li>
+      <li>some resources are publicly available by any http response, dont
+have to click thru gui if know url. But other resources, like maybe
+your file upload service, you would like users to be froced to go thru
+your application flow, and require a session etc.
+      </li>
+      <li>introduce a security filter to protect sertain resources
+      </li>
+    </ul>
+
+  </li>
+  <li>Custom Search
+    <ul>
+      <li>how to integrate lucene search into an application
+      </li>
+      <li>have Java Persistence data tier but also need search and indexing etc that interacts with DB tables directly
+      </li>
+    </ul>
+
+  </li>
+</ul>
+<br>
+</body>
+</html>
