@@ -10,6 +10,8 @@ import template.IdentifierComposition;
 import statemachine.Language;
 import org.sugarj.languages.Java;
 
+import statemachine.ToJava;
+
 public template ToJavaIO {
   $$id-as-string = ?Id(<id>); !Lit(String([Chars(<id>)]))
   $$pkg-type = ?PackageName(<id>); pkgs-type

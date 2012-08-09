@@ -1160,17 +1160,18 @@ public class Driver {
      * the current import
      */
     
+    RelativePath transformedPath = ModuleSystemCommands.transformedModelPath(currentPath, strPath);
     try {
       IStrategoTerm transformedTerm = STRCommands.assimilate(strat, trans, currentTerm, interp);
       
       if (transformedTerm == null)
-        return Pair.create(currentTerm, currentPath);
+        transformedTerm = currentTerm;
+      else
+        log.log(FileCommands.dropExtension(strPath.getRelativePath()) + " applied successfully.");
       
-      log.log(FileCommands.dropExtension(strPath.getRelativePath()) + " applied successfully.");
-      RelativePath transformedPath = ModuleSystemCommands.transformedModelPath(currentPath, strPath);
       return Pair.create(transformedTerm, transformedPath);
     } catch (Exception e) {
-      return Pair.create(currentTerm, currentPath);
+      return Pair.create(currentTerm, transformedPath);
     }
   }
 
