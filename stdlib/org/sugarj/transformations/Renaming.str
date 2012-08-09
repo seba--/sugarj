@@ -4,7 +4,7 @@ imports
   org/sugarj/languages/Java
 
 rules
-  rename-java(|pkg, from, to) = topdown(try(do-rename-java(|pkg, from, to)))
+  rename-java(|pkg, from, to) = where(!(pkg, from, to, <id>);debug(!"rename: ")); topdown(try(do-rename-java(|pkg, from, to)))
 
 rules
   do-rename-java(|pkg, from, to) :
@@ -34,7 +34,8 @@ rules
   do-rename-java(|pkg, from, to) :
        TypeName(qual, Id(from))
     -> TypeName(qual, Id(to))
-    where <match-pkgs-java> (pkg, qual)
+    where
+     <match-pkgs-java; debug(!"ok")> (pkg, qual)
 
   do-rename-java(|pkg, from, to) :
        PackageOrTypeName(Id(from))
@@ -51,6 +52,6 @@ rules
 
 
 rules
-  match-pkgs-java = ?([pkg], PackageOrTypeName(Id(pkg)))
+  match-pkgs-java = debug; ?([pkg], PackageOrTypeName(Id(pkg)))
   match-pkgs-java : (pkgs, PackageOrTypeName(jrest, Id(pkg))) -> <match-pkgs-java> (rest, jrest)
-    where <split-last> pkgs => (pkg, rest)
+    where <split-last> pkgs => (rest, pkg)
