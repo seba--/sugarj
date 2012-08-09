@@ -23,13 +23,13 @@ class ResolveModel extends AbstractPrimitive {
   private Environment env;
   
   public ResolveModel(Environment env) {
-    super("SUGARJ_resolve_model", 0, 1);
+    super("SUGARJ_resolve_model", 0, 0);
     this.env = env;
   }
 
   @Override
   public boolean call(IContext context, Strategy[] svars, IStrategoTerm[] tvars) throws InterpreterException {
-    String modelPath = ATermCommands.getString(tvars[0]);
+    String modelPath = ATermCommands.getString(context.current());
     try {
       Path p = ModuleSystemCommands.importModel(modelPath, env);
       if (p == null)

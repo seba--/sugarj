@@ -427,8 +427,6 @@ public class ATermCommands {
   public static String getLocalImportName(IStrategoTerm term, HybridInterpreter interp) throws IOException {
     if (isApplication(term, "TransImportDec"))
       term = getApplicationSubterm(term, "TransImportDec", 1);
-    else if (isApplication(term, "ModelTransImportDec"))
-      term = getApplicationSubterm(term, "ModelTransImportDec", 1);
     else
       return null;
     
@@ -443,14 +441,12 @@ public class ATermCommands {
   }
   
   public static boolean isTransformedImport(IStrategoTerm term) {
-    return isApplication(term, "TransImportDec") || isApplication(term, "ModelTransImportDec");
+    return isApplication(term, "TransImportDec");
   }
 
   public static boolean isImportDec(IStrategoTerm toplevelDecl) {
     return isApplication(toplevelDecl, "TypeImportDec") || 
         isApplication(toplevelDecl, "TypeImportOnDemandDec") || 
-        isApplication(toplevelDecl, "TransImportDec") ||
-        isApplication(toplevelDecl, "ModelImportDec") ||
-        isApplication(toplevelDecl, "ModelTransImportDec");
+        isApplication(toplevelDecl, "TransImportDec");
   }
 }

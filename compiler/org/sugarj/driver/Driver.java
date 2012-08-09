@@ -749,12 +749,7 @@ public class Driver {
         log.endSilent();
       }
     
-      if (term != null &&
-          (isApplication(term, "TypeImportDec") ||
-           isApplication(term, "TypeImportOnDemandDec") ||
-           isApplication(term, "TransImportDec") ||
-           isApplication(term, "ModelImportDec") ||
-           isApplication(term, "ModelTransImportDec"))) {
+      if (term != null && ATermCommands.isImportDec(term)) {
         pendingImports.add(term);
       }
       else {

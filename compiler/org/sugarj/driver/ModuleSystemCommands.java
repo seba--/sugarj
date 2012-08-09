@@ -151,11 +151,11 @@ public class ModuleSystemCommands {
     String name = null;
     log.beginTask("Extracting", "Extract name of imported module");
     try {
-      if (isApplication(toplevelDecl, "TypeImportDec") || isApplication(toplevelDecl, "ModelImportDec"))
+      if (isApplication(toplevelDecl, "TypeImportDec"))
         name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp);
       else if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
         name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp) + ".*";
-      else if (isApplication(toplevelDecl, "TransImportDec") || isApplication(toplevelDecl, "ModelTransImportDec"))
+      else if (isApplication(toplevelDecl, "TransImportDec"))
         name = SDFCommands.prettyPrintJava(ATermCommands.getApplicationSubterm(toplevelDecl.getSubterm(0), "TransApp", 0), interp);
     } finally {
       log.endTask(name);
@@ -164,7 +164,7 @@ public class ModuleSystemCommands {
   }
   
   public static List<IStrategoTerm> extractImportedTransformationNames(IStrategoTerm toplevelDecl) {
-    if (isApplication(toplevelDecl, "TransImportDec") || isApplication(toplevelDecl, "ModelTransImportDec"))
+    if (isApplication(toplevelDecl, "TransImportDec"))
       return ATermCommands.getList(ATermCommands.getApplicationSubterm(toplevelDecl.getSubterm(0), "TransApp", 1));
 
     return null;
