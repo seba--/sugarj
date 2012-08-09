@@ -6,30 +6,48 @@ public transformation TransTest {
 
 
 rules
-  main = where(recursively-transform(main-statemachine_ToJava))
+  main = recursively-transform(main-statemachine_ToJava)
 
   recursively-transform(trans) =
-    collect-all-model-imports(|"Statemachine");
-    map(
-      ?(model-path, model);
-      <trans> model;
-      where(recursively-transform(trans));
-      prim("SUGARJ_compile", model-path, "statemachine/test/TransTest"))
+    {| Renamings:
+      rules( Renamings := [] ); 
+      topdown(try(
+        {term, pkgs, name, model-path, model, generated:
+          ?term;
+          get-imported-model(conforms-to-metamodel(|"Statemachine")) => (pkgs, name, model-path, model);
+          <trans> model => generated;
+          where(recursively-transform(trans));
+          prim("SUGARJ_compile", model-path, "statemachine/test/TransTest");
+          rules( Renamings := [ (pkgs, name, (<conc-strings> (name, "$statemachine_test_TransTest")))
+                              | <Renamings>]);
+        }));
+      apply-renamings(|<Renamings>)
+    |}
 
-  collect-all-model-imports(|mm) =
-    collect-all(?TypeImportDec(<id>));
-    filter(
-      import-model-path => path;
-      prim("SUGARJ_resolve_model") => model;
-      where(collect-one(?ModelBody(("Statemachine", _))));
-      !(path, model))
+  get-imported-model(predicate) =
+    ?TypeImportDec(<id>);
+    import-model-path => (pkgs, name);
+    <build-path> (pkgs, name) => path;
+    prim("SUGARJ_resolve_model") => model;
+    where(predicate);
+    !(pkgs, name, path, model)
 
+  conforms-to-metamodel(|meta-model) =
+    collect-one(?ModelBody((meta-model, _)))
 
-  import-model-path : TypeName(Id(name)) -> name
-  import-model-path : TypeName(pkg, Id(name)) -> <conc-strings> (<import-model-pkg> pkg, "/", name)
+  import-model-path : TypeName(Id(name)) -> ([], name)
+  import-model-path : TypeName(pkg, Id(name)) -> (<import-model-pkg> pkg, name)
 
-  import-model-pkg : PackageOrTypeName(Id(name)) -> name
-  import-model-pkg : PackageOrTypeName(pkg, Id(name)) -> <conc-strings> (<import-model-pkg> pkg, "/", name)
+  import-model-pkg : PackageOrTypeName(Id(name)) -> [name]
+  import-model-pkg : PackageOrTypeName(pkg, Id(name)) -> <conc> (<import-model-pkg> pkg, [name])
+
+  build-path : ([], name) -> name
+  build-path : ([pkg|pkgs], name) -> <conc-strings> (pkg, "/", <build-path> (pkgs, name))
+
+  apply-renamings(|renamings) =
+    <?[(pkg, from, to)|rest]> renamings
+      < rename-java(|pkg, from, to); apply-renamings(|rest)
+      + id
 
 
 rules

@@ -9,6 +9,3 @@ signature constructors
 
   TransImportDec : TransformationExpr * ImportAs -> JavaImportDec
   ImportAs : JavaTypeName -> ImportAs
-
-  ModelImportDec : JavaTypeName -> JavaImportDec
-  ModelTransImportDec : TransformationExpr * ImportAs -> JavaImportDec

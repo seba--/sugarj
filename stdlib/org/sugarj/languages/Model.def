@@ -28,8 +28,5 @@ exports
     
     "import" TransformationExpr1 ImportAs? ";" -> JavaImportDec {cons("TransImportDec")}
     
-    "import" "model" JavaTypeName ";"  -> JavaImportDec {cons("ModelImportDec")}
-    "import" "model" TransformationExpr1 ImportAs? ";" -> JavaImportDec {cons("ModelTransImportDec")}
-
     "as" JavaTypeName -> ImportAs {cons("ImportAs")}
 

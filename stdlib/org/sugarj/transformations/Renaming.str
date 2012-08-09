@@ -1,0 +1,56 @@
+module org/sugarj/transformations/Renaming
+imports
+  libstrategolib 
+  org/sugarj/languages/Java
+
+rules
+  rename-java(|pkg, from, to) = topdown(try(do-rename-java(|pkg, from, to)))
+
+rules
+  do-rename-java(|pkg, from, to) :
+       ClassDecHead(mods, Id(from), typeParams, super, interface)
+    -> ClassDecHead(mods, Id(to), typeParams, super, interface) 
+    
+  do-rename-java(|pkg, from, to) :
+       InterfaceDecHead(mods, Id(from), typeParams, interface)
+    -> InterfaceDecHead(mods, Id(to), typeParams, interface) 
+
+  do-rename-java(|pkg, from, to) :
+       EnumDecHead(mods, Id(from), interface)
+    -> EnumDecHead(mods, Id(to), interface) 
+    
+  do-rename-java(|pkg, from, to) :
+       AnnoDecHead(mods, Id(from))
+    -> AnnoDecHead(mods, Id(to)) 
+    
+  do-rename-java(|pkg, from, to) :
+       ConstrDecHead(mods, typeParams, Id(from), params, throws)
+    -> ConstrDecHead(mods, typeParams, Id(to), params, throws)
+
+  do-rename-java(|pkg, from, to) :
+       TypeName(Id(from))
+    -> TypeName(Id(to))
+
+  do-rename-java(|pkg, from, to) :
+       TypeName(qual, Id(from))
+    -> TypeName(qual, Id(to))
+    where <match-pkgs-java> (pkg, qual)
+
+  do-rename-java(|pkg, from, to) :
+       PackageOrTypeName(Id(from))
+    -> PackageOrTypeName(Id(to))
+
+  do-rename-java(|pkg, from, to) :
+       PackageOrTypeName(qual, Id(from))
+    -> PackageOrTypeName(qual, Id(to))
+    where <match-pkgs-java> (pkg, qual)
+
+  do-rename-java(|pkg, from, to) :
+       AmbName(Id(from))
+    -> AmbName(Id(to))
+
+
+rules
+  match-pkgs-java = ?([pkg], PackageOrTypeName(Id(pkg)))
+  match-pkgs-java : (pkgs, PackageOrTypeName(jrest, Id(pkg))) -> <match-pkgs-java> (rest, jrest)
+    where <split-last> pkgs => (pkg, rest)
