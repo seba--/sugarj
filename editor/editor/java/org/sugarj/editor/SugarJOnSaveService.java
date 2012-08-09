@@ -35,7 +35,6 @@ public class SugarJOnSaveService implements IOnSaveService {
     // descriptor.reloadAllEditors(0);
   }
 
-  @Override
   public void invokeOnSave(IStrategoTerm ast) {
     // TODO Auto-generated method stub
   }

@@ -24,4 +24,5 @@ update-site/content.jar
 update-site/features/
 update-site/plugins/
 
-
+# home-made submodule org.spoofax.jsglr_layout
+layout-parsing

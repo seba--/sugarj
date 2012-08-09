@@ -1,0 +1,20 @@
+#!/bin/bash
+# cai 09.08.12
+# script to invoke sugarj from command line
+
+# find base directory of eclipse
+# WARNING: path is fragile and depends on project structure
+# namely that sugarj base directory is inside eclipse folder
+eclipse="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../../../.." && pwd )"
+ecore="$eclipse/plugins/*"
+sugarj="$eclipse/sugarj"
+common="$sugarj/common/bin"
+compiler="$sugarj/compiler/bin"
+stdlib="$sugarj/stdlib/bin"
+layout="$sugarj/layout-parsing/jsglr-layout/bin"
+cliroot="$sugarj/compiler"
+clijars="$cliroot/commons-cli-1.2.jar:$cliroot/strategoxt.jar"
+
+classpath="$compiler:$clijars:$common:$stdlib:$layout:$ecore"
+
+java -cp "$classpath" org.sugarj.driver.cli.Main $*

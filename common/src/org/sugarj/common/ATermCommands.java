@@ -106,6 +106,7 @@ public class ATermCommands {
     FileCommands.writeToFile(filename, atermToString(aterm));
   }
   
+  @SuppressWarnings("deprecation")
   public static String atermToString(IStrategoTerm aterm) {
     InlinePrinter printer = new InlinePrinter();
     aterm.prettyPrint(printer);

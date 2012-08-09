@@ -3,6 +3,7 @@
 	<name>org.sugarj.editor</name>
 	<comment></comment>
 	<projects>
+		<project>jsglr-layout</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
