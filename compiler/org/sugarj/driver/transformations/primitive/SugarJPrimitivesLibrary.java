@@ -18,6 +18,7 @@ public class SugarJPrimitivesLibrary extends AbstractStrategoOperatorRegistry {
     add(new ResolveModel(env));
     add(new CurrentPackage(driver));
     add(new CompileTransformed(env));
+    add(new TransformModel(env));
   }
   
   @Override

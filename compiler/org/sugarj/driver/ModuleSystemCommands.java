@@ -277,12 +277,12 @@ public class ModuleSystemCommands {
 
   public static RelativeSourceLocationPath getTransformedModelSourceFilePath(String modulePath, List<RelativePath> transformationPaths, Environment environment) {
     if (transformationPaths == null || transformationPaths.isEmpty())
-      return new RelativeSourceLocationPath(new SourceLocation(environment.bin, environment), modulePath + ".aterm");
+      return new RelativeSourceLocationPath(new SourceLocation(environment.bin, environment), modulePath + ".model");
     
     String transformationPathString = StringCommands.makeTransformationPathString(transformationPaths);
     
     String transformedModelPath = modulePath + "$" + transformationPathString;
-    return new RelativeSourceLocationPath(new SourceLocation(environment.bin, environment), transformedModelPath + ".aterm");
+    return new RelativeSourceLocationPath(new SourceLocation(environment.bin, environment), transformedModelPath + ".model");
   }
   
   public static RelativePath transformedModelPath(RelativePath modelPath, RelativePath transformationPath) {
