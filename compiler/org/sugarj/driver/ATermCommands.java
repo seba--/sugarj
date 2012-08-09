@@ -442,10 +442,6 @@ public class ATermCommands {
     return SDFCommands.prettyPrintJava(term, interp);
   }
   
-  public static boolean isModelImport(IStrategoTerm term) {
-    return isApplication(term, "ModelImportDec") || isApplication(term, "ModelTransImportDec");
-  }
-
   public static boolean isTransformedImport(IStrategoTerm term) {
     return isApplication(term, "TransImportDec") || isApplication(term, "ModelTransImportDec");
   }

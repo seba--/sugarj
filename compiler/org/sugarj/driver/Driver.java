@@ -51,8 +51,6 @@ import org.strategoxt.permissivegrammars.make_permissive;
 import org.strategoxt.tools.tools;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
-import org.sugarj.driver.cli.CLIError;
-import org.sugarj.driver.cli.DriverCLI;
 import org.sugarj.driver.path.AbsolutePath;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
@@ -798,11 +796,10 @@ public class Driver {
       if (skipImport)
         return;
       
-      // apply transformation prior to import
-      boolean modelImport = ATermCommands.isModelImport(toplevelDecl);
-      boolean transformedImport = ATermCommands.isTransformedImport(toplevelDecl);
       
+      boolean transformedImport = ATermCommands.isTransformedImport(toplevelDecl);
       if (transformedImport) {
+        // apply transformation prior to import
         List<IStrategoTerm> importTransformations = ModuleSystemCommands.extractImportedTransformationNames(toplevelDecl);
         List<RelativePath> resolvedTransformationPaths = importTransformations == null ? Collections.<RelativePath>emptyList() : resolveTransformationPaths(importTransformations, toplevelDecl);
         
@@ -829,15 +826,11 @@ public class Driver {
         }
       }
       
-      boolean success;
-      if (modelImport) {
-        success = processModelImport(modulePath);
-        boolean codeImportSuccess = false;
-        if (!codeImportSuccess)
-          dependsOnModel = true;
-      }
-      else
-        success = processImport(modulePath);
+      boolean codeImportSuccess = processImport(modulePath);
+      boolean modelImportSuccess = processModelImport(modulePath);
+      if (!codeImportSuccess)
+        dependsOnModel = true;
+      boolean success = codeImportSuccess || modelImportSuccess;
       
       if (!success && !transformedImport && !ATermCommands.hasError(toplevelDecl)) {
         setErrorMessage(toplevelDecl, "module not found: " + modulePath);
@@ -907,7 +900,7 @@ public class Driver {
 
         if (currentlyProcessing.keySet().contains(importSourceFile)) {
           // assume source file does not provide syntactic sugar
-          if (!ATermCommands.isModelImport(toplevelDecl))
+//          if (!ATermCommands.isModelImport(toplevelDecl))
             javaSource.addImport(modulePath.replace('/', '.'));
           skipProcessImport = true;
           compilationDelegates.add(importSourceFile);
@@ -996,7 +989,6 @@ public class Driver {
     if (clazz != null) {
       success = true;
       javaSource.addCheckedImport(modulePath.replace('/', '.'));
-      availableModels.add(clazz);
     }
 
     RelativePath sdf = ModuleSystemCommands.importSdf(modulePath, environment);
@@ -1004,7 +996,6 @@ public class Driver {
     if (sdf != null) {
       success = true;
       availableSDFImports.add(sdf);
-      availableModels.add(sdf);
       buildCompoundSdfModule();
     }
     
@@ -1013,7 +1004,6 @@ public class Driver {
     if (str != null) {
       success = true;
       availableSTRImports.add(str);
-      availableModels.add(str);
       buildCompoundStrModule();
     }
     
@@ -1021,7 +1011,6 @@ public class Driver {
     ModuleSystemCommands.registerSearchedEditorServicesFiles(modulePath, driverResult, environment);
     if (serv != null) {
       success = true;
-      availableModels.add(serv);
 
       log.beginTask("Incorporation", "Incorporate the imported editor services " + modulePath);
       try {
@@ -1557,45 +1546,6 @@ public class Driver {
     extractionContext = extraction.init();
     renamingContext = renaming.init();
     strjContext = org.strategoxt.strj.strj.init();
-  }
-  
-  /**
-* @param args
-* @throws IOException
-*/
-  public static void main(String[] args) {
-    // log.log("This is the extensible java compiler.");
-    Environment environment = new Environment();
-    
-    try {
-      String[] sources = DriverCLI.handleOptions(args, environment);
-
-      if (environment.getSourcePath().isEmpty())
-        environment.getSourcePath().add(new SourceLocation(new AbsolutePath("."), environment));
-      
-      IProgressMonitor monitor = new PrintProgressMonitor(System.out);
-
-      for (String source : sources)
-      {
-        RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(FileCommands.dropExtension(source), environment.getSourcePath());
-        
-        monitor.beginTask("compile " + sourceFile, IProgressMonitor.UNKNOWN);
-        Result res = compile(sourceFile, monitor, new LinkedHashMap<Path, Driver>());
-        if (!DriverCLI.processResultCLI(res, sourceFile, new File(".").getAbsolutePath()))
-          throw new RuntimeException("compilation of " + sourceFile + " failed");
-      }
-      
-    } catch (Exception e) {
-      e.printStackTrace();
-    } catch (CLIError e) {
-      Log.log.log(e.getMessage());
-      Log.log.log("");
-      e.showUsage();
-    }
-
-    // kills all remaining subprocesses, if any
-    // log.log("The extensible java compiler has done its job and says 'good bye'.");
-    System.exit(0);
   }
   
   
