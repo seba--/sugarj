@@ -1,0 +1,9 @@
+package statemachine.test;
+
+import statemachine.test.ATMRef<statemachine.test.TransTest>;
+
+public class ATMRefTest {
+  public static void main(String[] args) {
+    ATMRef.print();
+  }
+}

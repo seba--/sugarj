@@ -1,0 +1,500 @@
+package statemachine.test;
+
+import statemachine.ToJava;
+
+public transformation TransTest {
+
+
+rules
+  main = where(recursively-transform(main-statemachine_ToJava))
+
+  recursively-transform(trans) =
+    collect-all-model-imports(|"Statemachine");
+    map(
+      ?(model-path, model);
+      <trans> model;
+      where(recursively-transform(trans));
+      prim("SUGARJ_compile", model-path, "statemachine/test/TransTest"))
+
+  collect-all-model-imports(|mm) =
+    collect-all(?TypeImportDec(<id>));
+    filter(
+      import-model-path => path;
+      prim("SUGARJ_resolve_model") => model;
+      where(collect-one(?ModelBody(("Statemachine", _))));
+      !(path, model))
+
+
+  import-model-path : TypeName(Id(name)) -> name
+  import-model-path : TypeName(pkg, Id(name)) -> <conc-strings> (<import-model-pkg> pkg, "/", name)
+
+  import-model-pkg : PackageOrTypeName(Id(name)) -> name
+  import-model-pkg : PackageOrTypeName(pkg, Id(name)) -> <conc-strings> (<import-model-pkg> pkg, "/", name)
+
+
+rules
+  main-int =
+    ?this__
+    ; ?this__
+    ; where(collect-one(?PackageDec(_, <id>)) => pkg)
+    ; where(collect-one(?ModelDecHead(_, <id>)) => classname)
+    ; !SugarCompilationUnit(
+         Some(PackageDec([], pkg))
+       , [ TypeImportDec(
+             TypeName(
+               PackageOrTypeName(
+                 PackageOrTypeName(Id("java"))
+               , Id("lang")
+               )
+             , Id("IllegalArgumentException")
+             )
+           )
+         ]
+       , [ JavaTypeDec(
+             ClassDec(
+               ClassDecHead(
+                 [Public()]
+               , classname
+               , None()
+               , None()
+               , None()
+               )
+             , ClassBody(
+                 [InterfaceDec(
+                    InterfaceDecHead(
+                      [Public()|[Static()]]
+                    , Id("Event")
+                    , None()
+                    , None()
+                    )
+                  , []
+                  )|<conc> ( <all-events-as-classes> this__
+                           , [InterfaceDec(
+                                InterfaceDecHead(
+                                  [Public()|[Static()]]
+                                , Id("State")
+                                , None()
+                                , None()
+                                )
+                              , [ AbstractMethodDec(
+                                    [Public()]
+                                  , None()
+                                  , ClassOrInterfaceType(
+                                      TypeName(Id("State"))
+                                    , None()
+                                    )
+                                  , Id("step")
+                                  , [ Param(
+                                        []
+                                      , ClassOrInterfaceType(
+                                          TypeName(Id("Event"))
+                                        , None()
+                                        )
+                                      , Id("e")
+                                      )
+                                    ]
+                                  , None()
+                                  )
+                                ]
+                              )|<conc> ( <collect-all(?State(_, _))
+                                          ; mapconcat(
+                                              {this__, name, transitions, this__, t:
+                                                ( this__@this__@State(name, transitions) -> [FieldDec(
+                                                                                               [Private()|[Final()]]
+                                                                                             , ClassOrInterfaceType(
+                                                                                                 TypeName(Id("State"))
+                                                                                               , None()
+                                                                                               )
+                                                                                             , [ VarDec(
+                                                                                                   Id(
+                                                                                                     <conc-strings> ( <?Id(<id>)> name
+                                                                                                                    , <?Id(<id>)> Id("_instance")
+                                                                                                                    )
+                                                                                                   )
+                                                                                                 , NewInstance(
+                                                                                                     None()
+                                                                                                   , ClassOrInterfaceType(TypeName(name), None())
+                                                                                                   , []
+                                                                                                   , None()
+                                                                                                   )
+                                                                                                 )
+                                                                                               ]
+                                                                                             )|[MethodDec(
+                                                                                                  MethodDecHead(
+                                                                                                    [Public()]
+                                                                                                  , None()
+                                                                                                  , ClassOrInterfaceType(
+                                                                                                      TypeName(Id("State"))
+                                                                                                    , None()
+                                                                                                    )
+                                                                                                  , Id(
+                                                                                                      <conc-strings> ( <?Id(<id>)> Id("state_")
+                                                                                                                     , <?Id(<id>)> name
+                                                                                                                     )
+                                                                                                    )
+                                                                                                  , []
+                                                                                                  , None()
+                                                                                                  )
+                                                                                                , Block(
+                                                                                                    [ Return(
+                                                                                                        Some(
+                                                                                                          ExprName(
+                                                                                                            Id(
+                                                                                                              <conc-strings> ( <?Id(<id>)> name
+                                                                                                                             , <?Id(<id>)> Id("_instance")
+                                                                                                                             )
+                                                                                                            )
+                                                                                                          )
+                                                                                                        )
+                                                                                                      )
+                                                                                                    ]
+                                                                                                  )
+                                                                                                )|[ ClassDec(
+                                                                                                      ClassDecHead(
+                                                                                                        [Public()]
+                                                                                                      , name
+                                                                                                      , None()
+                                                                                                      , None()
+                                                                                                      , Some(
+                                                                                                          ImplementsDec(
+                                                                                                            [ InterfaceType(
+                                                                                                                TypeName(Id("State"))
+                                                                                                              , None()
+                                                                                                              )
+                                                                                                            ]
+                                                                                                          )
+                                                                                                        )
+                                                                                                      )
+                                                                                                    , ClassBody(
+                                                                                                        [ConstrDec(
+                                                                                                           ConstrDecHead(
+                                                                                                             [Private()]
+                                                                                                           , None()
+                                                                                                           , name
+                                                                                                           , []
+                                                                                                           , None()
+                                                                                                           )
+                                                                                                         , ConstrBody(None(), [])
+                                                                                                         )|[MethodDec(
+                                                                                                              MethodDecHead(
+                                                                                                                [Public()]
+                                                                                                              , None()
+                                                                                                              , ClassOrInterfaceType(
+                                                                                                                  TypeName(Id("String"))
+                                                                                                                , None()
+                                                                                                                )
+                                                                                                              , Id("toString")
+                                                                                                              , []
+                                                                                                              , None()
+                                                                                                              )
+                                                                                                            , Block(
+                                                                                                                [ Return(
+                                                                                                                    Some(<<id-as-string> name> this__)
+                                                                                                                  )
+                                                                                                                ]
+                                                                                                              )
+                                                                                                            )|[ MethodDec(
+                                                                                                                  MethodDecHead(
+                                                                                                                    [Public()]
+                                                                                                                  , None()
+                                                                                                                  , ClassOrInterfaceType(
+                                                                                                                      TypeName(Id("State"))
+                                                                                                                    , None()
+                                                                                                                    )
+                                                                                                                  , Id("step")
+                                                                                                                  , [ Param(
+                                                                                                                        []
+                                                                                                                      , ClassOrInterfaceType(
+                                                                                                                          TypeName(Id("Event"))
+                                                                                                                        , None()
+                                                                                                                        )
+                                                                                                                      , Id("e")
+                                                                                                                      )
+                                                                                                                    ]
+                                                                                                                  , None()
+                                                                                                                  )
+                                                                                                                , Block(
+                                                                                                                    <conc> ( <!transitions
+                                                                                                                              ; mapconcat(
+                                                                                                                                  {this__, t:
+                                                                                                                                    ( this__@this__@t -> If(
+                                                                                                                                                           <<transition-premise> t> this__
+                                                                                                                                                         , Block(
+                                                                                                                                                             <conc> (<<transition-consequence> t> this__, [])
+                                                                                                                                                           )
+                                                                                                                                                         ) )
+                                                                                                                                  }
+                                                                                                                                  ; (is-list <+ ![<id>])
+                                                                                                                                )> this__
+                                                                                                                           , [ Throw(
+                                                                                                                                 NewInstance(
+                                                                                                                                   None()
+                                                                                                                                 , ClassOrInterfaceType(
+                                                                                                                                     TypeName(Id("IllegalArgumentException"))
+                                                                                                                                   , None()
+                                                                                                                                   )
+                                                                                                                                 , [ Plus(
+                                                                                                                                       Lit(
+                                                                                                                                         String([Chars("Unexpected event ")])
+                                                                                                                                       )
+                                                                                                                                     , ExprName(Id("e"))
+                                                                                                                                     )
+                                                                                                                                   ]
+                                                                                                                                 , None()
+                                                                                                                                 )
+                                                                                                                               )
+                                                                                                                             ]
+                                                                                                                           )
+                                                                                                                  )
+                                                                                                                )
+                                                                                                              ]]]
+                                                                                                      )
+                                                                                                    )
+                                                                                                  ]]] )
+                                              }
+                                              ; (is-list <+ ![<id>])
+                                            )> this__
+                                       , [Semicolon()|[FieldDec(
+                                                         [Private()]
+                                                       , ClassOrInterfaceType(
+                                                           TypeName(Id("State"))
+                                                         , None()
+                                                         )
+                                                       , [ VarDec(
+                                                             Id("state")
+                                                           , ExprName(
+                                                               Id(
+                                                                 <conc-strings> ( <?Id(<id>)> <collect-one(?InitialState(<id>))> this__
+                                                                                , <?Id(<id>)> Id("_instance")
+                                                                                )
+                                                               )
+                                                             )
+                                                           )
+                                                         ]
+                                                       )|[MethodDec(
+                                                            MethodDecHead(
+                                                              [Public()]
+                                                            , None()
+                                                            , ClassOrInterfaceType(
+                                                                TypeName(Id("State"))
+                                                              , None()
+                                                              )
+                                                            , Id("step")
+                                                            , [ Param(
+                                                                  []
+                                                                , ClassOrInterfaceType(
+                                                                    TypeName(Id("Event"))
+                                                                  , None()
+                                                                  )
+                                                                , Id("e")
+                                                                )
+                                                              ]
+                                                            , None()
+                                                            )
+                                                          , Block(
+                                                              [ExprStm(
+                                                                 Assign(
+                                                                   ExprName(Id("state"))
+                                                                 , Invoke(
+                                                                     Method(
+                                                                       MethodName(
+                                                                         AmbName(Id("state"))
+                                                                       , Id("step")
+                                                                       )
+                                                                     )
+                                                                   , [ExprName(Id("e"))]
+                                                                   )
+                                                                 )
+                                                               )|[ Return(
+                                                                     Some(ExprName(Id("state")))
+                                                                   )
+                                                                 ]]
+                                                            )
+                                                          )|[MethodDec(
+                                                               MethodDecHead(
+                                                                 [Public()]
+                                                               , None()
+                                                               , ClassOrInterfaceType(
+                                                                   TypeName(Id("State"))
+                                                                 , None()
+                                                                 )
+                                                               , Id("run")
+                                                               , [ Param(
+                                                                     []
+                                                                   , ArrayType(
+                                                                       ClassOrInterfaceType(
+                                                                         TypeName(Id("Event"))
+                                                                       , None()
+                                                                       )
+                                                                     )
+                                                                   , Id("es")
+                                                                   )
+                                                                 ]
+                                                               , None()
+                                                               )
+                                                             , Block(
+                                                                 [ForEach(
+                                                                    Param(
+                                                                      []
+                                                                    , ClassOrInterfaceType(
+                                                                        TypeName(Id("Event"))
+                                                                      , None()
+                                                                      )
+                                                                    , Id("e")
+                                                                    )
+                                                                  , ExprName(Id("es"))
+                                                                  , ExprStm(
+                                                                      Invoke(
+                                                                        Method(MethodName(Id("step")))
+                                                                      , [ExprName(Id("e"))]
+                                                                      )
+                                                                    )
+                                                                  )|[ Return(
+                                                                        Some(ExprName(Id("state")))
+                                                                      )
+                                                                    ]]
+                                                               )
+                                                             )|[ MethodDec(
+                                                                   MethodDecHead(
+                                                                     [Public()]
+                                                                   , None()
+                                                                   , ClassOrInterfaceType(
+                                                                       TypeName(Id("State"))
+                                                                     , None()
+                                                                     )
+                                                                   , Id("currentState")
+                                                                   , []
+                                                                   , None()
+                                                                   )
+                                                                 , Block(
+                                                                     [ Return(
+                                                                         Some(ExprName(Id("state")))
+                                                                       )
+                                                                     ]
+                                                                   )
+                                                                 )
+                                                               ]]]]]
+                                       )]
+                           )]
+               )
+             )
+           )
+         ]
+       )
+
+  id-as-string =
+    ?Id(<id>)
+    ; !Lit(
+         String([Chars(<id>)])
+       )
+
+  ensure-list =
+    is-list <+ ![<id>]
+
+  event-as-class :
+    this__@EventName(name) -> [ClassDec(
+                                 ClassDecHead(
+                                   [Public()]
+                                 , name
+                                 , None()
+                                 , None()
+                                 , Some(
+                                     ImplementsDec(
+                                       [ InterfaceType(
+                                           TypeName(Id("Event"))
+                                         , None()
+                                         )
+                                       ]
+                                     )
+                                   )
+                                 )
+                               , ClassBody(
+                                   [ConstrDec(
+                                      ConstrDecHead(
+                                        [Private()]
+                                      , None()
+                                      , name
+                                      , []
+                                      , None()
+                                      )
+                                    , ConstrBody(None(), [])
+                                    )|[ MethodDec(
+                                          MethodDecHead(
+                                            [Public()]
+                                          , None()
+                                          , ClassOrInterfaceType(
+                                              TypeName(Id("String"))
+                                            , None()
+                                            )
+                                          , Id("toString")
+                                          , []
+                                          , None()
+                                          )
+                                        , Block(
+                                            [ Return(
+                                                Some(<<id-as-string> name> this__)
+                                              )
+                                            ]
+                                          )
+                                        )
+                                      ]]
+                                 )
+                               )|[ MethodDec(
+                                     MethodDecHead(
+                                       [Public()]
+                                     , None()
+                                     , ClassOrInterfaceType(
+                                         TypeName(Id("Event"))
+                                       , None()
+                                       )
+                                     , Id(
+                                         <conc-strings> ( <?Id(<id>)> Id("event_")
+                                                        , <?Id(<id>)> name
+                                                        )
+                                       )
+                                     , []
+                                     , None()
+                                     )
+                                   , Block(
+                                       [ Return(
+                                           Some(
+                                             NewInstance(
+                                               None()
+                                             , ClassOrInterfaceType(TypeName(name), None())
+                                             , []
+                                             , None()
+                                             )
+                                           )
+                                         )
+                                       ]
+                                     )
+                                   )
+                                 ]]
+
+  all-events-as-classes =
+    collect-all(
+      ?Events(<id>)
+      ; mapconcat(event-as-class ; ensure-list)
+    )
+    ; concat
+
+  transition-premise :
+    Transition(NamedEvent(name), _) -> InstanceOf(
+                                         ExprName(Id("e"))
+                                       , ClassOrInterfaceType(TypeName(name), None())
+                                       )
+
+  transition-consequence :
+    Transition(_, state@(Id(_))) -> [ Return(
+                                        Some(
+                                          ExprName(
+                                            Id(
+                                              <conc-strings> ( <?Id(<id>)> state
+                                                             , <?Id(<id>)> Id("_instance")
+                                                             )
+                                            )
+                                          )
+                                        )
+                                      )
+                                    ]
+}
