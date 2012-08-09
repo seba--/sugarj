@@ -2,6 +2,7 @@ package org.sugarj.driver.transformations.primitive;
 
 import java.util.LinkedHashMap;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.library.AbstractPrimitive;
@@ -24,10 +25,12 @@ import org.sugarj.driver.path.SourceLocation;
 class TransformModel extends AbstractPrimitive {
 
   private Environment environment;
+  private IProgressMonitor monitor;
   
-  public TransformModel(Environment environment) {
+  public TransformModel(Environment environment, IProgressMonitor monitor) {
     super("SUGARJ_transform_model", 1, 2);
     this.environment = environment;
+    this.monitor = monitor;
   }
 
   @Override
@@ -48,7 +51,7 @@ class TransformModel extends AbstractPrimitive {
     
     Result res;
     try {
-      res = Driver.compile(transformedModel, source, null, new LinkedHashMap<Path, Driver>());
+      res = Driver.compile(transformedModel, source, monitor, new LinkedHashMap<Path, Driver>());
     } catch (Exception e) {
       return false;
     }

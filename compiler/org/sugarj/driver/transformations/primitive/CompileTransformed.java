@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.library.AbstractPrimitive;
@@ -27,10 +28,12 @@ import org.sugarj.driver.path.RelativeSourceLocationPath;
 class CompileTransformed extends AbstractPrimitive {
 
   private Environment environment;
+  private IProgressMonitor monitor;
   
-  public CompileTransformed(Environment environment) {
+  public CompileTransformed(Environment environment, IProgressMonitor monitor) {
     super("SUGARJ_compile", 0, 3);
     this.environment = environment;
+    this.monitor = monitor;
   }
 
   @Override
@@ -48,7 +51,7 @@ class CompileTransformed extends AbstractPrimitive {
     
     Result res;
     try {
-      res = Driver.compile(generatedModel, source, null, new LinkedHashMap<Path, Driver>());
+      res = Driver.compile(generatedModel, source, monitor, new LinkedHashMap<Path, Driver>());
     } catch (Exception e) {
       return false;
     }

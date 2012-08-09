@@ -1550,7 +1550,7 @@ public class Driver {
     editorServicesParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.editorServicesTbl.getPath()), "Module");
 
     interp = new HybridInterpreter();
-    interp.addOperatorRegistry(new SugarJPrimitivesLibrary(this, environment));
+    interp.addOperatorRegistry(new SugarJPrimitivesLibrary(this, environment, monitor));
     
     sdfContext = tools.init();
     makePermissiveContext = make_permissive.init();
