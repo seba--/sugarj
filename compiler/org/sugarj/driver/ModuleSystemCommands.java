@@ -8,7 +8,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -228,12 +227,19 @@ public class ModuleSystemCommands {
     if (p.getFile().exists())
       return p;
     
+    URLClassLoader cl = null;
     try {
-      ClassLoader cl = new URLClassLoader(new URL[] {base.getFile().toURI().toURL()}, null);
+      cl = new URLClassLoader(new URL[] {base.getFile().toURI().toURL()}, null);
       if (cl.getResource(relativePath + extension) != null)
         return new RelativePath(base, relativePath + extension);
     } catch (MalformedURLException e) {
       e.printStackTrace();
+    } finally {
+      if (cl != null)
+        try {
+          cl.close();
+        } catch (IOException e) {
+        }
     }
     
     return null;
@@ -270,16 +276,12 @@ public class ModuleSystemCommands {
   }
 
   public static RelativeSourceLocationPath getTransformedModelSourceFilePath(String modulePath, List<RelativePath> transformationPaths, Environment environment) {
-    List<RelativePath> envTransformationPaths = environment.getTransformationPaths();
-    List<RelativePath> joinedTransformationPaths = new LinkedList<RelativePath>(envTransformationPaths);
-    if (transformationPaths != null)
-      joinedTransformationPaths.addAll(transformationPaths);
+    if (transformationPaths == null || transformationPaths.isEmpty())
+      return new RelativeSourceLocationPath(new SourceLocation(environment.bin, environment), modulePath + ".aterm");
     
-    String transformationPathString = StringCommands.makeTransformationPathString(joinedTransformationPaths);
+    String transformationPathString = StringCommands.makeTransformationPathString(transformationPaths);
     
-    String transformedModelPath = modulePath;
-    if (!transformationPathString.isEmpty()) 
-      transformedModelPath = modulePath + "$" + transformationPathString;
+    String transformedModelPath = modulePath + "$" + transformationPathString;
     return new RelativeSourceLocationPath(new SourceLocation(environment.bin, environment), transformedModelPath + ".aterm");
   }
   

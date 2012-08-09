@@ -73,9 +73,6 @@ public class Environment implements Serializable {
    */
   private List<Renaming> renamings = new LinkedList<Renaming>();
 
-  private List<RelativePath> transformationPaths = new LinkedList<RelativePath>();
-  
-  
   
   /**
    * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -224,14 +221,5 @@ public class Environment implements Serializable {
   public void setRenamings(List<Renaming> renamings) {
     this.renamings = renamings;
   }
-
-  public List<RelativePath> getTransformationPaths() {
-    return transformationPaths;
-  }
-  
-  public void setTransformationPaths(List<RelativePath> paths) {
-    transformationPaths = paths;
-  }
-  
 
 }

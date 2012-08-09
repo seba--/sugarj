@@ -450,10 +450,6 @@ public class ATermCommands {
     return isApplication(term, "TransImportDec") || isApplication(term, "ModelTransImportDec");
   }
 
-  public static boolean isTransitivelyTransformedImport(IStrategoTerm term, Environment environment) {
-    return isModelImport(term) && !environment.getTransformationPaths().isEmpty();
-  }
-
   public static boolean isImportDec(IStrategoTerm toplevelDecl) {
     return isApplication(toplevelDecl, "TypeImportDec") || 
         isApplication(toplevelDecl, "TypeImportOnDemandDec") || 
