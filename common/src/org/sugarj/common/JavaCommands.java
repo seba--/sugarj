@@ -47,8 +47,7 @@ public class JavaCommands {
     if(cp.length > 0)
       cpBuilder.append(Environment.classpathsep);
     
-    cpBuilder.append(dir);
-    
+    cpBuilder.append(dir).append(Environment.classpathsep).append(System.getenv("CLASSPATH"));
 
     String[] cmd = new String[7 + sourceFiles.size()];
     cmd[0] = "-cp";

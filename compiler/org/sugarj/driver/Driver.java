@@ -63,6 +63,8 @@ import org.sugarj.stdlib.StdLib;
 import org.sugarj.util.Pair;
 import org.sugarj.util.ProcessingListener;
 
+import com.sun.servicetag.SystemEnvironment;
+
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -147,7 +149,8 @@ public class Driver{
       FileCommands.createDir(environment.getBin());
       
       initializeCaches(environment, false);
-      sdfCache = sdfCaches.get(langLib.getLanguageName() + "#" + langLib.getVersion());
+      sdfCache = sdfCaches.get(
+          langLib.getLanguageName() + "#" + langLib.getVersion());
       if (sdfCache == null) {
         sdfCache = new ModuleKeyCache<Path>(sdfCaches);
         synchronized (sdfCaches) {
@@ -315,7 +318,7 @@ public class Driver{
    */
   private void process(String source, RelativePath sourceFile, IProgressMonitor monitor, boolean generateFiles) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     this.monitor = monitor;
-    log.beginTask("processing", "BEGIN PROCESSING " + sourceFile.getRelativePath());
+    log.beginTask("processing", "\nBEGIN PROCESSING " + sourceFile.getRelativePath());
     boolean success = false;
     try {
       init(sourceFile, generateFiles);
@@ -342,12 +345,12 @@ public class Driver{
         IncrementalParseResult parseResult = parseNextToplevelDeclaration(remainingInput, true);
         lastSugaredToplevelDecl = parseResult.getToplevelDecl();
         remainingInput = parseResult.getRest();
-        
+
         stepped();
-        
+
         // DESUGAR the parsed top-level declaration
         IStrategoTerm desugared = currentDesugar(lastSugaredToplevelDecl);
-        
+
         stepped();
         
         // PROCESS the assimilated top-level declaration
@@ -371,8 +374,9 @@ public class Driver{
       stepped();
       
       // COMPILE the generated java file
-      if (delegateCompilation == null)
+      if (delegateCompilation == null){
         compileGeneratedJavaFiles();
+      }
       else {
         driverResult.delegateCompilation(delegateCompilation, langLib.getOutFile(), langLib.getSource(), langLib.getGeneratedFiles());
       }
@@ -418,7 +422,6 @@ public class Driver{
             driverResult.isGenerateFiles());
       } catch (ClassNotFoundException e) {
         setErrorMessage(lastSugaredToplevelDecl, "Could not resolve imported class " + e.getMessage());
-        // throw new RuntimeException(e);
       }
       good = true;
     } finally {
@@ -744,7 +747,6 @@ public class Driver{
     try {
       FileCommands.deleteTempFiles(currentTransProg);
       currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment, langLib);
-
       return STRCommands.assimilate(currentTransProg, term, langLib.getInterpreter());
     } catch (StrategoException e) {
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();

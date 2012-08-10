@@ -172,7 +172,6 @@ public class STRCommands {
       log.log("calling STRJ");
       strj(str, java, main, strjContext, paths, langLib);
       
-      
       if (!JavaCommands.javac(java, dir, paths))
         throw new RuntimeException("java compilation failed");
         
