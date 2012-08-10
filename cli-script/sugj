@@ -5,7 +5,7 @@
 # find base directory of eclipse
 # WARNING: path is fragile and depends on project structure
 # namely that sugarj base directory is inside eclipse folder
-eclipse="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../../.." && pwd )"
+eclipse="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 plugins="$eclipse/plugins"
 sugarj="$eclipse/sugarj"
 common="$sugarj/common/bin"
@@ -18,7 +18,6 @@ langroot="$sugarj/language-libraries"
 langlibs="$langroot/base/bin:$langroot/haskell/bin:$langroot/java/bin:$langroot/prolog/bin"
 strimp="$plugins/org.strategoxt.imp.nativebundle_0.1.1.201202141159"
 
-cp="$compiler:$clijars:$common:$stdlib:$langlibs:$layout:$strimp:$plugins/*"
+classpath="$compiler:$clijars:$common:$stdlib:$langlibs:$layout:$strimp:$plugins/*"
 
-export CLASSPATH=$cp
-java org.sugarj.driver.cli.Main $*
+java -cp "$classpath" org.sugarj.driver.cli.Main $*
