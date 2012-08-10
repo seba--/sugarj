@@ -17,33 +17,26 @@ rules
 
   rename-main-rules(|unqualified-name) = ?body; 
     (prim("SUGARJ_current_package") <+ !"") => pkg;
-      <string-as-chars(map(try(?'/';!'_')))> pkg => pkg';
+    <string-as-chars(map(try(?'/';!'_')))> pkg => pkg';
     <conc-strings> (pkg',"_",unqualified-name) => qualified-name;
-    <rename-rules(|qualified-name)> body => sugarbody
+    <rename-rules(|"main", qualified-name)> body => sugarbody
   
-  rename-rules(|name) = map(try(rename-rules-block(|name))); topdown(try(\ SVar("main") -> SVar(<conc-strings> ("main", "-", name)) \))
+  rename-rules(|oname, nname) = topdown(try(rename-rule(|oname, nname))); topdown(try(\ SVar(oname) -> SVar(nname) \))
   
-  rename-rules-block(|name) :
-  	Strategies(ss) -> transformation-elem(Strategies(<map(try(rename-rule(|name)))> ss))
-  rename-rules-block(|name) :
-  	Rules(rs) -> transformation-elem(Rules(<map(try(rename-rule(|name)))> rs))
-  rename-rules-block(|name) :
-    block -> transformation-elem(block)
-
-  rename-rule(|name) :
-    RDefNoArgs("main", rule) -> RDefNoArgs(<conc-strings> ("main", "-", name), rule)
+  rename-rule(|oname, nname) :
+    RDefNoArgs(oname, rule) -> RDefNoArgs(nname, rule)
     
-  rename-rule(|name) :
-    RDef("main", typeids, rule) -> RDef(<conc-strings> ("main", "-", name), typeids, rule)
+  rename-rule(|oname, nname) :
+    RDef(oname, typeids, rule) -> RDef(nname, typeids, rule)
     
-  rename-rule(|name) :
-  	RDefT("main", typeids1,typeids2, rule ) -> RDefT(<conc-strings> ("main", "-", name), typeids1, typeids2, rule)
+  rename-rule(|oname, nname) :
+  	RDefT(oname, typeids1,typeids2, rule ) -> RDefT(nname, typeids1, typeids2, rule)
   	
-  rename-rule(|name) :
-  	SDefNoArgs("main", strategy) -> SDefNoArgs(<conc-strings> ("main", "-", name), strategy)
+  rename-rule(|oname, nname) :
+  	SDefNoArgs(oname, strategy) -> SDefNoArgs(nname, strategy)
   	
-  rename-rule(|name) :
-  	SDef("main", typeids, strategy) -> SDef(<conc-strings> ("main", "-", name), typeids, strategy)
+  rename-rule(|oname, nname) :
+  	SDef(oname, typeids, strategy) -> SDef(nname, typeids, strategy)
 
     
 /*
