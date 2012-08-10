@@ -1,0 +1,20 @@
+package transformation;
+
+public transformation Renaming {
+rules
+  import-model-path : TypeName(Id(name)) -> ([], name)
+  import-model-path : TypeName(pkg, Id(name)) -> (<import-model-pkg> pkg, name)
+
+  import-model-pkg : PackageOrTypeName(Id(name)) -> [name]
+  import-model-pkg : PackageOrTypeName(pkg, Id(name)) -> <conc> (<import-model-pkg> pkg, [name])
+
+  build-path : ([], name) -> name
+  build-path : ([pkg|pkgs], name) -> <conc-strings> (pkg, "/", <build-path> (pkgs, name))
+
+  name-suffix = !("$", <id>); conc-strings; string-replace(|"/","_")
+
+  apply-renamings(|renamings) =
+    where(<?[(pkg, from, to)|rest]> renamings)
+      < rename-java(|pkg, from, to); apply-renamings(|rest)
+      + id
+}

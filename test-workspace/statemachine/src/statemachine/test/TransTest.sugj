@@ -2,27 +2,23 @@ package statemachine.test;
 
 import statemachine.ToJava;
 
+import transformation.Recursive;
+
 public transformation TransTest {
 
 
 rules
-  main = ?(model, model-path, trans-path); 
-    {| Renamings: 
-         rules ( Renamings := [] );
-         !model;
-         recursively-transform(conforms-to-metamodel(|"Statemachine"), main-statemachine_ToJava | trans-path)
-    |};
-    prim("SUGARJ_compile", model-path, trans-path)
+  main = recursively-transform(conforms-to-metamodel(|"Statemachine"), main-statemachine_ToJava)
 
-  recursively-transform(metamodel-predicate, trans | trans-path) =
+  recursively-transform(model-predicate, trans | trans-path) =
     topdown(try(where(
       {pkgs, name, model-path, model, generated:
-        get-imported-model(metamodel-predicate) => (pkgs, name, model-path, model);
+        get-imported-model(model-predicate) => (pkgs, name, model-path, model);
         rules( Renamings := [ (pkgs, name, (<conc-strings> (name, <name-suffix> trans-path)))
                             | <Renamings>]);
         <trans> model => generated;
         prim("SUGARJ_compile", model-path, trans-path);
-        where(recursively-transform(metamodel-predicate, trans | trans-path))
+        where(recursively-transform(model-predicate, trans | trans-path))
       })));
     apply-renamings(|<Renamings>)
   

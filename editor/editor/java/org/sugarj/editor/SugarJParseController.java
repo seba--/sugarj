@@ -124,7 +124,6 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
       environment.setCacheDir(new RelativePath(environment.getRoot(), ".sugarjcache"));
     
     environment.setAtomicImportParsing(true);
-    environment.setGenerateJavaFile(true);
     
     environment.setNoChecking(true);
 

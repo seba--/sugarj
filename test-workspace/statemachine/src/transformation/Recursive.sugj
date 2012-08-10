@@ -1,0 +1,45 @@
+package transformation;
+
+import transformation.Renaming;
+
+public transformation Recursive {
+rules
+  main = SugarCompilationUnit(
+    id,
+    ensure-import(|TypeImportDec(TypeName(PackageOrTypeName(Id("transformation")), Id("Recursive")))),
+    topdown(try(\ SDefNoArgs("main", trans) -> 
+                  SDefNoArgs("main", Call(SVar("recursively-transform"), [Id(), trans]))\)))
+
+  recursively-transform(model-predicate, trans) = ?(model, model-path, trans-path); 
+    {| Renamings: 
+         rules ( Renamings := [] );
+         !model;
+         recursively-transform(model-predicate, trans | trans-path)
+    |};
+    prim("SUGARJ_compile", model-path, trans-path)
+
+  recursively-transform(model-predicate, trans | trans-path) =
+    topdown(try(where(
+      {pkgs, name, model-path, model, generated:
+        get-imported-model(model-predicate) => (pkgs, name, model-path, model);
+        <trans> model => generated;
+        rules( Renamings := [ (pkgs, name, (<conc-strings> (name, <name-suffix> trans-path)))
+                            | <Renamings>]);
+        prim("SUGARJ_compile", model-path, trans-path);
+        where(recursively-transform(model-predicate, trans | trans-path))
+      })));
+    apply-renamings(|<Renamings>)
+  
+  get-imported-model(predicate) =
+    ?TypeImportDec(<id>);
+    import-model-path => (pkgs, name);
+    <build-path> (pkgs, name) => path;
+    prim("SUGARJ_resolve_model") => model;
+    where(predicate);
+    !(pkgs, name, path, model)
+
+  ensure-import(|imp) = !(<id>, [imp]); union
+
+  conforms-to-metamodel(|meta-model) =
+    collect-one(?ModelBody((meta-model, _)))
+}
