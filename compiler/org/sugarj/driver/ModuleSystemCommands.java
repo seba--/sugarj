@@ -326,4 +326,13 @@ public class ModuleSystemCommands {
       return null;
     return FileCommands.dropExtension(p.getRelativePath());
   }
+  
+  public static boolean isModuleCompilationUpToDate(String modulePath, Environment environment) throws IOException {
+    Path dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
+    if (dep != null) {
+      Result res = Result.readDependencyFile(dep, environment);
+      return res != null && !res.isUpToDate(res.getSourceFile(), environment);
+    }
+    return false;
+  }
 }
