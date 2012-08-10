@@ -37,6 +37,7 @@ class CompileTransformed extends AbstractPrimitive {
     super("SUGARJ_compile", 0, 2);
     this.environment = environment;
     this.monitor = monitor;
+    this.generateFiles = generateFiles;
   }
 
   @Override

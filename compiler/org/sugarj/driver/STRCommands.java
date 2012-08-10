@@ -258,11 +258,10 @@ public class STRCommands {
         }
         return term;
       }
-      else 
-        throw new RuntimeException("hybrid interpreter failed");
     }
     catch (Exception e) {
-      throw new RuntimeException("desugaring failed", e);
+      throw new StrategoException("desugaring failed", e);
     }
+    throw new StrategoException("desugaring failed");
   }
 }

@@ -14,9 +14,10 @@ rules
     {| Renamings: 
          rules ( Renamings := [] );
          !model;
-         recursively-transform(model-predicate, trans | trans-path)
-    |};
-    prim("SUGARJ_compile", model-path, trans-path)
+         (where(model-predicate) < trans + id) => generated;
+         recursively-transform(model-predicate, trans | trans-path);
+         prim("SUGARJ_compile", model-path, trans-path)
+    |}
 
   recursively-transform(model-predicate, trans | trans-path) =
     topdown(try(where(
@@ -25,8 +26,8 @@ rules
         <trans> model => generated;
         rules( Renamings := [ (pkgs, name, (<conc-strings> (name, <name-suffix> trans-path)))
                             | <Renamings>]);
-        prim("SUGARJ_compile", model-path, trans-path);
-        where(recursively-transform(model-predicate, trans | trans-path))
+        where(recursively-transform(model-predicate, trans | trans-path));
+        prim("SUGARJ_compile", model-path, trans-path)
       })));
     apply-renamings(|<Renamings>)
   

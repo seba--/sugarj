@@ -772,7 +772,7 @@ public class Driver {
   }
 
   //TODO handle import declarations with asterisks, e.g. import foo.*;
-  private void processImportDec(IStrategoTerm toplevelDecl) {
+  private void processImportDec(IStrategoTerm toplevelDecl) throws TokenExpectedException, BadTokenException, IOException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     
     sugaredImportDecls.add(lastSugaredToplevelDecl);
     desugaredImportDecls.add(toplevelDecl);
@@ -811,8 +811,6 @@ public class Driver {
         log.logErr("module not found: " + modulePath);
       }
       
-    } catch (Exception e) {
-      throw new RuntimeException(e);
     } finally {
       log.endTask();
     }
@@ -1032,12 +1030,12 @@ public class Driver {
         else
           transformedTerm = newTerm;
         } catch (StrategoException e) {
-          setErrorMessage(toplevelDecl, "Failed to apply transformation " + strPath + " to model " + transformedPath);
+          setErrorMessage(toplevelDecl, "Failed to apply transformation " + strPath.getRelativePath() + " to model " + transformedPath.getRelativePath());
         }
         transformedPath = ModuleSystemCommands.transformedModelPath(transformedPath, strPath);
       }
       
-      ATermCommands.atermToFile(transformedTerm, transformedPath);
+//      ATermCommands.atermToFile(transformedTerm, transformedPath);
     } finally {
       log.endTask();
     }
