@@ -6,23 +6,25 @@ public transformation TransTest {
 
 
 rules
-  main = 
+  main = ?(model, model-path, trans-path); 
     {| Renamings: 
          rules ( Renamings := [] );
-         recursively-transform(main-statemachine_ToJava)
-    |}
+         !model;
+         recursively-transform(conforms-to-metamodel(|"Statemachine"), main-statemachine_ToJava | trans-path)
+    |};
+    prim("SUGARJ_compile", model-path, trans-path)
 
-  recursively-transform(trans) =
+  recursively-transform(metamodel-predicate, trans | trans-path) =
     topdown(try(where(
       {pkgs, name, model-path, model, generated:
-        get-imported-model(conforms-to-metamodel(|"Statemachine")) => (pkgs, name, model-path, model);
-        rules( Renamings := [ (pkgs, name, (<conc-strings> (name, "$statemachine_test_TransTest")))
+        get-imported-model(metamodel-predicate) => (pkgs, name, model-path, model);
+        rules( Renamings := [ (pkgs, name, (<conc-strings> (name, <name-suffix> trans-path)))
                             | <Renamings>]);
         <trans> model => generated;
-        where(recursively-transform(trans));
-        prim("SUGARJ_compile", model-path, "statemachine/test/TransTest")
+        prim("SUGARJ_compile", model-path, trans-path);
+        where(recursively-transform(metamodel-predicate, trans | trans-path))
       })));
-    apply-renamings(|<Renamings>); debug(!"renamed: ")
+    apply-renamings(|<Renamings>)
   
   get-imported-model(predicate) =
     ?TypeImportDec(<id>);
@@ -43,6 +45,8 @@ rules
 
   build-path : ([], name) -> name
   build-path : ([pkg|pkgs], name) -> <conc-strings> (pkg, "/", <build-path> (pkgs, name))
+
+  name-suffix = !("$", <id>); conc-strings; string-replace(|"/","_")
 
   apply-renamings(|renamings) =
     where(<?[(pkg, from, to)|rest]> renamings)

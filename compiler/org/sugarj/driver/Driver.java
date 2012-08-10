@@ -1110,25 +1110,26 @@ public class Driver {
     } finally {
       log.endTask();
     }
-      
-    /*
-     * applies each transformation's "main-<transformation name>" rule on the AST of
-     * the current import
-     */
+
     
     RelativePath transformedPath = ModuleSystemCommands.transformedModelPath(currentPath, strPath);
-    try {
-      IStrategoTerm transformedTerm = STRCommands.assimilate(strat, trans, currentTerm, interp);
-      
-      if (transformedTerm == null)
-        transformedTerm = currentTerm;
-      else
-        log.log(FileCommands.dropExtension(strPath.getRelativePath()) + " applied successfully.");
-      
-      return Pair.create(transformedTerm, transformedPath);
-    } catch (Exception e) {
-      return Pair.create(currentTerm, transformedPath);
+    IStrategoTerm transformationInput = 
+        ATermCommands.makeTuple(
+            currentTerm, 
+            ATermCommands.makeString(FileCommands.dropExtension(currentPath.getRelativePath()), null),
+            ATermCommands.makeString(FileCommands.dropExtension(strPath.getRelativePath()), null));
+
+    IStrategoTerm transformedTerm = STRCommands.assimilate(strat, trans, transformationInput, interp);
+    
+    if (transformedTerm != null) {
+      log.log(FileCommands.dropExtension(strPath.getRelativePath()) + " applied successfully.");
+      transformedTerm = ATermCommands.atermFromFile(transformedPath.getAbsolutePath());
     }
+    
+    if (transformedTerm == null)
+      throw new StrategoException("Transformation " + FileCommands.dropExtension(strPath.getRelativePath()) + " failed on " + currentPath.getRelativePath());
+    
+    return Pair.create(transformedTerm, transformedPath);
   }
 
 
