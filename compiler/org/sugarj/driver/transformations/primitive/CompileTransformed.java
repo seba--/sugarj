@@ -29,10 +29,11 @@ import org.sugarj.util.Renaming;
  */
 class CompileTransformed extends AbstractPrimitive {
 
+  private boolean generateFiles;
   private Environment environment;
   private IProgressMonitor monitor;
   
-  public CompileTransformed(Environment environment, IProgressMonitor monitor) {
+  public CompileTransformed(boolean generateFiles, Environment environment, IProgressMonitor monitor) {
     super("SUGARJ_compile", 0, 2);
     this.environment = environment;
     this.monitor = monitor;
@@ -40,6 +41,9 @@ class CompileTransformed extends AbstractPrimitive {
 
   @Override
   public boolean call(IContext context, Strategy[] svars, IStrategoTerm[] tvars) throws InterpreterException {
+    if (!generateFiles)
+      return false;
+    
     IStrategoTerm generatedModel = context.current();
     
     String modelPath = ATermCommands.getString(tvars[0]);

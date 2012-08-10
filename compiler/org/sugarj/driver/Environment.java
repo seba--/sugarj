@@ -59,8 +59,6 @@ public class Environment implements Serializable {
    * don't check resulting sdf and stratego files after splitting
    */
   private boolean noChecking = false;
-
-  private boolean generateJavaFile = false;
   
   
   private Path tmpDir = new AbsolutePath(System.getProperty("java.io.tmpdir"));
@@ -165,14 +163,6 @@ public class Environment implements Serializable {
 
   public void setNoChecking(boolean noChecking) {
     this.noChecking = noChecking;
-  }
-
-  public boolean isGenerateJavaFile() {
-    return generateJavaFile;
-  }
-
-  public void setGenerateJavaFile(boolean generateJavaFile) {
-    this.generateJavaFile = generateJavaFile;
   }
 
   public Path getTmpDir() {

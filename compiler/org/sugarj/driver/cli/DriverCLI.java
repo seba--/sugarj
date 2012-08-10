@@ -388,9 +388,6 @@ public class DriverCLI {
     if (line.hasOption("write-only-cache"))
       org.sugarj.driver.Environment.wocache = true;
     
-    if (line.hasOption("gen-java"))
-      environment.setGenerateJavaFile(true);
-    
     if (line.hasOption("atomic-imports"))
       environment.setAtomicImportParsing(true);
   
@@ -484,12 +481,6 @@ public class DriverCLI {
         false,
         "Specify the cache to be write-only.");
     
-    options.addOption(
-        null,
-        "gen-java",
-        false,
-        "Generate the resulting Java file in the source folder.");
-  
     options.addOption(
         null,
         "atomic-imports",

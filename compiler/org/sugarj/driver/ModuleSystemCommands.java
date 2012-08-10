@@ -331,7 +331,7 @@ public class ModuleSystemCommands {
     Path dep = ModuleSystemCommands.searchFile(modulePath, ".dep", environment);
     if (dep != null) {
       Result res = Result.readDependencyFile(dep, environment);
-      return res != null && !res.isUpToDate(res.getSourceFile(), environment);
+      return res != null && res.isUpToDate(res.getSourceFile(), environment);
     }
     return false;
   }

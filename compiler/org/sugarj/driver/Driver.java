@@ -818,32 +818,36 @@ public class Driver {
     }
   }
   
-  private Pair<String, Boolean> transformModel(String modulePath, List<IStrategoTerm> transformations, IStrategoTerm toplevelDecl) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private Pair<String, Boolean> transformModel(String modelPath, List<IStrategoTerm> transformations, IStrategoTerm toplevelDecl) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     List<RelativePath> resolvedTransformationPaths = resolveTransformationPaths(transformations, toplevelDecl);
     
-    RelativePath model = ModuleSystemCommands.importModel(modulePath, environment);
-    RelativeSourceLocationPath transformedModelSourceFile = ModuleSystemCommands.getTransformedModelSourceFilePath(modulePath, resolvedTransformationPaths, environment);
+    RelativePath model = ModuleSystemCommands.importModel(modelPath, environment);
+    RelativeSourceLocationPath transformedModelSourceFile = ModuleSystemCommands.getTransformedModelSourceFilePath(modelPath, resolvedTransformationPaths, environment);
     String transformedModelPath = ModuleSystemCommands.getModulePath(transformedModelSourceFile);
 
     Pair<String, Boolean> preparedImport = null;
-    if (ModuleSystemCommands.isModuleCompilationUpToDate(modulePath, environment))
-      preparedImport = Pair.create(transformedModelPath, false);
-    else if (model == null)
-      setErrorMessage(toplevelDecl, "model not found " + modulePath);
+    if (model == null)
+      setErrorMessage(toplevelDecl, "model not found " + modelPath);
     else if (resolvedTransformationPaths.isEmpty())
       // 'resolveTransformationPaths' will have marked an error in this case
       ;
-    else if (model != null) { 
+    else if (ModuleSystemCommands.isModuleCompilationUpToDate(transformedModelPath, environment))
+      preparedImport = Pair.create(transformedModelPath, false);
+    else { 
       executeTransformations(model, resolvedTransformationPaths, toplevelDecl);
+      
+      if (!FileCommands.exists(transformedModelSourceFile))
+        return Pair.create(transformedModelPath, true);
+      
       boolean skipImport = prepareImport(transformedModelPath, transformedModelSourceFile, null, null, toplevelDecl, false);
       preparedImport = Pair.create(transformedModelPath, skipImport);
     }
     
     String localModelName = ATermCommands.getLocalImportName(toplevelDecl, interp);
     if (localModelName != null)
-      environment.getRenamings().add(0, new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(modulePath)));
+      environment.getRenamings().add(0, new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(modelPath)));
     else
-      environment.getRenamings().add(0, new Renaming(model.getRelativePath(), modulePath));
+      environment.getRenamings().add(0, new Renaming(modelPath, transformedModelPath));
     
     return preparedImport;
   }
@@ -1032,6 +1036,8 @@ public class Driver {
         }
         transformedPath = ModuleSystemCommands.transformedModelPath(transformedPath, strPath);
       }
+      
+      ATermCommands.atermToFile(transformedTerm, transformedPath);
     } finally {
       log.endTask();
     }
@@ -1454,7 +1460,7 @@ public class Driver {
     editorServicesParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.editorServicesTbl.getPath()), "Module");
 
     interp = new HybridInterpreter();
-    interp.addOperatorRegistry(new SugarJPrimitivesLibrary(this, environment, monitor));
+    interp.addOperatorRegistry(new SugarJPrimitivesLibrary(this, environment, generateFiles, monitor));
     
     sdfContext = tools.init();
     makePermissiveContext = make_permissive.init();
