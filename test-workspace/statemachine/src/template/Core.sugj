@@ -10,11 +10,16 @@ public sugar Core {
   rules
     template-to-sugar :
       TemplateDec(mods, name, body) ->
-      TransDec(TransDecHead(mods, name), TransBody([Rules([main-strategy])]))
+      TransDec(TransDecHead(mods, name), TransBody([Rules([main-strategy, main-strategy2])]))
     where
       <compile-template-body> body => compiled-body;
-      main-strategy := SDefNoArgs("main", compiled-body)
+      main-strategy  := SDefNoArgs("main", Seq(Match(NoAnnoList(Tuple([Var("model"), Var("model-path"), Var("trans-path")]))), 
+                                           Seq(Build(Var("model")),
+                                           Seq(CallNoArgs(SVar("main")),
+                                           Prim("\"SUGARJ_compile\"", [Var("model-path"), Var("trans-path")])))));
+      main-strategy2 := SDefNoArgs("main", compiled-body)
 
+    
     compile-template-body = fail
 
   context-free syntax

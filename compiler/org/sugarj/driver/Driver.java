@@ -794,6 +794,8 @@ public class Driver {
         // apply transformation prior to import
         Pair<String, Boolean> transformedImport = 
             transformModel(modulePath, ModuleSystemCommands.extractImportedTransformationNames(toplevelDecl), toplevelDecl);
+        if (transformedImport == null)
+          return;
         modulePath = transformedImport.a;
         skipImport = transformedImport.b;
         if (skipImport)
@@ -1031,6 +1033,7 @@ public class Driver {
           transformedTerm = newTerm;
         } catch (StrategoException e) {
           setErrorMessage(toplevelDecl, "Failed to apply transformation " + strPath.getRelativePath() + " to model " + transformedPath.getRelativePath());
+          throw e;
         }
         transformedPath = ModuleSystemCommands.transformedModelPath(transformedPath, strPath);
       }
@@ -1126,7 +1129,7 @@ public class Driver {
           String transModel = FileCommands.getRelativeModulePath(SDFCommands.prettyPrintJava(getApplicationSubterm(transTerm, "TransApp", 0), interp));
           List<IStrategoTerm> innerTransformations = getList(getApplicationSubterm(transTerm, "TransApp", 1));
           Pair<String, Boolean> transformedModel = transformModel(transModel, innerTransformations, importTerm);
-          RelativePath transformation = ModuleSystemCommands.searchFile(transformedModel.a, ".str", environment);
+          RelativePath transformation = ModuleSystemCommands.searchFile(transformedModel.a.replace("$", "__"), ".str", environment);
           if (transformation != null)
             resolvedTransformationPaths.add(transformation);
         }

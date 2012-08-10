@@ -4,11 +4,26 @@ import transformation.Renaming;
 
 public transformation Recursive {
 rules
+  main = compiled(main)
+
+  compiled(trans) =
+    ?(model, model-path, trans-path);
+    !model;
+    trans;
+    prim("SUGARJ_compile", model-path, trans-path)
+
   main = SugarCompilationUnit(
     id,
     ensure-import(|TypeImportDec(TypeName(PackageOrTypeName(Id("transformation")), Id("Recursive")))),
-    topdown(try(\ SDefNoArgs("main", trans) -> 
-                  SDefNoArgs("main", Call(SVar("recursively-transform"), [Id(), trans]))\)))
+    map(debug;{name: SugarDec(SugarDecHead(id, Id(?name)), SugarBody(debug;recursify; debug;rename-main-rules(|name);debug))}))
+  
+  recursify = 
+    topdown(try(\ SDefNoArgs(sname, trans) -> 
+                  SDefNoArgs("main", Call(SVar("recursively-transform"), [Id(), trans']))
+                    where
+                      <string-starts-with(|"main-")> sname; 
+                      <topdown(try(\ Prim("\"SUGARJ_compile\"", _) -> Id() \))> trans => trans'
+                \))
 
   recursively-transform(model-predicate, trans) = ?(model, model-path, trans-path); 
     {| Renamings: 
@@ -44,3 +59,4 @@ rules
   conforms-to-metamodel(|meta-model) =
     collect-one(?ModelBody((meta-model, _)))
 }
+
