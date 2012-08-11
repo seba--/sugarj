@@ -281,7 +281,7 @@ public class ModuleSystemCommands {
     
     String transformationPathString = StringCommands.makeTransformationPathString(transformationPaths);
     
-    String transformedModelPath = modulePath + "$" + transformationPathString;
+    String transformedModelPath = modulePath + "$" + transformationPathString.replace('-', '$');
     return new RelativeSourceLocationPath(new SourceLocation(environment.bin, environment), transformedModelPath + ".model");
   }
   

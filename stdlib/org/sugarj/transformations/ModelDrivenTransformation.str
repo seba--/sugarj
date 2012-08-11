@@ -13,7 +13,7 @@ rules
     ->
     SugarDec(SugarDecHead(mods, Id(name)), SugarBody(sugarbody))
     where
-      <rename-main-rules(|name)> body => sugarbody
+      <rename-main-rules(|name); map(!transformation-elem(<id>))> body => sugarbody
 
   rename-main-rules(|unqualified-name) = ?body; 
     (prim("SUGARJ_current_package") <+ !"") => pkg;

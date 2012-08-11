@@ -15,6 +15,8 @@ rules
 
   apply-renamings(|renamings) =
     where(<?[(pkg, from, to)|rest]> renamings)
-      < rename-java(|pkg, from, to); apply-renamings(|rest)
+      < rename-java(|pkg, <as-java-path> from, <as-java-path> to); apply-renamings(|rest)
       + id
+
+  as-java-path = string-as-chars(map(try(?'-';!'$')))
 }
