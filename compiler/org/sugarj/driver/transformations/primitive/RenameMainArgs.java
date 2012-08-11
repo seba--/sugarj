@@ -25,10 +25,10 @@ class RenameMainArgs extends AbstractPrimitive {
     String transPath = ATermCommands.getString(context.current().getSubterm(1));
     
     modelPath = "main-" + modelPath.replace("$", "__").replace("/", "_");
-    transPath = "main-" + transPath.replace("$", "__").replace("/", "_");
+    String transModelPath = modelPath + "-" + transPath.replace("$", "__").replace("/", "_");
     
     IStrategoTerm fst = context.getFactory().makeString(modelPath);
-    IStrategoTerm snd = context.getFactory().makeString(transPath);
+    IStrategoTerm snd = context.getFactory().makeString(transModelPath);
     context.setCurrent(context.getFactory().makeTuple(fst, snd));
     
     return true;

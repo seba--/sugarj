@@ -8,12 +8,12 @@ rules
     ?(model, model-path, trans-path);
     !(model-path, trans-path);
     prim("SUGARJ_rename_main_args") => (old-name, new-name);
+    where(!SDefNoArgs(new-name, Call(SVar("recursively-transform"), [Id(), CallNoArgs(SVar(old-name))])) => new-main);
     !model;
     SugarCompilationUnit(
       id,
       ensure-import(|TypeImportDec(TypeName(PackageOrTypeName(Id("transformation")), Id("Recursive")))),
-      map(recursify(|old-name, new-name)));
-    rename-rules(|old-name, new-name);
+      map(SugarDec(id, SugarBody(!(transformation-elem(Rules([new-main])), <id>); conc))));
     prim("SUGARJ_compile", model-path, trans-path)
 
   recursify(|old-name) = 
@@ -21,7 +21,8 @@ rules
                                   Call(SVar("recursively-transform"), [Id(), trans']))
                     where
                       <?SDefNoArgs(old-name, <id>) + ?RDefNoArgs(old-name, <id>)> s => trans;
-                      <topdown(try(\ Prim("\"SUGARJ_compile\"", _) -> Id() \))> trans => trans'
+                      <topdown(not(?Prim("\"SUGARJ_compile\"", _)))> trans;
+                      !LRule(RuleNoCond(Var("x__"), App(Scope(["x__"], trans), Var("x__")))) => trans'
                 \))
 
   recursively-transform(model-predicate, trans) = ?(model, model-path, trans-path); 

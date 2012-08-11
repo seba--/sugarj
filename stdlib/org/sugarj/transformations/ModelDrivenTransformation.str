@@ -18,10 +18,10 @@ rules
   rename-main-rules(|unqualified-name) = ?body; 
     (prim("SUGARJ_current_package") <+ !"") => pkg;
     <string-as-chars(map(try(?'/';!'_')))> pkg => pkg';
-    <conc-strings> (pkg',"_",unqualified-name) => qualified-name;
+    <conc-strings> ("main", "-", pkg', "_", unqualified-name) => qualified-name;
     <rename-rules(|"main", qualified-name)> body => sugarbody
   
-  rename-rules(|oname, nname) = topdown(try(rename-rule(|oname, nname))); topdown(try(\ SVar(oname) -> SVar(nname) \))
+  rename-rules(|oname, nname) = topdown(try(rename-rule(|oname, nname))); topdown(try(SVar(?oname;!nname)))
   
   rename-rule(|oname, nname) :
     RDefNoArgs(oname, rule) -> RDefNoArgs(nname, rule)

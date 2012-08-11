@@ -464,11 +464,11 @@ public class Driver {
         for (Renaming ren : environment.getRenamings())
           fullExtName = StringCommands.rename(fullExtName, ren);
 
-        fullExtName = fullExtName.replace("$", "__");
+        fullExtName = fullExtName.replace("$", "-");
         extName = FileCommands.fileName(new AbsolutePath(fullExtName));
 
         if (isPublic)
-          checkToplevelDeclarationName(extName.replace("__", "$"), "editor service declaration", toplevelDecl);
+          checkToplevelDeclarationName(extName.replace("-", "$"), "editor service declaration", toplevelDecl);
         
         log.log("The name of the editor services is '" + extName + "'.");
         log.log("The full name of the editor services is '" + fullExtName + "'.");
@@ -568,7 +568,7 @@ public class Driver {
         for (Renaming ren : environment.getRenamings())
           fullExtName = StringCommands.rename(fullExtName, ren);
 
-        fullExtName = fullExtName.replace("$", "__");
+        fullExtName = fullExtName.replace("$", "-");
         extName = FileCommands.fileName(new AbsolutePath(fullExtName));
         fullExtName = fullExtName + (extension == null ? "" : ("." + extension));
 
@@ -710,11 +710,11 @@ public class Driver {
     for (Renaming ren : environment.getRenamings())
       fullExtName = StringCommands.rename(fullExtName, ren);
 
-    fullExtName = fullExtName.replace("$", "__");
+    fullExtName = fullExtName.replace("$", "-");
     modelName = FileCommands.fileName(new AbsolutePath(fullExtName));
 
     log.log("The name of the model is '" + modelName + "'.");
-    checkToplevelDeclarationName(modelName.replace("__", "$"), "model", toplevelDecl);
+    checkToplevelDeclarationName(modelName.replace("-", "$"), "model", toplevelDecl);
     
     generateModel(modelName, toplevelDecl);
   }
@@ -1053,7 +1053,7 @@ public class Driver {
     Path trans = null;
     try {
       log.beginTask("Compile transformation", "Compile transformation " + strPath.getRelativePath());
-      Path depPath = ModuleSystemCommands.searchFile(FileCommands.dropExtension(strPath.getRelativePath()).replace("__", "$"), ".dep", environment);
+      Path depPath = ModuleSystemCommands.searchFile(FileCommands.dropExtension(strPath.getRelativePath()).replace("-", "$"), ".dep", environment);
       if (depPath == null) {
         setErrorMessage(lastSugaredToplevelDecl, "Transformation not found " + FileCommands.dropExtension(strPath.getRelativePath()));
         return null;
@@ -1100,7 +1100,7 @@ public class Driver {
             String renamedPath = path;
             for (Renaming ren : environment.getRenamings())
               renamedPath = StringCommands.rename(renamedPath, ren);
-            renamedPath = renamedPath.replace("$", "__");
+            renamedPath = renamedPath.replace("$", "-");
   
             boolean moduleFound = false;
             for (RelativePath importPath : availableSTRImports) {
@@ -1129,7 +1129,7 @@ public class Driver {
           String transModel = FileCommands.getRelativeModulePath(SDFCommands.prettyPrintJava(getApplicationSubterm(transTerm, "TransApp", 0), interp));
           List<IStrategoTerm> innerTransformations = getList(getApplicationSubterm(transTerm, "TransApp", 1));
           Pair<String, Boolean> transformedModel = transformModel(transModel, innerTransformations, importTerm);
-          RelativePath transformation = ModuleSystemCommands.searchFile(transformedModel.a.replace("$", "__"), ".str", environment);
+          RelativePath transformation = ModuleSystemCommands.searchFile(transformedModel.a.replace("$", "-"), ".str", environment);
           if (transformation != null)
             resolvedTransformationPaths.add(transformation);
         }
@@ -1232,11 +1232,11 @@ public class Driver {
         for (Renaming ren : environment.getRenamings())
           fullExtName = StringCommands.rename(fullExtName, ren);
 
-        fullExtName = fullExtName.replace("$", "__");
+        fullExtName = fullExtName.replace("$", "-");
         extName = FileCommands.fileName(new AbsolutePath(fullExtName));
         
         if (isPublic)
-          checkToplevelDeclarationName(extName.replace("__", "$"), "sugar declaration", toplevelDecl);
+          checkToplevelDeclarationName(extName.replace("-", "$"), "sugar declaration", toplevelDecl);
         
         log.log("The name of the sugar is '" + extName + "'.");
         log.log("The full name of the sugar is '" + fullExtName + "'.");
