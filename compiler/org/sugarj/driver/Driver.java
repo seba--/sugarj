@@ -845,7 +845,7 @@ public class Driver {
     
     String localModelName = ATermCommands.getLocalImportName(toplevelDecl, interp);
     if (localModelName != null)
-      environment.getRenamings().add(0, new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(modelPath)));
+      environment.getRenamings().add(0, new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(transformedModelPath)));
     else
       environment.getRenamings().add(0, new Renaming(modelPath, transformedModelPath));
     
