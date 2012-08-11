@@ -831,10 +831,13 @@ public class Driver {
     else if (resolvedTransformationPaths.isEmpty())
       // 'resolveTransformationPaths' will have marked an error in this case
       ;
-    else if (ModuleSystemCommands.isModuleCompilationUpToDate(transformedModelPath, environment))
+    else if (ModuleSystemCommands.isModuleCompilationUpToDate(transformedModelPath, environment)) {
+      ModuleSystemCommands.registerGeneratedFiles(transformedModelPath, driverResult, environment);
       preparedImport = Pair.create(transformedModelPath, false);
+    }
     else { 
       executeTransformations(model, resolvedTransformationPaths, toplevelDecl);
+      ModuleSystemCommands.registerGeneratedFiles(transformedModelPath, driverResult, environment);
       
       if (!FileCommands.exists(transformedModelSourceFile))
         return Pair.create(transformedModelPath, true);

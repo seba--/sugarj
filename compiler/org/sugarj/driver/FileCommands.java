@@ -340,6 +340,14 @@ public class FileCommands {
     
     return file;
   }
+  
+  public static String dropFilename(String file) {
+    int i = file.lastIndexOf(Environment.sep);
+    if (i > 0)
+      return file.substring(0,i);
+
+    return "";
+  }
 
   public static String getRelativeModulePath(String module) {
     return module.replace(".", sep);

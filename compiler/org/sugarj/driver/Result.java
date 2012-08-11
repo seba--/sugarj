@@ -48,6 +48,7 @@ public class Result {
   
   private Map<Path, Integer> dependencies = new HashMap<Path, Integer>();
   private Map<Path, Integer> generatedFileHashes = new HashMap<Path, Integer>();
+  private Map<Path, Integer> dependingFileHashes = new HashMap<Path, Integer>();
   private Set<IStrategoTerm> editorServices = new HashSet<IStrategoTerm>();
   private List<String> collectedErrors = new LinkedList<String>();
   private Set<BadTokenException> parseErrors = new HashSet<BadTokenException>();
@@ -91,6 +92,11 @@ public class Result {
   }
   
   void addFileDependency(Path file) throws IOException {
+    allDependentFiles.add(file);
+    dependingFileHashes.put(file, FileCommands.fileHash(file));
+  }
+  
+  void addGeneratedFile(Path file) throws IOException {
     allDependentFiles.add(file);
     generatedFileHashes.put(file, FileCommands.fileHash(file));
   }
@@ -149,11 +155,16 @@ public class Result {
   public Collection<Path> getFileDependencies(Environment env) throws IOException {
     if (allDependentFiles == null) {
       allDependentFiles = new HashSet<Path>(generatedFileHashes.keySet());
+      allDependentFiles.addAll(dependingFileHashes.keySet());
       for (Path depFile : dependencies.keySet())
         allDependentFiles.addAll(readDependencyFile(depFile, env).getFileDependencies(env));
     }
 
     return allDependentFiles;
+  }
+  
+  public Set<Path> getDirectlyGeneratedFiles() {
+    return generatedFileHashes.keySet();
   }
   
   void setGenerationLog(Path file) {
@@ -189,10 +200,7 @@ public class Result {
   }
   
   void writeToFile(Path file, String content) throws IOException {
-    if (generateFiles) {
-      FileCommands.writeToFile(file, content);
-      generatedFileHashes.put(file, FileCommands.fileHash(file));
-    }
+    generateFile(file, content);
   }
   
   void appendToFile(Path file, String content) throws IOException {
@@ -246,6 +254,10 @@ public class Result {
       return false;
     
     for (Entry<Path, Integer> entry : generatedFileHashes.entrySet())
+      if (FileCommands.fileHash(entry.getKey()) != entry.getValue())
+        return false;
+
+    for (Entry<Path, Integer> entry : dependingFileHashes.entrySet())
       if (FileCommands.fileHash(entry.getKey()) != entry.getValue())
         return false;
 
@@ -411,6 +423,12 @@ public class Result {
           oos.writeInt(e.getValue());
         }
         
+        oos.writeInt(dependingFileHashes.size());
+        for (Entry<Path, Integer> e : dependingFileHashes.entrySet()) {
+          oos.writeObject(e.getKey());
+          oos.writeInt(e.getValue());
+        }
+        
         oos.writeObject(availableGeneratedFiles);
         oos.writeObject(deferredSourceFiles);
         
@@ -474,7 +492,14 @@ public class Result {
         int hash = ois.readInt();
         result.generatedFileHashes.put(file, hash);
       }
-      
+
+      int numDependingFiles = ois.readInt();
+      for (int i = 0; i< numDependingFiles; i++) {
+        Path file = Path.readPath(ois, env, reallocate);
+        int hash = ois.readInt();
+        result.dependingFileHashes.put(file, hash);
+      }
+
       result.availableGeneratedFiles = (Map<Path, Set<RelativePath>>) ois.readObject();
       result.deferredSourceFiles = (Map<Path, Pair<Path, ISourceFileContent>>) ois.readObject();
 

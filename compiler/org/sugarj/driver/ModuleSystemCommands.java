@@ -3,6 +3,7 @@ package org.sugarj.driver;
 import static org.sugarj.driver.ATermCommands.isApplication;
 import static org.sugarj.driver.Log.log;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -13,6 +14,7 @@ import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.HybridInterpreter;
+import org.sugarj.driver.path.AbsolutePath;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
 import org.sugarj.driver.path.RelativeSourceLocationPath;
@@ -309,12 +311,15 @@ public class ModuleSystemCommands {
     return null;
   } 
   
+  public static void registerResults(Result res, Environment env, String path) throws IOException {
+    Path dep = searchFile(FileCommands.dropExtension(path), ".dep", env);
+    if (dep != null)
+      res.addDependency(dep, env);
+  }
+  
   public static void registerResults(Result res, Environment env, RelativePath... ps) throws IOException {
-    for (RelativePath p : ps) {
-      Path dep = searchFile(FileCommands.dropExtension(p.getRelativePath()), ".dep", env);
-      if (dep != null)
-        res.addDependency(dep, env);
-    }
+    for (RelativePath p : ps)
+      registerResults(res, env, p.getRelativePath());
   }
   
   public static void registerResults(Result res, Environment env, Collection<? extends RelativePath> ps) throws IOException {
@@ -334,5 +339,16 @@ public class ModuleSystemCommands {
       return res != null && res.isUpToDate(res.getSourceFile(), environment);
     }
     return false;
+  }
+
+  public static void registerGeneratedFiles(String modulePath, Result res, Environment environment) throws IOException {
+    String fileName = FileCommands.fileName(modulePath);
+    RelativePath binDir = environment.new RelativePathBin(FileCommands.dropFilename(modulePath));
+    
+    for (File file : binDir.getFile().listFiles()) {
+      String otherFileName = FileCommands.fileName(file.getAbsolutePath());
+      if (fileName.equals(otherFileName))
+        res.addGeneratedFile(new AbsolutePath(file.getAbsolutePath()));
+    }
   }
 }
