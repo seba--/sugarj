@@ -53,11 +53,11 @@ rules
     prim("SUGARJ_write", model-path, trans-path)
 
   get-imported-model(predicate) =
-    ?TypeImportDec(<id>);debug(!"imported-model: ");
+    ?TypeImportDec(<id>);
     import-model-path => (pkgs, name);
     <build-path> (pkgs, name) => path;
     prim("SUGARJ_resolve_model") => model;
-    where(predicate);debug(!"imported-model OK: ");
+    where(predicate);
     !(pkgs, name, path, model)
 
   ensure-import(|imp) = !(<id>, [imp]); union
