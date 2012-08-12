@@ -782,7 +782,7 @@ public class Driver {
       // first ignore any transformations, second apply the transformations (if any)
       
       String modulePath = FileCommands.getRelativeModulePath(ModuleSystemCommands.extractImportedModuleName(toplevelDecl, interp));
-      RelativeSourceLocationPath importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath());
+      RelativeSourceLocationPath importSourceFile = ModuleSystemCommands.locateCompilableFile(modulePath, environment);
       
       boolean skipImport = prepareImport(modulePath, importSourceFile, null, null, toplevelDecl, false);
       if (skipImport)
@@ -1118,7 +1118,7 @@ public class Driver {
               setErrorMessage(importTerm, "transformation '"+ path +"' not found in available imports");
           } 
           else { // this branch handles qualified transformations
-            RelativeSourceLocationPath importSourceFile = ModuleSystemCommands.locateSourceFile(path, environment.getSourcePath());
+            RelativeSourceLocationPath importSourceFile = ModuleSystemCommands.locateCompilableFile(path, environment);
             prepareImport(path, importSourceFile, null, null, importTerm, false);
             
             RelativePath p = ModuleSystemCommands.searchFile(path, ".str", environment);
@@ -1949,7 +1949,12 @@ public class Driver {
   private Result subcompile(RelativeSourceLocationPath importSourceFile) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     storeCaches(environment);
     try {
-      return compile(importSourceFile, monitor, currentlyProcessing);
+      if (importSourceFile.getAbsolutePath().endsWith(".model")) {
+        IStrategoTerm term = ATermCommands.atermFromFile(importSourceFile.getAbsolutePath());
+        return compile(term, importSourceFile, monitor, currentlyProcessing);
+      }
+      else
+        return compile(importSourceFile, monitor, currentlyProcessing);
     } finally {
       initializeCaches(environment, true);
     }

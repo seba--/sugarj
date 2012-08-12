@@ -3,6 +3,8 @@ package template;
 import org.sugarj.languages.Model;
 import org.sugarj.languages.Stratego;
 
+import transformation.Recursive;
+
 public sugar Core {
   desugarings
     template-to-sugar
@@ -13,12 +15,8 @@ public sugar Core {
       TransDec(TransDecHead(mods, name), TransBody([Rules([main-strategy, main-strategy2])]))
     where
       <compile-template-body> body => compiled-body;
-      main-strategy  := SDefNoArgs("main", Seq(Match(NoAnnoList(Tuple([Var("model"), Var("model-path"), Var("trans-path")]))), 
-                                           Seq(Build(Var("model")),
-                                           Seq(CallNoArgs(SVar("main")),
-                                           Prim("\"SUGARJ_compile\"", [Var("model-path"), Var("trans-path")])))));
+      main-strategy  := SDefNoArgs("main", Call(SVar("recursively-transform"), [Id(), CallNoArgs(SVar("main"))]));
       main-strategy2 := SDefNoArgs("main", compiled-body)
-
     
     compile-template-body = fail
 

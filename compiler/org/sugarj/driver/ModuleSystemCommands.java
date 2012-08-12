@@ -148,7 +148,19 @@ public class ModuleSystemCommands {
     return result;
   }
   
-  
+  public static RelativeSourceLocationPath locateCompilableFile(String modulePath, Environment environment) {
+    if (modulePath.startsWith("org/sugarj"))
+      return null;
+    
+    RelativeSourceLocationPath result = locateSourceFile(modulePath, environment.getSourcePath());
+    if (result == null) {
+      RelativePath p = searchBinFile(modulePath, ".model", environment);
+      if (p != null)
+        result = new RelativeSourceLocationPath(p, environment);
+    }
+    
+    return result;
+  }
   
   public static String extractImportedModuleName(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
     String name = null;

@@ -45,4 +45,3 @@ public class DataATMTest {
     System.out.println("Current state: " + state);
   }
 }
-
