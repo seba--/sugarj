@@ -2,7 +2,7 @@ package statemachine.test;
 
 import entity.test.Account<entity.ToJava>;
 import entity.test.Customer<entity.ToJava>;
-import statemachine.test.DataATM<statemachine.data.ToJava, entity.ToJava>;
+import statemachine.test.DataATM<statemachine.data.ToJava>;
 
 import java.util.HashSet;
 
@@ -45,3 +45,4 @@ public class DataATMTest {
     System.out.println("Current state: " + state);
   }
 }
+

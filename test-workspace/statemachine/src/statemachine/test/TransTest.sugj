@@ -6,5 +6,5 @@ import transformation.Recursive;
 
 public transformation TransTest {
   rules
-    main = recursively-transform(conforms-to-metamodel(|"Statemachine"), main-statemachine_ToJava)
+    main = recursively-transform(conforms-to-metamodel(|"statemachine.Language"), main-statemachine_ToJava)
 }

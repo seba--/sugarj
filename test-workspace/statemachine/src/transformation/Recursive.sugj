@@ -38,16 +38,16 @@ rules
     apply-renamings(|<Renamings>)
   
   get-imported-model(predicate) =
-    ?TypeImportDec(<id>);
+    ?TypeImportDec(<id>);debug(!"imported-model: ");
     import-model-path => (pkgs, name);
     <build-path> (pkgs, name) => path;
     prim("SUGARJ_resolve_model") => model;
-    where(predicate);
+    where(predicate);debug(!"imported-model OK: ");
     !(pkgs, name, path, model)
 
   ensure-import(|imp) = !(<id>, [imp]); union
 
   conforms-to-metamodel(|meta-model) =
-    collect-one(?ModelBody((meta-model, _)))
+    where(collect-one(?ModelDecHead(_, _, meta-model)))
 }
 

@@ -11,7 +11,7 @@ public sugar Language {
   rules
     entity-model :
       entity@EntityDec(mods, name, super, body) -> 
-      ModelDec(ModelDecHead(mods, name), ModelBody(("Entity", super, body)))
+      ModelDec(ModelDecHead(mods, name, "entity.Language"), ModelBody((super, body)))
 
   context-free syntax
     Entity -> ToplevelDeclaration

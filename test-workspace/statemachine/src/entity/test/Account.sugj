@@ -2,7 +2,7 @@ package entity.test;
 
 import entity.Language;
 
-import model entity.test.Customer;
+import entity.test.Customer;
 
 public entity Account {
   uid     :: Integer

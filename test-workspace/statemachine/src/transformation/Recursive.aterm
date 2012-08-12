@@ -1,1 +1,0 @@
-Call(SVar("try"), [CallNoArgs(SVar("old-name"))])

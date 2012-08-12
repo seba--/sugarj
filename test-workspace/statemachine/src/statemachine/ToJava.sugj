@@ -27,7 +27,7 @@ public template ToJava {
   $$transition-consequence : Transition(_, state@(Id(_))) -> [ >return $state#_instance;< ]
 
   $pkg = collect-one(?PackageDec(_,<id>))
-  $classname = collect-one(?ModelDecHead(_,<id>))
+  $classname = collect-one(?ModelDecHead(_,<id>,_))
 
   package $pkg;
 

@@ -4,7 +4,7 @@ import entity.Language;
 
 import java.util.Set;
 
-import model entity.test.Account;
+import entity.test.Account;
 
 public entity Customer {
   name     :: String

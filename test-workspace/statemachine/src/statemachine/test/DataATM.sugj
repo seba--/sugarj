@@ -4,7 +4,7 @@ import statemachine.Language;
 
 import statemachine.DataExtension;
 
-import model entity.test.Account;
+import entity.test.Account;
 
 public statemachine DataATM {
   initial state Init 

@@ -7,7 +7,7 @@ public sugar Language {
   rules
     statemachine-model :
       model@Statemachine(mods, name, body) -> 
-      ModelDec(ModelDecHead(mods, name), ModelBody(("Statemachine", body)))
+      ModelDec(ModelDecHead(mods, name, "statemachine.Language"), ModelBody(body))
 
   context-free syntax
     Statemachine -> ToplevelDeclaration

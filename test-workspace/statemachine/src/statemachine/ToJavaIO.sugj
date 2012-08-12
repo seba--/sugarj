@@ -20,7 +20,7 @@ public template ToJavaIO {
       where <split-init-last> ys => (ys',z)
 
   $pkg = collect-one(?PackageDec(_,<id>))
-  $classname = collect-one(?ModelDecHead(_,<id>))
+  $classname = collect-one(?ModelDecHead(_,<id>,_))
 
   package $pkg;
 

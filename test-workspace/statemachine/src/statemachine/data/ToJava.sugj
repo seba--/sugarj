@@ -8,14 +8,20 @@ import statemachine.data.ParametricEvent;
 import statemachine.data.TransitionCondition;
 import statemachine.data.TransitionEffect;
 
+import transformation.Recursive;
+
 public transformation ToJava {
   rules
     main =
-      ?orig;
-      where(oncetd(?ModelBody(("Statemachine",_))));
-      main-statemachine_ToJava;
-      copy-imports(|orig);
-      add-internal-data-decls(|orig)
+      recursively-transform(
+        conforms-to-metamodel(|"statemachine.Language") + conforms-to-metamodel(|"entity.Language"),
+        conforms-to-metamodel(|"statemachine.Language")
+          < {orig:
+              ?orig;debug(!"SM: ");
+              main-statemachine_ToJava;
+              copy-imports(|orig);
+              add-internal-data-decls(|orig);debug(!"SM OK: ")}
+          + debug(!"Entity: ");main-entity_ToJava;debug(!"Entity OK: "))
 
   rules
     copy-imports(|orig) =
