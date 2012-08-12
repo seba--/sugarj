@@ -17,11 +17,11 @@ public transformation ToJava {
         conforms-to-metamodel(|"statemachine.Language") + conforms-to-metamodel(|"entity.Language"),
         conforms-to-metamodel(|"statemachine.Language")
           < {orig:
-              ?orig;debug(!"SM: ");
+              ?orig;
               main-statemachine_ToJava;
               copy-imports(|orig);
-              add-internal-data-decls(|orig);debug(!"SM OK: ")}
-          + debug(!"Entity: ");main-entity_ToJava;debug(!"Entity OK: "))
+              add-internal-data-decls(|orig)}
+          + main-entity_ToJava)
 
   rules
     copy-imports(|orig) =

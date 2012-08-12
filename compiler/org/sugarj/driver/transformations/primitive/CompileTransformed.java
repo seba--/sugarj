@@ -49,9 +49,6 @@ class CompileTransformed extends AbstractPrimitive {
 
   @Override
   public boolean call(IContext context, Strategy[] svars, IStrategoTerm[] tvars) throws InterpreterException {
-    if (!generateFiles)
-      return false;
-    
     IStrategoTerm generatedModel = context.current();
     
     String modelPath = ATermCommands.getString(tvars[0]);
@@ -76,7 +73,10 @@ class CompileTransformed extends AbstractPrimitive {
     Result res;
     try {
       environment.getRenamings().add(0, new Renaming(modelPath, source.getRelativePath()));
-      res = Driver.compile(generatedModel, source, monitor, new LinkedHashMap<Path, Driver>());
+      if (generateFiles)
+        res = Driver.compile(generatedModel, source, monitor, new LinkedHashMap<Path, Driver>());
+      else
+        res = Driver.parse(generatedModel, source, monitor, new LinkedHashMap<Path, Driver>());
     } catch (Exception e) {
       Log.log.logErr(e.getMessage());
       return false;
