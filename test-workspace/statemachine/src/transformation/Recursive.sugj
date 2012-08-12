@@ -17,8 +17,9 @@ rules
     prim("SUGARJ_compile", model-path, trans-path)
 
   recursively-transform(model-predicate, trans) = ?(model, model-path, trans-path); 
-    {| Renamings: 
-         rules ( Renamings := [] );
+    {| Renamings, Stack: 
+         rules ( Renamings := [] 
+                 Stack := [model-path]);
          !model;
          (where(model-predicate) < trans + id) => generated;
          recursively-transform(model-predicate, trans | trans-path);
@@ -27,13 +28,20 @@ rules
 
   recursively-transform(model-predicate, trans | trans-path) =
     topdown(try(where(
-      {pkgs, name, model-path, model, generated:
+      {pkgs, name, model-path, model, generated, seen-before:
         get-imported-model(model-predicate) => (pkgs, name, model-path, model);
+        where(<elem> (model-path,<Stack>) => seen-before);
         <trans> model => generated;
         rules( Renamings := [ (pkgs, name, (<conc-strings> (name, <name-suffix> trans-path)))
-                            | <Renamings>]);
-        where(recursively-transform(model-predicate, trans | trans-path));
-        prim("SUGARJ_compile", model-path, trans-path)
+                            | <Renamings>] 
+               Stack := [ model-path | <Stack> ] );
+        tryfinally(
+          if seen-before
+            then prim("SUGARJ_write", model-path, trans-path)
+            else where(recursively-transform(model-predicate, trans | trans-path));
+                 prim("SUGARJ_compile", model-path, trans-path)
+          end,
+          rules( Stack := <Stack; Tl> ))
       })));
     apply-renamings(|<Renamings>)
   
@@ -49,5 +57,7 @@ rules
 
   conforms-to-metamodel(|meta-model) =
     where(collect-one(?ModelDecHead(_, _, meta-model)))
+
+  tryfinally(s, final) = s < final + (final; fail)
 }
 

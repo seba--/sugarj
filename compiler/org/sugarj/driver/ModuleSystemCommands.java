@@ -140,7 +140,8 @@ public class ModuleSystemCommands {
       return null;
     
     RelativeSourceLocationPath result = searchFileInSourceLocationPath(modulePath, ".sugj", sourcePath);
-    
+    if (result == null)
+      result = searchFileInSourceLocationPath(modulePath, ".model", sourcePath);
     if (result == null)
       result = searchFileInSourceLocationPath(modulePath, ".java", sourcePath);
     

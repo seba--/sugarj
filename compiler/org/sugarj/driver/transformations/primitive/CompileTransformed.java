@@ -70,6 +70,7 @@ class CompileTransformed extends AbstractPrimitive {
     try {
       ATermCommands.atermToFile(generatedModel, source);
     } catch (IOException e) {
+      Log.log.logErr(e.getLocalizedMessage());
     }
     
     Result res;
