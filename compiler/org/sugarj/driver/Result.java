@@ -151,16 +151,22 @@ public class Result {
 //      }
   }
   
-  public boolean hasDependency(Path otherDep) {
-    return dependencies.containsKey(otherDep);
+  public boolean hasDependency(Path otherDep, Environment env) throws IOException {
+    if (dependencies.containsKey(otherDep))
+      return true;
+    for (Path dep : dependencies.keySet())
+      if (Result.readDependencyFile(dep, env).hasDependency(otherDep, env))
+        return true;
+    return false;
   }
   
   public Collection<Path> getFileDependencies(Environment env) throws IOException {
     if (allDependentFiles == null) {
-      allDependentFiles = new HashSet<Path>(generatedFileHashes.keySet());
-      allDependentFiles.addAll(dependingFileHashes.keySet());
+      HashSet<Path> deps = new HashSet<Path>(generatedFileHashes.keySet());
+      deps.addAll(dependingFileHashes.keySet());
       for (Path depFile : dependencies.keySet())
-        allDependentFiles.addAll(readDependencyFile(depFile, env).getFileDependencies(env));
+        deps.addAll(readDependencyFile(depFile, env).getFileDependencies(env));
+      synchronized(this) { allDependentFiles = deps; }
     }
 
     return allDependentFiles;
@@ -264,10 +270,9 @@ public class Result {
       if (FileCommands.fileHash(entry.getKey()) != entry.getValue())
         return false;
 
-    for (Entry<Path, Integer> entry : dependencies.entrySet()) {
+    for (Entry<Path, Integer> entry : dependencies.entrySet())
       if (FileCommands.fileHash(entry.getKey()) != entry.getValue())
         return false;
-    }
 
     return true;
   }

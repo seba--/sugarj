@@ -12,23 +12,23 @@ import java.lang.ref.WeakReference;
 { 
   public static $Extends$Interfaces_1_0 instance = new $Extends$Interfaces_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy m_16)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy p_21)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("ExtendsInterfaces_1_0");
-    Fail40:
+    Fail86:
     { 
-      IStrategoTerm f_104 = null;
-      IStrategoTerm e_104 = null;
+      IStrategoTerm l_116 = null;
+      IStrategoTerm k_116 = null;
       if(term.getTermType() != IStrategoTerm.APPL || renaming._consExtendsInterfaces_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail40;
-      e_104 = term.getSubterm(0);
-      IStrategoList annos26 = term.getAnnotations();
-      f_104 = annos26;
-      term = m_16.invoke(context, e_104);
+        break Fail86;
+      k_116 = term.getSubterm(0);
+      IStrategoList annos67 = term.getAnnotations();
+      l_116 = annos67;
+      term = p_21.invoke(context, k_116);
       if(term == null)
-        break Fail40;
-      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consExtendsInterfaces_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, f_104));
+        break Fail86;
+      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consExtendsInterfaces_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, l_116));
       context.popOnSuccess();
       if(true)
         return term;

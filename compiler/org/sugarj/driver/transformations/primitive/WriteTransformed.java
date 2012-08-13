@@ -10,8 +10,8 @@ import org.spoofax.interpreter.library.AbstractPrimitive;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.sugarj.driver.ATermCommands;
+import org.sugarj.driver.Driver;
 import org.sugarj.driver.Environment;
-import org.sugarj.driver.Log;
 import org.sugarj.driver.ModuleSystemCommands;
 import org.sugarj.driver.path.RelativePath;
 import org.sugarj.driver.path.RelativeSourceLocationPath;
@@ -25,10 +25,12 @@ import org.sugarj.driver.path.RelativeSourceLocationPath;
 class WriteTransformed extends AbstractPrimitive {
 
   private boolean generateFiles;
+  private Driver driver;
   private Environment environment;
   
-  public WriteTransformed(boolean generateFiles, Environment environment) {
+  public WriteTransformed(Driver driver, boolean generateFiles, Environment environment) {
     super("SUGARJ_write", 0, 2);
+    this.driver = driver;
     this.environment = environment;
     this.generateFiles = generateFiles;
   }
@@ -56,14 +58,16 @@ class WriteTransformed extends AbstractPrimitive {
     try {
       ATermCommands.atermToFile(generatedModel, source);
     } catch (IOException e) {
-      Log.log.logErr(e.getLocalizedMessage());
+      driver.setErrorMessage(e.getLocalizedMessage());
     }
     
     try {
       RelativePath model = ModuleSystemCommands.searchFile(modelPath, ".model", environment);
       ModuleSystemCommands.markGenerated(source, environment, model, transformationPaths);
     } catch (IOException e) {
-      Log.log.logErr(e.getLocalizedMessage());
+      driver.setErrorMessage(e.getLocalizedMessage());
+    } catch (ClassNotFoundException e) {
+      driver.setErrorMessage(e.getLocalizedMessage());
     }
     
     return true;

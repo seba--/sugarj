@@ -316,6 +316,7 @@ public class Driver {
     this.monitor = monitor;
     log.beginTask("processing", "BEGIN PROCESSING " + sourceFile.getRelativePath());
     boolean success = false;
+    List<Renaming> oldRenamings = new LinkedList<Renaming>(environment.getRenamings());
     try {
       init(declProvider, sourceFile, generateFiles);
       currentlyProcessing.put(sourceFile, this);
@@ -409,6 +410,7 @@ public class Driver {
       success = false;
     }
     finally {
+      environment.setRenamings(oldRenamings);
       currentlyProcessing.remove(sourceFile);
       log.endTask(success, "done processing " + sourceFile, "failed processing " + sourceFile);
     }
@@ -722,7 +724,10 @@ public class Driver {
   private void generateModel(String modelName, IStrategoTerm body) throws IOException {
     log.beginTask("Generate model.");
     try {
-      RelativePath modelOutFile = environment.new RelativePathBin(relPackageNameSep() + modelName + ".model");
+      RelativePath modelOutFile = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".model");
+      
+      if (modelOutFile.equals(sourceFile))
+        return;
       
       IStrategoTerm modelTerm = makeDesugaredSyntaxTree(body);
       driverResult.generateFile(modelOutFile, ATermCommands.atermToString(modelTerm));
@@ -1156,7 +1161,7 @@ public class Driver {
       IStrategoTerm dec = isApplication(toplevelDecl, "JavaTypeDec") ? getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0) : toplevelDecl;
       
       for (Renaming ren : environment.getRenamings())
-        dec = ATermCommands.renameJava(dec, ren, renamingContext);
+        dec = ATermCommands.applyRenaming(dec, ren, renamingContext);
       
       String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
       
@@ -1678,7 +1683,13 @@ public class Driver {
     driverResult.logError(msg);
     ATermCommands.setErrorMessage(toplevelDecl, msg);
   }
-  
+
+  public void setErrorMessage(String msg) {
+    driverResult.logError(msg);
+    if (lastSugaredToplevelDecl != null)
+      ATermCommands.setErrorMessage(lastSugaredToplevelDecl, msg);
+  }
+
   private IStrategoTerm currentDesugar(IStrategoTerm term) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     // assimilate toplevelDec using current transformation
     log.beginTask(
@@ -1958,6 +1969,10 @@ public class Driver {
     } finally {
       initializeCaches(environment, true);
     }
+  }
+
+  public Context getRenamingContext() {
+    return renamingContext;
   }
 
 }

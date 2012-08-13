@@ -34,6 +34,8 @@ import org.strategoxt.tools.sdf_desugar_0_0;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.transformations.extraction.extract_sdf_0_0;
 import org.sugarj.driver.transformations.extraction.extract_str_0_0;
+import org.sugarj.driver.transformations.renaming.apply_renaming_0_3;
+import org.sugarj.driver.transformations.renaming.rename_declarations_0_3;
 import org.sugarj.driver.transformations.renaming.rename_java_0_3;
 import org.sugarj.util.Renaming;
 
@@ -408,14 +410,14 @@ public class ATermCommands {
   /**
    * Renames names in the given Java term. 
    */
-  public static IStrategoTerm renameJava(IStrategoTerm term, Renaming ren, Context context) throws IOException, InvalidParseTableException {
+  public static IStrategoTerm applyRenaming(IStrategoTerm term, Renaming ren, Context context) throws IOException, InvalidParseTableException {
     IStrategoTerm result = null;
     try {
       List<IStrategoTerm> pkgs = new LinkedList<IStrategoTerm>();
       for (String pkg : ren.pkgs)
         pkgs.add(makeString(pkg, null));
       
-      result = rename_java_0_3.instance.invoke(context, term, makeList("Packages", pkgs), makeString(ren.from, null), makeString(ren.to, null));
+      result = apply_renaming_0_3.instance.invoke(context, term, makeList("Packages", pkgs), makeString(ren.from, null), makeString(ren.to, null));
     }
     catch (StrategoExit e) {
       if (e.getValue() != 0 || result == null)
@@ -423,7 +425,26 @@ public class ATermCommands {
     }
     return result;
   }
-  
+
+  /**
+   * Renames names in the given Java term. 
+   */
+  public static IStrategoTerm renameDeclarations(IStrategoTerm term, Renaming ren, Context context) throws IOException, InvalidParseTableException {
+    IStrategoTerm result = null;
+    try {
+      List<IStrategoTerm> pkgs = new LinkedList<IStrategoTerm>();
+      for (String pkg : ren.pkgs)
+        pkgs.add(makeString(pkg, null));
+      
+      result = rename_declarations_0_3.instance.invoke(context, term, makeList("Packages", pkgs), makeString(ren.from, null), makeString(ren.to, null));
+    }
+    catch (StrategoExit e) {
+      if (e.getValue() != 0 || result == null)
+        throw new RuntimeException("Stratego extraction failed", e);
+    }
+    return result;
+  }
+
   public static String getLocalImportName(IStrategoTerm term, HybridInterpreter interp) throws IOException {
     if (isApplication(term, "TransImportDec"))
       term = getApplicationSubterm(term, "TransImportDec", 1);

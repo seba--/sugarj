@@ -14,12 +14,12 @@ import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.library.AbstractPrimitive;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.jsglr.client.InvalidParseTableException;
 import org.spoofax.jsglr.shared.BadTokenException;
 import org.sugarj.driver.ATermCommands;
 import org.sugarj.driver.Driver;
 import org.sugarj.driver.Environment;
 import org.sugarj.driver.FileCommands;
-import org.sugarj.driver.Log;
 import org.sugarj.driver.ModuleSystemCommands;
 import org.sugarj.driver.Origin;
 import org.sugarj.driver.Result;
@@ -37,12 +37,14 @@ import org.sugarj.util.Renaming;
  */
 class CompileTransformed extends AbstractPrimitive {
 
+  private Driver driver;
   private boolean generateFiles;
   private Environment environment;
   private IProgressMonitor monitor;
   
-  public CompileTransformed(boolean generateFiles, Environment environment, IProgressMonitor monitor) {
+  public CompileTransformed(Driver driver, boolean generateFiles, Environment environment, IProgressMonitor monitor) {
     super("SUGARJ_compile", 0, 2);
+    this.driver = driver;
     this.environment = environment;
     this.monitor = monitor;
     this.generateFiles = generateFiles;
@@ -63,23 +65,29 @@ class CompileTransformed extends AbstractPrimitive {
         String transPath = ATermCommands.getString(pathTerm);
         transformationPaths.add(new RelativePath(transPath));
       }
-    
+
     RelativeSourceLocationPath source = ModuleSystemCommands.getTransformedModelSourceFilePath(modelPath, transformationPaths, environment);
+
     try {
+      Renaming ren = new Renaming(modelPath, source.getRelativePath());
+      environment.getRenamings().add(0, ren);
+      generatedModel = ATermCommands.renameDeclarations(generatedModel, ren, driver.getRenamingContext());
+
       ATermCommands.atermToFile(generatedModel, source);
     } catch (IOException e) {
-      Log.log.logErr(e.getLocalizedMessage());
+      driver.setErrorMessage(e.getLocalizedMessage());
+    } catch (InvalidParseTableException e) {
+      driver.setErrorMessage(e.getLocalizedMessage());
     }
     
     Result res;
     try {
-      environment.getRenamings().add(0, new Renaming(modelPath, source.getRelativePath()));
       if (generateFiles)
         res = Driver.compile(generatedModel, source, monitor, new LinkedHashMap<Path, Driver>());
       else
         res = Driver.parse(generatedModel, source, monitor, new LinkedHashMap<Path, Driver>());
     } catch (Exception e) {
-      Log.log.logErr(e.getMessage());
+      driver.setErrorMessage(e.getMessage());
       return false;
     } finally {
       environment.getRenamings().remove(0);
@@ -95,17 +103,17 @@ class CompileTransformed extends AbstractPrimitive {
       
       if (res.hasFailed()) {
         for (BadTokenException e : res.getParseErrors())
-          Log.log.logErr("line " + e.getLineNumber() + ": " + e.getLocalizedMessage());
+          driver.setErrorMessage("line " + e.getLineNumber() + ": " + e.getLocalizedMessage());
         for (String err : res.getCollectedErrors())
-          Log.log.logErr(err);
+          driver.setErrorMessage(err);
         return false;
       }
     
       checkCommunicationIntegrity(modelPath, transformationPaths, source, res);
     } catch (IOException e) {
-      Log.log.logErr(e.getMessage());
+      driver.setErrorMessage(e.getMessage());
     } catch (ClassNotFoundException e) {
-      Log.log.logErr(e.getMessage());
+      driver.setErrorMessage(e.getMessage());
     }
     
     return true;
@@ -135,7 +143,7 @@ class CompileTransformed extends AbstractPrimitive {
     
     for (Path p : transformedModelDeps)
       if (FileCommands.exists(p)) {
-        boolean ok = 
+        boolean ok = false || 
             source.equals(p) ||
             res.getDirectlyGeneratedFiles().contains(p) ||
             modelDeps.contains(p) || 
@@ -143,7 +151,7 @@ class CompileTransformed extends AbstractPrimitive {
         if (!ok) {
           // transformations may generated other artifacts, given that their dependencies are marked in the current result
           Path dep = new AbsolutePath(FileCommands.dropExtension(p.getAbsolutePath()) + ".dep");
-          if (FileCommands.exists(dep) && res.hasDependency(dep)) {
+          if (FileCommands.exists(dep) && res.hasDependency(dep, environment)) {
             Path originFile = new AbsolutePath(FileCommands.dropExtension(p.getAbsolutePath()) + ".origin");
             Origin origin = FileCommands.readObjectFromFile(originFile);
             ok = origin != null && origin.isGenerated();
@@ -154,9 +162,10 @@ class CompileTransformed extends AbstractPrimitive {
       }
 
     if (!failed.isEmpty()) {
-      Log.log.logErr("Violation of communication integrity: Generated model refers to the following artifacts, which neither the model nor the transformation refers to.");
+      StringBuilder b = new StringBuilder("Violation of communication integrity: Generated model refers to the following artifacts, which neither the model nor the transformation refers to.\n");
       for (String p : failed)
-        Log.log.logErr("  " + p);
+        b.append("  ").append(p).append('\n');
+      driver.setErrorMessage(b.toString());
     }
   }
 }

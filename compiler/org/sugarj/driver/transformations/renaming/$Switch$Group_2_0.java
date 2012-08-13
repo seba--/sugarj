@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Switch$Group_2_0 instance = new $Switch$Group_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy u_19, Strategy v_19)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy x_24, Strategy y_24)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("SwitchGroup_2_0");
-    Fail75:
+    Fail121:
     { 
-      IStrategoTerm x_112 = null;
-      IStrategoTerm v_112 = null;
-      IStrategoTerm w_112 = null;
-      IStrategoTerm y_112 = null;
+      IStrategoTerm l_125 = null;
+      IStrategoTerm j_125 = null;
+      IStrategoTerm k_125 = null;
+      IStrategoTerm m_125 = null;
       if(term.getTermType() != IStrategoTerm.APPL || renaming._consSwitchGroup_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail75;
-      v_112 = term.getSubterm(0);
-      w_112 = term.getSubterm(1);
-      IStrategoList annos58 = term.getAnnotations();
-      x_112 = annos58;
-      term = u_19.invoke(context, v_112);
+        break Fail121;
+      j_125 = term.getSubterm(0);
+      k_125 = term.getSubterm(1);
+      IStrategoList annos99 = term.getAnnotations();
+      l_125 = annos99;
+      term = x_24.invoke(context, j_125);
       if(term == null)
-        break Fail75;
-      y_112 = term;
-      term = v_19.invoke(context, w_112);
+        break Fail121;
+      m_125 = term;
+      term = y_24.invoke(context, k_125);
       if(term == null)
-        break Fail75;
-      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consSwitchGroup_2, new IStrategoTerm[]{y_112, term}), checkListAnnos(termFactory, x_112));
+        break Fail121;
+      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consSwitchGroup_2, new IStrategoTerm[]{m_125, term}), checkListAnnos(termFactory, l_125));
       context.popOnSuccess();
       if(true)
         return term;

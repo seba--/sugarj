@@ -18,6 +18,8 @@ rules
 
   recursively-transform(model-predicate, trans) = ?(model, model-path, trans-path); 
     {| Renamings, Stack: 
+         where(<split-packages-decname> model-path => (pkgs, name);
+               !(pkgs, name, (<conc-strings> (name, <name-suffix> trans-path))) => renaming);
          rules ( Renamings := [] 
                  Stack := [model-path]);
          !model;
@@ -28,23 +30,27 @@ rules
 
   recursively-transform(model-predicate, trans | trans-path) =
     topdown(try(where(
-      {pkgs, name, model-path, model, generated, seen-before:
+      {pkgs, name, model-path, model, generated, seen-before, new-renaming:
         get-imported-model(model-predicate) => (pkgs, name, model-path, model);
         where(<elem < !"yes" + !"no"> (model-path,<Stack>) => seen-before);
         <trans> model => generated;
-        rules( Renamings := [ (pkgs, name, (<conc-strings> (name, <name-suffix> trans-path)))
-                            | <Renamings>] 
+        where(!(pkgs, name, (<conc-strings> (name, <name-suffix> trans-path))) => new-renaming);
+        rules( Renamings := [ new-renaming | <Renamings>] 
                Stack := [ model-path | <Stack> ] );
         tryfinally(
           if where(!seen-before; equal(|"yes"))
             then write-renamed(|model-path, trans-path)
-            else recursively-transform(model-predicate, trans | trans-path);
-                 compile-renamed(|model-path, trans-path)
+            else {| Renamings:
+                   rules ( Renamings := [new-renaming] );
+                   recursively-transform(model-predicate, trans | trans-path);
+                   compile-renamed(|model-path, trans-path)
+                 |}
           end,
           rules( Stack := <Stack; Tl> ))
       })))
   
   compile-renamed(|model-path, trans-path) =
+    where(!(model-path,trans-path) ;debug(!"compile: "); Renamings; debug(!"Rename: "));
     apply-renamings(|<Renamings>);
     prim("SUGARJ_compile", model-path, trans-path)
 

@@ -24,6 +24,8 @@ import java.lang.ref.WeakReference;
 
   public static IStrategoConstructor _consSome_1;
 
+  public static IStrategoConstructor _conssorts_1;
+
   public static IStrategoConstructor _consDR_DUMMY_0;
 
   public static IStrategoConstructor _consDR_UNDEFINE_1;
@@ -424,6 +426,86 @@ import java.lang.ref.WeakReference;
 
   public static IStrategoConstructor _consCompilationUnit_3;
 
+  public static IStrategoConstructor _consToModelTerm_1;
+
+  public static IStrategoConstructor _consModelBody_1;
+
+  public static IStrategoConstructor _consModelDecHead_3;
+
+  public static IStrategoConstructor _consModelDec_2;
+
+  public static IStrategoConstructor _consChecksBody_1;
+
+  public static IStrategoConstructor _consChecksDecHead_2;
+
+  public static IStrategoConstructor _consChecksDec_2;
+
+  public static IStrategoConstructor _consEditorServicesBody_1;
+
+  public static IStrategoConstructor _consEditorServicesDecHead_2;
+
+  public static IStrategoConstructor _consEditorServicesDec_2;
+
+  public static IStrategoConstructor _consCompileError_2;
+
+  public static IStrategoConstructor _consgrammar_elem_1;
+
+  public static IStrategoConstructor _constransformation_elem_1;
+
+  public static IStrategoConstructor _conssyntax_1;
+
+  public static IStrategoConstructor _conslexical_syntax_1;
+
+  public static IStrategoConstructor _conscontext_free_syntax_1;
+
+  public static IStrategoConstructor _consvariables_1;
+
+  public static IStrategoConstructor _conslexical_variables_1;
+
+  public static IStrategoConstructor _conspriorities_1;
+
+  public static IStrategoConstructor _conslexical_priorities_1;
+
+  public static IStrategoConstructor _conscontext_free_priorities_1;
+
+  public static IStrategoConstructor _consrestrictions_1;
+
+  public static IStrategoConstructor _conslexical_restrictions_1;
+
+  public static IStrategoConstructor _conscontext_free_restrictions_1;
+
+  public static IStrategoConstructor _consaliases_1;
+
+  public static IStrategoConstructor _consStrategies_1;
+
+  public static IStrategoConstructor _consSignature_1;
+
+  public static IStrategoConstructor _consRules_1;
+
+  public static IStrategoConstructor _consOverlays_1;
+
+  public static IStrategoConstructor _consDesugarings_1;
+
+  public static IStrategoConstructor _consPureDesugaring_1;
+
+  public static IStrategoConstructor _consInjectDesugaring_4;
+
+  public static IStrategoConstructor _consSugarCompilationUnit_3;
+
+  public static IStrategoConstructor _consJavaTypeDec_1;
+
+  public static IStrategoConstructor _consSugarDec_2;
+
+  public static IStrategoConstructor _consSugarDecHead_2;
+
+  public static IStrategoConstructor _consNativeSugarDecHead_3;
+
+  public static IStrategoConstructor _consSuperSugarDec_1;
+
+  public static IStrategoConstructor _consSugarBody_1;
+
+  public static IStrategoConstructor _consNativeSugarBody_1;
+
   public static Context init(Context context)
   { 
     synchronized(renaming.class)
@@ -470,6 +552,7 @@ import java.lang.ref.WeakReference;
     _consConc_2 = termFactory.makeConstructor("Conc", 2);
     _consNone_0 = termFactory.makeConstructor("None", 0);
     _consSome_1 = termFactory.makeConstructor("Some", 1);
+    _conssorts_1 = termFactory.makeConstructor("sorts", 1);
     _consDR_DUMMY_0 = termFactory.makeConstructor("DR_DUMMY", 0);
     _consDR_UNDEFINE_1 = termFactory.makeConstructor("DR_UNDEFINE", 1);
     _consNamedEscape_1 = termFactory.makeConstructor("NamedEscape", 1);
@@ -670,6 +753,46 @@ import java.lang.ref.WeakReference;
     _consStaticImportOnDemandDec_1 = termFactory.makeConstructor("StaticImportOnDemandDec", 1);
     _consSemicolon_0 = termFactory.makeConstructor("Semicolon", 0);
     _consCompilationUnit_3 = termFactory.makeConstructor("CompilationUnit", 3);
+    _consToModelTerm_1 = termFactory.makeConstructor("ToModelTerm", 1);
+    _consModelBody_1 = termFactory.makeConstructor("ModelBody", 1);
+    _consModelDecHead_3 = termFactory.makeConstructor("ModelDecHead", 3);
+    _consModelDec_2 = termFactory.makeConstructor("ModelDec", 2);
+    _consChecksBody_1 = termFactory.makeConstructor("ChecksBody", 1);
+    _consChecksDecHead_2 = termFactory.makeConstructor("ChecksDecHead", 2);
+    _consChecksDec_2 = termFactory.makeConstructor("ChecksDec", 2);
+    _consEditorServicesBody_1 = termFactory.makeConstructor("EditorServicesBody", 1);
+    _consEditorServicesDecHead_2 = termFactory.makeConstructor("EditorServicesDecHead", 2);
+    _consEditorServicesDec_2 = termFactory.makeConstructor("EditorServicesDec", 2);
+    _consCompileError_2 = termFactory.makeConstructor("CompileError", 2);
+    _consgrammar_elem_1 = termFactory.makeConstructor("grammar-elem", 1);
+    _constransformation_elem_1 = termFactory.makeConstructor("transformation-elem", 1);
+    _conssyntax_1 = termFactory.makeConstructor("syntax", 1);
+    _conslexical_syntax_1 = termFactory.makeConstructor("lexical-syntax", 1);
+    _conscontext_free_syntax_1 = termFactory.makeConstructor("context-free-syntax", 1);
+    _consvariables_1 = termFactory.makeConstructor("variables", 1);
+    _conslexical_variables_1 = termFactory.makeConstructor("lexical-variables", 1);
+    _conspriorities_1 = termFactory.makeConstructor("priorities", 1);
+    _conslexical_priorities_1 = termFactory.makeConstructor("lexical-priorities", 1);
+    _conscontext_free_priorities_1 = termFactory.makeConstructor("context-free-priorities", 1);
+    _consrestrictions_1 = termFactory.makeConstructor("restrictions", 1);
+    _conslexical_restrictions_1 = termFactory.makeConstructor("lexical-restrictions", 1);
+    _conscontext_free_restrictions_1 = termFactory.makeConstructor("context-free-restrictions", 1);
+    _consaliases_1 = termFactory.makeConstructor("aliases", 1);
+    _consStrategies_1 = termFactory.makeConstructor("Strategies", 1);
+    _consSignature_1 = termFactory.makeConstructor("Signature", 1);
+    _consRules_1 = termFactory.makeConstructor("Rules", 1);
+    _consOverlays_1 = termFactory.makeConstructor("Overlays", 1);
+    _consDesugarings_1 = termFactory.makeConstructor("Desugarings", 1);
+    _consPureDesugaring_1 = termFactory.makeConstructor("PureDesugaring", 1);
+    _consInjectDesugaring_4 = termFactory.makeConstructor("InjectDesugaring", 4);
+    _consSugarCompilationUnit_3 = termFactory.makeConstructor("SugarCompilationUnit", 3);
+    _consJavaTypeDec_1 = termFactory.makeConstructor("JavaTypeDec", 1);
+    _consSugarDec_2 = termFactory.makeConstructor("SugarDec", 2);
+    _consSugarDecHead_2 = termFactory.makeConstructor("SugarDecHead", 2);
+    _consNativeSugarDecHead_3 = termFactory.makeConstructor("NativeSugarDecHead", 3);
+    _consSuperSugarDec_1 = termFactory.makeConstructor("SuperSugarDec", 1);
+    _consSugarBody_1 = termFactory.makeConstructor("SugarBody", 1);
+    _consNativeSugarBody_1 = termFactory.makeConstructor("NativeSugarBody", 1);
   }
 
   public static void initConstants(ITermFactory termFactory)

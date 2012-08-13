@@ -12,21 +12,14 @@ import java.lang.ref.WeakReference;
 { 
   public static rename_java_0_3 instance = new rename_java_0_3();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, IStrategoTerm ref_l_12, IStrategoTerm ref_m_12, IStrategoTerm ref_n_12)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, IStrategoTerm y_14, IStrategoTerm z_14, IStrategoTerm a_15)
   { 
-    TermReference l_12 = new TermReference(ref_l_12);
-    TermReference m_12 = new TermReference(ref_m_12);
-    TermReference n_12 = new TermReference(ref_n_12);
     context.push("rename_java_0_3");
-    Fail0:
+    Fail2:
     { 
-      lifted6 lifted65 = new lifted6();
-      lifted65.l_12 = l_12;
-      lifted65.m_12 = m_12;
-      lifted65.n_12 = n_12;
-      term = topdown_1_0.instance.invoke(context, term, lifted65);
+      term = do_rename_java_0_3.instance.invoke(context, term, y_14, z_14, a_15);
       if(term == null)
-        break Fail0;
+        break Fail2;
       context.popOnSuccess();
       if(true)
         return term;

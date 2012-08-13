@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Lazy$Or_2_0 instance = new $Lazy$Or_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy z_22, Strategy a_23)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy c_28, Strategy d_28)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("LazyOr_2_0");
-    Fail121:
+    Fail167:
     { 
-      IStrategoTerm u_121 = null;
-      IStrategoTerm s_121 = null;
-      IStrategoTerm t_121 = null;
-      IStrategoTerm w_121 = null;
+      IStrategoTerm n_137 = null;
+      IStrategoTerm l_137 = null;
+      IStrategoTerm m_137 = null;
+      IStrategoTerm o_137 = null;
       if(term.getTermType() != IStrategoTerm.APPL || renaming._consLazyOr_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail121;
-      s_121 = term.getSubterm(0);
-      t_121 = term.getSubterm(1);
-      IStrategoList annos101 = term.getAnnotations();
-      u_121 = annos101;
-      term = z_22.invoke(context, s_121);
+        break Fail167;
+      l_137 = term.getSubterm(0);
+      m_137 = term.getSubterm(1);
+      IStrategoList annos142 = term.getAnnotations();
+      n_137 = annos142;
+      term = c_28.invoke(context, l_137);
       if(term == null)
-        break Fail121;
-      w_121 = term;
-      term = a_23.invoke(context, t_121);
+        break Fail167;
+      o_137 = term;
+      term = d_28.invoke(context, m_137);
       if(term == null)
-        break Fail121;
-      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consLazyOr_2, new IStrategoTerm[]{w_121, term}), checkListAnnos(termFactory, u_121));
+        break Fail167;
+      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consLazyOr_2, new IStrategoTerm[]{o_137, term}), checkListAnnos(termFactory, n_137));
       context.popOnSuccess();
       if(true)
         return term;

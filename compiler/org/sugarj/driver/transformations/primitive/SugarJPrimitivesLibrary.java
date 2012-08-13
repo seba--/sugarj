@@ -18,8 +18,8 @@ public class SugarJPrimitivesLibrary extends AbstractStrategoOperatorRegistry {
   public SugarJPrimitivesLibrary(Driver driver, Environment env, boolean generateFiles, IProgressMonitor monitor) {
     add(new ResolveModel(env));
     add(new CurrentPackage(driver));
-    add(new CompileTransformed(generateFiles, env, monitor));
-    add(new WriteTransformed(generateFiles, env));
+    add(new CompileTransformed(driver, generateFiles, env, monitor));
+    add(new WriteTransformed(driver, generateFiles, env));
     add(new TransformModel(env, monitor));
     add(new RenameMainArgs());
   }

@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Assign$Div_2_0 instance = new $Assign$Div_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy n_22, Strategy o_22)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy q_27, Strategy r_27)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("AssignDiv_2_0");
-    Fail115:
+    Fail161:
     { 
-      IStrategoTerm l_120 = null;
-      IStrategoTerm j_120 = null;
-      IStrategoTerm k_120 = null;
-      IStrategoTerm m_120 = null;
+      IStrategoTerm b_136 = null;
+      IStrategoTerm u_135 = null;
+      IStrategoTerm y_135 = null;
+      IStrategoTerm d_136 = null;
       if(term.getTermType() != IStrategoTerm.APPL || renaming._consAssignDiv_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail115;
-      j_120 = term.getSubterm(0);
-      k_120 = term.getSubterm(1);
-      IStrategoList annos95 = term.getAnnotations();
-      l_120 = annos95;
-      term = n_22.invoke(context, j_120);
+        break Fail161;
+      u_135 = term.getSubterm(0);
+      y_135 = term.getSubterm(1);
+      IStrategoList annos136 = term.getAnnotations();
+      b_136 = annos136;
+      term = q_27.invoke(context, u_135);
       if(term == null)
-        break Fail115;
-      m_120 = term;
-      term = o_22.invoke(context, k_120);
+        break Fail161;
+      d_136 = term;
+      term = r_27.invoke(context, y_135);
       if(term == null)
-        break Fail115;
-      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consAssignDiv_2, new IStrategoTerm[]{m_120, term}), checkListAnnos(termFactory, l_120));
+        break Fail161;
+      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consAssignDiv_2, new IStrategoTerm[]{d_136, term}), checkListAnnos(termFactory, b_136));
       context.popOnSuccess();
       if(true)
         return term;

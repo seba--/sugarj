@@ -325,11 +325,11 @@ public class ModuleSystemCommands {
     return null;
   } 
   
-  public static void markGenerated(RelativePath generatedModel, Environment env, RelativePath model, List<RelativePath> transformations) throws IOException {
+  public static void markGenerated(RelativePath generatedModel, Environment env, RelativePath model, List<RelativePath> transformations) throws IOException, ClassNotFoundException {
     markGenerated(generatedModel, null, env, model, transformations);
   }
 
-  public static void markGenerated(RelativePath generatedModel, Result res, Environment env, RelativePath model, List<RelativePath> transformations) throws IOException {
+  public static void markGenerated(RelativePath generatedModel, Result res, Environment env, RelativePath model, List<RelativePath> transformations) throws IOException, ClassNotFoundException {
     String modelPath = FileCommands.dropExtension(model.getRelativePath());
     Path modelDep = searchFile(modelPath, ".dep", env);
     if (modelDep == null)
@@ -349,9 +349,20 @@ public class ModuleSystemCommands {
     FileCommands.writeObjectToFile(p, origin);
     
     if (res != null) {
-      res.addDependency(modelDep, env);
-      for (Path usedTransformationDep : transformationDeps)
-        res.addDependency(usedTransformationDep, env);
+      registerDependency(res, p, env);
+    }
+  }
+  
+  private static void registerDependency(Result result, Path dep, Environment env) throws ClassNotFoundException, IOException {
+    result.addDependency(dep, env);
+    Path originPath = new AbsolutePath(FileCommands.dropExtension(dep.getAbsolutePath()) + ".origin");
+    if (FileCommands.exists(originPath)) {
+      Origin origin = FileCommands.readObjectFromFile(originPath);
+      if (origin != null && origin.isGenerated()) {
+        registerDependency(result, origin.getOriginalModel(), env);
+        for (Path transPath : origin.getUsedTransformations())
+          registerDependency(result, transPath, env);
+      }
     }
   }
   

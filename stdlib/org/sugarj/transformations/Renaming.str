@@ -2,9 +2,26 @@ module org/sugarj/transformations/Renaming
 imports
   libstrategolib 
   org/sugarj/languages/Java
+  org/sugarj/languages/SugarJ
 
 rules
-  rename-java(|pkg, from, to) = topdown(try(do-rename-java(|pkg, from, to)))
+  apply-renaming(|pkgs, from, to) = 
+    topdown(
+      try(rename-java(|pkgs, from, to)); 
+      try(rename-sugardec(|from, to)); 
+      try(rename-modeldec(|from, to)); 
+      try(rename-editordec(|from, to)))
+
+  rename-declarations(|pkg, from, to) = 
+    SugarCompilationUnit(
+      id,
+      id,
+      apply-renaming(|pkg, from, to))
+
+  rename-java(|pkg, from, to) = do-rename-java(|pkg, from, to)
+  rename-sugardec(|from, to) : SugarDecHead(mods, Id(from)) -> SugarDecHead(mods, Id(to))
+  rename-modeldec(|from, to) : ModelDecHead(mods, Id(from), meta) -> ModelDecHead(mods, Id(to), meta)
+  rename-editordec(|from, to) : EditorServicesDecHead(mods, Id(from)) -> EditorServicesDecHead(mods, Id(to))
 
 rules
   do-rename-java(|pkg, from, to) :

@@ -14,9 +14,21 @@ rules
   name-suffix = !("$", <id>); conc-strings; string-replace(|"/","_")
 
   apply-renamings(|renamings) =
-    where(<?[(pkg, from, to)|rest]> renamings)
-      < rename-java(|pkg, <as-java-path> from, <as-java-path> to); apply-renamings(|rest)
+    where(<?[(pkgs, from, to)|rest]> renamings)
+      < apply-renaming(|pkgs, <as-java-path> from, <as-java-path> to); apply-renamings(|rest)
       + id
 
+  apply-renaming(|pkgs, from, to) =
+    topdown(try(rename-java(|pkgs, from, to)))
+
   as-java-path = string-as-chars(map(try(?'-';!'$')))
+
+  split-packages-decname =
+    where(!(<id>, "/"); not(split-before));
+    !([], <id>)
+
+  split-packages-decname =
+    !(<id>, "/"); split-before;debug => (pkg, rest);
+    <string-as-chars(Tl); split-packages-decname> rest => (pkgs, name);
+    !([pkg|pkgs], name)
 }

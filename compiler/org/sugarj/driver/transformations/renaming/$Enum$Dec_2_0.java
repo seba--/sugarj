@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Enum$Dec_2_0 instance = new $Enum$Dec_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy b_18, Strategy c_18)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy e_23, Strategy f_23)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("EnumDec_2_0");
-    Fail54:
+    Fail100:
     { 
-      IStrategoTerm h_108 = null;
-      IStrategoTerm f_108 = null;
-      IStrategoTerm g_108 = null;
-      IStrategoTerm i_108 = null;
+      IStrategoTerm n_120 = null;
+      IStrategoTerm l_120 = null;
+      IStrategoTerm m_120 = null;
+      IStrategoTerm o_120 = null;
       if(term.getTermType() != IStrategoTerm.APPL || renaming._consEnumDec_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail54;
-      f_108 = term.getSubterm(0);
-      g_108 = term.getSubterm(1);
-      IStrategoList annos40 = term.getAnnotations();
-      h_108 = annos40;
-      term = b_18.invoke(context, f_108);
+        break Fail100;
+      l_120 = term.getSubterm(0);
+      m_120 = term.getSubterm(1);
+      IStrategoList annos81 = term.getAnnotations();
+      n_120 = annos81;
+      term = e_23.invoke(context, l_120);
       if(term == null)
-        break Fail54;
-      i_108 = term;
-      term = c_18.invoke(context, g_108);
+        break Fail100;
+      o_120 = term;
+      term = f_23.invoke(context, m_120);
       if(term == null)
-        break Fail54;
-      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consEnumDec_2, new IStrategoTerm[]{i_108, term}), checkListAnnos(termFactory, h_108));
+        break Fail100;
+      term = termFactory.annotateTerm(termFactory.makeAppl(renaming._consEnumDec_2, new IStrategoTerm[]{o_120, term}), checkListAnnos(termFactory, n_120));
       context.popOnSuccess();
       if(true)
         return term;
