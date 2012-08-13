@@ -111,8 +111,10 @@ class CompileTransformed extends AbstractPrimitive {
     
       checkCommunicationIntegrity(modelPath, transformationPaths, source, res);
     } catch (IOException e) {
+      e.printStackTrace();
       driver.setErrorMessage(e.getMessage());
     } catch (ClassNotFoundException e) {
+      e.printStackTrace();
       driver.setErrorMessage(e.getMessage());
     }
     
@@ -130,7 +132,7 @@ class CompileTransformed extends AbstractPrimitive {
 
     Collection<Path> transDeps = new HashSet<Path>();
     for (RelativePath transPath : transformationPaths) {
-      Path transDep = ModuleSystemCommands.searchFile(FileCommands.dropExtension(transPath.getRelativePath()), ".dep", environment);
+      Path transDep = ModuleSystemCommands.searchFile(FileCommands.dropExtension(transPath.getRelativePath().replace('-', '$')), ".dep", environment);
       if (transDep != null) {
         Result transResult = Result.readDependencyFile(transDep, environment);
         transDeps.addAll(transResult.getFileDependencies(environment));

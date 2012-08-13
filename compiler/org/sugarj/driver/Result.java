@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -187,6 +188,15 @@ public class Result {
   void generateFile(Path file, String content) throws IOException {
     if (generateFiles) {
       FileCommands.writeToFile(file, content);
+      generatedFileHashes.put(file, FileCommands.fileHash(file));
+      allDependentFiles.add(file);
+      logGeneration(file);
+    }
+  }
+  
+  void generateFile(Path file, Serializable content) throws IOException {
+    if (generateFiles) {
+      FileCommands.writeObjectToFile(file, content);
       generatedFileHashes.put(file, FileCommands.fileHash(file));
       allDependentFiles.add(file);
       logGeneration(file);

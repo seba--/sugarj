@@ -112,19 +112,29 @@ public class FileCommands {
   }
   
   public static void writeObjectToFile(Path file, Serializable content) throws IOException {
-    FileCommands.createFile(file);
-    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file.getFile()));
-    oos.writeObject(content);
-    oos.close();
+    ObjectOutputStream oos = null;
+    try {
+      FileCommands.createFile(file);
+      oos = new ObjectOutputStream(new FileOutputStream(file.getFile()));
+      oos.writeObject(content);
+    } finally {
+      if (oos != null)
+        oos.close();
+    }
   }
 
+  @SuppressWarnings("unchecked")
   public static <T> T readObjectFromFile(Path file) throws IOException, ClassNotFoundException {
-    FileCommands.createFile(file);
-    ObjectInputStream oos = new ObjectInputStream(new FileInputStream(file.getFile()));
-    @SuppressWarnings("unchecked")
-    T object = (T) oos.readObject();
-    oos.close();
-    return object;
+    if (!exists(file))
+      return null;
+    ObjectInputStream ois = null;
+    try {
+      ois = new ObjectInputStream(new FileInputStream(file.getFile()));
+      return (T) ois.readObject();
+    } finally {
+      if (ois != null)
+        ois.close();
+    }
   }
 
   public static void appendToFile(Path file, String content)

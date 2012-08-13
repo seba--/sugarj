@@ -337,20 +337,23 @@ public class ModuleSystemCommands {
     
     List<Path> transformationDeps = new LinkedList<Path>();
     for (RelativePath trans : transformations) {
-      String transPath = FileCommands.dropExtension(trans.getRelativePath());
+      String transPath = FileCommands.dropExtension(trans.getRelativePath()).replace('-', '$');
       Path transDep = searchFile(transPath, ".dep", env);
-      if (modelDep == null)
+      if (transDep == null)
         throw new FileNotFoundException("Could not locate transformation dependency file " + transPath + ".");
       transformationDeps.add(transDep);
     }
     
     Origin origin = new Origin(modelDep, transformationDeps);
     Path p = new AbsolutePath(FileCommands.dropExtension(generatedModel.getAbsolutePath()) + ".origin");
-    FileCommands.writeObjectToFile(p, origin);
     
-    if (res != null) {
+    if (res != null)
+      res.generateFile(p, origin);
+    else
+      FileCommands.writeObjectToFile(p, origin);
+    
+    if (res != null)
       registerDependency(res, p, env);
-    }
   }
   
   private static void registerDependency(Result result, Path dep, Environment env) throws ClassNotFoundException, IOException {

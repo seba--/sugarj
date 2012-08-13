@@ -13,6 +13,7 @@ import org.sugarj.driver.ATermCommands;
 import org.sugarj.driver.Driver;
 import org.sugarj.driver.Environment;
 import org.sugarj.driver.ModuleSystemCommands;
+import org.sugarj.driver.Result;
 import org.sugarj.driver.path.RelativePath;
 import org.sugarj.driver.path.RelativeSourceLocationPath;
 
@@ -24,22 +25,17 @@ import org.sugarj.driver.path.RelativeSourceLocationPath;
  */
 class WriteTransformed extends AbstractPrimitive {
 
-  private boolean generateFiles;
   private Driver driver;
   private Environment environment;
   
-  public WriteTransformed(Driver driver, boolean generateFiles, Environment environment) {
+  public WriteTransformed(Driver driver, Environment environment) {
     super("SUGARJ_write", 0, 2);
     this.driver = driver;
     this.environment = environment;
-    this.generateFiles = generateFiles;
   }
 
   @Override
   public boolean call(IContext context, Strategy[] svars, IStrategoTerm[] tvars) throws InterpreterException {
-    if (!generateFiles)
-      return false;
-    
     IStrategoTerm generatedModel = context.current();
     
     String modelPath = ATermCommands.getString(tvars[0]);
