@@ -9,7 +9,10 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.net.URI;
 import java.net.URL;
 import java.util.List;
@@ -101,12 +104,27 @@ public class FileCommands {
    * @param content
    * @throws IOException
    */
-  public static void writeToFile(Path file, String content)
-      throws IOException {
+  public static void writeToFile(Path file, String content) throws IOException {
     FileCommands.createFile(file);
     FileOutputStream fos = new FileOutputStream(file.getFile());
     fos.write(content.getBytes());
     fos.close();
+  }
+  
+  public static void writeObjectToFile(Path file, Serializable content) throws IOException {
+    FileCommands.createFile(file);
+    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file.getFile()));
+    oos.writeObject(content);
+    oos.close();
+  }
+
+  public static <T> T readObjectFromFile(Path file) throws IOException, ClassNotFoundException {
+    FileCommands.createFile(file);
+    ObjectInputStream oos = new ObjectInputStream(new FileInputStream(file.getFile()));
+    @SuppressWarnings("unchecked")
+    T object = (T) oos.readObject();
+    oos.close();
+    return object;
   }
 
   public static void appendToFile(Path file, String content)

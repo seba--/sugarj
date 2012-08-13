@@ -59,6 +59,13 @@ class WriteTransformed extends AbstractPrimitive {
       Log.log.logErr(e.getLocalizedMessage());
     }
     
+    try {
+      RelativePath model = ModuleSystemCommands.searchFile(modelPath, ".model", environment);
+      ModuleSystemCommands.markGenerated(source, environment, model, transformationPaths);
+    } catch (IOException e) {
+      Log.log.logErr(e.getLocalizedMessage());
+    }
+    
     return true;
   }
   

@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -326,7 +325,11 @@ public class ModuleSystemCommands {
     return null;
   } 
   
-  public static void markGenerated(Result res, Environment env, RelativePath model, List<RelativePath> transformations) throws IOException {
+  public static void markGenerated(RelativePath generatedModel, Environment env, RelativePath model, List<RelativePath> transformations) throws IOException {
+    markGenerated(generatedModel, null, env, model, transformations);
+  }
+
+  public static void markGenerated(RelativePath generatedModel, Result res, Environment env, RelativePath model, List<RelativePath> transformations) throws IOException {
     String modelPath = FileCommands.dropExtension(model.getRelativePath());
     Path modelDep = searchFile(modelPath, ".dep", env);
     if (modelDep == null)
@@ -341,7 +344,22 @@ public class ModuleSystemCommands {
       transformationDeps.add(transDep);
     }
     
-    res.markGenerated(modelDep, transformationDeps, env);
+    Origin origin = new Origin(modelDep, transformationDeps);
+    Path p = new AbsolutePath(FileCommands.dropExtension(generatedModel.getAbsolutePath()) + ".origin");
+    FileCommands.writeObjectToFile(p, origin);
+    
+    if (res != null) {
+      res.addDependency(modelDep, env);
+      for (Path usedTransformationDep : transformationDeps)
+        res.addDependency(usedTransformationDep, env);
+    }
+  }
+  
+  public static Origin getOrigin(RelativePath model, Environment environment) throws ClassNotFoundException, IOException {
+    Path p = searchFile(model.getRelativePath(), ".origin", environment);
+    if (p != null)
+      return FileCommands.readObjectFromFile(p);
+    return null;
   }
 
   public static String getModulePath(RelativePath p) {

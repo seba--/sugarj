@@ -21,6 +21,7 @@ import org.sugarj.driver.Environment;
 import org.sugarj.driver.FileCommands;
 import org.sugarj.driver.Log;
 import org.sugarj.driver.ModuleSystemCommands;
+import org.sugarj.driver.Origin;
 import org.sugarj.driver.Result;
 import org.sugarj.driver.path.AbsolutePath;
 import org.sugarj.driver.path.Path;
@@ -89,7 +90,7 @@ class CompileTransformed extends AbstractPrimitive {
     
     try {
       RelativePath model = ModuleSystemCommands.searchFile(modelPath, ".model", environment);
-      ModuleSystemCommands.markGenerated(res, environment, model, transformationPaths);
+      ModuleSystemCommands.markGenerated(source, res, environment, model, transformationPaths);
       res.rewriteDependencyFile();
       
       if (res.hasFailed()) {
@@ -103,12 +104,14 @@ class CompileTransformed extends AbstractPrimitive {
       checkCommunicationIntegrity(modelPath, transformationPaths, source, res);
     } catch (IOException e) {
       Log.log.logErr(e.getMessage());
+    } catch (ClassNotFoundException e) {
+      Log.log.logErr(e.getMessage());
     }
     
     return true;
   }
   
-  private void checkCommunicationIntegrity(String modelPath, List<RelativePath> transformationPaths, Path source, Result res) throws IOException {
+  private void checkCommunicationIntegrity(String modelPath, List<RelativePath> transformationPaths, Path source, Result res) throws IOException, ClassNotFoundException {
     Path modelDep = ModuleSystemCommands.searchFile(FileCommands.dropExtension(modelPath), ".dep", environment);
     Collection<Path> modelDeps = new HashSet<Path>();
     if (modelDep != null) {
@@ -140,7 +143,11 @@ class CompileTransformed extends AbstractPrimitive {
         if (!ok) {
           // transformations may generated other artifacts, given that their dependencies are marked in the current result
           Path dep = new AbsolutePath(FileCommands.dropExtension(p.getAbsolutePath()) + ".dep");
-          ok = FileCommands.exists(dep) && res.hasDependency(dep) && Result.readDependencyFile(dep, environment).isGenerated();
+          if (FileCommands.exists(dep) && res.hasDependency(dep)) {
+            Path originFile = new AbsolutePath(FileCommands.dropExtension(p.getAbsolutePath()) + ".origin");
+            Origin origin = FileCommands.readObjectFromFile(originFile);
+            ok = origin != null && origin.isGenerated();
+          }
         }
         if (!ok)
           failed.add(FileCommands.dropExtension(p.getAbsolutePath()));

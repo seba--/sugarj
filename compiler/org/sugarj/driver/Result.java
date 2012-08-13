@@ -60,9 +60,6 @@ public class Result {
   private Set<Path> allDependentFiles = new HashSet<Path>();
   private Path generationLog;
   private String cacheVersion;
-  
-  private Path originalModelDep;
-  private List<Path> usedTransformationDeps;
 
   /**
    * deferred source files (*.sugj) -> 
@@ -417,23 +414,9 @@ public class Result {
         oos.writeObject(sourceFile);
         oos.writeInt(sourceFileHash);
         
-        oos.writeInt(dependencies.size());
-        for (Entry<Path, Integer> e : dependencies.entrySet()) {
-          oos.writeObject(e.getKey());
-          oos.writeInt(e.getValue());
-        }
-        
-        oos.writeInt(generatedFileHashes.size());
-        for (Entry<Path, Integer> e : generatedFileHashes.entrySet()) {
-          oos.writeObject(e.getKey());
-          oos.writeInt(e.getValue());
-        }
-        
-        oos.writeInt(dependingFileHashes.size());
-        for (Entry<Path, Integer> e : dependingFileHashes.entrySet()) {
-          oos.writeObject(e.getKey());
-          oos.writeInt(e.getValue());
-        }
+        oos.writeObject(dependencies);
+        oos.writeObject(generatedFileHashes);
+        oos.writeObject(dependingFileHashes);
         
         oos.writeObject(availableGeneratedFiles);
         oos.writeObject(deferredSourceFiles);
@@ -481,28 +464,9 @@ public class Result {
       result.sourceFile = (RelativeSourceLocationPath) Path.readPath(ois, env);
       result.sourceFileHash = ois.readInt();
       
-      boolean reallocate = false; // result.sourceFile.getAbsolutePath().startsWith(env.getRoot().getAbsolutePath());
-      
-      int numDependencies = ois.readInt();
-      for (int i = 0; i < numDependencies; i++) {
-        Path file = Path.readPath(ois, env, reallocate);
-        int hash = ois.readInt();
-        result.dependencies.put(file, hash);
-      }
-      
-      int numGeneratedFiles = ois.readInt();
-      for (int i = 0; i< numGeneratedFiles; i++) {
-        Path file = Path.readPath(ois, env, reallocate);
-        int hash = ois.readInt();
-        result.generatedFileHashes.put(file, hash);
-      }
-
-      int numDependingFiles = ois.readInt();
-      for (int i = 0; i< numDependingFiles; i++) {
-        Path file = Path.readPath(ois, env, reallocate);
-        int hash = ois.readInt();
-        result.dependingFileHashes.put(file, hash);
-      }
+      result.dependencies = (Map<Path, Integer>) ois.readObject();
+      result.generatedFileHashes = (Map<Path, Integer>) ois.readObject();
+      result.dependingFileHashes = (Map<Path, Integer>) ois.readObject();
 
       result.availableGeneratedFiles = (Map<Path, Set<RelativePath>>) ois.readObject();
       result.deferredSourceFiles = (Map<Path, Pair<Path, ISourceFileContent>>) ois.readObject();
@@ -557,25 +521,5 @@ public class Result {
   
   public boolean hasFailed() {
     return !getParseErrors().isEmpty() || !getCollectedErrors().isEmpty();
-  }
-  
-  public boolean isGenerated() {
-    return originalModelDep != null && usedTransformationDeps != null;
-  }
-
-  public Path getOriginalModel() {
-    return originalModelDep;
-  }
-  
-  public List<Path> getUsedTransformations() {
-    return usedTransformationDeps;
-  }
-  
-  public void markGenerated(Path originalModelDep, List<Path> usedTransformationDeps, Environment env) throws IOException {
-    this.originalModelDep = originalModelDep;
-    this.usedTransformationDeps = usedTransformationDeps;
-    addDependency(originalModelDep, env);
-    for (Path usedTransformationDep : usedTransformationDeps)
-      addDependency(usedTransformationDep, env);
   }
 }
