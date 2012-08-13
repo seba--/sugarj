@@ -4,11 +4,13 @@ import static org.sugarj.driver.ATermCommands.isApplication;
 import static org.sugarj.driver.Log.log;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -324,21 +326,24 @@ public class ModuleSystemCommands {
     return null;
   } 
   
-  public static void registerResults(Result res, Environment env, String path) throws IOException {
-    Path dep = searchFile(FileCommands.dropExtension(path), ".dep", env);
-    if (dep != null)
-      res.addDependency(dep, env);
+  public static void markGenerated(Result res, Environment env, RelativePath model, List<RelativePath> transformations) throws IOException {
+    String modelPath = FileCommands.dropExtension(model.getRelativePath());
+    Path modelDep = searchFile(modelPath, ".dep", env);
+    if (modelDep == null)
+      throw new FileNotFoundException("Could not locate model dependency file " + modelPath + ".");
+    
+    List<Path> transformationDeps = new LinkedList<Path>();
+    for (RelativePath trans : transformations) {
+      String transPath = FileCommands.dropExtension(trans.getRelativePath());
+      Path transDep = searchFile(transPath, ".dep", env);
+      if (modelDep == null)
+        throw new FileNotFoundException("Could not locate transformation dependency file " + transPath + ".");
+      transformationDeps.add(transDep);
+    }
+    
+    res.markGenerated(modelDep, transformationDeps, env);
   }
-  
-  public static void registerResults(Result res, Environment env, RelativePath... ps) throws IOException {
-    for (RelativePath p : ps)
-      registerResults(res, env, p.getRelativePath());
-  }
-  
-  public static void registerResults(Result res, Environment env, Collection<? extends RelativePath> ps) throws IOException {
-    registerResults(res, env, ps.toArray(new RelativePath[ps.size()]));
-  }
-  
+
   public static String getModulePath(RelativePath p) {
     if (p == null)
       return null;

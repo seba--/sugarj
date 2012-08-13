@@ -60,7 +60,9 @@ public class Result {
   private Set<Path> allDependentFiles = new HashSet<Path>();
   private Path generationLog;
   private String cacheVersion;
-  private Set<Path> influentialTransformations = new HashSet<Path>();
+  
+  private Path originalModelDep;
+  private List<Path> usedTransformationDeps;
 
   /**
    * deferred source files (*.sugj) -> 
@@ -150,6 +152,10 @@ public class Result {
 //          else
 //            deferred.put(e2.getKey(), e2.getValue());
 //      }
+  }
+  
+  public boolean hasDependency(Path otherDep) {
+    return dependencies.containsKey(otherDep);
   }
   
   public Collection<Path> getFileDependencies(Environment env) throws IOException {
@@ -434,8 +440,6 @@ public class Result {
         
         oos.writeObject(cacheVersion);
         
-        oos.writeObject(influentialTransformations);
-        
   //      new TermReader(ATermCommands.factory).unparseToFile(sugaredSyntaxTree, oos);
   //      oos.writeBoolean(failed);
   //      oos.writeObject(collectedErrors);
@@ -505,8 +509,6 @@ public class Result {
 
       result.cacheVersion = (String) ois.readObject();
       
-      result.influentialTransformations = (Set<Path>) ois.readObject();
-      
 //      result.sugaredSyntaxTree = new TermReader(ATermCommands.factory).parseFromStream(ois);
 //      result.failed = ois.readBoolean();
 //      result.collectedErrors = (List<String>) ois.readObject();
@@ -556,16 +558,24 @@ public class Result {
   public boolean hasFailed() {
     return !getParseErrors().isEmpty() || !getCollectedErrors().isEmpty();
   }
-
-  public Set<Path> getInfluentialTransformations() {
-    return influentialTransformations;
+  
+  public boolean isGenerated() {
+    return originalModelDep != null && usedTransformationDeps != null;
   }
 
-  public void setInfluentialTransformations(Set<Path> influentialTransformations) {
-    this.influentialTransformations = influentialTransformations;
+  public Path getOriginalModel() {
+    return originalModelDep;
   }
   
-  public void addInfluentialTransformation(Path p) {
-    influentialTransformations.add(p);
+  public List<Path> getUsedTransformations() {
+    return usedTransformationDeps;
+  }
+  
+  public void markGenerated(Path originalModelDep, List<Path> usedTransformationDeps, Environment env) throws IOException {
+    this.originalModelDep = originalModelDep;
+    this.usedTransformationDeps = usedTransformationDeps;
+    addDependency(originalModelDep, env);
+    for (Path usedTransformationDep : usedTransformationDeps)
+      addDependency(usedTransformationDep, env);
   }
 }

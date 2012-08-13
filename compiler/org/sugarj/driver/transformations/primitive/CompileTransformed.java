@@ -2,7 +2,6 @@ package org.sugarj.driver.transformations.primitive;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -23,6 +22,7 @@ import org.sugarj.driver.FileCommands;
 import org.sugarj.driver.Log;
 import org.sugarj.driver.ModuleSystemCommands;
 import org.sugarj.driver.Result;
+import org.sugarj.driver.path.AbsolutePath;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
 import org.sugarj.driver.path.RelativeSourceLocationPath;
@@ -88,11 +88,11 @@ class CompileTransformed extends AbstractPrimitive {
       return false;
     
     try {
-      ModuleSystemCommands.registerResults(res, environment, modelPath);
-      ModuleSystemCommands.registerResults(res, environment, transformationPaths);
+      RelativePath model = ModuleSystemCommands.searchFile(modelPath, ".model", environment);
+      ModuleSystemCommands.markGenerated(res, environment, model, transformationPaths);
       res.rewriteDependencyFile();
       
-      if (!res.getParseErrors().isEmpty() || !res.getCollectedErrors().isEmpty()) {
+      if (res.hasFailed()) {
         for (BadTokenException e : res.getParseErrors())
           Log.log.logErr("line " + e.getLineNumber() + ": " + e.getLocalizedMessage());
         for (String err : res.getCollectedErrors())
@@ -100,38 +100,7 @@ class CompileTransformed extends AbstractPrimitive {
         return false;
       }
     
-      Path modelDep = ModuleSystemCommands.searchFile(FileCommands.dropExtension(modelPath), ".dep", environment);
-      Collection<Path> modelDeps = 
-          modelDep == null ? 
-          Collections.<Path>emptyList() : 
-          Result.readDependencyFile(modelDep, environment).getFileDependencies(environment);
-
-      Collection<Path> transDeps = new HashSet<Path>();
-      for (RelativePath transPath : transformationPaths) {
-        Path transDep = ModuleSystemCommands.searchFile(FileCommands.dropExtension(transPath.getRelativePath()), ".dep", environment);
-        if (transDep != null)
-          transDeps.addAll(Result.readDependencyFile(transDep, environment).getFileDependencies(environment));
-      }
-
-      Collection<Path> transformedModelDeps = res.getFileDependencies(environment);
-      TreeSet<String> failed = new TreeSet<String>();
-      
-      for (Path p : transformedModelDeps)
-        if (FileCommands.exists(p)) {
-          boolean ok = 
-              source.equals(p) ||
-              res.getDirectlyGeneratedFiles().contains(p) ||
-              modelDeps.contains(p) || 
-              transDeps.contains(p);
-          if (!ok)
-            failed.add(FileCommands.dropExtension(p.getAbsolutePath()));
-        }
-
-      if (!failed.isEmpty()) {
-        Log.log.logErr("Violation of communication integrity: Generated model refers to the following artifacts, which neither the model nor the transformation refers to.");
-        for (String p : failed)
-          Log.log.logErr("  " + p);
-      }
+      checkCommunicationIntegrity(modelPath, transformationPaths, source, res);
     } catch (IOException e) {
       Log.log.logErr(e.getMessage());
     }
@@ -139,4 +108,48 @@ class CompileTransformed extends AbstractPrimitive {
     return true;
   }
   
+  private void checkCommunicationIntegrity(String modelPath, List<RelativePath> transformationPaths, Path source, Result res) throws IOException {
+    Path modelDep = ModuleSystemCommands.searchFile(FileCommands.dropExtension(modelPath), ".dep", environment);
+    Collection<Path> modelDeps = new HashSet<Path>();
+    if (modelDep != null) {
+      Result modelResult = Result.readDependencyFile(modelDep, environment);
+      modelDeps.addAll(modelResult.getFileDependencies(environment));
+      modelDeps.addAll(modelResult.getDirectlyGeneratedFiles()); 
+    }
+
+    Collection<Path> transDeps = new HashSet<Path>();
+    for (RelativePath transPath : transformationPaths) {
+      Path transDep = ModuleSystemCommands.searchFile(FileCommands.dropExtension(transPath.getRelativePath()), ".dep", environment);
+      if (transDep != null) {
+        Result transResult = Result.readDependencyFile(transDep, environment);
+        transDeps.addAll(transResult.getFileDependencies(environment));
+        transDeps.addAll(transResult.getDirectlyGeneratedFiles()); 
+      }
+    }
+
+    Collection<Path> transformedModelDeps = res.getFileDependencies(environment);
+    TreeSet<String> failed = new TreeSet<String>();
+    
+    for (Path p : transformedModelDeps)
+      if (FileCommands.exists(p)) {
+        boolean ok = 
+            source.equals(p) ||
+            res.getDirectlyGeneratedFiles().contains(p) ||
+            modelDeps.contains(p) || 
+            transDeps.contains(p);
+        if (!ok) {
+          // transformations may generated other artifacts, given that their dependencies are marked in the current result
+          Path dep = new AbsolutePath(FileCommands.dropExtension(p.getAbsolutePath()) + ".dep");
+          ok = FileCommands.exists(dep) && res.hasDependency(dep) && Result.readDependencyFile(dep, environment).isGenerated();
+        }
+        if (!ok)
+          failed.add(FileCommands.dropExtension(p.getAbsolutePath()));
+      }
+
+    if (!failed.isEmpty()) {
+      Log.log.logErr("Violation of communication integrity: Generated model refers to the following artifacts, which neither the model nor the transformation refers to.");
+      for (String p : failed)
+        Log.log.logErr("  " + p);
+    }
+  }
 }
