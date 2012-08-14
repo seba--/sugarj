@@ -28,7 +28,7 @@ rules
     !([], <id>)
 
   split-packages-decname =
-    !(<id>, "/"); split-before;debug => (pkg, rest);
+    !(<id>, "/"); split-before => (pkg, rest);
     <string-as-chars(Tl); split-packages-decname> rest => (pkgs, name);
     !([pkg|pkgs], name)
 }

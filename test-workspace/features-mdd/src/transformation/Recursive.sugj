@@ -18,8 +18,6 @@ rules
 
   recursively-transform(model-predicate, trans) = ?(model, model-path, trans-path); 
     {| Renamings, Stack: 
-         where(<split-packages-decname> model-path => (pkgs, name);
-               !(pkgs, name, (<conc-strings> (name, <name-suffix> trans-path))) => renaming);
          rules ( Renamings := [] 
                  Stack := [model-path]);
          !model;
@@ -50,7 +48,6 @@ rules
       })))
   
   compile-renamed(|model-path, trans-path) =
-    where(!(model-path,trans-path) ;debug(!"compile: "); Renamings; debug(!"Rename: "));
     apply-renamings(|<Renamings>);
     prim("SUGARJ_compile", model-path, trans-path)
 

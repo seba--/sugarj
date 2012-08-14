@@ -8,6 +8,7 @@ import concretesyntax.Stratego;
 import transformation.Compile;
 
 import variability.Model;
+import variability.CheckConfigAux;
 
 public transformation CheckConfig {
   rules
