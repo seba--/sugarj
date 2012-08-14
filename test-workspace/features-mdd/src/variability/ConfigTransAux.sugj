@@ -13,7 +13,7 @@ public sugar ConfigTransAux {
                             topdown(try(empty-interface-list))
 
     no-variability :
-      ModelDec(ModelDecHead(mods, name), ModelBody(("VariableStructure", structure)))
+      ModelDec(ModelDecHead(mods, name, "VariableStructure"), ModelBody(structure))
       -> structure
       where <not(oncetd(?OptionalNode(_,_) + ?VariableNode(_,_,_)))> structure
                            

@@ -18,5 +18,5 @@ public sugar Model {
    featuremodel : 
      FMDecl(mods, name, FMBody(features, requirements))
      -> 
-     ModelDec(ModelDecHead(mods, name), ModelBody(("FeatureModel", features, requirements)))
+     ModelDec(ModelDecHead(mods, name, "variability.Model"), ModelBody((features, requirements)))
 }

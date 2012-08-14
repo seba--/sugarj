@@ -20,7 +20,7 @@ public sugar Config {
     featureconfig :
     ConfigDecl(mods, name, model, configs)
     ->
-    ModelDec(ModelDecHead(mods, name), ModelBody(("FeatureConfig", model, configs)))
+    ModelDec(ModelDecHead(mods, name, "variability.Config"), ModelBody((model, configs)))
 
     get-feature-config = ?configs;
       <filter(?FeatureActivation(<collect-all(?FeatureName(Id(<id>)))>)); concat> configs => enabled;

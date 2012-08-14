@@ -5,14 +5,16 @@ import org.sugarj.languages.SugarJ;
 import concretesyntax.Java;
 import concretesyntax.Stratego;
 
+import transformation.Compile;
+
 import variability.Model;
 
 public transformation CheckConfig {
   rules
-    main = SugarCompilationUnit(id,ensure-aux-import,map(featuremodel-to-sugar))
+    main = compile-after(SugarCompilationUnit(id,ensure-aux-import,map(featuremodel-to-sugar)))
 
     featuremodel-to-sugar :
-      ModelDec(ModelDecHead(mods, Id(n)), ModelBody(("FeatureModel", features, requirements)))
+      ModelDec(ModelDecHead(mods, Id(n), "variability.Model"), ModelBody((features, requirements)))
       ->
       SugarDec(SugarDecHead(mods, Id(n)), SugarBody([transformation-elem(rulesblock1), transformation-elem(rulesblock2)]))
      where 

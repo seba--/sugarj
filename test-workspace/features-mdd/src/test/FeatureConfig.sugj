@@ -2,7 +2,7 @@ package test;
 
 import variability.Config;
 
-import model test.FeatureModel;
+import test.FeatureModel;
 import test.FeatureModel<variability.CheckConfig>;
 
 public config FeatureConfig for FeatureModel {  

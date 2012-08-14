@@ -2,10 +2,10 @@ package test;
 
 import variability.Java;
 //#ifdef(A)
-import model test.AnotherTest;
-import model test.InterfaceTest;
+import test.AnotherTest;
+import test.InterfaceTest;
 
-//import model test.FeatureModel;
+//import test.FeatureModel;
  
 #ifdef(C) 
 public variable class Test extends Object implements InterfaceTest {

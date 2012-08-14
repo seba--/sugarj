@@ -5,37 +5,43 @@ import org.sugarj.languages.SugarJ;
 
 import concretesyntax.Java;
 
+import transformation.Recursive;
+
 import variability.Config;
 import variability.FeatureExpressions;
 
 public transformation ConfigTrans {
   rules
-    main = SugarCompilationUnit(?pkg,ensure-aux-import,map(featureconfig-to-trans(|pkg)))
-    main = ignore-featuremodel
+    main =
+      recursively-transform(
+        conforms-to-metamodel(|"variability.Config") + conforms-to-metamodel(|"variability.Model"),
+        conforms-to-metamodel(|"variability.Config")
+          < SugarCompilationUnit(?pkg,ensure-aux-import,map(featureconfig-to-trans(|pkg)))
+          + ignore-featuremodel)
 
     featureconfig-to-trans(|pkg) :
-      ModelDec(ModelDecHead(mods, name), ModelBody(("FeatureConfig", model, configs)))
+      ModelDec(ModelDecHead(mods, Id(name), "variability.Config"), ModelBody((model, configs)))
       ->
-      SugarDec(SugarDecHead(mods, name), SugarBody([body]))
+      SugarDec(SugarDecHead(mods, Id(name)), SugarBody([transformation-elem(body)]))
     where
       <get-feature-config> configs => (enabled, disabled);
       <(map(feature-enabled2rule), map(feature-disabled2rule)); conc> (enabled, disabled) => rulez;
-      main-rule := SDefNoArgs("main", CallNoArgs(SVar("eliminate-variability")));
+      main-rule1 := SDefNoArgs("main", CallNoArgs(SVar("eliminate-variability")));
+      main-rule2 := SDefNoArgs("main", Call(SVar("recursively-transform"), [Id(), Call(SVar("try"), [CallNoArgs(SVar("main"))])]));
 
-      <pkg-name> pkg => pkg-name;
-      <conc-strings> (pkg-name,"_",<?Id(<id>)> name) => qualified-name;
-      <conc-strings> (qualified-name, "__variability_ConfigTrans") => my-qualified-name;
-      <rename-rules-block(|my-qualified-name)> Rules([main-rule | rulez]) => body
+      <conc-strings> (name, "-variability_ConfigTrans") => qualified-name;
+      <rename-main-rules(|qualified-name)> Rules([main-rule1, main-rule2 | rulez]) => body
 
     feature-enabled2rule = !SDefNoArgs("feature-enabled", Match(NoAnnoList(Str(<id>))))
     feature-disabled2rule = !SDefNoArgs("feature-disabled", Match(NoAnnoList(Str(<id>))))
 
-    ensure-aux-import : imps -> <union> (imps, [auximp])
-      where auximp := |[ import variability.ConfigTransAux; ]| 
+    ensure-aux-import : imps -> <union> (imps, [auximp1, auximp2])
+      where auximp1 := |[ import variability.ConfigTransAux; ]|;
+            auximp2 := |[ import transformation.Recursive; ]| 
 
     ignore-featuremodel =
       SugarCompilationUnit(id, ![], map(
-        \  ModelDec(ModelDecHead(mods, name), ModelBody(("FeatureModel",_,_)))
+        \  ModelDec(ModelDecHead(mods, name, "variability.Model"), _)
         -> ClassDec(ClassDecHead(mods, name, None, None, None), ClassBody([])) \))
 
     pkg-name : [] -> []

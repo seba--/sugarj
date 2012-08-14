@@ -11,7 +11,7 @@ public transformation ModelEditorServices {
     main = oncetd(to-editor-service)
 
     to-editor-service :
-      ModelDec(ModelDecHead(mods, Id(n)), ModelBody(("FeatureModel", features, requirements)))
+      ModelDec(ModelDecHead(mods, Id(n), "variability.Model"), ModelBody((features, requirements)))
       ->
       EditorServicesDec(EditorServicesDecHead(mods, Id(n)), EditorServicesBody(services))
     where <featuredecl2service> features => services
