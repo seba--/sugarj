@@ -941,7 +941,12 @@ public class Driver {
     
     if (dep != null && !skipProcessImport)
       driverResult.addDependency(dep, environment);
-
+    else if (skipProcessImport) {
+      Path d = dep;
+      if (d == null)
+        d = environment.new RelativePathBin(modulePath + ".dep");
+      driverResult.addCircularDependency(d);
+    }
     
     if (!skipProcessImport && importSourceFile != null)
       // if importSourceFile is delegated to something currently being processed

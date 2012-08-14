@@ -357,14 +357,16 @@ public class ModuleSystemCommands {
   }
   
   private static void registerDependency(Result result, Path dep, Environment env) throws ClassNotFoundException, IOException {
-    result.addDependency(dep, env);
     Path originPath = new AbsolutePath(FileCommands.dropExtension(dep.getAbsolutePath()) + ".origin");
     if (FileCommands.exists(originPath)) {
       Origin origin = FileCommands.readObjectFromFile(originPath);
       if (origin != null && origin.isGenerated()) {
+        result.addDependency(origin.getOriginalModel(), env);
         registerDependency(result, origin.getOriginalModel(), env);
-        for (Path transPath : origin.getUsedTransformations())
+        for (Path transPath : origin.getUsedTransformations()) {
+          result.addDependency(transPath, env);
           registerDependency(result, transPath, env);
+        }
       }
     }
   }
@@ -392,13 +394,8 @@ public class ModuleSystemCommands {
   }
 
   public static void registerGeneratedFiles(String modulePath, Result res, Environment environment) throws IOException {
-    String fileName = FileCommands.fileName(modulePath);
-    RelativePath binDir = environment.new RelativePathBin(FileCommands.dropFilename(modulePath));
-    
-    for (File file : binDir.getFile().listFiles()) {
-      String otherFileName = FileCommands.fileName(file.getAbsolutePath());
-      if (fileName.equals(otherFileName))
-        res.addGeneratedFile(new AbsolutePath(file.getAbsolutePath()));
-    }
+    Path dep = searchFile(modulePath.replace('-', '$'), ".dep", environment);
+    if (dep != null)
+      res.addDependency(dep, environment);
   }
 }

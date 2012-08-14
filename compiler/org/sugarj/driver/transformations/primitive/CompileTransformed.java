@@ -124,23 +124,25 @@ class CompileTransformed extends AbstractPrimitive {
   private void checkCommunicationIntegrity(String modelPath, List<RelativePath> transformationPaths, RelativePath source, Result res) throws IOException, ClassNotFoundException {
     Path modelDep = ModuleSystemCommands.searchFile(FileCommands.dropExtension(modelPath), ".dep", environment);
     Collection<Path> modelDeps = new HashSet<Path>();
+    Result modelResult = null;
     if (modelDep != null) {
-      Result modelResult = Result.readDependencyFile(modelDep, environment);
-      modelDeps.addAll(modelResult.getFileDependencies(environment));
+      modelResult = Result.readDependencyFile(modelDep, environment);
+      modelDeps.addAll(modelResult.getCircularFileDependencies(environment));
       modelDeps.addAll(modelResult.getDirectlyGeneratedFiles()); 
     }
 
     Collection<Path> transDeps = new HashSet<Path>();
+    Result transResult = null;
     for (RelativePath transPath : transformationPaths) {
       Path transDep = ModuleSystemCommands.searchFile(FileCommands.dropExtension(transPath.getRelativePath().replace('-', '$')), ".dep", environment);
       if (transDep != null) {
-        Result transResult = Result.readDependencyFile(transDep, environment);
-        transDeps.addAll(transResult.getFileDependencies(environment));
+        transResult = Result.readDependencyFile(transDep, environment);
+        transDeps.addAll(transResult.getCircularFileDependencies(environment));
         transDeps.addAll(transResult.getDirectlyGeneratedFiles()); 
       }
     }
 
-    Collection<Path> transformedModelDeps = res.getFileDependencies(environment);
+    Collection<Path> transformedModelDeps = res.getCircularFileDependencies(environment);
     TreeSet<String> failed = new TreeSet<String>();
     
     for (Path p : transformedModelDeps)
@@ -150,9 +152,12 @@ class CompileTransformed extends AbstractPrimitive {
             res.getDirectlyGeneratedFiles().contains(p) ||
             modelDeps.contains(p) || 
             transDeps.contains(p);
+        Result pRes = null;
         if (!ok) {
-          // transformations may generated other artifacts, given that their dependencies are marked in the current result
+          // transformations may generate other artifacts, given that their dependencies in turn are marked in the current result
           Path dep = new AbsolutePath(FileCommands.dropExtension(p.getAbsolutePath()) + ".dep");
+          if (FileCommands.exists(dep))
+            pRes = Result.readDependencyFile(dep, environment);
           if (FileCommands.exists(dep) && res.hasDependency(dep, environment)) {
             Path originFile = new AbsolutePath(FileCommands.dropExtension(p.getAbsolutePath()) + ".origin");
             Origin origin = FileCommands.readObjectFromFile(originFile);

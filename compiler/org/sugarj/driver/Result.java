@@ -48,6 +48,7 @@ public class Result {
   private final boolean generateFiles;
   
   private Map<Path, Integer> dependencies = new HashMap<Path, Integer>();
+  private Set<Path> circularDependencies = new HashSet<Path>();
   private Map<Path, Integer> generatedFileHashes = new HashMap<Path, Integer>();
   private Map<Path, Integer> dependingFileHashes = new HashMap<Path, Integer>();
   private Set<IStrategoTerm> editorServices = new HashSet<IStrategoTerm>();
@@ -100,56 +101,15 @@ public class Result {
     allDependentFiles.add(file);
     generatedFileHashes.put(file, FileCommands.fileHash(file));
   }
-  
+
+  void addCircularDependency(Path depFile) throws IOException {
+    circularDependencies.add(depFile);
+  }
+
   void addDependency(Path depFile, Environment env) throws IOException {
     dependencies.put(depFile, FileCommands.fileHash(depFile));
     Result result = readDependencyFile(depFile, env);
-    addDependency(result, env);
-  }
-  
-  void addDependency(Result result, Environment env) throws IOException {
-    assert result.getSourceFile() != null;
-    
     allDependentFiles.addAll(result.getFileDependencies(env));
-    
-//    for (Entry<Path, Map<Path, Set<RelativePath>>> e : result.availableGeneratedFiles.entrySet())
-//      if (!availableGeneratedFiles.containsKey(e.getKey()))
-//        availableGeneratedFiles.put(e.getKey(), e.getValue());
-//      else {
-//        Map<Path, Set<RelativePath>> deferred = availableGeneratedFiles.get(e.getKey());
-//        for (Entry<Path, Set<RelativePath>> e2 : e.getValue().entrySet())
-//          if (deferred.containsKey(e2.getKey()) && !deferred.get(e2.getKey()).equals(e2.getValue()))
-//            throw new IllegalStateException("Deferred generated files differ.");
-//          else
-//            deferred.put(e2.getKey(), e2.getValue());
-//      }
-    
-//    Map<Path, Set<RelativePath>> map = availableGeneratedFiles.get(sourceFile);
-//    if (map == null) {
-//      map = new HashMap<Path, Set<RelativePath>>();
-//      availableGeneratedFiles.put(sourceFile, map);
-//    }
-//    Set<RelativePath> set = map.get(result.sourceFile);
-//    if (set == null) {
-//      set = new HashSet<RelativePath>();
-//      map.put(result.sourceFile, set);
-//    }
-//    for (Entry<Path, Integer> e : result.generatedFileHashes.entrySet())
-//      if (e.getValue() != 0 && e.getKey() instanceof RelativePath)
-//        set.add((RelativePath) e.getKey());
-    
-    
-//    for (Entry<Path, Map<Path, Map<Path, ISourceFileContent>>> e : result.deferredSourceFiles.entrySet())
-//      if (!deferredSourceFiles.containsKey(e.getKey()))
-//        deferredSourceFiles.put(e.getKey(), e.getValue());
-//      else {
-//        Map<Path, Map<Path, ISourceFileContent>> deferred = deferredSourceFiles.get(e.getKey());
-//        for (Entry<Path, Map<Path, ISourceFileContent>> e2 : e.getValue().entrySet())
-//          if (deferred.containsKey(e2.getKey()) && !deferred.get(e2.getKey()).equals(e2.getValue()))
-//            throw new IllegalStateException("Deferred source files differ.");
-//          else
-//            deferred.put(e2.getKey(), e2.getValue());
-//      }
   }
   
   public boolean hasDependency(Path otherDep, Environment env) throws IOException {
@@ -171,6 +131,33 @@ public class Result {
     }
 
     return allDependentFiles;
+  }
+
+  public Collection<Path> getCircularFileDependencies(Environment env) throws IOException {
+    assert persistentPath != null;
+    
+    Set<Path> dependencies = new HashSet<Path>();
+    Set<Path> visited = new HashSet<Path>();
+    LinkedList<Path> queue = new LinkedList<Path>();
+    queue.add(persistentPath);
+    
+    while (!queue.isEmpty()) {
+      Path dep = queue.pop();
+      visited.add(dep);
+      Result res = readDependencyFile(dep, env);
+      
+      dependencies.addAll(res.generatedFileHashes.keySet());
+      dependencies.addAll(dependingFileHashes.keySet());
+      
+      for (Path nextDep : res.dependencies.keySet())
+        if (!visited.contains(nextDep))
+          queue.add(nextDep);
+      for (Path nextDep : res.circularDependencies)
+        if (!visited.contains(nextDep))
+          queue.add(nextDep);
+    }
+    
+    return dependencies;
   }
   
   public Set<Path> getDirectlyGeneratedFiles() {
@@ -430,6 +417,7 @@ public class Result {
         oos.writeInt(sourceFileHash);
         
         oos.writeObject(dependencies);
+        oos.writeObject(circularDependencies);
         oos.writeObject(generatedFileHashes);
         oos.writeObject(dependingFileHashes);
         
@@ -480,6 +468,7 @@ public class Result {
       result.sourceFileHash = ois.readInt();
       
       result.dependencies = (Map<Path, Integer>) ois.readObject();
+      result.circularDependencies = (Set<Path>) ois.readObject();
       result.generatedFileHashes = (Map<Path, Integer>) ois.readObject();
       result.dependingFileHashes = (Map<Path, Integer>) ois.readObject();
 
