@@ -724,10 +724,7 @@ public class Driver {
   private void generateModel(String modelName, IStrategoTerm body) throws IOException {
     log.beginTask("Generate model.");
     try {
-      RelativePath modelOutFile = environment.new RelativePathBin(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".model");
-      
-      if (modelOutFile.equals(sourceFile))
-        return;
+      RelativePath modelOutFile = environment.new RelativePathBin(relPackageNameSep() + modelName + ".model");
       
       IStrategoTerm modelTerm = makeDesugaredSyntaxTree(body);
       driverResult.generateFile(modelOutFile, ATermCommands.atermToString(modelTerm));
@@ -803,6 +800,11 @@ public class Driver {
           return;
         modulePath = transformedImport.a;
         skipImport = transformedImport.b;
+        
+        IStrategoTerm flatImport = ATermCommands.flattenTransImport(modulePath);
+        desugaredImportDecls.remove(toplevelDecl);
+        desugaredImportDecls.add(flatImport);
+        
         if (skipImport)
           return;
       }

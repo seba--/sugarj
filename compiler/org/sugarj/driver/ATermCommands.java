@@ -36,7 +36,6 @@ import org.sugarj.driver.transformations.extraction.extract_sdf_0_0;
 import org.sugarj.driver.transformations.extraction.extract_str_0_0;
 import org.sugarj.driver.transformations.renaming.apply_renaming_0_3;
 import org.sugarj.driver.transformations.renaming.rename_declarations_0_3;
-import org.sugarj.driver.transformations.renaming.rename_java_0_3;
 import org.sugarj.util.Renaming;
 
 /**
@@ -469,5 +468,39 @@ public class ATermCommands {
     return isApplication(toplevelDecl, "TypeImportDec") || 
         isApplication(toplevelDecl, "TypeImportOnDemandDec") || 
         isApplication(toplevelDecl, "TransImportDec");
+  }
+
+  public static IStrategoTerm flattenTransImport(String modulePath) {
+    LinkedList<String> pkgs = new LinkedList<String>();
+    
+    while (true) {
+      int firstDot = modulePath.indexOf('.');
+      int firstDollar = modulePath.indexOf('$');
+      if (firstDot < 0 || firstDot > firstDollar)
+        break;
+      
+      String pkg = modulePath.substring(0, firstDot);
+      pkgs.add(pkg);
+      modulePath = modulePath.substring(firstDot + 1);
+    }
+    
+    if (pkgs.isEmpty())
+      return makeAppl("TypeImportDec", "ImportDec", 1, 
+               makeAppl("TypeName", "TypeName", 1, 
+                 makeString(modulePath, null)));
+    
+    int index = pkgs.size() - 2;
+    IStrategoTerm pkg = makeAppl("Id", "JavaId", 1, makeString(pkgs.getLast(), null));
+    while (index > 0) {
+      pkg = makeAppl("PackageOrTypeName", "PackageOrTypeName", 2, 
+              makeAppl("Id", "JavaId", 1, makeString(pkgs.get(index), null)),
+              pkg);
+      index--;
+    }
+    
+    return makeAppl("TypeImportDec", "ImportDec", 1, 
+             makeAppl("TypeName", "TypeName", 2, 
+               pkg,
+               makeString(modulePath, null)));
   }
 }
