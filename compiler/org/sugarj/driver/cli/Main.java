@@ -48,9 +48,10 @@ public class Main {
         }
         
         // cai 09.08.12
-        // existence of language extension for file type is verified here
+        // existence of language extension for file type was verified here
         // removed because we don't want to call LanguageRegistry
-        // which depends on eclipse platform
+        // which depends on eclipse platform. we delegate the task to
+        // PILL.resolve() instead.
 
         allInputFiles.add(p);
         pendingInputFiles.add(p);
@@ -59,7 +60,7 @@ public class Main {
       IProgressMonitor monitor = new PrintProgressMonitor(System.out);
       
       for (final RelativeSourceLocationPath sourceFile : allInputFiles) {
-        monitor.beginTask("compile " + sourceFile, IProgressMonitor.UNKNOWN);
+        monitor.beginTask("compile " + sourceFile + "\n", IProgressMonitor.UNKNOWN);
         LanguageLibFactory lang = PILL.resolve(sourceFile.getFile());
         if(null==lang) continue;
         Result res = Driver.compile(sourceFile, monitor, lang);
