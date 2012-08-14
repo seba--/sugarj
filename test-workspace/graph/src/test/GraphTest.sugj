@@ -1,8 +1,5 @@
 package test;
 
-//import config.FullGraphConfig<variability.ConfigTrans> as Config;
-import config.MinimalGraphConfig<variability.ConfigTrans> as Config;
-
 import impl.Main<config.MinimalGraphConfig<variability.ConfigTrans>>;
 
 public class GraphTest {

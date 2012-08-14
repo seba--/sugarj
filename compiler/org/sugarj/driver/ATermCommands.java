@@ -474,14 +474,14 @@ public class ATermCommands {
     LinkedList<String> pkgs = new LinkedList<String>();
     
     while (true) {
-      int firstDot = modulePath.indexOf('.');
+      int firstSlash = modulePath.indexOf('/');
       int firstDollar = modulePath.indexOf('$');
-      if (firstDot < 0 || firstDot > firstDollar)
+      if (firstSlash < 0 || firstSlash > firstDollar)
         break;
       
-      String pkg = modulePath.substring(0, firstDot);
+      String pkg = modulePath.substring(0, firstSlash);
       pkgs.add(pkg);
-      modulePath = modulePath.substring(firstDot + 1);
+      modulePath = modulePath.substring(firstSlash + 1);
     }
     
     IStrategoTerm moduleId = makeAppl("Id", "JavaId", 1, makeString(modulePath, null));

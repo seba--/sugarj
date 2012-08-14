@@ -31,4 +31,9 @@ rules
     !(<id>, "/"); split-before => (pkg, rest);
     <string-as-chars(Tl); split-packages-decname> rest => (pkgs, name);
     !([pkg|pkgs], name)
+
+  rename-main-rules(|model-path, transformation-path) =
+    where(!(model-path, transformation-path);
+          prim("SUGARJ_rename_main_args") => (_, new-name));
+    rename-rules(|"main", new-name)
 }

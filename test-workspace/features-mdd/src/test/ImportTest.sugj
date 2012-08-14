@@ -14,4 +14,3 @@ public class ImportTest implements InterfaceTest {
 		System.out.println("something.");
 	}
 }
-

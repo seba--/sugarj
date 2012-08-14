@@ -1687,6 +1687,7 @@ public class Driver {
   }
 
   public void setErrorMessage(String msg) {
+    Log.log.logErr(msg);
     driverResult.logError(msg);
     if (lastSugaredToplevelDecl != null)
       ATermCommands.setErrorMessage(lastSugaredToplevelDecl, msg);
