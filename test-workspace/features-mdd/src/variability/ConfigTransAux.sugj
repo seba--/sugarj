@@ -23,8 +23,8 @@ public sugar ConfigTransAux {
 
   rules 
     empty-variable-type : 
-     ModelDec(mhead, ModelBody( OptionalNode(e,ClassDec(head, ClassBody(elems)))))
-     -> ModelDec(mhead, ModelBody(ClassDec(head, ClassBody([]))))
+     ModelDec(mhead, ModelBody( OptionalNode(e,ClassDec(ClassDecHead(mods, name, _, _, _), ClassBody(elems)))))
+     -> ModelDec(mhead, ModelBody(ClassDec(ClassDecHead(mods, name, None, None, None), ClassBody([]))))
       where <is-condition-disabled> e 
 
     empty-variable-type : 
