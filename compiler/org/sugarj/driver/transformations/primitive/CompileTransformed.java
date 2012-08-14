@@ -121,7 +121,7 @@ class CompileTransformed extends AbstractPrimitive {
     return true;
   }
   
-  private void checkCommunicationIntegrity(String modelPath, List<RelativePath> transformationPaths, Path source, Result res) throws IOException, ClassNotFoundException {
+  private void checkCommunicationIntegrity(String modelPath, List<RelativePath> transformationPaths, RelativePath source, Result res) throws IOException, ClassNotFoundException {
     Path modelDep = ModuleSystemCommands.searchFile(FileCommands.dropExtension(modelPath), ".dep", environment);
     Collection<Path> modelDeps = new HashSet<Path>();
     if (modelDep != null) {
@@ -164,7 +164,7 @@ class CompileTransformed extends AbstractPrimitive {
       }
 
     if (!failed.isEmpty()) {
-      StringBuilder b = new StringBuilder("Violation of communication integrity: Generated model refers to the following artifacts, which neither the model nor the transformation refers to.\n");
+      StringBuilder b = new StringBuilder("Violation of communication integrity in " + source.getRelativePath() + ": Generated model refers to the following artifacts, which neither the model nor the transformation refers to.\n");
       for (String p : failed)
         b.append("  ").append(p).append('\n');
       driver.setErrorMessage(b.toString());

@@ -1262,7 +1262,7 @@ public class Driver {
           log.log("The sugar is not native.");
 
 
-        generateModel(extName, toplevelDecl);
+        generateModel(extName.replace('-', '$'), toplevelDecl);
         if (dependsOnModel)
           return;
       } finally {

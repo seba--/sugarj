@@ -484,10 +484,12 @@ public class ATermCommands {
       modulePath = modulePath.substring(firstDot + 1);
     }
     
+    IStrategoTerm moduleId = makeAppl("Id", "JavaId", 1, makeString(modulePath, null));
+    
     if (pkgs.isEmpty())
       return makeAppl("TypeImportDec", "ImportDec", 1, 
                makeAppl("TypeName", "TypeName", 1, 
-                 makeString(modulePath, null)));
+                 moduleId));
     
     int index = pkgs.size() - 2;
     IStrategoTerm pkg = makeAppl("Id", "JavaId", 1, makeString(pkgs.getLast(), null));
@@ -501,6 +503,6 @@ public class ATermCommands {
     return makeAppl("TypeImportDec", "ImportDec", 1, 
              makeAppl("TypeName", "TypeName", 2, 
                pkg,
-               makeString(modulePath, null)));
+               moduleId));
   }
 }
