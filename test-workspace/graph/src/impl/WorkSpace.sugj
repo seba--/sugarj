@@ -2,7 +2,7 @@ package impl;
 
 import variability.Java;
 
-import model impl.Vertex;
+import impl.Vertex;
 
 
 #ifdef(SearchAlg)

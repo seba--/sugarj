@@ -2,9 +2,9 @@ package impl;
 
 import variability.Java;
 
-import model impl.Vertex;
-import model impl.Edge;
-import model impl.EdgeIfc;
+import impl.Vertex;
+import impl.Edge;
+import impl.EdgeIfc;
 import impl.NeighborIfc;
 
 

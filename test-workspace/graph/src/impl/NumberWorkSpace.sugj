@@ -2,8 +2,8 @@ package impl;
 
 import variability.Java;
 
-import model impl.WorkSpace;
-import model impl.Vertex;
+import impl.WorkSpace;
+import impl.Vertex;
 
 
 #ifdef(Number)

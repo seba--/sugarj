@@ -3,9 +3,9 @@ package impl;
 import variability.Java;
 
 import java.io.IOException;
-import model impl.Vertex;
-import model impl.Graph;
-import model impl.EdgeIfc;
+import impl.Vertex;
+import impl.Graph;
+import impl.EdgeIfc;
 
 
 
