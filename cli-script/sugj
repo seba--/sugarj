@@ -20,4 +20,4 @@ strimp="$plugins/org.strategoxt.imp.nativebundle_0.1.1.201202141159"
 
 classpath="$compiler:$clijars:$common:$stdlib:$langlibs:$layout:$strimp:$plugins/*"
 
-java -cp "$classpath" org.sugarj.driver.cli.Main $*
+java -Xss64m -Xmx1024m -cp "$classpath" org.sugarj.driver.cli.Main $*
