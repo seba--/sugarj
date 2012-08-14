@@ -23,12 +23,12 @@ public sugar ConfigTransAux {
 
   rules 
     empty-variable-type : 
-     ModelDec(mhead, ModelBody( ("VariableStructure", OptionalNode(e,ClassDec(head, ClassBody(elems)))) ))
-     -> ModelDec(mhead, ModelBody( ("VariableStructure", ClassDec(head, ClassBody([]))) ))
+     ModelDec(mhead, ModelBody( OptionalNode(e,ClassDec(head, ClassBody(elems)))))
+     -> ModelDec(mhead, ModelBody(ClassDec(head, ClassBody([]))))
       where <is-condition-disabled> e 
 
     empty-variable-type : 
-     ModelDec(mhead, ModelBody( ("VariableStructure", OptionalNode(e,InterfaceDec(head, ibody))) ))
-     -> ModelDec(mhead, ModelBody( ("VariableStructure", InterfaceDec(head, [])) ))
+     ModelDec(mhead, ModelBody(OptionalNode(e,InterfaceDec(head, ibody))))
+     -> ModelDec(mhead, ModelBody(InterfaceDec(head, [])))
       where <is-condition-disabled> e
 }

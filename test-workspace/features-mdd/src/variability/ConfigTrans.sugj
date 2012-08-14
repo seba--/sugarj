@@ -8,6 +8,7 @@ import concretesyntax.Java;
 import transformation.Recursive;
 
 import variability.Config;
+import variability.ConfigTransAux;
 import variability.FeatureExpressions;
 
 public transformation ConfigTrans {
@@ -27,7 +28,8 @@ public transformation ConfigTrans {
       <get-feature-config> configs => (enabled, disabled);
       <(map(feature-enabled2rule), map(feature-disabled2rule)); conc> (enabled, disabled) => rulez;
       main-rule1 := SDefNoArgs("main", CallNoArgs(SVar("eliminate-variability")));
-      main-rule2 := SDefNoArgs("main", Call(SVar("recursively-transform"), [Id(), Call(SVar("try"), [CallNoArgs(SVar("main"))])]));
+      conforms-call := CallT(SVar("conforms-to-metamodel"), [], [NoAnnoList(Str("\"VariableStructure\""))]);
+      main-rule2 := SDefNoArgs("main", Call(SVar("recursively-transform"), [conforms-call, CallNoArgs(SVar("main"))]));
 
       <conc-strings> (name, "-variability_ConfigTrans") => qualified-name;
       <rename-main-rules(|qualified-name)> Rules([main-rule1, main-rule2 | rulez]) => body
