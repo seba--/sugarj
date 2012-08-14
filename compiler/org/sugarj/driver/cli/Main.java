@@ -80,6 +80,10 @@ public class Main {
     System.exit(0);
   }
   
+  // cai 14.08.12
+  // without running eclipse platform,
+  // set up an environment to suit the expectation of subsequent code.
+  // here is mostly guess work; expect adjustment as issues pop up.
   private static Environment newConsoleEnvironment(String[] args){
     Environment environment = new Environment();
     
