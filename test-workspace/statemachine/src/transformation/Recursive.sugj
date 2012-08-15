@@ -30,13 +30,13 @@ rules
     topdown(try(where(
       {pkgs, name, model-path, model, generated, seen-before, new-renaming:
         get-imported-model(model-predicate) => (pkgs, name, model-path, model);
+        where(!(pkgs, name, (<conc-strings> (name, <name-suffix> trans-path))) => new-renaming);
+        rules( Renamings := [ new-renaming | <Renamings>] );
+
         not(is-circular-import(|model-path));
+        rules( Stack := [ model-path | <Stack> ] );
 
         <trans> model => generated;
-
-        where(!(pkgs, name, (<conc-strings> (name, <name-suffix> trans-path))) => new-renaming);
-        rules( Renamings := [ new-renaming | <Renamings>] 
-               Stack := [ model-path | <Stack> ] );
 
         tryfinally(
           {| Renamings:

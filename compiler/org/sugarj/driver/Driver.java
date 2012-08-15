@@ -811,7 +811,7 @@ public class Driver {
       
       boolean codeImportSuccess = processImport(modulePath);
       boolean modelImportSuccess = processModelImport(modulePath);
-      if (!codeImportSuccess)
+      if (modelImportSuccess && !codeImportSuccess)
         dependsOnModel = true;
       boolean success = codeImportSuccess || modelImportSuccess;
       
