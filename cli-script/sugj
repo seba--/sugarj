@@ -18,6 +18,7 @@ langroot="$sugarj/language-libraries"
 langlibs="$langroot/base/bin:$langroot/haskell/bin:$langroot/java/bin:$langroot/prolog/bin"
 strimp="$plugins/org.strategoxt.imp.nativebundle_0.1.1.201202141159"
 
-classpath="$compiler:$clijars:$common:$stdlib:$langlibs:$layout:$strimp:$plugins/*"
+classpath="$compiler:$clijars:$common:$stdlib:$langlibs:$layout"
+classpath="$classpath:$strimp:$plugins/*"
 
 java -Xss64m -Xmx1024m -cp "$classpath" org.sugarj.driver.cli.Main $*

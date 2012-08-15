@@ -21,6 +21,13 @@ import org.sugarj.driver.PrintProgressMonitor;
 import org.sugarj.driver.Result;
 import org.sugarj.LanguageLibFactory;
 
+// cai 15.08.12
+// imports to resolve language libraries
+import org.sugarj.common.FileCommands;
+import org.sugarj.JavaLibFactory;
+import org.sugarj.HaskellLibFactory;
+import org.sugarj.PrologLibFactory;
+
 /**
  * @author seba
  */
@@ -31,7 +38,7 @@ public class Main {
    * @throws IOException
    */
   public static void main(String[] args) throws Throwable {
-    
+
     Environment environment = newConsoleEnvironment(args);
     
     Set<RelativeSourceLocationPath> allInputFiles = new HashSet<RelativeSourceLocationPath>();
@@ -47,11 +54,14 @@ public class Main {
           continue;
         }
         
-        // cai 09.08.12
+        // cai 15.08.12
         // existence of language extension for file type was verified here
         // removed because we don't want to call LanguageRegistry
         // which depends on eclipse platform. we delegate the task to
-        // PILL.resolve() instead.
+        // Main.resolveLanguageLibrary() in the subsequent loop instead.
+        // It will not cause any problem (at the moment) because
+        // the variable allInputFiles is used only to compile and
+        // the variable pendingInputFiles is not used at all lol
 
         allInputFiles.add(p);
         pendingInputFiles.add(p);
@@ -61,7 +71,7 @@ public class Main {
       
       for (final RelativeSourceLocationPath sourceFile : allInputFiles) {
         monitor.beginTask("compile " + sourceFile + "\n", IProgressMonitor.UNKNOWN);
-        LanguageLibFactory lang = PILL.resolve(sourceFile.getFile());
+        LanguageLibFactory lang = resolveLanguageLib(sourceFile.getFile());
         if(null==lang) continue;
         Result res = Driver.compile(sourceFile, monitor, lang);
         if (!DriverCLI.processResultCLI(res, sourceFile, new File(".").getAbsolutePath()))
@@ -84,19 +94,38 @@ public class Main {
   // cai 14.08.12
   // without running eclipse platform,
   // set up an environment to suit the expectation of subsequent code.
-  // here is mostly guess work; expect adjustment as issues pop up.
+  // based on
+  //   org.sugarj.editor.SugarJParseController.makeProjectEnvironment(IJavaProject)
+  // and
+  //   org.sugarj.editor.SugarJParseController.setDefaultEnvironmentOptions(Environment)
   private static Environment newConsoleEnvironment(String[] args){
     Environment environment = new Environment();
-    
-    if (environment.getRoot()==null)
-      environment.setRoot(new AbsolutePath("."));
-
-    if (environment.getCacheDir() == null)
-      environment.setCacheDir(new RelativePath(environment.getRoot(), ".sugarjcache"));
-
-    if (environment.getSourcePath().isEmpty())
-      environment.getSourcePath().add(new SourceLocation(new AbsolutePath("."), environment));
+    environment.setRoot(new AbsolutePath("."));
+    environment.setBin(environment.getRoot());
+    environment.setCacheDir(new RelativePath(environment.getRoot(), ".sugarjcache"));
+    environment.getSourcePath().add(new SourceLocation(new AbsolutePath("."), environment));
+    environment.setAtomicImportParsing(true);
+    environment.setGenerateJavaFile(true);
+    environment.setNoChecking(true);
+    environment.getIncludePath().add(new AbsolutePath(strategoJarPath()));
     return environment;
+  }
+
+  private static LanguageLibFactory resolveLanguageLib(File source){
+    String ext = FileCommands.getExtension(source);
+    if("sugj".equals(ext))  return JavaLibFactory.getInstance();
+    // cai 09.08.12 TODO recognise extension of SugarHaskell and SugarProlog
+    Log.log.logErr("No language library found for source-file extension " + ext);
+    return null;
+  }
+  
+  // cai 15.08.12
+  // compute path to strategoxt.jar
+  // VERY-HARD-coded
+  private static String strategoJarPath(){
+    return new File(new Main().getClass().getResource("Main.class").getFile())
+    .getParentFile().getParentFile().getParentFile().getParentFile()
+    .getParentFile().getParent() + "/strategoxt.jar";
   }
 
 }
