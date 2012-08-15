@@ -23,37 +23,46 @@ rules
          !model;
          (where(model-predicate) < trans + id) => generated;
          recursively-transform(model-predicate, trans | trans-path);
-         compile-renamed(|model-path, trans-path)
+         compile-renamed(model-predicate | model-path, trans-path)
     |}
 
   recursively-transform(model-predicate, trans | trans-path) =
     topdown(try(where(
       {pkgs, name, model-path, model, generated, seen-before, new-renaming:
         get-imported-model(model-predicate) => (pkgs, name, model-path, model);
-        where(<elem < !"yes" + !"no"> (model-path,<Stack>) => seen-before);
+        not(is-circular-import(|model-path));
+
         <trans> model => generated;
+
         where(!(pkgs, name, (<conc-strings> (name, <name-suffix> trans-path))) => new-renaming);
         rules( Renamings := [ new-renaming | <Renamings>] 
                Stack := [ model-path | <Stack> ] );
+
         tryfinally(
-          if where(!seen-before; equal(|"yes"))
-            then write-renamed(|model-path, trans-path)
-            else {| Renamings:
-                   rules ( Renamings := [new-renaming] );
-                   recursively-transform(model-predicate, trans | trans-path);
-                   compile-renamed(|model-path, trans-path)
-                 |}
-          end,
+          {| Renamings:
+            rules ( Renamings := [new-renaming] );
+            recursively-transform(model-predicate, trans | trans-path);
+            compile-renamed(model-predicate | model-path, trans-path)
+          |},
           rules( Stack := <Stack; Tl> ))
       })))
-  
-  compile-renamed(|model-path, trans-path) =
-    apply-renamings(|<Renamings>);
-    prim("SUGARJ_compile", model-path, trans-path)
 
-  write-renamed(|model-path, trans-path) =
+  compile-renamed(model-predicate | model-path, trans-path) =
     apply-renamings(|<Renamings>);
-    prim("SUGARJ_write", model-path, trans-path)
+    if has-circular-import(model-predicate)
+      then prim("SUGARJ_write", model-path, trans-path)
+      else prim("SUGARJ_compile", model-path, trans-path)
+    end
+
+  has-circular-import(model-predicate) =
+    where(oncetd(is-circular-import(model-predicate)))
+
+  is-circular-import(model-predicate) =
+    get-imported-model(model-predicate) => (pkgs, name, model-path, model);
+    is-circular-import(|model-path)
+  
+  is-circular-import(|model-path) =
+    <elem> (model-path,<Stack>)
 
   get-imported-model(predicate) =
     ?TypeImportDec(<id>);

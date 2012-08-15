@@ -3,7 +3,6 @@ package org.sugarj.driver;
 import static org.sugarj.driver.ATermCommands.isApplication;
 import static org.sugarj.driver.Log.log;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -325,11 +324,11 @@ public class ModuleSystemCommands {
     return null;
   } 
   
-  public static void markGenerated(RelativePath generatedModel, Environment env, RelativePath model, List<RelativePath> transformations) throws IOException, ClassNotFoundException {
-    markGenerated(generatedModel, null, env, model, transformations);
+  public static Origin markGenerated(RelativePath generatedModel, Environment env, RelativePath model, List<RelativePath> transformations) throws IOException, ClassNotFoundException {
+    return markGenerated(generatedModel, null, env, model, transformations);
   }
 
-  public static void markGenerated(RelativePath generatedModel, Result res, Environment env, RelativePath model, List<RelativePath> transformations) throws IOException, ClassNotFoundException {
+  public static Origin markGenerated(RelativePath generatedModel, Result res, Environment env, RelativePath model, List<RelativePath> transformations) throws IOException, ClassNotFoundException {
     String modelPath = FileCommands.dropExtension(model.getRelativePath());
     Path modelDep = searchFile(modelPath, ".dep", env);
     if (modelDep == null)
@@ -345,21 +344,20 @@ public class ModuleSystemCommands {
     }
     
     Origin origin = new Origin(modelDep, transformationDeps);
-    Path p = new AbsolutePath(FileCommands.dropExtension(generatedModel.getAbsolutePath()) + ".origin");
     
-    if (res != null)
-      res.generateFile(p, origin);
-    else
-      FileCommands.writeObjectToFile(p, origin);
-    
-    if (res != null)
+    if (res != null) {
+      Path p = new AbsolutePath(FileCommands.dropExtension(generatedModel.getAbsolutePath()) + ".origin");
+      res.generateFile(p, origin.writeString());
       registerDependency(res, p, env);
+    }
+    
+    return origin;
   }
   
   private static void registerDependency(Result result, Path dep, Environment env) throws ClassNotFoundException, IOException {
     Path originPath = new AbsolutePath(FileCommands.dropExtension(dep.getAbsolutePath()) + ".origin");
     if (FileCommands.exists(originPath)) {
-      Origin origin = FileCommands.readObjectFromFile(originPath);
+      Origin origin = Origin.read(originPath);
       if (origin != null && origin.isGenerated()) {
         result.addDependency(origin.getOriginalModel(), env);
         registerDependency(result, origin.getOriginalModel(), env);
@@ -374,7 +372,7 @@ public class ModuleSystemCommands {
   public static Origin getOrigin(RelativePath model, Environment environment) throws ClassNotFoundException, IOException {
     Path p = searchFile(model.getRelativePath(), ".origin", environment);
     if (p != null)
-      return FileCommands.readObjectFromFile(p);
+      return Origin.read(p);
     return null;
   }
 

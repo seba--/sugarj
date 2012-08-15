@@ -12,8 +12,11 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.sugarj.driver.ATermCommands;
 import org.sugarj.driver.Driver;
 import org.sugarj.driver.Environment;
+import org.sugarj.driver.FileCommands;
 import org.sugarj.driver.ModuleSystemCommands;
-import org.sugarj.driver.Result;
+import org.sugarj.driver.Origin;
+import org.sugarj.driver.path.AbsolutePath;
+import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
 import org.sugarj.driver.path.RelativeSourceLocationPath;
 
@@ -27,11 +30,13 @@ class WriteTransformed extends AbstractPrimitive {
 
   private Driver driver;
   private Environment environment;
+  private boolean generateFiles;
   
-  public WriteTransformed(Driver driver, Environment environment) {
+  public WriteTransformed(Driver driver, Environment environment, boolean generateFiles) {
     super("SUGARJ_write", 0, 2);
     this.driver = driver;
     this.environment = environment;
+    this.generateFiles = generateFiles;
   }
 
   @Override
@@ -52,14 +57,19 @@ class WriteTransformed extends AbstractPrimitive {
     
     RelativeSourceLocationPath source = ModuleSystemCommands.getTransformedModelSourceFilePath(modelPath, transformationPaths, environment);
     try {
-      ATermCommands.atermToFile(generatedModel, source);
+      if (generateFiles)
+        ATermCommands.atermToFile(generatedModel, source);
     } catch (IOException e) {
       driver.setErrorMessage(e.getLocalizedMessage());
     }
     
     try {
       RelativePath model = ModuleSystemCommands.searchFile(modelPath, ".model", environment);
-      ModuleSystemCommands.markGenerated(source, environment, model, transformationPaths);
+      Origin origin = ModuleSystemCommands.markGenerated(source, environment, model, transformationPaths);
+      if (generateFiles) {
+        Path p = new AbsolutePath(FileCommands.dropExtension(source.getAbsolutePath()) + ".origin");
+        origin.write(p);
+      }
     } catch (IOException e) {
       driver.setErrorMessage(e.getLocalizedMessage());
     } catch (ClassNotFoundException e) {

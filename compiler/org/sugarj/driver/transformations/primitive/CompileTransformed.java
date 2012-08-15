@@ -73,7 +73,8 @@ class CompileTransformed extends AbstractPrimitive {
       environment.getRenamings().add(0, ren);
       generatedModel = ATermCommands.renameDeclarations(generatedModel, ren, driver.getRenamingContext());
 
-      ATermCommands.atermToFile(generatedModel, source);
+      if (generateFiles)
+        ATermCommands.atermToFile(generatedModel, source);
     } catch (IOException e) {
       driver.setErrorMessage(e.getLocalizedMessage());
     } catch (InvalidParseTableException e) {
@@ -99,7 +100,8 @@ class CompileTransformed extends AbstractPrimitive {
     try {
       RelativePath model = ModuleSystemCommands.searchFile(modelPath, ".model", environment);
       ModuleSystemCommands.markGenerated(source, res, environment, model, transformationPaths);
-      res.rewriteDependencyFile();
+      if (generateFiles)
+        res.rewriteDependencyFile();
       
       if (res.hasFailed()) {
         for (BadTokenException e : res.getParseErrors())
@@ -160,7 +162,7 @@ class CompileTransformed extends AbstractPrimitive {
             pRes = Result.readDependencyFile(dep, environment);
           if (FileCommands.exists(dep) && res.hasDependency(dep, environment)) {
             Path originFile = new AbsolutePath(FileCommands.dropExtension(p.getAbsolutePath()) + ".origin");
-            Origin origin = FileCommands.readObjectFromFile(originFile);
+            Origin origin = Origin.read(originFile);
             ok = origin != null && origin.isGenerated();
           }
         }
