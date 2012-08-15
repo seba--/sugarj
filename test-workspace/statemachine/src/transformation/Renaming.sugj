@@ -31,4 +31,7 @@ rules
     !(<id>, "/"); split-before => (pkg, rest);
     <string-as-chars(Tl); split-packages-decname> rest => (pkgs, name);
     !([pkg|pkgs], name)
+
+  compose-path : ([], name) -> <as-java-path> name
+  compose-path : ([pkg|pkgs], name) -> <conc-strings> (pkg, "/", <compose-path> (pkgs, name))
 }

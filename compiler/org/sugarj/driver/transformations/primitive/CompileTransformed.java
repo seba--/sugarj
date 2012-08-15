@@ -41,13 +41,15 @@ class CompileTransformed extends AbstractPrimitive {
   private boolean generateFiles;
   private Environment environment;
   private IProgressMonitor monitor;
+  private LinkedHashMap<Path, Driver> currentlyProcessing;
   
-  public CompileTransformed(Driver driver, boolean generateFiles, Environment environment, IProgressMonitor monitor) {
+  public CompileTransformed(Driver driver, boolean generateFiles, Environment environment, IProgressMonitor monitor, LinkedHashMap<Path, Driver> currentlyProcessing) {
     super("SUGARJ_compile", 0, 2);
     this.driver = driver;
     this.environment = environment;
     this.monitor = monitor;
     this.generateFiles = generateFiles;
+    this.currentlyProcessing = currentlyProcessing;
   }
 
   @Override
@@ -84,9 +86,9 @@ class CompileTransformed extends AbstractPrimitive {
     Result res;
     try {
       if (generateFiles)
-        res = Driver.compile(generatedModel, source, monitor, new LinkedHashMap<Path, Driver>());
+        res = Driver.compile(generatedModel, source, monitor, currentlyProcessing);
       else
-        res = Driver.parse(generatedModel, source, monitor, new LinkedHashMap<Path, Driver>());
+        res = Driver.parse(generatedModel, source, monitor, currentlyProcessing);
     } catch (Exception e) {
       driver.setErrorMessage(e.getMessage());
       return false;

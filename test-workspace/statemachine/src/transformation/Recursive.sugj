@@ -8,7 +8,7 @@ rules
     ?(model, model-path, trans-path);
     !(model-path, trans-path);
     prim("SUGARJ_rename_main_args") => (old-name, new-name);
-    where(!SDefNoArgs(new-name, Call(SVar("recursively-transform"), [Id(), Call(SVar("try"), [CallNoArgs(SVar(old-name))])])) => new-main);
+    where(!SDefNoArgs(new-name, Call(SVar("recursively-transform"), [Id(), CallNoArgs(SVar(old-name))])) => new-main);
     !model;
     SugarCompilationUnit(
       id,
@@ -28,28 +28,36 @@ rules
 
   recursively-transform(model-predicate, trans | trans-path) =
     topdown(try(where(
-      {pkgs, name, model-path, model, generated, seen-before, new-renaming:
+      {pkgs, name, model-path, model, generated, new-name, new-renaming, old-renamings, new-renamings:
         get-imported-model(model-predicate) => (pkgs, name, model-path, model);
-        where(!(pkgs, name, (<conc-strings> (name, <name-suffix> trans-path))) => new-renaming);
-        rules( Renamings := [ new-renaming | <Renamings>] );
+        where(!model-path;debug(!"check import: "));
+        where(<conc-strings> (name, <name-suffix> trans-path) => new-name;
+              !(pkgs, name, new-name) => new-renaming);
 
-        not(is-circular-import(|model-path));
-        rules( Stack := [ model-path | <Stack> ] );
+        where(old-renamings := <Renamings>;
+              new-renamings := [ new-renaming | old-renamings ]);
 
-        <trans> model => generated;
+        (not(is-circular-import(|<debug(!"test circularity: ")> model-path));
+         not(is-circular-import(|<compose-path; debug(!"test circularity: ")> (pkgs, new-name)))
+         <+ !model-path;debug(!"found circularity: "); rules( Renamings := new-renamings ); fail);
 
-        tryfinally(
+        rules( Stack := [ <debug(!"push path: ")> model-path | <Stack> ] );
+        finally-do(
+          where(!model-path;debug(!"apply trans: "));
+          <trans> model => generated;
+          where(!model-path;debug(!"trans ok: "));
+          rules( Renamings := new-renamings );
           {| Renamings:
             rules ( Renamings := [new-renaming] );
             recursively-transform(model-predicate, trans | trans-path);
+            where(!model-path;debug(!"compile renamed: "));
             compile-renamed(model-predicate | model-path, trans-path)
           |},
           rules( Stack := <Stack; Tl> ))
       })))
 
   compile-renamed(model-predicate | model-path, trans-path) =
-    apply-renamings(|<Renamings>);
-    if has-circular-import(model-predicate)
+    if finally-do(has-circular-import(model-predicate), apply-renamings(|<Renamings>))
       then prim("SUGARJ_write", model-path, trans-path)
       else prim("SUGARJ_compile", model-path, trans-path)
     end
@@ -77,6 +85,6 @@ rules
   conforms-to-metamodel(|meta-model) =
     where(collect-one(?ModelDecHead(_, _, meta-model)))
 
-  tryfinally(s, final) = s < final + (final; fail)
+  finally-do(s, final) = s < final + (final; fail)
 }
 

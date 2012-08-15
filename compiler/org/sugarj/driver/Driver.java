@@ -815,10 +815,8 @@ public class Driver {
         dependsOnModel = true;
       boolean success = codeImportSuccess || modelImportSuccess;
       
-      if (!success && !isTransformedImport && !ATermCommands.hasError(toplevelDecl)) {
+      if (!success && !isTransformedImport && !ATermCommands.hasError(toplevelDecl))
         setErrorMessage(toplevelDecl, "module not found: " + modulePath);
-        log.logErr("module not found: " + modulePath);
-      }
       
     } finally {
       log.endTask();
@@ -1476,7 +1474,7 @@ public class Driver {
     editorServicesParser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.editorServicesTbl.getPath()), "Module");
 
     interp = new HybridInterpreter();
-    interp.addOperatorRegistry(new SugarJPrimitivesLibrary(this, environment, generateFiles, monitor));
+    interp.addOperatorRegistry(new SugarJPrimitivesLibrary(this, environment, generateFiles, monitor, currentlyProcessing));
     
     sdfContext = tools.init();
     makePermissiveContext = make_permissive.init();
@@ -1687,6 +1685,7 @@ public class Driver {
   }
   
   private void setErrorMessage(IStrategoTerm toplevelDecl, String msg) {
+    Log.log.logErr(msg);
     driverResult.logError(msg);
     ATermCommands.setErrorMessage(toplevelDecl, msg);
   }
