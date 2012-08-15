@@ -7,7 +7,7 @@ public sugar Java {
   rules
     desugar-class-model :
       ClassModelDec(mods, name, body) -> 
-      ModelDec(ModelDecHead(mods, name), ModelBody(("Java", body))) 
+      ModelDec(ModelDecHead(mods, name, "metamodel.Java"), ModelBody(body)) 
 
   context-free syntax
     ClassModel -> ToplevelDeclaration
