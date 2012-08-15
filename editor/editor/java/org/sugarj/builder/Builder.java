@@ -90,6 +90,7 @@ public class Builder extends IncrementalProjectBuilder {
     try {
       FileCommands.delete(new AbsolutePath(f.getPath()));
     } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 

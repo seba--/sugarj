@@ -54,74 +54,79 @@ class CompileTransformed extends AbstractPrimitive {
 
   @Override
   public boolean call(IContext context, Strategy[] svars, IStrategoTerm[] tvars) throws InterpreterException {
-    IStrategoTerm generatedModel = context.current();
-    
-    String modelPath = ATermCommands.getString(tvars[0]);
-    
-    IStrategoTerm transformationsTerm = tvars[1];
-    List<RelativePath> transformationPaths = new LinkedList<RelativePath>(); 
-    if (ATermCommands.isString(transformationsTerm))
-      transformationPaths.add(new RelativePath(ATermCommands.getString(transformationsTerm)));
-    else
-      for (IStrategoTerm pathTerm : ATermCommands.getList(transformationsTerm)) {
-        String transPath = ATermCommands.getString(pathTerm);
-        transformationPaths.add(new RelativePath(transPath));
-      }
-
-    RelativeSourceLocationPath source = ModuleSystemCommands.getTransformedModelSourceFilePath(modelPath, transformationPaths, environment);
-
     try {
-      Renaming ren = new Renaming(modelPath, source.getRelativePath());
-      environment.getRenamings().add(0, ren);
-      generatedModel = ATermCommands.renameDeclarations(generatedModel, ren, driver.getRenamingContext());
-
-      if (generateFiles)
-        ATermCommands.atermToFile(generatedModel, source);
-    } catch (IOException e) {
-      driver.setErrorMessage(e.getLocalizedMessage());
-    } catch (InvalidParseTableException e) {
-      driver.setErrorMessage(e.getLocalizedMessage());
-    }
-    
-    Result res;
-    try {
-      if (generateFiles)
-        res = Driver.compile(generatedModel, source, monitor, currentlyProcessing);
-      else
-        res = Driver.parse(generatedModel, source, monitor, currentlyProcessing);
-    } catch (Exception e) {
-      driver.setErrorMessage(e.getMessage());
-      return false;
-    } finally {
-      environment.getRenamings().remove(0);
-    }
-    
-    if (res == null)
-      return false;
-    
-    try {
-      context.setCurrent(ATermCommands.atermFromFile(source.getAbsolutePath()));
-
-      RelativePath model = ModuleSystemCommands.searchFile(modelPath, ".model", environment);
-      ModuleSystemCommands.markGenerated(source, res, environment, model, transformationPaths);
-      if (generateFiles)
-        res.rewriteDependencyFile();
+      IStrategoTerm generatedModel = context.current();
       
-      if (res.hasFailed()) {
-        for (BadTokenException e : res.getParseErrors())
-          driver.setErrorMessage("line " + e.getLineNumber() + ": " + e.getLocalizedMessage());
-        for (String err : res.getCollectedErrors())
-          driver.setErrorMessage(err);
-        return false;
+      String modelPath = ATermCommands.getString(tvars[0]);
+      
+      IStrategoTerm transformationsTerm = tvars[1];
+      List<RelativePath> transformationPaths = new LinkedList<RelativePath>(); 
+      if (ATermCommands.isString(transformationsTerm))
+        transformationPaths.add(new RelativePath(ATermCommands.getString(transformationsTerm)));
+      else
+        for (IStrategoTerm pathTerm : ATermCommands.getList(transformationsTerm)) {
+          String transPath = ATermCommands.getString(pathTerm);
+          transformationPaths.add(new RelativePath(transPath));
+        }
+  
+      RelativeSourceLocationPath source = ModuleSystemCommands.getTransformedModelSourceFilePath(modelPath, transformationPaths, environment);
+      List<Path> dependencies = null;
+      
+      try {
+        Renaming ren = new Renaming(modelPath, source.getRelativePath());
+        environment.getRenamings().add(0, ren);
+        generatedModel = ATermCommands.renameDeclarations(generatedModel, ren, driver.getRenamingContext());
+  
+        if (generateFiles)
+          ATermCommands.atermToFile(generatedModel, source);
+        
+        RelativePath model = ModuleSystemCommands.searchFile(modelPath, ".model", environment);
+        dependencies = ModuleSystemCommands.getDependencies(environment, model, transformationPaths);
+      } catch (IOException e) {
+        driver.setErrorMessage(e.getLocalizedMessage());
+      } catch (InvalidParseTableException e) {
+        driver.setErrorMessage(e.getLocalizedMessage());
       }
-    
-      checkCommunicationIntegrity(modelPath, transformationPaths, source, res);
-    } catch (IOException e) {
-      e.printStackTrace();
-      driver.setErrorMessage(e.getMessage());
-    } catch (ClassNotFoundException e) {
-      e.printStackTrace();
-      driver.setErrorMessage(e.getMessage());
+      
+      Result res;
+      try {
+        if (generateFiles)
+          res = Driver.compile(generatedModel, source, monitor, currentlyProcessing, dependencies);
+        else
+          res = Driver.parse(generatedModel, source, monitor, currentlyProcessing, dependencies);
+      } catch (Exception e) {
+        e.printStackTrace();
+        driver.setErrorMessage(e.getMessage());
+        return false;
+      } finally {
+        environment.getRenamings().remove(0);
+      }
+      
+      if (res == null)
+        return false;
+      
+      try {
+        context.setCurrent(ATermCommands.atermFromFile(source.getAbsolutePath()));
+        
+        if (res.hasFailed()) {
+          for (BadTokenException e : res.getParseErrors())
+            driver.setErrorMessage("line " + e.getLineNumber() + ": " + e.getLocalizedMessage());
+          for (String err : res.getCollectedErrors())
+            driver.setErrorMessage(err);
+          return false;
+        }
+      
+        checkCommunicationIntegrity(modelPath, transformationPaths, source, res);
+      } catch (IOException e) {
+        e.printStackTrace();
+        driver.setErrorMessage(e.getMessage());
+      } catch (ClassNotFoundException e) {
+        e.printStackTrace();
+        driver.setErrorMessage(e.getMessage());
+      } catch (Exception e) {
+        e.printStackTrace();
+        driver.setErrorMessage(e.getMessage());
+      }
     } catch (Exception e) {
       e.printStackTrace();
       driver.setErrorMessage(e.getMessage());
@@ -166,11 +171,9 @@ class CompileTransformed extends AbstractPrimitive {
         Path dep = new AbsolutePath(FileCommands.dropExtension(p.getAbsolutePath()) + ".dep");
         if (FileCommands.exists(dep)) {
           pRes = Result.readDependencyFile(dep, environment);
-          boolean isContained = transformedModelDeps.containsAll(pRes.getCircularFileDependencies(environment));
-          if (pRes != null && isContained) {
-            Path originFile = new AbsolutePath(FileCommands.dropExtension(p.getAbsolutePath()) + ".origin");
-            Origin origin = FileCommands.exists(originFile) ? Origin.read(originFile) : null;
-            ok = origin != null && origin.isGenerated();
+          if (pRes != null && pRes.isGenerated()) {
+            boolean isContained = transformedModelDeps.containsAll(pRes.getCircularFileDependencies(environment));
+            ok = isContained;
           }
         }
       }

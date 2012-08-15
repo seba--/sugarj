@@ -329,6 +329,26 @@ public class ModuleSystemCommands {
   public static Origin markGenerated(RelativePath generatedModel, Environment env, RelativePath model, List<RelativePath> transformations) throws IOException, ClassNotFoundException {
     return markGenerated(generatedModel, null, env, model, transformations);
   }
+  
+  public static List<Path> getDependencies(Environment env, RelativePath model, List<RelativePath> transformations) throws IOException {
+    List<Path> deps = new LinkedList<Path>();
+    
+    String modelPath = FileCommands.dropExtension(model.getRelativePath());
+    Path modelDep = searchFile(modelPath, ".dep", env);
+    if (modelDep == null)
+      throw new FileNotFoundException("Could not locate model dependency file " + modelPath + ".");
+    deps.add(modelDep);
+    
+    for (RelativePath trans : transformations) {
+      String transPath = FileCommands.dropExtension(trans.getRelativePath()).replace('-', '$');
+      Path transDep = searchFile(transPath, ".dep", env);
+      if (transDep == null)
+        throw new FileNotFoundException("Could not locate transformation dependency file " + transPath + ".");
+      deps.add(transDep);
+    }
+    
+    return deps;
+  }
 
   public static Origin markGenerated(RelativePath generatedModel, Result res, Environment env, RelativePath model, List<RelativePath> transformations) throws IOException, ClassNotFoundException {
     String modelPath = FileCommands.dropExtension(model.getRelativePath());

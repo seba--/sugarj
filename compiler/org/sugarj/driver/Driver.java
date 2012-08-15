@@ -139,9 +139,11 @@ public class Driver {
 
   private RetractableTreeBuilder inputTreeBuilder;
   
-  public Driver(Environment env, LinkedHashMap<Path, Driver> currentlyProcessing) {
+  public Driver(Environment env, LinkedHashMap<Path, Driver> currentlyProcessing, boolean generateFiles) {
     this.environment = env;
     this.currentlyProcessing = currentlyProcessing;
+    this.generateFiles = generateFiles;
+    this.driverResult = new Result(generateFiles, CACHE_VERSION);
     
     try {
       if (environment.getCacheDir() != null)
@@ -224,40 +226,43 @@ public class Driver {
     return run(source, sourceFile, monitor, false, currentlyProcessing);
   }
 
-  public static Result compile(IStrategoTerm source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LinkedHashMap<Path, Driver> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    return run(source, sourceFile, monitor, true, currentlyProcessing);
+  public static Result compile(IStrategoTerm source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LinkedHashMap<Path, Driver> currentlyProcessing, List<Path> dependencies) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    return run(source, sourceFile, monitor, true, currentlyProcessing, dependencies);
   }
 
-  public static Result parse(IStrategoTerm source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LinkedHashMap<Path, Driver> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    return run(source, sourceFile, monitor, false, currentlyProcessing);
+  public static Result parse(IStrategoTerm source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LinkedHashMap<Path, Driver> currentlyProcessing, List<Path> dependencies) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    return run(source, sourceFile, monitor, false, currentlyProcessing, dependencies);
   }
 
-  
-  
   public static Result run(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles, LinkedHashMap<Path, Driver> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     return run(FileCommands.readFileAsString(sourceFile), sourceFile, monitor, generateFiles, currentlyProcessing);
   }
 
   private static Result run(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles, LinkedHashMap<Path, Driver> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    Driver driver = new Driver(sourceFile.getSourceLocation().getEnvironment(), currentlyProcessing);
+    Driver driver = new Driver(sourceFile.getSourceLocation().getEnvironment(), currentlyProcessing, generateFiles);
     ToplevelDeclarationProvider declProvider = driver.new SourceCodeToplevelDeclarationProvider(source);
-    return run(driver, declProvider, sourceFile, monitor, generateFiles);
+    return run(driver, declProvider, sourceFile, monitor);
   }
   
-  private static Result run(IStrategoTerm source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles, LinkedHashMap<Path, Driver> currentlyProcessing) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    Driver driver = new Driver(sourceFile.getSourceLocation().getEnvironment(), currentlyProcessing);
+  private static Result run(IStrategoTerm source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles, LinkedHashMap<Path, Driver> currentlyProcessing, List<Path> dependencies) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    Driver driver = new Driver(sourceFile.getSourceLocation().getEnvironment(), currentlyProcessing, generateFiles);
+    if (dependencies != null) {
+      driver.driverResult.setGenerated(true);
+      for (Path dep : dependencies)
+        driver.driverResult.addDependency(dep, sourceFile.getSourceLocation().getEnvironment());
+    }
     ToplevelDeclarationProvider declProvider = driver.new TermToplevelDeclarationProvider(source);
-    return run(driver, declProvider, sourceFile, monitor, generateFiles);
+    return run(driver, declProvider, sourceFile, monitor);
   }
 
 
-  private static Result run(Driver driver, ToplevelDeclarationProvider declProvider, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private static Result run(Driver driver, ToplevelDeclarationProvider declProvider, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     Entry<ToplevelDeclarationProvider, Driver> pending = null;
     
     try {
       synchronized (Driver.class) {
         pending = getPendingRun(sourceFile);
-        if (pending != null && !pending.getKey().equals(declProvider) && pending.getValue().generateFiles == generateFiles) {
+        if (pending != null && !pending.getKey().equals(declProvider) && pending.getValue().generateFiles == driver.generateFiles) {
           log.log("interrupting " + sourceFile);
           pending.getValue().interrupt();
         }
@@ -279,7 +284,7 @@ public class Driver {
       
       if (pending != null) {
         waitForPending(sourceFile);
-        return run(driver, declProvider, sourceFile, monitor, generateFiles);
+        return run(driver, declProvider, sourceFile, monitor);
       }
       
      synchronized (processingListener) {
@@ -287,7 +292,7 @@ public class Driver {
           listener.processingStarts(sourceFile);
       }
     
-      driver.process(declProvider, sourceFile, monitor, generateFiles);
+      driver.process(declProvider, sourceFile, monitor);
       if (!Environment.rocache)
         driver.storeCaches(sourceFile.getSourceLocation().getEnvironment());
     
@@ -299,7 +304,7 @@ public class Driver {
       org.strategoxt.imp.runtime.Environment.logException(e);
     } finally {
       pendingRuns.remove(sourceFile);
-      if (generateFiles)
+      if (driver.generateFiles)
         putResult(sourceFile, driver.driverResult != null && driver.driverResult.getSugaredSyntaxTree() == null ? null : driver.driverResult);
     }
 
@@ -317,13 +322,13 @@ public class Driver {
 * @throws TokenExpectedException
 * @throws InterruptedException
 */
-  private void process(ToplevelDeclarationProvider declProvider, RelativePath sourceFile, IProgressMonitor monitor, boolean generateFiles) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private void process(ToplevelDeclarationProvider declProvider, RelativePath sourceFile, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     this.monitor = monitor;
     log.beginTask("processing", "BEGIN PROCESSING " + sourceFile.getRelativePath());
     boolean success = false;
     List<Renaming> oldRenamings = new LinkedList<Renaming>(environment.getRenamings());
     try {
-      init(declProvider, sourceFile, generateFiles);
+      init(declProvider, sourceFile);
       currentlyProcessing.put(sourceFile, this);
       driverResult.setSourceFile(this.sourceFile, declProvider.getSourceHashCode());
       
@@ -1453,16 +1458,13 @@ public class Driver {
       driverResult.addEditorService(service);
   }
   
-  private void init(ToplevelDeclarationProvider declProvider, RelativePath sourceFile, boolean generateFiles) throws FileNotFoundException, IOException, InvalidParseTableException {
+  private void init(ToplevelDeclarationProvider declProvider, RelativePath sourceFile) throws FileNotFoundException, IOException, InvalidParseTableException {
     javaSource = null;
 
     this.declProvider = declProvider;
     this.sourceFile = new RelativeSourceLocationPath(new SourceLocation(sourceFile.getBasePath(), environment), sourceFile);
     this.sourceModulePath = FileCommands.dropExtension(sourceFile.getRelativePath());
-    this.generateFiles = generateFiles;
     
-    this.driverResult = new Result(generateFiles, CACHE_VERSION);
-
     currentGrammarSDF = new AbsolutePath(StdLib.initGrammar.getPath());
     currentGrammarModule = StdLib.initGrammarModule;
 
@@ -1703,6 +1705,8 @@ public class Driver {
   }
 
   public void setErrorMessage(String msg) {
+    if (msg == null)
+      return;
     Log.log.logErr(msg);
     driverResult.logError(msg);
     if (lastSugaredToplevelDecl != null)
@@ -1981,7 +1985,7 @@ public class Driver {
     try {
       if (importSourceFile.getAbsolutePath().endsWith(".model")) {
         IStrategoTerm term = ATermCommands.atermFromFile(importSourceFile.getAbsolutePath());
-        return compile(term, importSourceFile, monitor, currentlyProcessing);
+        return compile(term, importSourceFile, monitor, currentlyProcessing, new LinkedList<Path>());
       }
       else
         return compile(importSourceFile, monitor, currentlyProcessing);

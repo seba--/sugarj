@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.shared.BadTokenException;
@@ -46,7 +45,8 @@ public class Result {
   private Path persistentPath;
   private Integer persistentHash = null;
   
-  private final boolean generateFiles;
+  private boolean isGenerated;
+  private boolean generateFiles;
   
   private Map<Path, Integer> dependencies = new HashMap<Path, Integer>();
   private Set<Path> circularDependencies = new HashSet<Path>();
@@ -422,6 +422,9 @@ public class Result {
         FileCommands.createFile(dep);
         oos = new ObjectOutputStream(new FileOutputStream(dep.getFile()));
   
+        oos.writeBoolean(isGenerated);
+        oos.writeBoolean(generateFiles);
+        
         oos.writeObject(sourceFile);
         oos.writeInt(sourceFileHash);
         
@@ -472,6 +475,9 @@ public class Result {
     
     try {
       ois = new ObjectInputStream(new FileInputStream(dep.getFile()));
+      
+      result.isGenerated = ois.readBoolean();
+      result.generateFiles = ois.readBoolean();
       
       result.sourceFile = (RelativeSourceLocationPath) Path.readPath(ois, env);
       result.sourceFileHash = ois.readInt();
@@ -538,5 +544,13 @@ public class Result {
   
   public boolean hasFailed() {
     return !getParseErrors().isEmpty() || !getCollectedErrors().isEmpty();
+  }
+
+  public boolean isGenerated() {
+    return isGenerated;
+  }
+
+  public void setGenerated(boolean isGenerated) {
+    this.isGenerated = isGenerated;
   }
 }
