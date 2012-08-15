@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.shared.BadTokenException;
@@ -140,21 +141,29 @@ public class Result {
     Set<Path> visited = new HashSet<Path>();
     LinkedList<Path> queue = new LinkedList<Path>();
     queue.add(persistentPath);
+    visited.add(persistentPath);
     
     while (!queue.isEmpty()) {
       Path dep = queue.pop();
-      visited.add(dep);
       Result res = readDependencyFile(dep, env);
       
-      dependencies.addAll(res.generatedFileHashes.keySet());
-      dependencies.addAll(dependingFileHashes.keySet());
+      for (Path p : res.generatedFileHashes.keySet())
+        if (!dependencies.contains(p) && FileCommands.exists(p))
+          dependencies.add(p);
+      for (Path p : res.dependingFileHashes.keySet())
+        if (!dependencies.contains(p) && FileCommands.exists(p))
+          dependencies.add(p);
       
       for (Path nextDep : res.dependencies.keySet())
-        if (!visited.contains(nextDep))
-          queue.add(nextDep);
+        if (!visited.contains(nextDep)) {
+          queue.addFirst(nextDep);
+          visited.add(dep);
+        }
       for (Path nextDep : res.circularDependencies)
-        if (!visited.contains(nextDep))
-          queue.add(nextDep);
+        if (!visited.contains(nextDep)) {
+          queue.addFirst(nextDep);
+          visited.add(dep);
+        }
     }
     
     return dependencies;
@@ -224,7 +233,7 @@ public class Result {
     return editorServices;
   }
   
-  private boolean hasPersistentVersionChanged() throws IOException {
+  public boolean hasPersistentVersionChanged() throws IOException {
     return persistentPath != null && 
            persistentHash != null && 
            FileCommands.fileHash(persistentPath) != persistentHash;
@@ -508,6 +517,10 @@ public class Result {
   private void setPersistentPath(Path dep) throws IOException {
     persistentPath = dep;
     persistentHash = FileCommands.fileHash(dep);
+  }
+  
+  public Path getPersistentPath() {
+    return persistentPath;
   }
   
   void setSourceFile(RelativeSourceLocationPath sourceFile) throws IOException {

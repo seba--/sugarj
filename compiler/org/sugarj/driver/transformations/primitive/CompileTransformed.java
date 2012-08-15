@@ -122,6 +122,9 @@ class CompileTransformed extends AbstractPrimitive {
     } catch (ClassNotFoundException e) {
       e.printStackTrace();
       driver.setErrorMessage(e.getMessage());
+    } catch (Exception e) {
+      e.printStackTrace();
+      driver.setErrorMessage(e.getMessage());
     }
     
     return true;
@@ -151,28 +154,29 @@ class CompileTransformed extends AbstractPrimitive {
     Collection<Path> transformedModelDeps = res.getCircularFileDependencies(environment);
     TreeSet<String> failed = new TreeSet<String>();
     
-    for (Path p : transformedModelDeps)
-      if (FileCommands.exists(p)) {
-        boolean ok = false || 
-            source.equals(p) ||
-            res.getDirectlyGeneratedFiles().contains(p) ||
-            modelDeps.contains(p) || 
-            transDeps.contains(p);
-        Result pRes = null;
-        if (!ok) {
-          // transformations may generate other artifacts, given that their dependencies in turn are marked in the current result
-          Path dep = new AbsolutePath(FileCommands.dropExtension(p.getAbsolutePath()) + ".dep");
-          if (FileCommands.exists(dep))
-            pRes = Result.readDependencyFile(dep, environment);
-          if (FileCommands.exists(dep) && res.hasDependency(dep, environment)) {
+    for (Path p : transformedModelDeps) {
+      boolean ok = false || 
+          source.equals(p) ||
+          res.getDirectlyGeneratedFiles().contains(p) ||
+          modelDeps.contains(p) || 
+          transDeps.contains(p);
+      Result pRes = null;
+      if (!ok) {
+        // transformations may generate other artifacts, given that their dependencies in turn are marked in the current result
+        Path dep = new AbsolutePath(FileCommands.dropExtension(p.getAbsolutePath()) + ".dep");
+        if (FileCommands.exists(dep)) {
+          pRes = Result.readDependencyFile(dep, environment);
+          boolean isContained = transformedModelDeps.containsAll(pRes.getCircularFileDependencies(environment));
+          if (pRes != null && isContained) {
             Path originFile = new AbsolutePath(FileCommands.dropExtension(p.getAbsolutePath()) + ".origin");
-            Origin origin = Origin.read(originFile);
+            Origin origin = FileCommands.exists(originFile) ? Origin.read(originFile) : null;
             ok = origin != null && origin.isGenerated();
           }
         }
-        if (!ok)
-          failed.add(FileCommands.dropExtension(p.getAbsolutePath()));
       }
+      if (!ok)
+        failed.add(FileCommands.dropExtension(p.getAbsolutePath()));
+    }
 
     if (!failed.isEmpty()) {
       StringBuilder b = new StringBuilder("Violation of communication integrity in " + source.getRelativePath() + ": Generated model refers to the following artifacts, which neither the model nor the transformation refers to.\n");

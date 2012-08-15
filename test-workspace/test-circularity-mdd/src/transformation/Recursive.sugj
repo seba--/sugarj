@@ -105,8 +105,8 @@ rules
   add-defer(|model-path, import-path) =
     ?defer;
     (<lookup> (import-path, defer) => def
-      < ![(model-path, def) | defer]
-      + ![(model-path, import-path) | defer])
+      < ![(model-path, def) | <map(\(x, model-path) -> (x,def)\)> defer]
+      + ![(model-path, import-path) | <map(\(x, model-path) -> (x,import-path)\)> defer])
 
   remove-values(|val) = filter(\ (x,y) -> (x,y) where <not(equal(|val))> y \)
 }

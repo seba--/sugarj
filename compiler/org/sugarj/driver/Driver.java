@@ -264,6 +264,11 @@ public class Driver {
   
         if (pending == null) {
           Result result = getResult(sourceFile);
+          if (result != null && result.hasPersistentVersionChanged()) {
+            result = Result.readDependencyFile(result.getPersistentPath(), sourceFile.getSourceLocation().getEnvironment());
+            putResult(sourceFile, result);
+          }
+            
           if (result != null && result.isUpToDate(declProvider.getSourceHashCode(), sourceFile.getSourceLocation().getEnvironment()))
             return result;
         }
@@ -1147,9 +1152,11 @@ public class Driver {
           String transModel = FileCommands.getRelativeModulePath(SDFCommands.prettyPrintJava(getApplicationSubterm(transTerm, "TransApp", 0), interp));
           List<IStrategoTerm> innerTransformations = getList(getApplicationSubterm(transTerm, "TransApp", 1));
           Pair<String, Boolean> transformedModel = transformModel(transModel, innerTransformations, importTerm);
-          RelativePath transformation = ModuleSystemCommands.searchFile(transformedModel.a.replace("$", "-"), ".str", environment);
-          if (transformation != null)
-            resolvedTransformationPaths.add(transformation);
+          if (transformedModel != null) {
+            RelativePath transformation = ModuleSystemCommands.searchFile(transformedModel.a.replace("$", "-"), ".str", environment);
+            if (transformation != null)
+              resolvedTransformationPaths.add(transformation);
+          }
         }
       }
       return resolvedTransformationPaths;
