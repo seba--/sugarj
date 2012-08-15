@@ -33,6 +33,7 @@ import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.spoofax.terms.attachments.ParentAttachment;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.imp.runtime.services.ContentProposer;
+import org.strategoxt.lang.Context;
 import org.sugarj.driver.ATermCommands;
 import org.sugarj.driver.CommandExecution;
 import org.sugarj.driver.Driver;
@@ -296,12 +297,17 @@ public class SugarJParser extends JSGLRI {
     }
     
     try {
+      Context context = null;
+      synchronized (SugarJParser.class) {
+        context = org.strategoxt.strj.strj.init();
+      }
+      
       initialTrans = STRCommands.compile(
           new AbsolutePath(StdLib.initTrans.getPath()), 
           "main", 
           new LinkedList<Path>(),
           new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.strategoTbl.getPath()), "StrategoModule"),
-          org.strategoxt.strj.strj.init(),
+          context,
           strCache, 
           environment);
     } catch (InvalidParseTableException e) {
