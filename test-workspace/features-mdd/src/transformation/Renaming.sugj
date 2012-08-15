@@ -32,6 +32,9 @@ rules
     <string-as-chars(Tl); split-packages-decname> rest => (pkgs, name);
     !([pkg|pkgs], name)
 
+  compose-path : ([], name) -> <as-java-path> name
+  compose-path : ([pkg|pkgs], name) -> <conc-strings> (pkg, "/", <compose-path> (pkgs, name))
+
   rename-main-rules(|model-path, transformation-path) =
     where(!(model-path, transformation-path);
           prim("SUGARJ_rename_main_args") => (_, new-name));

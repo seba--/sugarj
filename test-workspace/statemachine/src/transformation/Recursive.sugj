@@ -19,7 +19,8 @@ rules
   recursively-transform(model-predicate, trans) = ?(model, model-path, trans-path); 
     {| Renamings, Stack: 
          rules ( Renamings := [] 
-                 Stack := [model-path]);
+                 Stack := [model-path]
+                 Deferred := []);
          !model;
          (where(model-predicate) < trans + id) => generated;
          recursively-transform(model-predicate, trans | trans-path);
@@ -59,24 +60,31 @@ rules
 
   compile-renamed(model-predicate | model-path, trans-path) =
     where(apply-renamings(|<Renamings; debug(!"rename: ")>) => renamed);
-    if has-circular-import(model-predicate)
-      then !renamed;
+    if has-circular-import(model-predicate) => circular-import
+      then <?(_, _, _, import-path, _)> circular-import;
            where(!(model-path, trans-path);debug(!"write renamed: "));
+           where(!(import-path, trans-path);debug(!"circular import: "));
+           rules( Deferred := <Deferred; add-defer(|model-path, import-path);debug(!"add defer: ")> );
+           !renamed;
            prim("SUGARJ_write", model-path, trans-path)
-      else !renamed;
-           where(!(model-path, trans-path);debug(!"compile renamed: "));
+      else where(!(model-path, trans-path);debug(!"compile renamed: "));
+           rules( Deferred := <Deferred;remove-values(|model-path); debug(!"remove defer: ")> );
+           !renamed;
            prim("SUGARJ_compile", model-path, trans-path)
     end
 
   has-circular-import(model-predicate) =
-    where(oncetd(is-circular-import(model-predicate)))
+    collect-one(is-circular-import(model-predicate))
 
   is-circular-import(model-predicate) =
     get-imported-model(model-predicate) => (pkgs, name, local-name, model-path, model);
     is-circular-import(|model-path)
   
   is-circular-import(|model-path) =
-    <elem> (model-path,<Stack>)
+    where(<elem> (model-path,<Stack>) +
+          <lookup> (model-path, <Deferred>) => def;
+          not(equal(|<Stack; Hd>));
+          <elem> (def, <Stack>))
 
   get-imported-model(predicate) =
     (?TypeImportDec(<id>) + ?TypeImportAsDec(<id>, _));
@@ -93,5 +101,13 @@ rules
     where(collect-one(?ModelDecHead(_, _, meta-model)))
 
   finally-do(s, final) = s < final + (final; fail)
+
+  add-defer(|model-path, import-path) =
+    ?defer;
+    (<lookup> (import-path, defer) => def
+      < ![(model-path, def) | defer]
+      + ![(model-path, import-path) | defer])
+
+  remove-values(|val) = filter(\ (x,y) -> (x,y) where <not(equal(|val))> y \)
 }
 
