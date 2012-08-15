@@ -8,4 +8,5 @@ signature constructors
   TransApp : JavaTypeName * List(TransformationExpr) -> TransformationExpr
 
   TransImportDec : TransformationExpr * ImportAs -> JavaImportDec
+  TypeImportAsDec : JavaTypeName * ImportAs -> JavaImportDec
   ImportAs : JavaTypeName -> ImportAs

@@ -168,6 +168,8 @@ public class ModuleSystemCommands {
     try {
       if (isApplication(toplevelDecl, "TypeImportDec"))
         name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp);
+      if (isApplication(toplevelDecl, "TypeAsImportDec"))
+        name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp);
       else if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
         name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp) + ".*";
       else if (isApplication(toplevelDecl, "TransImportDec"))

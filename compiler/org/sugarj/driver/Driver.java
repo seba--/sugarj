@@ -727,7 +727,11 @@ public class Driver {
       RelativePath modelOutFile = environment.new RelativePathBin(relPackageNameSep() + modelName + ".model");
       
       IStrategoTerm modelTerm = makeDesugaredSyntaxTree(body);
-      driverResult.generateFile(modelOutFile, ATermCommands.atermToString(modelTerm));
+      String string = ATermCommands.atermToString(modelTerm);
+      driverResult.generateFile(modelOutFile, string);
+      
+      if (modelOutFile.equals(sourceFile))
+        driverResult.setSourceFile(sourceFile, string.hashCode());
     } finally {
       log.endTask();
     }
@@ -801,7 +805,8 @@ public class Driver {
         modulePath = transformedImport.a;
         skipImport = transformedImport.b;
         
-        IStrategoTerm flatImport = ATermCommands.flattenTransImport(modulePath);
+        String localModelName = ATermCommands.getLocalImportName(toplevelDecl, interp);
+        IStrategoTerm flatImport = ATermCommands.flattenTransImport(modulePath, localModelName);
         desugaredImportDecls.remove(toplevelDecl);
         desugaredImportDecls.add(flatImport);
         

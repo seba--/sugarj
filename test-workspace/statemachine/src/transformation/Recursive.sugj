@@ -28,11 +28,13 @@ rules
 
   recursively-transform(model-predicate, trans | trans-path) =
     topdown(try(where(
-      {pkgs, name, model-path, model, generated, new-name, new-renaming, old-renamings, new-renamings:
-        get-imported-model(model-predicate) => (pkgs, name, model-path, model);
+      {pkgs, name, local-name, model-path, model, generated, new-name, new-renaming, old-renamings, new-renamings:
+        get-imported-model(model-predicate) => (pkgs, name, local-name, model-path, model);
         where(!model-path;debug(!"check import: "));
         where(<conc-strings> (name, <name-suffix> trans-path) => new-name;
-              !(pkgs, name, new-name) => new-renaming);
+              (<?None()> local-name
+                 < !(pkgs, name, new-name) => new-renaming
+                 + !([], <?Some(<id>)> local-name, new-name) => new-renaming));
 
         where(old-renamings := <Renamings>;
               new-renamings := [ new-renaming | old-renamings ]);
@@ -70,19 +72,20 @@ rules
     where(oncetd(is-circular-import(model-predicate)))
 
   is-circular-import(model-predicate) =
-    get-imported-model(model-predicate) => (pkgs, name, model-path, model);
+    get-imported-model(model-predicate) => (pkgs, name, local-name, model-path, model);
     is-circular-import(|model-path)
   
   is-circular-import(|model-path) =
     <elem> (model-path,<Stack>)
 
   get-imported-model(predicate) =
-    ?TypeImportDec(<id>);
+    (?TypeImportDec(<id>) + ?TypeImportAsDec(<id>, _));
     import-model-path => (pkgs, name);
     <build-path> (pkgs, name) => path;
     prim("SUGARJ_resolve_model") => model;
     where(predicate);
-    !(pkgs, name, path, model)
+    (?TypeImportAsDec(_, <id>); !Some(<id>) + !None()) => local-name;
+    !(pkgs, name, local-name, path, model)
 
   ensure-import(|imp) = !(<id>, [imp]); union
 

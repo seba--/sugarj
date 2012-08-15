@@ -100,6 +100,8 @@ class CompileTransformed extends AbstractPrimitive {
       return false;
     
     try {
+      context.setCurrent(ATermCommands.atermFromFile(source.getAbsolutePath()));
+
       RelativePath model = ModuleSystemCommands.searchFile(modelPath, ".model", environment);
       ModuleSystemCommands.markGenerated(source, res, environment, model, transformationPaths);
       if (generateFiles)

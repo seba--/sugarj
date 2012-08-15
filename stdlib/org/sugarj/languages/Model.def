@@ -27,6 +27,7 @@ exports
     JavaTypeName "<" {TransformationExpr ","}+ ">" -> TransformationExpr1 {cons("TransApp")}  
     
     "import" TransformationExpr1 ImportAs? ";" -> JavaImportDec {cons("TransImportDec")}
+    "import" JavaTypeName ImportAs ";"             -> JavaImportDec {cons("TypeImportAsDec")}
     
     "as" JavaTypeName -> ImportAs {cons("ImportAs")}
 

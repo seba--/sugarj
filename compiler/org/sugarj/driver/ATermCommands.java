@@ -447,6 +447,8 @@ public class ATermCommands {
   public static String getLocalImportName(IStrategoTerm term, HybridInterpreter interp) throws IOException {
     if (isApplication(term, "TransImportDec"))
       term = getApplicationSubterm(term, "TransImportDec", 1);
+    else if (isApplication(term, "TypeImportAsDec"))
+      term = getApplicationSubterm(term, "TypeImportAsDec", 1);
     else
       return null;
     
@@ -465,12 +467,13 @@ public class ATermCommands {
   }
 
   public static boolean isImportDec(IStrategoTerm toplevelDecl) {
-    return isApplication(toplevelDecl, "TypeImportDec") || 
+    return isApplication(toplevelDecl, "TypeImportDec") ||
+        isApplication(toplevelDecl, "TypeImportAsDec") ||
         isApplication(toplevelDecl, "TypeImportOnDemandDec") || 
         isApplication(toplevelDecl, "TransImportDec");
   }
 
-  public static IStrategoTerm flattenTransImport(String modulePath) {
+  public static IStrategoTerm flattenTransImport(String modulePath, String localName) {
     LinkedList<String> pkgs = new LinkedList<String>();
     
     while (true) {
@@ -487,9 +490,7 @@ public class ATermCommands {
     IStrategoTerm moduleId = makeAppl("Id", "JavaId", 1, makeString(modulePath, null));
     
     if (pkgs.isEmpty())
-      return makeAppl("TypeImportDec", "ImportDec", 1, 
-               makeAppl("TypeName", "TypeName", 1, 
-                 moduleId));
+      return makeImport(makeAppl("TypeName", "TypeName", 1,moduleId), localName);
     
     int index = pkgs.size() - 2;
     IStrategoTerm pkg = makeAppl("Id", "JavaId", 1, makeString(pkgs.getLast(), null));
@@ -503,9 +504,15 @@ public class ATermCommands {
       index--;
     }
     
-    return makeAppl("TypeImportDec", "ImportDec", 1, 
-             makeAppl("TypeName", "TypeName", 2, 
-               pkg,
-               moduleId));
+    return makeImport(makeAppl("TypeName", "TypeName", 2, pkg, moduleId), localName);
+  }
+  
+  private static IStrategoTerm makeImport(IStrategoTerm imp, String localName) {
+    if (localName == null)
+      return makeAppl("TypeImportDec", "ImportDec", 1, imp);
+    return makeAppl("TypeImportAsDec", "ImportDec", 2, 
+             imp,
+             makeAppl("ImportAs", "ImportAs", 1, 
+               makeAppl("Id", "Id", 1, makeString(localName, null))));
   }
 }
