@@ -9,6 +9,7 @@ import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.library.AbstractPrimitive;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.jsglr.client.InvalidParseTableException;
 import org.sugarj.driver.ATermCommands;
 import org.sugarj.driver.Driver;
 import org.sugarj.driver.Environment;
@@ -19,6 +20,7 @@ import org.sugarj.driver.path.AbsolutePath;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
 import org.sugarj.driver.path.RelativeSourceLocationPath;
+import org.sugarj.util.Renaming;
 
 /**
  * Primitive for looking up and loading a model according to the current environment.
@@ -57,9 +59,14 @@ class WriteTransformed extends AbstractPrimitive {
     
     RelativeSourceLocationPath source = ModuleSystemCommands.getTransformedModelSourceFilePath(modelPath, transformationPaths, environment);
     try {
+      Renaming ren = new Renaming(modelPath, source.getRelativePath());
+      generatedModel = ATermCommands.renameDeclarations(generatedModel, ren, driver.getRenamingContext());
+
       if (generateFiles)
         ATermCommands.atermToFile(generatedModel, source);
     } catch (IOException e) {
+      driver.setErrorMessage(e.getLocalizedMessage());
+    } catch (InvalidParseTableException e) {
       driver.setErrorMessage(e.getLocalizedMessage());
     }
     

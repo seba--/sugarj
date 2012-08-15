@@ -494,8 +494,11 @@ public class ATermCommands {
     int index = pkgs.size() - 2;
     IStrategoTerm pkg = makeAppl("Id", "JavaId", 1, makeString(pkgs.getLast(), null));
     while (index >= 0) {
+      IStrategoTerm t = makeAppl("Id", "JavaId", 1, makeString(pkgs.get(index), null));
+      if (index == 0)
+        t = makeAppl("PackageOrTypeName", "PackageOrTypeName", 1, t);
       pkg = makeAppl("PackageOrTypeName", "PackageOrTypeName", 2, 
-              makeAppl("Id", "JavaId", 1, makeString(pkgs.get(index), null)),
+              t,
               pkg);
       index--;
     }
