@@ -190,8 +190,7 @@ public abstract class LanguageLib implements Serializable {
 		if (source.isEmpty())	// if empty flag ist set, do not compile source
 			return;
 		
-		String content = source.getCode(generatedClasses, interp, outFile);
-		writeToFile(generateFiles, generatedFileHashes, outFile, content);
+		writeToFile(generateFiles, generatedFileHashes, outFile, source.getCode(generatedClasses, interp, outFile));
 
 		this.compile(javaOutFiles, bin, path, generateFiles);
 		for (Path cl : generatedClasses)
