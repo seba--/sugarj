@@ -8,7 +8,7 @@ rules
     ?(model, model-path, trans-path);
     !(model-path, trans-path);
     prim("SUGARJ_rename_main_args") => (old-name, new-name);
-    where(!SDefNoArgs(new-name, Call(SVar("recursively-transform"), [Id(), CallNoArgs(SVar(old-name))])) => new-main);
+    where(!SDefNoArgs(new-name, Call(SVar("recursively-transform"), [Id(), Call(SVar("try"), [CallNoArgs(SVar(old-name))])])) => new-main);
     !model;
     SugarCompilationUnit(
       id,

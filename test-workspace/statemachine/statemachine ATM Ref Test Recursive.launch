@@ -6,6 +6,6 @@
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="4"/>
 </listAttribute>
-<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="statemachine.test.ATMRefTest"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="statemachine.test.ATMRefTestRecursive"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="statemachine"/>
 </launchConfiguration>
