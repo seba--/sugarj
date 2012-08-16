@@ -49,8 +49,7 @@ import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoException;
 import org.strategoxt.permissivegrammars.make_permissive;
 import org.strategoxt.tools.tools;
-import org.sugarj.driver.caching.ModuleKey;
-import org.sugarj.driver.caching.ModuleKeyCache;
+import org.sugarj.driver.caching.DependentCacheValue;
 import org.sugarj.driver.path.AbsolutePath;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
@@ -121,8 +120,8 @@ public class Driver {
   private Context renamingContext;
   private Context strjContext;
   
-  private ModuleKeyCache<Path> sdfCache = null;
-  private ModuleKeyCache<Path> strCache = null;
+  private Map<String, List<DependentCacheValue<Path>>> sdfCache = null;
+  private Map<String, List<DependentCacheValue<Path>>> strCache = null;
   
   private Path currentGrammarTBL;
   private Path currentTransProg;
@@ -1520,49 +1519,33 @@ public class Driver {
     if (sdfCache == null || force)
       try {
         // log.log("load sdf cache from " + sdfCachePath);
-          sdfCache = (ModuleKeyCache<Path>) new ObjectInputStream(new FileInputStream(sdfCachePath.getFile())).readObject();
+          sdfCache = (Map<String, List<DependentCacheValue<Path>>>) new ObjectInputStream(new FileInputStream(sdfCachePath.getFile())).readObject();
       }
       catch (Exception e) {
         log.logErr("Could not read sdf cache, generating new one.");
-        sdfCache = new ModuleKeyCache<Path>();
+        sdfCache = new HashMap<String, List<DependentCacheValue<Path>>>();
         for (File f : environment.getCacheDir().getFile().listFiles())
           if (f.getPath().endsWith(".tbl"))
             f.delete();
       }
     else if (sdfCache == null)
-      sdfCache = new ModuleKeyCache<Path>();
+      sdfCache = new HashMap<String, List<DependentCacheValue<Path>>>();
     
     if (strCache == null || force)
       try {
         // log.log("load str cache from " + strCachePath);
-        strCache = (ModuleKeyCache<Path>) new ObjectInputStream(new FileInputStream(strCachePath.getFile())).readObject();
+        strCache = (Map<String, List<DependentCacheValue<Path>>>) new ObjectInputStream(new FileInputStream(strCachePath.getFile())).readObject();
       }
       catch (Exception e) {
         log.logErr("Could not read str cache, generating new one.");
-        strCache = new ModuleKeyCache<Path>();
+        strCache = new HashMap<String, List<DependentCacheValue<Path>>>();
         for (File f : environment.getCacheDir().getFile().listFiles())
           if (f.getPath().endsWith(".jar"))
             f.delete();
       }
     else if (strCache == null)
-      strCache = new ModuleKeyCache<Path>();
+      strCache = new HashMap<String, List<DependentCacheValue<Path>>>();
   }
-
-  
-  public static ModuleKeyCache<Path> reallocate(ModuleKeyCache<Path> cache, Environment env) {
-    ModuleKeyCache<Path> res = new ModuleKeyCache<Path>();
-    
-    for (Entry<ModuleKey, Path> e : cache.entrySet()) {
-      Map<Path, Integer> imports = new HashMap<Path, Integer>();
-      for (Entry<Path, Integer> e2 : e.getKey().imports.entrySet())
-        imports.put(Path.reallocate(e2.getKey(), env), e2.getValue());
-      
-      res.put(new ModuleKey(imports, e.getKey().body), Path.reallocate(e.getValue(), env));
-    }
-    
-    return res;
-  }
-
 
   private void storeCaches(Environment environment) throws IOException {
     if (environment.getCacheDir() == null)

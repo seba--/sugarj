@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -38,10 +39,10 @@ import org.strategoxt.stratego_sdf.pp_sdf_string_0_0;
 import org.strategoxt.stratego_xtc.stratego_xtc;
 import org.strategoxt.strc.pp_stratego_string_0_0;
 import org.strategoxt.tools.main_pack_sdf_0_0;
-import org.sugarj.driver.caching.ModuleKey;
-import org.sugarj.driver.caching.ModuleKeyCache;
+import org.sugarj.driver.caching.DependentCacheValue;
 import org.sugarj.driver.path.Path;
 import org.sugarj.stdlib.StdLib;
+import org.sugarj.util.Pair;
 
 /**
  * This class provides methods for various SDF commands. Each
@@ -164,12 +165,12 @@ public class SDFCommands {
    * @throws BadTokenException 
    * @throws TokenExpectedException 
    */
-  public static Path compile(Path sdf, String module, Collection<Path> dependentFiles, JSGLRI sdfParser, Context sdfContext, Context makePermissiveContext, ModuleKeyCache<Path> sdfCache, Environment environment) throws IOException,
+  public static Path compile(Path sdf, String module, Collection<Path> dependentFiles, JSGLRI sdfParser, Context sdfContext, Context makePermissiveContext, Map<String, List<DependentCacheValue<Path>>> sdfCache, Environment environment) throws IOException,
       InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
-    ModuleKey key = getModuleKeyForGrammar(sdf, module, dependentFiles, sdfParser);
+    Pair<String, ? extends Collection<Path>> key = getModuleKeyForGrammar(sdf, module, dependentFiles, sdfParser);
     Path tbl = lookupGrammarInCache(sdfCache, key);
     if (tbl == null) {
-      tbl = generateParseTable(key, sdf, module, sdfContext, makePermissiveContext, environment.getIncludePath());
+      tbl = generateParseTable(sdf, module, sdfContext, makePermissiveContext, environment.getIncludePath());
       tbl = cacheParseTable(sdfCache, key, tbl, environment);
     }
     
@@ -180,7 +181,7 @@ public class SDFCommands {
   }
   
   
-  private static Path cacheParseTable(ModuleKeyCache<Path> sdfCache, ModuleKey key, Path tbl, Environment environment) throws IOException {
+  private static Path cacheParseTable(Map<String, List<DependentCacheValue<Path>>> sdfCache, Pair<String, ? extends Collection<Path>> key, Path tbl, Environment environment) throws IOException {
     if (sdfCache == null)
       return tbl;
     
@@ -190,8 +191,12 @@ public class SDFCommands {
       FileCommands.moveFile(tbl, cacheTbl);
       
       if (!Environment.rocache) {
-        Path oldTbl = sdfCache.putGet(key, cacheTbl);
-        FileCommands.delete(oldTbl);
+        List<DependentCacheValue<Path>> list = sdfCache.get(key.a);
+        if (list == null) {
+          list = new LinkedList<DependentCacheValue<Path>>();
+          sdfCache.put(key.a, list);
+        }
+        list.add(new DependentCacheValue<Path>(key.b, cacheTbl));
       }
 
       if (CommandExecution.CACHE_INFO)
@@ -203,7 +208,7 @@ public class SDFCommands {
     }
   }
 
-  private static Path lookupGrammarInCache(ModuleKeyCache<Path> sdfCache, ModuleKey key) {
+  private static Path lookupGrammarInCache(Map<String, List<DependentCacheValue<Path>>> sdfCache, Pair<String, ? extends Collection<Path>> key) throws IOException {
     if (sdfCache == null)
       return null;
     
@@ -211,25 +216,24 @@ public class SDFCommands {
     
     log.beginTask("Searching", "Search parse table in cache");
     try {
+      List<DependentCacheValue<Path>> list = null;
+      
       if (!Environment.wocache)
-        result = sdfCache.get(key);
+        list = sdfCache.get(key.a);
       
-      if (result != null && !result.getFile().exists())
-        result = null;
+      if (list != null)
+        result = DependentCacheValue.lookupPathInList(list);
       
-      if (result == null)
-        return null;
-
-      if (CommandExecution.CACHE_INFO)
+      if (CommandExecution.CACHE_INFO && result != null)
         log.log("Cache location: '" + result + "'");
-
+      
       return result;
     } finally {
       log.endTask(result != null);
     }
   }
   
-  private static ModuleKey getModuleKeyForGrammar(Path sdf, String module, Collection<Path> dependentFiles, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  private static Pair<String, ? extends Collection<Path>> getModuleKeyForGrammar(Path sdf, String module, Collection<Path> dependentFiles, JSGLRI parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     log.beginTask("Generating", "Generate module key for current grammar");
     try {
       IStrategoTerm aterm = parser.parse(new FileInputStream(sdf.getFile()), sdf.getAbsolutePath());
@@ -243,7 +247,7 @@ public class SDFCommands {
         if (SDF_FILE_PATTERN.matcher(file.getAbsolutePath()).matches() && FileCommands.exists(file))
           depList.add(file);
       
-      return new ModuleKey(depList, term);
+      return Pair.create(ATermCommands.atermToString(term), depList);
     } catch (Exception e) {
       throw new SGLRException(parser.getParser(), "could not parse SDF file " + sdf, e);
     } finally {
@@ -251,8 +255,7 @@ public class SDFCommands {
     }
   }
 
-  private static Path generateParseTable(ModuleKey key,
-                                         Path sdf,
+  private static Path generateParseTable(Path sdf,
                                          String module,
                                          Context sdfContext,
                                          Context makePermissiveContext,

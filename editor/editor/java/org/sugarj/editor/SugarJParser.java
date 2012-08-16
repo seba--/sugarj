@@ -44,7 +44,7 @@ import org.sugarj.driver.ModuleSystemCommands;
 import org.sugarj.driver.Result;
 import org.sugarj.driver.RetractableTreeBuilder;
 import org.sugarj.driver.STRCommands;
-import org.sugarj.driver.caching.ModuleKeyCache;
+import org.sugarj.driver.caching.DependentCacheValue;
 import org.sugarj.driver.path.AbsolutePath;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativeSourceLocationPath;
@@ -284,12 +284,12 @@ public class SugarJParser extends JSGLRI {
       return initialTrans;
     
     Path strCachePath = environment.new RelativePathCache("strCache");
-    ModuleKeyCache<Path> strCache = null;
+    Map<String, List<DependentCacheValue<Path>>> strCache = null;
     try {
-      strCache = (ModuleKeyCache<Path>) new ObjectInputStream(new FileInputStream(strCachePath.getFile())).readObject();
+      strCache = (Map<String, List<DependentCacheValue<Path>>>) new ObjectInputStream(new FileInputStream(strCachePath.getFile())).readObject();
     }
     catch (Exception e) {
-      strCache = new ModuleKeyCache<Path>();
+      strCache = new HashMap<String, List<DependentCacheValue<Path>>>();
       if (environment.getCacheDir().getFile() != null && environment.getCacheDir().getFile().exists()) 
         for (File f : environment.getCacheDir().getFile().listFiles())
           if (f.getPath().endsWith(".jar"))

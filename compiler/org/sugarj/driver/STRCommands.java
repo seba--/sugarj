@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.spoofax.interpreter.library.IOAgent;
@@ -32,11 +33,11 @@ import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoException;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.strj.main_strj_0_0;
-import org.sugarj.driver.caching.ModuleKey;
-import org.sugarj.driver.caching.ModuleKeyCache;
+import org.sugarj.driver.caching.DependentCacheValue;
 import org.sugarj.driver.path.Path;
 import org.sugarj.driver.path.RelativePath;
 import org.sugarj.stdlib.StdLib;
+import org.sugarj.util.Pair;
 
 /**
  * This class provides methods for various SDF commands. Each
@@ -115,19 +116,18 @@ public class STRCommands {
   }
   
   
-  public static Path compile(Path str, String main, Collection<Path> dependentFiles, JSGLRI strParser, Context strjContext, ModuleKeyCache<Path> strCache, Environment environment) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
-    ModuleKey key = getModuleKeyForAssimilation(str, main, dependentFiles, strParser);
+  public static Path compile(Path str, String main, Collection<Path> dependentFiles, JSGLRI strParser, Context strjContext, Map<String, List<DependentCacheValue<Path>>> strCache, Environment environment) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+    Pair<String, ? extends Collection<Path>> key = getModuleKeyForAssimilation(str, main, dependentFiles, strParser);
     Path prog = lookupAssimilationInCache(strCache, key);
     
     if (prog == null) {
-      prog = generateAssimilator(key, str, main, strjContext, environment.getIncludePath());
+      prog = generateAssimilator(str, main, strjContext, environment.getIncludePath());
       prog = cacheAssimilator(strCache, key, prog, environment);
     }
     return prog;
   }
     
-  private static Path generateAssimilator(ModuleKey key,
-                                          Path str,
+  private static Path generateAssimilator(Path str,
                                           String main,
                                           Context strjContext,
                                           Collection<Path> paths) throws IOException {
@@ -157,7 +157,7 @@ public class STRCommands {
     }
   }
     
-  private static Path cacheAssimilator(ModuleKeyCache<Path> strCache, ModuleKey key, Path prog, Environment environment) throws IOException {
+  private static Path cacheAssimilator(Map<String, List<DependentCacheValue<Path>>> strCache, Pair<String, ? extends Collection<Path>> key, Path prog, Environment environment) throws IOException {
     if (strCache == null)
       return prog;
     
@@ -168,8 +168,12 @@ public class STRCommands {
       FileCommands.moveFile(prog, cacheProg);
       
       if (!Environment.rocache) {
-        Path oldProg = strCache.putGet(key, cacheProg);
-        FileCommands.delete(oldProg);
+        List<DependentCacheValue<Path>> list = strCache.get(key.a);
+        if (list == null) {
+          list = new LinkedList<DependentCacheValue<Path>>();
+          strCache.put(key.a, list);
+        }
+        list.add(new DependentCacheValue<Path>(key.b, cacheProg));
       }
 
       if (CommandExecution.CACHE_INFO)
@@ -181,7 +185,7 @@ public class STRCommands {
     }
   }
   
-  private static Path lookupAssimilationInCache(ModuleKeyCache<Path> strCache, ModuleKey key) {
+  private static Path lookupAssimilationInCache(Map<String, List<DependentCacheValue<Path>>> strCache, Pair<String, ? extends Collection<Path>> key) throws IOException {
     if (strCache == null)
       return null;
     
@@ -189,16 +193,15 @@ public class STRCommands {
     
     log.beginTask("Searching", "Search assimilator in cache");
     try {
+      List<DependentCacheValue<Path>> list = null;
+      
       if (!Environment.wocache)
-        result = strCache.get(key);
+        list = strCache.get(key.a);
       
-      if (result != null && !result.getFile().exists())
-        result = null;
+      if (list != null)
+        result = DependentCacheValue.lookupPathInList(list);
       
-      if (result == null)
-        return null;
-
-      if (CommandExecution.CACHE_INFO)
+      if (CommandExecution.CACHE_INFO && result != null)
         log.log("Cache location: '" + result + "'");
       
       return result;
@@ -208,7 +211,7 @@ public class STRCommands {
   }
 
 
-  private static ModuleKey getModuleKeyForAssimilation(Path str, String main, Collection<Path> dependentFiles, JSGLRI strParser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  private static Pair<String, ? extends Collection<Path>> getModuleKeyForAssimilation(Path str, String main, Collection<Path> dependentFiles, JSGLRI strParser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     log.beginTask("Generating", "Generate module key for current assimilation");
     try {
       IStrategoTerm aterm = strParser.parse(new BufferedInputStream(new FileInputStream(str.getFile())), str.getAbsolutePath());
@@ -220,7 +223,7 @@ public class STRCommands {
         if (STR_FILE_PATTERN.matcher(file.getAbsolutePath()).matches() && FileCommands.exists(file))
           depList.add(file);
       
-      return new ModuleKey(depList, aterm);
+      return Pair.create(ATermCommands.atermToString(aterm), depList);
     } catch (Exception e) {
       throw new SGLRException(strParser.getParser(), "could not parse STR file " + str, e);
     } finally {
