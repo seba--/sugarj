@@ -15,6 +15,7 @@ bin/
 # Spoofax stuff
 /editor/editor/*.generated.esv
 /editor/include/
+/editor/lib/*.generated.str
 /editor/syntax/*generated.pp
 
 
