@@ -14,14 +14,14 @@ public transformation ToJava {
   rules
     main =
       recursively-transform(
-        conforms-to-metamodel(|"statemachine.Language") + conforms-to-metamodel(|"entity.Language"),
-        conforms-to-metamodel(|"statemachine.Language")
+        id,
+        conforms-to-metamodel(|"statemachine.DataExtension")
           < {orig:
               ?orig;
               main-statemachine_ToJava;
               copy-imports(|orig);
               add-internal-data-decls(|orig)}
-          + main-entity_ToJava)
+          + conforms-to-metamodel(|"entity.Language"); main-entity_ToJava)
 
   rules
     copy-imports(|orig) =

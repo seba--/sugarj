@@ -1,9 +1,12 @@
 package statemachine;
 
+import statemachine.Language;
 import statemachine.data.InternalData;
 import statemachine.data.ParametricEvent;
 import statemachine.data.TransitionCondition;
 import statemachine.data.TransitionEffect;
 
 public sugar DataExtension {
+  desugarings
+    \ ModelDecHead(mods,name,"statemachine.Language") -> ModelDecHead(mods,name,"statemachine.DataExtension") \
 }
