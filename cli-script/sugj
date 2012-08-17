@@ -2,12 +2,10 @@
 # cai 09.08.12
 # script to invoke sugarj from command line
 
-# find base directory of eclipse
-# WARNING: path is fragile and depends on project structure
-# namely that sugarj base directory is inside eclipse folder
-eclipse="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
-plugins="$eclipse/plugins"
-sugarj="$eclipse/sugarj"
+# find base directory of sugarj
+# CELEBRATION: No longer dependent on eclipse's location
+sugarj="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+script="$sugarj/cli-script"
 common="$sugarj/common/bin"
 compiler="$sugarj/compiler/bin"
 stdlib="$sugarj/stdlib/bin"
@@ -16,9 +14,15 @@ cliroot="$sugarj/compiler"
 clijars="$cliroot/commons-cli-1.2.jar:$cliroot/strategoxt.jar:$cliroot/make_permissive.jar"
 langroot="$sugarj/language-libraries"
 langlibs="$langroot/base/bin:$langroot/haskell/bin:$langroot/java/bin:$langroot/prolog/bin"
-strimp="$plugins/org.strategoxt.imp.nativebundle_0.1.1.201202141159"
 
+# essential paths
 classpath="$compiler:$clijars:$common:$stdlib:$langlibs:$layout"
-classpath="$classpath:$strimp:$plugins/*"
 
-java -Xss64m -Xmx1024m -cp "$classpath" org.sugarj.driver.cli.Main $*
+# what we try to combine
+# somehow the nativebundle does not cooperate no matter what I do with it
+# zip, jar, etc won't help the star locate SDFBundleCommand.class
+sdfbundle="$script/jars/org.strategoxt.imp.nativebundle_0.1.1.201202141159"
+classpath="$classpath:$sdfbundle"
+classpath="$classpath:$script/jars/*"
+
+exec java -Xss64m -Xmx1024m -cp "$classpath" org.sugarj.driver.cli.Main $*

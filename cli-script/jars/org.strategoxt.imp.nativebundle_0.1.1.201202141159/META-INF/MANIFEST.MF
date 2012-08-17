@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven
+Built-By: nixbld2
+Build-Jdk: 1.6.0_24
+Export-Package: org.strategoxt.imp.nativebundle
+Require-Bundle: org.strategoxt.strj,org.eclipse.core.runtime,org.strat
+ egoxt.imp.runtime
+Bundle-Vendor: Spoofax.org
+Bundle-ActivationPolicy: lazy
+Bundle-Version: 0.1.1.201202141159
+Bundle-Name: Nativebundle Plug-in
+Bundle-Activator: org.strategoxt.imp.nativebundle.Activator
+Bundle-ManifestVersion: 2
+Import-Package: org.osgi.framework;version="1.3.0"
+Bundle-SymbolicName: org.strategoxt.imp.nativebundle
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+
