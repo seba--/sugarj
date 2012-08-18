@@ -1,0 +1,46 @@
+package model;
+
+import variability.Model; 
+
+public featuremodel GraphFeatureModel  {
+  features 
+   // GPL
+   Benchmark,
+   BaseImpl,
+   SearchAlg,
+   Undirected,
+   Weighted,
+   // GPL::Algorithms
+   Number,
+   Connected,
+   Transpose,
+   Mstprim,
+   Mstkruskal,
+   Cycle,
+   StronglyConnected,
+   // GPL::SearchAlg
+   SearchBase,
+   Dfs,
+   Bfs,
+   // GPL::BaseImpl
+   GenEdges,
+   GNOnlyNeighbours,
+   GNoEdges
+   
+   // structural requirements
+   constraint BaseImpl
+   constraint BaseImpl -> (GNOnlyNeighbours xor GenEdges xor GNoEdges)
+   constraint BaseImpl -> Benchmark
+   
+
+   constraint SearchBase -> SearchAlg
+   constraint SearchAlg -> (Dfs xor Bfs)
+
+   // additional requirements
+   constraint Connected -> Undirected
+   constraint (Dfs || Bfs || Number || Connected) -> SearchBase
+   constraint StronglyConnected -> (!Undirected && Dfs && Transpose)
+   constraint Cycle -> Dfs
+   constraint (Mstprim || Mstkruskal) -> (Undirected && Weighted)
+   
+}

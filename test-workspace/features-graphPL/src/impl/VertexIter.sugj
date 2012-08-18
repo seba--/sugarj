@@ -1,0 +1,24 @@
+package impl;
+
+import java.util.Iterator;
+
+import variability.Java;
+
+import impl.Graph;
+import impl.Vertex;
+
+
+public variable class VertexIter {
+  private Iterator iter;
+  VertexIter(){
+  }
+  VertexIter(  Graph g){
+    iter=g.vertices.iterator();
+  }
+  public Vertex next(){
+    return (Vertex)iter.next();
+  }
+  public boolean hasNext(){
+    return iter.hasNext();
+  }
+}
