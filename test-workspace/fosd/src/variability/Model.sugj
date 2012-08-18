@@ -1,0 +1,22 @@
+package variability;
+
+import variability.FeatureExpressions;
+
+public sugar Model {
+
+ context-free syntax
+   //feature model
+   AnnoOrSugarMod* "featuremodel" JavaId FeatureModelBody -> ToplevelDeclaration{cons("FMDecl")}
+   "{" FeatureDeclaration* FeatureRequirement* "}" -> FeatureModelBody {cons("FMBody")}
+   "features" {FeatureName ","}* -> FeatureDeclaration {cons("FeatureDecl")}
+   "constraint" FeatureExpr -> FeatureRequirement {cons("FeatureRequirement")}
+	
+ desugarings
+   featuremodel
+
+ rules
+   featuremodel : 
+     FMDecl(mods, name, FMBody(features, requirements))
+     -> 
+     ModelDec(ModelDecHead(mods, name, "variability.Model"), ModelBody((features, requirements)))
+}

@@ -1,0 +1,10 @@
+package test;
+
+import variability.Java;
+
+#ifdef(F)
+public variable class AnotherTest {
+
+#ifdef(A)
+   public int someInt;
+}
