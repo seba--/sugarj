@@ -1,6 +1,9 @@
 module org/sugarj/languages/Model
 
 signature constructors
+  MetamodelDec : MetamodelDecHead * SugarBody -> ToplevelDeclaration
+  MetamodelDecHead : List(AnnoOrSugarMod) * JavaId -> MetamodelDecHead
+
   TransDec : TransformationDecHead * TransformationBody -> ToplevelDeclaration
   TransDecHead : List(AnnoOrSugarMod) * JavaId -> TransformationDecHead
   TransBody : TransformationDef -> TransformationBody

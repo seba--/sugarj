@@ -29,7 +29,7 @@ exports
   context-free syntax
     WATER -> LAYOUT {cons("WATER")}
 
-  (
+
 
   sorts WATEREOF
 
@@ -58,10 +58,9 @@ exports
   syntax
     %% Kernel syntax insertion recovery rules   
 
-  )
+  
 
-  (
-
+  
   sorts SugarDec TypeOrSugarDec SugarMod AnnoOrSugarMod SugarBody SugarDecHead
         NativeSugarDecHead NativeSugarBody SugarCompilationUnit
         ToplevelDeclaration SugarJLayout
@@ -181,18 +180,3 @@ exports
 
   lexical syntax
          -> "}" {recover, reject}
-
-  %% models
-  sorts ModelDecHead ModelBody
-
-  lexical syntax
-    [a-zA-Z0-9\-\_]+ -> MetamodelID
-  lexical restrictions
-    MetamodelID -/- [a-zA-Z0-9\-\_]
-
-  context-free syntax
-    ModelDecHead ModelBody         -> ToplevelDeclaration     {cons("ModelDec")}
-    AnnoOrSugarMod* "model" JavaId "instantiates" MetamodelID -> ModelDecHead {cons("ModelDecHead")}
-    "{" ModelTerm "}"              -> ModelBody    {cons("ModelBody")}
-    ATerm -> ModelTerm {cons("ToModelTerm")}
-  )

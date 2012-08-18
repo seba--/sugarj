@@ -70,7 +70,7 @@ import org.sugarj.util.ToplevelDeclarationProvider;
 */
 public class Driver {
   
-  public final static String CACHE_VERSION = "model-0.5";
+  public final static String CACHE_VERSION = "model-0.6";
   
   private final static int PENDING_TIMEOUT = 30000;
 

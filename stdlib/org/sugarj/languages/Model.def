@@ -2,6 +2,24 @@ definition
 module org/sugarj/languages/Model
 imports org/sugarj/languages/Transformation
         org/sugarj/languages/TransformationImport
+exports
+ %% models
+  sorts ModelDecHead ModelBody
+
+  lexical syntax
+    [a-zA-Z0-9\-\_]+ -> MetamodelID
+  lexical restrictions
+    MetamodelID -/- [a-zA-Z0-9\-\_]
+
+  context-free syntax
+    ModelDecHead ModelBody         -> ToplevelDeclaration     {cons("ModelDec")}
+    AnnoOrSugarMod* "model" JavaId "instantiates" MetamodelID -> ModelDecHead {cons("ModelDecHead")}
+    "{" ModelTerm "}"              -> ModelBody    {cons("ModelBody")}
+    ATerm -> ModelTerm {cons("ToModelTerm")}
+ 
+  context-free syntax
+    MetamodelDecHead SugarBody         -> ToplevelDeclaration     {cons("MetamodelDec")}
+    AnnoOrSugarMod* "metamodel" JavaId -> MetamodelDecHead {cons("MetamodelDecHead")}
 
 %% transformations
 module org/sugarj/languages/Transformation

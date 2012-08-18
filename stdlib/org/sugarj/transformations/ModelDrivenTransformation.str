@@ -6,7 +6,13 @@ imports org/sugarj/languages/Model
         org/sugarj/languages/SugarJ
 
 rules
+  desugar = changed-tree(metamodel-to-sugar)
   desugar = changed-tree(transformation-to-sugar)
+
+  metamodel-to-sugar :
+  	MetamodelDec(MetamodelDecHead(mods, Id(name)), body)
+    -> 
+    SugarDec(SugarDecHead(mods, Id(name)), body)
 
   transformation-to-sugar :
   	TransDec(TransDecHead(mods, Id(name)), TransBody(body))
