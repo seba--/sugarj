@@ -1,6 +1,6 @@
 package entity.test;
 
-import entity.Language;
+import entity.Metamodel;
 
 import entity.test.Customer;
 

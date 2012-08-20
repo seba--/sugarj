@@ -1,8 +1,6 @@
 package statemachine.test;
 
-import statemachine.Language;
-
-import statemachine.DataExtension;
+import statemachine.data.Metamodel;
 
 import entity.test.Account;
 

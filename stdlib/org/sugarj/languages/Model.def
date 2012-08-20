@@ -29,8 +29,10 @@ exports
     AnnoOrSugarMod* "transformation" JavaId -> TransformationDecHead {cons("TransDecHead")}
     
     "{" TransformationDef "}" -> TransformationBody {cons("TransBody")}
-    Transformation*  -> TransformationDef 
-    
+    Transformation*  -> TransformationDef
+    DirectTransformation Transformation*  -> TransformationDef {ast("Cons(<1>, <2>)")} 
+
+    StrategoDef+ -> DirectTransformation {cons("Rules")}
     "strategies" StrategoDef*   -> Transformation {cons("Strategies")}
     "signature" StrategoSdecl*  -> Transformation {cons("Signature")}
     "rules" StrategoDef*        -> Transformation {cons("Rules")}

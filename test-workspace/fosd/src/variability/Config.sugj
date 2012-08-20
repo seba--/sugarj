@@ -4,7 +4,7 @@ import variability.FeatureExpressions;
 import variability.Model;
 import org.sugarj.languages.Java;
 
-public sugar Config { 
+public metamodel Config { 
 
  context-free syntax 
   //config declaration

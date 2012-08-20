@@ -1,9 +1,9 @@
 package statemachine.data;
 
-import statemachine.Language;
+import statemachine.Metamodel;
 import statemachine.data.EntityExp;
 
-public sugar TransitionCondition {
+public metamodel TransitionCondition {
   context-free syntax
     Event "if" EntityExp -> TransitionFrom {cons("WithCondition")}
 }

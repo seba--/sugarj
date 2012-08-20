@@ -8,7 +8,7 @@ public editor services Java {
     VariableClass._
 }
 
-public sugar Java {
+public metamodel Java {
 
   context-free syntax
     JavaVariableType -> ToplevelDeclaration

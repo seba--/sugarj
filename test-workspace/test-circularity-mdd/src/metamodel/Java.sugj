@@ -1,6 +1,6 @@
 package metamodel;
 
-public sugar Java {
+public metamodel Java {
   desugarings
     desugar-class-model
 

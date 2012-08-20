@@ -2,7 +2,7 @@ package entity;
 
 import template.Language;
 
-import entity.Language;
+import entity.Metamodel;
 import org.sugarj.languages.Java;
 
 public template ToJava {

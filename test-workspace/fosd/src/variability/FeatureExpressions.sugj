@@ -1,6 +1,6 @@
 package variability;
 
-public sugar FeatureExpressions {
+public metamodel FeatureExpressions {
 
   context-free syntax
    JavaId -> FeatureName {cons("FeatureName")}

@@ -1,6 +1,6 @@
 package statemachine.data;
 
-public sugar EntityExp {
+public metamodel EntityExp {
   /**
    * copied from https://svn.strategoxt.org/repos/WebDSL/webdsls/trunk/src/org/webdsl/dsl/syntax/WebDSL-Action.sdf
    **/

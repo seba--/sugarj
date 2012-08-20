@@ -1,13 +1,13 @@
 package statemachine;
 
-public sugar Language {
+public metamodel Metamodel {
   desugarings
     statemachine-model
 
   rules
     statemachine-model :
       model@Statemachine(mods, name, body) -> 
-      ModelDec(ModelDecHead(mods, name, "statemachine.Language"), ModelBody(body))
+      ModelDec(ModelDecHead(mods, name, "statemachine.Metamodel"), ModelBody(body))
 
   context-free syntax
     Statemachine -> ToplevelDeclaration

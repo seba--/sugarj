@@ -1,5 +1,7 @@
 package statemachine.data;
 
+import statemachine.data.Metamodel;
+
 import entity.ToJava;
 import statemachine.ToJava;
 
@@ -15,13 +17,13 @@ public transformation ToJava {
     main =
       recursively-transform(
         id,
-        conforms-to-metamodel(|"statemachine.DataExtension")
+        conforms-to-metamodel(|"statemachine.data.Metamodel")
           < {orig:
               ?orig;
               main-statemachine_ToJava;
               copy-imports(|orig);
               add-internal-data-decls(|orig)}
-          + conforms-to-metamodel(|"entity.Language"); main-entity_ToJava)
+          + conforms-to-metamodel(|"entity.Metamodel"); main-entity_ToJava)
 
   rules
     copy-imports(|orig) =

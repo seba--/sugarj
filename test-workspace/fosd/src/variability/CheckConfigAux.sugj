@@ -2,7 +2,7 @@ package variability;
 
 import variability.Config;
 
-public sugar CheckConfigAux {
+public transformation CheckConfigAux {
   rules
     featuremodel-names = fail
     model-requirements = fail

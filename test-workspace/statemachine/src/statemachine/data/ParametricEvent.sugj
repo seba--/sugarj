@@ -1,9 +1,9 @@
 package statemachine.data;
 
-import statemachine.Language;
-import entity.Language;
+import statemachine.Metamodel;
+import entity.Metamodel;
 
-public sugar ParametricEvent {
+public metamodel ParametricEvent {
   context-free syntax
     EventName "(" {Sort ","}+ ")" -> EventDec {cons("ParametricEvent")}
     EventName "(" {JavaId ","}+ ")" -> Event {cons("ParametricEvent")} 

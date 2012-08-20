@@ -5,7 +5,7 @@ import org.sugarj.languages.Model;
 
 import variability.FeatureExpressions;
 
-public sugar ConfigTransAux {
+public transformation ConfigTransAux {
   rules 
     eliminate-variability = downup(empty-variable-type <+ configure-node <+ id,
                                    try(filter(not(?VariabilityHole))));

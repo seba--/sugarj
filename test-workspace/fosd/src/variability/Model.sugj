@@ -2,7 +2,7 @@ package variability;
 
 import variability.FeatureExpressions;
 
-public sugar Model {
+public metamodel Model {
 
  context-free syntax
    //feature model

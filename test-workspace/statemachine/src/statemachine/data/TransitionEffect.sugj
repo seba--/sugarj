@@ -1,9 +1,9 @@
 package statemachine.data;
 
-import statemachine.Language;
+import statemachine.Metamodel;
 import statemachine.data.EntityExp;
 
-public sugar TransitionEffect {
+public metamodel TransitionEffect {
   context-free syntax
     StateName Effect -> TransitionTo {cons("WithEffect")}
 

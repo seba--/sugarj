@@ -335,8 +335,9 @@ public class SDFCommands {
         return parser.parse(source, "in-file declaration");
     }};
     
+    Future<IStrategoTerm> res = null;
     try {
-      Future<IStrategoTerm> res = parseExecutorService.submit(parseCallable);
+      res = parseExecutorService.submit(parseCallable);
       return res.get(PARSE_TIMEOUT, TimeUnit.MILLISECONDS);
     } catch (ExecutionException e) {
       if (e.getCause() instanceof SGLRException)
@@ -345,6 +346,7 @@ public class SDFCommands {
     } catch (InterruptedException e) {
       throw new SGLRException(parser.getParser(), "parser was interrupted", e);
     } catch (TimeoutException e) {
+      res.cancel(true);
       throw new SGLRException(parser.getParser(), "parser timed out, timeout at " + PARSE_TIMEOUT + "ms", e);
     }
   }
