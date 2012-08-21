@@ -123,6 +123,11 @@ public class Main {
   // compute path to strategoxt.jar
   // VERY-HARD-coded
   private static String strategoJarPath(){
+    // cai 21.08.12
+    // by a stroke of fortune, the path below works both in
+    //   sugarj/cli-script/classes/org/sugarj/driver/cli/
+    // and in
+    //   sugarj/compiler/bin/org/sugarj/driver/cli/
     return new File(new Main().getClass().getResource("Main.class").getFile())
     .getParentFile().getParentFile().getParentFile().getParentFile()
     .getParentFile().getParent() + "/strategoxt.jar";

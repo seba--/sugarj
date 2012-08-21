@@ -11,18 +11,18 @@ compiler="$sugarj/compiler/bin"
 stdlib="$sugarj/stdlib/bin"
 layout="$sugarj/layout-parsing/jsglr-layout/bin"
 cliroot="$sugarj/compiler"
-clijars="$cliroot/commons-cli-1.2.jar:$cliroot/strategoxt.jar:$cliroot/make_permissive.jar"
 langroot="$sugarj/language-libraries"
 langlibs="$langroot/base/bin:$langroot/haskell/bin:$langroot/java/bin:$langroot/prolog/bin"
 
 # essential paths
 classpath="$compiler:$clijars:$common:$stdlib:$langlibs:$layout"
 
-# what we try to combine
-# somehow the nativebundle does not cooperate no matter what I do with it
-# zip, jar, etc won't help the star locate SDFBundleCommand.class
-sdfbundle="$script/jars/org.strategoxt.imp.nativebundle_0.1.1.201202141159"
-classpath="$classpath:$sdfbundle"
-classpath="$classpath:$script/jars/*"
+# cli-script/u/extract.ruby will put classes nicely
+# together to avoid nasty resolutions
+# we put them behind other class paths so that
+# update in sugarj project is reflected immediately
+classes="$script/classes"
+native="$script/native"
+classpath="$classpath:$classes:$native"
 
 exec java -Xss64m -Xmx1024m -cp "$classpath" org.sugarj.driver.cli.Main $*

@@ -9,12 +9,11 @@ $classpath = `#{$this_dir}/classpath`
 $classes   = "#{$cliscript}/classes"
 $native    = "#{$cliscript}/native"
 
-# clean the classes dir. could be dangerous.
-`rm -rf #{$classes}/*`
+$nat_nat   = "#{$native}/native"
 
 def cpdir(path)
-  # we don't want to do anything with native folder
-  return if(path == $native)
+  # we copy $native/org into class folder
+  # return if(path == $native)
 
   path = "#{path}/org"
   if File.exist?(path)
@@ -52,6 +51,9 @@ def cpall(path)
     $stderr.puts "FATAL ERROR: #{path} is not recognised."
   end
 end
+
+# clean the classes dir. could be dangerous.
+`rm -rf #{$classes}/*`
 
 $classpath.split(':').each do |path|
   path.strip!
