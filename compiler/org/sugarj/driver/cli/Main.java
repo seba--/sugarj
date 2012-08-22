@@ -113,8 +113,9 @@ public class Main {
 
   private static LanguageLibFactory resolveLanguageLib(File source){
     String ext = FileCommands.getExtension(source);
-    if("sugj".equals(ext))  return JavaLibFactory.getInstance();
-    // cai 09.08.12 TODO recognise extension of SugarHaskell and SugarProlog
+    if("sugj".equals(ext)) return JavaLibFactory.getInstance();
+    if( "shs".equals(ext)) return HaskellLibFactory.getInstance();
+    // cai 22.08.12 TODO recognise extension of SugarProlog (if there's any)
     Log.log.logErr("No language library found for source-file extension " + ext);
     return null;
   }
