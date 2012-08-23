@@ -30,10 +30,17 @@ end
 
 def cpjar(path)
   # extract jar-file into classes
-  # cai 17.08.12
+  # cai 23.08.12
   # 1. is there a way to issue warning on overwrite?
+  # A: Maybe, but we don't want it. See #2.
+  #
   # 2. will un-jarring only */org cause problems?
-  puts(cmd = "cd #{$classes} && jar xf #{path} org")
+  # A: YES! In the form of
+  #      permissivegrammars: Could not find imported
+  #                          term file Comments.pp.af
+  #    So it seems we have to tolerate overwritting
+  #    common files, say META-INF/Manifest, over and over.
+  puts(cmd = "cd #{$classes} && jar xf #{path}")
   `#{cmd}`
 end
 
