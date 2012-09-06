@@ -138,7 +138,7 @@ public class Driver{
   public Driver(Environment env, LanguageLibFactory langLibFactory) {
     this.environment=env;
     this.langLib = langLibFactory.createLanguageLibrary();
-    langLib.setInterpreter(new HybridInterpreter());
+    langLib.setInterpreter(new HybridInterpreter(ATermCommands.factory));
 
     try {      
       if (environment.getCacheDir() != null)
