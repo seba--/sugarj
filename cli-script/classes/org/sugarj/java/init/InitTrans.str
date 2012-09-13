@@ -1,0 +1,4 @@
+module org/sugarj/java/init/InitTrans
+imports org/sugarj/stdlib/StdTrans
+        org/sugarj/languages/SugarJ
+        org/sugarj/java/EditorServiceExtension

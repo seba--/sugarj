@@ -1,0 +1,39 @@
+module org/sugarj/languages/SugarProlog
+
+signature constructors
+    NativeSugarBody        : StrategoModName -> NativeSugarBody
+    SugarBody              : SugarDef -> SugarBody
+    CompilationUnit            : SugarModuleDec * List(PrologModuleImport) * SugarBody -> SugarCompilationUnit
+                               : PrologProgram -> SugarCompilationUnit
+    InjectDesugaring           : StrategoId * Sdf2Symbol * Sdf2Symbol * Sdf2Attributes -> Desugaring
+    PureDesugaring             : StrategoId -> Desugaring
+    Desugarings                : List(Desugaring) -> Transformation
+    Overlays                   : List(StrategoOverlay) -> Transformation
+    Rules                      : List(StrategoDef) -> Transformation
+    Signature                  : List(StrategoSdecl) -> Transformation
+    Strategies                 : List(StrategoDef) -> Transformation
+    aliases                    : Sdf2Aliases -> Grammar
+    context-free-restrictions  : Sdf2Restrictions -> Grammar
+    lexical-restrictions       : Sdf2Restrictions -> Grammar
+    restrictions               : Sdf2Restrictions -> Grammar
+    context-free-priorities    : Sdf2Priorities -> Grammar
+    lexical-priorities         : Sdf2Priorities -> Grammar
+    priorities                 : Sdf2Priorities -> Grammar
+    lexical-variables          : Sdf2Productions -> Grammar
+    variables                  : Sdf2Productions -> Grammar
+    context-free-syntax        : Sdf2Productions -> Grammar
+    lexical-syntax             : Sdf2Productions -> Grammar
+    syntax                     : Sdf2Productions -> Grammar
+    'sorts                     : Sdf2Symbols -> Grammar
+                               : List(SugarDefElem) -> SugarDef
+    transformation-elem        : Transformation -> SugarDefElem
+    grammar-elem               : Grammar -> SugarDefElem
+    CompileError               : String * Any -> CompileError
+    
+    EditorServicesDec          : EditorServicesDecHead * EditorServicesDecBody -> SugarDec
+    EditorServicesDecHead      : List(Annos) * JavaId -> EditorServicesDecHead
+    EditorServicesBody         : List(EditorServicesSection) -> EditorServiceBody
+    ChecksDec          : EditorServicesDecHead * EditorServicesDecBody -> SugarDec
+    ChecksDecHead      : List(Annos) * JavaId -> EditorServicesDecHead
+    ChecksBody         : List(EditorServicesSection) -> EditorServiceBody
+    

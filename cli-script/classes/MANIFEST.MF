@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: org.strategoxt.permissivegrammars.make_permissive
+Class-Path: strategoxt.jar
+

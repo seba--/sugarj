@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?eclipse version="3.0"?>
+
+<plugin>
+   <extension
+         point="org.eclipse.imp.runtime.languageDescription">
+      <language
+            description="sdf2imp generic base language"
+            extensions="sdf2impbase"
+            language="DynamicRoot">
+      </language>
+   </extension>
+   <extension
+         id="org.strategoxt.imp.runtime.parser"
+         name="Root Parser Wrapper"
+         point="org.eclipse.imp.runtime.parser">
+      <parser
+            class="org.strategoxt.imp.runtime.dynamicloading.DynamicParseController"
+            language="DynamicRoot">
+      </parser>
+   </extension>
+   <extension
+         point="org.eclipse.imp.runtime.tokenColorer">
+      <tokenColorer
+            class="org.strategoxt.imp.runtime.dynamicloading.DynamicTokenColorer"
+            language="DynamicRoot">
+      </tokenColorer>
+   </extension>
+   <extension
+         point="org.eclipse.imp.runtime.referenceResolvers">
+      <referenceResolver
+            class="org.strategoxt.imp.runtime.dynamicloading.DynamicReferenceResolver"
+            language="DynamicRoot">
+      </referenceResolver>
+   </extension>
+   <extension
+         point="org.eclipse.imp.runtime.foldingUpdater">
+      <foldingUpdater
+            class="org.strategoxt.imp.runtime.dynamicloading.DynamicFoldingUpdater"
+            language="DynamicRoot">
+      </foldingUpdater>
+   </extension>
+   <extension
+         point="org.eclipse.imp.runtime.documentationProvider">
+      <docProvider
+            class="org.strategoxt.imp.runtime.services.DocumentationProvider"
+            language="DynamicRoot">
+      </docProvider>
+   </extension>
+   <extension
+         point="org.eclipse.imp.runtime.labelProvider">
+      <labelProvider
+            class="org.strategoxt.imp.runtime.services.LabelProvider"
+            language="DynamicRoot">
+      </labelProvider>
+   </extension>
+   <extension
+         point="org.eclipse.imp.runtime.modelTreeBuilder">
+      <treeBuilder
+            class="org.strategoxt.imp.runtime.dynamicloading.DynamicTreeModelBuilder"
+            language="DynamicRoot">
+      </treeBuilder>
+   </extension>
+   <extension
+         point="org.eclipse.imp.runtime.autoEditStrategy">
+      <autoEditStrategy
+            class="org.strategoxt.imp.runtime.dynamicloading.DynamicAutoEditStrategy"
+            language="DynamicRoot">
+      </autoEditStrategy>
+   </extension>
+   <extension
+         point="org.eclipse.imp.runtime.contentProposer">
+      <proposer
+            class="org.strategoxt.imp.runtime.dynamicloading.DynamicContentProposer"
+            language="DynamicRoot">
+      </proposer>
+   </extension>
+   
+   <extension
+         id="parsemarker"
+         name="org.strategoxt.imp.runtime.parsemarker"
+         point="org.eclipse.core.resources.markers">
+    		<persistent value="true" />
+        <super type="org.eclipse.core.resources.problemmarker"/>
+        <super type="org.eclipse.core.resources.textmarker"/>
+   </extension>
+   
+   <extension
+         id="analysismarker"
+         name="org.strategoxt.imp.runtime.analysismarker"
+         point="org.eclipse.core.resources.markers">
+    		<persistent value="true" />
+            <super type="org.eclipse.core.resources.problemmarker"/>
+            <super type="org.eclipse.core.resources.textmarker"/>
+   </extension>
+   
+   <extension
+      point="org.eclipse.ui.editors.annotationTypes">
+   <type
+      name="org.strategoxt.imp.runtime.parseerror"
+      super="org.eclipse.ui.workbench.texteditor.error"
+      markerType="org.strategoxt.imp.runtime.parsemarker"
+      markerSeverity="2">
+   </type>
+   <type
+      name="org.strategoxt.imp.runtime.parsewarning"
+      super="org.eclipse.ui.workbench.texteditor.warning"
+      markerType="org.strategoxt.imp.runtime.parsemarker"
+      markerSeverity="1">
+   </type>
+   <type
+      name="org.strategoxt.imp.runtime.analysiserror"
+      super="org.eclipse.ui.workbench.texteditor.error"
+      markerType="org.strategoxt.imp.runtime.analysismarker"
+      markerSeverity="2">
+   </type>
+   <type
+      name="org.strategoxt.imp.runtime.analysiswarning"
+      super="org.eclipse.ui.workbench.texteditor.warning"
+      markerType="org.strategoxt.imp.runtime.analysismarker"
+      markerSeverity="1">
+   </type>
+   </extension>
+   
+   <extension point="org.eclipse.ui.ide.markerResolution">
+      <markerResolutionGenerator
+         markerType="org.strategoxt.imp.runtime.parsemarker"
+         class="org.strategoxt.imp.runtime.parser.AmbSuggestionGenerator"/>
+   </extension>
+
+   <extension
+         id="org.strategoxt.imp.runtime.parseerrormarkerspec"
+         point="org.eclipse.ui.editors.markerAnnotationSpecification">
+      <specification
+            annotationType="org.strategoxt.imp.runtime.parseerror"
+            textPreferenceKey="spiParseErrorAnnotationColor"
+            textPreferenceValue="true"
+            presentationLayer="6"
+            showInNextPrevDropdownToolbarAction="true"
+            label="Spoofax/IMP Parser Annotation"
+            colorPreferenceKey="errorIndicationColor"
+            showInNextPrevDropdownToolbarActionKey="showErrorInNextPrevDropdownToolbarAction"
+            symbolicIcon="error"
+            isGoToNextNavigationTargetKey="isErrorGoToNextNavigationTarget"
+            isGoToPreviousNavigationTargetKey="isErrorGoToPreviousNavigationTarget"
+            isGoToPreviousNavigationTarget="true"
+            highlightPreferenceKey="errorIndicationHighlighting"
+            highlightPreferenceValue="false"
+            textStylePreferenceKey="errorTextStyle"
+			textStylePreferenceValue="SQUIGGLES"             
+            verticalRulerPreferenceKey="errorIndicationInVerticalRuler"
+            verticalRulerPreferenceValue="true"
+            overviewRulerPreferenceKey="errorIndicationInOverviewRuler"
+            overviewRulerPreferenceValue="true"
+            contributesToHeader="true"
+            colorPreferenceValue="255,128,147"/>
+   </extension>
+
+   <!-- Note that post-deployment colors may differ from debug colors -->
+   <extension
+         id="org.strategoxt.imp.runtime.parsewarningmarkerspec"
+         point="org.eclipse.ui.editors.markerAnnotationSpecification">
+      <specification
+            annotationType="org.strategoxt.imp.runtime.parsewarning"
+            textPreferenceKey="spiParseErrorAnnotationColor"
+            textPreferenceValue="true"
+            presentationLayer="5"
+            showInNextPrevDropdownToolbarAction="true"
+            label="Spoofax/IMP Parser Warning Annotation"
+            colorPreferenceKey="warningIndicationColor"
+            showInNextPrevDropdownToolbarActionKey="showErrorInNextPrevDropdownToolbarAction"
+            symbolicIcon="warning"
+            isGoToNextNavigationTargetKey="isErrorGoToNextNavigationTarget"
+            isGoToPreviousNavigationTargetKey="isErrorGoToPreviousNavigationTarget"
+            isGoToPreviousNavigationTarget="true"
+            highlightPreferenceKey="warningIndicationHighlighting"
+            highlightPreferenceValue="false"
+            textStylePreferenceKey="warningTextStyle"
+			textStylePreferenceValue="SQUIGGLES"             
+            verticalRulerPreferenceKey="warningIndicationInVerticalRuler"
+            verticalRulerPreferenceValue="true"
+            overviewRulerPreferenceKey="warningIndicationInOverviewRuler"
+            overviewRulerPreferenceValue="true"
+            contributesToHeader="true"
+            colorPreferenceValue="255,148,127"/>
+   </extension>
+
+   <extension
+         id="org.strategoxt.imp.runtime.analysiserrormarkerspec"
+         point="org.eclipse.ui.editors.markerAnnotationSpecification">
+      <specification
+            annotationType="org.strategoxt.imp.runtime.analysiserror"
+            colorPreferenceKey="spiAnalysisAnnotationColor"
+            colorPreferenceValue="255,128,147"
+            contributesToHeader="true"
+            highlightPreferenceKey="analysisAnnotationHighlightKey"
+            highlightPreferenceValue="false"
+            includeOnPreferencePage="false"
+            isGoToNextNavigationTarget="true"
+            isGoToNextNavigationTargetKey="analysisAnnotationIsGotoNextKey"
+            isGoToPreviousNavigationTarget="true"
+            isGoToPreviousNavigationTargetKey="analysisAnnotationIsGotoPrevKey"
+            label="Spoofax/IMP Analysis Annotation"
+            overviewRulerPreferenceKey="analysisAnnotationOverviewKey"
+            overviewRulerPreferenceValue="true"
+            presentationLayer="7"
+            showInNextPrevDropdownToolbarAction="true"
+            symbolicIcon="error"
+            textPreferenceKey="analysisErrorTextKey"
+            textPreferenceValue="true"
+            textStylePreferenceKey="analysisErrorTextStyleKey"
+            textStylePreferenceValue="SQUIGGLES"
+            verticalRulerPreferenceKey="analysisErrorVerticalKey"
+            verticalRulerPreferenceValue="true"/>
+   </extension>
+
+   <extension
+         id="org.strategoxt.imp.runtime.analysiswarningmarkerspec"
+         point="org.eclipse.ui.editors.markerAnnotationSpecification">
+      <specification
+            annotationType="org.strategoxt.imp.runtime.analysiswarning"
+            colorPreferenceKey="spiAnalysisAnnotationColor"
+            colorPreferenceValue="255,148,127"
+            contributesToHeader="true"
+            highlightPreferenceKey="analysisAnnotationHighlightKey"
+            highlightPreferenceValue="false"
+            includeOnPreferencePage="false"
+            isGoToNextNavigationTarget="true"
+            isGoToNextNavigationTargetKey="analysisAnnotationIsGotoNextKey"
+            isGoToPreviousNavigationTarget="true"
+            isGoToPreviousNavigationTargetKey="analysisAnnotationIsGotoPrevKey"
+            label="Spoofax/IMP Analysis Annotation"
+            overviewRulerPreferenceKey="analysisWarningOverviewKey"
+            overviewRulerPreferenceValue="true"
+            presentationLayer="5"
+            showInNextPrevDropdownToolbarAction="true"
+            symbolicIcon="warning"
+            textPreferenceKey="analysisWarningTextKey"
+            textPreferenceValue="true"
+            textStylePreferenceKey="analysisWarningTextStyleKey"
+            textStylePreferenceValue="SQUIGGLES"
+            verticalRulerPreferenceKey="analysisWarningVerticalKey"
+            verticalRulerPreferenceValue="true"/>
+   </extension>
+   
+   <extension
+         point="org.eclipse.imp.runtime.annotationHover">
+      <annotationHover
+            class="org.strategoxt.imp.runtime.services.AnnotationHover"
+            language="DynamicRoot">
+      </annotationHover>
+   </extension>
+   
+   <extension
+         point="org.eclipse.imp.runtime.hoverHelper">
+      <hoverHelper
+            class="org.strategoxt.imp.runtime.services.AnnotationHoverHelper"
+            language="DynamicRoot">
+      </hoverHelper>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            description="Spoofax actions"
+            id="org.strategoxt.imp.runtime.ui.actionSet"
+            label="Spoofax"
+            visible="true">
+         <action
+               class="org.strategoxt.imp.runtime.services.BuilderButtonDelegate"
+               definitionId="org.strategoxt.imp.runtime.transformCommand"
+               id="org.strategoxt.imp.runtime.stratego.builder"
+               label="Transform"
+               style="pulldown"
+               toolbarPath="spoofax"
+               tooltip="Apply transformation to file in current editor"/>
+               <!-- TODO: icon="icons/builder.png" -->
+      </actionSet>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            id="org.strategoxt.imp.runtime.transformCommandCategory"
+            name="Transform Command category">
+      </category>
+      <command
+            categoryId="org.strategoxt.imp.runtime.transformCommandCategory"
+            id="org.strategoxt.imp.runtime.transformCommand"
+            name="Transform"
+            description="Transform">
+      </command>
+      <command
+            categoryId="org.eclipse.ui.category.textEditor"
+            description="Go to definition"
+            id="org.strategoxt.imp.runtime.resolveReferenceCommand"
+            name="Go to definition">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.strategoxt.imp.runtime.services.BuilderButtonDelegate"
+            commandId="org.strategoxt.imp.runtime.transformCommand">
+      </handler>
+      <handler
+            class="org.strategoxt.imp.runtime.services.ReferenceResolverDelegate"
+            commandId="org.strategoxt.imp.runtime.resolveReferenceCommand">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="org.strategoxt.imp.runtime.transformCommand"
+            contextId="org.eclipse.ui.textEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+T"/>
+      <key
+            commandId="org.strategoxt.imp.runtime.transformCommand"
+            contextId="org.eclipse.ui.textEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="CTRL+T"/>
+      <key
+            commandId="org.eclipse.ui.project.buildProject"
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="M1+M3+B"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" />
+      <key
+            commandId="org.strategoxt.imp.runtime.resolveReferenceCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="F3"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="org.strategoxt.imp.runtime.SpoofaxPreferencePage"
+            id="org.strategoxt.imp.runtime.SpoofaxPreferencePage"
+            name="Spoofax">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.strategoxt.imp.runtime.PreferenceInitializer">
+      </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="true"
+            class="org.strategoxt.imp.runtime.services.RefactoringContributionFactory"
+            locationURI="popup:org.eclipse.ui.popup.any?before=additions">
+      </menuContribution>
+   </extension>
+   
+</plugin>
+

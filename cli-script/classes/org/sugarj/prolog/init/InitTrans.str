@@ -1,0 +1,3 @@
+module org/sugarj/prolog/init/InitTrans
+imports org/sugarj/stdlib/StdTrans
+        org/sugarj/languages/SugarProlog

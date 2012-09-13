@@ -1,0 +1,29 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven
+Built-By: nixbld2
+Build-Jdk: 1.6.0_24
+Export-Package: org.strategoxt.imp.runtime,org.strategoxt.imp.runtime.
+ dynamicloading,org.strategoxt.imp.runtime.parser,org.strategoxt.imp.r
+ untime.parser.ast,org.strategoxt.imp.runtime.parser.tokens,org.strate
+ goxt.imp.runtime.services,org.strategoxt.imp.runtime.stratego
+Require-Bundle: org.eclipse.imp.runtime,org.spoofax.jsglr;bundle-versi
+ on="0.3.0",org.spoofax.interpreter.core,org.spoofax.interpreter.libra
+ ry.jsglr,org.eclipse.core.runtime,org.eclipse.core.resources,org.juni
+ t,org.eclipse.swt,org.eclipse.jface,org.eclipse.jface.text,org.eclips
+ e.ui.editors,org.eclipse.ui.workbench.texteditor,org.eclipse.ui,org.e
+ clipse.ui.ide,org.eclipse.ui.console,org.eclipse.debug.ui,org.spoofax
+ .compiler,org.strategoxt.imp.generator,org.strategoxt.imp.spoofax.gen
+ erator,org.spoofax.terms,org.strategoxt.strj,org.strategoxt.imp.debug
+ .core,org.eclipse.core.expressions
+Bundle-Vendor: Spoofax.org
+Bundle-ActivationPolicy: lazy
+Bundle-Version: 0.1.1.201202141159
+Bundle-Name: Spoofax/IMP Runtime
+Bundle-Activator: org.strategoxt.imp.runtime.RuntimeActivator
+Bundle-ManifestVersion: 2
+Import-Package: org.eclipse.ltk.core.refactoring,org.eclipse.ltk.ui.re
+ factoring
+Bundle-SymbolicName: org.strategoxt.imp.runtime;singleton:=true
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+
