@@ -77,12 +77,19 @@ public class DriverCLI {
   
   public static boolean processResultCLI(Result res, Path file, String project) throws IOException {
     log.log("");
+
+    if (res == null) {
+      log.log("compilation failed, result is null");
+      return false;
+    }
     
     boolean success = res.getCollectedErrors().isEmpty();
     
     for (BadTokenException e : res.getParseErrors())
       log.log("syntax error: line " + e.getLineNumber() + " column " + e.getColumnNumber() + ": " + e.getMessage());
     
+    if (res.getSugaredSyntaxTree() == null)
+      return false;
     
     IToken tok = ImploderAttachment.getRightToken(res.getSugaredSyntaxTree());
     
