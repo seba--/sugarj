@@ -1,4 +1,0 @@
-module org/sugarj/java/init/initGrammar
-imports org/sugarj/languages/Java
-        org/sugarj/languages/SugarJ
-        org/sugarj/stdlib/Common

@@ -1,3 +1,0 @@
-module org/sugarj/haskell/initGrammar
-imports org/sugarj/languages/SugarHaskell
-        org/sugarj/stdlib/Common

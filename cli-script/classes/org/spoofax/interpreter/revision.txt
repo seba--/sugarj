@@ -1,2 +1,0 @@
-- Fixed hashtable ordering
-- Improved stacktracer and SSL_write_term_to_string

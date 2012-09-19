@@ -1,4 +1,0 @@
-module org/sugarj/prolog/init/initGrammar
-imports org/sugarj/languages/Prolog
-        org/sugarj/languages/SugarProlog
-        org/sugarj/stdlib/Common
