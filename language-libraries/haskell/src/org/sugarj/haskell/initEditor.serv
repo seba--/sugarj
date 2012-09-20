@@ -44,9 +44,10 @@ folding
   EditorServiceSection
   SugarDefElem
   _.Valdef
+  _.GdValdef
   HaskellExp.Do
   HaskellExp.Case
-  HaskellAlt
+//  HaskellAlt
   HaskellWhere
   
 

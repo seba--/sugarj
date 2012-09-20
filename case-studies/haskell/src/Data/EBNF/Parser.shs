@@ -128,4 +128,4 @@ rules
 rules
   constraint-error =
     ?EBNFDecl(name, <id>);
-    collect-all(?EBNFRule([n@EBNFNonterminal(name)|_],_); !(n, "left-recursive reference breaks generated parser"))
+    collect-all(?EBNFRule([n@EBNFNonterminal(name)|_],_); !(n, "Left-recursive production detected."))

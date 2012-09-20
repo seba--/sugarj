@@ -39,23 +39,26 @@ software installer: <a href="http://update.sugarj.org">http://update.sugarj.org<
 
 <h3>Installation</h3>
 
+<em>
+Please ensure enough stack space (about 4-16 MB) is available for
+the SDF parser. You can set the stack space of your Java runtime using the
+-Xss16m command line argument when starting Eclipse or setting -Xss16m in your
+eclipse.ini file.
+</em>
+
+<p>
 <ol>
 <li>Install Eclipse (follow instructions on <a href="eclipse.org">eclipse.org</a>).</li>
 <li>Start Eclipse.</li>
 <li>In Eclipse, select 'Install New Software' in the 'Help' menu.</li>
 <li>In the 'work with' field, copy the SugarJ update site <a
 href="http://update.sugarj.org">http://update.sugarj.org</a> and hit enter.</li>
-<li> Be sure to deselect the 'Group items by category' checkbox on the bottom of
-the window.</li> <li>Select the latest instance of SugarJ for your language and click
-continue. This will install the SugarJ compiler and Eclipse plugin.</li>
+<li>Be sure to deselect the 'Group items by category' checkbox on the bottom of
+the window.</li>
+<li>The update dialog will let you select any number of our currently supported
+host languages: Java (*.sugj), Haskell (*.shs), Prolog (*.sugp).</li>
 </ol>
-
-
-In addition, please ensure enough stack space (about 4-16 MB) is available for
-the SDF parser. You can set the stack space of your Java runtime using the
--Xss16m command line argument when starting Eclipse or setting -Xss16m in your
-eclipse.ini file.
-
+</p>
 
 <h3>Setting up a SugarJ project</h3>
 
@@ -82,7 +85,7 @@ project. For the meantime, please follow these three steps:
 
 A great way of getting to know SugarJ is to look at existing case studies. We made
 all of our case studies available online as open source. You can find them in
-our <a href="https://github.com/seba--/sugarj/tree/master/test-workspace">github
+our <a href="https://github.com/seba--/sugarj/tree/master/case-studies">github
 repository</a>.
 
 
