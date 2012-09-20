@@ -47,6 +47,8 @@ import org.sugarj.driver.STRCommands;
  */
 public class DriverCLI {
   
+  private static final String CONSOLE_CMD = "sugarj";
+  
   private static class Error {
     public String msg;
     public int lineStart;
@@ -340,7 +342,7 @@ public class DriverCLI {
   static void showUsageMessage(Options options) {
     HelpFormatter formatter = new HelpFormatter();
     formatter.printHelp(
-        "java -java sugarj.jar [options] source-files",
+        CONSOLE_CMD + " [options] source-files",
         options,
         false);
   }
@@ -383,7 +385,7 @@ public class DriverCLI {
     if (line.hasOption("cache"))
       environment.setCacheDir(new AbsolutePath(line.getOptionValue("cache")));
   
-    if (line.hasOption("gen-java"))
+    if (line.hasOption("gen-files"))
       environment.setGenerateJavaFile(true);
     
     if (line.hasOption("atomic-imports"))
@@ -455,7 +457,7 @@ public class DriverCLI {
         "show where files are cached");
   
     options.addOption(
-        null,
+        "cp",
         "buildpath",
         true,
         "Specify where to find compiled files. Multiple paths can be given separated by \'" + org.sugarj.common.Environment.classpathsep + "\'.");
@@ -498,9 +500,9 @@ public class DriverCLI {
     
     options.addOption(
         null,
-        "gen-java",
+        "gen-files",
         false,
-        "Generate the resulting Java file in the source folder.");
+        "Generate files?");
   
     options.addOption(
         null,
