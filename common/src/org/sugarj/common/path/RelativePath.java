@@ -1,5 +1,7 @@
 package org.sugarj.common.path;
 
+import java.io.File;
+
 import org.sugarj.common.Environment;
 
 /**
@@ -16,7 +18,7 @@ public class RelativePath extends Path {
   }
   
   public RelativePath(Path base, String relativePath) {
-    this.relativePath = trimFront(trimBack(relativePath));
+    this.relativePath = trimFront(trimBack(relativePath)).replace(File.separatorChar, '/');
     this.base = base;
     
     if (relativePath == null || relativePath.isEmpty())

@@ -1,5 +1,7 @@
 package org.sugarj.common.path;
 
+import java.io.File;
+
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -10,7 +12,7 @@ public class AbsolutePath extends Path {
   private String path;
   
   public AbsolutePath(String path) {
-    this.path = trimBack(path);
+    this.path = trimBack(path).replace(File.separatorChar, '/');
   }
   
   @Override
