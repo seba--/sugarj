@@ -20,9 +20,9 @@ bin/
 
 
 # update site
-update-site/artifacts.jar
-update-site/content.jar
-update-site/features/
-update-site/plugins/
+deployment/update-site/artifacts.jar
+deployment/update-site/content.jar
+deployment/update-site/features/
+deployment/update-site/plugins/
 
 
