@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project default="feature_export" name="build">
-	<target name="feature_export">
-		<pde.exportFeatures destination="/Users/seba/projects/sugarj/deployment/feature-compiler/build" exportSource="false" exportType="directory" features="org.sugarj.compiler" qualifier="0" useJARFormat="true"/>
-	</target>
-</project>
