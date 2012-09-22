@@ -49,9 +49,7 @@ Installing SugarJ
 The SugarJ compiler is almost self-contained and only requires an installation
 of a Java runtime version 6 or higher. Download `sugarj.zip` and
 extract it to a location of your choice. The directory structure of
-the archive is as follows. Adding `sugarj/bin` to the `PATH`
-environmental variable of your platform will allow invocation of
-SugarJ scripts without prefixing them by a location.
+the archive is as follows.
 
     sugarj/
       bin/              Scripts to invoke SugarJ
@@ -64,6 +62,10 @@ SugarJ scripts without prefixing them by a location.
       case-studies/     Sample SugarJ projects
       lib/              The back end
       README.md         This file
+
+Adding `sugarj/bin` to the `PATH` environmental variable of your
+platform will allow invocation of SugarJ scripts without prefixing
+them by a location.
 
 
 Invoking SugarJ
