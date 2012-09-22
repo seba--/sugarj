@@ -70,13 +70,20 @@ Invoking SugarJ
 ---------------
 
 Suppose your working directory is `sugarj/`. You can invoke the
-compiler like this:
+compiler like this on *nix:
 
     bin/sugarj -l java                       \
       --sourcepath case-studies/closures/src \
       -d           case-studies/closures/bin \
       concretesyntax/Test.sugj               # file(s) to compile relative
                                              # to sourcepath
+
+On Windows:
+
+    bin\sugarj -l java                       ^
+      --sourcepath case-studies/closures/src ^
+      -d           case-studies/closures/bin ^
+      concretesyntax\Test.sugj
 
 The generated `Test.class` may be executed thus:
 
