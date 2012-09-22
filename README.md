@@ -53,17 +53,17 @@ the archive is as follows. Adding `sugarj/bin` to the `PATH`
 environmental variable of your platform will allow invocation of
 SugarJ scripts without prefixing them by a location.
 
- sugarj/
-   bin/			Scripts to invoke SugarJ
-     sugarj		Compiler for *nix
-     sugarj.bat		Compiler for Windows
-     sugh		Alias of `sugarj -l haskell` on *nix
-     sugh.bat		Alias of `sugarj -l haskell` on Windows
-     sugj		Alias of `sugarj -l java` on *nix
-     sugj.bat		Alias of `sugarj -l java` on Windows
-   case-studies/	Sample SugarJ projects
-   lib/			The back end
-   README.md		This file
+   sugarj/
+     bin/			Scripts to invoke SugarJ
+       sugarj		Compiler for *nix
+       sugarj.bat		Compiler for Windows
+       sugh		Alias of `sugarj -l haskell` on *nix
+       sugh.bat		Alias of `sugarj -l haskell` on Windows
+       sugj		Alias of `sugarj -l java` on *nix
+       sugj.bat		Alias of `sugarj -l java` on Windows
+     case-studies/	Sample SugarJ projects
+     lib/			The back end
+     README.md		This file
 
 
 Invoking SugarJ
@@ -72,15 +72,15 @@ Invoking SugarJ
 Suppose your working directory is `sugarj/`. You can invoke the
 compiler like this:
 
-    `bin/sugarj -l java			     \
+    bin/sugarj -l java			     \
       --sourcepath case-studies/closures/src \
       -d	   case-studies/closures/bin \
       concretesyntax/Test.sugj 		     # file(s) to compile relative
-      					     # to sourcepath`
+      					     # to sourcepath
 
 The generated `Test.class` may be executed thus:
 
-    `java -cp case-studies/closures/bin concretesyntax.Test`
+    java -cp case-studies/closures/bin concretesyntax.Test
 
 
 Compiler options
