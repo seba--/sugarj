@@ -98,8 +98,8 @@ Compiler options
     --atomic-imports         Parse all import statements simultaneously.
     --cache <arg>            Specifiy a directory for caching.
     --cache-info             Show where files are cached
-    -cp,--buildpath <arg>    Specify where to find compiled files.
-                             Multiple paths can be given separated by ':'.
+    -cp,--buildpath <arg>    Specify where to find compiled files. Multiple
+                               paths can be given separated by ':'.
     -d <arg>                 Specify where to place compiled files
     --full-command-line      Show all arguments to subprocesses
     --gen-files              Generate files?
