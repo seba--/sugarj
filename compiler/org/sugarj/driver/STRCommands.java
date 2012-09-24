@@ -144,6 +144,8 @@ public class STRCommands {
       try {
         prog = generateAssimilator(key, str, main, strjContext, environment.getIncludePath(), langLib);
       } catch (StrategoException e) {
+        // piggy-back error message in programme object.
+        // nice. ---cai 23.09.12
         prog = new AbsolutePath("error: " +e.getMessage());
       } finally {
         cacheAssimilator(strCache, key, prog, environment);

@@ -7,8 +7,5 @@ sugarj="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 script="$sugarj/cli-script"
 
 classes="$script/classes"
-native="$script/native"
-classpath="$classes:$native"
 
-
-exec java -Xss64m -Xmx1024m -cp "$classpath" org.sugarj.driver.cli.Main $*
+exec java -Xss64m -Xmx1024m -cp "$classes" org.sugarj.driver.cli.Main $*

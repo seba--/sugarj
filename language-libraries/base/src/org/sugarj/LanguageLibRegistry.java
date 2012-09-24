@@ -61,11 +61,12 @@ public class LanguageLibRegistry {
   }
   
   private synchronized void loadExtensions() {
-    if(!Platform.isRunning()){
-      System.err.println("Fatal error: Eclipse platform is NOT running.");
-      System.exit(1);
-    }
     extensionsLoaded = true;
+
+    if (!Platform.isRunning())
+      return;
+      // throw new RuntimeException("Fatal error: Eclipse platform is NOT running.");
+   
     IExtensionRegistry registry = Platform.getExtensionRegistry();
     IExtensionPoint extensionPoint = registry.getExtensionPoint("org.sugarj.language");
     IConfigurationElement[] members = extensionPoint.getConfigurationElements();

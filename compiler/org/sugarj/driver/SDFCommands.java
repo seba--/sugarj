@@ -228,12 +228,15 @@ public class SDFCommands {
     try {
       result = sdfCache.get(key);
       
-      if (result == null || !result.getFile().exists())
+      if (result == null || !result.getFile().exists()) {
+        System.out.println("\nDidn't find " + result);
+        result = null;
         return null;
+      }
 
       if (CommandExecution.CACHE_INFO)
         log.log("Cache location: '" + result + "'");
-
+      
       return result;
     } finally {
       log.endTask(result != null);

@@ -9,7 +9,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.sugarj.LanguageLibFactory;
+import org.sugarj.LanguageLibRegistry;
 import org.sugarj.common.Environment;
+import org.sugarj.common.FileCommands;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.RelativePath;
@@ -19,14 +22,8 @@ import org.sugarj.driver.Driver;
 import org.sugarj.driver.ModuleSystemCommands;
 import org.sugarj.driver.PrintProgressMonitor;
 import org.sugarj.driver.Result;
-import org.sugarj.LanguageLibFactory;
-
 // cai 15.08.12
 // imports to resolve language libraries
-import org.sugarj.common.FileCommands;
-import org.sugarj.JavaLibFactory;
-import org.sugarj.HaskellLibFactory;
-import org.sugarj.PrologLibFactory;
 
 /**
  * @author seba
@@ -39,7 +36,7 @@ public class Main {
    */
   public static void main(String[] args) throws Throwable {
 
-    Environment environment = newConsoleEnvironment(args);
+    Environment environment = getConsoleEnvironment();
     
     Set<RelativeSourceLocationPath> allInputFiles = new HashSet<RelativeSourceLocationPath>();
     Set<RelativeSourceLocationPath> pendingInputFiles = new HashSet<RelativeSourceLocationPath>();
@@ -70,10 +67,11 @@ public class Main {
       IProgressMonitor monitor = new PrintProgressMonitor(System.out);
       
       for (final RelativeSourceLocationPath sourceFile : allInputFiles) {
-        monitor.beginTask("compile " + sourceFile + "\n", IProgressMonitor.UNKNOWN);
-        LanguageLibFactory lang = resolveLanguageLib(sourceFile.getFile());
-        if(null==lang) continue;
+        LanguageLibFactory lang = LanguageLibRegistry.getInstance().getLanguageLib(FileCommands.getExtension(sourceFile));
+        if (null == lang)
+          throw new RuntimeException("Unknown file extension \"" + FileCommands.getExtension(sourceFile) + "\".");
         Result res = Driver.compile(sourceFile, monitor, lang);
+    
         if (!DriverCLI.processResultCLI(res, sourceFile, new File(".").getAbsolutePath()))
           throw new RuntimeException("compilation of " + sourceFile + " failed");
       }
@@ -91,47 +89,19 @@ public class Main {
     System.exit(0);
   }
   
-  // cai 14.08.12
   // without running eclipse platform,
-  // set up an environment to suit the expectation of subsequent code.
-  // based on
-  //   org.sugarj.editor.SugarJParseController.makeProjectEnvironment(IJavaProject)
-  // and
-  //   org.sugarj.editor.SugarJParseController.setDefaultEnvironmentOptions(Environment)
-  private static Environment newConsoleEnvironment(String[] args){
+  // set up a default environment reasonable for command-line execution.
+  private static Environment getConsoleEnvironment() {
     Environment environment = new Environment();
-    environment.setRoot(new AbsolutePath("."));
-    environment.setBin(environment.getRoot());
-    environment.setCacheDir(new RelativePath(environment.getRoot(), ".sugarjcache"));
+    environment.setCacheDir(new RelativePath(new AbsolutePath(FileCommands.TMP_DIR), ".sugarjcache"));
     environment.getSourcePath().add(new SourceLocation(new AbsolutePath("."), environment));
     environment.setAtomicImportParsing(true);
     environment.setGenerateJavaFile(true);
     environment.setNoChecking(true);
-    environment.getIncludePath().add(new AbsolutePath(strategoJarPath()));
+    
+    for (String cp : System.getProperty("java.class.path").split(System.getProperty("path.separator")))
+      environment.getIncludePath().add(new AbsolutePath(cp));
     return environment;
-  }
-
-  private static LanguageLibFactory resolveLanguageLib(File source){
-    String ext = FileCommands.getExtension(source);
-    if("sugj".equals(ext)) return JavaLibFactory.getInstance();
-    if( "shs".equals(ext)) return HaskellLibFactory.getInstance();
-    // cai 22.08.12 TODO recognise extension of SugarProlog (if there's any)
-    Log.log.logErr("No language library found for source-file extension " + ext);
-    return null;
-  }
-  
-  // cai 15.08.12
-  // compute path to strategoxt.jar
-  // VERY-HARD-coded
-  private static String strategoJarPath(){
-    // cai 21.08.12
-    // by a stroke of fortune, the path below works both in
-    //   sugarj/cli-script/classes/org/sugarj/driver/cli/
-    // and in
-    //   sugarj/compiler/bin/org/sugarj/driver/cli/
-    return new File(new Main().getClass().getResource("Main.class").getFile())
-    .getParentFile().getParentFile().getParentFile().getParentFile()
-    .getParentFile().getParent() + "/strategoxt.jar";
   }
 
 }

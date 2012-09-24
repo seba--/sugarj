@@ -437,31 +437,31 @@ public class DriverCLI {
         "v", 
         "verbose", 
         false, 
-        "show verbose output");
+        "Show verbose output");
   
     options.addOption(
         null, 
         "silent-execution", 
         false, 
-        "try to be silent");
+        "Try to be silent");
   
     options.addOption(
         null,
         "sub-silent-execution",
         false,
-        "do not display output of subprocesses");
+        "Do not display output of subprocesses");
   
     options.addOption(
         null,
         "full-command-line",
         false,
-        "show all arguments to subprocesses");
+        "Show all arguments to subprocesses");
   
     options.addOption(
         null, 
         "cache-info", 
         false, 
-        "show where files are cached");
+        "Show where files are cached");
   
     options.addOption(
         "cp",

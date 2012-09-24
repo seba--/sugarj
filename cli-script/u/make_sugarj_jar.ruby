@@ -1,46 +1,31 @@
 #!/usr/bin/ruby
 # cai 13.09.12
-# creates sugarj.jar at $script/sugarj.jar
+# creates sugarj.jar at ARGV[0]/sugarj.jar
 # which contains classes compiled from sugarj projects
-#
-# cai 13.09.12
-# WARNING: Putting language libraries in a jar
-# makes STRJ unable to find them. In other words,
-# it is not possible to invoke sugarj from a jar.
+
+# cai 24.09.12
+# ALWAYS PRINT STUFF THROUGH $stderr
+# Rationale:
+# In IO.popen() or `cmd`, $stdout is directed into a buffer
+# or a string while $stderr is printed directly to the screen.
+# We want immediate feedback in these scripts.
+# Therefore, $stderr always.
+# The situation will become more comfortable in Ruby 1.9
+# where the option :err of IO.popen enables a more
+# structured approach.
+
+if ARGV.length != 1
+  $stderr.puts("Usage: #{__FILE__} <destination directory>")
+  exit 255
+else
+  $destination = ARGV.first
+end
 
 $this_dir  = File.expand_path(File.dirname(__FILE__))
 $script = File.dirname($this_dir)
-$sugarj = File.dirname(File.dirname($this_dir))
-$langroot="#{$sugarj}/language-libraries"
-$jarenv = "#{$script}/jar-env"
-
-$sugj_bins = [
-  "#{$sugarj}/common/bin",
-  "#{$sugarj}/compiler/bin",
-  "#{$sugarj}/stdlib/bin",
-  "#{$sugarj}/layout-parsing/jsglr-layout/bin",
-  "#{$langroot}/base/bin",
-  "#{$langroot}/haskell/bin",
-  "#{$langroot}/java/bin",
-  "#{$langroot}/prolog/bin"
-]
-
-def cpdir(path)
-  path = "#{path}/org"
-  if File.exist?(path)
-    # copy everything into classes
-    puts(cmd = "cp -nvr #{path} #{$jarenv}")
-    cp_out = `#{cmd}`
-    $stderr.puts cp_out if $? != 0
-  else
-    # path/org does not exist
-    $stderr.puts "FATAL ERROR: #{path}/org does not exist."
-    exit 1
-  end
-end
 
 def shell_try(command)
-  puts command
+  $stderr.puts(command)
   `#{command}`
   if $?.exitstatus != 0
     $stderr.puts "FAILED: #{command}"
@@ -48,16 +33,6 @@ def shell_try(command)
   end
 end
 
-# Step 1: clean jar-env, the workspace.
-shell_try "rm -rf #{$jarenv}/*"
-
-# Step 2: copy classes from sugarj projects into jar-env
-$sugj_bins.each {|bin| cpdir(bin)}
-
-shell_try %{
-cd    "#{$jarenv}" &&       \\
-jar -cfe                    \\
-../sugarj.jar               \\
-org.sugarj.driver.cli.Main  \\
-org
-}
+shell_try "#{$this_dir}/extract.ruby"
+shell_try "cd '#{$script}' && zip -r sugarj.zip sugarj"
+shell_try "cd '#{$script}' && mv sugarj.zip '#{$destination}'"
