@@ -6,6 +6,7 @@ import static org.spoofax.jsglr_layout.client.imploder.ImploderAttachment.getTok
 import static org.spoofax.terms.Term.tryGetConstructor;
 import static org.sugarj.common.Log.log;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -353,6 +354,20 @@ public class DriverCLI {
         options,
         false);
   }
+  
+  // cai 24.09.12
+  // constructs an AbsolutePath object from command-line argument
+  // paths that are not acceptable verbatim are prepended with a dot
+  // cf. org.sugarj.common.path.AbsolutePath.acceptable()
+  private static AbsolutePath pathArgument(String path){
+    if (!AbsolutePath.acceptable(path)) {
+      if (path.startsWith(File.separator) || path.startsWith("/"))
+        path = "." + path;
+      else
+        path = "./" + path;
+    }
+    return new AbsolutePath(path);
+  }
 
   private static String[] processOptions(Options options, CommandLine line, org.sugarj.common.Environment environment) throws org.apache.commons.cli.ParseException {
     if (line.hasOption("help")) {
@@ -380,17 +395,17 @@ public class DriverCLI {
   
     if (line.hasOption("buildpath"))
       for (String path : line.getOptionValue("buildpath").split(org.sugarj.common.Environment.classpathsep))
-        environment.getIncludePath().add(new AbsolutePath(path));
+        environment.getIncludePath().add(pathArgument(path));
   
     if (line.hasOption("sourcepath"))
       for (String path : line.getOptionValue("sourcepath").split(org.sugarj.common.Environment.classpathsep))
-        environment.getSourcePath().add(new SourceLocation(new AbsolutePath(path), environment));
+        environment.getSourcePath().add(new SourceLocation(pathArgument(path), environment));
   
     if (line.hasOption("d"))
-      environment.setBin(new AbsolutePath(line.getOptionValue("d")));
+      environment.setBin(pathArgument(line.getOptionValue("d")));
     
     if (line.hasOption("cache"))
-      environment.setCacheDir(new AbsolutePath(line.getOptionValue("cache")));
+      environment.setCacheDir(pathArgument(line.getOptionValue("cache")));
   
     if (line.hasOption("gen-files"))
       environment.setGenerateJavaFile(true);

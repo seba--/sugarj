@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.sugarj.LanguageLib;
 import org.sugarj.LanguageLibFactory;
 import org.sugarj.LanguageLibRegistry;
 import org.sugarj.common.Environment;
@@ -39,29 +40,18 @@ public class Main {
     Environment environment = getConsoleEnvironment();
     
     Set<RelativeSourceLocationPath> allInputFiles = new HashSet<RelativeSourceLocationPath>();
-    Set<RelativeSourceLocationPath> pendingInputFiles = new HashSet<RelativeSourceLocationPath>();
     
     try {
       String[] sources = DriverCLI.handleOptions(args, environment);
       
       for (String source : sources) {
-        RelativeSourceLocationPath p = ModuleSystemCommands.locateSourceFile(source, environment.getSourcePath());
-        if (p == null) {
-          Log.log.logErr("Could not locate source file " + source);
+        RelativeSourceLocationPath sourceLocation = ModuleSystemCommands.locateSourceFile(source, environment.getSourcePath());
+        if (sourceLocation == null) {
+          Log.log.logErr("Could not locate source file \"" + source +"\".");
           continue;
         }
-        
-        // cai 15.08.12
-        // existence of language extension for file type was verified here
-        // removed because we don't want to call LanguageRegistry
-        // which depends on eclipse platform. we delegate the task to
-        // Main.resolveLanguageLibrary() in the subsequent loop instead.
-        // It will not cause any problem (at the moment) because
-        // the variable allInputFiles is used only to compile and
-        // the variable pendingInputFiles is not used at all lol
 
-        allInputFiles.add(p);
-        pendingInputFiles.add(p);
+        allInputFiles.add(sourceLocation);
       }
       
       IProgressMonitor monitor = new PrintProgressMonitor(System.out);
@@ -70,6 +60,7 @@ public class Main {
         LanguageLibFactory lang = LanguageLibRegistry.getInstance().getLanguageLib(FileCommands.getExtension(sourceFile));
         if (null == lang)
           throw new RuntimeException("Unknown file extension \"" + FileCommands.getExtension(sourceFile) + "\".");
+        
         Result res = Driver.compile(sourceFile, monitor, lang);
     
         if (!DriverCLI.processResultCLI(res, sourceFile, new File(".").getAbsolutePath()))
@@ -83,9 +74,7 @@ public class Main {
       Log.log.log("");
       e.showUsage();
     }
-
-    // kills all remaining subprocesses, if any
-    // log.log("The extensible java compiler has done its job and says 'good bye'.");
+    
     System.exit(0);
   }
   
@@ -99,8 +88,10 @@ public class Main {
     environment.setGenerateJavaFile(true);
     environment.setNoChecking(true);
     
-    for (String cp : System.getProperty("java.class.path").split(System.getProperty("path.separator")))
-      environment.getIncludePath().add(new AbsolutePath(cp));
+    for (String cp : System.getProperty("java.class.path").split(System.getProperty("path.separator"))) {
+      if (cp.length() > 0)
+        environment.getIncludePath().add(new AbsolutePath(cp));
+    }
     return environment;
   }
 

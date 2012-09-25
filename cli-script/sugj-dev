@@ -16,7 +16,7 @@ langroot="$sugarj/language-libraries"
 langlibs="$langroot/base/bin:$langroot/haskell/bin:$langroot/java/bin:$langroot/prolog/bin"
 
 # essential paths
-classpath="$compiler:$clijars:$common:$stdlib:$langlibs:$layout"
+classpath="$compiler:$common:$stdlib:$langlibs:$layout"
 
 # cli-script/u/extract.ruby will put classes nicely
 # together to avoid nasty resolutions

@@ -15,21 +15,29 @@ public class AbsolutePath extends Path {
   // when constructed given a relative path,
   // this object assumes JVM's PWD to be the base.
   public AbsolutePath(String path) {
-    // TODO
-    // 1. Incorporate discussion
-    // 2. Trace cause of
-    //    org.strategoxt.lang.StrategoErrorExit: pack-sdf: error: file ./C:/Users/cai/Ap
-    //    pData/Local/Temp/sugarj5620452099082416616.sdf does not exis
-    try{
-      this.path = (new File(path)).getCanonicalPath();
-    } catch (java.io.IOException e) {
-      throw new RuntimeException(e);
-    }
+    if (!acceptable(path))
+      throw new IllegalArgumentException(
+          "Internal error: AbsolutePath constructed on unacceptable argument:\n\""+path+"\""
+      );
+    this.path = trimBack(path).replace(File.separatorChar, '/');
   }
   
   @Override
   public String getAbsolutePath() {
     return path;
+  }
+  
+  // cai 24.09.12
+  // test whether `path` is an acceptable argument to
+  // the constructor of AbsolutePath. A path is acceptable
+  // iff
+  // 1. it is an absolute path according to Java, or
+  // 2. its root is a dot.
+  public static boolean acceptable(String path){
+    return new File(path).isAbsolute()
+        || path.startsWith("./")
+        || path.startsWith("." + File.separator)
+        || path.equals(".");
   }
 
 }

@@ -103,8 +103,15 @@ public class SDFCommands {
       if (path.getFile().isDirectory()){
         cmd.add("-I");
         cmd.add(path.getAbsolutePath());
-      }    
+      }
     
+    LanguageLib l = langLib;
+    System.out.println("\n************* dir_ *************\n" + l.getLibraryDirectory());
+    System.out.println("\n************* path *************\n" + l.getLibraryDirectory().getPath());
+    System.out.println("\n************* cmds *************" +
+      Arrays.asList(cmd.toArray(new String[cmd.size()])).toString().replaceAll("^\\[|\\]$|, ", "\n"));
+    System.out.println("************* end_ *************\n");
+
     try {
       sdfContext.invokeStrategyCLI(main_pack_sdf_0_0.instance, "pack-sdf", cmd.toArray(new String[cmd.size()]));
     } catch(StrategoExit e) {
