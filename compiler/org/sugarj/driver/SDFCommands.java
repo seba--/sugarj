@@ -66,7 +66,7 @@ public class SDFCommands {
   /*
    * timeout for parsing files (in milliseconds)
    */
-  public static long PARSE_TIMEOUT = 10000;
+  public static long PARSE_TIMEOUT = 86400000; // 24 hours. strj can take a while. (cai 14.08.12)
   
   static {
     try {
@@ -74,6 +74,13 @@ public class SDFCommands {
       Log.log.log("set parse timeout to " + PARSE_TIMEOUT);
     } catch (Exception e) {
     }
+  }
+  
+  // cai 27.09.12
+  // convert path-separator to that of the OS
+  // so that strategoXT doesn't prepend ./ to C:/foo/bar/baz.
+  private static String nativePath(String path){
+      return path.replace('/', File.separatorChar);
   }
   
   private static void packSdf(Path sdf, Path def, Context sdfContext, Collection<Path> paths, LanguageLib langLib) throws IOException {
@@ -84,27 +91,27 @@ public class SDFCommands {
      */
     
     List<String> cmd = new ArrayList<String>(Arrays.asList(new String[]{
-        "-i", sdf.getAbsolutePath(),
-        "-o", def.getAbsolutePath()
+        "-i", nativePath(sdf.getAbsolutePath()),
+        "-o", nativePath(def.getAbsolutePath())
     }));
     
     for (File grammarFile : langLib.getGrammars()) {
       cmd.add("-Idef");
-      cmd.add(grammarFile.getPath());
+      cmd.add(nativePath(grammarFile.getPath()));
     }
     
     cmd.add("-I");
-    cmd.add(langLib.getLibraryDirectory().getPath());
+    cmd.add(nativePath(langLib.getLibraryDirectory().getPath()));
     cmd.add("-I");
-    cmd.add(StdLib.stdLibDir.getPath());
+    cmd.add(nativePath(StdLib.stdLibDir.getPath()));
     
    
     for (Path path : paths) 
       if (path.getFile().isDirectory()){
         cmd.add("-I");
-        cmd.add(path.getAbsolutePath());
-      }    
-    
+        cmd.add(nativePath(path.getAbsolutePath()));
+        
+      }
     try {
       sdfContext.invokeStrategyCLI(main_pack_sdf_0_0.instance, "pack-sdf", cmd.toArray(new String[cmd.size()]));
     } catch(StrategoExit e) {
@@ -228,12 +235,15 @@ public class SDFCommands {
     try {
       result = sdfCache.get(key);
       
-      if (result == null || !result.getFile().exists())
+      if (result == null || !result.getFile().exists()) {
+        System.out.println("\nDidn't find " + result);
+        result = null;
         return null;
+      }
 
       if (CommandExecution.CACHE_INFO)
         log.log("Cache location: '" + result + "'");
-
+      
       return result;
     } finally {
       log.endTask(result != null);
