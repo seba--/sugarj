@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.strategoxt.tools.main_pack_sdf_0_0;
 import org.sugarj.LanguageLib;
 import org.sugarj.LanguageLibFactory;
 import org.sugarj.LanguageLibRegistry;
@@ -23,18 +24,12 @@ import org.sugarj.driver.Driver;
 import org.sugarj.driver.ModuleSystemCommands;
 import org.sugarj.driver.PrintProgressMonitor;
 import org.sugarj.driver.Result;
-// cai 15.08.12
-// imports to resolve language libraries
 
 /**
  * @author seba
  */
 public class Main {
 
-  /**
-   * @param args
-   * @throws IOException
-   */
   public static void main(String[] args) throws Throwable {
 
     Environment environment = getConsoleEnvironment();
