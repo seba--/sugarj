@@ -66,7 +66,7 @@ public class SDFCommands {
   /*
    * timeout for parsing files (in milliseconds)
    */
-  public static long PARSE_TIMEOUT = 86400000; // 24 hours. strj can take a while. (cai 14.08.12)
+  public static long PARSE_TIMEOUT = 10000;
   
   static {
     try {
