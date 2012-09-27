@@ -1,0 +1,6 @@
+#!/bin/bash
+# script to invoke sugarj from command line
+# using class files in deployment library
+
+script="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+exec java -Xss64m -Xmx1024m -cp "$script/lib" org.sugarj.driver.cli.Main $*
