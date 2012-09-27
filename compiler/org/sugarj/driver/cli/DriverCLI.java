@@ -6,7 +6,6 @@ import static org.spoofax.jsglr_layout.client.imploder.ImploderAttachment.getTok
 import static org.spoofax.terms.Term.tryGetConstructor;
 import static org.sugarj.common.Log.log;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,8 +46,6 @@ import org.sugarj.driver.STRCommands;
  * large chunk copied and adapted from org.strategoxt.imp.runtime.parser.ParseErrorHandler
  */
 public class DriverCLI {
-  
-  private static final String CONSOLE_CMD = "sugarj";
   
   private static class Error {
     public String msg;
@@ -350,23 +347,9 @@ public class DriverCLI {
   static void showUsageMessage(Options options) {
     HelpFormatter formatter = new HelpFormatter();
     formatter.printHelp(
-        CONSOLE_CMD + " [options] source-files",
+        "java -java sugarj.jar [options] source-files",
         options,
         false);
-  }
-  
-  // cai 24.09.12
-  // constructs an AbsolutePath object from command-line argument
-  // paths that are not acceptable verbatim are prepended with a dot
-  // cf. org.sugarj.common.path.AbsolutePath.acceptable()
-  private static AbsolutePath pathArgument(String path){
-    if (!AbsolutePath.acceptable(path)) {
-      if (path.startsWith(File.separator) || path.startsWith("/"))
-        path = "." + path;
-      else
-        path = "./" + path;
-    }
-    return new AbsolutePath(path);
   }
 
   private static String[] processOptions(Options options, CommandLine line, org.sugarj.common.Environment environment) throws org.apache.commons.cli.ParseException {
@@ -395,19 +378,19 @@ public class DriverCLI {
   
     if (line.hasOption("buildpath"))
       for (String path : line.getOptionValue("buildpath").split(org.sugarj.common.Environment.classpathsep))
-        environment.getIncludePath().add(pathArgument(path));
+        environment.getIncludePath().add(new AbsolutePath(path));
   
     if (line.hasOption("sourcepath"))
       for (String path : line.getOptionValue("sourcepath").split(org.sugarj.common.Environment.classpathsep))
-        environment.getSourcePath().add(new SourceLocation(pathArgument(path), environment));
+        environment.getSourcePath().add(new SourceLocation(new AbsolutePath(path), environment));
   
     if (line.hasOption("d"))
-      environment.setBin(pathArgument(line.getOptionValue("d")));
+      environment.setBin(new AbsolutePath(line.getOptionValue("d")));
     
     if (line.hasOption("cache"))
-      environment.setCacheDir(pathArgument(line.getOptionValue("cache")));
+      environment.setCacheDir(new AbsolutePath(line.getOptionValue("cache")));
   
-    if (line.hasOption("gen-files"))
+    if (line.hasOption("gen-java"))
       environment.setGenerateJavaFile(true);
     
     if (line.hasOption("atomic-imports"))
@@ -452,34 +435,34 @@ public class DriverCLI {
         "v", 
         "verbose", 
         false, 
-        "Show verbose output");
+        "show verbose output");
   
     options.addOption(
         null, 
         "silent-execution", 
         false, 
-        "Try to be silent");
+        "try to be silent");
   
     options.addOption(
         null,
         "sub-silent-execution",
         false,
-        "Do not display output of subprocesses");
+        "do not display output of subprocesses");
   
     options.addOption(
         null,
         "full-command-line",
         false,
-        "Show all arguments to subprocesses");
+        "show all arguments to subprocesses");
   
     options.addOption(
         null, 
         "cache-info", 
         false, 
-        "Show where files are cached");
+        "show where files are cached");
   
     options.addOption(
-        "cp",
+        null,
         "buildpath",
         true,
         "Specify where to find compiled files. Multiple paths can be given separated by \'" + org.sugarj.common.Environment.classpathsep + "\'.");
@@ -522,9 +505,9 @@ public class DriverCLI {
     
     options.addOption(
         null,
-        "gen-files",
+        "gen-java",
         false,
-        "Generate files?");
+        "Generate the resulting Java file in the source folder.");
   
     options.addOption(
         null,

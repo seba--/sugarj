@@ -242,10 +242,7 @@ public class FileCommands {
   }
 
   public static void createDir(Path dir) throws IOException {
-    boolean isMade = dir.getFile().mkdirs();
-    boolean exists = dir.getFile().exists();
-    if (!isMade && !exists)
-      throw new IOException("Failed to create the directories\n" + dir);
+    dir.getFile().mkdirs();
   }
 
   /**

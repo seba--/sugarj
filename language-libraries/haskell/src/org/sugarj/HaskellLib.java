@@ -102,6 +102,8 @@ public class HaskellLib extends LanguageLib {
       String thisClassPath = "org/sugarj/HaskellLib.class";
       URL thisClassURL = HaskellLib.class.getClassLoader().getResource(thisClassPath);
       
+      System.out.println(thisClassURL);
+      
       if (thisClassURL.getProtocol().equals("bundleresource"))
         try {
           thisClassURL = FileLocator.resolve(thisClassURL);

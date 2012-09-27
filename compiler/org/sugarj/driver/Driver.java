@@ -138,7 +138,6 @@ public class Driver{
   public Driver(Environment env, LanguageLibFactory langLibFactory) {
     this.environment=env;
     this.langLib = langLibFactory.createLanguageLibrary();
-
     langLib.setInterpreter(new HybridInterpreter());
 
     try {      
@@ -743,6 +742,7 @@ public class Driver{
         "desugaring",
         "DESUGAR the current toplevel declaration.");
     try {
+      FileCommands.deleteTempFiles(currentTransProg);
       currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment, langLib);
 
       return STRCommands.assimilate(currentTransProg, term, langLib.getInterpreter());
@@ -1081,7 +1081,8 @@ public class Driver{
     log.beginTask("checking grammar", "CHECK current grammar");
     
     try {
-      SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfContext, makePermissiveContext, sdfCache, environment, langLib);
+      Path p = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfContext, makePermissiveContext, sdfCache, environment, langLib);
+      FileCommands.deleteTempFiles(p);
     } finally {
       log.endTask();
     }
@@ -1091,6 +1092,7 @@ public class Driver{
     log.beginTask("checking transformation", "CHECK current transformation");
     
     try {
+      FileCommands.deleteTempFiles(currentTransProg);
       currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment, langLib);
     } catch (StrategoException e) {
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
