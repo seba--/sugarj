@@ -11,7 +11,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 public class PrintProgressMonitor implements IProgressMonitor {
 
   private PrintStream out;
-  private Stack<String> tasks = new Stack<String>();
+  private Stack<String> tasks;
   private boolean canceled;
   
   public PrintProgressMonitor(PrintStream out) {
