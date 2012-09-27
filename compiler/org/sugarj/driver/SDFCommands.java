@@ -76,13 +76,6 @@ public class SDFCommands {
     }
   }
   
-  // cai 27.09.12
-  // convert path-separator to that of the OS
-  // so that strategoXT doesn't prepend ./ to C:/foo/bar/baz.
-  private static String nativePath(String path){
-      return path.replace('/', File.separatorChar);
-  }
-  
   private static void packSdf(Path sdf, Path def, Context sdfContext, Collection<Path> paths, LanguageLib langLib) throws IOException {
     
     /*
@@ -91,27 +84,27 @@ public class SDFCommands {
      */
     
     List<String> cmd = new ArrayList<String>(Arrays.asList(new String[]{
-        "-i", nativePath(sdf.getAbsolutePath()),
-        "-o", nativePath(def.getAbsolutePath())
+        "-i", sdf.getAbsolutePath(),
+        "-o", def.getAbsolutePath()
     }));
     
     for (File grammarFile : langLib.getGrammars()) {
       cmd.add("-Idef");
-      cmd.add(nativePath(grammarFile.getPath()));
+      cmd.add(grammarFile.getPath());
     }
     
     cmd.add("-I");
-    cmd.add(nativePath(langLib.getLibraryDirectory().getPath()));
+    cmd.add(langLib.getLibraryDirectory().getPath());
     cmd.add("-I");
-    cmd.add(nativePath(StdLib.stdLibDir.getPath()));
+    cmd.add(StdLib.stdLibDir.getPath());
     
    
     for (Path path : paths) 
       if (path.getFile().isDirectory()){
         cmd.add("-I");
-        cmd.add(nativePath(path.getAbsolutePath()));
-        
-      }
+        cmd.add(path.getAbsolutePath());
+      }    
+    
     try {
       sdfContext.invokeStrategyCLI(main_pack_sdf_0_0.instance, "pack-sdf", cmd.toArray(new String[cmd.size()]));
     } catch(StrategoExit e) {
@@ -235,15 +228,12 @@ public class SDFCommands {
     try {
       result = sdfCache.get(key);
       
-      if (result == null || !result.getFile().exists()) {
-        System.out.println("\nDidn't find " + result);
-        result = null;
+      if (result == null || !result.getFile().exists())
         return null;
-      }
 
       if (CommandExecution.CACHE_INFO)
         log.log("Cache location: '" + result + "'");
-      
+
       return result;
     } finally {
       log.endTask(result != null);
