@@ -11,7 +11,14 @@ public class AbsolutePath extends Path {
 
   private String path;
   
+  // cai 23.09.12
+  // when constructed given a relative path,
+  // this object assumes JVM's PWD to be the base.
   public AbsolutePath(String path) {
+    if (!acceptable(path))
+      throw new IllegalArgumentException(
+          "Internal error: AbsolutePath constructed on unacceptable argument:\n\""+path+"\""
+      );
     this.path = trimBack(path).replace(File.separatorChar, '/');
   }
   
@@ -19,4 +26,18 @@ public class AbsolutePath extends Path {
   public String getAbsolutePath() {
     return path;
   }
+  
+  // cai 24.09.12
+  // test whether `path` is an acceptable argument to
+  // the constructor of AbsolutePath. A path is acceptable
+  // iff
+  // 1. it is an absolute path according to Java, or
+  // 2. its root is a dot.
+  public static boolean acceptable(String path){
+    return new File(path).isAbsolute()
+        || path.startsWith("./")
+        || path.startsWith("." + File.separator)
+        || path.equals(".");
+  }
+
 }
