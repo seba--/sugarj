@@ -1,5 +1,0 @@
-#!/bin/bash
-# compile sugared java
-
-this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-exec "$this_dir/sugarj" -l java $*
