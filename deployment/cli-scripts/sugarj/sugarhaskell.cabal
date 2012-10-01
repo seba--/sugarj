@@ -1,0 +1,18 @@
+name:                sugarhaskell
+version:             0.1
+build-type:          Simple
+license:             GPL
+author:              Sebastian Erdweg
+maintainer:          seba at informatik uni-marburg de
+homepage:            http://sugarj.org
+bug-reports:         http://github.com/seba--/sugarj/issues
+synopsis:            Library-based syntactic extensibility for Haskell
+category:            Language
+category:            Code generation
+category:            Source-tools
+
+data-dir:            lib
+
+
+executable sugarhaskell
+  main-is:      SugarHaskell.hs
