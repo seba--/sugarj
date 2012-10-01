@@ -1,0 +1,11 @@
+#!/bin/bash
+# cai 13.09.12
+# script to invoke sugarj from command line
+# using class files in the repository
+
+sugarj="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+script="$sugarj/cli-script"
+
+classes="$script/classes"
+
+exec java -Xss64m -Xmx1024m -cp "$classes" org.sugarj.driver.cli.Main $*
