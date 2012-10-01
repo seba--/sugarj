@@ -34,5 +34,3 @@ def shell_try(command)
 end
 
 shell_try "#{$this_dir}/extract.ruby"
-shell_try "cd '#{$script}' && zip -r sugarj.zip sugarj"
-shell_try "cd '#{$script}' && mv sugarj.zip '#{$destination}'"
