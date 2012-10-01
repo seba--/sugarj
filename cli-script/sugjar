@@ -1,0 +1,9 @@
+#!/bin/bash
+# cai 21.08.12
+# script to invoke sugarj.jar from command line
+# is slower than ./sugj because of decompression
+
+cliscript="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+sugjar="$cliscript/sugarj.jar"
+
+exec java -Xss64m -Xmx1024m -jar "$sugjar" $*

@@ -1,0 +1,29 @@
+#!/bin/bash
+# cai 09.08.12
+# script to invoke sugarj from command line
+# using latest-available classes
+
+# find base directory of sugarj
+# CELEBRATION: No longer dependent on eclipse's location
+sugarj="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+script="$sugarj/cli-script"
+common="$sugarj/common/bin"
+compiler="$sugarj/compiler/bin"
+stdlib="$sugarj/stdlib/bin"
+layout="$sugarj/layout-parsing/jsglr-layout/bin"
+cliroot="$sugarj/compiler"
+langroot="$sugarj/language-libraries"
+langlibs="$langroot/base/bin:$langroot/haskell/bin:$langroot/java/bin:$langroot/prolog/bin"
+
+# essential paths
+classpath="$compiler:$common:$stdlib:$langlibs:$layout"
+
+# cli-script/u/extract.ruby will put classes nicely
+# together to avoid nasty resolutions
+# we put them behind other class paths so that
+# update in sugarj project is reflected immediately
+classes="$script/classes"
+native="$script/native"
+classpath="$classpath:$classes:$native"
+
+exec java -Xss64m -Xmx1024m -cp "$classpath" org.sugarj.driver.cli.Main $*
