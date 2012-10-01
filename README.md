@@ -47,42 +47,69 @@ Installing SugarJ
 -----------------
 
 The SugarJ compiler is almost self-contained and only requires an installation
-of a Java runtime version 6 or higher. Download and compile the SugarJ compiler
-as well as the standard library (stdlib) using javac.
+of a Java runtime version 6 or higher. Download `sugarj.zip` and
+extract it to a location of your choice. The directory structure of
+the archive is as follows.
+
+    sugarj/
+      bin/              Scripts to invoke SugarJ
+        sugarj          Compiler for *nix
+        sugarj.bat      Compiler for Windows
+        sugh            Alias of `sugarj -l haskell` for *nix
+        sugh.bat        Alias of `sugarj -l haskell` for Windows
+        sugj            Alias of `sugarj -l java` for *nix
+        sugj.bat        Alias of `sugarj -l java` for Windows
+      case-studies/     Sample SugarJ projects
+      lib/              The back end
+      README.md         This file
+
+Adding `sugarj/bin` to the `PATH` environmental variable of your
+platform will allow invocation of SugarJ scripts without prefixing
+them by a location.
 
 
 Invoking SugarJ
 ---------------
 
-The main class of the compiler is org.sugarj.driver.Driver. You can invoke the
-SugarJ compiler like this:
+Suppose your working directory is `sugarj/`. You can invoke the
+compiler like this on *nix:
 
-    java -Xss64M -Xmx1024M \
-      -cp bin:strategoxt.jar:commons-cli-1.2.jar:commons-collections-3.2.1.jar:make_permissive.jar \
-       org.sugarj.driver.Driver <source_file>
+    bin/sugarj -l java                       \
+      --sourcepath case-studies/closures/src \
+      -d           case-studies/closures/bin \
+      concretesyntax/Test.sugj               # file(s) to compile relative
+                                             # to sourcepath
+
+On Windows:
+
+    bin\sugarj -l java                       ^
+      --sourcepath case-studies/closures/src ^
+      -d           case-studies/closures/bin ^
+      concretesyntax\Test.sugj
+
+The generated `Test.class` may be executed thus:
+
+    java -cp case-studies/closures/bin concretesyntax.Test
 
 
 Compiler options
 ----------------
 
     --atomic-imports         Parse all import statements simultaneously.
-    --buildpath <arg>        Specify where to find compiled files.
-                             Multiple paths can be given separated by ':'.
     --cache <arg>            Specifiy a directory for caching.
-    --cache-info             show where files are cached
+    --cache-info             Show where files are cached
+    -cp,--buildpath <arg>    Specify where to find compiled files. Multiple
+                               paths can be given separated by ':'.
     -d <arg>                 Specify where to place compiled files
-    --full-command-line      show all arguments to subprocesses
-    --gen-java               Generate the resulting Java file in the
-                             source folder.
+    --full-command-line      Show all arguments to subprocesses
+    --gen-files              Generate files?
     --help                   Print this synopsis of options
-    --imports-changed        Declare that the imported modules have
-                             changed since last compilation.
-    --no-checing             Do not check resulting SDF and Stratego
-                             files.
+    -l,--language <arg>      Specify a language library to activate.
+    --no-checking            Do not check resulting SDF and Stratego files.
     --read-only-cache        Specify the cache to be read-only.
-    --silent-execution       try to be silent
+    --silent-execution       Try to be silent
     --sourcepath <arg>       Specify where to find source files. Multiple
-                             paths can be given separated by ':'.
-    --sub-silent-execution   do not display output of subprocesses
-     -v,--verbose            show verbose output
+                               paths can be given separated by ':'.
+    --sub-silent-execution   Do not display output of subprocesses
+    -v,--verbose             Show verbose output
     --write-only-cache       Specify the cache to be write-only.

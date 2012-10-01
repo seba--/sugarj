@@ -18,7 +18,7 @@ import org.sugarj.languagelib.SourceFileContent;
 public class JavaSourceFileContent extends SourceFileContent {
   private static final long serialVersionUID = -3684457648615950708L;
 
-  String packageDecl;
+  String packageDecl = "";
   List<String> imports = new LinkedList<String>();
   List<String> checkedImports = new LinkedList<String>();
   boolean importsOptional;

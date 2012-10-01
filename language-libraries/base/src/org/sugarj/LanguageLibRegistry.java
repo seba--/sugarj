@@ -62,6 +62,10 @@ public class LanguageLibRegistry {
   
   private synchronized void loadExtensions() {
     extensionsLoaded = true;
+
+    if (!Platform.isRunning())
+      return;
+   
     IExtensionRegistry registry = Platform.getExtensionRegistry();
     IExtensionPoint extensionPoint = registry.getExtensionPoint("org.sugarj.language");
     IConfigurationElement[] members = extensionPoint.getConfigurationElements();
