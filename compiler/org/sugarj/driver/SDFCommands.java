@@ -66,7 +66,7 @@ public class SDFCommands {
   /*
    * timeout for parsing files (in milliseconds)
    */
-  public static long PARSE_TIMEOUT = 10000;
+  public static long PARSE_TIMEOUT = 60000;
   
   static {
     try {
