@@ -71,8 +71,16 @@ them by a location.
 Invoking SugarJ
 ---------------
 
-Suppose your working directory is `sugarj/`. You can invoke the
-compiler like this on *nix:
+If the current directory is your working directory containing the source files,
+calling SugarJ is very easy:
+
+    bin/sugarj -l java closures/Test.sugj
+
+The `-l` flag is necessary to specify your host language of choice. Currently,
+we support Haskell, Java, and Prolog.
+
+If your source files are located in `case-studies/closure/src`, you can invoke
+the compiler like this on *nix:
 
     bin/sugarj -l java                       \
       --sourcepath case-studies/closures/src \
