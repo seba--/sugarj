@@ -6,7 +6,7 @@
 # find base directory of sugarj
 # CELEBRATION: No longer dependent on eclipse's location
 sugarj="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
-script="$sugarj/deployment/cli-script"
+script="$sugarj/deployment/cli-scripts"
 common="$sugarj/common/bin"
 compiler="$sugarj/compiler/bin"
 stdlib="$sugarj/stdlib/bin"
