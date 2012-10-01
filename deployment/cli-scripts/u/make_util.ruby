@@ -32,5 +32,3 @@ def shell_try(command)
     exit 1
   end
 end
-
-shell_try "#{$this_dir}/extract.ruby"

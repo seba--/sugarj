@@ -8,4 +8,13 @@ $script = File.dirname($this_dir)
 
 load "#{$this_dir}/make_util.ruby"
 
-shell_try "cd '#{$script}' && cp sugarj '#{$destination}'"
+$stdout.puts "Really overwrite '#{$destination}'? (y/n)"
+$stdout.flush
+if STDIN.gets.chomp == "y"
+  load "#{$this_dir}/extract.ruby"
+
+  shell_try "rm -rf '#{$destination}'"
+
+  shell_try "cd '#{$script}' && cp -r sugarj '#{$destination}'"
+  shell_try "cd '#{$script}' && cp -r cabal/* '#{$destination}'"
+end
