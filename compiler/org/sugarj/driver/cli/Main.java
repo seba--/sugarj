@@ -1,16 +1,10 @@
-/**
- * 
- */
 package org.sugarj.driver.cli;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.strategoxt.tools.main_pack_sdf_0_0;
-import org.sugarj.LanguageLib;
 import org.sugarj.LanguageLibFactory;
 import org.sugarj.LanguageLibRegistry;
 import org.sugarj.common.Environment;
@@ -41,6 +35,7 @@ public class Main {
       
       for (String source : sources) {
         RelativeSourceLocationPath sourceLocation = ModuleSystemCommands.locateSourceFile(source, environment.getSourcePath());
+        
         if (sourceLocation == null) {
           Log.log.logErr("Could not locate source file \"" + source +"\".");
           continue;
