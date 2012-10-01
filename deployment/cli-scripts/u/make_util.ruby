@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
-# cai 13.09.12
-# creates sugarj.jar at ARGV[0]/sugarj.jar
+# cai 01.10.12
+# creates sugarj.zip at ARGV[0]/sugarj.jar
 # which contains classes compiled from sugarj projects
 
 # cai 24.09.12
