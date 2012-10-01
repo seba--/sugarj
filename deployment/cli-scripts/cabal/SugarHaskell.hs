@@ -8,7 +8,6 @@ import Paths_sugarhaskell
 main = do
   args <- getArgs
   lib <- getDataFileName "lib"
-  putStrLn $ show lib
   rawSystem "java" $
     ["-Xss64m", 
      "-Xmx1024m", 
