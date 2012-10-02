@@ -17,8 +17,8 @@ maintainer:          seba at informatik uni-marburg de
 homepage:            http://sugarj.org
 bug-reports:         http://github.com/seba--/sugarj/issues
 category:            Language, Code generation, Source-tools
-
 data-dir:            lib
+extra-source-files:  README.md
 
 executable sugarhaskell
   main-is:       SugarHaskell.hs

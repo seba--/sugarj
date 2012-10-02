@@ -9,8 +9,9 @@ main = do
   args <- getArgs
   lib <- getDataFileName "lib"
   rawSystem "java" $
-    ["-Xss64m", 
+    ["-Xss16m", 
      "-Xmx1024m", 
+     "-XX:MaxPermSize=256m",
      "-cp", 
      lib, 
      "org.sugarj.driver.cli.Main"]

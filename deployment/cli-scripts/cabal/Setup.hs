@@ -1,13 +1,19 @@
-import Distribution.Simple(defaultMainWithHooks, simpleUserHooks, UserHooks(instHook), compilerId)
-import Distribution.Simple.LocalBuildInfo(LocalBuildInfo(compiler,installDirTemplates), substituteInstallDirTemplates)
+import Distribution.Simple(defaultMainWithHooks, simpleUserHooks, UserHooks(instHook,sDistHook), compilerId)
+import Distribution.Simple.LocalBuildInfo(LocalBuildInfo(compiler,installDirTemplates,withPrograms), substituteInstallDirTemplates)
 import Distribution.Simple.InstallDirs(InstallDirs(datadir), absoluteInstallDirs, initialPathTemplateEnv, fromPathTemplate)
-import Distribution.Simple.Setup(InstallFlags)
+import Distribution.Simple.Program ( defaultProgramConfiguration, requireProgram,
+                              rawSystemProgram, tarProgram )
+import Distribution.Simple.Setup(InstallFlags,SDistFlags)
+
+import Distribution.Package
 import Distribution.PackageDescription
 import Distribution.Text (Text(..))
+import Distribution.Verbosity
 
 import System.Directory
 import System.Environment(getArgs)
-import System.FilePath((</>), takeFileName)
+import System.FilePath((</>), (<.>), takeFileName)
+import System.IO(openTempFile, hClose)
 import Control.Applicative((<$>))
 import Control.Exception(throw)
 import Control.Monad(when,forM_)
@@ -15,7 +21,8 @@ import Control.Monad(when,forM_)
 
 main = defaultMainWithHooks hooks
   where
-    hooks = defaultHooks { instHook = installDataDir }
+    hooks = defaultHooks { instHook = installDataDir, sDistHook = tarballAll  }
+
 
 defaultHooks = simpleUserHooks
 
@@ -58,3 +65,40 @@ copyDir src dst = do
 
   where
     whenM s r = s >>= flip when r
+
+
+tarballAll :: PackageDescription -> Maybe LocalBuildInfo -> UserHooks -> SDistFlags -> IO ()
+tarballAll desc minfo _ _ = do
+  putStrLn "Prepare distribution of SugarHaskel..."
+  
+  pwd <- getCurrentDirectory
+  tmpDir <- mkTempDir "sugarhaskell.tar.gz"
+  let tarName = tarBallName desc
+  let sourceDir = tmpDir </> tarName
+  
+  copyDir pwd sourceDir
+      
+  let tarBallDir = pwd </> "dist"
+  createDirectoryIfMissing True tarBallDir
+  let tarBallFilePath = tarBallDir </> tarName <.> "tar.gz"
+  
+  createArchive minfo tmpDir tarName tarBallFilePath
+  
+  where
+    tarBallName = show . disp . packageId
+  
+createArchive minfo contextDir inDir out = do
+  (tarProg, _) <- requireProgram normal tarProgram
+                    (maybe defaultProgramConfiguration withPrograms minfo)
+  rawSystemProgram normal tarProg
+           ["-C", contextDir, "-czf", out, inDir]
+
+mkTempDir :: String -> IO FilePath
+mkTempDir s = do 
+  tmpDir <- getTemporaryDirectory
+  let path = tmpDir </> s
+  (path, handle) <- openTempFile tmpDir s
+  hClose handle  
+  removeFile path
+  createDirectory path
+  return path
