@@ -1,6 +1,6 @@
 name:                sugarhaskell
 version:             0.1
-cabal-version:       >= 1.2
+cabal-version:       >= 1.6
 build-type:          Custom
 license:             GPL
 author:              Sebastian Erdweg
