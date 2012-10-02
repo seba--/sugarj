@@ -26,9 +26,10 @@ $script = File.dirname($this_dir)
 
 def shell_try(command)
   $stderr.puts(command)
-  `#{command}`
+  $v = `#{command}`
   if $?.exitstatus != 0
     $stderr.puts "FAILED: #{command}"
     exit 1
   end
+  return $v
 end
