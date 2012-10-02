@@ -5,8 +5,8 @@ description:         SugarHaskell is a syntactically extensible variant of Haske
                      modules, whose import activates the language extensions at
                      hand. The article "Layout-sensitive Language Extensibility
                      With SugarHaskell" presented at the Haskell Symposium 2012
-                     describes details of SugarHaskell and is available online at:
-                     http://sugarj.org/sugarhaskell.pdf
+                     describes details of SugarHaskell and is available online at
+                     <http://sugarj.org/sugarhaskell.pdf>.
 version:             0.1
 cabal-version:       >= 1.6
 build-type:          Custom
@@ -22,7 +22,7 @@ data-dir:            lib
 
 executable sugarhaskell
   main-is:       SugarHaskell.hs
-  build-depends: base, process
+  build-depends: base >= 4 && < 5, process
 
 source-repository head
   type:     git

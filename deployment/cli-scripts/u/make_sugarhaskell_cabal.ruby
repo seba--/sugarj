@@ -18,5 +18,5 @@ if STDIN.gets.chomp == "y"
   shell_try "cd '#{$script}' && cp -r sugarj '#{$destination}'"
   shell_try "cd '#{$script}' && cp -r cabal/* '#{$destination}'"
 
-#  shell_try "cd '#{$destination}' && cabal sdist"
+  shell_try "cd '#{$destination}' && cabal sdist"
 end
