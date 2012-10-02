@@ -14,4 +14,6 @@ main = do
      "-cp", 
      lib, 
      "org.sugarj.driver.cli.Main"]
+    -- arguments to sugarj from here on
+    ++ ["-l", "haskell"]
     ++ args
