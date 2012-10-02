@@ -15,3 +15,9 @@ data-dir:            lib
 executable sugarhaskell
   main-is:       SugarHaskell.hs
   build-depends: base, process
+
+source-repository head
+  type:     git
+  location: http://github.com/seba--/sugarj
+  subdir:   compiler
+
