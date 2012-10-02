@@ -1,13 +1,21 @@
 name:                sugarhaskell
+synopsis:            Library-based syntactic extensibility for Haskell
+description:         SugarHaskell is a syntactically extensible variant of Haskell.
+                     SugarHaskell organizes language extensions in regular Haskell
+                     modules, whose import activates the language extensions at
+                     hand. The article "Layout-sensitive Language Extensibility
+                     With SugarHaskell" presented at the Haskell Symposium 2012
+                     describes details of SugarHaskell and is available online at:
+                     http://sugarj.org/sugarhaskell.pdf
 version:             0.1
 cabal-version:       >= 1.6
 build-type:          Custom
 license:             GPL
+license-file:        LICENSE
 author:              Sebastian Erdweg
 maintainer:          seba at informatik uni-marburg de
 homepage:            http://sugarj.org
 bug-reports:         http://github.com/seba--/sugarj/issues
-synopsis:            Library-based syntactic extensibility for Haskell
 category:            Language, Code generation, Source-tools
 
 data-dir:            lib
