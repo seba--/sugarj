@@ -1,9 +1,9 @@
 import Distribution.Simple(defaultMainWithHooks, simpleUserHooks, UserHooks(instHook,sDistHook), compilerId)
-import Distribution.Simple.LocalBuildInfo(LocalBuildInfo(compiler,installDirTemplates,withPrograms), substituteInstallDirTemplates)
-import Distribution.Simple.InstallDirs(InstallDirs(datadir), absoluteInstallDirs, initialPathTemplateEnv, fromPathTemplate)
+import Distribution.Simple.LocalBuildInfo(LocalBuildInfo(compiler,installDirTemplates,withPrograms), absoluteInstallDirs)
+import Distribution.Simple.InstallDirs(InstallDirs(..), initialPathTemplateEnv, fromPathTemplate)
 import Distribution.Simple.Program ( defaultProgramConfiguration, requireProgram,
                               rawSystemProgram, tarProgram )
-import Distribution.Simple.Setup(InstallFlags,SDistFlags)
+import Distribution.Simple.Setup(InstallFlags,SDistFlags,CopyDest(..))
 
 import Distribution.Package
 import Distribution.PackageDescription
@@ -30,21 +30,18 @@ installDataDir :: PackageDescription -> LocalBuildInfo -> UserHooks -> InstallFl
 installDataDir desc info hooks flags =
   let origDataDir = dataDir desc
       dirName = takeFileName origDataDir
-      cabalDataDir = fromPathTemplate $ datadir absInstallDirs 
-      packageDataDir = cabalDataDir </> pkgId
-      destDataDir = packageDataDir </> dirName in do
+      destDataDir = cabalDataDir </> dirName in do
+  -- putStrLn $ "desc: " ++ show desc  
+  -- putStrLn $ "info: " ++ show info
+  -- putStrLn $ "flags: " ++ show flags
+  
   putStrLn $ "Installing SugarHaskell dependencies to " ++ destDataDir ++ " ..."
   copyDir origDataDir destDataDir
   instHook defaultHooks desc info hooks flags
   
   where 
-    pkg = package desc
-    pkgId = show $ disp $ pkg
-    comp = compilerId $ compiler info
-     
-    env = initialPathTemplateEnv pkg comp
-    installDirs = installDirTemplates info
-    absInstallDirs = substituteInstallDirTemplates env installDirs
+    absInstallDirs = absoluteInstallDirs desc info NoCopyDest
+    InstallDirs {datadir = cabalDataDir} = absInstallDirs
 
 -- copied from http://stackoverflow.com/questions/6807025/what-is-the-haskell-way-to-copy-a-directory
 copyDir ::  FilePath -> FilePath -> IO ()
