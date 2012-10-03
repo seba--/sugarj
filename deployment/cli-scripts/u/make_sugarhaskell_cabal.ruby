@@ -17,6 +17,7 @@ if STDIN.gets.chomp == "y"
 
   shell_try "cd '#{$script}' && cp -r sugarj '#{$destination}'"
   shell_try "cd '#{$script}' && cp -r cabal/* '#{$destination}'"
+  shell_try "cd '#{$script}' && rm -rf '#{$destination}'/bin"
 
   shell_try "cd '#{$destination}' && ghc -o Setup Setup.hs"
   shell_try "cd '#{$destination}' && ./Setup configure"
