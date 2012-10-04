@@ -463,7 +463,7 @@ public class DriverCLI {
         "v", 
         "verbose", 
         true, 
-        "Verbosity. Separate options with '-' CORE, PARSE, TRANSFORM, IMPORT, LANGLIB, CACHING, DETAIL, DEBUG");
+        "Verbosity. Values are CORE, PARSE, TRANSFORM, IMPORT, LANGLIB, CACHING, DETAIL, and DEBUG. Use multiple times to activate verbosity for multiple features.");
   
     options.addOption(
         null, 
