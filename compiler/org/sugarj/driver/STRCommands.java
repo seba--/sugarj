@@ -146,7 +146,8 @@ public class STRCommands {
       } catch (StrategoException e) {
         prog = new AbsolutePath("error: " +e.getMessage());
       } finally {
-        cacheAssimilator(strCache, key, prog, environment);
+        if (prog != null)
+          cacheAssimilator(strCache, key, prog, environment);
       }
     }
     
