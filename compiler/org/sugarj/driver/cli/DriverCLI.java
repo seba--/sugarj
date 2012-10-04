@@ -371,7 +371,9 @@ public class DriverCLI {
     if (line.hasOption("verbose")) {
       int level = 0;
       for (String option : line.getOptionValues("verbose"))
-        if ("CORE".equals(option))
+        if ("SILENT".equals(option))
+          ;
+        else if ("CORE".equals(option))
           level |= Log.CORE;
         else if ("PARSE".equals(option))
           level |= Log.PARSE;
@@ -463,7 +465,7 @@ public class DriverCLI {
         "v", 
         "verbose", 
         true, 
-        "Verbosity. Values are CORE, PARSE, TRANSFORM, IMPORT, LANGLIB, CACHING, DETAIL, and DEBUG. Use multiple times to activate verbosity for multiple features.");
+        "Verbosity. Values are SILENT, CORE, PARSE, TRANSFORM, IMPORT, LANGLIB, CACHING, DETAIL, and DEBUG. Use multiple times to activate verbosity for multiple features.");
   
     options.addOption(
         null, 

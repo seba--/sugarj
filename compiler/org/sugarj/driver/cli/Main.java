@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.sugarj.LanguageLibFactory;
 import org.sugarj.LanguageLibRegistry;
 import org.sugarj.common.Environment;
@@ -16,7 +17,6 @@ import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.common.path.SourceLocation;
 import org.sugarj.driver.Driver;
 import org.sugarj.driver.ModuleSystemCommands;
-import org.sugarj.driver.PrintProgressMonitor;
 import org.sugarj.driver.Result;
 
 /**
@@ -44,7 +44,7 @@ public class Main {
         allInputFiles.add(sourceLocation);
       }
       
-      IProgressMonitor monitor = new PrintProgressMonitor(System.out);
+      IProgressMonitor monitor = new NullProgressMonitor();
       
       for (final RelativeSourceLocationPath sourceFile : allInputFiles) {
         LanguageLibFactory lang = LanguageLibRegistry.getInstance().getLanguageLib(FileCommands.getExtension(sourceFile));
