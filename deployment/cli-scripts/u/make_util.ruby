@@ -1,7 +1,11 @@
 #!/usr/bin/ruby
-# cai 01.10.12
-# creates sugarj.zip at ARGV[0]/sugarj.jar
-# which contains classes compiled from sugarj projects
+# cai 04.10.12
+# utility script that provides:
+# 1. the global variable $destination, an absolute path,
+#    as the only argument from the command line.
+# 2. the function shell_try, which launches a command-line
+#    utility and aborts if it signals failure by exiting
+#    with a non-zero code.
 
 # cai 24.09.12
 # ALWAYS PRINT STUFF THROUGH $stderr
@@ -18,7 +22,7 @@ if ARGV.length != 1
   $stderr.puts("Usage: #{__FILE__} <destination directory>")
   exit 255
 else
-  $destination = ARGV.first
+  $destination = File.expand_path(ARGV.first)
 end
 
 $this_dir  = File.expand_path(File.dirname(__FILE__))
