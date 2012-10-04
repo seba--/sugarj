@@ -17,7 +17,6 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.spoofax.interpreter.core.Tools;
-import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -209,8 +208,6 @@ public class DriverCLI {
   }
 
   
-  private static final IStrategoConstructor ambCons = Environment.getTermFactory().makeConstructor("amb", 1);
-  
     /**
      * Report recoverable errors (e.g., inserted brackets).
      * 
@@ -221,7 +218,7 @@ public class DriverCLI {
       IStrategoTerm ambStart;
       
       public void preVisit(IStrategoTerm term) {
-        if (ambStart == null && ambCons == tryGetConstructor(term)) {
+        if (ambStart == null && Environment.getTermFactory().makeConstructor("amb", 1) == tryGetConstructor(term)) {
           reportAmbiguity(term, errors);
           ambStart = term;
         }
@@ -372,14 +369,27 @@ public class DriverCLI {
       throw new CLIError("help requested", options);
   
     if (line.hasOption("verbose")) {
-      CommandExecution.SILENT_EXECUTION = false;
-      CommandExecution.SUB_SILENT_EXECUTION = false;
-      CommandExecution.FULL_COMMAND_LINE = true;
-    } 
-    else {
-      CommandExecution.SILENT_EXECUTION = true;
-      CommandExecution.SUB_SILENT_EXECUTION = true;
-      CommandExecution.FULL_COMMAND_LINE = false;
+      int level = 0;
+      for (String option : line.getOptionValues("verbose"))
+        if ("CORE".equals(option))
+          level |= Log.CORE;
+        else if ("PARSE".equals(option))
+          level |= Log.PARSE;
+        else if ("TRANSFORM".equals(option))
+          level |= Log.TRANSFORM;
+        else if ("IMPORT".equals(option))
+          level |= Log.IMPORT;
+        else if ("LANGLIB".equals(option))
+          level |= Log.LANGLIB;
+        else if ("CACHING".equals(option))
+          level |= Log.CACHING;
+        else if ("DETAIL".equals(option))
+          level |= Log.DETAIL;
+        else if ("DEBUG".equals(option))
+          level |= Log.ALWAYS;
+        else 
+          throw new CLIError("Unknown verbosity level " + option, options);
+      Log.log.setLoggingLevel(level);
     }
   
     if (line.hasOption("silent-execution"))
@@ -452,8 +462,8 @@ public class DriverCLI {
     options.addOption(
         "v", 
         "verbose", 
-        false, 
-        "Show verbose output");
+        true, 
+        "Verbosity. Separate options with '-' CORE, PARSE, TRANSFORM, IMPORT, LANGLIB, CACHING, DETAIL, DEBUG");
   
     options.addOption(
         null, 
