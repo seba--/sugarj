@@ -5,4 +5,4 @@ import Launch
 main = do
   args <- getArgs
   lib <- getDataFileName "lib"
-  launch lib ("-l" : "haskell" : args)
+  launch lib ("-l" : "java" : args)

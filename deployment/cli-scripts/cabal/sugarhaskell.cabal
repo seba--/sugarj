@@ -24,6 +24,10 @@ executable sugarhaskell
   main-is:       SugarHaskell.hs
   build-depends: base >= 4 && < 5, process
 
+executable sugarj
+  main-is:       SugarJ.hs
+  build-depends: base >= 4 && < 5, process
+
 source-repository head
   type:     git
   location: http://github.com/seba--/sugarj
