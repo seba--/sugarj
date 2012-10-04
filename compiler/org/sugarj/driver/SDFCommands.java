@@ -39,7 +39,6 @@ import org.strategoxt.strc.pp_stratego_string_0_0;
 import org.strategoxt.tools.main_pack_sdf_0_0;
 import org.sugarj.LanguageLib;
 import org.sugarj.common.ATermCommands;
-import org.sugarj.common.CommandExecution;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.Log;
@@ -71,7 +70,7 @@ public class SDFCommands {
   static {
     try {
       PARSE_TIMEOUT = Long.parseLong(System.getProperty("org.sugarj.parse_timeout"));
-      Log.log.log("set parse timeout to " + PARSE_TIMEOUT);
+      Log.log.log("set parse timeout to " + PARSE_TIMEOUT, Log.PARSE);
     } catch (Exception e) {
     }
   }
@@ -200,7 +199,7 @@ public class SDFCommands {
     }
     
     if (tbl != null)
-      log.log("use generated table " + tbl);
+      log.log("use generated table " + tbl, Log.CACHING);
     
     return tbl;
   }
@@ -210,7 +209,7 @@ public class SDFCommands {
     if (sdfCache == null)
       return;
     
-    log.beginTask("Caching", "Cache parse table");
+    log.beginTask("Caching", "Cache parse table", Log.CACHING);
     try {
       Path cacheTbl = environment.createCachePath(tbl.getFile().getName());
       FileCommands.copyFile(tbl, cacheTbl);
@@ -218,8 +217,7 @@ public class SDFCommands {
       Path oldTbl = sdfCache.putGet(key, cacheTbl);
       FileCommands.delete(oldTbl);
 
-      if (CommandExecution.CACHE_INFO)
-        log.log("Cache Location: " + cacheTbl);
+      log.log("Cache Location: " + cacheTbl, Log.CACHING);
     } finally {
       log.endTask();
     }
@@ -231,18 +229,16 @@ public class SDFCommands {
     
     Path result = null;
     
-    log.beginTask("Searching", "Search parse table in cache");
+    log.beginTask("Searching", "Search parse table in cache", Log.CACHING);
     try {
       result = sdfCache.get(key);
       
       if (result == null || !result.getFile().exists()) {
-        System.out.println("\nDidn't find " + result);
         result = null;
         return null;
       }
 
-      if (CommandExecution.CACHE_INFO)
-        log.log("Cache location: '" + result + "'");
+      log.log("Cache location: '" + result + "'", Log.CACHING);
       
       return result;
     } finally {
@@ -251,7 +247,7 @@ public class SDFCommands {
   }
   
   private static ModuleKey getModuleKeyForGrammar(Path sdf, String module, Collection<Path> dependentFiles, SGLR parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
-    log.beginTask("Generating", "Generate module key for current grammar");
+    log.beginTask("Generating", "Generate module key for current grammar", Log.CACHING);
     try {
       IStrategoTerm aterm = (IStrategoTerm) parser.parse(FileCommands.readFileAsString(sdf), sdf.getAbsolutePath(), "Sdf2Module");
 
@@ -280,7 +276,7 @@ public class SDFCommands {
                                          Collection<Path> paths,
                                          LanguageLib langLib)
       throws IOException, InvalidParseTableException {
-    log.beginTask("Generating", "Generate the parse table");
+    log.beginTask("Generating", "Generate the parse table", Log.PARSE);
     try {
       Path tblFile = null;
       
@@ -310,7 +306,7 @@ public class SDFCommands {
   }
   
   private static void makePermissive(Path def, Path permissiveDef, Context context) throws IOException {
-    log.beginExecution("make permissive", "-i", def.getAbsolutePath(), "-o", permissiveDef.getAbsolutePath());
+    log.beginExecution("make permissive", Log.PARSE, "-i", def.getAbsolutePath(), "-o", permissiveDef.getAbsolutePath());
     try {
       make_permissive.mainNoExit(context, "-i", def.getAbsolutePath(), "-o", permissiveDef.getAbsolutePath());
     }
@@ -373,7 +369,7 @@ public class SDFCommands {
   }
   
   private static Pair<SGLR, IStrategoTerm> parseImplode(ParseTable table, Path tbl, String source, String start, boolean useRecovery, ITreeBuilder treeBuilder) throws IOException, SGLRException {
-    log.beginExecution("parsing");
+    log.beginExecution("parsing", Log.PARSE);
 
     Pair<SGLR, IStrategoTerm> result = null;
     try {

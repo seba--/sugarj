@@ -98,7 +98,7 @@ public class CommandExecution {
         while ((line = reader.readLine()) != null) {
           msg.add(prefix + line);
           if (!silent)
-            log.logErr(prefix + line);
+            log.logErr(prefix + line, Log.ALWAYS);
         }
       } catch (IOException ioe) {
         ioe.printStackTrace();

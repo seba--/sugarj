@@ -79,17 +79,15 @@ public class DriverCLI {
   }
   
   public static boolean processResultCLI(Result res, Path file, String project) throws IOException {
-    log.log("");
-
     if (res == null) {
-      log.log("compilation failed, result is null");
+      log.log("compilation failed", Log.ALWAYS);
       return false;
     }
     
     boolean success = res.getCollectedErrors().isEmpty();
     
     for (BadTokenException e : res.getParseErrors())
-      log.log("syntax error: line " + e.getLineNumber() + " column " + e.getColumnNumber() + ": " + e.getMessage());
+      log.log("syntax error: line " + e.getLineNumber() + " column " + e.getColumnNumber() + ": " + e.getMessage(), Log.ALWAYS);
     
     if (res.getSugaredSyntaxTree() == null)
       return false;
@@ -106,7 +104,7 @@ public class DriverCLI {
     success &= errors.isEmpty();
     
     for (Error error : errors)
-      log.log("error: line " + error.lineStart + " column " + error.columnStart + " to line " + error.lineEnd + " column " + error.columEnd + ":\n  " + error.msg);
+      log.log("error: line " + error.lineStart + " column " + error.columnStart + " to line " + error.lineEnd + " column " + error.columEnd + ":\n  " + error.msg, Log.ALWAYS);
 
     
     IStrategoTerm errorTree = STRCommands.assimilate("sugarj-analyze", res.getDesugaringsFile(), tuple, new HybridInterpreter());
@@ -159,9 +157,9 @@ public class DriverCLI {
       right = left;
     
     if (left == null || right == null)
-      log.log("error: " + msg + "\n  in tree " + ATermCommands.atermToFile(term));
+      log.log("error: " + msg + "\n  in tree " + ATermCommands.atermToFile(term), Log.ALWAYS);
     else
-      log.log("error: line " + left.getLine() + " column " + left.getColumn() + " to line " + right.getLine() + " column " + right.getColumn() + ":\n  " + msg);
+      log.log("error: line " + left.getLine() + " column " + left.getColumn() + " to line " + right.getLine() + " column " + right.getColumn() + ":\n  " + msg, Log.ALWAYS);
   }
   
   
@@ -370,15 +368,18 @@ public class DriverCLI {
   }
 
   private static String[] processOptions(Options options, CommandLine line, org.sugarj.common.Environment environment) throws org.apache.commons.cli.ParseException {
-    if (line.hasOption("help")) {
-      // TODO This is not exactly an error ...
+    if (line.hasOption("help"))
       throw new CLIError("help requested", options);
-    }
   
     if (line.hasOption("verbose")) {
       CommandExecution.SILENT_EXECUTION = false;
       CommandExecution.SUB_SILENT_EXECUTION = false;
       CommandExecution.FULL_COMMAND_LINE = true;
+    } 
+    else {
+      CommandExecution.SILENT_EXECUTION = true;
+      CommandExecution.SUB_SILENT_EXECUTION = true;
+      CommandExecution.FULL_COMMAND_LINE = false;
     }
   
     if (line.hasOption("silent-execution"))
@@ -435,7 +436,7 @@ public class DriverCLI {
         Class<?> cl = DriverCLI.class.getClassLoader().loadClass(clName);
         cl.newInstance();
       } catch (Exception e) {
-        Log.log.logErr("Could not load language plugin " + libName + ": " + e.getMessage());
+        Log.log.logErr("Could not load language plugin " + libName + ": " + e.getMessage(), Log.ALWAYS);
       }
     }
   }

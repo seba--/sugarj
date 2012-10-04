@@ -37,7 +37,7 @@ public class Main {
         RelativeSourceLocationPath sourceLocation = ModuleSystemCommands.locateSourceFile(source, environment.getSourcePath());
         
         if (sourceLocation == null) {
-          Log.log.logErr("Could not locate source file \"" + source +"\".");
+          Log.log.logErr("Could not locate source file \"" + source +"\".", Log.ALWAYS);
           continue;
         }
 
@@ -60,8 +60,8 @@ public class Main {
     } catch (Exception e) {
       e.printStackTrace();
     } catch (CLIError e) {
-      Log.log.log(e.getMessage());
-      Log.log.log("");
+      Log.log.log(e.getMessage(), Log.ALWAYS);
+      Log.log.log("", Log.ALWAYS);
       e.showUsage();
     }
     

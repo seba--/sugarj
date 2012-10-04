@@ -314,7 +314,7 @@ public class HaskellLib extends LanguageLib {
     try {
        msg = new CommandExecution(true).execute(cmds);
     } catch (ExecutionError e) {
-      Log.log.logErr("Command execution failed: " + Arrays.toString(e.getCmds()));
+      Log.log.logErr("Command execution failed: " + Arrays.toString(e.getCmds()), Log.ALWAYS);
       return false;
     } finally {
       CommandExecution.SILENT_EXECUTION = oldSilent;

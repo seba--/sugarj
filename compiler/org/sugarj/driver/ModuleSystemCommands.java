@@ -15,6 +15,7 @@ import org.sugarj.LanguageLib;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
+import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
@@ -65,7 +66,7 @@ public class ModuleSystemCommands {
     if (sdf == null)
       return null;
     
-    log.log("Found syntax definition for " + modulePath);
+    log.log("Found syntax definition for " + modulePath, Log.IMPORT);
     return sdf;
   }
   
@@ -89,7 +90,7 @@ public class ModuleSystemCommands {
     if (str == null)
       return null;
 
-    log.log("Found desugaring for " + modulePath);
+    log.log("Found desugaring for " + modulePath, Log.IMPORT);
     return str;
   }
   
@@ -111,9 +112,11 @@ public class ModuleSystemCommands {
     if (serv == null)
       return false;
     
-    log.beginTask("Incorporation", "Incorporate the imported editor services " + modulePath);
+    BufferedReader reader = null;
+    
+    log.beginTask("Incorporation", "Incorporate the imported editor services " + modulePath, Log.IMPORT);
     try {
-      BufferedReader reader = new BufferedReader(new FileReader(serv.getFile()));
+      reader = new BufferedReader(new FileReader(serv.getFile()));
       String line;
       
       while ((line = reader.readLine()) != null)
@@ -121,6 +124,9 @@ public class ModuleSystemCommands {
       
       return true;
     } finally {
+      if (reader != null)
+        reader.close();
+      
       log.endTask();
     }
   }
@@ -210,12 +216,19 @@ public class ModuleSystemCommands {
     if (p.getFile().exists())
       return p;
     
+    URLClassLoader cl = null;
     try {
-      ClassLoader cl = new URLClassLoader(new URL[] {base.getFile().toURI().toURL()}, null);
+      cl = new URLClassLoader(new URL[] {base.getFile().toURI().toURL()}, null);
       if (cl.getResource(relativePath + "." + extension) != null)
         return new RelativePath(base, relativePath + "." + extension);
     } catch (MalformedURLException e) {
       e.printStackTrace();
+    } finally {
+      if (cl != null)
+        try {
+          cl.close();
+        } catch (IOException e) {
+        }
     }
     
     return null;

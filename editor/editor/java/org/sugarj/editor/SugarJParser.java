@@ -242,7 +242,6 @@ public class SugarJParser extends JSGLRI {
     try {
       table = ATermCommands.parseTableManager.loadFromFile(result.getParseTable().getAbsolutePath());
     } catch (InvalidParseTableException e) {
-      Log.log.logErr(e.getMessage());
       return null;
     }
     SGLR parser = new SGLR(treeBuilder, table);
