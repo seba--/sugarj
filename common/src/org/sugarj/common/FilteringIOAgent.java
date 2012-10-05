@@ -19,10 +19,20 @@ public class FilteringIOAgent extends IOAgent {
    */
   private List<Pattern> excludePatterns;
   
+  /**
+   * Always log messages if the active logging level matches `includeLogLevel`.
+   */
+  private int includeLogLevel;
+  
   private final Writer outWriter = new FilteringWriter(super.getWriter(CONST_STDOUT));
   private final Writer errWriter = new FilteringWriter(super.getWriter(CONST_STDERR));
   
   public FilteringIOAgent(String... regexs) {
+    this(Log.NONE, regexs);
+  }
+  
+  public FilteringIOAgent(int level, String... regexs) {
+    includeLogLevel = level;
     excludePatterns = new LinkedList<Pattern>();
     for (String regex : regexs)
       addExcludePattern(regex);
@@ -53,28 +63,39 @@ public class FilteringIOAgent extends IOAgent {
     
     private final Writer writer;
     private boolean skip;
+    private String msg;
     
     public FilteringWriter(Writer writer) {
       this.writer = writer;
       this.skip = false;
+      this.msg = new String();
     }
     
     @Override
     public void write(char[] cbuf, int off, int len) throws IOException {
       String s = new String(cbuf, off, len);
-
+      msg += s;
       if (skip) {
         skip = !s.endsWith("\n");
+        pushMessageToLog();
         return;
       }
       
       for (Pattern pat: excludePatterns)
         if (pat.matcher(s).matches()) {
           skip = !s.endsWith("\n");
+          pushMessageToLog();
           return;
         }
       
       writer.write(cbuf, off, len);
+    }
+    
+    private void pushMessageToLog() {
+      if (msg.endsWith("\n")) {
+        Log.log.log(msg.substring(0, msg.length() - 2), includeLogLevel);
+        msg = new String();
+      }
     }
 
     @Override

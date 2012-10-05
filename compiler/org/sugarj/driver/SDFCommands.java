@@ -75,8 +75,8 @@ public class SDFCommands {
     }
   }
   
-  private static IOAgent packSdfIOAgent = new FilteringIOAgent("  including .*");
-  private static IOAgent sdf2tableIOAgent = new FilteringIOAgent("Invoking native tool .*");
+  private static IOAgent packSdfIOAgent = new FilteringIOAgent(Log.PARSE | Log.DETAIL, "  including .*");
+  private static IOAgent sdf2tableIOAgent = new FilteringIOAgent(Log.PARSE | Log.DETAIL, "Invoking native tool .*");
   
   // cai 27.09.12
   // convert path-separator to that of the OS
