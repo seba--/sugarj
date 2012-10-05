@@ -34,24 +34,19 @@
         <h2>News</h2>
 
 <ul>
+<li>Support for <a href="https://groups.google.com/d/msg/sugarj/Ip9lPTx9daU/JdFVg59j9GgJ">multilingual syntactic extensibility</a> integrated into master branch and available as Eclipse update. Currently supported languages: Java, Haskell, Prolog.</li>
 <li><a href="http://sugarj.org/sugarhaskell.pdf">SugarHaskell paper</a> accepted at Haskell Symposium 2012</li>
 <li><a href="http://groups.google.com/group/sugarj">SugarJ Google group</a>: Discuss and stay up-to-date</li>
-<li>Syntactic extensibility for Haskell: SugarHaskell is up and running.<br/>
+<li><a href="https://groups.google.com/d/msg/sugarj/Txx0CRaOHTw/cNaFyPsr0t8J">Syntactic extensibility for Haskell</a>: SugarHaskell is up and running.<br/>
     Install it from our <a href="http://update.sugarj.org/"> Eclipse update site</a>, including IDE support and layout-sensitive parsing.</li>
 <li>What does language composition really mean?
 Paper at LDTA 2012
 [ <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications.html#ErdwegGR12">abstract</a>
 | <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications/languagecomposition.pdf">.pdf</a> ]</li>
-<li>SugarJ now on github: <a href="http://github.com/seba&#45;&#45;/sugarj">http://github.com/seba&#45;&#45;/sugarj</a>
-</li>
-<li>Tool demonstration and poster on SugarJ at SPLASH 2011</li>
-<li>Paper Growing a Language Environment with Editor Libraries at GPCE 2011
-[ <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications.html#ErdwegKRKOV11">abstract</a>
-| <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications/editorlibs.pdf">.pdf</a> ]</li>
-<li>Paper SugarJ: Library-based Syntactic Language Extensibility at OOPSLA 2011
-[ <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications.html#ErdwegRKO11">abstract</a>
-| <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications/sugarj.pdf">.pdf</a> ]</li>
-</ul><h2>Description</h2>
+</ul>
+
+
+<h2>Description</h2>
 
 <p>In essence, the goal of SugarJ is to enable expressing programms in the syntax most natural to the problem domain the program is supposed to address. For instance, when generating XML documents in Java, the programmer should be able to use standard XML syntax instead of Java syntax for calling JDOM, say.</p>
 
@@ -63,25 +58,39 @@ Paper at LDTA 2012
 
 <h2>Installation and Usage</h2>
 
-<p>Please also take a look at <a href="first-steps.html">first steps with SugarJ</a>.</p>
+<em>
+Please ensure enough stack space (about 4-16 MB) is available for
+the SDF parser. You can set the stack space of your Java runtime using the
+-Xss16m command line argument when starting Eclipse or setting -Xss16m in your
+eclipse.ini file.
+</em>
 
-<p>For a quick start, install our Eclipse plugin available at <a href="http://update.sugarj.org/">http://update.sugarj.org/</a>.
-The source code of all components of SugarJ is available on github at <a href="http://github.com/seba&#45;&#45;/sugarj">http://github.com/seba&#45;&#45;/sugarj</a>:<br/>
-<a href="http://github.com/seba&#45;&#45;/sugarj/tree/master/test-workspace">case studies</a>,
+<p>For a quick start, install our Eclipse plugin available at 
+<a href="http://update.sugarj.org/">http://update.sugarj.org/</a>.
+The update dialog will let you select any number of our currently supported
+host languages: Java (*.sugj), Haskell (*.shs), Prolog (*.sugp).
+</p>
+
+<p>The source code of all components of SugarJ is available on <a href="http://github.com/seba&#45;&#45;/sugarj">github</a>.<br/>
+<a href="http://github.com/seba&#45;&#45;/sugarj/tree/master/case-studies">case studies</a>,
 <a href="http://github.com/seba&#45;&#45;/sugarj/tree/master/compiler">compiler</a>,
-<a href="http://github.com/seba&#45;&#45;/sugarj/tree/master/editor">IDE</a>.</p>
+<a href="http://github.com/seba&#45;&#45;/sugarj/tree/master/editor">IDE</a>,
+<a href="http://github.com/seba&#45;&#45;/sugarj/tree/master/language-libraries">language libraries</a>.
+</p>
+
+<p>We also prepared some information on <a href="first-steps.html">first steps with SugarJ</a>.</p>
 
 <h3>Subprojects</h3>
 
 We are currently developing a number of extensions of SugarJ. The relevant code can be found as follows:
 
 <ul>
-<li>SugarHaskell: in branch <a href="http://github.com/seba--/sugarj/tree/haskell">haskell</a> with case studies
-    located in <a href="http://github.com/seba--/sugarj/tree/haskell/test-workspace/haskell">/test-workspace/haskell</a>, file extension is ".shs"</li>
+<li>SugarHaskell: integrated into <a href="http://github.com/seba--/sugarj/tree/master">master branch</a> with case studies
+    located in <a href="http://github.com/seba--/sugarj/tree/master/case-studies/haskell">/case-studies/haskell</a>, file extension is ".shs"</li>
 <li>Layout-sensitive parsing: in repository <a href="http://github.com/seba--/layout-parsing/">layout-parsing</a></li>
-<li>Model-oriented programming: in branch <a href="http://github.com/seba--/sugarj/tree/model-driven">model-driven</a></li>
+<li><a href="jpromo/index.html">Model-oriented programming</a>: in branch <a href="http://github.com/seba--/sugarj/tree/jpromo">jpromo</a></li>
 <li>Incremental introduction of DSLs for software maintenance: <a href="http://github.com/seba--/sugarj/tree/master/test-workspace/java-pet-store">Java Pet Store case study</a></li>
-<li>Language extensibility for any language: in <a href="http://github.com/frieger/sugarj">frieger's sugarj fork</a></li>
+<li>Language extensibility for any language: was in <a href="http://github.com/frieger/sugarj">frieger's sugarj fork</a>, now integrated into the SugarJ <a href="http://github.com/seba--/sugarj/tree/master">master branch</a></li>
 </ul>
 
 

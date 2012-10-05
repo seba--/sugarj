@@ -32,6 +32,16 @@
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
 
+<br/>
+
+<em>
+Please ensure enough stack space (about 4-16 MB) is available for
+the SDF parser. You can set the stack space of your Java runtime using the
+-Xss16m command line argument when starting Eclipse or setting -Xss16m in your
+eclipse.ini file.
+</em>
+
+
 <h2>First steps with SugarJ</h2>
 
 We collected a few guidelines to get you started with SugarJ more easily.
@@ -40,7 +50,7 @@ We collected a few guidelines to get you started with SugarJ more easily.
 
 A great way of getting to know SugarJ is to look at existing case studies. We made
 all of our case studies available online as open source. You can find them in
-our <a href="https://github.com/seba--/sugarj/tree/master/test-workspace">github
+our <a href="https://github.com/seba--/sugarj/tree/master/case-studies">github
 repository</a>.
 
 <h3>Setting up a SugarJ project</h3>
@@ -71,16 +81,12 @@ project. For the meantime, please follow these three steps:
 <li>In Eclipse, select 'Install New Software' in the 'Help' menu.</li>
 <li>In the 'work with' field, copy the SugarJ update site <a
 href="http://update.sugarj.org">http://update.sugarj.org</a> and hit enter.</li>
-<li> Be sure to deselect the 'Group items by category' checkbox on the bottom of
-the window.</li> <li>Select the latest instance of Sugarclipse and click
-continue. This will install the SugarJ compiler and Eclipse plugin.</li>
+<li>Be sure to deselect the 'Group items by category' checkbox on the bottom of
+the window.</li>
+<li>The update dialog will let you select any number of our currently supported
+host languages: Java (*.sugj), Haskell (*.shs), Prolog (*.sugp).</li>
 </ol>
 
-
-In addition, please ensure enough stack space (about 4-16 MB) is available for
-the SDF parser. You can set the stack space of your Java runtime using the
--Xss16m command line argument when starting Eclipse or setting -Xss16m in your
-eclipse.ini file.
 
       </section>
     </div>
