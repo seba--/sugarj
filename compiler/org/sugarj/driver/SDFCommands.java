@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
+import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr_layout.client.ITreeBuilder;
 import org.spoofax.jsglr_layout.client.InvalidParseTableException;
@@ -34,13 +35,13 @@ import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.permissivegrammars.make_permissive;
 import org.strategoxt.stratego_sdf.pp_sdf_string_0_0;
-import org.strategoxt.stratego_xtc.stratego_xtc;
 import org.strategoxt.strc.pp_stratego_string_0_0;
 import org.strategoxt.tools.main_pack_sdf_0_0;
 import org.sugarj.LanguageLib;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
+import org.sugarj.common.FilteringIOAgent;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.driver.caching.ModuleKey;
@@ -66,7 +67,6 @@ public class SDFCommands {
    * timeout for parsing files (in milliseconds)
    */
   public static long PARSE_TIMEOUT = 60000;
-  
   static {
     try {
       PARSE_TIMEOUT = Long.parseLong(System.getProperty("org.sugarj.parse_timeout"));
@@ -74,6 +74,9 @@ public class SDFCommands {
     } catch (Exception e) {
     }
   }
+  
+  private static IOAgent packSdfIOAgent = new FilteringIOAgent("  including .*");
+  private static IOAgent sdf2tableIOAgent = new FilteringIOAgent("Invoking native tool .*");
   
   // cai 27.09.12
   // convert path-separator to that of the OS
@@ -83,12 +86,10 @@ public class SDFCommands {
   }
   
   private static void packSdf(Path sdf, Path def, Context sdfContext, Collection<Path> paths, LanguageLib langLib) throws IOException {
-    
     /*
      * We can include as many paths as we want here, checking the
      * adequacy of the occurring imports is done elsewhere.
      */
-    
     List<String> cmd = new ArrayList<String>(Arrays.asList(new String[]{
         "-i", nativePath(sdf.getAbsolutePath()),
         "-o", nativePath(def.getAbsolutePath())
@@ -104,14 +105,14 @@ public class SDFCommands {
     cmd.add("-I");
     cmd.add(nativePath(StdLib.stdLibDir.getPath()));
     
-   
     for (Path path : paths) 
-      if (path.getFile().isDirectory()){
+      if (path.getFile().isDirectory()) {
         cmd.add("-I");
         cmd.add(nativePath(path.getAbsolutePath()));
-        
       }
+    
     try {
+      sdfContext.setIOAgent(packSdfIOAgent);
       sdfContext.invokeStrategyCLI(main_pack_sdf_0_0.instance, "pack-sdf", cmd.toArray(new String[cmd.size()]));
     } catch(StrategoExit e) {
       if (e.getValue() != 0) {
@@ -123,11 +124,11 @@ public class SDFCommands {
       throw new RuntimeException("execution of pack-sdf failed");
   }
   
-  private static void sdf2Table(Path def, Path tbl, String module) throws IOException {
-    sdf2Table(def, tbl, module, false);
+  private static void sdf2Table(Path def, Path tbl, String module, Context xtcContext) throws IOException {
+    sdf2Table(def, tbl, module, xtcContext, false);
   }
   
-  private static void sdf2Table(Path def, Path tbl, String module, boolean normalize) throws IOException {
+  private static void sdf2Table(Path def, Path tbl, String module, Context xtcContext, boolean normalize) throws IOException {
     String[] cmd; 
     
     if (!normalize)
@@ -148,24 +149,24 @@ public class SDFCommands {
     for (int i = 0; i < termArgs.length; i++)
       termArgs[i] = ATermCommands.makeString(cmd[i], null);
     
-    Context context = stratego_xtc.init();
+    xtcContext.setIOAgent(sdf2tableIOAgent);
     SDFBundleCommand.getInstance().init();
-    SDFBundleCommand.getInstance().invoke(context, "sdf2table", termArgs);
+    SDFBundleCommand.getInstance().invoke(xtcContext, "sdf2table", termArgs);
     
     if (!tbl.getFile().exists())
       throw new RuntimeException("execution of sdf2table failed");
   }
 
-  private static void normalizeTable(Path def, String module) throws IOException {
+  private static void normalizeTable(Path def, String module, Context xtcContext) throws IOException {
     Path tbl = FileCommands.newTempFile("tbl");
-    sdf2Table(def, tbl, module, true);
+    sdf2Table(def, tbl, module, xtcContext, true);
     FileCommands.deleteTempFiles(tbl);
   }
   
-  public static void check(Path sdf, String module, Context sdfContext, Collection<Path> paths, LanguageLib langLib) throws IOException {
+  public static void check(Path sdf, String module, Context sdfContext, Context xtcContext, Collection<Path> paths, LanguageLib langLib) throws IOException {
     Path def = FileCommands.newTempFile("def");
     packSdf(sdf, def, sdfContext, paths, langLib);
-    normalizeTable(def, module);
+    normalizeTable(def, module, xtcContext);
     FileCommands.deleteTempFiles(def);
   }
   
@@ -183,7 +184,8 @@ public class SDFCommands {
                               Collection<Path> dependentFiles, 
                               SGLR sdfParser, 
                               Context sdfContext, 
-                              Context makePermissiveContext, 
+                              Context makePermissiveContext,
+                              Context xtcContext,
                               ModuleKeyCache<Path> sdfCache, 
                               Environment environment,
                               LanguageLib langLib) throws IOException,
@@ -194,7 +196,7 @@ public class SDFCommands {
     ModuleKey key = getModuleKeyForGrammar(sdf, module, dependentFiles, sdfParser);
     Path tbl = lookupGrammarInCache(sdfCache, key);
     if (tbl == null) {
-      tbl = generateParseTable(key, sdf, module, sdfContext, makePermissiveContext, environment.getIncludePath(), langLib);
+      tbl = generateParseTable(key, sdf, module, sdfContext, makePermissiveContext, xtcContext, environment.getIncludePath(), langLib);
       cacheParseTable(sdfCache, key, tbl, environment);
     }
     
@@ -273,6 +275,7 @@ public class SDFCommands {
                                          String module,
                                          Context sdfContext,
                                          Context makePermissiveContext,
+                                         Context xtcContext,
                                          Collection<Path> paths,
                                          LanguageLib langLib)
       throws IOException, InvalidParseTableException {
@@ -284,7 +287,7 @@ public class SDFCommands {
 
       Path def = FileCommands.newTempFile("def");
       packSdf(sdf, def, sdfContext, paths, langLib);
-      sdf2Table(def, tblFile, module);
+      sdf2Table(def, tblFile, module, xtcContext);
       FileCommands.deleteTempFiles(def);
       return tblFile;
     } finally {

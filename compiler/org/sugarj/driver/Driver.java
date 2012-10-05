@@ -43,6 +43,7 @@ import org.strategoxt.HybridInterpreter;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoException;
 import org.strategoxt.permissivegrammars.make_permissive;
+import org.strategoxt.stratego_xtc.stratego_xtc;
 import org.strategoxt.tools.tools;
 import org.sugarj.LanguageLib;
 import org.sugarj.LanguageLibFactory;
@@ -112,6 +113,7 @@ public class Driver{
   private SGLR parser;
   private Context sdfContext;
   private Context makePermissiveContext;
+  private Context xtcContext;
   private Context extractionContext;
   private Context strjContext;
   
@@ -652,7 +654,7 @@ public class Driver{
   
   private IStrategoTerm currentParse(String remainingInput, boolean recovery) throws IOException,
       InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
-    currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfContext, makePermissiveContext, sdfCache, environment, langLib);
+    currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfContext, makePermissiveContext, xtcContext, sdfCache, environment, langLib);
 
     ParseTable table = ATermCommands.parseTableManager.loadFromFile(currentGrammarTBL.getAbsolutePath());
     
@@ -1006,7 +1008,7 @@ public class Driver{
     log.beginTask("checking grammar", "CHECK current grammar", Log.CORE);
     
     try {
-      SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfContext, makePermissiveContext, sdfCache, environment, langLib);
+      SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfContext, makePermissiveContext, xtcContext, sdfCache, environment, langLib);
     } finally {
       log.endTask();
     }
@@ -1069,8 +1071,9 @@ public class Driver{
     editorServicesParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.editorServicesTbl.getPath()));
     
     sdfContext = tools.init();
-    makePermissiveContext = make_permissive.init();;
-    extractionContext = extraction.init();;
+    makePermissiveContext = make_permissive.init();
+    xtcContext = stratego_xtc.init();
+    extractionContext = extraction.init();
     strjContext = org.strategoxt.strj.strj.init();
 
   }
