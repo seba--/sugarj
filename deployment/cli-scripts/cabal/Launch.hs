@@ -5,8 +5,9 @@ import System.Environment
 
 import Paths_sugarhaskell
 
--- launch :: String -> [String] -> IO <something GHC-specific>
-launch lib args =
+launch lang = do
+  args <- getArgs
+  lib <- getDataFileName "lib"
   rawSystem "java" $
     ["-Xss16m", 
      "-Xmx1024m", 
@@ -15,4 +16,5 @@ launch lib args =
      lib, 
      "org.sugarj.driver.cli.Main"]
     -- arguments to sugarj from here on
+    ++ ["-l", lang]
     ++ args

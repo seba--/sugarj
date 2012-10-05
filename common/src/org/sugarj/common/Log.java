@@ -14,20 +14,38 @@ public class Log {
   
   public static final boolean BORING_DONE_MESSAGES = false;
   
+  public static final int NONE = 0;
+  public static final int CORE = 1 << 0;
+  public static final int PARSE = 1 << 1;
+  public static final int TRANSFORM = 1 << 2;
+  public static final int IMPORT = 1 << 3;
+  public static final int LANGLIB = 1 << 4;
+  public static final int CACHING = 1 << 5;
+  public static final int DETAIL = 1 << 6;
+  public static final int ALWAYS = CORE | PARSE | TRANSFORM | IMPORT | LANGLIB | CACHING | DETAIL;
+  
   public static final Log log = new Log();
-
+  
   private Stack<String> tasks = new Stack<String>();
   private Stack<Long> timings = new Stack<Long>();
   private Stack<Boolean> lightweight = new Stack<Boolean>();
   private int silent = -1;
+  private int loglevel = CORE;
   
   public static PrintStream out = System.out;
   public static PrintStream err = System.err;
   
-  public synchronized void beginTask(String shortText, String longText, boolean inline) {
+  public synchronized void beginTask(String shortText, String longText, boolean inline, int tasklevel) {
     if (silent >= 0)
       return;
     
+    boolean active = (loglevel & tasklevel) > 0;
+    
+    if (!active) {
+      tasks.push(null);
+      return;
+    }
+      
     noLongerLeaf();
 
     indent();
@@ -40,12 +58,12 @@ public class Log {
     timings.push(System.currentTimeMillis());
   }
   
-  public void beginTask(String shortText, String longText) {
-    beginTask(shortText, longText, COLLAPSE_LEAF_TASKS);
+  public void beginTask(String shortText, String longText, int level) {
+    beginTask(shortText, longText, COLLAPSE_LEAF_TASKS, level);
   }
   
-  public void beginTask(String text) {
-    beginTask(text, text);
+  public void beginTask(String text, int level) {
+    beginTask(text, text, level);
   }
   
   public synchronized void endTask(String error, boolean doneMessage) {
@@ -58,16 +76,19 @@ public class Log {
       return;
     
     String shortText = tasks.pop();
+    if (shortText == null)
+      return;
+    
     Long startTime = timings.pop();
     long duration = endTime - startTime;
     
     if (lightweight.pop()) {
       out.println(" ... " + error + " - " + duration + "ms");
     } else if (doneMessage) {
-      log.log(shortText + " " + error + " - " + duration + "ms");
+      log.log(shortText + " " + error + " - " + duration + "ms", Log.ALWAYS);
     }
     else 
-      log.log(shortText + " " + error + " - " + duration + "ms");
+      log.log(shortText + " " + error + " - " + duration + "ms", Log.ALWAYS);
   }
   
   public void endTask() {
@@ -89,12 +110,15 @@ public class Log {
       endTask(bad);
   }
   
-  public void log(Object o) {
-    log(o.toString());
+  public void log(Object o, int msglevel) {
+    log(o.toString(), msglevel);
   }
   
-  public synchronized void log(String text) {
+  public synchronized void log(String text, int msglevel) {
     if (silent >= 0)
+      return;
+    
+    if ((loglevel & msglevel) == 0)
       return;
     
     noLongerLeaf();
@@ -102,8 +126,11 @@ public class Log {
     out.println(text);
   }
   
-  public synchronized void logErr(String text) {
+  public synchronized void logErr(String text, int msglevel) {
     if (silent >= 0)
+      return;
+    
+    if ((loglevel & msglevel) == 0)
       return;
     
     noLongerLeaf();
@@ -119,24 +146,24 @@ public class Log {
     }
   }
 
-  public void beginExecution(String prefix, String... cmds) {
+  public void beginExecution(String prefix, int level, String... cmds) {
     if (CommandExecution.FULL_COMMAND_LINE) {
       if (CommandExecution.WRAP_COMMAND_LINE) {
-        beginTask("execute " + prefix);
+        beginTask("execute " + prefix, level);
         
-        logCommandLine(cmds);
+        logCommandLine(cmds, level);
       } 
       else {
         StringBuilder builder = new StringBuilder();
         builder.append("execute");
         for (String cmd : cmds)
           builder.append(' ').append(cmd);
-        beginTask("execute " + prefix, builder.toString(), false);
+        beginTask("execute " + prefix, builder.toString(), false, level);
       }
     } else if (!CommandExecution.SUB_SILENT_EXECUTION) {
-      beginTask("execute " + prefix);
+      beginTask("execute " + prefix, level);
     } else {
-      beginInlineTask("execute " + prefix);
+      beginInlineTask("execute " + prefix, level);
     }
   }
   
@@ -158,19 +185,19 @@ public class Log {
     return buf.toString();
   }
   
-  public void logCommandLine(String[] cmds) {
+  public void logCommandLine(String[] cmds, int level) {
     for (int i = 0; i < cmds.length; i++) {
       if (cmds[i].startsWith("-") && i + 1 < cmds.length && !cmds[i+1].startsWith("-")) {
-        log(cmds[i] + " " + cmds[i + 1]);
+        log(cmds[i] + " " + cmds[i + 1], level);
         i++;
       }
       else
-        log(cmds[i]);
+        log(cmds[i], level);
     }
   }
 
-  public void beginInlineTask(String text) {
-    beginTask(text, text, true);
+  public void beginInlineTask(String text, int level) {
+    beginTask(text, text, true, level);
   }
 
   private void indent() {
@@ -183,14 +210,10 @@ public class Log {
   }
   
   public void endExecution(int exitValue, String[] errMsg) {
-    if (exitValue == 0)
-      endTask();
-    else {
+    endTask();
+    if (exitValue != 0)
       for (String err : errMsg)
-        log(err);
-      
-      endTask("failed with exit value " + exitValue);
-    }
+        log(err, Log.ALWAYS);
   }
   
   public void beginSilent() {
@@ -199,5 +222,9 @@ public class Log {
   
   public void endSilent() {
     silent--;
+  }
+  
+  public void setLoggingLevel(int level) {
+    this.loglevel = level;
   }
 }

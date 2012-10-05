@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.sugarj.LanguageLibFactory;
 import org.sugarj.LanguageLibRegistry;
 import org.sugarj.common.Environment;
@@ -16,7 +17,6 @@ import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.common.path.SourceLocation;
 import org.sugarj.driver.Driver;
 import org.sugarj.driver.ModuleSystemCommands;
-import org.sugarj.driver.PrintProgressMonitor;
 import org.sugarj.driver.Result;
 
 /**
@@ -37,14 +37,14 @@ public class Main {
         RelativeSourceLocationPath sourceLocation = ModuleSystemCommands.locateSourceFile(source, environment.getSourcePath());
         
         if (sourceLocation == null) {
-          Log.log.logErr("Could not locate source file \"" + source +"\".");
+          Log.log.logErr("Could not locate source file \"" + source +"\".", Log.ALWAYS);
           continue;
         }
 
         allInputFiles.add(sourceLocation);
       }
       
-      IProgressMonitor monitor = new PrintProgressMonitor(System.out);
+      IProgressMonitor monitor = new NullProgressMonitor();
       
       for (final RelativeSourceLocationPath sourceFile : allInputFiles) {
         LanguageLibFactory lang = LanguageLibRegistry.getInstance().getLanguageLib(FileCommands.getExtension(sourceFile));
@@ -60,8 +60,8 @@ public class Main {
     } catch (Exception e) {
       e.printStackTrace();
     } catch (CLIError e) {
-      Log.log.log(e.getMessage());
-      Log.log.log("");
+      Log.log.log(e.getMessage(), Log.ALWAYS);
+      Log.log.log("", Log.ALWAYS);
       e.showUsage();
     }
     

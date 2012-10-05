@@ -7,6 +7,14 @@ description:         SugarHaskell is a syntactically extensible variant of Haske
                      With SugarHaskell" presented at the Haskell Symposium 2012
                      describes details of SugarHaskell and is available online at
                      <http://sugarj.org/sugarhaskell.pdf>.
+
+                     SugarHaskell is implemented in Java. Therefore, this package
+                     installs various Java binaries on your machine. A Java VM is
+                     required for running SugarHaskell. This also explains the large
+                     size of the package, which is 24 MB.
+
+                     This package redistributes SDF and Stratego, which are part of
+                     SugarHaskell and published under the same license. 
 version:             0.1
 cabal-version:       >= 1.6
 build-type:          Custom

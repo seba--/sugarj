@@ -23,6 +23,7 @@ import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
+import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
@@ -263,10 +264,10 @@ public class PrologLib extends LanguageLib implements Serializable {
 			moduleName = prettyPrint(getApplicationSubterm(toplevelDecl, "SugarModuleDec", 0));
 			prologSource.setModuleDecl(":-module(" + moduleName + ", []).");
 		}
+		
 		relNamespaceName = FileCommands.dropFilename(sourceFile.getRelativePath());
 		decName = getRelativeModulePath(moduleName);
-		log.log("The SDF / Stratego package name is '" + relNamespaceName + "'.");
-		
+		log.log("The SDF / Stratego package name is '" + relNamespaceName + "'.", Log.DETAIL);
 		
 		if (prologOutFile == null) 
 			prologOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + getGeneratedFileExtension());

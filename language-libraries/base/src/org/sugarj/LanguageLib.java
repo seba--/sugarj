@@ -82,7 +82,7 @@ public abstract class LanguageLib implements Serializable {
 		try {
 			InputStream in = this.getClass().getClassLoader().getResourceAsStream(resource);
 			if (in == null) {
-			  Log.log.logErr("Could not load resource " + resource);
+			  Log.log.logErr("Could not load resource " + resource, Log.ALWAYS);
 				return new File(getLibraryDirectory().getPath() + File.separator + resource);
 			}
 

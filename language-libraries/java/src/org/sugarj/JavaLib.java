@@ -26,6 +26,7 @@ import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.JavaCommands;
+import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
@@ -154,16 +155,10 @@ public class JavaLib extends LanguageLib implements Serializable {
 
   public String extractImportedModuleName(IStrategoTerm toplevelDecl) throws IOException {
     String name = null;
-    log.beginTask("Extracting", "Extract name of imported module");
-    try {
-      if (isApplication(toplevelDecl, "TypeImportDec"))
-        name = prettyPrint(toplevelDecl.getSubterm(0));
-
-      if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
-        name = prettyPrint(toplevelDecl.getSubterm(0)) + ".*";
-    } finally {
-      log.endTask(name);
-    }
+    if (isApplication(toplevelDecl, "TypeImportDec"))
+      name = prettyPrint(toplevelDecl.getSubterm(0));
+    else if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
+      name = prettyPrint(toplevelDecl.getSubterm(0)) + ".*";
     return name;
   }
 
@@ -263,7 +258,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 
     relPackageName = getRelativeModulePath(packageName);
 
-    log.log("The SDF / Stratego package name is '" + relPackageName + "'.");
+    log.log("The SDF / Stratego package name is '" + relPackageName + "'.", Log.DETAIL);
 
     checkPackageName(toplevelDecl, sourceFile, errorLog);
 

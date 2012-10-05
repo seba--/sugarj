@@ -78,12 +78,12 @@ public class LanguageLibRegistry {
   public synchronized Bundle loadLanguagePlugin(String pluginId) {
     Bundle bundle = Platform.getBundle(pluginId);
     if (bundle == null)
-      Log.log.logErr("Could not load language plugin " + pluginId);
+      Log.log.logErr("Could not load language plugin " + pluginId, Log.ALWAYS);
     else
       try {
         bundle.start();
       } catch (BundleException e) {
-        Log.log.logErr("Could not start language plugin " + pluginId);
+        Log.log.logErr("Could not start language plugin " + pluginId, Log.ALWAYS);
       }
     return bundle;
   }

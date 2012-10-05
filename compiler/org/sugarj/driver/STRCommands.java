@@ -32,10 +32,10 @@ import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.strj.main_strj_0_0;
 import org.sugarj.LanguageLib;
 import org.sugarj.common.ATermCommands;
-import org.sugarj.common.CommandExecution;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.JavaCommands;
+import org.sugarj.common.Log;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
@@ -146,7 +146,8 @@ public class STRCommands {
       } catch (StrategoException e) {
         prog = new AbsolutePath("error: " +e.getMessage());
       } finally {
-        cacheAssimilator(strCache, key, prog, environment);
+        if (prog != null)
+          cacheAssimilator(strCache, key, prog, environment);
       }
     }
     
@@ -163,13 +164,13 @@ public class STRCommands {
                                           Collection<Path> paths,
                                           LanguageLib langLib) throws IOException {
     boolean success = false;
-    log.beginTask("Generating", "Generate the assimilator");
+    log.beginTask("Generating", "Generate the assimilator", Log.TRANSFORM);
     try {
       Path dir = FileCommands.newTempDir();
       FileCommands.createDir(new RelativePath(dir, "sugarj"));
       String javaFilename = FileCommands.fileName(str).replace("-", "_");
       Path java = new RelativePath(dir, "sugarj" + Environment.sep + javaFilename + ".java");
-      log.log("calling STRJ");
+      log.log("calling STRJ", Log.TRANSFORM);
       strj(str, java, main, strjContext, paths, langLib);
       
       
@@ -194,7 +195,7 @@ public class STRCommands {
       return;
     
 
-    log.beginTask("Caching", "Cache assimilator");
+    log.beginTask("Caching", "Cache assimilator", Log.CACHING);
     try {
       Path cacheProg = environment.createCachePath(prog.getFile().getName());
       if (FileCommands.exists(prog))
@@ -205,8 +206,7 @@ public class STRCommands {
       Path oldProg = strCache.putGet(key, cacheProg);
       FileCommands.delete(oldProg);
 
-      if (CommandExecution.CACHE_INFO)
-        log.log("Cache Location: " + cacheProg);
+      log.log("Cache Location: " + cacheProg, Log.CACHING);
     } finally {
       log.endTask();
     }
@@ -218,15 +218,14 @@ public class STRCommands {
     
     Path result = null;
     
-    log.beginTask("Searching", "Search assimilator in cache");
+    log.beginTask("Searching", "Search assimilator in cache", Log.CACHING);
     try {
       result = strCache.get(key);
       
       if (result == null || !result.getFile().exists())
         return null;
 
-      if (CommandExecution.CACHE_INFO)
-        log.log("Cache location: '" + result + "'");
+      log.log("Cache location: '" + result + "'", Log.CACHING);
       
       return result;
     } finally {
@@ -236,7 +235,7 @@ public class STRCommands {
 
 
   private static ModuleKey getModuleKeyForAssimilation(Path str, String main, Collection<Path> dependentFiles, SGLR strParser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
-    log.beginTask("Generating", "Generate module key for current assimilation");
+    log.beginTask("Generating", "Generate module key for current assimilation", Log.CACHING);
     try {
       IStrategoTerm aterm = (IStrategoTerm) strParser.parse(FileCommands.readFileAsString(str), str.getAbsolutePath(), "StrategoModule");
 
@@ -277,12 +276,12 @@ public class STRCommands {
         IToken right = ImploderAttachment.getRightToken(in);
         String sort = ImploderAttachment.getSort(in);
         
-        try {
-          term = ATermCommands.makeMutable(term);
-          ImploderAttachment.putImploderAttachment(term, false, sort, left, right);
-        } catch (Exception e) {
-          log.log("origin annotation failed");
-        }
+//        try {
+//          term = ATermCommands.makeMutable(term);
+//          ImploderAttachment.putImploderAttachment(term, false, sort, left, right);
+//        } catch (Exception e) {
+//          log.log("origin annotation failed");
+//        }
         return term;
       }
       else

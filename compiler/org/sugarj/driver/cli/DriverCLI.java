@@ -17,7 +17,6 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.spoofax.interpreter.core.Tools;
-import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -79,17 +78,15 @@ public class DriverCLI {
   }
   
   public static boolean processResultCLI(Result res, Path file, String project) throws IOException {
-    log.log("");
-
     if (res == null) {
-      log.log("compilation failed, result is null");
+      log.log("compilation failed", Log.ALWAYS);
       return false;
     }
     
     boolean success = res.getCollectedErrors().isEmpty();
     
     for (BadTokenException e : res.getParseErrors())
-      log.log("syntax error: line " + e.getLineNumber() + " column " + e.getColumnNumber() + ": " + e.getMessage());
+      log.log("syntax error: line " + e.getLineNumber() + " column " + e.getColumnNumber() + ": " + e.getMessage(), Log.ALWAYS);
     
     if (res.getSugaredSyntaxTree() == null)
       return false;
@@ -106,7 +103,7 @@ public class DriverCLI {
     success &= errors.isEmpty();
     
     for (Error error : errors)
-      log.log("error: line " + error.lineStart + " column " + error.columnStart + " to line " + error.lineEnd + " column " + error.columEnd + ":\n  " + error.msg);
+      log.log("error: line " + error.lineStart + " column " + error.columnStart + " to line " + error.lineEnd + " column " + error.columEnd + ":\n  " + error.msg, Log.ALWAYS);
 
     
     IStrategoTerm errorTree = STRCommands.assimilate("sugarj-analyze", res.getDesugaringsFile(), tuple, new HybridInterpreter());
@@ -159,9 +156,9 @@ public class DriverCLI {
       right = left;
     
     if (left == null || right == null)
-      log.log("error: " + msg + "\n  in tree " + ATermCommands.atermToFile(term));
+      log.log("error: " + msg + "\n  in tree " + ATermCommands.atermToFile(term), Log.ALWAYS);
     else
-      log.log("error: line " + left.getLine() + " column " + left.getColumn() + " to line " + right.getLine() + " column " + right.getColumn() + ":\n  " + msg);
+      log.log("error: line " + left.getLine() + " column " + left.getColumn() + " to line " + right.getLine() + " column " + right.getColumn() + ":\n  " + msg, Log.ALWAYS);
   }
   
   
@@ -211,8 +208,6 @@ public class DriverCLI {
   }
 
   
-  private static final IStrategoConstructor ambCons = Environment.getTermFactory().makeConstructor("amb", 1);
-  
     /**
      * Report recoverable errors (e.g., inserted brackets).
      * 
@@ -223,7 +218,7 @@ public class DriverCLI {
       IStrategoTerm ambStart;
       
       public void preVisit(IStrategoTerm term) {
-        if (ambStart == null && ambCons == tryGetConstructor(term)) {
+        if (ambStart == null && Environment.getTermFactory().makeConstructor("amb", 1) == tryGetConstructor(term)) {
           reportAmbiguity(term, errors);
           ambStart = term;
         }
@@ -370,15 +365,33 @@ public class DriverCLI {
   }
 
   private static String[] processOptions(Options options, CommandLine line, org.sugarj.common.Environment environment) throws org.apache.commons.cli.ParseException {
-    if (line.hasOption("help")) {
-      // TODO This is not exactly an error ...
+    if (line.hasOption("help"))
       throw new CLIError("help requested", options);
-    }
   
     if (line.hasOption("verbose")) {
-      CommandExecution.SILENT_EXECUTION = false;
-      CommandExecution.SUB_SILENT_EXECUTION = false;
-      CommandExecution.FULL_COMMAND_LINE = true;
+      int level = 0;
+      for (String option : line.getOptionValues("verbose"))
+        if ("SILENT".equals(option))
+          ;
+        else if ("CORE".equals(option))
+          level |= Log.CORE;
+        else if ("PARSE".equals(option))
+          level |= Log.PARSE;
+        else if ("TRANSFORM".equals(option))
+          level |= Log.TRANSFORM;
+        else if ("IMPORT".equals(option))
+          level |= Log.IMPORT;
+        else if ("LANGLIB".equals(option))
+          level |= Log.LANGLIB;
+        else if ("CACHING".equals(option))
+          level |= Log.CACHING;
+        else if ("DETAIL".equals(option))
+          level |= Log.DETAIL;
+        else if ("DEBUG".equals(option))
+          level |= Log.ALWAYS;
+        else 
+          throw new CLIError("Unknown verbosity level " + option, options);
+      Log.log.setLoggingLevel(level);
     }
   
     if (line.hasOption("silent-execution"))
@@ -435,7 +448,7 @@ public class DriverCLI {
         Class<?> cl = DriverCLI.class.getClassLoader().loadClass(clName);
         cl.newInstance();
       } catch (Exception e) {
-        Log.log.logErr("Could not load language plugin " + libName + ": " + e.getMessage());
+        Log.log.logErr("Could not load language plugin " + libName + ": " + e.getMessage(), Log.ALWAYS);
       }
     }
   }
@@ -451,8 +464,8 @@ public class DriverCLI {
     options.addOption(
         "v", 
         "verbose", 
-        false, 
-        "Show verbose output");
+        true, 
+        "Verbosity. Values are SILENT, CORE, PARSE, TRANSFORM, IMPORT, LANGLIB, CACHING, DETAIL, and DEBUG. Use multiple times to activate verbosity for multiple features.");
   
     options.addOption(
         null, 
