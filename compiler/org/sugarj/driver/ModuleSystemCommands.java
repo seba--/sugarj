@@ -206,6 +206,7 @@ public class ModuleSystemCommands {
     return null;
   }
 
+  @SuppressWarnings("resource")
   private static RelativePath searchFile(Path base, String relativePath, String extension) {
     if (relativePath.startsWith(base.getAbsolutePath())) {
       int sepOffset = relativePath.endsWith(Environment.sep) ? 0 : 1;
@@ -224,11 +225,13 @@ public class ModuleSystemCommands {
     } catch (MalformedURLException e) {
       e.printStackTrace();
     } finally {
+      /* URLClassLoader.close() is only available in Java 1.7.
       if (cl != null)
         try {
           cl.close();
         } catch (IOException e) {
         }
+      */
     }
     
     return null;
