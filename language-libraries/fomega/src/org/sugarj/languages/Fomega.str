@@ -20,12 +20,9 @@ signature
     KiArrow: FomegaKind * FomegaKind -> FomegaKind
 
     Module: FomegaMID * List(FomegaImport) * List(FomegaDef) -> FomegaModule
-    Import: FomegaMID -> FomegaImport
-    ImportQlfd: FomegaMID -> FomegaImport
-    PublicValDef: FomegaVID * FomegaExpr -> FomegaDef
-    ValDef: FomegaVID * FomegaExpr -> FomegaDef
-    PublicTypeDef: FomegaTID * FomegaType -> FomegaDef
-    TypeDef: FomegaTID * FomegaType -> FomegaDef
+    Import: Option(Qualified) * FomegaMID -> FomegaImport
+    ValDef: Option(Public) * FomegaVID * FomegaExpr -> FomegaDef
+    TypeDef: Option(Public) * FomegaTID * FomegaType -> FomegaDef
 
     Var: FomegaVID -> FomegaExpr
     QVar: FomegaMID * FomegaVID -> FomegaExpr

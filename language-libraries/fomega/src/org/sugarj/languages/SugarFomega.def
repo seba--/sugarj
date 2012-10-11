@@ -12,8 +12,8 @@ exports
 
   context-free syntax
     FomegaModuleDec FomegaImport* FomegaOrSugarDec -> SugarCompilationUnit {cons("CompilationUnit")}
-    FomegaDef* -> FomegaOrSugarDec
-    SugarDefElem* -> FomegaOrSugarDec
+    FomegaDef* -> FomegaOrSugarDec {cons("FomegaBody")}
+    SugarDefElem* -> FomegaOrSugarDec {cons("SugarBody")}
 
     "MODULE" FomegaMID -> FomegaModuleDec {cons("ModuleDec")}
 
@@ -68,5 +68,4 @@ exports
   context-free syntax
     FomegaModuleDec -> ToplevelDeclaration
     FomegaImport -> ToplevelDeclaration
-    FomegaDef -> ToplevelDeclaration
-    SugarElemDef -> ToplevelDeclaration
+    FomegaOrSugarDec -> ToplevelDeclaration
