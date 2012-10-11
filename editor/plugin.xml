@@ -6,7 +6,7 @@
           <language
                 derivedFrom="DynamicRoot"
                 description="SugarJ"
-                extensions="sugj,shs,sugp"
+                extensions="sugj,shs,sugp,sf"
                 language="SugarJ"
                 validator="org.sugarj.editor.SugarJValidator"
                 validatorClass="org.sugarj.editor.SugarJValidator"></language>
