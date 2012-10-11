@@ -29,7 +29,7 @@
    TypeDef                   -- _1 KW["TYPE"] _2 KW["="] _3,
    TypeDef.1:opt             -- _1,
    FomegaBody                -- _1,
-   FomegaBody.1:iter         -- KW["\n"],
+   FomegaBody.1:iter-sep     -- _1 KW["\n"],
    Public                    -- KW["PUBLIC"],
    Qualified                 -- KW["QUALIFIED"],
    Var                       -- _1,
