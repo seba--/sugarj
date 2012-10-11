@@ -1,0 +1,7 @@
+MODULE Test
+
+IMPORT Foo
+
+TYPE App = FUN A::* . A
+
+
