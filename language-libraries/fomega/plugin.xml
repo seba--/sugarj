@@ -3,6 +3,6 @@
 <plugin>
    <extension
          point="org.sugarj.language">
-      <languagePlugin id="org.sugarj.haskell" />
+      <languagePlugin id="org.sugarj.fomega" />
    </extension>
 </plugin>
