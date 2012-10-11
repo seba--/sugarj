@@ -117,7 +117,8 @@ exports
   sorts Module Def Import
 
   context-free syntax
-    "MODULE" MID Import* Def* -> Module {cons("Module")}
+    "MODULE" MID -> ModuleDec {cons("ModuleDec")}
+    ModuleDec Import* Def* -> Module {cons("Module")}
     "IMPORT" Qualified? MID -> Import {cons("Import")}
     Public? "VAL" VID "=" Expr -> Def {cons("ValDef")}
     Public? "TYPE" TID "=" Type -> Def {cons("TypeDef")}
@@ -171,7 +172,7 @@ exports
     }
 
 module org/sugarj/languages/Fomega
-imports Fomega [
+imports Fomega-Module [
     BlockComment => FomegaBlockComment
     CommentPart => FomegaCommentPart
     OpenBrace => FomegaOpenBrace
@@ -192,4 +193,5 @@ imports Fomega [
     Def => FomegaDef
     Import => FomegaImport
     Expr => FomegaExpr
-    Field => FomegaField ]
+    Field => FomegaField
+    ModuleDec => FomegaModuleDec ]

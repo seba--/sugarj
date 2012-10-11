@@ -6,7 +6,6 @@ import static org.sugarj.common.ATermCommands.isApplication;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -16,12 +15,9 @@ import java.util.Set;
 import org.eclipse.core.runtime.FileLocator;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.sugarj.common.ATermCommands;
-import org.sugarj.common.CommandExecution;
-import org.sugarj.common.CommandExecution.ExecutionError;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
-import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.path.RelativeSourceLocationPath;
@@ -232,10 +228,10 @@ public class FomegaLib extends LanguageLib {
 
   @Override
   public void processLanguageSpecific(IStrategoTerm toplevelDecl, Environment environment) throws IOException {
-    IStrategoTerm term = getApplicationSubterm(toplevelDecl, "FomegaBody", 0);
+//    IStrategoTerm term = getApplicationSubterm(toplevelDecl, "FomegaBody", 0);
     String text = null;
     try {
-      text = prettyPrint(term);
+      text = prettyPrint(toplevelDecl);
     } catch (NullPointerException e) {
       ATermCommands.setErrorMessage(toplevelDecl, "pretty printing Fomega failed");
     }
