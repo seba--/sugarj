@@ -122,6 +122,10 @@ exports
     "IMPORT" Qualified? MID -> Import {cons("Import")}
     Public? "VAL" VID "=" Expr -> Def {cons("ValDef")}
     Public? "TYPE" TID "=" Type -> Def {cons("TypeDef")}
+
+    %% for pretty printer
+    Def+ -> FomegaDefList {cons("FomegaBody")}
+
   
     "PUBLIC" -> Public {cons("Public")}
     "QUALIFIED" -> Qualified {cons("Qualified")}
