@@ -1,5 +1,7 @@
 package org.sugarj;
 
+import org.sugarj.common.Log;
+
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
@@ -19,6 +21,7 @@ public class FomegaLibFactory extends LanguageLibFactory {
 	 */
 	@Override
 	public LanguageLib createLanguageLibrary() {
+	  Log.log.setLoggingLevel(Log.ALWAYS);
 		return new FomegaLib();
 	}
 

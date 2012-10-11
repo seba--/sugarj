@@ -11,12 +11,9 @@ exports
   	SugarCompilationUnit
 
   context-free syntax
-    FomegaModuleDec FomegaImport* FomegaOrSugarDec -> SugarCompilationUnit {cons("CompilationUnit")}
-    FomegaDef* -> FomegaOrSugarDec {cons("FomegaBody")}
-    SugarDefElem* -> FomegaOrSugarDec {cons("SugarBody")}
-
-    "MODULE" FomegaMID -> FomegaModuleDec {cons("ModuleDec")}
-
+    FomegaModuleDec FomegaImport* FomegaOrSugarDec? -> SugarCompilationUnit {cons("CompilationUnit")}
+    FomegaDef+ -> FomegaOrSugarDec {cons("FomegaBody")}
+    SugarDefElem+ -> FomegaOrSugarDec {cons("SugarBody")}
 
   context-free syntax
     Grammar        -> SugarDefElem {cons("grammar-elem")}
