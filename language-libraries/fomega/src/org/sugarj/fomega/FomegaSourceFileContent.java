@@ -29,7 +29,7 @@ public class FomegaSourceFileContent extends SourceFileContent {
     return bodyDecls.isEmpty() && hasNonhaskellDecl;
   }
   
-  public void setHasNonhaskellDecl(boolean hasNonhaskellDecl) {
+  public void setHasNonfomegaDecl(boolean hasNonhaskellDecl) {
     this.hasNonhaskellDecl = hasNonhaskellDecl;
   }
   

@@ -36,15 +36,13 @@ public class FomegaLib extends LanguageLib {
 
   private static final long serialVersionUID = -8916207157344649789L;
   
-  private final String GHC_COMMAND = "ghc";
-
   private transient File libDir;
   
   private FomegaSourceFileContent sourceContent;
-  private Path outFile;
   private Set<RelativePath> generatedModules = new HashSet<RelativePath>();
   
   private String relNamespaceName;
+  private Path outFile;
   private String moduleName;
 
   private IStrategoTerm ppTable;
@@ -99,7 +97,7 @@ public class FomegaLib extends LanguageLib {
   @Override
   public File getLibraryDirectory() {
     if (libDir == null) { // set up directories first
-      String thisClassPath = "org/sugarj/HaskellLib.class";
+      String thisClassPath = "org/sugarj/FomegaLib.class";
       URL thisClassURL = FomegaLib.class.getClassLoader().getResource(thisClassPath);
       
       if (thisClassURL.getProtocol().equals("bundleresource"))
@@ -120,12 +118,12 @@ public class FomegaLib extends LanguageLib {
 
   @Override
   public String getGeneratedFileExtension() {
-    return "o";
+    return "pts";
   }
 
   @Override
   public String getSugarFileExtension() {
-    return "shs";
+    return "sf";
   }
 
   @Override
@@ -155,13 +153,13 @@ public class FomegaLib extends LanguageLib {
 
   @Override
   public boolean isLanguageSpecificDec(IStrategoTerm decl) {
-    return isApplication(decl, "HaskellBody");
+    return isApplication(decl, "FomegaBody");
   }
 
   @Override
   public boolean isSugarDec(IStrategoTerm decl) {
     if (isApplication(decl, "SugarBody")) {
-      sourceContent.setHasNonhaskellDecl(true);
+      sourceContent.setHasNonfomegaDecl(true);
       return true;
     }
     return false;
@@ -170,7 +168,7 @@ public class FomegaLib extends LanguageLib {
   @Override
   public boolean isEditorServiceDec(IStrategoTerm decl) {
     if (isApplication(decl, "EditorBody")) {   
-      sourceContent.setHasNonhaskellDecl(true);
+      sourceContent.setHasNonfomegaDecl(true);
       return true;
     }
     return false;
@@ -184,7 +182,7 @@ public class FomegaLib extends LanguageLib {
   @Override
   public boolean isPlainDec(IStrategoTerm decl) {
     if (isApplication(decl, "PlainDec")) {   
-      sourceContent.setHasNonhaskellDecl(true);
+      sourceContent.setHasNonfomegaDecl(true);
       return true;
     }
     return false;
@@ -203,7 +201,7 @@ public class FomegaLib extends LanguageLib {
   
   @Override
   public void setupSourceFile(RelativePath sourceFile, Environment environment) {
-    outFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".hs");
+    outFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".pts-source");
     sourceContent = new FomegaSourceFileContent();
   }
 
@@ -234,12 +232,12 @@ public class FomegaLib extends LanguageLib {
 
   @Override
   public void processLanguageSpecific(IStrategoTerm toplevelDecl, Environment environment) throws IOException {
-    IStrategoTerm term = getApplicationSubterm(toplevelDecl, "HaskellBody", 0);
+    IStrategoTerm term = getApplicationSubterm(toplevelDecl, "FomegaBody", 0);
     String text = null;
     try {
       text = prettyPrint(term);
     } catch (NullPointerException e) {
-      ATermCommands.setErrorMessage(toplevelDecl, "pretty printing Haskell failed");
+      ATermCommands.setErrorMessage(toplevelDecl, "pretty printing Fomega failed");
     }
     if (text != null)
       sourceContent.addBodyDecl(text);
@@ -247,7 +245,7 @@ public class FomegaLib extends LanguageLib {
 
   @Override
   public String getImportedModulePath(IStrategoTerm toplevelDecl) throws IOException {
-    return prettyPrint(getApplicationSubterm(toplevelDecl, "Import", 2)).replace('.', '/');
+    return prettyPrint(getApplicationSubterm(toplevelDecl, "Import", 1)).replace('.', '/');
   }
   
   @Override
@@ -272,7 +270,7 @@ public class FomegaLib extends LanguageLib {
   @Override
   public String prettyPrint(IStrategoTerm term) throws IOException {
     if (ppTable == null) 
-      ppTable = ATermCommands.readPrettyPrintTable(ensureFile("org/sugarj/languages/Haskell.pp").getAbsolutePath());
+      ppTable = ATermCommands.readPrettyPrintTable(ensureFile("org/sugarj/languages/Fomega.pp").getAbsolutePath());
     
     return ATermCommands.prettyPrint(ppTable, term, interp);
   }
@@ -280,47 +278,17 @@ public class FomegaLib extends LanguageLib {
   @Override
   protected void compile(List<Path> outFiles, Path bin, List<Path> includePaths, boolean generateFiles) throws IOException {
     if (generateFiles) {
-      List<String> cmds = new LinkedList<String>();
-      cmds.add(GHC_COMMAND);
-      
-      for (Path outFile : outFiles)
-        cmds.add(outFile.getAbsolutePath());
-      
-      cmds.add("-i");
-      if (!includePaths.isEmpty()) {
-        StringBuilder searchPath = new StringBuilder("-i");
-        for (Path path : includePaths)
-          if (new File(path.getAbsolutePath()).isDirectory())
-            searchPath.append(path.getAbsolutePath()).append(":");
-        searchPath.deleteCharAt(searchPath.length() - 1);
-        cmds.add(searchPath.toString());
+      for (Path out : outFiles) {
+        RelativePath relOut = (RelativePath) out;
+        Path compilePath = new RelativePath(bin, FileCommands.dropExtension(relOut.getRelativePath()) + ".pts");
+        FileCommands.copyFile(out, compilePath);
       }
-      
-      new CommandExecution(false).execute(cmds.toArray(new String[cmds.size()]));
     }
   }
 
   @Override
   public boolean isModuleResolvable(String relModulePath) {
-    boolean oldSilent = CommandExecution.SILENT_EXECUTION;
-    CommandExecution.SILENT_EXECUTION = true;
-    String[] cmds = new String[]{
-      "ghc-pkg", 
-      "find-module", relModulePath.replace('/', '.'),
-      "--simple-output"
-    };
-    
-    String[][] msg;
-    try {
-       msg = new CommandExecution(true).execute(cmds);
-    } catch (ExecutionError e) {
-      Log.log.logErr("Command execution failed: " + Arrays.toString(e.getCmds()), Log.ALWAYS);
-      return false;
-    } finally {
-      CommandExecution.SILENT_EXECUTION = oldSilent;
-    }
-    
-    return msg.length > 0 && msg[0].length > 0;
+    return false;
   }
 
   @Override

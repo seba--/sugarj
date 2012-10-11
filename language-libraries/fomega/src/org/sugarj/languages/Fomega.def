@@ -118,13 +118,13 @@ exports
 
   context-free syntax
     "MODULE" MID Import* Def* -> Module {cons("Module")}
-    "IMPORT" MID -> Import {cons("Import")}
-    "IMPORT" "QUALIFIED" MID -> Import {cons("ImportQlfd")}
-    "PUBLIC" "VAL" VID "=" Expr -> Def {cons("PublicValDef")}
-    "VAL" VID "=" Expr -> Def {cons("ValDef")}
-    "PUBLIC" "TYPE" TID "=" Type -> Def {cons("PublicTypeDef")}
-    "TYPE" TID "=" Type -> Def {cons("TypeDef")}
+    "IMPORT" Qualified? MID -> Import {cons("Import")}
+    Public? "VAL" VID "=" Expr -> Def {cons("ValDef")}
+    Public? "TYPE" TID "=" Type -> Def {cons("TypeDef")}
   
+    "PUBLIC" -> Public {cons("Public")}
+    "QUALIFIED" -> Qualified {cons("Qualified")}
+    
   context-free start-symbols Module 
 
 
