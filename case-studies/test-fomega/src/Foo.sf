@@ -1,0 +1,15 @@
+MODULE Foo
+
+signature constructors
+  TyAbs : A * A * A -> A
+
+context-free syntax
+  "FUN" FomegaTID "::" FomegaKind "." FomegaType -> FomegaType {cons("FunTyAbs")}
+
+rules
+  desugar-fun-type-abs : 
+    FunTyAbs(name,kind,type) 
+    -> TyAbs(name,kind,type)
+
+desugarings
+  desugar-fun-type-abs
