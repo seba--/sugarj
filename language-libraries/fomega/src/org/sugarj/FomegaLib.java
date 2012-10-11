@@ -34,8 +34,8 @@ import org.sugarj.languagelib.SourceImport;
  */
 public class FomegaLib extends LanguageLib {
 
-  private static final long serialVersionUID = -8916207157344649789L;
-  
+  private static final long serialVersionUID = 6325786656556068937L;
+
   private transient File libDir;
   
   private FomegaSourceFileContent sourceContent;

@@ -11,7 +11,7 @@ import org.sugarj.LanguageLibRegistry;
 public class Activator extends AbstractUIPlugin {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "org.sugarj.fomega"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "org.sugarj.fomega";
 
 	// The shared instance
 	private static Activator plugin;
