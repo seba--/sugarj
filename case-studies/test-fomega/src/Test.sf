@@ -11,4 +11,3 @@ VAL x : Nat = (1,2,2,3)
 TYPE T2 :: * = Nat
 TYPE T :: * => * = \X :: * . T2
 
-

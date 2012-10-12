@@ -3,13 +3,13 @@ MODULE type.Check
 IMPORT org.sugarj.languages.Fomega
 
 rules
-  constraint-error : FomegaBody(defs) -> result
-    where <foldl(check-next-def)> (defs, (<empty-ctx>, ![]))
-
+  constraint-error : FomegaBody(defs) -> errors
+    where <foldl(check-next-def)> (defs, (<empty-ctx>, [])) => (ctx, errors)
+  
   check-next-def : (def, (ctx, errors)) -> (ctx', errors')
     where
-      <check-def> def => def-errors;
-      <concat> (errors, def-errors)  => errors';
+      <debug(!"defs: ");check-def; debug(!"def-errors: ")> (ctx, def) => def-errors;
+      <conc> (errors, def-errors)  => errors';
       <extend-ctx> (def, ctx) => ctx'
 
   extend-ctx : (TypeDef(_, name, kind, _), ctx) -> <bind-tvar> (name, kind, ctx)
@@ -17,11 +17,11 @@ rules
 
   check-def : (ctx, TypeDef(_, name, kind, type)) -> []
     where <kcheck> (ctx, type, kind)
-  check-def : (ctx, TypeDef(_, name, kind, type)) -> [(type, <msg-wrong-kind> kind)]
+  check-def : (ctx, TypeDef(_, name, kind, type)) -> [(type, <write-to-string; msg-wrong-kind> kind)]
     where <not(kcheck)> (ctx, type, kind)
 
   // TODO
-  check-def : ValDef(_, name, kind, type) -> []
+  check-def : (ctx, ValDef(_, name, kind, type)) -> []
 
 signature constructors
   Var : Var -> Var
@@ -57,4 +57,3 @@ rules
 rules
   tcheck : (ctx, term, type) -> []
     where fail
-
