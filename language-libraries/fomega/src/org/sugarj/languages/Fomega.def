@@ -31,7 +31,7 @@ exports
   lexical syntax
     [a-z][A-Za-z0-9]* -> VID
     [A-Z][A-Za-z0-9]* -> TID
-    [A-Z][A-Za-z0-9]* -> MID
+    [a-zA-Z][A-Za-z0-9]* -> MID
     [0-9]+ -> NAT
     "\""~[\"\\\n\r]*"\"" -> STRING
 
@@ -73,7 +73,12 @@ exports
     "VAL" "TYPE" "TRUE" "FALSE" -/- [A-Za-z0-9]
 
     "Nat" "Bool" "String" -/- [A-Za-z0-9]
-    
+
+  context-free syntax
+    {MID "."}+ -> ModuleId {cons("ModuleId")}
+
+  context-free restrictions
+    ModuleId -/- [\.]
 
 module Fomega-Type
 imports Fomega-Lexical
@@ -96,7 +101,7 @@ exports
     Kind "=>" Kind -> Kind {cons("KiArrow")}        
 
     AtomicType -> Type
-    MID "." TID -> Type {cons("TyQVar")}
+    ModuleId "." TID -> Type {cons("TyQVar")}
 
   context-free priorities
       Type Type -> Type {cons("TyApp"), left}
@@ -114,18 +119,17 @@ imports Fomega-Type
 imports Fomega-Expr
 
 exports
-  sorts Module Def Import
+  sorts Module Def Import ModuleDec
 
   context-free syntax
-    "MODULE" MID -> ModuleDec {cons("ModuleDec")}
+    "MODULE" ModuleId -> ModuleDec {cons("ModuleDec")}
     ModuleDec Import* Def* -> Module {cons("Module")}
-    "IMPORT" Qualified? MID -> Import {cons("Import")}
+    "IMPORT" Qualified? ModuleId -> Import {cons("Import")}
     Public? "VAL" VID "=" Expr -> Def {cons("ValDef")}
     Public? "TYPE" TID "=" Type -> Def {cons("TypeDef")}
 
     %% for pretty printer
     Def+ -> FomegaDefList {cons("FomegaBody")}
-
   
     "PUBLIC" -> Public {cons("Public")}
     "QUALIFIED" -> Qualified {cons("Qualified")}
@@ -142,7 +146,7 @@ exports
 
   context-free syntax
     VID -> Expr {cons("Var")}
-	MID "." VID -> Expr {cons("QVar")}
+	ModuleId "." VID -> Expr {cons("QVar")}
     "(" Expr ")" -> Expr {bracket}
     "{" {Field ","}* "}" -> Expr {cons("Record")}
     "<" Field ">" -> Expr {cons("Variant")}
@@ -194,6 +198,7 @@ imports Fomega-Module [
     TypeDecl => FomegaTypeDecl
     Kind => FomegaKind
     Module => FomegaModule
+	ModuleId => FomegaModuleId
     Def => FomegaDef
     Import => FomegaImport
     Expr => FomegaExpr
