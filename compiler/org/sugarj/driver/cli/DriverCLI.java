@@ -9,6 +9,7 @@ import static org.sugarj.common.Log.log;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
@@ -410,9 +411,12 @@ public class DriverCLI {
       for (String path : line.getOptionValue("buildpath").split(org.sugarj.common.Environment.classpathsep))
         environment.getIncludePath().add(pathArgument(path));
   
-    if (line.hasOption("sourcepath"))
+    if (line.hasOption("sourcepath")) {
+      HashSet<SourceLocation> sourcePath = new HashSet<SourceLocation>();
       for (String path : line.getOptionValue("sourcepath").split(org.sugarj.common.Environment.classpathsep))
-        environment.getSourcePath().add(new SourceLocation(pathArgument(path), environment));
+        sourcePath.add(new SourceLocation(pathArgument(path), environment));
+      environment.setSourcePath(sourcePath);
+    }
   
     if (line.hasOption("d"))
       environment.setBin(pathArgument(line.getOptionValue("d")));
