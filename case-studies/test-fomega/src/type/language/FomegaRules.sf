@@ -1,0 +1,7 @@
+MODULE type.language.FomegaRules
+
+IMPORT type.language.FomegaRelation
+IMPORT type.language.Rule
+
+==============
+() |- Nat :: *
