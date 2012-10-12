@@ -1,9 +1,14 @@
 MODULE Test
 
 IMPORT sub.Bar
+// IMPORT Foo
+IMPORT type.Check
 
-IMPORT Foo
+// TYPE App :: * => * = FUN A::* . A
 
-TYPE App = FUN A::* . A
+VAL x : Nat = (1,2,2,3)
 
-VAL x = (1,2,2,3)
+TYPE T2 :: * = Nat
+TYPE T :: * => * = \X :: * . T2
+
+
