@@ -13,3 +13,4 @@ builders
   provider : include/sugarj-java.jar                                                                          
                                                                                                               
   builder  : "Show abstract syntax (for selection)" = generate-aterm (openeditor) (realtime) (source)
+  builder  : "Show desugared abstract syntax (for selection)" = desugar-main (openeditor) (realtime) (source)
