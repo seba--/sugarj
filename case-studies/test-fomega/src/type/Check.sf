@@ -1,0 +1,9 @@
+MODULE type.Check
+
+rules
+  kcheck : (ctx, type, kind) -> []
+    where fail
+
+rules
+  tcheck : (ctx, term, type) -> []
+    where fail
