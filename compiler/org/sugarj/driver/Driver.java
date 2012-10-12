@@ -385,6 +385,10 @@ public class Driver{
       // TODO do something more sensible
       e.printStackTrace();
       success = false;
+    } catch (ATermCommands.MatchError e) {
+   // TODO do something more sensible
+      e.printStackTrace();
+      success = false;
     }
     finally {
       log.endTask(success, "done processing " + sourceFile, "failed to process " + sourceFile);
