@@ -3,6 +3,7 @@ MODULE type.language.RelationDeclaration
 IMPORT org.sugarj.languages.Sdf2;
 
 context-free syntax
+  TypeRelationDecl -> SugarDefElem
   "type" "relation" StrategoId TypeRelationSignature -> TypeRelationDecl {cons("TypeRelationDecl")}
 
   TypeRelationCtx TypeRelationSymbol TypeRelationTerm TypeRelationOfTypeSymbol TypeRelationType
@@ -19,21 +20,24 @@ lexical syntax
 lexical restrictions
   OperatorSymbol -/- ~[\ \n\t\r]
 
-context-free syntax
-  TypeRelationDecl -> ToplevelDeclaration
-
 
 desugarings
   desugar-type-relation-declaration
 
 rules
-  desugar-type-relation-declaration :
+  desugar-type-relation-declaration =
+    SugarBody(
+      where(filter(?TypeRelationDecl(_,_)); not(?[])); 
+      mapconcat(type-relation-declaration-to-sugar <+ ![<id>]))
+
+  type-relation-declaration-to-sugar :
     TypeRelationDecl(name, rel) ->
-    SugarBody([grammar-elem(context-free-syntax([prod])),
-               transformation-elem(Rules([rule]))])
+    [grammar-elem(context-free-syntax([prod | metavar-prods])),
+     transformation-elem(Rules([rule]))]
   where
     <type-rel-to-prod> rel => prod;
-    <type-rel-to-rule(|name)> rel => rule
+    <type-rel-to-rule(|name)> rel => rule;
+    <type-rel-metavar-prods> rel => metavar-prods
 
   type-rel-to-prod : 
     TypeRelationSig(ctxSort, relSymbol, termSort, typeOfSymbol, typeSort) ->
@@ -46,3 +50,14 @@ rules
     RDefNoArgs("type-relation-name",
                RuleNoCond(NoAnnoList(Str(relSymbol)), 
                           NoAnnoList(Str(name))))
+
+  type-rel-metavar-prods : 
+    TypeRelationSig(ctxSort, _, termSort, _, typeSort) ->
+    [<type-rel-metavar-prod> ctxSort,
+     <type-rel-metavar-prod> termSort,
+     <type-rel-metavar-prod> typeSort]
+
+  type-rel-metavar-prod :
+    name ->
+    prod([lit("~"), sort("StrategoVar")], sort(name), no-attrs())
+
