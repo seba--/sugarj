@@ -34,7 +34,8 @@ import org.strategoxt.imp.nativebundle.SDFBundleCommand;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.permissivegrammars.make_permissive;
-import org.strategoxt.stratego_sdf.pp_sdf_string_0_0;
+import org.strategoxt.stratego_gpp.box2text_string_0_1;
+import org.strategoxt.stratego_sdf.pp_sdf_box_0_0;
 import org.strategoxt.strc.pp_stratego_string_0_0;
 import org.strategoxt.tools.main_pack_sdf_0_0;
 import org.sugarj.LanguageLib;
@@ -415,9 +416,13 @@ public class SDFCommands {
    * @throws IOException 
    */
   public static String prettyPrintSDF(IStrategoTerm term, HybridInterpreter interp) throws IOException {
-    IStrategoTerm string = pp_sdf_string_0_0.instance.invoke(interp.getCompiledContext(), term);
-    if (string != null)
-      return Term.asJavaString(string);
+    Context ctx = interp.getCompiledContext();
+    IStrategoTerm boxTerm = pp_sdf_box_0_0.instance.invoke(ctx, term);
+    if (boxTerm != null) {
+      IStrategoTerm textTerm = box2text_string_0_1.instance.invoke(ctx, boxTerm, ATermCommands.factory.makeInt(80));
+      if (textTerm != null)
+        return ATermCommands.getString(textTerm);
+    }
     
     throw new RuntimeException("pretty printing SDF AST failed");
   }
