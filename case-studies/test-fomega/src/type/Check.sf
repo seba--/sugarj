@@ -3,7 +3,25 @@ MODULE type.Check
 IMPORT org.sugarj.languages.Fomega
 
 rules
-  constraint-error : TypeDef(_, name, kind, type) -> <kcheck> (<empty-ctx>, type, kind)
+  constraint-error : FomegaBody(defs) -> result
+    where <foldl(check-next-def)> (defs, (<empty-ctx>, ![]))
+
+  check-next-def : (def, (ctx, errors)) -> (ctx', errors')
+    where
+      <check-def> def => def-errors;
+      <concat> (errors, def-errors)  => errors';
+      <extend-ctx> (def, ctx) => ctx'
+
+  extend-ctx : (TypeDef(_, name, kind, _), ctx) -> <bind-tvar> (name, kind, ctx)
+  extend-ctx : (ValDef(_, name, type, _), ctx) -> <bind-var> (name, type, ctx)
+
+  check-def : (ctx, TypeDef(_, name, kind, type)) -> []
+    where <kcheck> (ctx, type, kind)
+  check-def : (ctx, TypeDef(_, name, kind, type)) -> [(type, <msg-wrong-kind> kind)]
+    where <not(kcheck)> (ctx, type, kind)
+
+  // TODO
+  check-def : ValDef(_, name, kind, type) -> []
 
 signature constructors
   Var : Var -> Var
@@ -15,8 +33,8 @@ rules
   bind-tvar : (tvar, kind, ctx) -> [(TVar(tvar), kind) | ctx]
 
   head : [a|_] -> a
-  lookup-var : (var, ctx) -> <head; filter( ?(Var(var),<id>) )> ctx
-  lookup-tvar : (tvar, ctx) -> <head; filter( ?(TVar(tvar),<id>) )> ctx
+  lookup-var : (var, ctx) -> <filter( ?(Var(var),<id>) ); head> ctx
+  lookup-tvar : (tvar, ctx) -> <filter( ?(TVar(tvar),<id>) ); head> ctx
 
 rules
   msg-expected-kind : (exp,act) -> <concat-strings> ["Expected kind ", exp, ", actual kind ", act, "."]
@@ -25,22 +43,16 @@ rules
 
 rules
   // K-TVar
-  kcheck : (ctx, TyVar(tvar), kind) -> (tvar, <msg-unbound> (tvar, "type variable"))
-    where
-      <not(lookup-tvar)> (tvar, ctx)
-
-  kcheck : (ctx, TyVar(tvar), kind) -> (tvar, <msg-expected-kind> (kind, kind'))
+  kcheck : (ctx, TyVar(tvar), kind) -> []
     where
       <lookup-tvar> (tvar, ctx) => kind';
-      <not(equal)> (kind, kind')   
+      <equal> (kind, kind')   
 
   // K-Abs
-  kcheck : (ctx, TyAbs(x, k1, t2), KiArrow(k1, k2)) -> (t2, <msg-wrong-kind> k2)
+  kcheck : (ctx, TyAbs(x, k1, t2), KiArrow(k1, k2)) -> []
     where
       <bind-tvar> (x, k1, ctx) => ctx';
-      <not(kcheck)> (ctx', t2, k2)
-
-  kcheck : (ctx, type, kind) -> (type, "kind check not imlemented yet")
+      <kcheck> (ctx', t2, k2)
 
 rules
   tcheck : (ctx, term, type) -> []
