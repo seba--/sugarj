@@ -21,8 +21,8 @@ signature
 
     Module: FomegaMID * List(FomegaImport) * List(FomegaDef) -> FomegaModule
     Import: Option(Qualified) * FomegaMID -> FomegaImport
-    ValDef: Option(Public) * FomegaVID * FomegaExpr -> FomegaDef
-    TypeDef: Option(Public) * FomegaTID * FomegaType -> FomegaDef
+    ValDef: Option(Public) * FomegaVID * FomegaType * FomegaExpr -> FomegaDef
+    TypeDef: Option(Public) * FomegaTID * FomegaKind * FomegaType -> FomegaDef
 
     Var: FomegaVID -> FomegaExpr
     QVar: FomegaMID * FomegaVID -> FomegaExpr
@@ -48,3 +48,5 @@ signature
     Field: FomegaVID * FomegaExpr -> FomegaField
 
 	Branch: FomegaVID * FomegaVID * FomegaExpr -> FomegaBranch
+
+    FomegaBody : Body -> FomegaBody

@@ -125,8 +125,8 @@ exports
     "MODULE" ModuleId -> ModuleDec {cons("ModuleDec")}
     ModuleDec Import* Def* -> Module {cons("Module")}
     "IMPORT" Qualified? ModuleId -> Import {cons("Import")}
-    Public? "VAL" VID "=" Expr -> Def {cons("ValDef")}
-    Public? "TYPE" TID "=" Type -> Def {cons("TypeDef")}
+    Public? "VAL" VID ":" Type "=" Expr -> Def {cons("ValDef")}
+    Public? "TYPE" TID "::" Kind "=" Type -> Def {cons("TypeDef")}
 
     %% for pretty printer
     Def+ -> FomegaDefList {cons("FomegaBody")}
