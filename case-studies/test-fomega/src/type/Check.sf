@@ -41,7 +41,17 @@ rules
   msg-wrong-kind : act -> <concat-strings> ["Wrong kind ", act, "."]
   msg-unbound : (thing, what) -> <concat-strings> ["Unbound ", what, ": ", thing]
 
+
 rules
+  // K-Nat
+  kcheck : (ctx, TyNat, KiStar) -> []
+
+  // K-Bool
+  kcheck : (ctx, TyBool, KiStar) -> []
+
+  // K-String
+  kcheck : (ctx, TyString, KiStar) -> []
+
   // K-TVar
   kcheck : (ctx, TyVar(tvar), kind) -> []
     where
