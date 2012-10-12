@@ -1,0 +1,6 @@
+MODULE type.language.Test
+
+IMPORT type.language.RelationDeclaration
+
+type relation tcheck
+  Ctx |- Term : Type
