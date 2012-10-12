@@ -1,9 +1,48 @@
 MODULE type.Check
 
+IMPORT org.sugarj.languages.Fomega
+
 rules
-  kcheck : (ctx, type, kind) -> []
-    where fail
+  constraint-error : TypeDef(_, name, kind, type) -> <kcheck> (<empty-ctx>, type, kind)
+
+signature constructors
+  Var : Var -> Var
+  TVar : TVar -> TVar
+
+rules
+  empty-ctx : x -> []
+  bind-var : (var, type, ctx) -> [(Var(var), type) | ctx]
+  bind-tvar : (tvar, kind, ctx) -> [(TVar(tvar), kind) | ctx]
+
+  head : [a|_] -> a
+  lookup-var : (var, ctx) -> <head; filter( ?(Var(var),<id>) )> ctx
+  lookup-tvar : (tvar, ctx) -> <head; filter( ?(TVar(tvar),<id>) )> ctx
+
+rules
+  msg-expected-kind : (exp,act) -> <concat-strings> ["Expected kind ", exp, ", actual kind ", act, "."]
+  msg-wrong-kind : act -> <concat-strings> ["Wrong kind ", act, "."]
+  msg-unbound : (thing, what) -> <concat-strings> ["Unbound ", what, ": ", thing]
+
+rules
+  // K-TVar
+  kcheck : (ctx, TyVar(tvar), kind) -> (tvar, <msg-unbound> (tvar, "type variable"))
+    where
+      <not(lookup-tvar)> (tvar, ctx)
+
+  kcheck : (ctx, TyVar(tvar), kind) -> (tvar, <msg-expected-kind> (kind, kind'))
+    where
+      <lookup-tvar> (tvar, ctx) => kind';
+      <not(equal)> (kind, kind')   
+
+  // K-Abs
+  kcheck : (ctx, TyAbs(x, k1, t2), KiArrow(k1, k2)) -> (t2, <msg-wrong-kind> k2)
+    where
+      <bind-tvar> (x, k1, ctx) => ctx';
+      <not(kcheck)> (ctx', t2, k2)
+
+  kcheck : (ctx, type, kind) -> (type, "kind check not imlemented yet")
 
 rules
   tcheck : (ctx, term, type) -> []
     where fail
+
