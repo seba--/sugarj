@@ -1,4 +1,4 @@
-MODULE type.language.Test
+MODULE type.language.FomegaRelation
 
 IMPORT org.sugarj.languages.Fomega
 IMPORT type.language.RelationDeclaration
@@ -8,5 +8,5 @@ context-free syntax
   Ctx ";" FomegaVID ":" FomegaType -> Ctx {cons("CtxBindVar")}
   Ctx ";" FomegaTID "::" FomegaKind -> Ctx {cons("CtxBindTVar")}
 
-type relation tcheck
-  Ctx |- FomegaType : FomegaKind
+type relation kcheck
+  Ctx |- FomegaType :: FomegaKind

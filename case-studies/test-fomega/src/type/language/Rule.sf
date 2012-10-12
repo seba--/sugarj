@@ -1,0 +1,24 @@
+MODULE type.language.Rule
+
+context-free syntax
+  TypeRule -> SugarDefElem
+
+  RulePremises RuleSep RuleConsequence
+    -> TypeRule {cons("TypeRule"),
+                 layout(1.first.col == 2.first.col &&
+                        2.first.col == 3.first.col)}
+
+  PremiseList -> RulePremises {cons("PremiseList")}
+              -> RulePremises {cons("NoPremises")}
+  OffTypeRelation -> RuleConsequence {cons("Consequence")}
+
+  OffTypeRelation -> PremiseList
+  OffTypeRelation PremiseList -> PremiseList {cons("PremiseCons"), layout(1.first.col == 2.first.col)}
+
+  TypeRelation -> OffTypeRelation {layout(1.first.col < 1.left.col)}
+
+lexical syntax
+  "===" "="* -> RuleSep
+lexical restrictions
+  RuleSep -/- [\=]
+

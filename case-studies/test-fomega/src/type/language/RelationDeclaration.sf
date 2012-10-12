@@ -35,15 +35,18 @@ rules
     [grammar-elem(context-free-syntax([prod | metavar-prods])),
      transformation-elem(Rules([rule]))]
   where
-    <type-rel-to-prod> rel => prod;
+    <type-rel-to-prod(|name)> rel => prod;
     <type-rel-to-rule(|name)> rel => rule;
     <type-rel-metavar-prods> rel => metavar-prods
 
-  type-rel-to-prod : 
+  type-rel-to-prod(|name) : 
     TypeRelationSig(ctxSort, relSymbol, termSort, typeOfSymbol, typeSort) ->
     prod([sort(ctxSort), lit(relSymbol), sort(termSort), lit(typeOfSymbol), sort(typeSort)],
          sort("TypeRelation"),
-         no-attrs())
+         attrs([cons-attr]))
+  where
+    <conc-strings> (name, "TypeRelation") => cons-name;
+    !term(default(appl(unquoted("cons"), [fun(quoted(cons-name))]))) => cons-attr
 
   type-rel-to-rule(|name) :
     TypeRelationSig(ctxSort, relSymbol, termSort, typeOfSymbol, typeSort) ->
@@ -59,5 +62,8 @@ rules
 
   type-rel-metavar-prod :
     name ->
-    prod([lit("~"), sort("StrategoVar")], sort(name), no-attrs())
+    prod([lit("~"), sort("StrategoVar")], sort(name), attrs([cons-attr]))
+  where
+    <conc-strings> (name, "Var") => cons-name;
+    !term(default(appl(unquoted("cons"), [fun(quoted(cons-name))]))) => cons-attr
 
