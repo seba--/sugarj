@@ -411,7 +411,7 @@ public class DriverCLI {
       for (String path : line.getOptionValue("buildpath").split(org.sugarj.common.Environment.classpathsep))
         environment.getIncludePath().add(pathArgument(path));
   
-    if (line.hasOption("sourcepath")){
+    if (line.hasOption("sourcepath")) {
       HashSet<SourceLocation> sourcePath = new HashSet<SourceLocation>();
       for (String path : line.getOptionValue("sourcepath").split(org.sugarj.common.Environment.classpathsep))
         sourcePath.add(new SourceLocation(pathArgument(path), environment));
