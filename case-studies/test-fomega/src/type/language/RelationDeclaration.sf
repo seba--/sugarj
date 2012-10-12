@@ -1,0 +1,48 @@
+MODULE type.language.RelationDeclaration
+
+IMPORT org.sugarj.languages.Sdf2;
+
+context-free syntax
+  "type" "relation" StrategoId TypeRelationSignature -> TypeRelationDecl {cons("TypeRelationDecl")}
+
+  TypeRelationCtx TypeRelationSymbol TypeRelationTerm TypeRelationOfTypeSymbol TypeRelationType
+    -> TypeRelationSignature {cons("TypeRelationSig")}
+  
+  Sdf2Sort -> TypeRelationCtx
+  OperatorSymbol -> TypeRelationSymbol
+  Sdf2Sort -> TypeRelationTerm
+  OperatorSymbol -> TypeRelationOfTypeSymbol
+  Sdf2Sort -> TypeRelationType
+
+lexical syntax
+  ~[\ \n\t\r]+ -> OperatorSymbol
+lexical restrictions
+  OperatorSymbol -/- ~[\ \n\t\r]
+
+context-free syntax
+  TypeRelationDecl -> ToplevelDeclaration
+
+
+desugarings
+  desugar-type-relation-declaration
+
+rules
+  desugar-type-relation-declaration :
+    TypeRelationDecl(name, rel) ->
+    SugarBody([grammar-elem(context-free-syntax([prod])),
+               transformation-elem(Rules([rule]))])
+  where
+    <type-rel-to-prod> rel => prod;
+    <type-rel-to-rule(|name)> rel => rule
+
+  type-rel-to-prod : 
+    TypeRelationSig(ctxSort, relSymbol, termSort, typeOfSymbol, typeSort) ->
+    prod([sort(ctxSort), lit(relSymbol), sort(termSort), lit(typeOfSymbol), sort(typeSort)],
+         sort("TypeRelation"),
+         no-attrs())
+
+  type-rel-to-rule(|name) :
+    TypeRelationSig(ctxSort, relSymbol, termSort, typeOfSymbol, typeSort) ->
+    RDefNoArgs("type-relation-name",
+               RuleNoCond(NoAnnoList(Str(relSymbol)), 
+                          NoAnnoList(Str(name))))
