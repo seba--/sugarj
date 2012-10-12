@@ -1,7 +1,6 @@
 MODULE Foo
 
-signature constructors
-  TyAbs : A * A * A -> A
+IMPORT org.sugarj.languages.Fomega
 
 context-free syntax
   "FUN" FomegaTID "::" FomegaKind "." FomegaType -> FomegaType {cons("FunTyAbs")}

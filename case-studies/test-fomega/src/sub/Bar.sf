@@ -1,0 +1,4 @@
+MODULE sub.Bar
+
+IMPORT sub.subsub.Barf
+

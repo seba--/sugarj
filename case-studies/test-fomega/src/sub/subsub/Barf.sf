@@ -1,0 +1,3 @@
+MODULE sub.subsub.Barf
+
+VAL x = 1

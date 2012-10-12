@@ -1,7 +1,9 @@
 MODULE Test
 
+IMPORT sub.Bar
+
 IMPORT Foo
 
 TYPE App = FUN A::* . A
 
-
+VAL x = (1,2,2,3)
