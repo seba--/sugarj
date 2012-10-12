@@ -19,6 +19,8 @@
    TyAbs                     -- KW["\\"] _1 KW["::"] _2 KW["."] _3,
    TyMu                      -- KW["MU"] _1 KW["."] _2,
    ModuleDec                 -- KW["MODULE"] _1,
+   ModuleId                  -- H hs=0 [_1],
+   ModuleId.1:iter-sep       -- H hs=0 [_1 KW["."]],
    Module                    -- _1 _2 _3,
    Module.2:iter-star        -- _1,
    Module.3:iter-star        -- _1,
