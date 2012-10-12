@@ -12,3 +12,7 @@ rules
 
 desugarings
   desugar-fun-type-abs
+
+rules
+  constraint-warning :
+    t@FunTyAbs(name, kind, type) -> (t, "\"FUN\" keyword is depreciated.")
