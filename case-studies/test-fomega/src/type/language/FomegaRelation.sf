@@ -17,3 +17,6 @@ type relation kcheck
 
 type relation tcheck
   Ctx |- FomegaExpr : FomegaType
+
+//TODO SugarJ compiler should forward editor configs whenever some language declaration is present
+colorer

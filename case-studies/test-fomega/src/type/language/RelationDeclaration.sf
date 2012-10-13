@@ -10,9 +10,9 @@ context-free syntax
     -> TypeRelationSignature {cons("TypeRelationSig")}
   
   Sdf2Sort -> TypeRelationCtx
-  OperatorSymbol -> TypeRelationSymbol
+  OperatorSymbol -> TypeRelationSymbol {cons("TypeRelationSymbol")}
   Sdf2Sort -> TypeRelationTerm
-  OperatorSymbol -> TypeRelationOfTypeSymbol
+  OperatorSymbol -> TypeRelationOfTypeSymbol {cons("TypeRelationOfTypeSymbol")}
   Sdf2Sort -> TypeRelationType
 
 lexical syntax
@@ -40,7 +40,7 @@ rules
     <type-rel-metavar-prods> rel => metavar-prods
 
   type-rel-to-prod(|name) : 
-    TypeRelationSig(ctxSort, relSymbol, termSort, typeOfSymbol, typeSort) ->
+    TypeRelationSig(ctxSort, TypeRelationSymbol(relSymbol), termSort, TypeRelationOfTypeSymbol(typeOfSymbol), typeSort) ->
     prod([sort(ctxSort), lit(relSymbol), sort(termSort), lit(typeOfSymbol), sort(typeSort)],
          sort("TypeRelation"),
          attrs([cons-attr]))
@@ -49,7 +49,7 @@ rules
     !term(default(appl(unquoted("cons"), [fun(quoted(cons-name))]))) => cons-attr
 
   type-rel-to-rule(|name) :
-    TypeRelationSig(ctxSort, relSymbol, termSort, typeOfSymbol, typeSort) ->
+    TypeRelationSig(ctxSort, TypeRelationSymbol(relSymbol), termSort, TypeRelationOfTypeSymbol(typeOfSymbol), typeSort) ->
     RDefNoArgs("type-relation-name",
                RuleNoCond(NoAnnoList(Str(relSymbol)), 
                           NoAnnoList(Str(name))))
@@ -67,3 +67,7 @@ rules
     !"Metavar" => cons-name;
     !term(default(appl(unquoted("cons"), [fun(quoted(cons-name))]))) => cons-attr
 
+
+colorer
+  darkorange = 200 100 0
+  _.Metavar : darkgreen (recursive)
