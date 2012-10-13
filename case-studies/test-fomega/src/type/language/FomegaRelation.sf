@@ -8,6 +8,10 @@ context-free syntax
   Ctx ";" FomegaVID ":" FomegaType -> Ctx {cons("CtxBindVar")}
   Ctx ";" FomegaTID "::" FomegaKind -> Ctx {cons("CtxBindTVar")}
 
+syntax
+  "V~" <StrategoVar-CF> -> <FomegaVID-CF> {cons("Metavar"), prefer}
+  "T~" <StrategoVar-CF> -> <FomegaTID-CF> {cons("Metavar"), prefer}
+
 type relation kcheck
   Ctx |- FomegaType :: FomegaKind
 

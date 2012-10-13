@@ -64,6 +64,6 @@ rules
     name ->
     prod([lit("~"), sort("StrategoVar")], sort(name), attrs([cons-attr]))
   where
-    <conc-strings> (name, "Var") => cons-name;
+    !"Metavar" => cons-name;
     !term(default(appl(unquoted("cons"), [fun(quoted(cons-name))]))) => cons-attr
 
