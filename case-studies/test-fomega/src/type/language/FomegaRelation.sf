@@ -10,3 +10,6 @@ context-free syntax
 
 type relation kcheck
   Ctx |- FomegaType :: FomegaKind
+
+type relation tcheck
+  Ctx |- FomegaExpr : FomegaType
