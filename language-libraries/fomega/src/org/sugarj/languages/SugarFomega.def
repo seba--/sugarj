@@ -14,6 +14,7 @@ exports
     FomegaModuleDec FomegaImport* FomegaOrSugarDec? -> SugarCompilationUnit {cons("CompilationUnit")}
     FomegaDef+ -> FomegaOrSugarDec {cons("FomegaBody"), longest-match}
     SugarDefElem+ -> FomegaOrSugarDec {cons("SugarBody"), longest-match}
+    EditorServiceSection+ -> FomegaOrSugarDec {cons("EditorBody"), longest-match}
 
   context-free syntax
     Grammar        -> SugarDefElem {cons("grammar-elem")}
