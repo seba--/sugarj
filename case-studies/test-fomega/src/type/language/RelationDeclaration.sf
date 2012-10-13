@@ -70,4 +70,5 @@ rules
 
 colorer
   darkorange = 200 100 0
+  _.Metavar : gray
   _.Metavar : darkgreen (recursive)
