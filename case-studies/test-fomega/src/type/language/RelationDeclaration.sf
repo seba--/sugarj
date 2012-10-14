@@ -1,6 +1,7 @@
 MODULE type.language.RelationDeclaration
 
-IMPORT org.sugarj.languages.Sdf2;
+IMPORT org.sugarj.languages.Sdf2
+IMPORT org.sugarj.languages.Stratego
 
 context-free syntax
   TypeRelationDecl -> SugarDefElem
@@ -45,13 +46,15 @@ rules
          sort("TypeRelation"),
          attrs([cons-attr]))
   where
-    <conc-strings> (name, "TypeRelation") => cons-name;
+    <conc-strings> (name, "-TypeRelation") => cons-name;
     !term(default(appl(unquoted("cons"), [fun(quoted(cons-name))]))) => cons-attr
+
+  take-type-relation-name = string-as-chars(back-split-at(|13); ?(<id>,_))
 
   type-rel-to-rule(|name) :
     TypeRelationSig(ctxSort, TypeRelationSymbol(relSymbol), termSort, TypeRelationOfTypeSymbol(typeOfSymbol), typeSort) ->
     RDefNoArgs("type-relation-name",
-               RuleNoCond(NoAnnoList(Str(relSymbol)), 
+               RuleNoCond(Tuple([NoAnnoList(Str(relSymbol)), NoAnnoList(Str(typeOfSymbol))]), 
                           NoAnnoList(Str(name))))
 
   type-rel-metavar-prods : 
@@ -67,8 +70,10 @@ rules
     !"Metavar" => cons-name;
     !term(default(appl(unquoted("cons"), [fun(quoted(cons-name))]))) => cons-attr
 
+signature constructors
+  Metavar : String -> Term
 
 colorer
-  darkorange = 200 100 0
-  _.Metavar : gray
-  _.Metavar : darkgreen (recursive)
+  darkergreen = 0 80 0
+  _.Metavar : 190 190 190
+  _.Metavar : darkergreen (recursive)

@@ -1,5 +1,9 @@
 MODULE type.language.Rule
 
+IMPORT org.sugarj.languages.Stratego
+IMPORT concretesyntax.Stratego
+IMPORT type.language.RelationDeclaration
+
 context-free syntax
   TypeRule -> SugarDefElem
 
@@ -23,3 +27,55 @@ lexical restrictions
   RuleSep -/- [\=]
 context-free syntax
   RuleSep StrategoVar? -> RuleSepName {cons("RuleName"), layout(1.first.line == 2.last.line)}
+
+
+desugarings
+  desugar-type-rule
+
+rules
+  TrmFromTerm = 
+    ?Metavar(<MetaExplode>)
+
+  desugar-type-rule :
+    TypeRule(pres, sep, post@Consequence(consname#([ctx,term,type]))) -> 
+    transformation-elem(rule)
+  where
+    <take-type-relation-name> consname => name;
+    <type-rule-stratego(|name)> (ctx, term, type, pres) => rule
+
+  type-rule-stratego(|name) :
+    (ctx, term, type, pres) ->
+    |[ rules
+         ~name =
+           ?(term~tctx, term~tterm, term~ttype)
+           < strategy~(<type-rule-stratego-pres> pres)
+           + select-term;
+             ![(<id>, <concat-strings>["Could not validate subject. Expected: ", term~type-string])]
+    ]|
+  where
+    <trm-explode> ctx => tctx;
+    <trm-explode> term => tterm;
+    <trm-explode> type => ttype;
+    <write-to-string; trm-explode> type => type-string
+
+  select-term = ?(_,<id>,_)
+
+  type-rule-stratego-pres :
+    NoPremises -> |[ ![] ]|
+  type-rule-stratego-pres :
+    PremiseList(l) -> |[ !term~<type-rule-stratego-pres> l; concat ]|
+  type-rule-stratego-pres :
+    PremiseCons(rel, rest) -> 
+    ListTail([<type-rule-stratego-pre> rel],
+              <type-rule-stratego-pres> rest)
+  type-rule-stratego-pres :
+    rel ->
+    List([<type-rule-stratego-pre> rel])
+
+  type-rule-stratego-pre :
+    consname#([ctx, term, type]) ->
+    App(CallNoArgs(SVar(name)),
+        NoAnnoList(Tuple([<trm-explode> ctx, <trm-explode> term, <trm-explode> type])))
+  where
+    <take-type-relation-name> consname => name
+
