@@ -1,0 +1,90 @@
+/** 
+* Use this module to detect semantic constraint violations, 
+* i.e. report preservation errors/warnings for newly introduced or solved constraint errors/warnings.
+* REMARK: Only use this module in case nambinding preservations are not checked.
+* Otherwise, use behavior-preservation.str
+*/
+module lib-refactoring/correctness-preservation.generated
+
+imports
+  libstratego-lib
+  lib/editor-common.generated
+
+strategies
+
+    /**
+   * Returns correctness preservation errors and warnings by analyzing the ast-change.
+   * The analysis covers semantic-constraint errors and warnings,
+   * reporting problems for 1) introduced and 2) (possible unintended) solved issues.
+   * 
+   * The AST changes must be a List of tuples (term-before, term-after) whereby
+   * 1) term-before and term-after are the terms before, respectively after the refactoring transformation. 
+   * 2) both terms can be semantically analyzed by the "analyze-top" strategy
+   *
+   * @type List(Tuple(ast-before, ast-after)) -> Tuple(List(errors), List(warnings))
+   * @param analyse             t -> t  sets namebinding annotation and prepares for checking semantic constraints
+   * @param constraint-error    t -> (t, String)
+   * @param constraint-warning  t -> (t, String)
+   */
+  get-correctness-violations(analyze, constraint-error, constraint-warning):
+    ast-changes -> 
+    <foldr(
+      !([],[]), 
+      tuple-conc, 
+      get-correctness-violations-astchange(
+      	analyze, 
+      	constraint-error, 
+      	constraint-warning
+      )
+  )> ast-changes
+
+	
+  /**
+   * Returns correctness preservation errors and warnings by analyzing the ast-change.
+   * The analysis covers semantic-constraint errors and warnings,
+   * reporting problems for 1) introduced and 2) (possible unintended) solved issues.
+   * 
+   * The AST change must be a tuple (term-before, term-after) whereby
+   * 1) term-before and term-after are the terms before, respectively after the refactoring transformation. 
+   * 2) both terms can be semantically analyzed by the "analyze-top" strategy
+   *
+   * @type  Tuple(ast-before, ast-after) -> Tuple(List(errors), List(warnings))
+   * @param analyse             t -> t   prepares for checking semantic constraints
+   * @param constraint-error    t -> (t, String)
+   * @param constraint-warning  t -> (t, String)
+   */  
+  get-correctness-violations-astchange(analyze, constraint-error, constraint-warning):
+    (ast-before, ast-after) -> (errors, warnings)
+    where
+      ast-before-reanalyzed := <analyze> ast-before; //TODO: why needed?
+      //index-transaction(
+        errors-before   := <collect-all(constraint-error, conc)> ast-before-reanalyzed; 
+        warnings-before := <collect-all(constraint-warning, conc)> ast-before-reanalyzed; 
+      //);
+      //ast with name annotations that express the ACTUAL binding structure
+      ast-after-reanalyzed := <analyze> ast-after;
+      //index-transaction(
+        errors-after   := <collect-all(constraint-error, conc)> ast-after-reanalyzed;
+        warnings-after := <collect-all(constraint-warning, conc)> ast-after-reanalyzed;
+      //);
+      errors := <semantic-constraint-preservation-issues> (errors-before, errors-after);
+      warnings := <semantic-constraint-preservation-issues> (warnings-before, warnings-after)
+
+
+  semantic-constraint-preservation-issues:
+    (old-issues, new-issues) -> <conc> (introduced-issues, solved-issues)
+    where
+      introduced-issues := <diff(is-same-issue)> (new-issues, old-issues);
+      solved-issues     := <diff(is-same-issue); map(!(<Fst>, $[SOLVED, [<Snd>]]))> (old-issues, new-issues)
+  
+  is-same-issue:
+    issue-tuple@((trm1, message1), (trm2, message2)) -> issue-tuple
+    where
+      <origin-equal(|trm1)> trm2 <+
+      <origin-equal(|trm2)> trm1
+    where
+      <equal> (message1, message2) <+
+      <equal> (<has-annos; get-annos> trm1, <get-annos> trm2)
+      
+  tuple-conc:
+    ((errs1, warns1),(errs2, warns2)) -> (<conc>(errs1, errs2), <conc>(warns1, warns2)) 
