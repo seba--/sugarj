@@ -5,8 +5,8 @@ IMPORT type.language.RelationDeclaration
 
 context-free syntax
   "()" -> Ctx {cons("CtxEmpty")}
-  Ctx ";" FomegaVID ":" FomegaType -> Ctx {cons("CtxBindVar")}
-  Ctx ";" FomegaTID "::" FomegaKind -> Ctx {cons("CtxBindTVar")}
+  "(" Ctx ";" FomegaVID ":" FomegaType ")" -> Ctx {cons("CtxBindVar")}
+  "(" Ctx ";" FomegaTID "::" FomegaKind ")" -> Ctx {cons("CtxBindTVar")}
 
 syntax
   "V~" <StrategoVar-CF> -> <FomegaVID-CF> {cons("Metavar"), prefer}
