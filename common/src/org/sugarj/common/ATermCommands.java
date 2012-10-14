@@ -79,6 +79,22 @@ public class ATermCommands {
     }
   }
   
+  public static class PrettyPrintError extends Error {
+    private static final long serialVersionUID = 1435096897087780884L;
+    private IStrategoTerm term;
+    private String msg;
+    public PrettyPrintError(IStrategoTerm term, String msg) {
+      this.term = term;
+      this.msg = msg;
+    }
+    public IStrategoTerm getTerm() {
+      return term;
+    }
+    public String getMsg() {
+      return msg;
+    }
+  }
+  
   public static ITermFactory factory = new ImploderOriginTermFactory(new ParentTermFactory(new TermFactory().getFactoryWithStorageType(IStrategoTerm.MUTABLE)));
   public static ParseTableManager parseTableManager = new ParseTableManager(factory, false);
 
@@ -302,15 +318,15 @@ public class ATermCommands {
     IToken left = ImploderAttachment.getLeftToken(toplevelDecl);
     IToken right = ImploderAttachment.getRightToken(toplevelDecl);
     
-    Path file = null;
-    try {
-      file = atermToFile(toplevelDecl);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+//    Path file = null;
+//    try {
+//      file = atermToFile(toplevelDecl);
+//    } catch (IOException e) {
+//      e.printStackTrace();
+//    }
     
     if (left == null || right == null)
-      throw new IllegalStateException(msg + ": " + file);
+      throw new IllegalStateException(msg);
     
     for (int i = left.getIndex(), max = right.getIndex(); i <= max; i++) {
       Token tok = ((Token) left.getTokenizer().getTokenAt(i));

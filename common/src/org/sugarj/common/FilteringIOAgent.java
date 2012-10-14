@@ -24,8 +24,8 @@ public class FilteringIOAgent extends IOAgent {
    */
   private int includeLogLevel;
   
-  private final Writer outWriter = new FilteringWriter(super.getWriter(CONST_STDOUT));
-  private final Writer errWriter = new FilteringWriter(super.getWriter(CONST_STDERR));
+  private final Writer outWriter = new FilteringWriter(new org.sugarj.util.PrintStreamWriter(Log.out));
+  private final Writer errWriter = new FilteringWriter(new org.sugarj.util.PrintStreamWriter(Log.err));
   
   public FilteringIOAgent(String... regexs) {
     this(Log.NONE, regexs);

@@ -5,9 +5,6 @@ import static org.sugarj.common.Log.log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,6 +31,7 @@ import org.sugarj.LanguageLib;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
+import org.sugarj.common.FilteringIOAgent;
 import org.sugarj.common.JavaCommands;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.AbsolutePath;
@@ -56,6 +54,8 @@ public class STRCommands {
   
   private final static Pattern STR_FILE_PATTERN = Pattern.compile(".*\\.str");
 
+  private static IOAgent strjIOAgent = new FilteringIOAgent(Log.TRANSFORM | Log.DETAIL);
+  
   /**
    *  Compiles a {@code *.str} file to a single {@code *.java} file. 
    */
@@ -92,25 +92,7 @@ public class STRCommands {
     try {
       // XXX strj does not create Java file with non-fresh context
       Context c = org.strategoxt.strj.strj.init();
-      
-      c.setIOAgent(new IOAgent() {
-        private final PrintStream err = new PrintStream(log, true);
-        private final Writer errWriter = new org.sugarj.util.PrintStreamWriter(err);
-        
-        public Writer getWriter(int fd) {
-            if (fd == CONST_STDERR)
-              return errWriter; 
-            else 
-              return super.getWriter(fd);
-        }
-        
-        public OutputStream internalGetOutputStream(int fd) {
-            if (fd == CONST_STDERR)
-              return err; 
-            else 
-              return super.internalGetOutputStream(fd);
-        }
-      });
+      c.setIOAgent(strjIOAgent);
       
       c.invokeStrategyCLI(main_strj_0_0.instance, "strj", cmd.toArray(new String[cmd.size()]));
     }
