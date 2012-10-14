@@ -13,12 +13,12 @@ IMPORT type.language.Rule
 () |- String :: *
 
 ========================== K-Var
-~ctx; T~X::~k |- T~X :: ~k
+(~ctx; T~X::~k) |- T~X :: ~k
 
 ~ctx |- T~X :: ~k
 ========================== K-Weak
-~ctx; T~Y::~k |- T~X :: ~k
+(~ctx; T~Y::~k) |- T~X :: ~k
 
-~ctx; T~X :: ~k1 |- ~T :: ~k2
+(~ctx; T~X :: ~k1) |- ~T :: ~k2
 ===================================== K-TAbs
 ~ctx |- \T~X :: ~k1. ~T :: ~k1 => ~k2
