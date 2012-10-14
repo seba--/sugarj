@@ -45,6 +45,7 @@ import org.strategoxt.lang.StrategoException;
 import org.sugarj.LanguageLib;
 import org.sugarj.LanguageLibFactory;
 import org.sugarj.common.ATermCommands;
+import org.sugarj.common.ATermCommands.PrettyPrintError;
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
@@ -950,6 +951,8 @@ public class Driver{
       if (FileCommands.exists(strExtension))
         buildCompoundStrModule();
 
+    } catch (PrettyPrintError e) {
+      setErrorMessage(toplevelDecl, e.getMsg());
     } finally {
       log.endTask();
     }

@@ -424,7 +424,7 @@ public class SDFCommands {
         return ATermCommands.getString(textTerm);
     }
     
-    throw new RuntimeException("pretty printing SDF AST failed");
+    throw new ATermCommands.PrettyPrintError(term, "pretty printing SDF AST failed");
   }
   
   /**
@@ -439,7 +439,7 @@ public class SDFCommands {
     if (string != null)
       return Term.asJavaString(string);
     
-    throw new RuntimeException("pretty printing STR AST failed: " + ATermCommands.atermToFile(term));
+    throw new ATermCommands.PrettyPrintError(term, "pretty printing STR AST failed: " + ATermCommands.atermToFile(term));
   }
   
   private static String sdfToDef(String sdf) {
