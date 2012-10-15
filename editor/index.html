@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="SugarJ : Library-based Language Extensibility" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="../stylesheets/stylesheet.css">
+
+    <title>SugarJ</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/seba&#45;&#45;/sugarj">Fork Me on GitHub</a>
+
+          <a href=".."><h1 id="project_title">SugarJ</h1>
+          <h2 id="project_tagline">Library-based Language Extensibility</h2></a>
+
+          <section id="downloads">
+            <a class="zip_download_link" href="https://github.com/seba&#45;&#45;/sugarj/zipball/master">Download SugarJ as a .zip file</a>
+            <a class="eclipse_download_link" href="http://update.sugarj.org/">SugarJ Eclipse plugin</a>
+          </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h2>News</h2>
+
+<ul>
+<li>Support for <a href="https://groups.google.com/d/msg/sugarj/Ip9lPTx9daU/JdFVg59j9GgJ">multilingual syntactic extensibility</a> integrated into master branch and available as Eclipse update. Currently supported languages: Java, Haskell, Prolog.</li>
+<li><a href="http://sugarj.org/sugarhaskell.pdf">SugarHaskell paper</a> accepted at Haskell Symposium 2012</li>
+<li><a href="http://groups.google.com/group/sugarj">SugarJ Google group</a>: Discuss and stay up-to-date</li>
+<li><a href="https://groups.google.com/d/msg/sugarj/Txx0CRaOHTw/cNaFyPsr0t8J">Syntactic extensibility for Haskell</a>: SugarHaskell is up and running.<br/>
+    Install it from our <a href="http://update.sugarj.org/"> Eclipse update site</a>, including IDE support and layout-sensitive parsing.</li>
+<li>What does language composition really mean?
+Paper at LDTA 2012
+[ <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications.html#ErdwegGR12">abstract</a>
+| <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications/languagecomposition.pdf">.pdf</a> ]</li>
+</ul>
+
+
+<h2>Description</h2>
+
+<p>In essence, the goal of SugarJ is to enable expressing programms in the syntax most natural to the problem domain the program is supposed to address. For instance, when generating XML documents in Java, the programmer should be able to use standard XML syntax instead of Java syntax for calling JDOM, say.</p>
+
+<p>We propose to integrate syntactic extensibility into the main extension mechanism of programming languages—libraries. Libraries thus export syntactic sugar in addition to semantic artifacts traditionally exported: classes, methods, data types, etc. When importing a library, the syntax of the general purpose language is augmented by the syntactic definition exported by the library.</p>
+
+<p><img src="xmleditorscreenshot.jpg" alt="SugarJ in action"></p>
+
+<p>Notably, libraries that contain syntactic sugar retain the composability and self-applicability of conventional libraries: syntactic sugar can be composed by importing multiple libraries; syntactic sugar can be used in the development of a library that exports syntactic sugar itself. This enables the embedding of DSLs and the development of meta-DSLs, that is a DSL for defining DSLs, without ever leaving or reasoning outside of a SugarJ program.</p>
+
+<h2>Installation and Usage</h2>
+
+<em>
+Please ensure enough stack space (about 4-16 MB) is available for
+the SDF parser. You can set the stack space of your Java runtime using the
+-Xss16m command line argument when starting Eclipse or setting -Xss16m in your
+eclipse.ini file.
+</em>
+
+<p>For a quick start, install our Eclipse plugin available at 
+<a href="http://update.sugarj.org/">http://update.sugarj.org/</a>.
+The update dialog will let you select any number of our currently supported
+host languages: Java (*.sugj), Haskell (*.shs), Prolog (*.sugp).
+</p>
+
+<p>The source code of all components of SugarJ is available on <a href="http://github.com/seba&#45;&#45;/sugarj">github</a>.<br/>
+<a href="http://github.com/seba&#45;&#45;/sugarj/tree/master/case-studies">case studies</a>,
+<a href="http://github.com/seba&#45;&#45;/sugarj/tree/master/compiler">compiler</a>,
+<a href="http://github.com/seba&#45;&#45;/sugarj/tree/master/editor">IDE</a>,
+<a href="http://github.com/seba&#45;&#45;/sugarj/tree/master/language-libraries">language libraries</a>.
+</p>
+
+<p>We also prepared some information on <a href="../first-steps.html">first steps with SugarJ</a>.</p>
+
+<h3>Subprojects</h3>
+
+We are currently developing a number of extensions of SugarJ. The relevant code can be found as follows:
+
+<ul>
+<li>SugarHaskell: integrated into <a href="http://github.com/seba--/sugarj/tree/master">master branch</a> with case studies
+    located in <a href="http://github.com/seba--/sugarj/tree/master/case-studies/haskell">/case-studies/haskell</a>, file extension is ".shs"</li>
+<li>Layout-sensitive parsing: in repository <a href="http://github.com/seba--/layout-parsing/">layout-parsing</a></li>
+<li><a href="../jpromo/index.html">Model-oriented programming</a>: in branch <a href="http://github.com/seba--/sugarj/tree/jpromo">jpromo</a></li>
+<li>Incremental introduction of DSLs for software maintenance: <a href="http://github.com/seba--/sugarj/tree/master/test-workspace/java-pet-store">Java Pet Store case study</a></li>
+<li>Language extensibility for any language: was in <a href="http://github.com/frieger/sugarj">frieger's sugarj fork</a>, now integrated into the SugarJ <a href="http://github.com/seba--/sugarj/tree/master">master branch</a></li>
+</ul>
+
+
+<h2>Team</h2>
+
+<p>
+  Get in touch, discuss, or simply stay up-to-date by joining the <a href="http://groups.google.com/group/sugarj">SugarJ Google group</a>.
+</p>
+
+<ul>
+<li><a href="http://www.informatik.uni-marburg.de/%7Eseba/">Sebastian Erdweg</a>, project leader, University of Marburg</li>
+<li><a href="http://www.informatik.uni-marburg.de/%7Erendel/">Tillmann Rendel</a>, University of Marburg</li>
+<li><a href="http://www.uni-marburg.de/fb12/ps/team/kaestner">Christian Kästner</a>, University of Marburg</li>
+<li><a href="http://www.informatik.uni-marburg.de/%7Ekos/">Klaus Ostermann</a>, University of Marburg</li>
+<li><a href="http://www.lclnet.nl/">Lennart Kats</a>, Delft University of Technology</li>
+<li><a href="http://eelcovisser.org/">Eelco Visser</a>, Delft University of Technology</li>
+<li><a href="http://www.informatik.uni-marburg.de/~pgiarrusso/">Paolo G. Giarrusso</a>, University of Marburg</li>
+<li>Jonas Pusch, University of Marburg</li>
+<li>Stefan Fehrenbach, University of Marburg</li>
+<li>Felix Rieger, University of Marburg</li>
+</ul><h2>Publications</h2>
+
+<p>Sebastian Erdweg, Felix Rieger, Tillmann Rendel, and Klaus Ostermann.
+<strong>Layout-sensitive Language Extensibility with SugarHaskell</strong>.
+In <em>Proceedings of Haskell Symposium</em>, 2012. to appear.
+[ <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications.html#ErdwegRRO12">abstract</a>
+| <a href="http://www.informatik.uni-marburg.de/~seba/publications/sugarhaskell.pdf">.pdf</a> ]
+
+<p>Sebastian Erdweg, Paolo G. Giarrusso, and Tillmann Rendel. <strong>Language Composition Untangled</strong>. In <em>Proceedings of Workshop on Language Descriptions, Tools and Applications (LDTA)</em>, 2012. to appear.
+  [ <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications.html#ErdwegGR12">abstract</a>
+  | <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications/languagecomposition.pdf">.pdf</a> ]</p>
+
+<p>Sebastian Erdweg and Lennart C. L. Kats and Tillmann Rendel and Christian Kästner and Klaus Ostermann and Eelco Visser. <strong>Growing a Language Environment with Editor Libraries</strong>. In <em>Proceedings of Conference on Generative Programming and Component Engineering (GPCE)</em>, pages 167–176. ACM, 2011.
+  [ <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications.html#ErdwegKRKOV11">abstract</a>
+  | <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications/editorlibs.pdf">.pdf</a> ]</p>
+
+<p>Sebastian Erdweg, Tillmann Rendel, Christian Kästner and Klaus Ostermann. <strong>SugarJ: Library-based Syntactic Language Extensibility</strong>. In <em>Proceedings of Conference on Object-Oriented Programming, Systems, Languages, and Applications (OOPSLA)</em>, pages 391–406. ACM, 2011. <strong>Distinguished Paper Award</strong>.
+  [ <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications.html#ErdwegRKO11">abstract</a>
+  | <a href="http://www.informatik.uni-marburg.de/%7Eseba/publications/sugarj.pdf">.pdf</a> ]</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <!-- <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p> -->
+        <!-- <p class="copyright">SugarJ maintained by <a href="https://github.com/seba&#45;&#45;">seba&#45;&#45;</a></p> -->
+      </footer>
+    </div>
+
+
+<!-- Start of StatCounter Code for Default Guide -->
+<script type="text/javascript">
+var sc_project=8112241; 
+var sc_invisible=1; 
+var sc_security="b21d7b72"; 
+</script>
+<script type="text/javascript"
+src="http://www.statcounter.com/counter/counter.js"></script>
+<noscript><div class="statcounter"><a title="hits counter"
+href="http://statcounter.com/free-hit-counter/"
+target="_blank"><img class="statcounter"
+src="http://c.statcounter.com/8112241/0/b21d7b72/1/"
+alt="hits counter"></a></div></noscript>
+<!-- End of StatCounter Code for Default Guide -->    
+
+  </body>
+</html>
