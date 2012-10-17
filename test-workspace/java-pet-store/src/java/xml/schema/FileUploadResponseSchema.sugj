@@ -1,0 +1,44 @@
+package xml.schema;
+import xml.schema.XmlSchema;
+
+public xmlschema FileUploadResponseSchema {
+  <{http://www.w3.org/2001/XMLSchema}schema targetNamespace="jpsfur">
+    
+    <{http://www.w3.org/2001/XMLSchema}element name="response" type="FileUploadResponse">
+    </{http://www.w3.org/2001/XMLSchema}element>
+
+    <{http://www.w3.org/2001/XMLSchema}complexType name="FileUploadResponse">
+      <{http://www.w3.org/2001/XMLSchema}sequence>
+        <{http://www.w3.org/2001/XMLSchema}element name="message" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+
+        <{http://www.w3.org/2001/XMLSchema}element name="status" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+        
+        <{http://www.w3.org/2001/XMLSchema}element name="duration" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+
+        <{http://www.w3.org/2001/XMLSchema}element name="duration_string" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+      
+        <{http://www.w3.org/2001/XMLSchema}element name="start_date" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+
+        <{http://www.w3.org/2001/XMLSchema}element name="end_date" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+
+        <{http://www.w3.org/2001/XMLSchema}element name="upload_size" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+
+		<{http://www.w3.org/2001/XMLSchema}element name="thumbnail" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+
+		<{http://www.w3.org/2001/XMLSchema}element name="itemId" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+
+		<{http://www.w3.org/2001/XMLSchema}element name="productId" type="string">
+        </{http://www.w3.org/2001/XMLSchema}element>
+	  </{http://www.w3.org/2001/XMLSchema}sequence>      
+    </{http://www.w3.org/2001/XMLSchema}complexType>
+  </{http://www.w3.org/2001/XMLSchema}schema>
+}

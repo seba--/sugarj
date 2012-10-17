@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import xml.Sugar;
+import xml.schema.FileUploadResponseSchema;
 
 public class FileUploadBean {
     private boolean bDebug=true;
@@ -312,6 +313,7 @@ public class FileUploadBean {
             response.setHeader("Cache-Control", "no-cache,no-store,max-age=0");
             response.setDateHeader("Expires", 1);
             String xml =
+			  @Validate{jpsfur}
               <response>
                 <message>${responseMessage}</message>
                 <status>${status.getStatus()}</status>
