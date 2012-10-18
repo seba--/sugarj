@@ -1,0 +1,13 @@
+module typing.check.Module
+
+import typing.check.Context
+import typing.check.Signature
+
+import org.sugarj.languages.Fomega
+
+rules
+  signatureOf:
+    (ctx, [TDef(id,T) | defs]) -> ([],<conc> (msgs1,msgs2,msgs3))
+    where if <freeIn> (id,ctx) then ![] else !["duplicate name"] => msgs1
+        ; <kindOf> (ctx,T) => (K,msgs2)
+        ; <signatureOf> (CtxBindTVarDef(ctx,id,T),defs) => (sig,msgs3)
