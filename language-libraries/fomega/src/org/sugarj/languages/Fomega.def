@@ -99,6 +99,13 @@ exports
 
     QID -> Type {cons("TyQVar")}
 
+    Type Type -> Type {cons("TyApp"), left}
+	Type "**" {Type "**"}+ -> Type {cons("TyTuple"), right}
+	Type "->" Type -> Type {cons("TyArrow"), right}
+	"forall" ID "::" Kind "." Type -> Type {cons("TyForall")}
+	"\\" ID "::" Kind "." Type -> Type {cons("TyAbs")}
+	"mu" ID "." Type -> Type {cons("TyMu")}
+
   context-free priorities
       Type Type -> Type {cons("TyApp"), left}
 	> Type "**" {Type "**"}+ -> Type {cons("TyTuple"), right}
@@ -115,7 +122,7 @@ imports Fomega-Type
 imports Fomega-Expr
 
 exports
-  sorts Module Def Import ModuleDec FomegaDefList Public Qualified
+  sorts Module Def Import ModuleDec Public Qualified
 
   context-free syntax
     "module" MID -> ModuleDec {cons("ModuleDec")}
@@ -123,10 +130,7 @@ exports
     "import" Qualified? MID -> Import {cons("Import")}
     Public? "val" ID ":" Type "=" Expr -> Def {cons("ValDef")}
     Public? "type" ID "::" Kind "=" Type -> Def {cons("TypeDef")}
-
-    %% for pretty printer
-    Def+ -> FomegaDefList {cons("FomegaBody")}
-  
+ 
     "public" -> Public {cons("Public")}
     "qualified" -> Qualified {cons("Qualified")}
     
@@ -155,6 +159,18 @@ exports
     ID "=" Expr -> Field {cons("Field")}
 
     "<" ID "=" ID ">" "=>" Expr -> Branch {cons("Branch")}
+
+    Expr "!" ID -> Expr {cons("SelectRcd")}
+    Expr "!" NAT -> Expr {cons("SelectTup")}
+    Expr Expr -> Expr {cons("App"), left}
+    Expr "[" Type "]" -> Expr {cons("TApp")}
+    "fold" "[" Type "]" Expr -> Expr {cons("Fold")}
+    "unfold" "[" Type "]" Expr -> Expr {cons("Unfold")}
+    Expr "as" Type -> Expr {cons("Ascription")}
+    "\\" ID ":" Type "." Expr -> Expr {cons("Abs")}
+    "\\" ID "::" Kind "." Expr -> Expr {cons("TAbs")}
+    "if" Expr "then" Expr "else" Expr -> Expr {cons("Cond")}
+    "case" Expr "of" {Branch ";"}+ -> Expr {cons("Case")}
 
   context-free priorities
     {
