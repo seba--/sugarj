@@ -1,8 +1,8 @@
-module type.language.Rule
+module typing.language.Rule
 
 import org.sugarj.languages.Stratego
 import concretesyntax.Stratego
-import type.language.RelationDeclaration
+import typing.language.RelationDeclaration
 
 context-free syntax
   TypeRule -> SugarDefElem
