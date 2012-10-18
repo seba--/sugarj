@@ -1,6 +1,7 @@
 module typing.Check
 
 import org.sugarj.languages.Fomega
+import org.sugarj.languages.SugarFomega
 
 rules
   constraint-error : FomegaBody(defs) -> errors
