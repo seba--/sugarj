@@ -1,4 +1,5 @@
-MODULE sub.Bar
+module sub.Bar
 
-IMPORT sub.subsub.Barf
+import qualified sub.subsub.Barf
 
+val x : Nat -> Nat = \x:T.x->N. sub.sub sub

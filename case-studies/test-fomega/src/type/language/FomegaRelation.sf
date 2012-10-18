@@ -1,7 +1,7 @@
-MODULE type.language.FomegaRelation
+module type.language.FomegaRelation
 
-IMPORT org.sugarj.languages.Fomega
-IMPORT type.language.RelationDeclaration
+import org.sugarj.languages.Fomega
+import type.language.RelationDeclaration
 
 context-free syntax
   "()" -> Ctx {cons("CtxEmpty")}
