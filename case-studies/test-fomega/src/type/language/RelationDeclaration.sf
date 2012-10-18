@@ -1,7 +1,7 @@
-MODULE type.language.RelationDeclaration
+module type.language.RelationDeclaration
 
-IMPORT org.sugarj.languages.Sdf2
-IMPORT org.sugarj.languages.Stratego
+import org.sugarj.languages.Sdf2
+import org.sugarj.languages.Stratego
 
 context-free syntax
   TypeRelationDecl -> SugarDefElem

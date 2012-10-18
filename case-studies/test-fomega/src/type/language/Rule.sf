@@ -1,8 +1,8 @@
-MODULE type.language.Rule
+module type.language.Rule
 
-IMPORT org.sugarj.languages.Stratego
-IMPORT concretesyntax.Stratego
-IMPORT type.language.RelationDeclaration
+import org.sugarj.languages.Stratego
+import concretesyntax.Stratego
+import type.language.RelationDeclaration
 
 context-free syntax
   TypeRule -> SugarDefElem

@@ -1,7 +1,7 @@
-MODULE type.language.FomegaRules
+module type.language.FomegaRules
 
-IMPORT type.language.FomegaRelation
-IMPORT type.language.Rule
+import type.language.FomegaRelation
+import type.language.Rule
 
 ================ K-Nat
 ~ctx |- Nat :: *
