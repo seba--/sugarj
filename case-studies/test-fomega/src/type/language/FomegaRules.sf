@@ -3,14 +3,14 @@ module type.language.FomegaRules
 import type.language.FomegaRelation
 import type.language.Rule
 
-============== K-Nat
-() |- Nat :: *
+================ K-Nat
+~ctx |- Nat :: *
 
-=============== K-Bool
-() |- Bool :: *
+================= K-Bool
+~ctx |- Bool :: *
 
-================= K-String
-() |- String :: *
+=================== K-String
+~ctx |- String :: *
 
 ============================ K-Var
 (~ctx; T~X::~k) |- T~X :: ~k
