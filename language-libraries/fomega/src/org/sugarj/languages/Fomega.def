@@ -2,7 +2,7 @@ definition
 module Fomega-Lexical
 
 exports
-  sorts VID TID MID NAT STRING Keyword PrimitiveType
+  sorts ID MID QID NAT STRING Keyword PrimitiveType
     BlockComment CommentPart OpenBrace CloseBrace Dash
 
   lexical syntax
@@ -29,88 +29,84 @@ exports
     LAYOUT? -/- [\ \t\r\n]
 
   lexical syntax
-    [a-z][A-Za-z0-9]* -> VID
-    [A-Z][A-Za-z0-9]* -> TID
-    [a-zA-Z][A-Za-z0-9]* -> MID
+    [a-zA-Z][A-Za-z0-9]* -> ID
     [0-9]+ -> NAT
     "\""~[\"\\\n\r]*"\"" -> STRING
 
-    Keyword -> TID {reject}
-    Keyword -> MID {reject}
-    PrimitiveType -> TID {reject}
+    Keyword -> ID {reject}
+    PrimitiveType -> ID {reject}
 
-    "FORALL" -> Keyword
-    "MU" -> Keyword
-    "IF" -> Keyword
-    "THEN" -> Keyword
-	"ELSE" -> Keyword
-	"CASE" -> Keyword
-	"OF" -> Keyword
-	"FOLD" -> Keyword
-	"UNFOLD" -> Keyword
-    "AS" -> Keyword
-	"MODULE" -> Keyword
-	"IMPORT" -> Keyword
-	"QUALIFIED" -> Keyword
-	"PUBLIC" -> Keyword
-    "VAL" -> Keyword
-	"TYPE" -> Keyword
-	"TRUE" -> Keyword
-	"FALSE" -> Keyword
+    "forall" -> Keyword
+    "mu" -> Keyword
+    "if" -> Keyword
+    "then" -> Keyword
+	"else" -> Keyword
+	"case" -> Keyword
+	"of" -> Keyword
+	"fold" -> Keyword
+	"unfold" -> Keyword
+    "as" -> Keyword
+	"module" -> Keyword
+	"import" -> Keyword
+	"qualified" -> Keyword
+	"public" -> Keyword
+    "val" -> Keyword
+	"type" -> Keyword
+	"true" -> Keyword
+	"false" -> Keyword
 
     "Nat" -> PrimitiveType
     "Bool" -> PrimitiveType
     "String" -> PrimitiveType
 
   lexical restrictions
-    TID -/- [A-Za-z0-9]
-    VID -/- [A-Za-z0-9]
-    MID -/- [A-Za-z0-9]
+    ID -/- [A-Za-z0-9]
     NAT -/- [0-9]
 
-    "IF" "THEN" "ELSE" "CASE" "OF" "FOLD" "UNFOLD"
-    "AS" "MODULE" "IMPORT" "QUALIFIED" "PUBLIC" 
-    "VAL" "TYPE" "TRUE" "FALSE" -/- [A-Za-z0-9]
+    "if" "then" "else" "case" "of" "fold" "unfold"
+    "as" "module" "import" "qualified" "public" 
+    "val" "type" "true" "false" -/- [A-Za-z0-9]
 
     "Nat" "Bool" "String" -/- [A-Za-z0-9]
 
-  context-free syntax
-    {MID "."}+ -> ModuleId {cons("ModuleId")}
+  lexical syntax
+    {ID "."}+ -> MID
+	ID "." {ID "."}+ -> QID
 
-  context-free restrictions
-    ModuleId -/- [\.]
+  lexical restrictions
+    MID -/- [\.]
+    QID -/- [\.]
 
 module Fomega-Type
 imports Fomega-Lexical
 
 exports
-  sorts Type AtomicType TypeDecl Kind
+  sorts Type TypeDecl Kind
 
   context-free syntax
-    TID -> AtomicType {cons("TyVar")}
-    "Nat" -> AtomicType {cons("TyNat")}
-    "Bool" -> AtomicType {cons("TyBool")}
-    "String" -> AtomicType {cons("TyString")}
-    "{" {TypeDecl ","}* "}" -> AtomicType {cons("TyRecord")}
-    "<" {TypeDecl ","}* ">" -> AtomicType {cons("TyVariant")}
-	"(" Type ")" -> AtomicType {bracket}
+    ID -> Type {cons("TyVar")}
+    "Nat" -> Type {cons("TyNat")}
+    "Bool" -> Type {cons("TyBool")}
+    "String" -> Type {cons("TyString")}
+    "{" {TypeDecl ","}* "}" -> Type {cons("TyRecord")}
+    "<" {TypeDecl ","}* ">" -> Type {cons("TyVariant")}
+	"(" Type ")" -> Type {bracket}
 
-    VID ":" Type -> TypeDecl {cons("TyDecl")}
+    ID ":" Type -> TypeDecl {cons("TyDecl")}
 
     "*" -> Kind {cons("KiStar")}
     Kind "=>" Kind -> Kind {cons("KiArrow")}        
 
-    AtomicType -> Type
-    ModuleId "." TID -> Type {cons("TyQVar")}
+    QID -> Type {cons("TyQVar")}
 
   context-free priorities
       Type Type -> Type {cons("TyApp"), left}
 	> Type "**" {Type "**"}+ -> Type {cons("TyTuple"), right}
 	> Type "->" Type -> Type {cons("TyArrow"), right}
 	> {
-      "FORALL" TID "::" Kind "." Type -> Type {cons("TyForall")}
-	  "\\" TID "::" Kind "." Type -> Type {cons("TyAbs")}
-	  "MU" TID "." Type -> Type {cons("TyMu")}
+      "forall" ID "::" Kind "." Type -> Type {cons("TyForall")}
+	  "\\" ID "::" Kind "." Type -> Type {cons("TyAbs")}
+	  "mu" ID "." Type -> Type {cons("TyMu")}
     }
 
 module Fomega-Module
@@ -119,20 +115,20 @@ imports Fomega-Type
 imports Fomega-Expr
 
 exports
-  sorts Module Def Import ModuleDec
+  sorts Module Def Import ModuleDec FomegaDefList Public Qualified
 
   context-free syntax
-    "MODULE" ModuleId -> ModuleDec {cons("ModuleDec")}
+    "module" MID -> ModuleDec {cons("ModuleDec")}
     ModuleDec Import* Def* -> Module {cons("Module")}
-    "IMPORT" Qualified? ModuleId -> Import {cons("Import")}
-    Public? "VAL" VID ":" Type "=" Expr -> Def {cons("ValDef")}
-    Public? "TYPE" TID "::" Kind "=" Type -> Def {cons("TypeDef")}
+    "import" Qualified? MID -> Import {cons("Import")}
+    Public? "val" ID ":" Type "=" Expr -> Def {cons("ValDef")}
+    Public? "type" ID "::" Kind "=" Type -> Def {cons("TypeDef")}
 
     %% for pretty printer
     Def+ -> FomegaDefList {cons("FomegaBody")}
   
-    "PUBLIC" -> Public {cons("Public")}
-    "QUALIFIED" -> Qualified {cons("Qualified")}
+    "public" -> Public {cons("Public")}
+    "qualified" -> Qualified {cons("Qualified")}
     
   context-free start-symbols Module 
 
@@ -145,38 +141,38 @@ exports
   sorts Expr Field Branch
 
   context-free syntax
-    VID -> Expr {cons("Var")}
-	ModuleId "." VID -> Expr {cons("QVar")}
+    ID -> Expr {cons("Var")}
+	QID -> Expr {cons("QVar")}
     "(" Expr ")" -> Expr {bracket}
     "{" {Field ","}* "}" -> Expr {cons("Record")}
     "<" Field ">" -> Expr {cons("Variant")}
     "(" Expr "," {Expr ","}+ ")" -> Expr {cons("Tuple")}
-    "TRUE" -> Expr {cons("True")}
-    "FALSE" -> Expr {cons("False")}
+    "true" -> Expr {cons("True")}
+    "false" -> Expr {cons("False")}
     NAT -> Expr {cons("Nat")}
     STRING -> Expr {cons("String")}
 
-    VID "=" Expr -> Field {cons("Field")}
+    ID "=" Expr -> Field {cons("Field")}
 
-    "<" VID "=" VID ">" "=>" Expr -> Branch {cons("Branch")}
+    "<" ID "=" ID ">" "=>" Expr -> Branch {cons("Branch")}
 
   context-free priorities
     {
-      Expr "." VID -> Expr {cons("SelectRcd")}
-      Expr "." NAT -> Expr {cons("SelectTup")}
+      Expr "!" ID -> Expr {cons("SelectRcd")}
+      Expr "!" NAT -> Expr {cons("SelectTup")}
     }
     > {
       Expr Expr -> Expr {cons("App"), left}
       Expr "[" Type "]" -> Expr {cons("TApp")}
-      "FOLD" "[" Type "]" Expr -> Expr {cons("Fold")}
-      "UNFOLD" "[" Type "]" Expr -> Expr {cons("Unfold")}
+      "fold" "[" Type "]" Expr -> Expr {cons("Fold")}
+      "unfold" "[" Type "]" Expr -> Expr {cons("Unfold")}
     }
-    > Expr "AS" Type -> Expr {cons("Ascription")}
+    > Expr "as" Type -> Expr {cons("Ascription")}
     > { 
-      "\\" VID ":" AtomicType "." Expr -> Expr {cons("Abs")}
-      "\\" TID "::" Kind "." Expr -> Expr {cons("TAbs")}
-	  "IF" Expr "THEN" Expr "ELSE" Expr -> Expr {cons("Cond")}
-      "CASE" Expr "OF" {Branch ";"}+ -> Expr {cons("Case")}
+      "\\" ID ":" Type "." Expr -> Expr {cons("Abs")}
+      "\\" ID "::" Kind "." Expr -> Expr {cons("TAbs")}
+	  "if" Expr "then" Expr "else" Expr -> Expr {cons("Cond")}
+      "case" Expr "of" {Branch ";"}+ -> Expr {cons("Case")}
     }
 
 module org/sugarj/languages/Fomega
@@ -187,20 +183,21 @@ imports Fomega-Module [
     CloseBrace => FomegaCloseBrace
     Dash => FomegaDash
 	MID => FomegaMID
-	TID => FomegaTID
-    VID => FomegaVID
+    ID => FomegaID
+    QID => FomegaQID
     NAT => FomegaNAT
     STRING => FomegaSTRING
     Keyword => FomegaKeyword
     PrimitiveType => FomegaPrimitiveType    
     Type => FomegaType
-    AtomicType => FomegaAtomicType
     TypeDecl => FomegaTypeDecl
     Kind => FomegaKind
     Module => FomegaModule
-	ModuleId => FomegaModuleId
     Def => FomegaDef
     Import => FomegaImport
     Expr => FomegaExpr
     Field => FomegaField
-    ModuleDec => FomegaModuleDec ]
+    ModuleDec => FomegaModuleDec
+    Branch => FomegaBranch
+    Qualified => FomegaQualified
+    Public => FomegaPublic ]
