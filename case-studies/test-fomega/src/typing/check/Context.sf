@@ -1,0 +1,14 @@
+module typing.check.Context
+
+import org.sugarj.languages.Fomega
+
+signature
+  sorts Context
+
+  constructors
+    CtxEmpty: Context
+    CtxBindTVar: Context * FomegaID * FomegaKind -> Context
+    CtxBindTVarDef: Context * FomegaID * FomegaKind * FomegaType -> Context
+    CtxBindQTVarDef: Context * FomegaQID * FomegaKind * FomegaType -> Context
+    CtxBindVar: Context * FomegaID * FomegaType -> Context
+    CtxBindQVar: Context * FomegaQID * FomegaType -> Context
