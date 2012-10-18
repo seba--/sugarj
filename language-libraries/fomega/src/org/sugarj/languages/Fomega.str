@@ -4,8 +4,8 @@ signature
   constructors
     Qualified  : FomegaQualified
     Public     : FomegaPublic
-    TypeDef    : Option(FomegaPublic) * FomegaID * FomegaKind * FomegaType -> FomegaDef
-    ValDef     : Option(FomegaPublic) * FomegaID * FomegaType * FomegaExpr -> FomegaDef
+    TypeDef    : Option(FomegaPublic) * FomegaID * FomegaType -> FomegaDef
+    ValDef     : Option(FomegaPublic) * FomegaID * FomegaExpr -> FomegaDef
     Import     : Option(FomegaQualified) * FomegaMID -> FomegaImport
     Module     : FomegaModuleDec * List(FomegaImport) * List(FomegaDef) -> FomegaModule
     ModuleDec  : FomegaMID -> FomegaModuleDec
