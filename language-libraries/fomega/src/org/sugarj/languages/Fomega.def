@@ -128,8 +128,8 @@ exports
     "module" MID -> ModuleDec {cons("ModuleDec")}
     ModuleDec Import* Def* -> Module {cons("Module")}
     "import" Qualified? MID -> Import {cons("Import")}
-    Public? "val" ID ":" Type "=" Expr -> Def {cons("ValDef")}
-    Public? "type" ID "::" Kind "=" Type -> Def {cons("TypeDef")}
+    Public? "val" ID "=" Expr -> Def {cons("ValDef")}
+    Public? "type" ID "=" Type -> Def {cons("TypeDef")}
  
     "public" -> Public {cons("Public")}
     "qualified" -> Qualified {cons("Qualified")}

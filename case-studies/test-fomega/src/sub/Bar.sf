@@ -1,5 +1,6 @@
 module sub.Bar
 
-import qualified sub.subsub.Barf
+import sub.subsub.Barf
+import typing.check.Context
 
-val x : Nat -> Nat = \x:T.x->N. sub.sub sub
+val x = \x:T.x->N. sub.sub sub

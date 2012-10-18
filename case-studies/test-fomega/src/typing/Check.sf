@@ -3,6 +3,7 @@ module typing.Check
 import org.sugarj.languages.Fomega
 import org.sugarj.languages.SugarFomega
 
+/*
 rules
   constraint-error : FomegaBody(defs) -> errors
     where <foldl(check-next-def)> (defs, (<empty-ctx>, [])) => (ctx, errors)
@@ -68,3 +69,4 @@ rules
 rules
   tcheck : (ctx, term, type) -> []
     where fail
+*/
