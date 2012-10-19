@@ -1,2 +1,4 @@
 module typing.check.Term
 
+rules
+  typeOf = fail
