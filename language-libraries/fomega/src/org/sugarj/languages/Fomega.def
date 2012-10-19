@@ -100,7 +100,6 @@ exports
     QID -> Type {cons("TyQVar")}
 
     Type Type -> Type {cons("TyApp"), left}
-	Type "**" {Type "**"}+ -> Type {cons("TyTuple"), right}
 	Type "->" Type -> Type {cons("TyArrow"), right}
 	"forall" ID "::" Kind "." Type -> Type {cons("TyForall")}
 	"\\" ID "::" Kind "." Type -> Type {cons("TyAbs")}
@@ -108,7 +107,6 @@ exports
 
   context-free priorities
       Type Type -> Type {cons("TyApp"), left}
-	> Type "**" {Type "**"}+ -> Type {cons("TyTuple"), right}
 	> Type "->" Type -> Type {cons("TyArrow"), right}
 	> {
       "forall" ID "::" Kind "." Type -> Type {cons("TyForall")}
@@ -150,7 +148,6 @@ exports
     "(" Expr ")" -> Expr {bracket}
     "{" {Field ","}* "}" -> Expr {cons("Record")}
     "<" Field ">" -> Expr {cons("Variant")}
-    "(" Expr "," {Expr ","}+ ")" -> Expr {cons("Tuple")}
     "true" -> Expr {cons("True")}
     "false" -> Expr {cons("False")}
     NAT -> Expr {cons("Nat")}
@@ -161,7 +158,6 @@ exports
     "<" ID "=" ID ">" "=>" Expr -> Branch {cons("Branch")}
 
     Expr "!" ID -> Expr {cons("SelectRcd")}
-    Expr "!" NAT -> Expr {cons("SelectTup")}
     Expr Expr -> Expr {cons("App"), left}
     Expr "[" Type "]" -> Expr {cons("TApp")}
     "fold" "[" Type "]" Expr -> Expr {cons("Fold")}
@@ -173,10 +169,7 @@ exports
     "case" Expr "of" {Branch ";"}+ -> Expr {cons("Case")}
 
   context-free priorities
-    {
       Expr "!" ID -> Expr {cons("SelectRcd")}
-      Expr "!" NAT -> Expr {cons("SelectTup")}
-    }
     > {
       Expr Expr -> Expr {cons("App"), left}
       Expr "[" Type "]" -> Expr {cons("TApp")}
@@ -198,7 +191,7 @@ imports Fomega-Module [
     OpenBrace => FomegaOpenBrace
     CloseBrace => FomegaCloseBrace
     Dash => FomegaDash
-	MID => FomegaMID
+    ID => FomegaMID
     ID => FomegaID
     QID => FomegaQID
     NAT => FomegaNAT

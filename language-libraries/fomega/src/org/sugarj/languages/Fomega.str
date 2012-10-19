@@ -16,7 +16,6 @@ signature
     TAbs       : FomegaID * FomegaKind * FomegaExpr -> FomegaExpr
     Abs        : FomegaID * FomegaType * FomegaExpr -> FomegaExpr
     Ascription : FomegaExpr * FomegaType -> FomegaExpr
-    SelectTup  : FomegaExpr * FomegaNAT -> FomegaExpr
     Unfold     : FomegaType * FomegaExpr -> FomegaExpr
     Fold       : FomegaType * FomegaExpr -> FomegaExpr
     TApp       : FomegaExpr * FomegaType -> FomegaExpr
@@ -26,7 +25,6 @@ signature
     Nat        : FomegaNAT -> FomegaExpr
     False      : FomegaExpr
     True       : FomegaExpr
-    Tuple      : FomegaExpr * List(FomegaExpr) -> FomegaExpr
     Variant    : FomegaField -> FomegaExpr
     Record     : List(FomegaField) -> FomegaExpr
     QVar       : FomegaQID -> FomegaExpr
@@ -38,7 +36,6 @@ signature
     TyAbs      : FomegaID * FomegaKind * FomegaType -> FomegaType
     TyForall   : FomegaID * FomegaKind * FomegaType -> FomegaType
     TyArrow    : FomegaType * FomegaType -> FomegaType
-    TyTuple    : FomegaType * List(FomegaType) -> FomegaType
     TyApp      : FomegaType * FomegaType -> FomegaType
     TyQVar     : FomegaQID -> FomegaType
     TyVariant  : List(FomegaTypeDecl) -> FomegaType
