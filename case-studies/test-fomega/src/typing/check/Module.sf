@@ -11,10 +11,13 @@ import org.sugarj.languages.Fomega
 rules
 
   signatureOf:
-    (ctx, [TypeDef(None(),x,T) | defs]) -> ([],<conc> (msgs1,msgs2,msgs3))
+    (ctx,[TypeDef(None(),x,T) | defs]) -> (sig,<conc> (msgs1,msgs2,msgs3))
     where errorUnless(<not(elem)> (x,<dom> ctx) | <concat-strings> [x, " already defined."]) => msgs1
         ; <kindOf> (ctx,T) => (K,msgs2)
         ; <signatureOf> (CtxBindTVarDef(ctx,x,K,T),defs) => (sig,msgs3)
 
   signatureOf:
-    
+    (ctx,[TypeDef(Some(Public()),x,T) | defs]) -> (SigBindTVarDef(x,K,T,sig),<conc> (msgs1,msgs2,msgs3))
+    where errorUnless(<not(elem)> (x,<dom> ctx) | <concat-strings> [x, " already defined."]) => msgs1
+        ; <kindOf> (ctx,T) => (K,msgs2)
+        ; <signatureOf> (CtxBindTVarDef(ctx,x,K,T),defs) => (sig,msgs3)
