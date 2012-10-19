@@ -1,1 +1,4 @@
 module typing.check.Type
+
+rules
+  kindOf = fail

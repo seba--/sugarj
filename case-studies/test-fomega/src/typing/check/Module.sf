@@ -1,14 +1,20 @@
 module typing.check.Module
 
 import typing.check.Context
+import typing.check.Type
 import typing.check.Signature
 import typing.check.ErrorHandling
 
 import org.sugarj.languages.Fomega
 
+
 rules
+
   signatureOf:
-    (ctx, [TDef(x,T) | defs]) -> ([],<conc> (msgs1,msgs2,msgs3))
-    where errorUnless(<not(elem)> (x,<dom> ctx) | concat-strings [x, " already defined."]) => msgs1
+    (ctx, [TypeDef(None(),x,T) | defs]) -> ([],<conc> (msgs1,msgs2,msgs3))
+    where errorUnless(<not(elem)> (x,<dom> ctx) | <concat-strings> [x, " already defined."]) => msgs1
         ; <kindOf> (ctx,T) => (K,msgs2)
         ; <signatureOf> (CtxBindTVarDef(ctx,x,K,T),defs) => (sig,msgs3)
+
+  signatureOf:
+    
