@@ -1,4 +1,128 @@
-module typing.check.Term
+module typing.check.Expr
+
+import typing.check.Context
+import typing.check.Type
+
+import org.sugar.languages.Fomega
+
+signature
+  constructors
+    TyUnknown: FomegaType
 
 rules
-  typeOf = fail
+  labType: (x,[]) -> (TyUnknown, ["undefined label ",x])
+  labType: (x,[TyDecl(x,T)|decls]) -> (T,[])
+  labType: (x,[TyDecl(y,T)|decls]) -> <labType> (x,decls)
+           where <not(equal)> (x,y)
+
+  norm = fail // TODO
+  typeEq = fail // TODO
+
+  typeIsVariant: TyVariant(decls) -> (decls,[])
+  typeIsVariant:
+    T -> ([],[<concat-string> ["type mismatch, expected variant type but found"
+                              ,<write-to-string> T]])
+    where if (!T; ?TyVariant(_)) then fail else id end
+
+  // *** Case expression ***
+  //
+  // Note: the rules for case expressions are inefficient since they
+  // calculate the type of the scrutinee repeatedly -- but they are
+  // simple, though, and do not require an additional judgment for
+  // branches.
+  //
+  // Γ ⊢ e1 : T1   Γ ⊢ T1 ⇓ <decls>   x:S ∈ decls   Γ,y:S ⊢ e2 : T2
+  // ---------------------------------------------------------------
+  // Γ ⊢ case e1 of <x=y> ⇒ e2 : T2
+  typeOf:
+    (ctx,Case(e1,[Branch(x,y,e2)])) -> (T2,<conc> (msgs1,msgs2,msgs3,msgs4))
+    where <typeOf> (ctx,e1) => (T1,msgs1)
+        ; <norm> (ctx,T1) => T1'
+        ; <typeIsVariant> T1' => (decls,msgs2)
+        ; <labType> (x,decls) => (S,msgs3)
+        ; <typeOf> (CtxBindVar(ctx,y,S),e2) => (T2,msgs4)
+  // Γ ⊢ e1 : T1   Γ ⊢ T1 ⇓ <decls>   x:S ∈ decls   Γ,y:S ⊢ e2 : T2
+  // Γ ⊢ case e1 of brs : R          Γ ⊢ T2 ⇓ U           Γ ⊢ R ⇓ U
+  // ---------------------------------------------------------------
+  // Γ ⊢ case e1 <x=y> ⇒ e2; brs : U
+  typeOf:
+    (ctx,Case(e1,[Branch(x1,x2,e2),Branch(y1,y2,e3)|brs])) ->
+    (U,<conc> (msgs1,msgs2,msgs3,msgs4,msg5))
+    where <typeof> (ctx,e1) => (T1,msgs1)
+        ; <norm> (ctx,T1) => T1'
+        ; <typeIsVariant> T1' => (decls,msgs2)
+        ; <labType> (x1,decls) => (S,msgs3)
+        ; <typeOf> (CtxBindVar(ctx,x2,S),e2) => (T2,msgs4)
+        ; <typeOf> (ctx,Case(e1,[Branch(y1,y2,e3)|brs])) => (R,msgs4)
+        ; <norm> (ctx,T2) => T2'
+        ; <norm> (ctx,R) => R'
+        ; <typeEq> (T2',R2') => msgs5
+
+  // *** Conditional ***
+  //
+  // Γ ⊢ e1 : T1   Γ ⊢ e2 : T2   Γ ⊢ e3 : T3
+  // Γ ⊢ T1 ⇓ Bool   Γ ⊢ T2 ⇓ U   Γ ⊢ T3 ⇓ U
+  // ----------------------------------------
+  // Γ ⊢ if e1 then e2 else e3 : U
+  typeOf:
+    (ctx,Cond(e1,e2,e3)) ->
+    (T2',<conc> (msgs1,msgs2,msgs3,msgs4,msgs5))
+    where <typeOf> (ctx,e1) => (T1,msgs1)
+        ; <typeOf> (ctx,e2) => (T2,msgs2)
+        ; <typeOf> (ctx,e3) => (T3,msgs3)
+        ; <norm> (ctx,T1) => T1'
+        ; <norm> (ctx,T2) => T2'
+        ; <norm> (ctx,T3) => T3'
+        ; <typeEq> (Bool(),T1') => msgs4
+        ; <typeEq> (T2',T3') => msgs5
+
+  // *** Polymorphic function ***
+  //
+  // Γ,X::K1 ⊢ e2 : T2
+  // ----------------------------
+  // Γ ⊢ \X::K1. e2 : ∀ X::K1. T2
+  typeOf:
+    (ctx,TAbs(X,K1,e2)) -> (TyForall(X,K1,T2),msgs1)
+    where <typeof> (CtxBindTVar(ctx,X,K1),e2) => (T2,msgs1)
+
+  // *** Abstraction ***
+  //
+  // Γ,x:T1 ⊢ e2 : T2   Γ ⊢ T1 :: *
+  // ------------------------------
+  // Γ ⊢ \x::T1. e2 : T1 → T2
+  typeOf:
+    (ctx,Abs(x,T1,e2)) -> (TyFun(T1,T2),<conc> (msgs1,msgs2,msgs3))
+    where <typeOf> (CtxBindVar(ctx,x,T1),e2) => (T2,msgs1)
+        ; <kindOf> (ctx,T1) => (K1,msgs2)
+        ; kindEq (KiStar(),K1) => msgs3
+
+  // *** Ascription ***
+  //
+  // Γ ⊢ e : S   Γ ⊢ T :: *   Γ ⊢ S ⇓ U   Γ ⊢ T ⇓ U
+  // -----------------------------------------------
+  // Γ ⊢ e as T : T
+  typeOf:
+    (ctx,Ascription(e,T)) -> (T,<conc> (msgs1,msgs2,msgs3))
+    where <typeOf> (ctx,e) => (S,msgs1)
+        ; <kindOf> (ctx,T) => (K,msgs2)
+        ; <norm> (ctx,S) => S'
+        ; <norm> (cyx,T) => T'
+        ; <typeEq> (T',S') => msgs3
+
+  //
+// *** Notes ***
+//
+// Judgments:
+// * x ∉ sel(decls)
+// * x:S ∈ decls
+// * qx ≠ qy
+// * x ≠ y
+// * Γ ⊢ e : T
+// * Γ ⊢ T ⇓ S
+// * error(<msg>)
+//
+// Structural equality of types modulo α-conversion, record/variant permutation,
+// and with TyUnknown equal to any type.
+//
+// Conditional decomposition of compound types, i.e. mu X.T, \X::K.T,
+// forall X::K.T, T->S, T**...**S, {x:T,...,y:S}, <x:T,...,y:S>.
