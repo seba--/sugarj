@@ -1,0 +1,5 @@
+module type.check.ErrorHandling
+
+strategies
+  errorIf(condition|msg) = if condition then ![msg] else ![] end
+  errorUnless(condistion|msg) = if condition then ![] else ![msg] end

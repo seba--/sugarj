@@ -12,3 +12,13 @@ signature
     CtxBindQTVarDef: Context * FomegaQID * FomegaKind * FomegaType -> Context
     CtxBindVar: Context * FomegaID * FomegaType -> Context
     CtxBindQVar: Context * FomegaQID * FomegaType -> Context
+
+rules
+  dom: CtxEmpty() -> []
+  dom: CtxBindTVar(ctx,x,K) -> [x | <dom> ctx]
+  dom: CtxBindTVarDef(ctx,x,K,T) -> [x | <dom> ctx]
+  dom: CtxBindQTVarDef(ctx,qx,K,T) -> [qx | <dom> ctx]
+  dom: CtxBindVar(ctx,x,T) -> [x | <dom> ctx]
+  dom: CtxBindQVar(ctx,qx,T) -> [qx | <dom> ctx]
+
+  freeIn: (x,ctx) -> <not(elem)> (x,xs) where <dom> ctx => xs
