@@ -1,4 +1,140 @@
 module typing.check.Type
 
+import typing.check.Context
+
+import org.sugar.languages.Fomega
+
+signature
+  constructors
+    KiUnknown: FomegaKind
+
 rules
-  kindOf = fail
+  lab: [] -> []
+  lab: [TyDecl(x,T) | decls] -> [x,<lab> decls]
+
+  // <kindEq> (KExpected,KActual)
+  kindEq: (KiUnknown(),K) -> []
+  kindEq: (K,KiUnknown()) -> []
+  kindEq: (K,K) -> []
+  kindEq: (K,J) -> [<concat-strings> ["kind mismatch, expected "
+                                     ,<write-to-string> K
+                                     ," but found "
+                                     <write-to-string> J]]
+          where <not(equal)> (K,J)
+              ; <not(equal)> (K,KiUnknown())
+
+  // <KindEqArrow>
+  kindEqArrow: KiArrow(K1,K2) -> (K1,K2,[])
+  kindEqArrow: K -> (KiUnknown,KiUnknown
+                    ,[<concat-string> ["kind mismatch, expected arrow kind but found "
+                                      ,<write-to-string> K]])
+               where if (!K; ?KiArrow(_,_)) then fail else id end
+
+  kindOf:
+    (ctx,TyMu(X,T)) -> (K,<conc> (msgs1,msgs2))
+    where <kindOf> (CtxBindTVar(ctx,X,KiStar()),T) => (K,msgs1)
+        ; <kindEq> (KiStar(),K) => msgs2
+
+  kindOf:
+    (ctx,TyAbs(X,K1,T2)) -> (KiArrow(K1,K2),msgs1)
+    where <kindOf> (CtxBindTVar(ctx,X,K1),T2) => (K2,msgs1)
+
+  kindOf:
+    (ctx,TyForall(X,K1,T2)) -> (KiStar(),<conc> (msgs1,msgs2))
+    where <kindOf> (CtxBindTVar(ctx,X,K1),T2) => (K2,msgs1)
+        ; <kindEq> (KiStar(),K2) => msgs2
+
+  kindOf:
+    (ctx,TyArrow(T1,T2)) -> (KiStar(),<conc> (msgs1,msgs2,msgs2,msgs4))
+    where <kindOf> (ctx,T1) => (K1,msgs1)
+        ; <kindOf> (ctx,T2) => (K2,msgs2)
+        ; <kindEq> (KiStar(),K1) => msgs3
+        ; <kindEq> (KiStar(),K2) => msgs4
+
+  kindOf:
+    (ctx,TyApp(T1,T2)) -> (K12,<conc> (msgs1,msgs2,msgs3,msgs3))
+    where <kindOf> (ctx,T1) => (K1,msgs1)
+        ; <kindOf> (ctx,T2) => (K2,msgs2)
+        ; <kindEqArrow> K1 => (K11,K12,msgs3)
+        ; <kindEq> (K11,K2) => msgs4
+
+  kindOf:
+    (CtxEmpty,TyQVar(qX)) -> (KiUnknown,["undefined identifier ",qX])
+  kindOf:
+    (CtxBindTVar(ctx,Y,K),TyQVar(qX)) -> <kindOf> (ctx,TyQVar(qX))
+  kindOf:
+    (CtxBindTVarDef(ctx,Y,K,T),TyQVar(qX)) -> <kindOf> (ctx,TyQVar(qX))
+  kindOf:
+    (CtxBindVar(ctx,y,T),TyQVar(qX)) -> <kindOf> (ctx,TyQVar(qX))
+  kindOf:
+    (CtxBindQVar(ctx,qy,T),TyQVar(qX)) -> <kindOf> (ctx,TyQVar(qX))
+  kindOf:
+    (CtxBindQTVarDef(ctx,qX,K,T),TyQVar(qX)) -> (K,[])
+  kindOf:
+    (CtxBindQTVarDef(ctx,qY,K,T),TyQVar(qX)) -> <kindOf> (ctx,TyQVar(qX))
+    where <not(equal)> (qY,qX)
+
+  kindOf:
+    (ctx,TyVariant([])) -> (KiStar(),[])
+  kindOf:
+    (ctx,TyVariant([TyDecl(x,T) | decls])) ->
+    (KiStar(),<conc> (msgs1,msgs2,msgs3,msgs4))
+    where errorUnless(<not(elem)> (x,<lab> decls)
+                     | <concat-strings> ["duplicate label ",x])
+        ; <kindOf> (ctx,T) => (K,msgs1)
+        ; <kindOf> (ctx,TyVariant(decls)) => (J,msgs2)
+        ; <kindEq> (KiStar(),K) => msgs3
+        ; <kindEq> (KiStar(),J) => msgs4
+
+  kindOf:
+    (ctx,TyRecord([])) -> (KiStar(),[])
+  kindOf:
+    (ctx,TyRecord([TyDecl(x,T) | decls])) ->
+    (KiStar(),<conc> (msgs1,msgs2,msgs3,msgs4))
+    where errorUnless(<not(elem)> (x,<lab> decls)
+                     | <concat-strings> ["duplicate label ",x])
+        ; <kindOf> (ctx,T) => (K,msgs1)
+        ; <kindOf> (ctx,TyVariant(decls)) => (J,msgs2)
+        ; <kindEq> (KiStar(),K) => msgs3
+        ; <kindEq> (KiStar(),J) => msgs4
+
+  kindOf:
+    (ctx,TyString) -> (KiStar(),[])
+
+  kindOf:
+    (ctx,TyNat) -> (KiStar(),[])
+
+  kindOf:
+    (ctx,TyBool) -> (KiStar(),[])
+
+  kindOf:
+    (CtxEmpty,TyVar(X)) -> (KiUnknown,["undefined identifier ",X])
+  kindOf:
+    (CtxBindVar(ctx,y,T),TyVar(X)) -> <kindOf> (ctx,TyVar(X))
+  kindOf:
+    (CtxBindQVar(ctx,qy,T),TyVar(X)) -> <kindOf> (ctx,TyVar(X))
+  kindOf:
+    (CtxBindQTVarDef(ctx,qY,K,T),TyVar(X)) -> <kindOf> (ctx,TyVar(X))
+  kindOf:
+    (CtxBindTVar(ctx,X,K),TyVar(X)) -> (K,[])
+  kindOf:
+    (CtxBindTVarDef(ctx,X,K,T),TyVar(X)) -> (K,[])
+  kindOf:
+    (CtxBindTVar(ctx,Y,K),TyVar(X)) -> <kindOf> (ctx,TyVar(X))
+    where <not(equal)> (Y,X)
+  kindOf:
+    (CtxBindTVarDef(ctx,Y,K,T),TyVar(X)) -> <kindof> (ctx,TyVar(X))
+    where <not(equal)> (Y,X)
+
+// *** Notes ***
+//
+// Judgments:
+// * x ∉ lab(decls)
+// * qx ≠ qy
+// * x ≠ y
+// * Γ ⊢ T :: K
+// * error(<msg>)
+//
+// Structural equality for kinds with KiUnknown equal to any kind.
+//
+// Conditional decomposition of arrow kinds.
