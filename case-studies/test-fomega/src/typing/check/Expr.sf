@@ -17,6 +17,7 @@ rules
 
   norm = fail // TODO
   typeEq = fail // TODO
+  subst = fail // TODO
 
   typeIsVariant: TyVariant(decls) -> (decls,[])
   typeIsVariant:
@@ -109,7 +110,26 @@ rules
         ; <norm> (cyx,T) => T'
         ; <typeEq> (T',S') => msgs3
 
+  // *** Unfold ***
   //
+  // Γ ⊢ T :: *   Γ ⊢ e : S   Γ ⊢ T ⇓ μX.U   Γ ⊢ S ⇓ μX.U
+  // -----------------------------------------------------
+  // Γ ⊢ unfold [T] e : [X↦μX.U]U
+  typeOf:
+    (ctx,Unfold(T,e)) ->
+    (<subst> (X,T',T1),<conc> (msgs1,msgs2,msgs3,msgs4,msgs5,msgs6)
+    where <kindOf> (ctx,T) => (K,msgs1)
+        ; <kindEq> (KiStar(),K) => msgs2
+        ; <typeOf> (ctx,e) => (S,msgs3)
+        ; <norm> (ctx,T) => T'
+        ; <norm> (ctx,S) => S'
+        ; <typeIsMu> T' => (X,T1,msgs4)
+        ; <typeIsMu> S' => (Y,T2,msgs5)
+        ; <typeEq> (T',S') => msgs6
+
+  // *** Fold ***
+  //
+  // Γ ⊢ T :: *   Γ ⊢ e : S   Γ ⊢ T ⇓ μX.U
 // *** Notes ***
 //
 // Judgments:
