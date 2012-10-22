@@ -15,12 +15,14 @@ rules
   labType: (x,[TyDecl(y,T)|decls]) -> <labType> (x,decls)
            where <not(equal)> (x,y)
 
+  sel = fail // TODO
+
   norm = fail // TODO
   typeEq = fail // TODO
   subst = fail // TODO
 
-  typeIsVariant: TyVariant(decls) -> (decls,[])
-  typeIsVariant:
+  typeEqVariant: TyVariant(decls) -> (decls,[])
+  typeEqVariant:
     T -> ([],[<concat-string> ["type mismatch, expected variant type but found"
                               ,<write-to-string> T]])
     where if (!T; ?TyVariant(_)) then fail else id end
@@ -31,6 +33,8 @@ rules
   // calculate the type of the scrutinee repeatedly -- but they are
   // simple, though, and do not require an additional judgment for
   // branches.
+  // This case also rule does not check if we have duplicate labels in
+  // branches.
   //
   // Γ ⊢ e1 : T1   Γ ⊢ T1 ⇓ <decls>   x:S ∈ decls   Γ,y:S ⊢ e2 : T2
   // ---------------------------------------------------------------
@@ -39,7 +43,7 @@ rules
     (ctx,Case(e1,[Branch(x,y,e2)])) -> (T2,<conc> (msgs1,msgs2,msgs3,msgs4))
     where <typeOf> (ctx,e1) => (T1,msgs1)
         ; <norm> (ctx,T1) => T1'
-        ; <typeIsVariant> T1' => (decls,msgs2)
+        ; <typeEqVariant> T1' => (decls,msgs2)
         ; <labType> (x,decls) => (S,msgs3)
         ; <typeOf> (CtxBindVar(ctx,y,S),e2) => (T2,msgs4)
   // Γ ⊢ e1 : T1   Γ ⊢ T1 ⇓ <decls>   x:S ∈ decls   Γ,y:S ⊢ e2 : T2
@@ -51,7 +55,7 @@ rules
     (U,<conc> (msgs1,msgs2,msgs3,msgs4,msg5))
     where <typeof> (ctx,e1) => (T1,msgs1)
         ; <norm> (ctx,T1) => T1'
-        ; <typeIsVariant> T1' => (decls,msgs2)
+        ; <typeEqVariant> T1' => (decls,msgs2)
         ; <labType> (x1,decls) => (S,msgs3)
         ; <typeOf> (CtxBindVar(ctx,x2,S),e2) => (T2,msgs4)
         ; <typeOf> (ctx,Case(e1,[Branch(y1,y2,e3)|brs])) => (R,msgs4)
@@ -72,9 +76,9 @@ rules
         ; <typeOf> (ctx,e2) => (T2,msgs2)
         ; <typeOf> (ctx,e3) => (T3,msgs3)
         ; <norm> (ctx,T1) => T1'
+        ; <typeEqBool> T1' => msgs4
         ; <norm> (ctx,T2) => T2'
         ; <norm> (ctx,T3) => T3'
-        ; <typeEq> (Bool(),T1') => msgs4
         ; <typeEq> (T2',T3') => msgs5
 
   // *** Polymorphic function ***
@@ -95,7 +99,7 @@ rules
     (ctx,Abs(x,T1,e2)) -> (TyFun(T1,T2),<conc> (msgs1,msgs2,msgs3))
     where <typeOf> (CtxBindVar(ctx,x,T1),e2) => (T2,msgs1)
         ; <kindOf> (ctx,T1) => (K1,msgs2)
-        ; kindEq (KiStar(),K1) => msgs3
+        ; kindEqStar K1 => msgs3
 
   // *** Ascription ***
   //
@@ -103,41 +107,139 @@ rules
   // -----------------------------------------------
   // Γ ⊢ e as T : T
   typeOf:
-    (ctx,Ascription(e,T)) -> (T,<conc> (msgs1,msgs2,msgs3))
+    (ctx,Ascription(e,T)) -> (T,<conc> (msgs1,msgs2,msgs3,msgs4))
     where <typeOf> (ctx,e) => (S,msgs1)
         ; <kindOf> (ctx,T) => (K,msgs2)
+        ; <kindEqStar> K => msgs3
         ; <norm> (ctx,S) => S'
         ; <norm> (cyx,T) => T'
-        ; <typeEq> (T',S') => msgs3
+        ; <typeEq> (T',S') => msgs4
 
   // *** Unfold ***
   //
-  // Γ ⊢ T :: *   Γ ⊢ e : S   Γ ⊢ T ⇓ μX.U   Γ ⊢ S ⇓ μX.U
+  // Γ ⊢ T :: *   Γ ⊢ e : S   Γ ⊢ S ⇓ μX.U   Γ ⊢ U ⇓ μX.U
   // -----------------------------------------------------
   // Γ ⊢ unfold [T] e : [X↦μX.U]U
   typeOf:
     (ctx,Unfold(T,e)) ->
     (<subst> (X,T',T1),<conc> (msgs1,msgs2,msgs3,msgs4,msgs5,msgs6)
     where <kindOf> (ctx,T) => (K,msgs1)
-        ; <kindEq> (KiStar(),K) => msgs2
+        ; <kindEqStar> K => msgs2
         ; <typeOf> (ctx,e) => (S,msgs3)
         ; <norm> (ctx,T) => T'
         ; <norm> (ctx,S) => S'
-        ; <typeIsMu> T' => (X,T1,msgs4)
-        ; <typeIsMu> S' => (Y,T2,msgs5)
-        ; <typeEq> (T',S') => msgs6
+        ; <typeEqMu> T' => (X,T1,msgs4)
+        ; <typeEqMu> S' => (Y,S1,msgs5)
+        ; <fresh> [T',S'] => Z
+        ; <subst> (X,TyVar(Z),T1) => T1'
+        ; <subst> (Y,TyVar(Z),S1) => S1'
+        ; <typeEq> (T1',S1') => msgs6
 
   // *** Fold ***
   //
-  // Γ ⊢ T :: *   Γ ⊢ e : S   Γ ⊢ T ⇓ μX.U
+  // Γ ⊢ T :: *   Γ ⊢ T ⇓ μX.U   Γ ⊢ e : [X↦μX.U]U
+  // ----------------------------------------------
+  // Γ ⊢ fold [T] e : T
+  typeOf:
+    (ctx,Fold(T,e)) ->
+    (T,<conc> (msgs1,msgs2,msgs3))
+    where <kindOf> (ctx,T) => (K,msgs1)
+        ; <kindEqStar> K => msgs2
+        ; <norm> (ctx,T) => T'
+        ; <typeEqMu> T' => (X,T1,msgs3)
+        ; <typeOf> (ctx,e) => S
+        ; <typeEq> (S, <subst> (X,TyMu(X,T1),T1)) => msgs4
+
+  // *** TApp ***
+  //
+  // Γ ⊢ e1 : T1   Γ ⊢ T1 ⇓ ∀X::K11.T12   Γ ⊢ T2 :: K11
+  // ---------------------------------------------------
+  // Γ ⊢ e1 [T2] : [X↦T2]T12
+  typeOf:
+    (ctx,TApp(e1,T2)) -> (<subst> (X,T2,T12),<conc> (msgs1,msgs2,msgs3,msgs4))
+    where <typeOf> (ctx,e1) => (T1,msgs1)
+        ; <norm> (ctx,T1) => T1'
+        ; <typeEqForall> T1' => (X,K11,T12,msgs2)
+        ; <kindOf> (ctx,T2) => (K2,msgs3)
+        ; <kindEq> (K11,K2) => msgs4
+
+  // *** App ***
+  //
+  // Γ ⊢ e1 : T1   Γ ⊢ e2: T2   Γ ⊢ T1 ⇓ T11 → T12   Γ ⊢ T2 ⇓ T11
+  // -------------------------------------------------------------
+  // Γ ⊢ e1 e2 : T12
+  typeOf:
+    (ctx,App(e1,e2)) -> (T12,<conc> (msgs1,msgs2,msgs3,msgs4))
+    where <typeOf> (ctx,e1) => (T1,msgs1)
+        ; <typeOf> (ctx,e2) => (T2,msgs2)
+        ; <norm> (ctx,T1) => T1'
+        ; <typeEqArrow> T1' => (T11,T12,msgs3)
+        ; <norm> (ctx,T2) => T2'
+        ; <typeEq> (T11,T2') => msgs4
+
+  // *** SelectRcd ***
+  //
+  // Γ ⊢ e : T   Γ ⊢ T ⇓ {decls}   x:S ∈ decls
+  // ------------------------------------------
+  // Γ ⊢ e!x : S
+  typeOf:
+    (ctx,SelectRcd(e,x)) -> (S,<conc> (msgs1,msgs2,msgs3))
+    where <typeOf> (ctx,e) => (T,msgs1)
+        ; <norm> (ctx,T) => T'
+        ; <typeEqRecord> T1 => (decls,msgs2)
+        ; <labType> (x,decls) => (S,msgs3)
+
+  // *** Primitive types ***
+  typeOf: (ctx,String(str)) => (TyString,[])
+  typeOf: (ctx,Nat(n)) => (TyNat,[])
+  typeOf: (ctx,False()) => (TyBool,[])
+  typeOf: (ctx,True()) => (TyBool,[])
+
+  // *** Variant ***
+  //
+  // Γ ⊢ T :: *   Γ ⊢ e : S   Γ ⊢ S ⇓ U   Γ ⊢ T ⇓ <decls>   x:U ∈ decls
+  // -------------------------------------------------------------------
+  // Γ ⊢ <x=e> as T : T
+  typeOf:
+    (ctx,Variant(e,T)) -> (T,<conc> (msgs1,msgs2,msgs3,msgs4,msgs5,msgs6))
+    where <kindOf> (ctx,T) => (K,msgs1)
+        ; <kindEqStar> K => msgs2
+        ; <typeOf> e => (S,msgs3)
+        ; <norm> S => S'
+        ; <norm> T => T'
+        ; <typeEqVariant> T' => (decls,msgs4)
+        ; labType(x,decls) => (U,msgs5)
+        ; <typeEq> (S',U) => msgs6
+
+  // *** Record ***
+  //
+  // -----------
+  // Γ ⊢ {} : {}
+  typeOf:
+    (ctx,Record([])) -> (TyRecord([]),[])
+  // Γ ⊢ e : T   x ∉ sel(flds)   Γ ⊢ {flds} : S   Γ ⊢ S ⇓ {decls}
+  // -------------------------------------------------------------
+  // Γ ⊢ {x=e,flds} : {x:T,decls}
+  typeOf:
+    (ctx,Record([Field(x,e)|flds])) ->
+    (Record([Field(x,T)|decls]),<conc> (msgs1,msgs2,msgs3)
+    where <typeOf> (ctx,e) => T
+        ; errorUnless(<not>(elem)> (x,<sel> flds)
+                     | <concat-string> ["duplicate selector",x]) => msgs1
+        ; <typeOf> (ctx,Record(flds)) => (S,msgs2)
+        ; <norm> (ctx,S) => S'
+        ; <typeEqRecord> S' => (decls,msgs3)
+    
+
 // *** Notes ***
 //
 // Judgments:
-// * x ∉ sel(decls)
+// * x ∉ sel(flds)
 // * x:S ∈ decls
 // * qx ≠ qy
 // * x ≠ y
 // * Γ ⊢ e : T
+// * Γ ⊢ T :: K
 // * Γ ⊢ T ⇓ S
 // * error(<msg>)
 //
