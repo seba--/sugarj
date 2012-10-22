@@ -23,17 +23,23 @@ rules
           where <not(equal)> (K,J)
               ; <not(equal)> (K,KiUnknown())
 
-  // <KindEqArrow>
+  // <kindEqArrow>
   kindEqArrow: KiArrow(K1,K2) -> (K1,K2,[])
   kindEqArrow: K -> (KiUnknown,KiUnknown
                     ,[<concat-string> ["kind mismatch, expected arrow kind but found "
                                       ,<write-to-string> K]])
                where if (!K; ?KiArrow(_,_)) then fail else id end
 
+  // <kindEqStar>
+  kindEqStar: KiStar() -> []
+  kindEqStar: K -> ["kind mismatch, expected * but found "
+                   ,<write-to-string> K]
+              where if (!K; ?KiStar()) then fail else id
+
   kindOf:
     (ctx,TyMu(X,T)) -> (K,<conc> (msgs1,msgs2))
     where <kindOf> (CtxBindTVar(ctx,X,KiStar()),T) => (K,msgs1)
-        ; <kindEq> (KiStar(),K) => msgs2
+        ; <kindEqStar> K => msgs2
 
   kindOf:
     (ctx,TyAbs(X,K1,T2)) -> (KiArrow(K1,K2),msgs1)
@@ -42,14 +48,14 @@ rules
   kindOf:
     (ctx,TyForall(X,K1,T2)) -> (KiStar(),<conc> (msgs1,msgs2))
     where <kindOf> (CtxBindTVar(ctx,X,K1),T2) => (K2,msgs1)
-        ; <kindEq> (KiStar(),K2) => msgs2
+        ; <kindEqStar> K2 => msgs2
 
   kindOf:
     (ctx,TyArrow(T1,T2)) -> (KiStar(),<conc> (msgs1,msgs2,msgs2,msgs4))
     where <kindOf> (ctx,T1) => (K1,msgs1)
         ; <kindOf> (ctx,T2) => (K2,msgs2)
-        ; <kindEq> (KiStar(),K1) => msgs3
-        ; <kindEq> (KiStar(),K2) => msgs4
+        ; <kindEqStar> K1 => msgs3
+        ; <kindEqStar> K2 => msgs4
 
   kindOf:
     (ctx,TyApp(T1,T2)) -> (K12,<conc> (msgs1,msgs2,msgs3,msgs3))
@@ -83,8 +89,8 @@ rules
                      | <concat-strings> ["duplicate label ",x])
         ; <kindOf> (ctx,T) => (K,msgs1)
         ; <kindOf> (ctx,TyVariant(decls)) => (J,msgs2)
-        ; <kindEq> (KiStar(),K) => msgs3
-        ; <kindEq> (KiStar(),J) => msgs4
+        ; <kindEqStar> K => msgs3
+        ; <kindEqSTar> J => msgs4
 
   kindOf:
     (ctx,TyRecord([])) -> (KiStar(),[])
@@ -95,8 +101,8 @@ rules
                      | <concat-strings> ["duplicate label ",x])
         ; <kindOf> (ctx,T) => (K,msgs1)
         ; <kindOf> (ctx,TyVariant(decls)) => (J,msgs2)
-        ; <kindEq> (KiStar(),K) => msgs3
-        ; <kindEq> (KiStar(),J) => msgs4
+        ; <kindEqStar> K => msgs3
+        ; <kindEqSTar> J => msgs4
 
   kindOf:
     (ctx,TyString) -> (KiStar(),[])
@@ -137,4 +143,4 @@ rules
 //
 // Structural equality for kinds with KiUnknown equal to any kind.
 //
-// Conditional decomposition of arrow kinds.
+// Conditional decomposition of kinds.
