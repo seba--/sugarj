@@ -147,7 +147,7 @@ exports
 	QID -> Expr {cons("QVar")}
     "(" Expr ")" -> Expr {bracket}
     "{" {Field ","}* "}" -> Expr {cons("Record")}
-    "<" Field ">" -> Expr {cons("Variant")}
+    "<" Field ">" "as" Type -> Expr {cons("Variant")}
     "true" -> Expr {cons("True")}
     "false" -> Expr {cons("False")}
     NAT -> Expr {cons("Nat")}
@@ -180,7 +180,7 @@ exports
     > { 
       "\\" ID ":" Type "." Expr -> Expr {cons("Abs")}
       "\\" ID "::" Kind "." Expr -> Expr {cons("TAbs")}
-	  "if" Expr "then" Expr "else" Expr -> Expr {cons("Cond")}
+      "if" Expr "then" Expr "else" Expr -> Expr {cons("Cond")}
       "case" Expr "of" {Branch ";"}+ -> Expr {cons("Case")}
     }
 
