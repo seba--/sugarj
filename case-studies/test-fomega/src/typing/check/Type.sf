@@ -84,25 +84,25 @@ rules
     (ctx,TyVariant([])) -> (KiStar(),[])
   kindOf:
     (ctx,TyVariant([TyDecl(x,T) | decls])) ->
-    (KiStar(),<conc> (msgs1,msgs2,msgs3,msgs4))
+    (KiStar(),<conc> (msgs1,msgs2,msgs3,msgs4,msgs5))
     where errorUnless(<not(elem)> (x,<lab> decls)
-                     | <concat-strings> ["duplicate label ",x])
-        ; <kindOf> (ctx,T) => (K,msgs1)
-        ; <kindOf> (ctx,TyVariant(decls)) => (J,msgs2)
-        ; <kindEqStar> K => msgs3
-        ; <kindEqSTar> J => msgs4
+                     | <concat-strings> ["duplicate label ",x]) => msgs1
+        ; <kindOf> (ctx,T) => (K,msgs2)
+        ; <kindOf> (ctx,TyVariant(decls)) => (J,msgs3)
+        ; <kindEqStar> K => msgs4
+        ; <kindEqSTar> J => msgs5
 
   kindOf:
     (ctx,TyRecord([])) -> (KiStar(),[])
   kindOf:
     (ctx,TyRecord([TyDecl(x,T) | decls])) ->
-    (KiStar(),<conc> (msgs1,msgs2,msgs3,msgs4))
+    (KiStar(),<conc> (msgs1,msgs2,msgs3,msgs4,msgs5))
     where errorUnless(<not(elem)> (x,<lab> decls)
-                     | <concat-strings> ["duplicate label ",x])
-        ; <kindOf> (ctx,T) => (K,msgs1)
-        ; <kindOf> (ctx,TyVariant(decls)) => (J,msgs2)
-        ; <kindEqStar> K => msgs3
-        ; <kindEqSTar> J => msgs4
+                     | <concat-strings> ["duplicate label ",x]) => msgs1
+        ; <kindOf> (ctx,T) => (K,msgs2)
+        ; <kindOf> (ctx,TyVariant(decls)) => (J,msgs3)
+        ; <kindEqStar> K => msgs4
+        ; <kindEqSTar> J => msgs5
 
   kindOf:
     (ctx,TyString) -> (KiStar(),[])
