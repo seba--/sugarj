@@ -1,10 +1,11 @@
 module typing.check.TypeOperations
+
 //module typing/check/TypeOperations
 
 import org.sugarj.languages.Fomega
 //imports org/sugarj/languages/Fomega
 
-import collection.list.set
+//import collection.list.set
 //imports collection/list/set
 
 rules
