@@ -1,0 +1,86 @@
+// module typing.check.TypeOperations
+module typing/check/TypeOperations
+
+// import org.sugarj.languages.Fomega
+
+// import collection.list.set
+
+imports org/sugarj/languages/Fomega
+imports collection/list/set
+
+rules
+  // *** Free variables ***
+  freeVars: TyMu(X,T) -> <diff> (<freeVars> T,[X])
+  freeVars: TyAbs(X,K,T) -> <diff> (<freeVars> T,[X])
+  freeVars: TyForall(X,K,T) -> <diff> (<freeVars> T,[X])
+  freeVars: TyArrow(T1,T2) -> <union> (<freeVars> T1,<freeVars> T2)
+  freeVars: TyApp(T1,T2) -> <union> (<freeVars> T1,<freeVars> T2)
+  freeVars: TyQVar(qX) -> []
+  freeVars: TyVariant(decls) -> <unions> (<map(freeVarsDecl)> decls)
+  freeVars: TyRecord(decls) -> <unions> (<map(freeVarsDecl)> decls)
+  freeVars: TyString() -> []
+  freeVars: TyNat() -> []
+  freeVars: TyBool() -> []
+  freeVars: TyVar(X) -> [X]
+
+  freeVarsDecl: TyDecl(x,T) -> <freeVars> T
+
+  // *** Generate fresh variable ***
+  fresh: (X,Ts) -> Z
+         where <unions> (<map(freeVars)> Ts) => fvs
+             ; <genID> (X,0,fvs) => Z
+  genID: (X,n,fvs) -> Y
+         where <concat-strings> [X,"_",<write-to-string> n] => Z
+             ; (if <elem> (Z,fvs) then
+                  <genID> (X,<add> (n,1),fvs)
+               else
+                  !Z
+               end) => Y
+
+  // *** Capture-avoiding substitution ***
+  // μ-type
+  subst: (X,S,TyMu(X,T)) -> TyMu(X,T)
+  subst: (X,S,TyMu(Y,T)) -> TyMu(Y,<subst> (X,S,T))
+         where <not(equal)> (X,Y)
+             ; <not(elem)> (Y,<freeVars> S)
+  subst: (X,S,TyMu(Y,T)) -> TyMu(Z,<subst> (X,S,<subst> (Y,TyVar(Z),T)))
+         where <not(equal)> (X,Y)
+             ; <elem> (Y,<freeVars> S)
+             ; <fresh> (Y,[T,S]) => Z
+
+  // Type abstraction
+  subst: (X,S,TyAbs(X,K,T)) -> TyAbs(X,K,T)
+  subst: (X,S,TyAbs(Y,K,T)) -> TyAbs(X,K,<subst> (X,S,T))
+         where <not(equal)> (X,Y)
+             ; <not(elem)> (Y,<freeVars> S)
+  subst: (X,S,TyAbs(Y,K,T)) -> TyAbs(Z,K,<subst> (X,S,<subst> (Y,TyVar(Z),T)))
+         where <not(equal)> (X,Y)
+             ; <elem> (Y,<freeVars> S)
+             ; <fresh> (Y,[T,S]) => Z
+
+  // ∀-type
+  subst: (X,S,TyForall(X,K,T)) -> TyForall(X,K,T)
+  subst: (X,S,TyForall(Y,K,T)) -> TyForall(Y,K,<subst> (X,S,T))
+         where <not(equal)> (X,Y)
+             ; <not(elem)> (Y,<freeVars> S)
+  subst: (X,S,TyForall(Y,K,T)) -> TyForall(Z,K,<subst> (X,S,<subst> (Y,TyVar(Z),T)))
+         where <not(equal)> (X,Y)
+             ; <elem> (Y,<freeVars> S)
+             ; <fresh> (Y,[T,S]) => Z
+
+  // Simple cases
+  subst: (X,S,TyArrow(T1,T2)) -> TyArrow(<subst> (X,S,T1),<subst> (X,S,T2))
+  subst: (X,S,TyApp(T1,T2)) -> TyApp(<subst> (X,S,T1),<subst> (X,S,T2))
+  subst: (X,S,TyQVar(qX)) -> TyQVar(qX)
+  subst: (X,S,TyVariant(decls)) -> TyVariant(<map(\decl -> <substDecl> (X,S,decl)\)> decls)
+  subst: (X,S,TyRecord(decls)) -> TyRecord(<map(\decl -> <substDecl> (X,S,decl)\)> decls)
+  subst: (X,S,TyString()) -> TyString()
+  subst: (X,S,TyNat()) -> TyNat()
+  subst: (X,S,TyBool()) -> TyBool()
+
+  // Type variables
+  subst: (X,S,TyVar(X)) -> S
+  subst: (X,S,TyVar(Y)) -> TyVar(Y)
+         where <not(equal)> (X,Y)
+
+  substDecl: (X,S,TyDecl(x,T)) -> TyDecl(x,<subst> (X,S,T))
