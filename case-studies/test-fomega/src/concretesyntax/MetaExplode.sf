@@ -1,6 +1,6 @@
-MODULE concretesyntax.MetaExplode
+module concretesyntax.MetaExplode
 
-IMPORT org.sugarj.languages.Stratego
+import org.sugarj.languages.Stratego
 
 desugarings
   meta-explode

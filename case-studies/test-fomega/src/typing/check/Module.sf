@@ -1,17 +1,18 @@
-//module typing.check.Module
-module typing/check/Module
+module typing.check.Module
+//module typing/check/Module
 
-//import typing.check.Context
-//import typing.check.Type
-//import typing.check.Signature
-//import typing.check.ErrorHandling
-imports typing/check/Context
-        typing/check/Type
-        typing/check/Signature
-        typing/check/ErrorHandling
+import typing.check.Context
+import typing.check.Type
+import typing.check.Signature
+import typing.check.Expr
+import typing.check.ErrorHandling
+//imports typing/check/Context
+//        typing/check/Type
+//        typing/check/Signature
+//        typing/check/ErrorHandling
 
-//import org.sugarj.languages.Fomega
-imports org/sugarj/languages/Fomega
+import org.sugarj.languages.Fomega
+//imports org/sugarj/languages/Fomega
 
 rules
 
@@ -35,6 +36,6 @@ rules
 
   signatureOf:
     (ctx,[ValDef(Some(Public()),x,e) | defs]) -> (SigBindVar(x,T,sig),<conc> (msgs1,msgs2,msgs3))
-    where errorUnless(<not(elem)> (x,<dom> ctx) | <concat-string> [x," already defined."]) => msgs1
+    where errorUnless(<not(elem)> (x,<dom> ctx) | <concat-strings> [x," already defined."]) => msgs1
         ; <typeOf> (ctx,e) => (T,msgs2)
         ; <signatureOf> (CtxBindVar(ctx,x,T),defs) => (sig,msgs3)
