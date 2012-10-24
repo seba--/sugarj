@@ -1,0 +1,9 @@
+module Sample
+
+//import typing.check.ConstraintError
+
+type NatPair = {fst:Nat,snd:Nat}
+
+val twoNats = {fst=1,snd=true}
+
+val swap = \p:NatPair. {fst=p.snd,snd=p.fst}

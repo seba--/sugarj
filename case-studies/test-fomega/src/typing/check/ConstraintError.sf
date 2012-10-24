@@ -1,0 +1,8 @@
+module typing.check.ConstraintError
+
+import typing.check.Module
+import typing.check.Context
+
+rules
+  constraint-error: FomegaBody(defs) -> errors
+    where <signatureOf> (CtxEmpty,defs) -> (sig,errors)

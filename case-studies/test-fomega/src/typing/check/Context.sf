@@ -1,8 +1,8 @@
-//module typing.check.Context
-module typing/check/Context
+module typing.check.Context
+//module typing/check/Context
 
-//import org.sugarj.languages.Fomega
-imports org/sugarj/languages/Fomega
+import org.sugarj.languages.Fomega
+//imports org/sugarj/languages/Fomega
 
 signature
   sorts Context

@@ -1,11 +1,12 @@
-//module typing.check.Type
-module typing/check/Type
+module typing.check.Type
+//module typing/check/Type
 
-//import typing.check.Context
-imports typing/check/Context
+import typing.check.Context
+import typing.check.ErrorHandling
+//imports typing/check/Context
 
-//import org.sugar.languages.Fomega
-imports org/sugarj/languages/Fomega
+import org.sugarj.languages.Fomega
+//imports org/sugarj/languages/Fomega
 
 signature
   constructors
@@ -28,9 +29,9 @@ rules
 
   // <kindEqArrow>
   kindEqArrow: KiArrow(K1,K2) -> (K1,K2,[])
-  kindEqArrow: K -> (KiUnknown,KiUnknown
-                    ,[<concat-string> ["kind mismatch, expected arrow kind but found "
-                                      ,<write-to-string> K]])
+  kindEqArrow: K -> (KiUnknown(),KiUnknown()
+                    ,[<concat-strings> ["kind mismatch, expected arrow kind but found "
+                                       ,<write-to-string> K]])
                where if (!K; ?KiArrow(_,_)) then fail else id end
 
   // <kindEqStar>
@@ -68,7 +69,7 @@ rules
         ; <kindEq> (K11,K2) => msgs4
 
   kindOf:
-    (CtxEmpty,TyQVar(qX)) -> (KiUnknown,["undefined identifier ",qX])
+    (CtxEmpty(),TyQVar(qX)) -> (KiUnknown(),["undefined identifier ",qX])
   kindOf:
     (CtxBindTVar(ctx,Y,K),TyQVar(qX)) -> <kindOf> (ctx,TyQVar(qX))
   kindOf:
@@ -93,7 +94,7 @@ rules
         ; <kindOf> (ctx,T) => (K,msgs2)
         ; <kindOf> (ctx,TyVariant(decls)) => (J,msgs3)
         ; <kindEqStar> K => msgs4
-        ; <kindEqSTar> J => msgs5
+        ; <kindEqStar> J => msgs5
 
   kindOf:
     (ctx,TyRecord([])) -> (KiStar(),[])
@@ -105,19 +106,19 @@ rules
         ; <kindOf> (ctx,T) => (K,msgs2)
         ; <kindOf> (ctx,TyVariant(decls)) => (J,msgs3)
         ; <kindEqStar> K => msgs4
-        ; <kindEqSTar> J => msgs5
+        ; <kindEqStar> J => msgs5
 
   kindOf:
-    (ctx,TyString) -> (KiStar(),[])
+    (ctx,TyString()) -> (KiStar(),[])
 
   kindOf:
-    (ctx,TyNat) -> (KiStar(),[])
+    (ctx,TyNat()) -> (KiStar(),[])
 
   kindOf:
-    (ctx,TyBool) -> (KiStar(),[])
+    (ctx,TyBool()) -> (KiStar(),[])
 
   kindOf:
-    (CtxEmpty,TyVar(X)) -> (KiUnknown,["undefined identifier ",X])
+    (CtxEmpty(),TyVar(X)) -> (KiUnknown(),["undefined identifier ",X])
   kindOf:
     (CtxBindVar(ctx,y,T),TyVar(X)) -> <kindOf> (ctx,TyVar(X))
   kindOf:
@@ -132,7 +133,7 @@ rules
     (CtxBindTVar(ctx,Y,K),TyVar(X)) -> <kindOf> (ctx,TyVar(X))
     where <not(equal)> (Y,X)
   kindOf:
-    (CtxBindTVarDef(ctx,Y,K,T),TyVar(X)) -> <kindof> (ctx,TyVar(X))
+    (CtxBindTVarDef(ctx,Y,K,T),TyVar(X)) -> <kindOf> (ctx,TyVar(X))
     where <not(equal)> (Y,X)
 
 // *** Notes ***
