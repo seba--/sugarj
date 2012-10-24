@@ -1,4 +1,5 @@
-module typing.check.ErrorHandling
+//module typing.check.ErrorHandling
+module typing/check/ErrorHandling
 
 rules
   errorIf(condition|msg) = if condition then ![msg] else ![] end

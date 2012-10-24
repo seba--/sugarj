@@ -1,12 +1,17 @@
-module typing.check.Module
+//module typing.check.Module
+module typing/check/Module
 
-import typing.check.Context
-import typing.check.Type
-import typing.check.Signature
-import typing.check.ErrorHandling
+//import typing.check.Context
+//import typing.check.Type
+//import typing.check.Signature
+//import typing.check.ErrorHandling
+imports typing/check/Context
+        typing/check/Type
+        typing/check/Signature
+        typing/check/ErrorHandling
 
-import org.sugarj.languages.Fomega
-
+//import org.sugarj.languages.Fomega
+imports org/sugarj/languages/Fomega
 
 rules
 
