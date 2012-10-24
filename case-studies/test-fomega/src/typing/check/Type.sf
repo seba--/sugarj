@@ -1,8 +1,11 @@
-module typing.check.Type
+//module typing.check.Type
+module typing/check/Type
 
-import typing.check.Context
+//import typing.check.Context
+imports typing/check/Context
 
-import org.sugar.languages.Fomega
+//import org.sugar.languages.Fomega
+imports org/sugarj/languages/Fomega
 
 signature
   constructors
@@ -10,7 +13,7 @@ signature
 
 rules
   lab: [] -> []
-  lab: [TyDecl(x,T) | decls] -> [x,<lab> decls]
+  lab: [TyDecl(x,T) | decls] -> [x|<lab> decls]
 
   // <kindEq> (KExpected,KActual)
   kindEq: (KiUnknown(),K) -> []
@@ -19,7 +22,7 @@ rules
   kindEq: (K,J) -> [<concat-strings> ["kind mismatch, expected "
                                      ,<write-to-string> K
                                      ," but found "
-                                     <write-to-string> J]]
+                                     ,<write-to-string> J]]
           where <not(equal)> (K,J)
               ; <not(equal)> (K,KiUnknown())
 
@@ -34,7 +37,7 @@ rules
   kindEqStar: KiStar() -> []
   kindEqStar: K -> ["kind mismatch, expected * but found "
                    ,<write-to-string> K]
-              where if (!K; ?KiStar()) then fail else id
+              where if (!K; ?KiStar()) then fail else id end
 
   kindOf:
     (ctx,TyMu(X,T)) -> (K,<conc> (msgs1,msgs2))
