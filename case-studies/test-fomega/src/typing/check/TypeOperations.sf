@@ -84,3 +84,31 @@ rules
          where <not(equal)> (X,Y)
 
   substDecl: (X,S,TyDecl(x,T)) -> TyDecl(x,<subst> (X,S,T))
+
+  // Normalization
+  norm: T -> T'
+        where <parReduce> T => S
+            ; <typeEq> (T,S) => msgs
+            ; if (!msgs; ?[]) then
+                !T
+              else
+                !(<norm> S)
+              end => T'
+
+  // Parallel reduction
+  parReduce: TyNat -> TyNat
+  parReduce: TyString -> TyString
+  parReduce: TyBool -> TyBool
+  parReduce: TyVar(X) -> TyVar(X)
+  parReduce: TyQVar(qX) -> TyQVar(qX)
+  parReduce: TyMu(X,T) -> TyMu(X,<parReduce> T)
+  parReduce: TyAbs(X,K,T) -> TyAbs(X,K,<parReduce> T)
+  parReduce: TyForall(X,K,T) -> TyForall(X,K,<parReduce> T)
+  parReduce: TyArrow(T1,T2) -> TyArrow(<parReduce> T1,<parReduce> T2)
+  parReduce: TyApp(T1,T2) -> TyApp(<parReduce> T1,<parReduce> T2)
+             where if (!T; ?(TyAbs(_,_,_))) then fail else id end
+  parReduce: TyApp(TyAbs(X,K11,T12),T2) -> <subst> (X,<parReduce> T2,<parReduce> T12)
+  parReduce: TyVariant(decls) -> TyVariant(<map(parReduceDecl)> decls)
+  parReduce: TyRecord(decls) -> TyRecord(<map(parReduceDecl)> decls)
+
+  parReduceDecl: TyDecl(x,T) -> TyDecl(x,<parReduce> T)

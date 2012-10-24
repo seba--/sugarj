@@ -23,8 +23,6 @@ rules
   labType: (x,[TyDecl(y,T)|decls]) -> <labType> (x,decls)
            where <not(equal)> (x,y)
 
-  norm = fail // TODO
-
   typeMismatch:
     (S,T) -> [<concat-strings> ["type mismatch, expected "
                                ,<write-to-string> S
