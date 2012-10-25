@@ -5,4 +5,4 @@ import typing.check.Context
 
 rules
   constraint-error: FomegaBody(defs) -> errors
-    where <signatureOf> (CtxEmpty(),defs) -> (sig,errors)
+    where <signatureOf> (CtxEmpty(),defs) => (sig,errors)
