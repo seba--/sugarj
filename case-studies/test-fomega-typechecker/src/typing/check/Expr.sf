@@ -36,7 +36,7 @@ rules
 
   typeOf:
     (ctx,Case(e1,[Branch(x1,x2,e2),Branch(y1,y2,e3)|brs])) ->
-    (U,<conc> (msgs1,msgs2,msgs3,msgs4,msg5))
+    (R,<conc> (msgs1,msgs2,msgs3,msgs4,msgs5))
     where <typeOf> (ctx,e1) => (T1,msgs1)
         ; <norm> (ctx,T1) => T1'
         ; <typeEqVariant> T1' => (decls,msgs2)
@@ -45,7 +45,7 @@ rules
         ; <typeOf> (ctx,Case(e1,[Branch(y1,y2,e3)|brs])) => (R,msgs4)
         ; <norm> (ctx,T2) => T2'
         ; <norm> (ctx,R) => R'
-        ; <typeEq> (T2',R2') => msgs5
+        ; <typeEq> (T2',R') => msgs5
 
   // *** Conditional ***
   //
