@@ -14,11 +14,6 @@ import org.sugarj.languages.Fomega
 
 //imports org/sugarj/languages/Fomega
 
-signature
-  constructors
-    TyUnknown: FomegaType
-    IDUnknown: FomegaID
-
 rules
 
   // *** Case expression ***
@@ -42,7 +37,7 @@ rules
   typeOf:
     (ctx,Case(e1,[Branch(x1,x2,e2),Branch(y1,y2,e3)|brs])) ->
     (U,<conc> (msgs1,msgs2,msgs3,msgs4,msg5))
-    where <typeof> (ctx,e1) => (T1,msgs1)
+    where <typeOf> (ctx,e1) => (T1,msgs1)
         ; <norm> (ctx,T1) => T1'
         ; <typeEqVariant> T1' => (decls,msgs2)
         ; <labType> (x1,decls) => (S,msgs3)
@@ -72,13 +67,13 @@ rules
 
   typeOf:
     (ctx,TAbs(X,K1,e2)) -> (TyForall(X,K1,T2),msgs1)
-    where <typeof> (CtxBindTVar(ctx,X,K1),e2) => (T2,msgs1)
+    where <typeOf> (CtxBindTVar(ctx,X,K1),e2) => (T2,msgs1)
 
   // *** Abstraction ***
   //
 
   typeOf:
-    (ctx,Abs(x,T1,e2)) -> (TyFun(T1,T2),<conc> (msgs1,msgs2,msgs3))
+    (ctx,Abs(x,T1,e2)) -> (TyArrow(T1,T2),<conc> (msgs1,msgs2,msgs3))
     where <typeOf> (CtxBindVar(ctx,x,T1),e2) => (T2,msgs1)
         ; <kindOf> (ctx,T1) => (K1,msgs2)
         ; <kindEqStar> K1 => msgs3
@@ -92,7 +87,7 @@ rules
         ; <kindOf> (ctx,T) => (K,msgs2)
         ; <kindEqStar> K => msgs3
         ; <norm> (ctx,S) => S'
-        ; <norm> (cyx,T) => T'
+        ; <norm> (ctx,T) => T'
         ; <typeEq> (T',S') => msgs4
 
   // *** Unfold ***
@@ -156,27 +151,27 @@ rules
     (ctx,SelectRcd(e,x)) -> (S,<conc> (msgs1,msgs2,msgs3))
     where <typeOf> (ctx,e) => (T,msgs1)
         ; <norm> (ctx,T) => T'
-        ; <typeEqRecord> T1 => (decls,msgs2)
+        ; <typeEqRecord> T' => (decls,msgs2)
         ; <labType> (x,decls) => (S,msgs3)
 
   // *** Primitive types ***
-  typeOf: (ctx,String(str)) -> (TyString,[])
-  typeOf: (ctx,Nat(n)) -> (TyNat,[])
-  typeOf: (ctx,False()) -> (TyBool,[])
-  typeOf: (ctx,True()) -> (TyBool,[])
+  typeOf: (ctx,String(str)) -> (TyString(),[])
+  typeOf: (ctx,Nat(n)) -> (TyNat(),[])
+  typeOf: (ctx,False()) -> (TyBool(),[])
+  typeOf: (ctx,True()) -> (TyBool(),[])
 
   // *** Variant ***
   //
 
   typeOf:
-    (ctx,Variant(e,T)) -> (T,<conc> (msgs1,msgs2,msgs3,msgs4,msgs5,msgs6))
+    (ctx,Variant(Field(x,e),T)) -> (T,<conc> (msgs1,msgs2,msgs3,msgs4,msgs5,msgs6))
     where <kindOf> (ctx,T) => (K,msgs1)
         ; <kindEqStar> K => msgs2
         ; <typeOf> e => (S,msgs3)
         ; <norm> S => S'
         ; <norm> T => T'
         ; <typeEqVariant> T' => (decls,msgs4)
-        ; labType(x,decls) => (U,msgs5)
+        ; <labType> (x,decls) => (U,msgs5)
         ; <typeEq> (S',U) => msgs6
 
   // *** Record ***
@@ -193,11 +188,11 @@ rules
         ; <norm> (ctx,S) => S'
         ; <typeEqRecord> S' => (decls,msgs2)
         ; errorUnless(<not(elem)> (x,<lab> flds)
-                     | <concat-string> ["duplicate label ",x]) => msgs3
+                     | <concat-strings> ["duplicate label ",x]) => msgs3
 
   // *** Var ***
   typeOf:
-    (CtxEmpty,Var(x)) -> (TyUnknown,["undefined identifier ",x])
+    (CtxEmpty(),Var(x)) -> (TyUnknown(),["undefined identifier ",x])
   typeOf:
     (CtxBindQVar(ctx,qy,T),Var(x)) -> <typeOf> (ctx,Var(x))
   typeOf:
@@ -214,7 +209,7 @@ rules
 
   // *** QVar ***
   typeOf:
-    (CtxEmpty,QVar(qx)) -> (TyUnknown,["undefined identifier ",qx])
+    (CtxEmpty(),QVar(qx)) -> (TyUnknown(),["undefined identifier ",qx])
   typeOf:
     (CtxBindVar(ctx,y,T),QVar(qx)) -> <typeOf> (ctx,QVar(qx))
   typeOf:
