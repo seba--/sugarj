@@ -1,16 +1,15 @@
 module typing.check.TypeOperations
 
-//module typing/check/TypeOperations
-
+import typing.check.Type
 import org.sugarj.languages.Fomega
-//imports org/sugarj/languages/Fomega
 
-//import collection.list.set
-//imports collection/list/set
+signature
+  constructors
+    TyUnknown: FomegaType
+    IDUnknown: FomegaID
 
 rules
-  // x:S ∈ decls
-  labType: (x,[]) -> (TyUnknown, ["undefined label ",x])
+  labType: (x,[]) -> (TyUnknown(), ["undefined label ",x])
   labType: (x,[TyDecl(x,T)|decls]) -> (T,[])
   labType: (x,[TyDecl(y,T)|decls]) -> <labType> (x,decls)
            where <not(equal)> (x,y)
@@ -113,53 +112,53 @@ rules
 
   typeEqVariant: TyVariant(decls) -> (decls,[])
   typeEqVariant:
-    T -> ([],[<concat-string> ["type mismatch, expected variant type but found"
-                              ,<write-to-string> T]])
+    T -> ([],[<concat-strings> ["type mismatch, expected variant type but found"
+                               ,<write-to-string> T]])
     where if (!T; ?TyVariant(_)) then fail else id end
 
-  typeEqBool: TyBool -> []
+  typeEqBool: TyBool() -> []
   typeEqBool:
-    T -> [<concat-string> ["type mismatch, expected Bool but found"
-                          ,<write-to-string> T]]
-    where if (!T; ?TyBool) then fail else id end
+    T -> [<concat-strings> ["type mismatch, expected Bool but found"
+                           ,<write-to-string> T]]
+    where if (!T; ?TyBool()) then fail else id end
 
-  typeEqNat: TyNat -> []
+  typeEqNat: TyNat() -> []
   typeEqNat:
-    T -> [<concat-string> ["type mismatch, expected Nat but found"
-                          ,<write-to-string> T]]
-    where if (!T; ?TyNat) then fail else id end
+    T -> [<concat-strings> ["type mismatch, expected Nat but found"
+                           ,<write-to-string> T]]
+    where if (!T; ?TyNat()) then fail else id end
 
-  typeEqString: TyString -> []
+  typeEqString: TyString() -> []
   typeEqString:
-    T -> [<concat-string> ["type mismatch, expected String but found"
-                          ,<write-to-string> T]]
-    where if (!T; ?TyString) then fail else id end
+    T -> [<concat-strings> ["type mismatch, expected String but found"
+                           ,<write-to-string> T]]
+    where if (!T; ?TyString()) then fail else id end
 
   typeEqMu: TyMu(X,T) -> (X,T,[])
   typeEqMu:
-    T -> (IDUnknown,TyUnknown
-         ,[<concat-string> ["type mismatch, expected recursive type but found"
-                           ,<write-to-string> T]])
+    T -> (IDUnknown(),TyUnknown()
+         ,[<concat-strings> ["type mismatch, expected recursive type but found"
+                            ,<write-to-string> T]])
     where if (!T; ?TyMu(_,_)) then fail else id end
 
   typeEqForall: TyForall(X,K,T) -> (X,K,T,[])
   typeEqForall:
-    T -> (IDUnknown,TyUnknown
-         ,[<concat-string> ["type mismatch, expected for all type but found"
-                           ,<write-to-string> T]])
+    T -> (IDUnknown(),TyUnknown()
+         ,[<concat-strings> ["type mismatch, expected for all type but found"
+                            ,<write-to-string> T]])
     where if (!T; ?TyForall(_,_,_)) then fail else id end
 
   typeEqArrow: TyArrow(X,T) -> (X,T,[])
   typeEqMu:
-    T -> (TyUnknown,TyUnknown
-         ,[<concat-string> ["type mismatch, expected arrow type but found"
-                           ,<write-to-string> T]])
+    T -> (TyUnknown(),TyUnknown()
+         ,[<concat-strings> ["type mismatch, expected arrow type but found"
+                            ,<write-to-string> T]])
     where if (!T; ?TyArrow(_,_)) then fail else id end
 
-  typeEqRecord: TyRecords(decls) -> (decls,[])
+  typeEqRecord: TyRecord(decls) -> (decls,[])
   typeEqRecord:
-    T -> ([] ,[<concat-string> ["type mismatch, expected record type but found"
-                               ,<write-to-string> T]])
+    T -> ([] ,[<concat-strings> ["type mismatch, expected record type but found"
+                                ,<write-to-string> T]])
     where if (!T; ?TyRecord(_)) then fail else id end
 
 
@@ -250,9 +249,9 @@ rules
               end => T'
 
   // Parallel reduction
-  parReduce: TyNat -> TyNat
-  parReduce: TyString -> TyString
-  parReduce: TyBool -> TyBool
+  parReduce: TyNat() -> TyNat()
+  parReduce: TyString() -> TyString()
+  parReduce: TyBool() -> TyBool()
   parReduce: TyVar(X) -> TyVar(X)
   parReduce: TyQVar(qX) -> TyQVar(qX)
   parReduce: TyMu(X,T) -> TyMu(X,<parReduce> T)
@@ -260,7 +259,7 @@ rules
   parReduce: TyForall(X,K,T) -> TyForall(X,K,<parReduce> T)
   parReduce: TyArrow(T1,T2) -> TyArrow(<parReduce> T1,<parReduce> T2)
   parReduce: TyApp(T1,T2) -> TyApp(<parReduce> T1,<parReduce> T2)
-             where if (!T; ?(TyAbs(_,_,_))) then fail else id end
+             where if (!T1; ?(TyAbs(_,_,_))) then fail else id end
   parReduce: TyApp(TyAbs(X,K11,T12),T2) -> <subst> (X,<parReduce> T2,<parReduce> T12)
   parReduce: TyVariant(decls) -> TyVariant(<map(parReduceDecl)> decls)
   parReduce: TyRecord(decls) -> TyRecord(<map(parReduceDecl)> decls)
