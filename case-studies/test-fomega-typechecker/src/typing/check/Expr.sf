@@ -3,6 +3,7 @@ module typing.check.Expr
 import typing.check.Context
 import typing.check.Type
 import typing.check.TypeOperations
+import typing.check.ErrorHandling
 
 import org.sugarj.languages.Fomega
 
@@ -21,28 +22,33 @@ rules
   // ---------------------------------------------------------------
   // Γ ⊢ case e1 of <x=y> ⇒ e2 : T2
   typeOf:
-    (ctx,Case(e1,[Branch(x,y,e2)])) -> (T2,<conc> (msgs1,msgs2,msgs3,msgs4))
-    where <typeOf> (ctx,e1) => (T1,msgs1)
+    (ctx,Case(e1,[Branch(x,y,e2)])) -> (T2,<conc> (errs1,errs2,errs3,errs4))
+    where <typeOf> (ctx,e1) => (T1,errs1)
         ; <norm> (ctx,T1) => T1'
         ; <typeEqVariant> T1' => (decls,msgs2)
+        ; <msgsToErrs> (msgs2,e1) => errs2
         ; <labType> (x,decls) => (S,msgs3)
-        ; <typeOf> (CtxBindVar(ctx,y,S),e2) => (T2,msgs4)
+        ; <msgsToErrs> (msgs3,x) => errs3
+        ; <typeOf> (CtxBindVar(ctx,y,S),e2) => (T2,errs4)
   // Γ ⊢ e1 : T1 Γ ⊢ T1 ⇓ <decls> x:S ∈ decls Γ,y:S ⊢ e2 : T2
   // Γ ⊢ case e1 of brs : R Γ ⊢ T2 ⇓ U Γ ⊢ R ⇓ U
   // ---------------------------------------------------------------
   // Γ ⊢ case e1 <x=y> ⇒ e2; brs : U
   typeOf:
     (ctx,Case(e1,[Branch(x1,x2,e2),Branch(y1,y2,e3)|brs])) ->
-    (R,<conc> (msgs1,msgs2,msgs3,msgs4,msgs5))
-    where <typeOf> (ctx,e1) => (T1,msgs1)
+    (R,<conc> (errs1,errs2,errs3,errs4,errs5))
+    where <typeOf> (ctx,e1) => (T1,errs1)
         ; <norm> (ctx,T1) => T1'
         ; <typeEqVariant> T1' => (decls,msgs2)
+        ; <msgsToErrs> (msgs2,e1) => errs2
         ; <labType> (x1,decls) => (S,msgs3)
-        ; <typeOf> (CtxBindVar(ctx,x2,S),e2) => (T2,msgs4)
-        ; <typeOf> (ctx,Case(e1,[Branch(y1,y2,e3)|brs])) => (R,msgs4)
+        ; <msgsToErrs> (msgs3,x1) => errs3
+        ; <typeOf> (CtxBindVar(ctx,x2,S),e2) => (T2,errs4)
+        ; <typeOf> (ctx,Case(e1,[Branch(y1,y2,e3)|brs])) => (R,errs4)
         ; <norm> (ctx,T2) => T2'
         ; <norm> (ctx,R) => R'
         ; <typeEq> (T2',R') => msgs5
+        ; <msgsToErrs> (msgs5,[Branch(x1,x2,e2),Branch(y1,y2,e3)|brs]) => errs5
 
   // *** Conditional ***
   //
@@ -52,15 +58,17 @@ rules
   // Γ ⊢ if e1 then e2 else e3 : U
   typeOf:
     (ctx,Cond(e1,e2,e3)) ->
-    (T2',<conc> (msgs1,msgs2,msgs3,msgs4,msgs5))
-    where <typeOf> (ctx,e1) => (T1,msgs1)
-        ; <typeOf> (ctx,e2) => (T2,msgs2)
-        ; <typeOf> (ctx,e3) => (T3,msgs3)
+    (T2',<conc> (errs1,errs2,errs3,errs4,errs5))
+    where <typeOf> (ctx,e1) => (T1,errs1)
+        ; <typeOf> (ctx,e2) => (T2,errs2)
+        ; <typeOf> (ctx,e3) => (T3,errs3)
         ; <norm> (ctx,T1) => T1'
         ; <typeEqBool> T1' => msgs4
+        ; <msgsToErrs> (msgs4,e1) => errs4
         ; <norm> (ctx,T2) => T2'
         ; <norm> (ctx,T3) => T3'
         ; <typeEq> (T2',T3') => msgs5
+        ; <msgsToErrs> (msgs5,[e2,e3]) => errs5
 
   // *** Polymorphic function ***
   //
@@ -68,8 +76,8 @@ rules
   // ----------------------------
   // Γ ⊢ \X::K1. e2 : ∀ X::K1. T2
   typeOf:
-    (ctx,TAbs(X,K1,e2)) -> (TyForall(X,K1,T2),msgs1)
-    where <typeOf> (CtxBindTVar(ctx,X,K1),e2) => (T2,msgs1)
+    (ctx,TAbs(X,K1,e2)) -> (TyForall(X,K1,T2),errs1)
+    where <typeOf> (CtxBindTVar(ctx,X,K1),e2) => (T2,errs1)
 
   // *** Abstraction ***
   //
@@ -77,10 +85,11 @@ rules
   // ------------------------------
   // Γ ⊢ \x::T1. e2 : T1 → T2
   typeOf:
-    (ctx,Abs(x,T1,e2)) -> (TyArrow(T1,T2),<conc> (msgs1,msgs2,msgs3))
-    where <typeOf> (CtxBindVar(ctx,x,T1),e2) => (T2,msgs1)
-        ; <kindOf> (ctx,T1) => (K1,msgs2)
+    (ctx,Abs(x,T1,e2)) -> (TyArrow(T1,T2),<conc> (errs1,errs2,errs3))
+    where <typeOf> (CtxBindVar(ctx,x,T1),e2) => (T2,errs1)
+        ; <kindOf> (ctx,T1) => (K1,errs2)
         ; <kindEqStar> K1 => msgs3
+        ; <msgsToErrs> (msgs3,T1) => errs3
 
   // *** Ascription ***
   //
@@ -88,13 +97,15 @@ rules
   // -----------------------------------------------
   // Γ ⊢ e as T : T
   typeOf:
-    (ctx,Ascription(e,T)) -> (T,<conc> (msgs1,msgs2,msgs3,msgs4))
-    where <typeOf> (ctx,e) => (S,msgs1)
-        ; <kindOf> (ctx,T) => (K,msgs2)
+    (ctx,Ascription(e,T)) -> (T,<conc> (errs1,errs2,errs3,errs4))
+    where <typeOf> (ctx,e) => (S,errs1)
+        ; <kindOf> (ctx,T) => (K,errs2)
         ; <kindEqStar> K => msgs3
+        ; <msgsToErrs> (msgs3,T) => errs3
         ; <norm> (ctx,S) => S'
         ; <norm> (ctx,T) => T'
         ; <typeEq> (T',S') => msgs4
+        ; <msgsToErrs> (msgs4,Ascription(e,T)) => errs4
 
   // *** Unfold ***
   //
@@ -103,18 +114,22 @@ rules
   // Γ ⊢ e as T : T
   typeOf:
     (ctx,Unfold(T,e)) ->
-    (<subst> (X,T',T1),<conc> (msgs1,msgs2,msgs3,msgs4,msgs5,msgs6))
-    where <kindOf> (ctx,T) => (K,msgs1)
+    (<subst> (X,T',T1),<conc> (errs1,errs2,errs3,errs4,errs5,errs6))
+    where <kindOf> (ctx,T) => (K,errs1)
         ; <kindEqStar> K => msgs2
-        ; <typeOf> (ctx,e) => (S,msgs3)
+        ; <msgsToErrs> (msgs2,T) => errs2
+        ; <typeOf> (ctx,e) => (S,errs3)
         ; <norm> (ctx,T) => T'
         ; <norm> (ctx,S) => S'
         ; <typeEqMu> T' => (X,T1,msgs4)
+        ; <msgsToErrs> (msgs4,T) => errs4
         ; <typeEqMu> S' => (Y,S1,msgs5)
+	    ; <msgsToErrs> (msgs5,e) => errs5
         ; <fresh> [T',S'] => Z
         ; <subst> (X,TyVar(Z),T1) => T1'
         ; <subst> (Y,TyVar(Z),S1) => S1'
         ; <typeEq> (T1',S1') => msgs6
+        ; <msgsToErrs> (msgs6,Unfold(T,e)) => errs6
 
   // *** Fold ***
   //
@@ -123,13 +138,16 @@ rules
   // Γ ⊢ fold [T] e : T
   typeOf:
     (ctx,Fold(T,e)) ->
-    (T,<conc> (msgs1,msgs2,msgs3))
-    where <kindOf> (ctx,T) => (K,msgs1)
+    (T,<conc> (errs1,errs2,errs3))
+    where <kindOf> (ctx,T) => (K,errs1)
         ; <kindEqStar> K => msgs2
+        ; <msgsToErrs> (msgs2,T) => errs2 
         ; <norm> (ctx,T) => T'
         ; <typeEqMu> T' => (X,T1,msgs3)
+        ; <msgsToErrs> (msgs3,T) => errs3
         ; <typeOf> (ctx,e) => S
         ; <typeEq> (S, <subst> (X,TyMu(X,T1),T1)) => msgs4
+        ; <msgsToErrs> (msgs4,Fold(T,e)) => errs4
 
   // *** TApp ***
   //
@@ -137,12 +155,14 @@ rules
   // ---------------------------------------------------
   // Γ ⊢ e1 [T2] : [X↦T2]T12
   typeOf:
-    (ctx,TApp(e1,T2)) -> (<subst> (X,T2,T12),<conc> (msgs1,msgs2,msgs3,msgs4))
-    where <typeOf> (ctx,e1) => (T1,msgs1)
+    (ctx,TApp(e1,T2)) -> (<subst> (X,T2,T12),<conc> (errs1,errs2,errs3,errs4))
+    where <typeOf> (ctx,e1) => (T1,errs1)
         ; <norm> (ctx,T1) => T1'
         ; <typeEqForall> T1' => (X,K11,T12,msgs2)
-        ; <kindOf> (ctx,T2) => (K2,msgs3)
+	    ; <msgsToErrs> (msgs2,e1) => errs2
+        ; <kindOf> (ctx,T2) => (K2,errs3)
         ; <kindEq> (K11,K2) => msgs4
+        ; <msgsToErrs> (msgs4,T2) => errs4
 
   // *** App ***
   //
@@ -150,13 +170,15 @@ rules
   // -------------------------------------------------------------
   // Γ ⊢ e1 e2 : T12
   typeOf:
-    (ctx,App(e1,e2)) -> (T12,<conc> (msgs1,msgs2,msgs3,msgs4))
-    where <typeOf> (ctx,e1) => (T1,msgs1)
-        ; <typeOf> (ctx,e2) => (T2,msgs2)
-        ; <norm> (ctx,T1) => T1'
+    (ctx,App(e1,e2)) -> (T12,<conc> (errs1,errs2,errs3,errs4))
+    where <typeOf> (ctx,e1) => (T1,errs1)
+        ; <typeOf> (ctx,e2) => (T2,errs2)
+        ; <debug(!"Ni: ");norm;debug(!"No: ")> (ctx,T1) => T1'
         ; <typeEqArrow> T1' => (T11,T12,msgs3)
+        ; <msgsToErrs> (msgs3,e1) => errs3
         ; <norm> (ctx,T2) => T2'
         ; <typeEq> (T11,T2') => msgs4
+        ; <msgsToErrs> (msgs4,e2) => errs4
 
   // *** SelectRcd ***
   //
@@ -164,11 +186,13 @@ rules
   // ------------------------------------------
   // Γ ⊢ e!x : S
   typeOf:
-    (ctx,SelectRcd(e,x)) -> (S,<conc> (msgs1,msgs2,msgs3))
-    where <typeOf> (ctx,e) => (T,msgs1)
+    (ctx,SelectRcd(e,x)) -> (S,<conc> (errs1,errs2,errs3))
+    where <typeOf> (ctx,e) => (T,errs1)
         ; <norm> (ctx,T) => T'
         ; <typeEqRecord> T' => (decls,msgs2)
+        ; <msgsToErrs> (msgs2,e) => errs2
         ; <labType> (x,decls) => (S,msgs3)
+        ; <msgsToErrs> (msgs3,x) => errs3
 
   // *** Primitive types ***
   typeOf: (ctx,String(str)) -> (TyString(),[])
@@ -182,15 +206,19 @@ rules
   // -------------------------------------------------------------------
   // Γ ⊢ <x=e> as T : T
   typeOf:
-    (ctx,Variant(Field(x,e),T)) -> (T,<conc> (msgs1,msgs2,msgs3,msgs4,msgs5,msgs6))
-    where <kindOf> (ctx,T) => (K,msgs1)
+    (ctx,Variant(Field(x,e),T)) -> (T,<conc> (errs1,errs2,errs3,errs4,errs5,errs6))
+    where <kindOf> (ctx,T) => (K,errs1)
         ; <kindEqStar> K => msgs2
-        ; <typeOf> e => (S,msgs3)
+        ; <msgsToErrs> (msgs2,T) => errs2
+        ; <typeOf> e => (S,errs3)
         ; <norm> S => S'
         ; <norm> T => T'
         ; <typeEqVariant> T' => (decls,msgs4)
+        ; <msgsToErrs> (msgs4,T) => errs4
         ; <labType> (x,decls) => (U,msgs5)
+        ; <msgsToErrs> (msgs5,x) => errs5
         ; <typeEq> (S',U) => msgs6
+        ; <msgsToErrs> (msgs6,e) => errs6
 
   // *** Record ***
   //
@@ -203,17 +231,18 @@ rules
   // Γ ⊢ {x=e,flds} : {x:T,decls}
   typeOf:
     (ctx,Record([Field(x,e)|flds])) ->
-    (Record([Field(x,T)|decls]),<conc> (msgs1,msgs2,msgs3))
+    (Record([Field(x,T)|decls]),<conc> (errs1,errs2,errs3))
     where <typeOf> (ctx,e) => T
-        ; <typeOf> (ctx,Record(flds)) => (S,msgs1)
+        ; <typeOf> (ctx,Record(flds)) => (S,errs1)
         ; <norm> (ctx,S) => S'
         ; <typeEqRecord> S' => (decls,msgs2)
+        ; <msgsToErrs> (msgs2,flds) => errs2
         ; errorUnless(<not(elem)> (x,<lab> flds)
-                     | <concat-strings> ["duplicate label ",x]) => msgs3
+                     | [(x,<concat-strings> ["duplicate label ",x])]) => errs3
 
   // *** Var ***
   typeOf:
-    (CtxEmpty(),Var(x)) -> (TyUnknown(),["undefined identifier ",x])
+    (CtxEmpty(),Var(x)) -> (TyUnknown(),[(x,<concat-strings> ["undefined identifier ",x])])
   typeOf:
     (CtxBindQVar(ctx,qy,T),Var(x)) -> <typeOf> (ctx,Var(x))
   typeOf:
@@ -230,7 +259,7 @@ rules
 
   // *** QVar ***
   typeOf:
-    (CtxEmpty(),QVar(qx)) -> (TyUnknown(),["undefined identifier ",qx])
+    (CtxEmpty(),QVar(qx)) -> (TyUnknown(),[(qx,<concat-strings> ["undefined identifier ",qx])])
   typeOf:
     (CtxBindVar(ctx,y,T),QVar(qx)) -> <typeOf> (ctx,QVar(qx))
   typeOf:

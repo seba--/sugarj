@@ -25,3 +25,17 @@ public type T8 = {x:Nat,y:Nat,z:Id String}
 public type T9 = Nat -> Bool -> String -> Id Bool
 
 public type T10 = {x:Nat,x1:Id T1,y:Bool}
+
+public val v1 = 1
+
+public val v2 = \x:Bool.\y:Nat. x
+
+public val v3 = v2 true 1
+
+public val id = \A::*.\a:A.a
+
+public val v4 = id [Id Nat]
+
+public val v5 = id [Id Bool]
+
+public val v5 = v4 true

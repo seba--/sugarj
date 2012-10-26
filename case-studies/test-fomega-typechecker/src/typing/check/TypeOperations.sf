@@ -110,56 +110,64 @@ rules
           where <not(equal)> (S,TyUnknown())
               ; <not(equal)> (T,TyUnknown())
 
+  typeEqVariant: TyUnknown() -> ([],[])
   typeEqVariant: TyVariant(decls) -> (decls,[])
   typeEqVariant:
     T -> ([],[<concat-strings> ["type mismatch, expected variant type but found"
                                ,<write-to-string> T]])
-    where if (!T; ?TyVariant(_)) then fail else id end
+    where if (!T; ?TyVariant(_)) then fail else if (!T; ?TyUnknown()) then fail else id end end
 
+  typeEqBool: TyUnknown() -> []
   typeEqBool: TyBool() -> []
   typeEqBool:
     T -> [<concat-strings> ["type mismatch, expected Bool but found"
                            ,<write-to-string> T]]
-    where if (!T; ?TyBool()) then fail else id end
+    where if (!T; ?TyBool()) then fail else if (!T; ?TyUnknown()) then fail else id end end
 
+  typeEqNat: TyUnknown() -> []
   typeEqNat: TyNat() -> []
   typeEqNat:
     T -> [<concat-strings> ["type mismatch, expected Nat but found"
                            ,<write-to-string> T]]
-    where if (!T; ?TyNat()) then fail else id end
+    where if (!T; ?TyNat()) then fail else if (!T; ?TyUnknown()) then fail else id end end
 
+  typeEqString: TyUnknown() -> []
   typeEqString: TyString() -> []
   typeEqString:
     T -> [<concat-strings> ["type mismatch, expected String but found"
                            ,<write-to-string> T]]
-    where if (!T; ?TyString()) then fail else id end
+    where if (!T; ?TyString()) then fail else if (!T; ?TyUnknown()) then fail else id end end
 
+  typeEqMu: TyUnknown() -> (IDUnknown(),TyUnknown(),[])
   typeEqMu: TyMu(X,T) -> (X,T,[])
   typeEqMu:
     T -> (IDUnknown(),TyUnknown()
          ,[<concat-strings> ["type mismatch, expected recursive type but found"
                             ,<write-to-string> T]])
-    where if (!T; ?TyMu(_,_)) then fail else id end
+    where if (!T; ?TyMu(_,_)) then fail else if (!T; ?TyUnknown()) then fail else id end end
 
+  typeEqForall: TyUnknown() -> (IDUnknown(),KiUnknown(),TyUnknown(),[])
   typeEqForall: TyForall(X,K,T) -> (X,K,T,[])
   typeEqForall:
     T -> (IDUnknown(),TyUnknown()
          ,[<concat-strings> ["type mismatch, expected for all type but found"
                             ,<write-to-string> T]])
-    where if (!T; ?TyForall(_,_,_)) then fail else id end
+    where if (!T; ?TyForall(_,_,_)) then fail else if (!T; ?TyUnknown()) then fail else id end end
 
-  typeEqArrow: TyArrow(X,T) -> (X,T,[])
-  typeEqMu:
+  typeEqArrow: TyUnknown() -> (TyUnknown(),TyUnknown(),[])
+  typeEqArrow: TyArrow(S,T) -> (S,T,[])
+  typeEqArrow:
     T -> (TyUnknown(),TyUnknown()
          ,[<concat-strings> ["type mismatch, expected arrow type but found"
                             ,<write-to-string> T]])
-    where if (!T; ?TyArrow(_,_)) then fail else id end
+    where if (!T; ?TyArrow(_,_)) then fail else if (!T; ?TyUnknown()) then fail else id end end
 
+  typeEqRecord: TyUnknown() -> ([],[])
   typeEqRecord: TyRecord(decls) -> (decls,[])
   typeEqRecord:
     T -> ([] ,[<concat-strings> ["type mismatch, expected record type but found"
                                 ,<write-to-string> T]])
-    where if (!T; ?TyRecord(_)) then fail else id end
+    where if (!T; ?TyRecord(_)) then fail else if (!T; ?TyUnknown()) then fail else id end end
 
 
   // *** Free variables ***
@@ -239,29 +247,30 @@ rules
   substDecl: (X,S,TyDecl(x,T)) -> TyDecl(x,<subst> (X,S,T))
 
   // Normalization
-  norm: T -> T'
-        where <parReduce> T => S
+  norm: (ctx,T) -> T'
+        where <parReduce> (ctx,T) => S
             ; <typeEq> (T,S) => msgs
             ; if (!msgs; ?[]) then
                 !T
               else
-                !(<norm> S)
+                !(<norm> (ctx,S))
               end => T'
 
   // Parallel reduction
-  parReduce: TyNat() -> TyNat()
-  parReduce: TyString() -> TyString()
-  parReduce: TyBool() -> TyBool()
-  parReduce: TyVar(X) -> TyVar(X)
-  parReduce: TyQVar(qX) -> TyQVar(qX)
-  parReduce: TyMu(X,T) -> TyMu(X,<parReduce> T)
-  parReduce: TyAbs(X,K,T) -> TyAbs(X,K,<parReduce> T)
-  parReduce: TyForall(X,K,T) -> TyForall(X,K,<parReduce> T)
-  parReduce: TyArrow(T1,T2) -> TyArrow(<parReduce> T1,<parReduce> T2)
-  parReduce: TyApp(T1,T2) -> TyApp(<parReduce> T1,<parReduce> T2)
+  parReduce: (ctx,TyUnknown()) -> TyUnknown()
+  parReduce: (ctx,TyNat()) -> TyNat()
+  parReduce: (ctx,TyString()) -> TyString()
+  parReduce: (ctx,TyBool()) -> TyBool()
+  parReduce: (ctx,TyVar(X)) -> TyVar(X)
+  parReduce: (ctx,TyQVar(qX)) -> TyQVar(qX)
+  parReduce: (ctx,TyMu(X,T)) -> TyMu(X,<parReduce> (ctx,T))
+  parReduce: (ctx,TyAbs(X,K,T)) -> TyAbs(X,K,<parReduce> (ctx,T))
+  parReduce: (ctx,TyForall(X,K,T)) -> TyForall(X,K,<parReduce> (ctx,T))
+  parReduce: (ctx,TyArrow(T1,T2)) -> TyArrow(<parReduce> (ctx,T1),<parReduce> (ctx,T2))
+  parReduce: (ctx,TyApp(T1,T2)) -> TyApp(<parReduce> (ctx,T1),<parReduce> (ctx,T2))
              where if (!T1; ?(TyAbs(_,_,_))) then fail else id end
-  parReduce: TyApp(TyAbs(X,K11,T12),T2) -> <subst> (X,<parReduce> T2,<parReduce> T12)
-  parReduce: TyVariant(decls) -> TyVariant(<map(parReduceDecl)> decls)
-  parReduce: TyRecord(decls) -> TyRecord(<map(parReduceDecl)> decls)
+  parReduce: (ctx,TyApp(TyAbs(X,K11,T12),T2)) -> <subst> (X,<parReduce> (ctx,T2),<parReduce> (ctx,T12))
+  parReduce: (ctx,TyVariant(decls)) -> TyVariant(<map(\ decl -> <parReduceDecl> (ctx,decl) \)> decls)
+  parReduce: (ctx,TyRecord(decls)) -> TyRecord(<map(\ decl -> <parReduceDecl> (ctx,decl) \)> decls)
 
-  parReduceDecl: TyDecl(x,T) -> TyDecl(x,<parReduce> T)
+  parReduceDecl: (ctx,TyDecl(x,T)) -> TyDecl(x,<parReduce> (ctx,T))
