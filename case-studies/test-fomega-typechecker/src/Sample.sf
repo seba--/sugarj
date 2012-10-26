@@ -15,3 +15,13 @@ public type T3 = Id2 (\Z::*. Z) (mu D. Nat)
 public type T4 = Id Nat
 
 public type T5 = T2 Bool
+
+public type T6 = \A::*.\B::*=>*. A -> A -> B A
+
+public type T7 = {x:Nat,y:Bool,z:String}
+
+public type T8 = {x:Nat,y:Nat,z:Id String}
+
+public type T9 = Nat -> Bool -> String -> Id Bool
+
+public type T10 = {x:Nat,x1:Id T1,y:Bool}
