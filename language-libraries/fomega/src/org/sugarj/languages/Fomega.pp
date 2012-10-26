@@ -1,4 +1,6 @@
 [
+   FomegaBody                -- _1,
+   FomegaBody.1:iter-sep     -- _1 KW["\n"],
    TyVar                     -- _1,
    TyNat                     -- KW["Nat"],
    TyBool                    -- KW["Bool"],
