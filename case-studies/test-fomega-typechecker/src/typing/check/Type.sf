@@ -61,7 +61,7 @@ rules
         ; <msgsToErrs> (msgs2,T2) => errs2
 
   kindOf:
-    (ctx,TyArrow(T1,T2)) -> (KiStar(),<conc> (errs1,errs2,errs2,errs4))
+    (ctx,TyArrow(T1,T2)) -> (KiStar(),<conc> (errs1,errs2,errs3,errs4))
     where <kindOf> (ctx,T1) => (K1,errs1)
         ; <kindOf> (ctx,T2) => (K2,errs2)
         ; <kindEqStar> K1 => msgs3
