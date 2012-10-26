@@ -1,12 +1,9 @@
 module typing.check.Type
-//module typing/check/Type
 
 import typing.check.Context
 import typing.check.ErrorHandling
-//imports typing/check/Context
 
 import org.sugarj.languages.Fomega
-//imports org/sugarj/languages/Fomega
 
 signature
   constructors
@@ -16,60 +13,73 @@ rules
   lab: [] -> []
   lab: [TyDecl(x,T) | decls] -> [x|<lab> decls]
 
-  // <kindEq> (KExpected,KActual)
+  kindMismatch:
+    (K,J) -> [<concat-strings> ["kind mismatch, expected ",<write-to-string> K," but found ",<write-to-string> J]]
+
   kindEq: (KiUnknown(),K) -> []
   kindEq: (K,KiUnknown()) -> []
-  kindEq: (K,K) -> []
-  kindEq: (K,J) -> [<concat-strings> ["kind mismatch, expected "
-                                     ,<write-to-string> K
-                                     ," but found "
-                                     ,<write-to-string> J]]
-          where <not(equal)> (K,J)
-              ; <not(equal)> (K,KiUnknown())
+  kindEq: (K,J) -> <kindEqProper> (K,J)
+          where <not(equal)> (K,KiUnknown())
+              ; <not(equal)> (J,KiUnknown())
 
-  // <kindEqArrow>
+  kindEqProper: (KiStar(),K) -> msgs
+                where if !K; ?KiStar() then ![] else !(<kindMismatch> (KiStar(),K)) end => msgs
+  kindEqProper: (KiArrow(J1,J2),K) -> msgs
+                where if (!K; ?KiArrow(K1,K2)) then
+                        !(<conc> (<kindEq> (J1,K1),<kindEq> (J2,K2)))
+                      else
+                        !(<kindMismatch> (KiArrow(J1,J2),K))
+                      end => msgs
+
+  kindEqArrow: KiUnknown() -> (KiUnknown(),KiUnknown(),[])
   kindEqArrow: KiArrow(K1,K2) -> (K1,K2,[])
   kindEqArrow: K -> (KiUnknown(),KiUnknown()
                     ,[<concat-strings> ["kind mismatch, expected arrow kind but found "
                                        ,<write-to-string> K]])
-               where if (!K; ?KiArrow(_,_)) then fail else id end
+               where if (!K; ?KiArrow(_,_)) then fail else if (!K; ?KiUnknown()) then fail else id end end
 
-  // <kindEqStar>
+  kindEqStar: KiUnknown() -> []
   kindEqStar: KiStar() -> []
-  kindEqStar: K -> ["kind mismatch, expected * but found "
-                   ,<write-to-string> K]
-              where if (!K; ?KiStar()) then fail else id end
+  kindEqStar: K -> [<concat-strings> ["kind mismatch, expected * but found "
+                                     ,<write-to-string> K]]
+              where if (!K; ?KiStar()) then fail else if (!K; ?KiUnknown()) then fail else id end end
 
   kindOf:
-    (ctx,TyMu(X,T)) -> (K,<conc> (msgs1,msgs2))
-    where <kindOf> (CtxBindTVar(ctx,X,KiStar()),T) => (K,msgs1)
+    (ctx,TyMu(X,T)) -> (K,<conc> (errs1,errs2))
+    where <kindOf> (CtxBindTVar(ctx,X,KiStar()),T) => (K,errs1)
         ; <kindEqStar> K => msgs2
+        ; <msgsToErrs> (msgs2,T) => errs2
 
   kindOf:
-    (ctx,TyAbs(X,K1,T2)) -> (KiArrow(K1,K2),msgs1)
-    where <kindOf> (CtxBindTVar(ctx,X,K1),T2) => (K2,msgs1)
+    (ctx,TyAbs(X,K1,T2)) -> (KiArrow(K1,K2),errs1)
+    where <kindOf> (CtxBindTVar(ctx,X,K1),T2) => (K2,errs1)
 
   kindOf:
-    (ctx,TyForall(X,K1,T2)) -> (KiStar(),<conc> (msgs1,msgs2))
-    where <kindOf> (CtxBindTVar(ctx,X,K1),T2) => (K2,msgs1)
+    (ctx,TyForall(X,K1,T2)) -> (KiStar(),<conc> (errs1,errs2))
+    where <kindOf> (CtxBindTVar(ctx,X,K1),T2) => (K2,errs1)
         ; <kindEqStar> K2 => msgs2
+        ; <msgsToErrs> (msgs2,T2) => errs2
 
   kindOf:
-    (ctx,TyArrow(T1,T2)) -> (KiStar(),<conc> (msgs1,msgs2,msgs2,msgs4))
-    where <kindOf> (ctx,T1) => (K1,msgs1)
-        ; <kindOf> (ctx,T2) => (K2,msgs2)
+    (ctx,TyArrow(T1,T2)) -> (KiStar(),<conc> (errs1,errs2,errs2,errs4))
+    where <kindOf> (ctx,T1) => (K1,errs1)
+        ; <kindOf> (ctx,T2) => (K2,errs2)
         ; <kindEqStar> K1 => msgs3
+	    ; <msgsToErrs> (msgs3,T1) => errs3
         ; <kindEqStar> K2 => msgs4
+        ; <msgsToErrs> (msgs4,T2) => errs4
 
   kindOf:
-    (ctx,TyApp(T1,T2)) -> (K12,<conc> (msgs1,msgs2,msgs3,msgs3))
-    where <kindOf> (ctx,T1) => (K1,msgs1)
-        ; <kindOf> (ctx,T2) => (K2,msgs2)
+    (ctx,TyApp(T1,T2)) -> (K12,<conc> (errs1,errs2,errs3,errs4))
+    where <kindOf> (ctx,T1) => (K1,errs1)
+        ; <kindOf> (ctx,T2) => (K2,errs2)
         ; <kindEqArrow> K1 => (K11,K12,msgs3)
+        ; <msgsToErrs> (msgs3,T1) => errs3
         ; <kindEq> (K11,K2) => msgs4
+        ; <msgsToErrs> (msgs4,T2) => errs4
 
   kindOf:
-    (CtxEmpty(),TyQVar(qX)) -> (KiUnknown(),["undefined identifier ",qX])
+    (CtxEmpty(),TyQVar(qX)) -> (KiUnknown(),[(qX,"undefined identifier ",qX)])
   kindOf:
     (CtxBindTVar(ctx,Y,K),TyQVar(qX)) -> <kindOf> (ctx,TyQVar(qX))
   kindOf:
@@ -88,25 +98,29 @@ rules
     (ctx,TyVariant([])) -> (KiStar(),[])
   kindOf:
     (ctx,TyVariant([TyDecl(x,T) | decls])) ->
-    (KiStar(),<conc> (msgs1,msgs2,msgs3,msgs4,msgs5))
+    (KiStar(),<conc> (errs1,errs2,errs3,errs4,errs5))
     where errorUnless(<not(elem)> (x,<lab> decls)
-                     | <concat-strings> ["duplicate label ",x]) => msgs1
-        ; <kindOf> (ctx,T) => (K,msgs2)
-        ; <kindOf> (ctx,TyVariant(decls)) => (J,msgs3)
+                     | [(decls, <concat-strings> ["duplicate label ",x])]) => errs1
+        ; <kindOf> (ctx,T) => (K,errs2)
+        ; <kindOf> (ctx,TyVariant(decls)) => (J,errs3)
         ; <kindEqStar> K => msgs4
+        ; <msgsToErrs> (msgs4,T) => errs4
         ; <kindEqStar> J => msgs5
+        ; <msgsToErrs> (msgs5,decls) => errs5
 
   kindOf:
     (ctx,TyRecord([])) -> (KiStar(),[])
   kindOf:
     (ctx,TyRecord([TyDecl(x,T) | decls])) ->
-    (KiStar(),<conc> (msgs1,msgs2,msgs3,msgs4,msgs5))
+    (KiStar(),<conc> (errs1,errs2,errs3,errs4,errs5))
     where errorUnless(<not(elem)> (x,<lab> decls)
-                     | <concat-strings> ["duplicate label ",x]) => msgs1
-        ; <kindOf> (ctx,T) => (K,msgs2)
-        ; <kindOf> (ctx,TyVariant(decls)) => (J,msgs3)
+                     | [(x,<concat-strings> ["duplicate label ",x])]) => errs1
+        ; <kindOf> (ctx,T) => (K,errs2)
+        ; <kindOf> (ctx,TyVariant(decls)) => (J,errs3)
         ; <kindEqStar> K => msgs4
+        ; <msgsToErrs> (msgs4,T) => errs4
         ; <kindEqStar> J => msgs5
+        ; <msgsToErrs> (msgs5,decls) => errs5
 
   kindOf:
     (ctx,TyString()) -> (KiStar(),[])
@@ -118,7 +132,7 @@ rules
     (ctx,TyBool()) -> (KiStar(),[])
 
   kindOf:
-    (CtxEmpty(),TyVar(X)) -> (KiUnknown(),["undefined identifier ",X])
+    (CtxEmpty(),TyVar(X)) -> (KiUnknown(),[(X,<concat-strings> ["undefined identifier ",X])])
   kindOf:
     (CtxBindVar(ctx,y,T),TyVar(X)) -> <kindOf> (ctx,TyVar(X))
   kindOf:

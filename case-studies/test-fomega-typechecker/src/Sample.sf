@@ -1,9 +1,17 @@
 module Sample
 
-//import typing.check.ConstraintError
+import typing.check.ConstraintError
 
-type NatPair = {fst:Nat,snd:Nat}
+public type Id2 = \X::*=>*. X
 
-val twoNats = {fst=1,snd=true}
+public type Id = \X::*. X
 
-val swap = \p:NatPair. {fst=p.snd,snd=p.fst}
+public type T1 = mu A. A
+
+public type T2 = \ Q::*. Q
+
+public type T3 = Id2 (\Z::*. Z) (mu D. Nat)
+
+public type T4 = Id Nat
+
+public type T5 = T2 Bool
