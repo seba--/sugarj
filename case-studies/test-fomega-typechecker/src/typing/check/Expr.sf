@@ -1,18 +1,10 @@
 module typing.check.Expr
 
-//module typing/check/Expr
-
 import typing.check.Context
 import typing.check.Type
 import typing.check.TypeOperations
 
-// imports typing/check/Context
-//        typing/check/Type
-//        typing/check/TypeOperations
-
 import org.sugarj.languages.Fomega
-
-//imports org/sugarj/languages/Fomega
 
 rules
 
@@ -25,7 +17,9 @@ rules
   // This case also rule does not check if we have duplicate labels in
   // branches.
   //
-
+  // Γ ⊢ e1 : T1 Γ ⊢ T1 ⇓ <decls> x:S ∈ decls Γ,y:S ⊢ e2 : T2
+  // ---------------------------------------------------------------
+  // Γ ⊢ case e1 of <x=y> ⇒ e2 : T2
   typeOf:
     (ctx,Case(e1,[Branch(x,y,e2)])) -> (T2,<conc> (msgs1,msgs2,msgs3,msgs4))
     where <typeOf> (ctx,e1) => (T1,msgs1)
@@ -33,7 +27,10 @@ rules
         ; <typeEqVariant> T1' => (decls,msgs2)
         ; <labType> (x,decls) => (S,msgs3)
         ; <typeOf> (CtxBindVar(ctx,y,S),e2) => (T2,msgs4)
-
+  // Γ ⊢ e1 : T1 Γ ⊢ T1 ⇓ <decls> x:S ∈ decls Γ,y:S ⊢ e2 : T2
+  // Γ ⊢ case e1 of brs : R Γ ⊢ T2 ⇓ U Γ ⊢ R ⇓ U
+  // ---------------------------------------------------------------
+  // Γ ⊢ case e1 <x=y> ⇒ e2; brs : U
   typeOf:
     (ctx,Case(e1,[Branch(x1,x2,e2),Branch(y1,y2,e3)|brs])) ->
     (R,<conc> (msgs1,msgs2,msgs3,msgs4,msgs5))
@@ -49,7 +46,10 @@ rules
 
   // *** Conditional ***
   //
-
+  // Γ ⊢ e1 : T1 Γ ⊢ e2 : T2 Γ ⊢ e3 : T3
+  // Γ ⊢ T1 ⇓ Bool Γ ⊢ T2 ⇓ U Γ ⊢ T3 ⇓ U
+  // ----------------------------------------
+  // Γ ⊢ if e1 then e2 else e3 : U
   typeOf:
     (ctx,Cond(e1,e2,e3)) ->
     (T2',<conc> (msgs1,msgs2,msgs3,msgs4,msgs5))
@@ -64,14 +64,18 @@ rules
 
   // *** Polymorphic function ***
   //
-
+  // Γ,X::K1 ⊢ e2 : T2
+  // ----------------------------
+  // Γ ⊢ \X::K1. e2 : ∀ X::K1. T2
   typeOf:
     (ctx,TAbs(X,K1,e2)) -> (TyForall(X,K1,T2),msgs1)
     where <typeOf> (CtxBindTVar(ctx,X,K1),e2) => (T2,msgs1)
 
   // *** Abstraction ***
   //
-
+  // Γ,x:T1 ⊢ e2 : T2 Γ ⊢ T1 :: *
+  // ------------------------------
+  // Γ ⊢ \x::T1. e2 : T1 → T2
   typeOf:
     (ctx,Abs(x,T1,e2)) -> (TyArrow(T1,T2),<conc> (msgs1,msgs2,msgs3))
     where <typeOf> (CtxBindVar(ctx,x,T1),e2) => (T2,msgs1)
@@ -80,7 +84,9 @@ rules
 
   // *** Ascription ***
   //
-
+  // Γ ⊢ e : S Γ ⊢ T :: * Γ ⊢ S ⇓ U Γ ⊢ T ⇓ U
+  // -----------------------------------------------
+  // Γ ⊢ e as T : T
   typeOf:
     (ctx,Ascription(e,T)) -> (T,<conc> (msgs1,msgs2,msgs3,msgs4))
     where <typeOf> (ctx,e) => (S,msgs1)
@@ -92,7 +98,9 @@ rules
 
   // *** Unfold ***
   //
-
+  // Γ ⊢ e : S Γ ⊢ T :: * Γ ⊢ S ⇓ U Γ ⊢ T ⇓ U
+  // -----------------------------------------------
+  // Γ ⊢ e as T : T
   typeOf:
     (ctx,Unfold(T,e)) ->
     (<subst> (X,T',T1),<conc> (msgs1,msgs2,msgs3,msgs4,msgs5,msgs6))
@@ -110,7 +118,9 @@ rules
 
   // *** Fold ***
   //
-
+  // Γ ⊢ T :: * Γ ⊢ T ⇓ μX.U Γ ⊢ e : [X↦μX.U]U
+  // ----------------------------------------------
+  // Γ ⊢ fold [T] e : T
   typeOf:
     (ctx,Fold(T,e)) ->
     (T,<conc> (msgs1,msgs2,msgs3))
@@ -123,7 +133,9 @@ rules
 
   // *** TApp ***
   //
-
+  // Γ ⊢ e1 : T1 Γ ⊢ T1 ⇓ ∀X::K11.T12 Γ ⊢ T2 :: K11
+  // ---------------------------------------------------
+  // Γ ⊢ e1 [T2] : [X↦T2]T12
   typeOf:
     (ctx,TApp(e1,T2)) -> (<subst> (X,T2,T12),<conc> (msgs1,msgs2,msgs3,msgs4))
     where <typeOf> (ctx,e1) => (T1,msgs1)
@@ -134,7 +146,9 @@ rules
 
   // *** App ***
   //
-
+  // Γ ⊢ e1 : T1 Γ ⊢ e2: T2 Γ ⊢ T1 ⇓ T11 → T12 Γ ⊢ T2 ⇓ T11
+  // -------------------------------------------------------------
+  // Γ ⊢ e1 e2 : T12
   typeOf:
     (ctx,App(e1,e2)) -> (T12,<conc> (msgs1,msgs2,msgs3,msgs4))
     where <typeOf> (ctx,e1) => (T1,msgs1)
@@ -146,7 +160,9 @@ rules
 
   // *** SelectRcd ***
   //
-
+  // Γ ⊢ e : T Γ ⊢ T ⇓ {decls} x:S ∈ decls
+  // ------------------------------------------
+  // Γ ⊢ e!x : S
   typeOf:
     (ctx,SelectRcd(e,x)) -> (S,<conc> (msgs1,msgs2,msgs3))
     where <typeOf> (ctx,e) => (T,msgs1)
@@ -162,7 +178,9 @@ rules
 
   // *** Variant ***
   //
-
+  // Γ ⊢ T :: * Γ ⊢ e : S Γ ⊢ S ⇓ U Γ ⊢ T ⇓ <decls> x:U ∈ decls
+  // -------------------------------------------------------------------
+  // Γ ⊢ <x=e> as T : T
   typeOf:
     (ctx,Variant(Field(x,e),T)) -> (T,<conc> (msgs1,msgs2,msgs3,msgs4,msgs5,msgs6))
     where <kindOf> (ctx,T) => (K,msgs1)
@@ -176,10 +194,13 @@ rules
 
   // *** Record ***
   //
-
+  // -----------
+  // Γ ⊢ {} : {}
   typeOf:
     (ctx,Record([])) -> (TyRecord([]),[])
-
+  // Γ ⊢ e : T Γ ⊢ {flds} : S Γ ⊢ S ⇓ {decls} x ∉ lab(decls)
+  // --------------------------------------------------------------
+  // Γ ⊢ {x=e,flds} : {x:T,decls}
   typeOf:
     (ctx,Record([Field(x,e)|flds])) ->
     (Record([Field(x,T)|decls]),<conc> (msgs1,msgs2,msgs3))
@@ -224,4 +245,20 @@ rules
     (CtxBindQVar(ctx,qy,T),QVar(qx)) -> <typeOf> (ctx,QVar(qx))
     where <not(equal)> (qy,qx)
 
-
+// *** Notes ***
+//
+// Judgments:
+// * x ∉ sel(flds)
+// * x:S ∈ decls
+// * qx ≠ qy
+// * x ≠ y
+// * Γ ⊢ e : T
+// * Γ ⊢ T :: K
+// * Γ ⊢ T ⇓ S
+// * error(<msg>)
+//
+// Structural equality of types modulo α-conversion, record/variant permutation,
+// and with TyUnknown equal to any type.
+//
+// Conditional decomposition types, i.e. Nat, Bool, String, mu X.T,
+// forall X::K.T, T->S, {x:T,...,y:S}, <x:T,...,y:S>.

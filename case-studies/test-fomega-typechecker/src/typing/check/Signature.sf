@@ -1,8 +1,6 @@
 module typing.check.Signature
-//module typing/check/Signature
 
 import org.sugarj.languages.Fomega
-//imports org/sugarj/languages/Fomega
 
 signature
   sorts Signature
