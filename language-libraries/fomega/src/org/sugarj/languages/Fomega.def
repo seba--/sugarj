@@ -120,18 +120,20 @@ imports Fomega-Type
 imports Fomega-Expr
 
 exports
-  sorts Module Def Import ModuleDec Public Qualified
+  sorts Module Def Import Imports ModuleDec Public Qualified Definitions
 
   context-free syntax
     "module" MID -> ModuleDec {cons("ModuleDec")}
-    ModuleDec Import* Def* -> Module {cons("Module")}
+    ModuleDec Imports Definitions -> Module {cons("Module")}
+    Import* -> Imports {cons("FomegaImports")}
     "import" Qualified? MID -> Import {cons("Import")}
+    Def+ -> Definitions {cons("FomegaBody")}
     Public? "val" ID "=" Expr -> Def {cons("ValDef")}
-    Public? "type" ID "=" Type -> Def {cons("TypeDef")}
- 
+    Public? "type" ID "=" Type -> Def {cons("TypeDef")} 
+
     "public" -> Public {cons("Public")}
     "qualified" -> Qualified {cons("Qualified")}
-    
+
   context-free start-symbols Module 
 
 
@@ -186,6 +188,7 @@ exports
 
 module org/sugarj/languages/Fomega
 imports Fomega-Module [
+    Definitions => FomegaDefinitions
     BlockComment => FomegaBlockComment
     CommentPart => FomegaCommentPart
     OpenBrace => FomegaOpenBrace

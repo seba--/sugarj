@@ -11,10 +11,17 @@ exports
   	SugarCompilationUnit
 
   context-free syntax
-    FomegaModuleDec FomegaImport* FomegaOrSugarDec? -> SugarCompilationUnit {cons("CompilationUnit")}
-    FomegaDef+ -> FomegaOrSugarDec {cons("FomegaBody"), longest-match}
-    SugarDefElem+ -> FomegaOrSugarDec {cons("SugarBody"), longest-match}
-    EditorServiceSection+ -> FomegaOrSugarDec {cons("EditorBody"), longest-match}
+    FomegaModuleDec FomegaImports FomegaOrSugarDec -> SugarCompilationUnit {cons("CompilationUnit")}
+
+    FomegaDefinitions LAYOUT? -> FomegaOrSugarDec
+    SugarDefElements LAYOUT? -> FomegaOrSugarDec
+    EditorServiceSections LAYOUT? -> FomegaOrSugarDec
+
+    SugarDefElem+ -> SugarDefElements {cons("SugarBody")}
+    EditorServiceSection+ -> EditorServiceSections {cons("EditorBody")}
+
+  context-free restrictions
+    FomegaOrSugarDec -/- ~[]    
 
   context-free syntax
     Grammar        -> SugarDefElem {cons("grammar-elem")}
