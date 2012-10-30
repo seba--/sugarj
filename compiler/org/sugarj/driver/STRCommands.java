@@ -55,7 +55,7 @@ public class STRCommands {
   /**
    *  Compiles a {@code *.str} file to a single {@code *.java} file. 
    */
-  private static void strj(Path str, Path rtree, String main, Context strjContext, Collection<Path> paths, LanguageLib langLib) throws IOException {
+  private static void strj(boolean normalize, Path str, Path out, String main, Context strjContext, Collection<Path> paths, LanguageLib langLib) throws IOException {
     
     /*
      * We can include as many paths as we want here, checking the
@@ -63,13 +63,15 @@ public class STRCommands {
      */
     List<String> cmd = new ArrayList<String>(Arrays.asList(new String[] {
         "-i", toWindowsPath(str.getAbsolutePath()),
-        "-o", toWindowsPath(rtree.getAbsolutePath()),
+        "-o", toWindowsPath(out.getAbsolutePath()),
         "-m", main,
         "-p", "sugarj",
         "--library",
         "-O", "0",
-        "-F" // produce rtree only
     }));
+    
+    if (normalize)
+      cmd.add("-F");
     
     cmd.add("-I");
     cmd.add(StdLib.stdLibDir.getPath());
@@ -115,7 +117,7 @@ public class STRCommands {
       if (e.getValue() != 0)
         throw new StrategoException("STRJ failed", e);
     } finally {
-      if (log.size() > 0 && !log.toString().contains("Compilation succeeded"))
+      if (log.size() > 0 && !log.toString().contains("Abstract syntax in"))
         throw new StrategoException(log.toString());
 
     }
@@ -163,11 +165,11 @@ public class STRCommands {
     boolean success = false;
     log.beginTask("Generating", "Generate the assimilator", Log.TRANSFORM);
     try {
-      Path rtree = FileCommands.newTempFile("rtree");
+      Path prog = FileCommands.newTempFile("ctree");
       log.log("calling STRJ", Log.TRANSFORM);
-      strj(str, rtree, main, strjContext, paths, langLib);
-      success = rtree != null;
-      return rtree;
+      strj(true, str, prog, main, strjContext, paths, langLib);
+      success = FileCommands.exists(prog);
+      return prog;
     } finally {
       log.endTask(success);
     }
@@ -238,13 +240,13 @@ public class STRCommands {
     
   }
 
-  public static IStrategoTerm assimilate(Path rtree, IStrategoTerm in, HybridInterpreter interp) throws IOException {
-    return assimilate("internal-main", rtree, in, interp);
+  public static IStrategoTerm assimilate(Path ctree, IStrategoTerm in, HybridInterpreter interp) throws IOException {
+    return assimilate("internal-main", ctree, in, interp);
   }
   
-  public static IStrategoTerm assimilate(String strategy, Path rtree, IStrategoTerm in, HybridInterpreter interp) throws IOException {
+  public static IStrategoTerm assimilate(String strategy, Path ctree, IStrategoTerm in, HybridInterpreter interp) throws IOException {
     try {
-      interp.load(rtree.getAbsolutePath());
+      interp.load(ctree.getAbsolutePath());
       interp.setCurrent(in);
       
       if (interp.invoke(strategy)) {
