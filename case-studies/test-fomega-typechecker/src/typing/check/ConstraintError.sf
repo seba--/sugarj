@@ -1,0 +1,11 @@
+module typing.check.ConstraintError
+
+import typing.check.Module
+import typing.check.Context
+
+import org.sugarj.languages.Fomega
+import org.sugarj.languages.SugarFomega
+
+rules
+  constraint-error: FomegaBody(defs) -> errors
+    where <debug(!"in: "); signatureOf; debug(!"out: ")> (CtxEmpty(),defs) => (sig,errors)

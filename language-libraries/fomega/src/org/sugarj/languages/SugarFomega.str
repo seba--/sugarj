@@ -3,6 +3,7 @@ module org/sugarj/languages/SugarFomega
 signature constructors
   CompilationUnit : FomegaModuleDec * List(FomegaImport) * List(FomegaOrSugarDec) -> SugarCompilationUnit
   ModuleDec : FomegaMID -> FomegaModuleDec
+  FomegaBody : List(FomegaDef) -> FomegaOrSugarDec
 
     transformation-elem        : Transformation -> SugarDefElem
     grammar-elem               : Grammar -> SugarDefElem

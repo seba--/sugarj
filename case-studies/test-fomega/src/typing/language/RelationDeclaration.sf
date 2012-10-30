@@ -1,11 +1,11 @@
-MODULE type.language.RelationDeclaration
+module typing.language.RelationDeclaration
 
-IMPORT org.sugarj.languages.Sdf2
-IMPORT org.sugarj.languages.Stratego
+import org.sugarj.languages.Sdf2
+import org.sugarj.languages.Stratego
 
 context-free syntax
   TypeRelationDecl -> SugarDefElem
-  "type" "relation" StrategoId TypeRelationSignature -> TypeRelationDecl {cons("TypeRelationDecl")}
+  "typing" "relation" StrategoId TypeRelationSignature -> TypeRelationDecl {cons("TypeRelationDecl")}
 
   TypeRelationCtx TypeRelationSymbol TypeRelationTerm TypeRelationOfTypeSymbol TypeRelationType
     -> TypeRelationSignature {cons("TypeRelationSig")}

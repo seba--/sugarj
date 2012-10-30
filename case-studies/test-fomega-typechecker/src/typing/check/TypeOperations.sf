@@ -1,0 +1,276 @@
+module typing.check.TypeOperations
+
+import typing.check.Type
+import org.sugarj.languages.Fomega
+
+signature
+  constructors
+    TyUnknown: FomegaType
+    IDUnknown: FomegaID
+
+rules
+  labType: (x,[]) -> (TyUnknown(), ["undefined label ",x])
+  labType: (x,[TyDecl(x,T)|decls]) -> (T,[])
+  labType: (x,[TyDecl(y,T)|decls]) -> <labType> (x,decls)
+           where <not(equal)> (x,y)
+
+  typeMismatch:
+    (S,T) -> [<concat-strings> ["type mismatch, expected "
+                               ,<write-to-string> S
+                               ," but found "
+                               ,<write-to-string> T]]
+
+  typeEqProper: (TyString(),T) -> msgs
+    where if !T; ?TyString() then ![] else !(<typeMismatch> (TyString(),T)) end => msgs
+  typeEqProper: (TyBool(),T) -> msgs
+    where if (!T; ?TyBool()) then ![] else !(<typeMismatch> (TyBool(),T)) end => msgs
+  typeEqProper: (TyNat(),T) -> msgs
+    where if (!T; ?TyNat()) then ![] else !(<typeMismatch> (TyNat(),T)) end => msgs
+  typeEqProper: (TyQVar(qX),T) -> msgs
+    where if (!T; ?TyQVar(qX)) then ![] else !(<typeMismatch> (TyQVar(qX),T)) end => msgs
+  typeEqProper: (TyVar(X),T) -> msgs
+    where if (!T; ?TyVar(X)) then ![] else !(<typeMismatch> (TyVar(X),T)) end => msgs
+  typeEqProper: (TyArrow(S1,S2),T) -> msgs
+    where if (!T; ?TyArrow(T1,T2)) then
+            !(<conc> (<typeEq> (S1,T1),<typeEq> (S2,T2)))
+          else
+            !(<typeMismatch> (TyArrow(S1,S2),T))
+          end => msgs
+  typeEqProper: (TyRecord(decls),T) -> msgs
+    where if (!T; ?TyRecord(decls1)) then
+            <lab> decls => labs;
+            <lab> decls1 => labs1;
+            if <set-eq> (labs,labs1) then
+              <declsEq> (decls,decls1)
+            else
+              !(<typeMismatch> (TyRecord(decls),T))
+            end
+          else
+            !(<typeMismatch> (TyRecord(decls),T))
+          end => msgs
+  typeEqProper: (TyVariant(decls),T) -> msgs
+    where if (!T; ?TyVariant(decls1)) then
+            <lab> decls => labs;
+            <lab> decls1 => labs1;
+            if <set-eq> (labs,labs1) then
+              <declsEq> (decls,decls1)
+            else
+              !(<typeMismatch> (TyVariant(decls),T))
+            end
+          else
+            !(<typeMismatch> (TyVariant(decls),T))
+          end => msgs
+  typeEqProper: (TyApp(S1,S2),T) -> msgs
+    where if (!T; ?TyArrow(T1,T2)) then
+            !(<conc> (<typeEq> (S1,T1),<typeEq> (S2,T2)))
+          else
+            !(<typeMismatch> (TyApp(S1,S2),T))
+          end => msgs
+  typeEqProper: (TyMu(X,S),T) -> msgs
+    where if (!T; ?TyMu(Y,U)) then
+            <fresh> (X,[S,U]) => Z;
+            <typeEq> (<subst> (X,TyVar(Z),S),<subst> (Y,TyVar(Z),U))
+          else
+            !(<typeMismatch> (TyMu(X,S),T))
+          end => msgs
+  typeEqProper: (TyForall(X,K,S),T) -> msgs
+    where if (!T; ?TyForall(Y,J,U)) then
+            <kindEq> (K,J) => msgs1;
+            <fresh> (X,[S,U]) => Z;
+            <typeEq> (<subst> (X,TyVar(Z),S),<subst> (Y,TyVar(Z),U)) => msgs2;
+            !(<conc> (msgs1,msgs2))
+          else
+            !(<typeMismatch> (TyForall(X,K,S),T))
+          end => msgs
+  typeEqProper: (TyAbs(X,K,S),T) -> msgs
+    where if (!T; ?TyForall(Y,J,U)) then
+            <kindEq> (K,J) => msgs1;
+            <fresh> (X,[S,U]) => Z;
+            <typeEq> (<subst> (X,TyVar(Z),S),<subst> (Y,TyVar(Z),U)) => msgs2;
+            !(<conc> (msgs1,msgs2))
+          else
+            !(<typeMismatch> (TyAbs(X,K,S),T))
+          end => msgs
+  typeEqProper: (TyVar(X),T) -> msgs
+    where if (!T; ?TyVar(X)) then ![] else !(<typeMismatch> (TyVar(X),T)) end => msgs
+
+  // Assumes that both lists of declarations have the same labels
+  declsEq: ([],decls1) -> []
+  declsEq: ([TyDecl(x,T)|decls],decls1) -> <conc> (msgs2,msgs3)
+    where <labType> (x,decls1) => (S,msgs1)
+        ; <typeEq> (T,S) => msgs2
+        ; <declsEq> (decls,decls1) => msgs3
+
+  // TyUnknown is equal to any type. Other types are compared structurally.
+  // Bound variable are renamed as necessary and the order of declarations
+  // in record and variant types is not relevant.
+  typeEq: (TyUnknown(),T) -> []
+  typeEq: (S,TyUnknown()) -> []
+  typeEq: (S,T) -> <typeEqProper> (S,T)
+          where <not(equal)> (S,TyUnknown())
+              ; <not(equal)> (T,TyUnknown())
+
+  typeEqVariant: TyUnknown() -> ([],[])
+  typeEqVariant: TyVariant(decls) -> (decls,[])
+  typeEqVariant:
+    T -> ([],[<concat-strings> ["type mismatch, expected variant type but found"
+                               ,<write-to-string> T]])
+    where if (!T; ?TyVariant(_)) then fail else if (!T; ?TyUnknown()) then fail else id end end
+
+  typeEqBool: TyUnknown() -> []
+  typeEqBool: TyBool() -> []
+  typeEqBool:
+    T -> [<concat-strings> ["type mismatch, expected Bool but found"
+                           ,<write-to-string> T]]
+    where if (!T; ?TyBool()) then fail else if (!T; ?TyUnknown()) then fail else id end end
+
+  typeEqNat: TyUnknown() -> []
+  typeEqNat: TyNat() -> []
+  typeEqNat:
+    T -> [<concat-strings> ["type mismatch, expected Nat but found"
+                           ,<write-to-string> T]]
+    where if (!T; ?TyNat()) then fail else if (!T; ?TyUnknown()) then fail else id end end
+
+  typeEqString: TyUnknown() -> []
+  typeEqString: TyString() -> []
+  typeEqString:
+    T -> [<concat-strings> ["type mismatch, expected String but found"
+                           ,<write-to-string> T]]
+    where if (!T; ?TyString()) then fail else if (!T; ?TyUnknown()) then fail else id end end
+
+  typeEqMu: TyUnknown() -> (IDUnknown(),TyUnknown(),[])
+  typeEqMu: TyMu(X,T) -> (X,T,[])
+  typeEqMu:
+    T -> (IDUnknown(),TyUnknown()
+         ,[<concat-strings> ["type mismatch, expected recursive type but found"
+                            ,<write-to-string> T]])
+    where if (!T; ?TyMu(_,_)) then fail else if (!T; ?TyUnknown()) then fail else id end end
+
+  typeEqForall: TyUnknown() -> (IDUnknown(),KiUnknown(),TyUnknown(),[])
+  typeEqForall: TyForall(X,K,T) -> (X,K,T,[])
+  typeEqForall:
+    T -> (IDUnknown(),TyUnknown()
+         ,[<concat-strings> ["type mismatch, expected for all type but found"
+                            ,<write-to-string> T]])
+    where if (!T; ?TyForall(_,_,_)) then fail else if (!T; ?TyUnknown()) then fail else id end end
+
+  typeEqArrow: TyUnknown() -> (TyUnknown(),TyUnknown(),[])
+  typeEqArrow: TyArrow(S,T) -> (S,T,[])
+  typeEqArrow:
+    T -> (TyUnknown(),TyUnknown()
+         ,[<concat-strings> ["type mismatch, expected arrow type but found"
+                            ,<write-to-string> T]])
+    where if (!T; ?TyArrow(_,_)) then fail else if (!T; ?TyUnknown()) then fail else id end end
+
+  typeEqRecord: TyUnknown() -> ([],[])
+  typeEqRecord: TyRecord(decls) -> (decls,[])
+  typeEqRecord:
+    T -> ([] ,[<concat-strings> ["type mismatch, expected record type but found"
+                                ,<write-to-string> T]])
+    where if (!T; ?TyRecord(_)) then fail else if (!T; ?TyUnknown()) then fail else id end end
+
+
+  // *** Free variables ***
+  freeVars: TyMu(X,T) -> <diff> (<freeVars> T,[X])
+  freeVars: TyAbs(X,K,T) -> <diff> (<freeVars> T,[X])
+  freeVars: TyForall(X,K,T) -> <diff> (<freeVars> T,[X])
+  freeVars: TyArrow(T1,T2) -> <union> (<freeVars> T1,<freeVars> T2)
+  freeVars: TyApp(T1,T2) -> <union> (<freeVars> T1,<freeVars> T2)
+  freeVars: TyQVar(qX) -> []
+  freeVars: TyVariant(decls) -> <unions> (<map(freeVarsDecl)> decls)
+  freeVars: TyRecord(decls) -> <unions> (<map(freeVarsDecl)> decls)
+  freeVars: TyString() -> []
+  freeVars: TyNat() -> []
+  freeVars: TyBool() -> []
+  freeVars: TyVar(X) -> [X]
+
+  freeVarsDecl: TyDecl(x,T) -> <freeVars> T
+
+  // *** Generate fresh variable ***
+  fresh: (X,Ts) -> Z
+         where <unions> (<map(freeVars)> Ts) => fvs
+             ; <genID> (X,0,fvs) => Z
+  genID: (X,n,fvs) -> Y
+         where <concat-strings> [X,"_",<write-to-string> n] => Z
+             ; (if <elem> (Z,fvs) then
+                  <genID> (X,<add> (n,1),fvs)
+               else
+                  !Z
+               end) => Y
+
+  // *** Capture-avoiding substitution ***
+  // μ-type
+  subst: (X,S,TyMu(X,T)) -> TyMu(X,T)
+  subst: (X,S,TyMu(Y,T)) -> TyMu(Y,<subst> (X,S,T))
+         where <not(equal)> (X,Y)
+             ; <not(elem)> (Y,<freeVars> S)
+  subst: (X,S,TyMu(Y,T)) -> TyMu(Z,<subst> (X,S,<subst> (Y,TyVar(Z),T)))
+         where <not(equal)> (X,Y)
+             ; <elem> (Y,<freeVars> S)
+             ; <fresh> (Y,[T,S]) => Z
+
+  // Type abstraction
+  subst: (X,S,TyAbs(X,K,T)) -> TyAbs(X,K,T)
+  subst: (X,S,TyAbs(Y,K,T)) -> TyAbs(X,K,<subst> (X,S,T))
+         where <not(equal)> (X,Y)
+             ; <not(elem)> (Y,<freeVars> S)
+  subst: (X,S,TyAbs(Y,K,T)) -> TyAbs(Z,K,<subst> (X,S,<subst> (Y,TyVar(Z),T)))
+         where <not(equal)> (X,Y)
+             ; <elem> (Y,<freeVars> S)
+             ; <fresh> (Y,[T,S]) => Z
+
+  // ∀-type
+  subst: (X,S,TyForall(X,K,T)) -> TyForall(X,K,T)
+  subst: (X,S,TyForall(Y,K,T)) -> TyForall(Y,K,<subst> (X,S,T))
+         where <not(equal)> (X,Y)
+             ; <not(elem)> (Y,<freeVars> S)
+  subst: (X,S,TyForall(Y,K,T)) -> TyForall(Z,K,<subst> (X,S,<subst> (Y,TyVar(Z),T)))
+         where <not(equal)> (X,Y)
+             ; <elem> (Y,<freeVars> S)
+             ; <fresh> (Y,[T,S]) => Z
+
+  // Simple cases
+  subst: (X,S,TyArrow(T1,T2)) -> TyArrow(<subst> (X,S,T1),<subst> (X,S,T2))
+  subst: (X,S,TyApp(T1,T2)) -> TyApp(<subst> (X,S,T1),<subst> (X,S,T2))
+  subst: (X,S,TyQVar(qX)) -> TyQVar(qX)
+  subst: (X,S,TyVariant(decls)) -> TyVariant(<map(\decl -> <substDecl> (X,S,decl)\)> decls)
+  subst: (X,S,TyRecord(decls)) -> TyRecord(<map(\decl -> <substDecl> (X,S,decl)\)> decls)
+  subst: (X,S,TyString()) -> TyString()
+  subst: (X,S,TyNat()) -> TyNat()
+  subst: (X,S,TyBool()) -> TyBool()
+
+  // Type variables
+  subst: (X,S,TyVar(X)) -> S
+  subst: (X,S,TyVar(Y)) -> TyVar(Y)
+         where <not(equal)> (X,Y)
+
+  substDecl: (X,S,TyDecl(x,T)) -> TyDecl(x,<subst> (X,S,T))
+
+  // Normalization
+  norm: (ctx,T) -> T'
+        where <parReduce> (ctx,T) => S
+            ; <typeEq> (T,S) => msgs
+            ; if (!msgs; ?[]) then
+                !T
+              else
+                !(<norm> (ctx,S))
+              end => T'
+
+  // Parallel reduction
+  parReduce: (ctx,TyUnknown()) -> TyUnknown()
+  parReduce: (ctx,TyNat()) -> TyNat()
+  parReduce: (ctx,TyString()) -> TyString()
+  parReduce: (ctx,TyBool()) -> TyBool()
+  parReduce: (ctx,TyVar(X)) -> TyVar(X)
+  parReduce: (ctx,TyQVar(qX)) -> TyQVar(qX)
+  parReduce: (ctx,TyMu(X,T)) -> TyMu(X,<parReduce> (ctx,T))
+  parReduce: (ctx,TyAbs(X,K,T)) -> TyAbs(X,K,<parReduce> (ctx,T))
+  parReduce: (ctx,TyForall(X,K,T)) -> TyForall(X,K,<parReduce> (ctx,T))
+  parReduce: (ctx,TyArrow(T1,T2)) -> TyArrow(<parReduce> (ctx,T1),<parReduce> (ctx,T2))
+  parReduce: (ctx,TyApp(T1,T2)) -> TyApp(<parReduce> (ctx,T1),<parReduce> (ctx,T2))
+             where if (!T1; ?(TyAbs(_,_,_))) then fail else id end
+  parReduce: (ctx,TyApp(TyAbs(X,K11,T12),T2)) -> <subst> (X,<parReduce> (ctx,T2),<parReduce> (ctx,T12))
+  parReduce: (ctx,TyVariant(decls)) -> TyVariant(<map(\ decl -> <parReduceDecl> (ctx,decl) \)> decls)
+  parReduce: (ctx,TyRecord(decls)) -> TyRecord(<map(\ decl -> <parReduceDecl> (ctx,decl) \)> decls)
+
+  parReduceDecl: (ctx,TyDecl(x,T)) -> TyDecl(x,<parReduce> (ctx,T))

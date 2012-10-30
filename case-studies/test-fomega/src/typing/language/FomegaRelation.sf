@@ -1,0 +1,22 @@
+module typing.language.FomegaRelation
+
+import org.sugarj.languages.Fomega
+import typing.language.RelationDeclaration
+
+context-free syntax
+  "()" -> Ctx {cons("CtxEmpty")}
+  "(" Ctx ";" FomegaID ":" FomegaType ")" -> Ctx {cons("CtxBindVar")}
+  "(" Ctx ";" FomegaID "::" FomegaKind ")" -> Ctx {cons("CtxBindTVar")}
+
+syntax
+  "V~" <StrategoVar-CF> -> <FomegaID-CF> {cons("Metavar"), prefer}
+  "T~" <StrategoVar-CF> -> <FomegaID-CF> {cons("Metavar"), prefer}
+
+typing relation kcheck
+  Ctx |- FomegaType :: FomegaKind
+
+typing relation tcheck
+  Ctx |- FomegaExpr : FomegaType
+
+//TODO SugarJ compiler should forward editor configs whenever some language declaration is present
+colorer

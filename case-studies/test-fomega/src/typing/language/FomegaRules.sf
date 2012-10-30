@@ -1,15 +1,15 @@
-MODULE type.language.FomegaRules
+module typing.language.FomegaRules
 
-IMPORT type.language.FomegaRelation
-IMPORT type.language.Rule
+import typing.language.FomegaRelation
+import typing.language.Rule
 
-================ K-Nat
+============== K-Nat
 ~ctx |- Nat :: *
 
-================= K-Bool
+=============== K-Bool
 ~ctx |- Bool :: *
 
-=================== K-String
+================= K-String
 ~ctx |- String :: *
 
 ============================ K-Var

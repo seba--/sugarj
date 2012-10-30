@@ -1,4 +1,6 @@
-MODULE sub.Bar
+module sub.Bar
 
-IMPORT sub.subsub.Barf
+import sub.subsub.Barf
+import typing.check.Context
 
+val x = \x:T.x->N. sub.sub sub

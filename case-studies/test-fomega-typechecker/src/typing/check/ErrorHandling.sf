@@ -1,0 +1,6 @@
+module typing.check.ErrorHandling
+
+rules
+  errorIf(condition|msg) = if condition then ![msg] else ![] end
+  errorUnless(condition|msg) = if condition then ![] else ![msg] end
+  msgsToErrs: (msgs,T) -> <map(\ msg -> (T,msg) \)> msgs

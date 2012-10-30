@@ -1,0 +1,36 @@
+module typing.check.Module
+
+import typing.check.Context
+import typing.check.Type
+import typing.check.Signature
+import typing.check.Expr
+import typing.check.ErrorHandling
+
+import org.sugarj.languages.Fomega
+
+rules
+  signatureOf: (ctx,[]) -> (SigEmpty(),[])
+
+  signatureOf:
+    (ctx,[TypeDef(None(),X,T) | defs]) -> (sig,<conc> (msgs1,msgs2,msgs3))
+    where errorUnless(<not(elem)> (X,<dom> ctx) | (X,<concat-strings> [X," already defined."])) => msgs1
+        ; <kindOf> (ctx,T) => (K,msgs2)
+        ; <signatureOf> (CtxBindTVarDef(ctx,X,K,T),defs) => (sig,msgs3)
+
+  signatureOf:
+    (ctx,[TypeDef(Some(Public()),X,T) | defs]) -> (SigBindTVarDef(X,K,T,sig),<conc> (msgs1,msgs2,msgs3))
+    where errorUnless(<not(elem)> (X,<dom> ctx) | (X,<concat-strings> [X," already defined."])) => msgs1
+        ; <kindOf> (ctx,T) => (K,msgs2)
+        ; <signatureOf> (CtxBindTVarDef(ctx,X,K,T),defs) => (sig,msgs3)
+
+  signatureOf:
+    (ctx,[ValDef(None(),x,e) | defs]) -> (sig,<conc> (msgs1,msgs2,msgs3))
+    where errorUnless(<not(elem)> (x,<dom> ctx) | (x,<concat-strings> [x," already defined."])) => msgs1
+        ; <typeOf> (ctx,e) => (T,msgs2)
+        ; <signatureOf> (CtxBindVar(ctx,x,T),defs) => (sig,msgs3)
+
+  signatureOf:
+    (ctx,[ValDef(Some(Public()),x,e) | defs]) -> (SigBindVar(x,T,sig),<conc> (msgs1,msgs2,msgs3))
+    where errorUnless(<not(elem)> (x,<dom> ctx) | (x,<concat-strings> [x," already defined."])) => msgs1
+        ; <typeOf> (ctx,e) => (T,msgs2)
+        ; <signatureOf> (CtxBindVar(ctx,x,T),defs) => (sig,msgs3)
