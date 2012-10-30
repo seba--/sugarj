@@ -227,4 +227,8 @@ public class Log {
   public void setLoggingLevel(int level) {
     this.loglevel = level;
   }
+
+  public int getLoggingLevel() {
+    return this.loglevel;
+  }
 }

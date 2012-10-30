@@ -16,9 +16,7 @@ public class AbsolutePath extends Path {
   // this object assumes JVM's PWD to be the base.
   public AbsolutePath(String path) {
     if (!acceptable(path))
-      throw new IllegalArgumentException(
-          "Internal error: AbsolutePath constructed on unacceptable argument:\n\""+path+"\""
-      );
+      throw new IllegalArgumentException("AbsolutePath constructed on unacceptable argument: " + path);
     this.path = trimBack(path).replace(File.separatorChar, '/');
   }
   

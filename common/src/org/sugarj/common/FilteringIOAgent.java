@@ -84,16 +84,18 @@ public class FilteringIOAgent extends IOAgent {
       for (Pattern pat: excludePatterns)
         if (pat.matcher(s).matches()) {
           skip = !s.endsWith("\n");
-          pushMessageToLog();
+          msg = new String();
           return;
         }
       
-      writer.write(cbuf, off, len);
+      if ((Log.log.getLoggingLevel() & includeLogLevel) > 0)
+        writer.write(cbuf, off, len);
     }
     
     private void pushMessageToLog() {
       if (msg.endsWith("\n")) {
-        Log.log.log(msg.substring(0, msg.length() - 1), includeLogLevel);
+        if (msg.length() > 1)
+          Log.log.log(msg.substring(0, msg.length() - 1), includeLogLevel);
         msg = new String();
       }
     }

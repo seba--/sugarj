@@ -62,5 +62,4 @@ public sugar Accessors {
 	strategies
 		constructorPairs = ?AccFieldDec(_, type, vars, accs); if <elem> (AccCon(), accs) then !vars; map(\VarDec(Id(name)) -> (type, name) \) else ![] end
 		genConstructor(|classname) = filterAccDecs; mapconcat(constructorPairs); if ?[] then ![] else ?l; ![ConstrDec(ConstrDecHead([Public()], None(), Id(classname), <map(\(type, name) -> Param([], type, Id(name))\)> l, None()), ConstrBody(Some(SuperConstrInv(None(), [])), <map(\(type, name) -> ExprStm(Assign(Field(This(), Id(name)), ExprName(Id(name))))\)> l))] end
-
 }

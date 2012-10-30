@@ -34,6 +34,12 @@ public class FileCommands {
     }
   }
   
+  /**
+   * 
+   * @param suffix without dot "."
+   * @return
+   * @throws IOException
+   */
   public static Path newTempFile(String suffix) throws IOException {
     File f =
         File.createTempFile(
