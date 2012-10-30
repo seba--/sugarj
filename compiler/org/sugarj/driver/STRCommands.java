@@ -20,8 +20,6 @@ import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr_layout.client.InvalidParseTableException;
 import org.spoofax.jsglr_layout.client.SGLR;
-import org.spoofax.jsglr_layout.client.imploder.IToken;
-import org.spoofax.jsglr_layout.client.imploder.ImploderAttachment;
 import org.spoofax.jsglr_layout.shared.BadTokenException;
 import org.spoofax.jsglr_layout.shared.SGLRException;
 import org.spoofax.jsglr_layout.shared.TokenExpectedException;
@@ -34,11 +32,9 @@ import org.sugarj.LanguageLib;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
-import org.sugarj.common.JavaCommands;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
-import org.sugarj.common.path.RelativePath;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.transformations.extraction.extract_str_0_0;
@@ -59,7 +55,7 @@ public class STRCommands {
   /**
    *  Compiles a {@code *.str} file to a single {@code *.java} file. 
    */
-  private static void strj(Path str, Path java, String main, Context strjContext, Collection<Path> paths, LanguageLib langLib) throws IOException {
+  private static void strj(Path str, Path rtree, String main, Context strjContext, Collection<Path> paths, LanguageLib langLib) throws IOException {
     
     /*
      * We can include as many paths as we want here, checking the
@@ -67,11 +63,12 @@ public class STRCommands {
      */
     List<String> cmd = new ArrayList<String>(Arrays.asList(new String[] {
         "-i", toWindowsPath(str.getAbsolutePath()),
-        "-o", toWindowsPath(java.getAbsolutePath()),
+        "-o", toWindowsPath(rtree.getAbsolutePath()),
         "-m", main,
         "-p", "sugarj",
         "--library",
-        "-O", "0"
+        "-O", "0",
+        "-F" // produce rtree only
     }));
     
     cmd.add("-I");
@@ -166,25 +163,11 @@ public class STRCommands {
     boolean success = false;
     log.beginTask("Generating", "Generate the assimilator", Log.TRANSFORM);
     try {
-      Path dir = FileCommands.newTempDir();
-      FileCommands.createDir(new RelativePath(dir, "sugarj"));
-      String javaFilename = FileCommands.fileName(str).replace("-", "_");
-      Path java = new RelativePath(dir, "sugarj" + Environment.sep + javaFilename + ".java");
+      Path rtree = FileCommands.newTempFile("rtree");
       log.log("calling STRJ", Log.TRANSFORM);
-      strj(str, java, main, strjContext, paths, langLib);
-      
-      
-      if (!JavaCommands.javac(java, dir, paths))
-        throw new RuntimeException("java compilation failed");
-        
-      Path jarfile = FileCommands.newTempFile("jar");
-      JavaCommands.jar(dir, jarfile);
-
-      FileCommands.deleteTempFiles(dir);
-      FileCommands.deleteTempFiles(java);
-
-      success = jarfile != null;
-      return jarfile;
+      strj(str, rtree, main, strjContext, paths, langLib);
+      success = rtree != null;
+      return rtree;
     } finally {
       log.endTask(success);
     }
@@ -255,27 +238,25 @@ public class STRCommands {
     
   }
 
-  public static IStrategoTerm assimilate(Path jarfile, IStrategoTerm in, HybridInterpreter interp) throws IOException {
-    return assimilate("internal-main", jarfile, in, interp);
+  public static IStrategoTerm assimilate(Path rtree, IStrategoTerm in, HybridInterpreter interp) throws IOException {
+    return assimilate("internal-main", rtree, in, interp);
   }
   
-  public static IStrategoTerm assimilate(String strategy, Path jarfile, IStrategoTerm in, HybridInterpreter interp) throws IOException {
+  public static IStrategoTerm assimilate(String strategy, Path rtree, IStrategoTerm in, HybridInterpreter interp) throws IOException {
     try {
-      // XXX try release loaded classes by creating a completely new interpreter
-      HybridInterpreter newInterp = new HybridInterpreter(interp.getFactory(), interp.getProgramFactory());
-      newInterp.loadJars(jarfile.getFile().toURI().toURL());
-      newInterp.setCurrent(in);
+      interp.load(rtree.getAbsolutePath());
+      interp.setCurrent(in);
       
-      if (newInterp.invoke(strategy)) {
-        IStrategoTerm term = newInterp.current();
+      if (interp.invoke(strategy)) {
+        IStrategoTerm term = interp.current();
         
         // XXX does this improve memory consumption?
-        newInterp.reset();
+        interp.reset();
         
-        IToken left = ImploderAttachment.getLeftToken(in);
-        IToken right = ImploderAttachment.getRightToken(in);
-        String sort = ImploderAttachment.getSort(in);
-        
+//        IToken left = ImploderAttachment.getLeftToken(in);
+//        IToken right = ImploderAttachment.getRightToken(in);
+//        String sort = ImploderAttachment.getSort(in);
+//        
 //        try {
 //          term = ATermCommands.makeMutable(term);
 //          ImploderAttachment.putImploderAttachment(term, false, sort, left, right);
