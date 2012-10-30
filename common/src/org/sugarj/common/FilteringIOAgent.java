@@ -24,8 +24,8 @@ public class FilteringIOAgent extends IOAgent {
    */
   private int includeLogLevel;
   
-  private final Writer outWriter = new FilteringWriter(super.getWriter(CONST_STDOUT));
-  private final Writer errWriter = new FilteringWriter(super.getWriter(CONST_STDERR));
+  private final Writer outWriter = new FilteringWriter(new org.sugarj.util.PrintStreamWriter(Log.out));
+  private final Writer errWriter = new FilteringWriter(new org.sugarj.util.PrintStreamWriter(Log.err));
   
   public FilteringIOAgent(String... regexs) {
     this(Log.NONE, regexs);
@@ -84,11 +84,12 @@ public class FilteringIOAgent extends IOAgent {
       for (Pattern pat: excludePatterns)
         if (pat.matcher(s).matches()) {
           skip = !s.endsWith("\n");
-          pushMessageToLog();
+          msg = new String();
           return;
         }
       
-      writer.write(cbuf, off, len);
+      if ((Log.log.getLoggingLevel() & includeLogLevel) > 0)
+        writer.write(cbuf, off, len);
     }
     
     private void pushMessageToLog() {
