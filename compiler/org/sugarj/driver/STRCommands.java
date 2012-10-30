@@ -5,9 +5,6 @@ import static org.sugarj.common.Log.log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,9 +29,10 @@ import org.sugarj.LanguageLib;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
+import org.sugarj.common.FilteringIOAgent;
 import org.sugarj.common.Log;
-import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
+import org.sugarj.common.path.RelativePath;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.transformations.extraction.extract_str_0_0;
@@ -48,9 +46,21 @@ import org.sugarj.stdlib.StdLib;
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
 public class STRCommands {
-  
+
+  private static IOAgent strjIOAgent = new FilteringIOAgent(Log.CORE | Log.TRANSFORM, 
+                                                            Pattern.quote("[ strj | info ]") + ".*", 
+                                                            Pattern.quote("[ strj | error ] Compilation failed") + ".*");
   
   private final static Pattern STR_FILE_PATTERN = Pattern.compile(".*\\.str");
+  
+  private final static Path FAILED_COMPILATION_PATH;
+  static {
+    try {
+      FAILED_COMPILATION_PATH = FileCommands.newTempFile("ctree");
+    } catch (IOException e) {
+      throw new IllegalStateException(e);
+    }
+  }
 
   /**
    *  Compiles a {@code *.str} file to a single {@code *.java} file. 
@@ -92,24 +102,7 @@ public class STRCommands {
       // XXX strj does not create Java file with non-fresh context
       Context c = org.strategoxt.strj.strj.init();
       
-      c.setIOAgent(new IOAgent() {
-        private final PrintStream err = new PrintStream(log, true);
-        private final Writer errWriter = new org.sugarj.util.PrintStreamWriter(err);
-        
-        public Writer getWriter(int fd) {
-            if (fd == CONST_STDERR)
-              return errWriter; 
-            else 
-              return super.getWriter(fd);
-        }
-        
-        public OutputStream internalGetOutputStream(int fd) {
-            if (fd == CONST_STDERR)
-              return err; 
-            else 
-              return super.internalGetOutputStream(fd);
-        }
-      });
+      c.setIOAgent(strjIOAgent);
       
       c.invokeStrategyCLI(main_strj_0_0.instance, "strj", cmd.toArray(new String[cmd.size()]));
     }
@@ -138,21 +131,23 @@ public class STRCommands {
                                                           SGLRException {
     ModuleKey key = getModuleKeyForAssimilation(str, main, dependentFiles, strParser);
     Path prog = lookupAssimilationInCache(strCache, key);
+    StrategoException error = null;
     
     if (prog == null) {
       try {
         prog = generateAssimilator(key, str, main, strjContext, environment.getIncludePath(), langLib);
       } catch (StrategoException e) {
-        prog = new AbsolutePath("error: " +e.getMessage());
+        prog = FAILED_COMPILATION_PATH;
+        error = e;
       } finally {
         if (prog != null)
           cacheAssimilator(strCache, key, prog, environment);
       }
+
+      if (error != null)
+        throw error;
     }
-    
-    if (prog.getAbsolutePath().startsWith("error:"))
-      throw new StrategoException(prog.getAbsolutePath());
-    
+        
     return prog;
   }
     
