@@ -70,8 +70,10 @@ public class SugarJParser extends JSGLRI {
     
     assert environment != null;
     
-    if (!LanguageLibRegistry.getInstance().isRegistered(FileCommands.getExtension(filename)))
+    if (!LanguageLibRegistry.getInstance().isRegistered(FileCommands.getExtension(filename))) {
+      Log.log.logErr("Unknown source-file extension " + FileCommands.getExtension(filename), Log.ALWAYS);
       return null;
+    }
 
     this.result = null;
     Result result = getResult(filename);
