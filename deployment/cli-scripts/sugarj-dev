@@ -8,15 +8,18 @@
 sugarj="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 script="$sugarj/deployment/cli-scripts"
 common="$sugarj/common/bin"
-compiler="$sugarj/compiler/bin"
+compiler="$sugarj/compiler/bin:$sugarj/compiler/bin/*"
 stdlib="$sugarj/stdlib/bin"
 layout="$sugarj/layout-parsing/jsglr-layout/bin"
+deployment="$sugarj/deployment/cli-scripts/jars/*"
+
 cliroot="$sugarj/compiler"
 langroot="$sugarj/language-libraries"
-langlibs="$langroot/base/bin:$langroot/haskell/bin:$langroot/java/bin:$langroot/prolog/bin"
+langlibs="$langroot/base/bin:$langroot/haskell/bin:$langroot/java/bin:$langroot/prolog/bin:$langroot/fomega/bin"
+
 
 # essential paths
-classpath="$compiler:$common:$stdlib:$langlibs:$layout"
+classpath="$compiler:$common:$stdlib:$langlibs:$layout:$deployment"
 
 # cli-script/u/extract.ruby will put classes nicely
 # together to avoid nasty resolutions
@@ -25,5 +28,6 @@ classpath="$compiler:$common:$stdlib:$langlibs:$layout"
 classes="$script/classes"
 native="$script/native"
 classpath="$classpath:$classes:$native"
+
 
 exec java -Xss64m -Xmx1024m -cp "$classpath" org.sugarj.driver.cli.Main $*
