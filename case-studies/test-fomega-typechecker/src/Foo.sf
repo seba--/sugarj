@@ -1,16 +1,22 @@
-module Sample
+module Foo
 
 import typing.check.ConstraintError
 
-public type Id2 = \X::*=>*. Y
 
-public type Id = \X::*. X1
+type X = Nat
+
+val y = 1
+
+public type Id2 = \X::*=>*. X
+
+public type Id = \X::*. X
 
 public type T1 = mu A. A
 
 public type T2 = \ Q::*. Q
 
 public type T3 = Id2 (\Z::*. Z) (mu D. Nat)
+
 
 public type T4 = Id Nat
 
@@ -30,12 +36,10 @@ public val v1 = 1
 
 public val v2 = \x:Bool.\y:Nat. x
 
-public val v3 = v2 true 1
+public val v3 = v2 true true
 
 public val id = \A::*.\a:A.a
 
 public val v4 = id [Id Nat]
 
-public val v5 = id [Id Bool]
 
-//public val v5 = v4 true
