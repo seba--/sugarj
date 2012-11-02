@@ -1,0 +1,102 @@
+module Lambda
+
+imports Rules
+imports Check
+imports libstratego-lib
+
+signature constructors
+  Base : String -> Type
+  Fun : Type * Type -> Type
+
+  Var : String -> Exp
+  Abs : String * Type * Exp -> Exp
+  App : Exp * Exp -> Exp
+
+
+rules
+  var-rule = 
+    !Rule([], 
+          Rel(BindCtx(Metavar("ctx"), Metavar("v"), Metavar("t")),
+              Var(Metavar("v")),
+              Metavar("t")))
+
+  weak-rule = 
+    !Rule([Rel(Metavar("ctx"),
+               Metavar("v"),
+               Metavar("t"))
+          ,Neq(Metavar("v"), Metavar("w"))
+          ],
+          Rel(BindCtx(Metavar("ctx"), Metavar("w"), Metavar("u")),
+              Var(Metavar("v")),
+              Metavar("t")))
+
+  abs-rule = 
+    !Rule([Rel(BindCtx(Metavar("ctx"), Metavar("v"), Metavar("t")),
+               Metavar("e"),
+               Metavar("t2"))
+          ], 
+          Rel(Metavar("ctx"),
+              Abs(Metavar("v"), Metavar("t1"), Metavar("e")),
+              Fun(Metavar("t1"), Metavar("t2"))))
+
+  app-rule = 
+    !Rule([Rel(Metavar("ctx"),
+               Metavar("e1"),
+               Fun(Metavar("t1"), Metavar("t2")))
+          ,Rel(Metavar("ctx"),
+               Metavar("e2"),
+               Metavar("t1"))
+          ], 
+          Rel(Metavar("ctx"),
+              App(Metavar("e1"), Metavar("e2")),
+              Metavar("t2")))
+
+  lambda-rulez = ![<var-rule>, <weak-rule>, <abs-rule>, <app-rule>]
+
+
+rules
+  str-var-rule : 
+    (BindCtx(ctx, v, t),
+     Var(v))
+    ->
+    t
+
+  str-weak-rule :
+    (BindCtx(ctx, w, u),
+     Var(v))
+    ->
+    t
+  where
+    <not(equal)> (v, w);
+    <str-check-type> (ctx, Var(v)) => t
+
+  str-abs-rule : 
+    (ctx,
+     Abs(v, t1, e))
+    ->
+    Fun(t1, t2)
+  where
+    <str-check-type> (BindCtx(ctx, v, t1), e) => t2
+
+  str-app-rule :
+    (ctx,
+     App(e1, e2))
+    ->
+    t2
+  where
+    <debug(!"app-rule: ")> (ctx, App(e1,e2));
+    <str-check-type> (ctx, e1) => Fun(t1, t2);
+    <str-check-type> (ctx, e2) => t1
+
+
+  str-check-type = not(?(_,_)); !(EmptyCtx,<id>); str-check-type
+
+  str-check-type =
+      str-var-rule
+    + str-weak-rule
+    + str-abs-rule
+    + str-app-rule
+
+// rules
+//  main = io-wrap(str-check-type)
+

@@ -1,0 +1,81 @@
+module Let
+
+imports Lambda
+
+signature constructors
+  Let : String * Type * Exp * Exp -> Exp
+
+rules
+  desugar-let :
+    Let(v, t, e1, e2)
+    ->
+    App(Abs(v, t, e2), e1)
+
+rules
+  let-rule = 
+    !Rule([Rel(Metavar("ctx"),
+               Metavar("e1"),
+               Metavar("t1"))
+          ,Rel(BindCtx(Metavar("ctx"), Metavar("v"), Metavar("t1")),
+               Metavar("e2"),
+               Metavar("t2"))
+          ], 
+          Rel(Metavar("ctx"),
+              Let(Metavar("v"), Metavar("t1"), Metavar("e1"), Metavar("e2")),
+              Metavar("t2")))
+
+  let-obligation = 
+    !Rule([Rel(Metavar("ctx"),
+               Metavar("e1"),
+               Metavar("t1"))
+          ,Rel(BindCtx(Metavar("ctx"), Metavar("v"), Metavar("t1")),
+               Metavar("e2"),
+               Metavar("t2"))
+          ], 
+          Rel(Metavar("ctx"),
+              App(Abs(Metavar("v"), Metavar("t1"), Metavar("e2")), Metavar("e1")),
+              Metavar("t2")))
+
+  str-let-rule :
+    (ctx,
+     Let(v, t1, e1, e2))
+    ->
+    t2
+  where
+    <str-check-type> (ctx, e1) => t1;
+    <str-check-type> (BindCtx(ctx, v, t1), e2) => t2
+
+
+rules
+  // allows additional axioms in deriving types 
+  dynamic-axioms-rule :
+    (ctx, e)
+    ->
+    t
+  where
+    <debug(!"dyn-ax-rule: ")> (ctx,e);
+    <Dynamic-Axioms < debug(!"dyn-ax succ: ") + (debug(!"dyn-ax fail: ");fail)> (ctx, e) => t
+
+  str-check-type = dynamic-axioms-rule
+
+  // activate a list of axioms through dynamic rules
+  activate-axioms : [] -> []
+  activate-axioms : [Rel(ctx,e,t)|as] -> <rules(Dynamic-Axioms : (ctx,e) -> t); activate-axioms> as
+
+  // check an obligation:
+  //   (i)   activate axioms
+  //   (ii)  derive type of goal
+  //   (iii) compare derived type with expected type
+  check-obligation =
+    ?Rule(axioms, Rel(ctx, e, t));
+    {| axioms:
+         <activate-axioms> axioms;
+         <str-check-type> (ctx, e) => t2
+    |};
+    <debug(!"expected type: ")> t;
+    <debug(!"actual type: ")> t2 ;
+    <equal> (t, t2);
+    !"obligation fulfilled"
+  
+  main = let-obligation; check-obligation
+
