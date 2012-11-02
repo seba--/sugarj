@@ -1,0 +1,15 @@
+module Rules
+
+imports Lambda
+
+signature constructors
+  Metavar : String -> Metavar
+
+  EmptyCtx : Ctx
+  BindCtx : Ctx * String * Type -> Ctx
+
+  Rel : Ctx * Exp * Type -> Rel
+  Eq : a * a -> Rel
+  Neq : a * a -> Rel
+
+  Rule : List(Rel) * Rel -> Rule

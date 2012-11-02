@@ -1,0 +1,42 @@
+module Check
+
+imports libstratego-lib
+
+rules
+  check(all-rulez) :
+    ([rule | rulez], exp)
+    -> <check-rule(all-rulez)> (rule, exp)
+
+  check(all-rulez) :
+    ([rule | rulez], exp)
+    -> <check(all-rulez)> (rulez, exp)
+
+  check(all-rulez) = not(?(_,_)); !(<all-rulez>, <id>); check(all-rulez)
+
+
+rules
+  check-rule(all-rulez) :
+    (Rule([],Rel(ctx-pat,exp-pat,type-pat)), ctx, exp)
+    -> type
+    where 
+      <match> (ctx-pat, ctx) => env1;
+      <match> (exp-pat, exp, env1) => env2;
+      <subst> (env2, type-pat) => type;
+      <no-metavar> type
+
+  match : (pat,t) -> <match> (pat,t,[])
+
+  match : (Metavar(v), t, env) -> <match> (t', t, env)
+    where <lookup> (v, env) => t'
+  match : (Metavar(v), t, env) -> [(v, t)|env]
+  match : (c#(xs), c#(ys), env) -> <match-list> (xs, ys, env)
+
+  match-list : ([], [], env) -> env
+  match-list : ([x|xs], [y|ys], env) -> <match-list> (xs, ys, env')
+    where <match> (x, y) => env'
+
+  subst : (env, Metavar(v)) -> t
+    where <lookup> (v, env) => t
+  subst : (env, c#(xs)) -> c#(<map(!(env,<id>);subst)> xs)
+
+  no-metavar = collect-all(?Metavar(_)); ?[]
