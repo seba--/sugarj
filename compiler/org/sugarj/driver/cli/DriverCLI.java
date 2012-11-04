@@ -37,7 +37,6 @@ import org.sugarj.common.CommandExecution;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
-import org.sugarj.common.path.SourceLocation;
 import org.sugarj.driver.Result;
 import org.sugarj.driver.STRCommands;
 
@@ -412,9 +411,9 @@ public class DriverCLI {
         environment.getIncludePath().add(pathArgument(path));
   
     if (line.hasOption("sourcepath")) {
-      HashSet<SourceLocation> sourcePath = new HashSet<SourceLocation>();
+      HashSet<Path> sourcePath = new HashSet<Path>();
       for (String path : line.getOptionValue("sourcepath").split(org.sugarj.common.Environment.classpathsep))
-        sourcePath.add(new SourceLocation(pathArgument(path), environment));
+        sourcePath.add(pathArgument(path));
       environment.setSourcePath(sourcePath);
     }
   

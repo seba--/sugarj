@@ -36,7 +36,6 @@ import org.sugarj.common.Log;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.driver.Driver;
 import org.sugarj.driver.ModuleSystemCommands;
 import org.sugarj.driver.Result;
@@ -53,9 +52,9 @@ public class Builder extends IncrementalProjectBuilder {
 
   private class BuildInput {
     public final IResource resource;
-    public final RelativeSourceLocationPath sourceFile;
+    public final RelativePath sourceFile;
     public final LanguageLibFactory langLibFactory;
-    public BuildInput(IResource resource, RelativeSourceLocationPath path, LanguageLibFactory langLibFactory) {
+    public BuildInput(IResource resource, RelativePath path, LanguageLibFactory langLibFactory) {
       this.resource = resource; 
       this.sourceFile = path;
       this.langLibFactory = langLibFactory;
@@ -143,7 +142,7 @@ public class Builder extends IncrementalProjectBuilder {
           
           if (libReg.isRegistered(resource.getFileExtension())) {
             String path = getProject().getLocation().makeAbsolute() + "/" + relPath;
-            final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(
+            final RelativePath sourceFile = ModuleSystemCommands.locateSourceFile(
                     path.toString(),
                     environment.getSourcePath()); 
             
@@ -165,6 +164,8 @@ public class Builder extends IncrementalProjectBuilder {
   }
 
   private void build(IProgressMonitor monitor, final List<BuildInput> inputs, String what) {
+    final Environment environment = SugarJParseController.makeProjectEnvironment(getProject());
+    
     CommandExecution.SILENT_EXECUTION = false;
     CommandExecution.SUB_SILENT_EXECUTION = false;
     CommandExecution.FULL_COMMAND_LINE = true;
@@ -189,11 +190,10 @@ public class Builder extends IncrementalProjectBuilder {
               
             monitor.beginTask("compile " + input.sourceFile.getRelativePath(), IProgressMonitor.UNKNOWN);
 
-            Environment environment = input.sourceFile.getSourceLocation().getEnvironment();
             RelativePath depFile = new RelativePath(environment.getBin(), FileCommands.dropExtension(input.sourceFile.getRelativePath()) + ".dep");
             Result res = Result.readDependencyFile(depFile, environment);
             if (res == null || !res.isUpToDate(input.sourceFile, environment))
-              res = Driver.compile(input.sourceFile, monitor, input.langLibFactory);
+              res = Driver.compile(input.sourceFile, environment, monitor, input.langLibFactory);
             
             IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
             for (IWorkbenchWindow workbenchWindow : workbenchWindows)

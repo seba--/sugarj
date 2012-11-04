@@ -39,7 +39,7 @@ import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.AbsolutePath;
-import org.sugarj.common.path.RelativeSourceLocationPath;
+import org.sugarj.common.path.RelativePath;
 import org.sugarj.driver.Driver;
 import org.sugarj.driver.ModuleSystemCommands;
 import org.sugarj.driver.Result;
@@ -101,7 +101,7 @@ public class SugarJParser extends JSGLRI {
       return;
     }
     
-    final RelativeSourceLocationPath sourceFile = ModuleSystemCommands.locateSourceFile(filename, environment.getSourcePath());
+    final RelativePath sourceFile = ModuleSystemCommands.locateSourceFile(filename, environment.getSourcePath());
     final LanguageLibFactory factory = LanguageLibRegistry.getInstance().getLanguageLib(FileCommands.getExtension(filename));
 
     SugarJParser.setPending(filename, true);
@@ -133,7 +133,7 @@ public class SugarJParser extends JSGLRI {
     parseJob.schedule();
   }
   
-  private Result runParser(String input, RelativeSourceLocationPath sourceFile, LanguageLibFactory factory, IProgressMonitor monitor) throws InterruptedException {
+  private Result runParser(String input, RelativePath sourceFile, LanguageLibFactory factory, IProgressMonitor monitor) throws InterruptedException {
     CommandExecution.SILENT_EXECUTION = false;
     CommandExecution.SUB_SILENT_EXECUTION = false;
     CommandExecution.FULL_COMMAND_LINE = true;
@@ -143,7 +143,7 @@ public class SugarJParser extends JSGLRI {
     SugarJConsole.activateConsoleOnce();
     
     try {
-      return Driver.parse(input, sourceFile, monitor, factory);
+      return Driver.parse(input, sourceFile, environment, monitor, factory);
     } catch (InterruptedException e) {
       throw e;
     } catch (Exception e) {

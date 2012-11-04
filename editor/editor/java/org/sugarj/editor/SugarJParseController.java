@@ -1,5 +1,6 @@
 package org.sugarj.editor;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.imp.model.ISourceProject;
 import org.eclipse.imp.parser.IMessageHandler;
@@ -17,7 +18,6 @@ import org.sugarj.common.Environment;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.common.path.SourceLocation;
 
 public class SugarJParseController extends SugarJParseControllerGenerated {
   
@@ -70,19 +70,23 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
       IMessageHandler handler) {
     super.initialize(filePath, project, handler);
     
-    if (project != null) {
-      IJavaProject javaProject = JavaCore.create(project.getRawProject());
-      if (javaProject != null)
-        try {
-          environment = makeProjectEnvironment(javaProject);
-        } catch (JavaModelException e) {
-          environment = null;
-          throw new RuntimeException(e);
-        }
-    }
+    if (project != null)
+      environment = makeProjectEnvironment(project.getRawProject());
     
     if (sugarjParser != null)
       sugarjParser.setEnvironment(environment);
+  }
+  
+  public static Environment makeProjectEnvironment(IProject project) {
+    IJavaProject javaProject = JavaCore.create(project);
+    if (javaProject == null)
+      return null;
+    
+    try {
+      return makeProjectEnvironment(javaProject);
+    } catch (JavaModelException e) {
+      throw new RuntimeException(e);
+    }
   }
   
   public static Environment makeProjectEnvironment(IJavaProject project) throws JavaModelException {
@@ -106,7 +110,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
         includePath = new AbsolutePath(p);
       
       if (fragment.getKind() == IPackageFragmentRoot.K_SOURCE)
-        env.getSourcePath().add(new SourceLocation(includePath, env));
+        env.getSourcePath().add(includePath);
       else if (fragment.getKind() == IPackageFragmentRoot.K_BINARY)
         env.getIncludePath().add(includePath);
     }

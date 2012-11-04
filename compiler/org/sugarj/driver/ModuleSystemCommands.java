@@ -18,8 +18,6 @@ import org.sugarj.common.FileCommands;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.common.path.RelativeSourceLocationPath;
-import org.sugarj.common.path.SourceLocation;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -136,29 +134,29 @@ public class ModuleSystemCommands {
   }
 
 
-  public static RelativeSourceLocationPath locateSourceFile(String path, Set<SourceLocation> sourcePath) {
+  public static RelativePath locateSourceFile(String path, Set<Path> sourcePath) {
     if (path.startsWith("org/sugarj"))
       return null;
     
-    RelativeSourceLocationPath result = searchFileInSourceLocationPath(FileCommands.dropExtension(path), FileCommands.getExtension(path), sourcePath);
+    RelativePath result = searchFileInSourceLocationPath(FileCommands.dropExtension(path), FileCommands.getExtension(path), sourcePath);
         
     return result;
   }
 
-  public static RelativeSourceLocationPath locateSourceFile(String modulePath, String extension, Set<SourceLocation> sourcePath) {
+  public static RelativePath locateSourceFile(String modulePath, String extension, Set<Path> sourcePath) {
     if (modulePath.startsWith("org/sugarj"))
       return null;
     
-    RelativeSourceLocationPath result = searchFileInSourceLocationPath(modulePath, extension, sourcePath);
+    RelativePath result = searchFileInSourceLocationPath(modulePath, extension, sourcePath);
         
     return result;
   }
   
-  public static RelativeSourceLocationPath locateSourceFile(String modulePath, Set<SourceLocation> sourcePath, LanguageLib langLib) {
+  public static RelativePath locateSourceFile(String modulePath, Set<Path> sourcePath, LanguageLib langLib) {
     if (modulePath.startsWith("org/sugarj"))
       return null;
     
-    RelativeSourceLocationPath result = searchFileInSourceLocationPath(modulePath, langLib.getSugarFileExtension(), sourcePath);
+    RelativePath result = searchFileInSourceLocationPath(modulePath, langLib.getSugarFileExtension(), sourcePath);
         
     return result;
   }
@@ -196,11 +194,11 @@ public class ModuleSystemCommands {
     return null;
   }
 
-  private static RelativeSourceLocationPath searchFileInSourceLocationPath(String relativePath, String extension, Set<SourceLocation> searchPath) {
-    for (SourceLocation loc : searchPath) {
-      RelativePath p = searchFile(loc.getPath(), relativePath, extension);
+  private static RelativePath searchFileInSourceLocationPath(String relativePath, String extension, Set<Path> searchPath) {
+    for (Path loc : searchPath) {
+      RelativePath p = searchFile(loc, relativePath, extension);
       if (p != null)
-        return new RelativeSourceLocationPath(loc, p);
+        return p;
     }
     
     return null;

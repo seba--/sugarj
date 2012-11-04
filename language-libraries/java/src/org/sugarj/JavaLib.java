@@ -29,7 +29,6 @@ import org.sugarj.common.JavaCommands;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.java.JavaSourceFileContent;
 
 public class JavaLib extends LanguageLib implements Serializable {
@@ -140,7 +139,7 @@ public class JavaLib extends LanguageLib implements Serializable {
   }
 
 
-  private void checkPackageName(IStrategoTerm toplevelDecl, RelativeSourceLocationPath sourceFile, IErrorLogger errorLog) {
+  private void checkPackageName(IStrategoTerm toplevelDecl, RelativePath sourceFile, IErrorLogger errorLog) {
     if (sourceFile != null) {
       String packageName = relPackageName == null ? "" : relPackageName.replace('/', '.');
 
@@ -253,7 +252,7 @@ public class JavaLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException {
+  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativePath sourceFile, RelativePath sourceFileFromResult) throws IOException {
     String packageName = extractNamespaceName(toplevelDecl, interp);
 
     relPackageName = getRelativeModulePath(packageName);

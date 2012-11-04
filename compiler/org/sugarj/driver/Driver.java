@@ -55,8 +55,6 @@ import org.sugarj.common.Log;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.common.path.RelativeSourceLocationPath;
-import org.sugarj.common.path.SourceLocation;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.transformations.extraction.extraction;
 import org.sugarj.stdlib.StdLib;
@@ -89,7 +87,7 @@ public class Driver{
   
   private Path depOutFile;
 
-  private RelativeSourceLocationPath sourceFile;
+  private RelativePath sourceFile;
 
   private Path currentGrammarSDF;
   private String currentGrammarModule;
@@ -215,23 +213,23 @@ public class Driver{
     resultCache.put(file, result);
   }
   
-  public static Result compile(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    return run(sourceFile, monitor, true, langLibFactory);
+  public static Result compile(RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    return run(sourceFile, env, monitor, true, langLibFactory);
   }
 
-  public static Result parse(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    return run(sourceFile, monitor, false, langLibFactory);
+  public static Result parse(RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    return run(sourceFile, env, monitor, false, langLibFactory);
   }
   
-  public static Result compile(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    return run(source, sourceFile, monitor, true, langLibFactory);
+  public static Result compile(String source, RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    return run(source, sourceFile, env, monitor, true, langLibFactory);
   }
   
-  public static Result parse(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    return run(source, sourceFile, monitor, false, langLibFactory);
+  public static Result parse(String source, RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    return run(source, sourceFile, env, monitor, false, langLibFactory);
   }
 
-  private static Result run(RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private static Result run(RelativePath sourceFile, Environment env, IProgressMonitor monitor, boolean generateFiles, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     if (generateFiles)
       synchronized (currentlyProcessing) {
         currentlyProcessing.add(sourceFile);
@@ -241,7 +239,7 @@ public class Driver{
     
     try {
       String source = FileCommands.readFileAsString(sourceFile);
-      res = run(source, sourceFile, monitor, generateFiles, langLibFactory);
+      res = run(source, sourceFile, env, monitor, generateFiles, langLibFactory);
     } finally {
       if (generateFiles)
         synchronized (currentlyProcessing) {
@@ -253,8 +251,8 @@ public class Driver{
     return res;
   }
   
-  private static Result run(String source, RelativeSourceLocationPath sourceFile, IProgressMonitor monitor, boolean generateFiles, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    Driver driver = new Driver(sourceFile.getSourceLocation().getEnvironment(), langLibFactory);
+  private static Result run(String source, RelativePath sourceFile, Environment env, IProgressMonitor monitor, boolean generateFiles, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    Driver driver = new Driver(env, langLibFactory);
     Entry<String, Driver> pending = null;
     
     synchronized (Driver.class) {
@@ -266,7 +264,7 @@ public class Driver{
 
       if (pending == null) {
         Result result = getResult(sourceFile);
-        if (result != null && result.isUpToDate(source.hashCode(), sourceFile.getSourceLocation().getEnvironment()))
+        if (result != null && result.isUpToDate(source.hashCode(), env))
           return result;
       }
       
@@ -276,7 +274,7 @@ public class Driver{
     
     if (pending != null) {
       waitForPending(sourceFile);
-      return run(source, sourceFile, monitor, generateFiles, langLibFactory);
+      return run(source, sourceFile, env, monitor, generateFiles, langLibFactory);
     }
     
     try {
@@ -286,7 +284,7 @@ public class Driver{
       }
     
       driver.process(source, sourceFile, monitor, generateFiles);
-      Driver.storeCaches(sourceFile.getSourceLocation().getEnvironment());
+      Driver.storeCaches(env);
     
       synchronized (processingListener) {
         for (ProcessingListener listener : processingListener)
@@ -778,7 +776,7 @@ public class Driver{
       if (!modulePath.startsWith("org/sugarj")) { // module is not in sugarj standard library
         Path dep = ModuleSystemCommands.searchFile(modulePath, "dep", environment);
         Result res = null;
-        RelativeSourceLocationPath importSourceFile = null;
+        RelativePath importSourceFile = null;
         
         if (dep != null) {
           try {
@@ -809,7 +807,7 @@ public class Driver{
                 delegateCompilation = importSourceFile;
               }
               else {
-                res = compile(importSourceFile, monitor, langLib.getFactoryForLanguage());    // XXX: Think of a better way to handle this
+                res = compile(importSourceFile, environment, monitor, langLib.getFactoryForLanguage());
                 if (res.hasFailed())
                   setErrorMessage(toplevelDecl, "problems while compiling " + importModuleName);
               }
@@ -1045,7 +1043,7 @@ public class Driver{
 
     depOutFile = null;
 
-    this.sourceFile = new RelativeSourceLocationPath(new SourceLocation(sourceFile.getBasePath(), environment), sourceFile);
+    this.sourceFile = sourceFile;
     this.generateFiles = generateFiles;
     
     this.driverResult = new Result(generateFiles);
@@ -1212,7 +1210,7 @@ public class Driver{
         ois = new ObjectInputStream(new FileInputStream(driverResult.getGenerationLog().getFile()));
         while (true) {
           try {
-            Path p = Path.readPath(ois, environment);
+            Path p = (Path) ois.readObject();
             FileCommands.delete(p);
           } catch (ClassNotFoundException e) { 
           }
