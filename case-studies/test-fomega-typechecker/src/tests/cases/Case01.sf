@@ -1,0 +1,20 @@
+module tests.cases.Case01
+
+import typing.check.TypeChecker
+
+
+// error: "type mismatch, expected TyString but found TyNat"
+//  in tree /tmp/sugarj5530359997944215472.ast
+// public val test01 = \x:<left:Nat,right:Bool>.
+//   case x of
+//     <left=l> => "zero"
+//   ; <right=r> => 1
+
+// public val test02 = \x:Bool.
+//   case x of
+//     <right=r> => "one"
+//   ; <left=l> => "zero"
+
+public val test03 = \x:<left:Bool,right:Nat>.
+  case x of
+    <right=r> => "one"

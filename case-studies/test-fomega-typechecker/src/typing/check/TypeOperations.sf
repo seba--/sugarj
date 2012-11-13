@@ -9,9 +9,16 @@ signature
     IDUnknown: FomegaID
 
 rules
-  labType: (x,[]) -> (TyUnknown(), ["undefined label ",x])
+  labType: (x,T) -> (TyUnknown(), ["not a variant or record type"])
+           where if (!T; ?Cons(_,_)) then fail else if (!T; ?Nil()) then fail else id end end
+  labType: (x,[]) -> (TyUnknown(), [<concat-strings> ["undefined label ",x]])
   labType: (x,[TyDecl(x,T)|decls]) -> (T,[])
   labType: (x,[TyDecl(y,T)|decls]) -> <labType> (x,decls)
+           where <not(equal)> (x,y)
+
+  without: ([],x) -> []
+  without: ([TyDecl(x,T)|decls],x) -> decls
+  without: ([TyDecl(y,T)|decls],x) -> [TyDecl(y,T)|<without> (decls,x)]
            where <not(equal)> (x,y)
 
   typeMismatch:
@@ -113,7 +120,7 @@ rules
   typeEqVariant: TyUnknown() -> ([],[])
   typeEqVariant: TyVariant(decls) -> (decls,[])
   typeEqVariant:
-    T -> ([],[<concat-strings> ["type mismatch, expected variant type but found"
+    T -> ([],[<concat-strings> ["type mismatch, expected variant type but found "
                                ,<write-to-string> T]])
     where if (!T; ?TyVariant(_)) then fail else if (!T; ?TyUnknown()) then fail else id end end
 

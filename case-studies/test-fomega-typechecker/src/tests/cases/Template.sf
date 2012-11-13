@@ -1,0 +1,4 @@
+module tests.cases.Template
+
+import typing.check.TypeChecker
+
