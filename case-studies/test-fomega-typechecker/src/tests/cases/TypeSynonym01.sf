@@ -1,0 +1,15 @@
+module tests.cases.TypeSynonym01
+
+import typing.check.TypeChecker
+
+type NatPair = {fst:Nat,snd:Nat}
+
+val f = \p:NatPair. p!fst
+
+val pair = {snd=4,fst=1}
+
+val foo = f pair
+
+// error: line 13 column 12 to line 13 column 18:
+//   "type mismatch, expected TyRecord([TyDecl(\"fst\",TyNat),TyDecl(\"snd\",TyNat)]) but found TyRecord([TyDecl(\"fst\",TyNat)])"
+// val test01 = f {fst=6}
