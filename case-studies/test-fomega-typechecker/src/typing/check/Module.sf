@@ -15,13 +15,15 @@ rules
     (ctx,[TypeDef(None(),X,T) | defs]) -> (sig,<conc> (msgs1,msgs2,msgs3))
     where errorUnless(<not(elem)> (X,<dom> ctx) | (X,<concat-strings> [X," already defined."])) => msgs1
         ; <kindOf> (ctx,T) => (K,msgs2)
-        ; <signatureOf> (CtxBindTVarDef(ctx,X,K,T),defs) => (sig,msgs3)
+        ; if !K; ?KiUnknown() then !T else <norm> (ctx,T) end => T'
+        ; <signatureOf> (CtxBindTVarDef(ctx,X,K,T'),defs) => (sig,msgs3)
 
   signatureOf:
     (ctx,[TypeDef(Some(Public()),X,T) | defs]) -> (SigBindTVarDef(X,K,T,sig),<conc> (msgs1,msgs2,msgs3))
     where errorUnless(<not(elem)> (X,<dom> ctx) | (X,<concat-strings> [X," already defined."])) => msgs1
         ; <kindOf> (ctx,T) => (K,msgs2)
-        ; <signatureOf> (CtxBindTVarDef(ctx,X,K,T),defs) => (sig,msgs3)
+        ; if !K; ?KiUnknown() then !T else <norm> (ctx,T) end => T'
+        ; <signatureOf> (CtxBindTVarDef(ctx,X,K,T'),defs) => (sig,msgs3)
 
   signatureOf:
     (ctx,[ValDef(None(),x,e) | defs]) -> (sig,<conc> (msgs1,msgs2,msgs3))
