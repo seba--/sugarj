@@ -85,7 +85,7 @@ rules
             !(<typeMismatch> (TyForall(X,K,S),T))
           end => msgs
   typeEqProper: (TyAbs(X,K,S),T) -> msgs
-    where if (!T; ?TyForall(Y,J,U)) then
+    where if (!T; ?TyAbs(Y,J,U)) then
             <kindEq> (K,J) => msgs1;
             <fresh> (X,[S,U]) => Z;
             <typeEq> (<subst> (X,TyVar(Z),S),<subst> (Y,TyVar(Z),U)) => msgs2;
