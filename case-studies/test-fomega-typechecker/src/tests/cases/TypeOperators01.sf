@@ -1,0 +1,18 @@
+module tests.cases.TypeOperators01
+
+import typing.check.TypeChecker
+
+type I = \X::*.X
+type K = \X::*.\Y::*.X
+
+val id = \X::*.\x:X.x
+
+val f = \n:K Nat Bool. n
+
+val x = id [Nat] 7
+
+val bar = f x
+
+// error: line 16 column 16 to line 16 column 26:
+//   "type mismatch, expected TyNat but found TyBool"
+val test01 = f (id [Bool] true)
