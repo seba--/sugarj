@@ -8,5 +8,5 @@ import org.sugarj.languages.SugarFomega
 
 rules
   constraint-error: FomegaBody(defs) -> result
-    where <debug(!"in: "); signatureOf; debug(!"out: ")> (CtxEmpty(),defs) => (sig,errors)
+    where <signatureOf> (CtxEmpty(),defs) => (sig,errors)
         ; if !errors; ?[] then fail else !errors end => result
