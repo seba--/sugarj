@@ -234,19 +234,19 @@ rules
   // Γ ⊢ {} : {}
   typeOf:
     (ctx,Record([])) -> (TyRecord([]),[])
-  // Γ ⊢ e : T Γ ⊢ {flds} : S Γ ⊢ S ⇓ {decls} x ∉ lab(decls)
+  // Γ ⊢ e : T   Γ ⊢ {flds} : S   Γ ⊢ S ⇓ {decls}   x ∉ lab(decls)
   // --------------------------------------------------------------
   // Γ ⊢ {x=e,flds} : {x:T,decls}
   typeOf:
     (ctx,Record([Field(x,e)|flds])) ->
-    (Record([Field(x,T)|decls]),<conc> (errs1,errs2,errs3))
-    where <typeOf> (ctx,e) => T
-        ; <typeOf> (ctx,Record(flds)) => (S,errs1)
+    (TyRecord([TyDecl(x,T)|decls]),<conc> (errs1,errs2,errs3,errs4))
+    where <typeOf> (ctx,e) => (T,errs1)
+        ; <typeOf> (ctx,Record(flds)) => (S,errs2)
         ; <norm> (ctx,S) => S'
-        ; <typeEqRecord> S' => (decls,msgs2)
-        ; <msgsToErrs> (msgs2,flds) => errs2
-        ; errorUnless(<not(elem)> (x,<lab> flds)
-                     | (x,<concat-strings> ["duplicate label ",x])) => errs3
+        ; <typeEqRecord> S' => (decls,msgs3)
+        ; <msgsToErrs> (msgs3,flds) => errs3
+        ; errorUnless(<not(elem)> (x,<lab> decls)
+                     | (x,<concat-strings> ["duplicate label ",x])) => errs4
 
   // *** Var ***
   typeOf:
