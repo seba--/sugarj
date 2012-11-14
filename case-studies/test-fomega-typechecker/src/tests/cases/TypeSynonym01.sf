@@ -12,4 +12,4 @@ val foo = f pair
 
 // error: line 13 column 12 to line 13 column 18:
 //   "type mismatch, expected TyRecord([TyDecl(\"fst\",TyNat),TyDecl(\"snd\",TyNat)]) but found TyRecord([TyDecl(\"fst\",TyNat)])"
-// val test01 = f {fst=6}
+val test01 = f {fst=6}
