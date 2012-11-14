@@ -263,7 +263,17 @@ rules
   parReduce: (ctx,TyNat()) -> TyNat()
   parReduce: (ctx,TyString()) -> TyString()
   parReduce: (ctx,TyBool()) -> TyBool()
-  parReduce: (ctx,TyVar(X)) -> TyVar(X)
+
+  parReduce: (CtxBindTVar(ctx,X,K),TyVar(X)) -> TyVar(X)
+  parReduce: (CtxBindTVar(ctx,Y,K),TyVar(X)) -> <parReduce> (ctx,TyVar(X))
+             where <not(equal)> (X,Y)
+  parReduce: (CtxBindTVarDef(ctx,X,K,T),TyVar(X)) -> T
+  parReduce: (CtxBindTVarDef(ctx,Y,K,T),TyVar(X)) -> <parReduce> (ctx,TyVar(X))
+             where <not(equal)> (X,Y)
+  parReduce: (CtxBindQTVarDef(ctx,qY,K,T),TyVar(X)) -> <parReduce> (ctx,TyVar(X))
+  parReduce: (CtxBindVar(ctx,x,T),TyVar(X)) -> <parReduce> (ctx,TyVar(X))
+  parReduce: (CtxBindQVar(ctx,qx,T),TyVar(X)) -> <parReduce> (ctx,TyVar(X))
+
   parReduce: (ctx,TyQVar(qX)) -> TyQVar(qX)
   parReduce: (ctx,TyMu(X,T)) -> TyMu(X,<parReduce> (ctx,T))
   parReduce: (ctx,TyAbs(X,K,T)) -> TyAbs(X,K,<parReduce> (ctx,T))
