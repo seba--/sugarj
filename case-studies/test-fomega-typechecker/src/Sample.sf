@@ -1,10 +1,10 @@
 module Sample
 
-import typing.check.ConstraintError
+import typing.check.TypeChecker
 
-public type Id2 = \X::*=>*. Y
+public type Id2 = \X::*=>*. X
 
-public type Id = \X::*. X1
+public type Id = \X::*. X
 
 public type T1 = mu A. A
 
@@ -38,4 +38,4 @@ public val v4 = id [Id Nat]
 
 public val v5 = id [Id Bool]
 
-//public val v5 = v4 true
+public val v6 = v4 1
