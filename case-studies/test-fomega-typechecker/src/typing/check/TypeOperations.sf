@@ -63,7 +63,7 @@ rules
             !(<typeMismatch> (TyVariant(decls),T))
           end => msgs
   typeEqProper: (TyApp(S1,S2),T) -> msgs
-    where if (!T; ?TyArrow(T1,T2)) then
+    where if (!T; ?TyApp(T1,T2)) then
             !(<conc> (<typeEq> (S1,T1),<typeEq> (S2,T2)))
           else
             !(<typeMismatch> (TyApp(S1,S2),T))
