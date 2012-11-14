@@ -13,84 +13,50 @@ rules
 
   // *** Case expression ***
   //
-  // Γ ⊢ e : S   Γ ⊢ S ⇓ <decls>   Γ | <decls> ⊢ brs : T
-  // ----------------------------------------------------
+  // Γ ⊢ e : S   Γ ⊢ S ⇓ <decls>   lab(decls) ≐ tag(brs)   Γ | <decls> ⊢ brs : T
+  // ----------------------------------------------------------------------------
   // Γ ⊢ case e of brs : T
   typeOf:
-    (ctx,Case(e,brs)) -> (T,<conc> (errs1,errs2,errs3))
+    (ctx,Case(e,brs)) -> (T,<conc> (errs1,errs2,errs3,errs4))
     where <typeOf;debug(!"A01")> (ctx,e) => (S,errs1)
         ; <norm;debug(!"A02")> (ctx,S) => S'
         ; <typeEqVariant;debug(!"A03")> S' => (decls,msgs2)
-        ; <msgsToErrs;debug(!"A04")> (msgs2,e) => errs2
-        ; <typeOfBrs;debug(!"A05")> (ctx,decls,brs) => (T,errs3)
+        ; errorUnless(<set-eq> (<make-set> (<lab> decls),<make-set> (<tag> brs))
+                     | (brs,<concat-strings>
+                            ["missing branch(es) for "
+                            ,<write-to-string> (<diff> (<lab> decls,<tag> brs))
+                            ])) => errs2
+        ; <msgsToErrs;debug(!"A04")> (msgs2,e) => errs3
+        ; <typeOfBrs;debug(!"A05")> (ctx,decls,brs) => (T,errs4)
 
   // Branches
   //
-  // x:S ∈ <decl>   Γ,y:S ⊢ e : T
+  // x:S ∈ <decls>   Γ,y:S ⊢ e : T
   // -----------------------------
-  // Γ | <decl> ⊢ <x=y> => e : T
+  // Γ | <decls> ⊢ <x=y> => e : T
   typeOfBrs:
     (ctx,R,[Branch(x,y,e)]) -> (T,<conc> (errs1,errs2))
     where <debug(!"B05a");labType;debug(!"A05a")> (x,R) => (S,msgs1)
         ; <msgsToErrs;debug(!"A06")> (msgs1,x) => errs1
         ; <typeOf;debug(!"A07")> (CtxBindVar(ctx,y,S),e) => (T,errs2)
 
-  // x ∉ tag(brs)   x:S ∈ <decl,decls>   Γ,y:S ⊢ e : T   Γ ⊢ T ⇓ U
-  // Γ | (<decl,decls> \ x) ⊢ brs : R                    Γ ⊢ R ⇓ U
-  // -------------------------------------------------------------
-  // Γ | <decl,decls> ⊢ <x=y> => e; brs : U
+  // x ∉ tag(brs)   x:S ∈ <decls>   Γ,y:S ⊢ e : T1
+  // Γ ⊢ T1 ⇓ U    Γ | R ⊢ brs : T2     Γ ⊢ T2 ⇓ U
+  // ----------------------------------------------
+  // Γ | <decls> ⊢ <x=y> => e; brs : U
   typeOfBrs:
-    (ctx,[decl1,decl2|decls],[Branch(x,y,e)|brs]) ->
-    (R',<conc> (errs1,errs2,errs3,errs4,errs5))
+    (ctx,R,[Branch(x,y,e)|brs]) ->
+    (T1',<conc> (errs1,errs2,errs3,errs4,errs5))
     where errorUnless(<not(elem)> (x, <tag> brs)
-                      | [(x,<concat-strings> ["duplicate tag ",x])]) => errs1
-        ; <labType> (x,[decl1,decl2|decls]) => (S,msgs2)
+                      | (x,<concat-strings> ["duplicate tag ",x])) => errs1
+        ; <labType> (x,R) => (S,msgs2)
         ; <msgsToErrs> (msgs2,x) => errs2
-        ; <typeOf> (CtxBindVar(ctx,y,S),e) => (T,errs3)
-        ; <norm> (ctx,T) => T'
-        ; <typeOfBrs> (ctx,<without> ([decl1,decl2|decls],x),brs) => (R,errs4)
-        ; <norm> (ctx,R) => R'
-        ; <typeEq> (T',R') => msgs5
+        ; <typeOf> (CtxBindVar(ctx,y,S),e) => (T1,errs3)
+        ; <norm> (ctx,T1) => T1'
+        ; <typeOfBrs> (ctx,R,brs) => (T2,errs4)
+        ; <norm> (ctx,T2) => T2'
+        ; <typeEq> (T1',T2') => msgs5
         ; <msgsToErrs> (msgs5,[Branch(x,y,e)|brs]) => errs5
-
-  // Note: the rules for case expressions are inefficient since they
-  // calculate the type of the scrutinee repeatedly -- but they are
-  // simple, though, and do not require an additional judgment for
-  // branches.
-  // This case also rule does not check if we have duplicate labels in
-  // branches.
-  //
-  // Γ ⊢ e1 : T1    Γ ⊢ T1 ⇓ <decls>    x:S ∈ decls    Γ,y:S ⊢ e2 : T2
-  // ------------------------------------------------------------------
-  // Γ ⊢ case e1 of <x=y> ⇒ e2 : T2
-  // typeOf:
-  //   (ctx,Case(e1,[Branch(x,y,e2)])) -> (T2,<conc> (errs1,errs2,errs3,errs4))
-  //   where <typeOf> (ctx,e1) => (T1,errs1)
-  //       ; <norm> (ctx,T1) => T1'
-  //       ; <typeEqVariant> T1' => (decls,msgs2)
-  //       ; <msgsToErrs> (msgs2,e1) => errs2
-  //       ; <labType> (x,decls) => (S,msgs3)
-  //       ; <msgsToErrs> (msgs3,x) => errs3
-  //       ; <typeOf> (CtxBindVar(ctx,y,S),e2) => (T2,errs4)
-  // Γ ⊢ e1 : T1 Γ ⊢ T1 ⇓ <decls> x:S ∈ decls Γ,y:S ⊢ e2 : T2
-  // Γ ⊢ case e1 of brs : R Γ ⊢ T2 ⇓ U Γ ⊢ R ⇓ U
-  // ---------------------------------------------------------------
-  // Γ ⊢ case e1 <x=y> ⇒ e2; brs : U
-  // typeOf:
-  //   (ctx,Case(e1,[Branch(x1,x2,e2),Branch(y1,y2,e3)|brs])) ->
-  //   (R,<conc> (errs1,errs2,errs3,errs4,errs5,errs6))
-  //   where <typeOf> (ctx,e1) => (T1,errs1)
-  //       ; <norm> (ctx,T1) => T1'
-  //       ; <typeEqVariant> T1' => (decls,msgs2)
-  //       ; <msgsToErrs> (msgs2,e1) => errs2
-  //       ; <labType> (x1,decls) => (S,msgs3)
-  //       ; <msgsToErrs> (msgs3,x1) => errs3
-  //       ; <typeOf> (CtxBindVar(ctx,x2,S),e2) => (T2,errs4)
-  //       ; <typeOf> (ctx,Case(e1,[Branch(y1,y2,e3)|brs])) => (R,errs5)
-  //       ; <norm> (ctx,T2) => T2'
-  //       ; <norm> (ctx,R) => R'
-  //       ; <typeEq> (T2',R') => msgs6
-  //       ; <msgsToErrs> (msgs6,[Branch(x1,x2,e2),Branch(y1,y2,e3)|brs]) => errs6
 
   // *** Conditional ***
   //
@@ -280,7 +246,7 @@ rules
         ; <typeEqRecord> S' => (decls,msgs2)
         ; <msgsToErrs> (msgs2,flds) => errs2
         ; errorUnless(<not(elem)> (x,<lab> flds)
-                     | [(x,<concat-strings> ["duplicate label ",x])]) => errs3
+                     | (x,<concat-strings> ["duplicate label ",x])) => errs3
 
   // *** Var ***
   typeOf:
@@ -319,7 +285,8 @@ rules
 // *** Notes ***
 //
 // Judgments:
-// * x ∉ lab(brs)
+// * lab(decls) ≐ tag(brs)
+// * x ∉ tag(brs)
 // * x ∉ sel(flds)
 // * x:S ∈ decls
 // * qx ≠ qy
