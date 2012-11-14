@@ -1,0 +1,19 @@
+module tests.cases.RecursiveTypes01
+
+import typing.check.TypeChecker
+
+type Fix = \A::*.\B::*.mu R. R -> A -> B
+
+public val fix = \A::*.\B::*.\f:((A->B) -> (A->B)).
+  (\x:(Fix A B). (\y:A. f ((unfold [Fix A B] x) x) y))
+  (fold [Fix A B]
+    (\x:(Fix A B). (\y:A. f ((unfold [Fix A B] x) x) y)))
+
+// type FixCBN = \A::*.mu R. R -> A
+
+// val fixCBN = \A::*.\f:(A->A).
+//   (\x:(FixCBN A). f ((unfold [FixCBN A] x) x))
+//   (fold [FixCBN A]
+//     (\x:(FixCBN A). f ((unfold [FixCBN A] x) x)))
+
+// public val diverge = \A::*. fixCBN [A] (\x:A. x)
