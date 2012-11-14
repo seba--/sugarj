@@ -275,9 +275,9 @@ rules
   parReduce: (CtxBindQVar(ctx,qx,T),TyVar(X)) -> <parReduce> (ctx,TyVar(X))
 
   parReduce: (ctx,TyQVar(qX)) -> TyQVar(qX)
-  parReduce: (ctx,TyMu(X,T)) -> TyMu(X,<parReduce> (ctx,T))
-  parReduce: (ctx,TyAbs(X,K,T)) -> TyAbs(X,K,<parReduce> (ctx,T))
-  parReduce: (ctx,TyForall(X,K,T)) -> TyForall(X,K,<parReduce> (ctx,T))
+  parReduce: (ctx,TyMu(X,T)) -> TyMu(X,<parReduce> (CtxBindTVar(ctx,X,KiStar()),T))
+  parReduce: (ctx,TyAbs(X,K,T)) -> TyAbs(X,K,<parReduce> (CtxBindTVar(ctx,X,K),T))
+  parReduce: (ctx,TyForall(X,K,T)) -> TyForall(X,K,<parReduce> (CtxBindTVar(ctx,X,K),T))
   parReduce: (ctx,TyArrow(T1,T2)) -> TyArrow(<parReduce> (ctx,T1),<parReduce> (ctx,T2))
   parReduce: (ctx,TyApp(T1,T2)) -> TyApp(<parReduce> (ctx,T1),<parReduce> (ctx,T2))
              where if (!T1; ?(TyAbs(_,_,_))) then fail else id end
