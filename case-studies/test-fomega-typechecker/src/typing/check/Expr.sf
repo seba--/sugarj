@@ -18,16 +18,16 @@ rules
   // Γ ⊢ case e of brs : T
   typeOf:
     (ctx,Case(e,brs)) -> (T,<conc> (errs1,errs2,errs3,errs4))
-    where <typeOf;debug(!"A01")> (ctx,e) => (S,errs1)
-        ; <norm;debug(!"A02")> (ctx,S) => S'
-        ; <typeEqVariant;debug(!"A03")> S' => (decls,msgs2)
+    where <typeOf> (ctx,e) => (S,errs1)
+        ; <norm> (ctx,S) => S'
+        ; <typeEqVariant> S' => (decls,msgs2)
         ; errorUnless(<set-eq> (<make-set> (<lab> decls),<make-set> (<tag> brs))
                      | (brs,<concat-strings>
                             ["missing branch(es) for "
                             ,<write-to-string> (<diff> (<lab> decls,<tag> brs))
                             ])) => errs2
-        ; <msgsToErrs;debug(!"A04")> (msgs2,e) => errs3
-        ; <typeOfBrs;debug(!"A05")> (ctx,decls,brs) => (T,errs4)
+        ; <msgsToErrs> (msgs2,e) => errs3
+        ; <typeOfBrs> (ctx,decls,brs) => (T,errs4)
 
   // Branches
   //
@@ -36,9 +36,9 @@ rules
   // Γ | <decls> ⊢ <x=y> => e : T
   typeOfBrs:
     (ctx,R,[Branch(x,y,e)]) -> (T,<conc> (errs1,errs2))
-    where <debug(!"B05a");labType;debug(!"A05a")> (x,R) => (S,msgs1)
-        ; <msgsToErrs;debug(!"A06")> (msgs1,x) => errs1
-        ; <typeOf;debug(!"A07")> (CtxBindVar(ctx,y,S),e) => (T,errs2)
+    where <labType> (x,R) => (S,msgs1)
+        ; <msgsToErrs> (msgs1,x) => errs1
+        ; <typeOf> (CtxBindVar(ctx,y,S),e) => (T,errs2)
 
   // x ∉ tag(brs)   x:S ∈ <decls>   Γ,y:S ⊢ e : T1
   // Γ ⊢ T1 ⇓ U    Γ | R ⊢ brs : T2     Γ ⊢ T2 ⇓ U
