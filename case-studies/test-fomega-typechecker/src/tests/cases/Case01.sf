@@ -2,19 +2,41 @@ module tests.cases.Case01
 
 import typing.check.TypeChecker
 
-
 // error: "type mismatch, expected TyString but found TyNat"
-//  in tree /tmp/sugarj5530359997944215472.ast
-// public val test01 = \x:<left:Nat,right:Bool>.
-//   case x of
-//     <left=l> => "zero"
-//   ; <right=r> => 1
+//   in tree /tmp/sugarj5530359997944215472.ast
+val test01 = \x:<left:Nat,right:Bool>.
+  case x of
+    <left=l> => "zero"
+  ; <right=r> => 1
 
-// public val test02 = \x:Bool.
-//   case x of
-//     <right=r> => "one"
-//   ; <left=l> => "zero"
-
-public val test03 = \x:<left:Bool,right:Nat>.
+// error: line 16 column 4 to line 17 column 16:
+//   "missing branch(es) for []"
+// error: line 15 column 7 to line 15 column 7:
+//   "type mismatch, expected variant type but found TyBool"
+// error: line 16 column 5 to line 16 column 5:
+//   "undefined label right"
+// error: line 17 column 5 to line 17 column 5:
+//   "undefined label left"
+val test02 = \x:Bool.
   case x of
     <right=r> => "one"
+  ; <left=l> => "two"
+
+// error: line 28 column 4 to line 29 column 16:
+//   "missing branch(es) for [\"middle\"]"
+val test03 = \x:<left:Bool,middle:String,right:Nat>.
+  case x of
+    <right=r> => "one"
+  ; <left=l> => "two"
+
+// error: line 35 column 5 to line 35 column 5:
+//   "duplicate tag foo"
+// error: line 36 column 5 to line 36 column 5:
+//   "duplicate tag bar"
+val test04 = \x:<foo:{},quxx:{},bar:{}>.
+  case x of
+    <foo=f> => 1
+  ; <bar=b> => 2
+  ; <foo=f> => 3
+  ; <bar=b> => 4
+  ; <quxx=q> => 5

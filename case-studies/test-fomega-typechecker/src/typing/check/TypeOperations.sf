@@ -16,11 +16,6 @@ rules
   labType: (x,[TyDecl(y,T)|decls]) -> <labType> (x,decls)
            where <not(equal)> (x,y)
 
-  without: ([],x) -> []
-  without: ([TyDecl(x,T)|decls],x) -> decls
-  without: ([TyDecl(y,T)|decls],x) -> [TyDecl(y,T)|<without> (decls,x)]
-           where <not(equal)> (x,y)
-
   typeMismatch:
     (S,T) -> [<concat-strings> ["type mismatch, expected "
                                ,<write-to-string> S

@@ -1,0 +1,11 @@
+module tests.cases.Case02
+
+import typing.check.TypeChecker
+
+
+val f = \n:Nat. n
+
+// error: line 10 column 18 to line 10 column 18:
+//   "type mismatch, expected TyNat but found TyBool"
+val test01 = \x:<bool:Bool>.
+  case x of <bool=b> => f b
