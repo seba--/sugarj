@@ -281,7 +281,7 @@ rules
   parReduce: (ctx,TyArrow(T1,T2)) -> TyArrow(<parReduce> (ctx,T1),<parReduce> (ctx,T2))
   parReduce: (ctx,TyApp(T1,T2)) -> TyApp(<parReduce> (ctx,T1),<parReduce> (ctx,T2))
              where if (!T1; ?(TyAbs(_,_,_))) then fail else id end
-  parReduce: (ctx,TyApp(TyAbs(X,K11,T12),T2)) -> <subst> (X,<parReduce> (ctx,T2),<parReduce> (ctx,T12))
+  parReduce: (ctx,TyApp(TyAbs(X,K11,T12),T2)) -> <subst> (X,<parReduce> (ctx,T2),<parReduce> (CtxBindTVar(ctx,X,K11),T12))
   parReduce: (ctx,TyVariant(decls)) -> TyVariant(<map(\ decl -> <parReduceDecl> (ctx,decl) \)> decls)
   parReduce: (ctx,TyRecord(decls)) -> TyRecord(<map(\ decl -> <parReduceDecl> (ctx,decl) \)> decls)
 
