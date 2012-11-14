@@ -3,27 +3,9 @@ module Fomega-Lexical
 
 exports
   sorts ID MID QID NAT STRING Keyword PrimitiveType
-    BlockComment CommentPart OpenBrace CloseBrace Dash
 
   lexical syntax
     [\ \t\r\n] -> LAYOUT
-
-    "--" ~[\n]* [\n] -> LAYOUT
-
-    BlockComment -> LAYOUT
-    "{-" CommentPart* "-}" -> BlockComment
-    ~[\{\-] -> CommentPart
-    OpenBrace -> CommentPart
-    CloseBrace -> CommentPart
-    Dash -> CommentPart
-    BlockComment -> CommentPart
-    [\-] -> Dash
-    [\{] -> OpenBrace
-    [\}] -> CloseBrace
-
-  lexical restrictions
-    Dash -/- [\}]
-    OpenBrace -/- [\-]
 
   context-free restrictions
     LAYOUT? -/- [\ \t\r\n]
@@ -189,11 +171,6 @@ exports
 module org/sugarj/languages/Fomega
 imports Fomega-Module [
     Definitions => FomegaDefinitions
-    BlockComment => FomegaBlockComment
-    CommentPart => FomegaCommentPart
-    OpenBrace => FomegaOpenBrace
-    CloseBrace => FomegaCloseBrace
-    Dash => FomegaDash
     ID => FomegaMID
     ID => FomegaID
     QID => FomegaQID
