@@ -82,14 +82,18 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
     if (javaProject == null)
       return null;
     
+    Environment env = null;
+    
     try {
-      return makeProjectEnvironment(javaProject);
+      env = makeProjectEnvironment(javaProject);
     } catch (JavaModelException e) {
       throw new RuntimeException(e);
     }
+    
+    return env;
   }
   
-  public static Environment makeProjectEnvironment(IJavaProject project) throws JavaModelException {
+  private static Environment makeProjectEnvironment(IJavaProject project) throws JavaModelException {
     Environment env = new Environment();
     
     IPath fullPath = project.getProject().getFullPath();

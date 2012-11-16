@@ -128,7 +128,7 @@ public class Builder extends IncrementalProjectBuilder {
 
     try {
       getProject().accept(new IResourceVisitor() {
-        Environment environment = SugarJParseController.makeProjectEnvironment(JavaCore.create(getProject()));
+        Environment environment = SugarJParseController.makeProjectEnvironment(getProject());
         
         @Override
         public boolean visit(IResource resource) throws CoreException {
