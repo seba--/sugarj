@@ -45,6 +45,8 @@ public class JavaLib extends LanguageLib implements Serializable {
 
   private String relPackageName;
 
+  private Path sourcePath;
+
   public String getVersion() {
     return "java-0.1";
   }
@@ -283,6 +285,10 @@ public class JavaLib extends LanguageLib implements Serializable {
     javaOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + getOriginalFileExtension());
     javaSource = new JavaSourceFileContent();
     javaSource.setOptionalImport(false);
+    
+    for (Path dir : environment.getSourcePath())
+      if (sourceFile.getBasePath().equals(dir))
+        sourcePath = dir;
   }
 
   @Override
@@ -293,7 +299,7 @@ public class JavaLib extends LanguageLib implements Serializable {
   @Override
   protected void compile(List<Path> javaOutFiles, Path bin, List<Path> path, boolean generateFiles) throws IOException {
     if (generateFiles)
-      JavaCommands.javac(javaOutFiles, bin, path);
+      JavaCommands.javac(javaOutFiles, sourcePath, bin, path);
   }
 
   @Override
