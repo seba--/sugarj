@@ -103,6 +103,16 @@ public abstract class LanguageLib implements Serializable {
 	public abstract String getGeneratedFileExtension();
 	public abstract String getSugarFileExtension();
 	
+	/**
+	 * Can be used to provide extension for source files of original language.
+	 * Will be used to resolve imports if no sugar file is available.
+	 * 
+	 * @return null or file extension of original non-sugared language.
+	 */
+	public String getOringalFileExtension() {
+	  return null;
+	}
+	
 	
 
 	public abstract SourceFileContent getSource();

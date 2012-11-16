@@ -35,15 +35,25 @@ public class LanguageLibRegistry {
     return instance;
   }
 
-  public synchronized void registerLanguageLib(LanguageLibFactory lib) {
-    languageLibs.put(lib.createLanguageLibrary().getSugarFileExtension(), lib);
+  public synchronized void registerLanguageLib(LanguageLibFactory libFactory) {
+    LanguageLib lib = libFactory.createLanguageLibrary();
+    languageLibs.put(lib.getSugarFileExtension(), libFactory);
+    if (lib.getOringalFileExtension() != null)
+      languageLibs.put(lib.getOringalFileExtension(), libFactory);
   }
 
-  public synchronized void unregisterLanguageLib(LanguageLibFactory lib) {
-    String ext = lib.createLanguageLibrary().getSugarFileExtension();
-    LanguageLibFactory reg = languageLibs.get(ext);
-    if (reg != null && reg.equals(lib))
-      languageLibs.remove(ext);
+  public synchronized void unregisterLanguageLib(LanguageLibFactory libFactory) {
+    LanguageLib lib = libFactory.createLanguageLibrary();
+    
+    LanguageLibFactory reg = languageLibs.get(lib.getSugarFileExtension());
+    if (reg != null && reg.equals(libFactory))
+      languageLibs.remove(lib.getSugarFileExtension());
+    
+    if (lib.getOringalFileExtension() != null) {
+      reg = languageLibs.get(lib.getOringalFileExtension());
+      if (reg != null && reg.equals(libFactory))
+        languageLibs.remove(lib.getOringalFileExtension());
+    }
   }
   
   public synchronized LanguageLibFactory getLanguageLib(String extension) {

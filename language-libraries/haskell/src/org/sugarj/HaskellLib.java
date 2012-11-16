@@ -126,6 +126,11 @@ public class HaskellLib extends LanguageLib {
   public String getSugarFileExtension() {
     return "shs";
   }
+  
+  @Override
+  public String getOringalFileExtension() {
+    return "hs";
+  }
 
   @Override
   public SourceFileContent getSource() {
@@ -202,7 +207,7 @@ public class HaskellLib extends LanguageLib {
   
   @Override
   public void setupSourceFile(RelativePath sourceFile, Environment environment) {
-    outFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".hs");
+    outFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + getOringalFileExtension());
     sourceContent = new HaskellSourceFileContent();
   }
 
