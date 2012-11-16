@@ -3,16 +3,16 @@
    <description name="SugarJ" url="sugarj.org/update">
       SugarJ
    </description>
-   <feature url="features/org.sugarj.base_1.0.0.201209131202.jar" id="org.sugarj.base" version="1.0.0.201209131202">
+   <feature url="features/org.sugarj.base_1.0.0.201211051301.jar" id="org.sugarj.base" version="1.0.0.201211051301">
       <category name="org.sugarj"/>
    </feature>
-   <feature url="features/org.sugarj.haskell_1.0.0.201209131202.jar" id="org.sugarj.haskell" version="1.0.0.201209131202">
+   <feature url="features/org.sugarj.haskell_1.0.0.201211051301.jar" id="org.sugarj.haskell" version="1.0.0.201211051301">
       <category name="org.sugarj"/>
    </feature>
-   <feature url="features/org.sugarj.java_1.0.0.201209131202.jar" id="org.sugarj.java" version="1.0.0.201209131202">
+   <feature url="features/org.sugarj.java_1.0.0.201211051301.jar" id="org.sugarj.java" version="1.0.0.201211051301">
       <category name="org.sugarj"/>
    </feature>
-   <feature url="features/org.sugarj.prolog_1.0.0.201209131202.jar" id="org.sugarj.prolog" version="1.0.0.201209131202">
+   <feature url="features/org.sugarj.prolog_1.0.0.201211051301.jar" id="org.sugarj.prolog" version="1.0.0.201211051301">
       <category name="org.sugarj"/>
    </feature>
    <feature url="features/org.spoofax.jsglr_layout_1.0.0.201209131211.jar" id="org.spoofax.jsglr_layout" version="1.0.0.201209131211">
