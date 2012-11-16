@@ -109,7 +109,7 @@ public abstract class LanguageLib implements Serializable {
 	 * 
 	 * @return null or file extension of original non-sugared language.
 	 */
-	public String getOringalFileExtension() {
+	public String getOriginalFileExtension() {
 	  return null;
 	}
 	

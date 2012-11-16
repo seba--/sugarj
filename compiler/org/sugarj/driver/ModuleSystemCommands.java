@@ -157,8 +157,8 @@ public class ModuleSystemCommands {
       return null;
     
     RelativePath result = searchFileInSourceLocationPath(modulePath, langLib.getSugarFileExtension(), sourcePath);
-    if (result == null && langLib.getOringalFileExtension() != null)
-      result = searchFileInSourceLocationPath(modulePath, langLib.getOringalFileExtension(), sourcePath);
+    if (result == null && langLib.getOriginalFileExtension() != null)
+      result = searchFileInSourceLocationPath(modulePath, langLib.getOriginalFileExtension(), sourcePath);
         
     return result;
   }

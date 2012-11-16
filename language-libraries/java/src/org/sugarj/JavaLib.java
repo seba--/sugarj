@@ -139,7 +139,7 @@ public class JavaLib extends LanguageLib implements Serializable {
   }
   
   @Override
-  public String getOringalFileExtension() {
+  public String getOriginalFileExtension() {
     return "java";
   }
 
@@ -267,7 +267,7 @@ public class JavaLib extends LanguageLib implements Serializable {
     checkPackageName(toplevelDecl, sourceFile, errorLog);
 
     if (javaOutFile == null)
-      javaOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + getOringalFileExtension()); // XXX:
+      javaOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + getOriginalFileExtension()); // XXX:
                                               
     // moved here before depOutFile==null check
     javaSource.setNamespaceDecl(prettyPrint(toplevelDecl));
@@ -280,7 +280,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 
   @Override
   public void setupSourceFile(RelativePath sourceFile, Environment environment) {
-    javaOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + getOringalFileExtension());
+    javaOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + getOriginalFileExtension());
     javaSource = new JavaSourceFileContent();
     javaSource.setOptionalImport(false);
   }

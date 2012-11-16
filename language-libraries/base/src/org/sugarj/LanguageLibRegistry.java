@@ -38,8 +38,8 @@ public class LanguageLibRegistry {
   public synchronized void registerLanguageLib(LanguageLibFactory libFactory) {
     LanguageLib lib = libFactory.createLanguageLibrary();
     languageLibs.put(lib.getSugarFileExtension(), libFactory);
-    if (lib.getOringalFileExtension() != null)
-      languageLibs.put(lib.getOringalFileExtension(), libFactory);
+    if (lib.getOriginalFileExtension() != null)
+      languageLibs.put(lib.getOriginalFileExtension(), libFactory);
   }
 
   public synchronized void unregisterLanguageLib(LanguageLibFactory libFactory) {
@@ -49,10 +49,10 @@ public class LanguageLibRegistry {
     if (reg != null && reg.equals(libFactory))
       languageLibs.remove(lib.getSugarFileExtension());
     
-    if (lib.getOringalFileExtension() != null) {
-      reg = languageLibs.get(lib.getOringalFileExtension());
+    if (lib.getOriginalFileExtension() != null) {
+      reg = languageLibs.get(lib.getOriginalFileExtension());
       if (reg != null && reg.equals(libFactory))
-        languageLibs.remove(lib.getOringalFileExtension());
+        languageLibs.remove(lib.getOriginalFileExtension());
     }
   }
   
