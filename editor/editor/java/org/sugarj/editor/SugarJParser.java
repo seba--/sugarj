@@ -30,7 +30,7 @@ import org.spoofax.jsglr_layout.shared.BadTokenException;
 import org.spoofax.jsglr_layout.shared.SGLRException;
 import org.spoofax.terms.attachments.ParentAttachment;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
-import org.strategoxt.imp.runtime.services.ContentProposer;
+import org.strategoxt.imp.runtime.services.ContentProposerSemantic;
 import org.sugarj.LanguageLibFactory;
 import org.sugarj.LanguageLibRegistry;
 import org.sugarj.common.ATermCommands;
@@ -79,7 +79,7 @@ public class SugarJParser extends JSGLRI {
     if (result == null)
       result = parseFailureResult(filename);
 
-    if (input.contains(ContentProposer.COMPLETION_TOKEN) && result != null && result.getParseTable() != null) {
+    if (input.contains(ContentProposerSemantic.COMPLETION_TOKEN) && result != null && result.getParseTable() != null) {
       this.result = result;
       return ATermCommands.fixTokenizer(parseCompletionTree(input, filename, result));
     }
@@ -268,7 +268,7 @@ public class SugarJParser extends JSGLRI {
       
       IStrategoTerm nextDecl = ATermCommands.getApplicationSubterm(term, "NextToplevelDeclaration", 0);
       list.add(nextDecl);
-      if (nextDecl.toString().contains(ContentProposer.COMPLETION_TOKEN)) {
+      if (nextDecl.toString().contains(ContentProposerSemantic.COMPLETION_TOKEN)) {
         IStrategoList termList = ATermCommands.makeList("NextToplevelDeclaration", list);
         
         IStrategoList listIt = termList;
