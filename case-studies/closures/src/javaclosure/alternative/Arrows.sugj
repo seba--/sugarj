@@ -3,10 +3,6 @@ package javaclosure.alternative;
 import javaclosure.Syntax;
 
 public sugar Arrows {
-  signature constructors
-    ArrowFunctionType   : JavaType * JavaType -> JavaType
-    ArrowBlockLambda : JavaFormalParam * JavaType * JavaBlock -> JavaLambda
-  
   context-free syntax
     JavaType "->" JavaType   -> JavaType {right, cons("ArrowFunctionType")}
     "(" JavaType ")"         -> JavaType {bracket}
@@ -15,8 +11,8 @@ public sugar Arrows {
     "fun" "(" JavaFormalParam ")" "->" JavaType JavaBlock -> JavaExpr {cons("ArrowBlockLambda")}
   
   desugarings
-    \ ArrowFunctionType(arg, res) -> FunctionType(res, arg) \
-    \ ArrowBlockLambda(arg, resType, body) -> BlockLambda(resType, arg, body) \
+    \ ArrowFunctionType(arg, res) -> ClosureType(res, arg) \
+    \ ArrowBlockLambda(arg, resType, body) -> Closure(resType, arg, body) \
   
   %% The remaining priorities follow by transitivity.
   context-free priorities
