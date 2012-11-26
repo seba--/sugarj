@@ -251,7 +251,7 @@ rules
   // Normalization
   norm: (ctx,T) -> T'
         where <parReduce> (ctx,T) => S
-            ; <debug(!"IN ");typeEq;debug(!"OUT ")> (T,S) => msgs
+            ; <typeEq> (T,S) => msgs
             ; if (!msgs; ?[]) then
                 !T
               else
