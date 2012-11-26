@@ -132,8 +132,8 @@ rules
         ; <typeEqMu> T' => (X,T1,msgs4)
         ; <msgsToErrs> (msgs4,T) => errs4
         ; <typeEqMu> S' => (Y,S1,msgs5)
-	    ; <msgsToErrs> (msgs5,e) => errs5
-        ; <fresh> [T',S'] => Z
+	; <msgsToErrs> (msgs5,e) => errs5
+        ; <fresh> (X,[T',S']) => Z
         ; <subst> (X,TyVar(Z),T1) => T1'
         ; <subst> (Y,TyVar(Z),S1) => S1'
         ; <typeEq> (T1',S1') => msgs6
@@ -141,21 +141,22 @@ rules
 
   // *** Fold ***
   //
-  // Γ ⊢ T :: * Γ ⊢ T ⇓ μX.U Γ ⊢ e : [X↦μX.U]U
-  // ----------------------------------------------
+  // Γ ⊢ T :: *   Γ ⊢ T ⇓ μX.U   Γ ⊢ e : [X↦μX.U]U
+  // -----------------------------------------------
   // Γ ⊢ fold [T] e : T
   typeOf:
     (ctx,Fold(T,e)) ->
-    (T,<conc> (errs1,errs2,errs3))
+    (T,<conc> (errs1,errs2,errs3,errs4,errs5))
     where <kindOf> (ctx,T) => (K,errs1)
         ; <kindEqStar> K => msgs2
         ; <msgsToErrs> (msgs2,T) => errs2 
         ; <norm> (ctx,T) => T'
         ; <typeEqMu> T' => (X,T1,msgs3)
         ; <msgsToErrs> (msgs3,T) => errs3
-        ; <typeOf> (ctx,e) => S
-        ; <typeEq> (S, <subst> (X,TyMu(X,T1),T1)) => msgs4
-        ; <msgsToErrs> (msgs4,Fold(T,e)) => errs4
+        ; <typeOf> (ctx,e) => (S,errs4)
+        ; <norm> (ctx,S) => S'
+        ; <typeEq> (S', <subst> (X,TyMu(X,T1),T1)) => msgs5
+        ; <msgsToErrs> (msgs5,Fold(T,e)) => errs5
 
   // *** TApp ***
   //
