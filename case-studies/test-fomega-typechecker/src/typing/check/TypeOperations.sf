@@ -213,7 +213,7 @@ rules
 
   // Type abstraction
   subst: (X,S,TyAbs(X,K,T)) -> TyAbs(X,K,T)
-  subst: (X,S,TyAbs(Y,K,T)) -> TyAbs(X,K,<subst> (X,S,T))
+  subst: (X,S,TyAbs(Y,K,T)) -> TyAbs(Y,K,<subst> (X,S,T))
          where <not(equal)> (X,Y)
              ; <not(elem)> (Y,<freeVars> S)
   subst: (X,S,TyAbs(Y,K,T)) -> TyAbs(Z,K,<subst> (X,S,<subst> (Y,TyVar(Z),T)))
@@ -251,7 +251,7 @@ rules
   // Normalization
   norm: (ctx,T) -> T'
         where <parReduce> (ctx,T) => S
-            ; <typeEq> (T,S) => msgs
+            ; <debug(!"IN ");typeEq;debug(!"OUT ")> (T,S) => msgs
             ; if (!msgs; ?[]) then
                 !T
               else
