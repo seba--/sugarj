@@ -36,7 +36,7 @@ public class ModuleSystemCommands {
      * @throws IOException
      */
     public static boolean importBinFile(String modulePath, IStrategoTerm toplevelDecl, Environment environment, LanguageLib langLib) throws IOException {
-      RelativePath clazz = searchFile(modulePath, langLib.getGeneratedFileExtension(), environment);
+      RelativePath clazz = searchFile(modulePath, langLib.getFactoryForLanguage().getGeneratedFileExtension(), environment);
       if (clazz == null && !langLib.isModuleResolvable(modulePath))
         return false;
       
@@ -45,7 +45,7 @@ public class ModuleSystemCommands {
     }
     
     public static void registerSearchedClassFiles(String modulePath, Result driverResult, Environment environment, LanguageLib langLib) throws IOException {
-      registerSearchedFiles(modulePath, langLib.getGeneratedFileExtension(), driverResult, environment);
+      registerSearchedFiles(modulePath, langLib.getFactoryForLanguage().getGeneratedFileExtension(), driverResult, environment);
     }
 
   
@@ -156,9 +156,9 @@ public class ModuleSystemCommands {
     if (modulePath.startsWith("org/sugarj"))
       return null;
     
-    RelativePath result = searchFileInSourceLocationPath(modulePath, langLib.getSugarFileExtension(), sourcePath);
-    if (result == null && langLib.getOriginalFileExtension() != null)
-      result = searchFileInSourceLocationPath(modulePath, langLib.getOriginalFileExtension(), sourcePath);
+    RelativePath result = searchFileInSourceLocationPath(modulePath, langLib.getFactoryForLanguage().getSugarFileExtension(), sourcePath);
+    if (result == null && langLib.getFactoryForLanguage().getOriginalFileExtension() != null)
+      result = searchFileInSourceLocationPath(modulePath, langLib.getFactoryForLanguage().getOriginalFileExtension(), sourcePath);
         
     return result;
   }
