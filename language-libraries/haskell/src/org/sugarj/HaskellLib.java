@@ -118,21 +118,6 @@ public class HaskellLib extends LanguageLib {
   }
 
   @Override
-  public String getGeneratedFileExtension() {
-    return "o";
-  }
-
-  @Override
-  public String getSugarFileExtension() {
-    return "shs";
-  }
-  
-  @Override
-  public String getOriginalFileExtension() {
-    return "hs";
-  }
-
-  @Override
   public SourceFileContent getSource() {
     return sourceContent;
   }
@@ -207,7 +192,7 @@ public class HaskellLib extends LanguageLib {
   
   @Override
   public void setupSourceFile(RelativePath sourceFile, Environment environment) {
-    outFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + getOriginalFileExtension());
+    outFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + HaskellLibFactory.getInstance().getOriginalFileExtension());
     sourceContent = new HaskellSourceFileContent();
   }
 
@@ -220,7 +205,7 @@ public class HaskellLib extends LanguageLib {
     String declaredRelNamespaceName = FileCommands.dropFilename(qualifiedModulePath);
     relNamespaceName = FileCommands.dropFilename(sourceFile.getRelativePath());
     
-    RelativePath objectFile = environment.createBinPath(getRelativeNamespaceSep() + moduleName + "." + getGeneratedFileExtension());
+    RelativePath objectFile = environment.createBinPath(getRelativeNamespaceSep() + moduleName + "." + HaskellLibFactory.getInstance().getGeneratedFileExtension());
     generatedModules.add(objectFile);
     
     sourceContent.setNamespaceDecl(prettyPrint(toplevelDecl));

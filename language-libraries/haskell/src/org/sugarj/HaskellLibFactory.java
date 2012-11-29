@@ -22,4 +22,20 @@ public class HaskellLibFactory extends LanguageLibFactory {
 		return new HaskellLib();
 	}
 
+
+  @Override
+  public String getGeneratedFileExtension() {
+    return "o";
+  }
+
+  @Override
+  public String getSugarFileExtension() {
+    return "shs";
+  }
+  
+  @Override
+  public String getOriginalFileExtension() {
+    return "hs";
+  }
+
 }
