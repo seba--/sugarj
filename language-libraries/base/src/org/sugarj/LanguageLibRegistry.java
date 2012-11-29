@@ -99,6 +99,9 @@ public class LanguageLibRegistry {
   }
   
   public synchronized List<String> getRegisteredFileExtensions() {
+    if (!extensionsLoaded)
+      loadExtensions();
+
     List<String> list = new LinkedList<String>();
     for (LanguageLibFactory fact : languageLibs.values())
       list.add(fact.createLanguageLibrary().getSugarFileExtension());

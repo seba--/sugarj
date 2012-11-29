@@ -11,6 +11,6 @@ language General properties
   description   : "Spoofax/IMP-generated editor for the SugarJ language"
   url           : http://sugarj.org
                   
-  extensions    : sugj,shs,sugp
+  extensions    : 
   table         : include/SugarJ.tbl
   start symbols : SugarCompilationUnit
