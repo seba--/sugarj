@@ -15,4 +15,19 @@ public class JavaLibFactory extends LanguageLibFactory {
     return new JavaLib();
   }
 
+  @Override
+  public String getGeneratedFileExtension() {
+    return "class";
+  }
+
+  @Override
+  public String getSugarFileExtension() {
+    return "sugj";
+  }
+  
+  @Override
+  public String getOriginalFileExtension() {
+    return "java";
+  }
+
 }

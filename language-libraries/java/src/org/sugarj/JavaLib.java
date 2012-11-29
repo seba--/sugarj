@@ -130,22 +130,6 @@ public class JavaLib extends LanguageLib implements Serializable {
       System.err.println(file.getPath() + " does not exist.");
   }
 
-  @Override
-  public String getGeneratedFileExtension() {
-    return "class";
-  }
-
-  @Override
-  public String getSugarFileExtension() {
-    return "sugj";
-  }
-  
-  @Override
-  public String getOriginalFileExtension() {
-    return "java";
-  }
-
-
   private void checkPackageName(IStrategoTerm toplevelDecl, RelativePath sourceFile, IErrorLogger errorLog) {
     if (sourceFile != null) {
       String packageName = relPackageName == null ? "" : relPackageName.replace('/', '.');
@@ -269,7 +253,7 @@ public class JavaLib extends LanguageLib implements Serializable {
     checkPackageName(toplevelDecl, sourceFile, errorLog);
 
     if (javaOutFile == null)
-      javaOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + getOriginalFileExtension()); // XXX:
+      javaOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + JavaLibFactory.getInstance().getOriginalFileExtension()); // XXX:
                                               
     // moved here before depOutFile==null check
     javaSource.setNamespaceDecl(prettyPrint(toplevelDecl));
@@ -282,7 +266,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 
   @Override
   public void setupSourceFile(RelativePath sourceFile, Environment environment) {
-    javaOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + getOriginalFileExtension());
+    javaOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + JavaLibFactory.getInstance().getOriginalFileExtension());
     javaSource = new JavaSourceFileContent();
     javaSource.setOptionalImport(false);
     
