@@ -59,7 +59,7 @@ public class HaskellLib extends LanguageLib {
 
   @Override
   public List<File> getGrammars() {
-    List<File> grammars = new LinkedList<File>(super.getGrammars());
+    List<File> grammars = new LinkedList<File>(getDefaultGrammars());
     grammars.add(ensureFile("org/sugarj/languages/SugarHaskell.def"));
     grammars.add(ensureFile("org/sugarj/languages/Haskell.def"));
     return Collections.unmodifiableList(grammars);
@@ -267,7 +267,7 @@ public class HaskellLib extends LanguageLib {
   }
   
   @Override
-  protected void compile(List<Path> outFiles, Path bin, List<Path> includePaths, boolean generateFiles) throws IOException {
+  public void compile(List<Path> outFiles, Path bin, List<Path> includePaths, boolean generateFiles) throws IOException {
     if (generateFiles) {
       List<String> cmds = new LinkedList<String>();
       cmds.add(GHC_COMMAND);
