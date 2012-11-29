@@ -53,7 +53,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 
   @Override
   public List<File> getGrammars() {
-    List<File> grammars = new LinkedList<File>(super.getGrammars());
+    List<File> grammars = new LinkedList<File>(getDefaultGrammars());
     grammars.add(ensureFile("org/sugarj/languages/SugarJ.def"));
     grammars.add(ensureFile("org/sugarj/languages/Java-15.def"));
     return Collections.unmodifiableList(grammars);
@@ -281,7 +281,7 @@ public class JavaLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  protected void compile(List<Path> javaOutFiles, Path bin, List<Path> path, boolean generateFiles) throws IOException {
+  public void compile(List<Path> javaOutFiles, Path bin, List<Path> path, boolean generateFiles) throws IOException {
     if (generateFiles)
       JavaCommands.javac(javaOutFiles, sourcePath, bin, path);
   }
