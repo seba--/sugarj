@@ -409,7 +409,9 @@ public class Driver{
     log.beginTask("compilation", "COMPILE generated " + langLib.getLanguageName() + " files", Log.CORE);
     try {
       try {
-        langLib.compile(langLib.getOutFile(), langLib.getSource(),
+        langLib.compileAll(
+            langLib.getOutFile(), 
+            langLib.getSource(),
             environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), langLib.getGeneratedFiles(),
             driverResult.getAvailableGeneratedFiles().get(driverResult.getSourceFile()),
             driverResult.getDeferredSourceFiles().get(driverResult.getSourceFile()),
