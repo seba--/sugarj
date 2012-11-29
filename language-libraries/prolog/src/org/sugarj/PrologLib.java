@@ -59,7 +59,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 		
 	@Override
 	public List<File> getGrammars() {
-		List<File> grammars = new LinkedList<File>(super.getGrammars());
+		List<File> grammars = new LinkedList<File>(getDefaultGrammars());
 		grammars.add(ensureFile("org/sugarj/languages/SugarProlog.def"));
 		grammars.add(ensureFile("org/sugarj/languages/Prolog.def"));
 		return Collections.unmodifiableList(grammars);
@@ -269,17 +269,13 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 
 	@Override
-	protected void compile(List<Path> sourceFiles, Path bin, List<Path> path,
-			boolean generateFiles)
-			throws IOException {
-
+	public void compile(List<Path> sourceFiles, Path bin, List<Path> path, boolean generateFiles) throws IOException {
 		if (generateFiles) {
 			for (Path file : sourceFiles) {
 				// XXX: do nothing here?
 				System.err.println("prolog;     no compilation neccessary, file: " + file);
 			}
 		}
-
 	}
 	
 	@Override
