@@ -176,16 +176,6 @@ public class PrologLib extends LanguageLib implements Serializable {
 	  }
 
 	@Override
-	public String getGeneratedFileExtension() {
-		return "pro";
-	}
-
-	@Override
-	public String getSugarFileExtension() {
-		return "sugp";
-	}
-
-	@Override
 	public SourceFileContent getSource() {
 		return prologSource;
 	}
@@ -231,7 +221,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	@Override
 	public void setupSourceFile(RelativePath sourceFile, Environment environment) {
-		prologOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + getGeneratedFileExtension());
+		prologOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + PrologLibFactory.getInstance().getGeneratedFileExtension());
 		prologSource = new PrologSourceFileContent(this);
 		prologSource.setOptionalImport(false);
 		
@@ -269,7 +259,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 		log.log("The SDF / Stratego package name is '" + relNamespaceName + "'.", Log.DETAIL);
 		
 		if (prologOutFile == null) 
-			prologOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + getGeneratedFileExtension());
+			prologOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + PrologLibFactory.getInstance().getGeneratedFileExtension());
 	}
 	
 
@@ -349,8 +339,4 @@ public class PrologLib extends LanguageLib implements Serializable {
 	public IStrategoTerm getEditorServices(IStrategoTerm decl) {
 		throw new UnsupportedOperationException("SugarProlog does currently not support editor libraries.");
 	}
-
-
-	
-	
 }

@@ -14,4 +14,14 @@ public class PrologLibFactory extends LanguageLibFactory {
 	public LanguageLib createLanguageLibrary() {
 		return new PrologLib();
 	}
+
+  @Override
+  public String getGeneratedFileExtension() {
+    return "pro";
+  }
+
+  @Override
+  public String getSugarFileExtension() {
+    return "sugp";
+  }
 }
