@@ -147,19 +147,19 @@ public class Driver{
       FileCommands.createDir(environment.getBin());
       
       initializeCaches(environment, false);
-      sdfCache = sdfCaches.get(langLib.getLanguageName() + "#" + langLib.getVersion());
+      sdfCache = sdfCaches.get(langLibFactory.getLanguageName() + "#" + langLibFactory.getVersion());
       if (sdfCache == null) {
         sdfCache = new ModuleKeyCache<Path>(sdfCaches);
         synchronized (sdfCaches) {
-          sdfCaches.put(langLib.getLanguageName() + "#" + langLib.getVersion(), sdfCache);
+          sdfCaches.put(langLibFactory.getLanguageName() + "#" + langLibFactory.getVersion(), sdfCache);
         }
       }
       
-      strCache = strCaches.get(langLib.getLanguageName() + "#" + langLib.getVersion());
+      strCache = strCaches.get(langLibFactory.getLanguageName() + "#" + langLibFactory.getVersion());
       if (strCache == null) {
         strCache = new ModuleKeyCache<Path>(strCaches);
         synchronized (strCaches) {
-          strCaches.put(langLib.getLanguageName() + "#" + langLib.getVersion(), strCache);
+          strCaches.put(langLibFactory.getLanguageName() + "#" + langLibFactory.getVersion(), strCache);
         }
       }
     } catch (IOException e) {
@@ -406,7 +406,7 @@ public class Driver{
 
   private void compileGeneratedJavaFiles() throws IOException {
     boolean good = false;
-    log.beginTask("compilation", "COMPILE generated " + langLib.getLanguageName() + " files", Log.CORE);
+    log.beginTask("compilation", "COMPILE generated " + langLib.getFactoryForLanguage().getLanguageName() + " files", Log.CORE);
     try {
       try {
         langLib.compileAll(
@@ -882,14 +882,14 @@ public class Driver{
   }
 
   private void processLanguageDec(IStrategoTerm toplevelDecl) throws IOException {
-    log.beginTask("processing", "PROCESS " + langLib.getLanguageName() + " declaration.", Log.CORE);
+    log.beginTask("processing", "PROCESS " + langLib.getFactoryForLanguage().getLanguageName() + " declaration.", Log.CORE);
     try {
       
       if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
         sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
 
       
-      log.beginTask("Generate " + langLib.getLanguageName() + " code.", Log.LANGLIB);
+      log.beginTask("Generate " + langLib.getFactoryForLanguage().getLanguageName() + " code.", Log.LANGLIB);
       try {
         langLib.processLanguageSpecific(toplevelDecl, environment);
       } finally {
