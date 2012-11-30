@@ -16,6 +16,16 @@ public class JavaLibFactory extends LanguageLibFactory {
   }
 
   @Override
+  public String getLanguageName() {
+    return "Java";
+  }
+
+  @Override
+  public String getVersion() {
+    return "java-0.1";
+  }
+
+  @Override
   public String getGeneratedFileExtension() {
     return "class";
   }

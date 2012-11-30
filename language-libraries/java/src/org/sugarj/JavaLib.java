@@ -47,10 +47,6 @@ public class JavaLib extends LanguageLib implements Serializable {
 
   private Path sourcePath;
 
-  public String getVersion() {
-    return "java-0.1";
-  }
-
   @Override
   public List<File> getGrammars() {
     List<File> grammars = new LinkedList<File>(getDefaultGrammars());
@@ -321,11 +317,6 @@ public class JavaLib extends LanguageLib implements Serializable {
     IStrategoTerm sugarBody = getApplicationSubterm(body, "SugarBody", 0);
 
     return sugarBody;
-  }
-
-  @Override
-  public String getLanguageName() {
-    return "Java";
   }
 
   @Override
