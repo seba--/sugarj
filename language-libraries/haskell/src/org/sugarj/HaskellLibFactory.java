@@ -22,6 +22,15 @@ public class HaskellLibFactory extends LanguageLibFactory {
 		return new HaskellLib();
 	}
 
+  @Override
+  public String getVersion() {
+    return "haskell-0.1";
+  }
+  
+  @Override
+  public String getLanguageName() {
+    return "Haskell";
+  }
 
   @Override
   public String getGeneratedFileExtension() {

@@ -48,15 +48,6 @@ public class HaskellLib extends LanguageLib {
 
   private IStrategoTerm ppTable;
 
-  public String getVersion() {
-    return "haskell-0.1";
-  }
-  
-  @Override
-  public String getLanguageName() {
-    return "Haskell";
-  }
-
   @Override
   public List<File> getGrammars() {
     List<File> grammars = new LinkedList<File>(getDefaultGrammars());
