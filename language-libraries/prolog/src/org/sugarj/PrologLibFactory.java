@@ -9,7 +9,17 @@ public class PrologLibFactory extends LanguageLibFactory {
   public static PrologLibFactory getInstance() {
     return instance;
   }
-  
+
+  @Override
+  public String getVersion() {
+    return "prolog-0.1";
+  }
+
+  @Override
+  public String getLanguageName() {
+    return "Prolog";
+  }
+
 	@Override
 	public LanguageLib createLanguageLibrary() {
 		return new PrologLib();
