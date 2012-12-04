@@ -4,15 +4,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
 import org.sugarj.common.path.Path;
-import org.sugarj.common.path.RelativePath;
 
 /**
  * 
@@ -31,10 +26,14 @@ public class JavaCommands {
   }
   
   public static boolean javac(List<Path> sourceFiles, Path dir, Collection<Path> cp) throws IOException {
-    return javac(sourceFiles, dir, cp.toArray(new Path[cp.size()]));
+    return javac(sourceFiles, null, dir, cp.toArray(new Path[cp.size()]));
   }
 
-  public static boolean javac(List<Path> sourceFiles, Path dir, Path... cp) throws IOException {
+  public static boolean javac(List<Path> sourceFiles, Path sourcePath, Path dir, Collection<Path> cp) throws IOException {
+    return javac(sourceFiles, sourcePath, dir, cp.toArray(new Path[cp.size()]));
+  }
+
+  public static boolean javac(List<Path> sourceFiles, Path sourcePath, Path dir, Path... cp) throws IOException {
     StringBuilder cpBuilder = new StringBuilder();
     
     for (int i = 0; i < cp.length; i++) {
@@ -50,17 +49,25 @@ public class JavaCommands {
     cpBuilder.append(dir);
     
 
-    String[] cmd = new String[7 + sourceFiles.size()];
-    cmd[0] = "-cp";
-    cmd[1] = cpBuilder.toString();
-    cmd[2] = "-d";
-    cmd[3] = FileCommands.toWindowsPath(dir.getAbsolutePath());
-    cmd[4] = "-source";
-    cmd[5] = "1.5";
-    cmd[6] = "-nowarn";
+    int argNum = 7 + (sourcePath == null ? 0 : 2);
+    int next = 0;
+    String[] cmd = new String[argNum + sourceFiles.size()];
+    cmd[next++] = "-cp";
+    cmd[next++] = cpBuilder.toString();
+    cmd[next++] = "-d";
+    cmd[next++] = FileCommands.toWindowsPath(dir.getAbsolutePath());
+    cmd[next++] = "-source";
+    cmd[next++] = "1.5";
+    cmd[next++] = "-nowarn";
+    if (sourcePath != null) {
+      cmd[next++] = "-sourcepath";
+      cmd[next++] = sourcePath.getAbsolutePath();
+    }
+      
+    
     
     for (int i = 0; i < sourceFiles.size(); i++)
-      cmd[i + 7] = FileCommands.toWindowsPath(sourceFiles.get(i).getAbsolutePath());
+      cmd[i + argNum] = FileCommands.toWindowsPath(sourceFiles.get(i).getAbsolutePath());
     
     // this is ECJ
     return BatchCompiler.compile(

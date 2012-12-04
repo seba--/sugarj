@@ -24,7 +24,6 @@ import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.haskell.HaskellSourceFileContent;
 import org.sugarj.languagelib.SourceFileContent;
 import org.sugarj.languagelib.SourceImport;
@@ -127,6 +126,11 @@ public class HaskellLib extends LanguageLib {
   public String getSugarFileExtension() {
     return "shs";
   }
+  
+  @Override
+  public String getOriginalFileExtension() {
+    return "hs";
+  }
 
   @Override
   public SourceFileContent getSource() {
@@ -203,12 +207,12 @@ public class HaskellLib extends LanguageLib {
   
   @Override
   public void setupSourceFile(RelativePath sourceFile, Environment environment) {
-    outFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".hs");
+    outFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + getOriginalFileExtension());
     sourceContent = new HaskellSourceFileContent();
   }
 
   @Override
-  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException {
+  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativePath sourceFile, RelativePath sourceFileFromResult) throws IOException {
     String qualifiedModuleName = prettyPrint(getApplicationSubterm(toplevelDecl, "ModuleDec", 0));
     String qualifiedModulePath = qualifiedModuleName.replace('.', '/');
     String declaredModuleName = FileCommands.fileName(qualifiedModulePath);

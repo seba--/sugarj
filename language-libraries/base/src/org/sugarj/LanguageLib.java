@@ -22,7 +22,6 @@ import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.languagelib.SourceFileContent;
 import org.sugarj.stdlib.StdLib;
 
@@ -104,6 +103,16 @@ public abstract class LanguageLib implements Serializable {
 	public abstract String getGeneratedFileExtension();
 	public abstract String getSugarFileExtension();
 	
+	/**
+	 * Can be used to provide extension for source files of original language.
+	 * Will be used to resolve imports if no sugar file is available.
+	 * 
+	 * @return null or file extension of original non-sugared language.
+	 */
+	public String getOriginalFileExtension() {
+	  return null;
+	}
+	
 	
 
 	public abstract SourceFileContent getSource();
@@ -142,7 +151,7 @@ public abstract class LanguageLib implements Serializable {
 	}
 	
 	
-	public abstract void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException;
+	public abstract void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativePath sourceFile, RelativePath sourceFileFromResult) throws IOException;
 
 	public abstract LanguageLibFactory getFactoryForLanguage();
 	

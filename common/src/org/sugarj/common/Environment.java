@@ -12,7 +12,6 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.common.path.SourceLocation;
 import org.sugarj.stdlib.StdLib;
 
 
@@ -29,39 +28,6 @@ public class Environment implements Serializable {
   
   public static String sep = "/";
   public static String classpathsep = File.pathSeparator;
-
-  /**
-   * @author Sebastian Erdweg <seba at informatik uni-marburg de>
-   */
-  private class RelativePathBin extends RelativePath {
-    private static final long serialVersionUID = -4418944917032203709L;
-
-    public RelativePathBin(String relativePath) {
-      super(relativePath);
-    }
-    
-    @Override
-    public Path getBasePath() {
-      return bin;
-    }
-  }
-  
-  /**
-   * @author Sebastian Erdweg <seba at informatik uni-marburg de>
-   */
-  private class RelativePathCache extends RelativePath {
-    private static final long serialVersionUID = -6347244639940662095L;
-
-    public RelativePathCache(String relativePath) {
-      super(relativePath);
-    }
-    
-    @Override
-    public Path getBasePath() {
-      return cacheDir;
-    }
-  }
-
   
   private Path cacheDir = null;
   
@@ -85,7 +51,7 @@ public class Environment implements Serializable {
   
   private Path tmpDir = new AbsolutePath(System.getProperty("java.io.tmpdir"));
   
-  private Set<SourceLocation> sourcePath = new HashSet<SourceLocation>();
+  private Set<Path> sourcePath = new HashSet<Path>();
   private Set<Path> includePath = new HashSet<Path>();
   
   public Environment() {
@@ -101,11 +67,11 @@ public class Environment implements Serializable {
     this.root = root;
   }
 
-  public Set<SourceLocation> getSourcePath() {
+  public Set<Path> getSourcePath() {
     return sourcePath;
   }
 
-  public void setSourcePath(Set<SourceLocation> sourcePath) {
+  public void setSourcePath(Set<Path> sourcePath) {
     this.sourcePath = sourcePath;
   }
 
@@ -168,11 +134,11 @@ public class Environment implements Serializable {
     this.includePath = includePath;
   }
 
-  public RelativePath createCachePath(String relativePath) {
-    return new RelativePathCache(relativePath);
-  }
-
   public RelativePath createBinPath(String relativePath) {
-    return new RelativePathBin(relativePath);
+    return new RelativePath(bin, relativePath);
+  }
+  
+  public RelativePath createCachePath(String relativePath) {
+    return new RelativePath(cacheDir, relativePath);
   }
 }

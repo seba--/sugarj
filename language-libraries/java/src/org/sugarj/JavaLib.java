@@ -29,7 +29,6 @@ import org.sugarj.common.JavaCommands;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.java.JavaSourceFileContent;
 
 public class JavaLib extends LanguageLib implements Serializable {
@@ -45,6 +44,8 @@ public class JavaLib extends LanguageLib implements Serializable {
   private JavaSourceFileContent javaSource;
 
   private String relPackageName;
+
+  private Path sourcePath;
 
   public String getVersion() {
     return "java-0.1";
@@ -138,9 +139,14 @@ public class JavaLib extends LanguageLib implements Serializable {
   public String getSugarFileExtension() {
     return "sugj";
   }
+  
+  @Override
+  public String getOriginalFileExtension() {
+    return "java";
+  }
 
 
-  private void checkPackageName(IStrategoTerm toplevelDecl, RelativeSourceLocationPath sourceFile, IErrorLogger errorLog) {
+  private void checkPackageName(IStrategoTerm toplevelDecl, RelativePath sourceFile, IErrorLogger errorLog) {
     if (sourceFile != null) {
       String packageName = relPackageName == null ? "" : relPackageName.replace('/', '.');
 
@@ -253,7 +259,7 @@ public class JavaLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativeSourceLocationPath sourceFile, RelativeSourceLocationPath sourceFileFromResult) throws IOException {
+  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativePath sourceFile, RelativePath sourceFileFromResult) throws IOException {
     String packageName = extractNamespaceName(toplevelDecl, interp);
 
     relPackageName = getRelativeModulePath(packageName);
@@ -263,7 +269,7 @@ public class JavaLib extends LanguageLib implements Serializable {
     checkPackageName(toplevelDecl, sourceFile, errorLog);
 
     if (javaOutFile == null)
-      javaOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + ".java"); // XXX:
+      javaOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + getOriginalFileExtension()); // XXX:
                                               
     // moved here before depOutFile==null check
     javaSource.setNamespaceDecl(prettyPrint(toplevelDecl));
@@ -276,9 +282,13 @@ public class JavaLib extends LanguageLib implements Serializable {
 
   @Override
   public void setupSourceFile(RelativePath sourceFile, Environment environment) {
-    javaOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".java");
+    javaOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + getOriginalFileExtension());
     javaSource = new JavaSourceFileContent();
     javaSource.setOptionalImport(false);
+    
+    for (Path dir : environment.getSourcePath())
+      if (sourceFile.getBasePath().equals(dir))
+        sourcePath = dir;
   }
 
   @Override
@@ -289,7 +299,7 @@ public class JavaLib extends LanguageLib implements Serializable {
   @Override
   protected void compile(List<Path> javaOutFiles, Path bin, List<Path> path, boolean generateFiles) throws IOException {
     if (generateFiles)
-      JavaCommands.javac(javaOutFiles, bin, path);
+      JavaCommands.javac(javaOutFiles, sourcePath, bin, path);
   }
 
   @Override

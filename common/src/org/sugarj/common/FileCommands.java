@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
@@ -135,6 +136,17 @@ public class FileCommands {
     return fileData.toString();
   }
 
+  public static String readStreamAsString(InputStream in) throws IOException {
+    StringBuilder fileData = new StringBuilder(1000);
+    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+    char[] buf = new char[1024];
+    int numRead = 0;
+    while ((numRead = reader.read(buf)) != -1)
+      fileData.append(buf, 0, numRead);
+
+    reader.close();
+    return fileData.toString();
+  }
   
   public static String fileName(URL url) {
     return fileName(new AbsolutePath(url.getPath()));

@@ -8,8 +8,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.spoofax.jsglr_layout.shared.BadTokenException;
+import org.sugarj.common.path.RelativePath;
 import org.sugarj.driver.Result;
-import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.util.ProcessingListener;
 
 /**
@@ -23,7 +23,7 @@ public class MarkingProcessingListener implements ProcessingListener {
     this.project = project;
   }
 
-  private IResource getResource(RelativeSourceLocationPath sourceFile) throws JavaModelException {
+  private IResource getResource(RelativePath sourceFile) throws JavaModelException {
     if (!sourceFile.getAbsolutePath().startsWith(project.getLocation().toString()))
       return null;
     
@@ -39,7 +39,7 @@ public class MarkingProcessingListener implements ProcessingListener {
   }
   
   @Override
-  public void processingStarts(RelativeSourceLocationPath sourceFile) {
+  public void processingStarts(RelativePath sourceFile) {
     try {
       IResource resource = getResource(sourceFile);
       if (resource != null)

@@ -24,7 +24,6 @@ import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.languagelib.SourceFileContent;
 import org.sugarj.util.AppendableObjectOutputStream;
 
@@ -50,7 +49,7 @@ public class Result implements IErrorLogger {
   private IStrategoTerm sugaredSyntaxTree = null;
   private Path parseTableFile;
   private Path desugaringsFile;
-  private RelativeSourceLocationPath sourceFile;
+  private RelativePath sourceFile;
   private Integer sourceFileHash;
   private Set<Path> allDependentFiles = new HashSet<Path>();
   private boolean failed = false;
@@ -379,21 +378,19 @@ public class Result implements IErrorLogger {
     try {
       ois = new ObjectInputStream(new FileInputStream(dep.getFile()));
       
-      result.sourceFile = (RelativeSourceLocationPath) Path.readPath(ois, env);
+      result.sourceFile = (RelativePath) ois.readObject();
       result.sourceFileHash = ois.readInt();
-      
-      boolean reallocate = result.sourceFile.getBasePath().toString().equals(env.getRoot());
       
       int numDependencies = ois.readInt();
       for (int i = 0; i < numDependencies; i++) {
-        Path file = Path.readPath(ois, env, reallocate);
+        Path file = (Path) ois.readObject();
         int hash = ois.readInt();
         result.dependencies.put(file, hash);
       }
       
       int numGeneratedFiles = ois.readInt();
       for (int i = 0; i< numGeneratedFiles; i++) {
-        Path file = Path.readPath(ois, env, reallocate);
+        Path file = (Path) ois.readObject();
         int hash = ois.readInt();
         result.generatedFileHashes.put(file, hash);
       }
@@ -429,12 +426,12 @@ public class Result implements IErrorLogger {
     persistentHash = FileCommands.fileHash(dep);
   }
   
-  public void setSourceFile(RelativeSourceLocationPath sourceFile, int sourceFileHash) {
+  public void setSourceFile(RelativePath sourceFile, int sourceFileHash) {
     this.sourceFile = sourceFile;
     this.sourceFileHash = sourceFileHash;
   }
 
-  public RelativeSourceLocationPath getSourceFile() {
+  public RelativePath getSourceFile() {
     return sourceFile;
   }
   

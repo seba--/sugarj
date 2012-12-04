@@ -26,7 +26,6 @@ import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.common.path.RelativeSourceLocationPath;
 import org.sugarj.languagelib.SourceFileContent;
 import org.sugarj.prolog.PrologSourceFileContent;
 import org.sugarj.prolog.PrologSourceFileContent.PrologModuleImport;
@@ -253,8 +252,8 @@ public class PrologLib extends LanguageLib implements Serializable {
 	public void processNamespaceDec(IStrategoTerm toplevelDecl,
 			Environment environment,
 			IErrorLogger errorLog,
-			RelativeSourceLocationPath sourceFile,
-			RelativeSourceLocationPath sourceFileFromResult) throws IOException {
+			RelativePath sourceFile,
+			RelativePath sourceFileFromResult) throws IOException {
 		
 		String moduleName = null;
 		if (isApplication(toplevelDecl, "ModuleDec")) {
