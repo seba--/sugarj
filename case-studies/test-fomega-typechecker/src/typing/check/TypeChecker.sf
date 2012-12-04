@@ -10,3 +10,27 @@ rules
   constraint-error: FomegaBody(defs) -> result
     where <signatureOf> (CtxEmpty(),defs) => (sig,errors)
         ; if !errors; ?[] then fail else !errors end => result
+
+  generate-type-context =
+    CompilationUnit(
+      id, 
+      id,
+      \ [fb@FomegaBody(defs)] -> 
+        [fb, SugarBody([transformation-elem(Rules(<generate-type-context-rules> defs))])] \)
+  
+  generate-type-context-rules : 
+    (ctx,[TypeDef(None(),X,T) | defs]) -> <generate-type-context-rules> (ctx,defs)
+  generate-type-context-rules : 
+    (ctx,[TypeDef(Some(Public()),X,T) | defs]) -> 
+    [RDefNoArgs("imported-type-context-tyvar", RuleNoCond(NoAnnoList(Str(X)), K)) | rulez]
+    where <kindOf> (ctx,T) => (K,[])
+        ; if !K; ?KiUnknown() then !T else <norm> (ctx,T) end => T'
+        ; <generate-type-context-rules> (CtxBindTVarDef(ctx,X,K,T'),defs) => rulez
+  generate-type-context-rules : 
+    (ctx,[ValDef(None(),x,e) | defs]) -> <generate-type-context-rules> (ctx,defs)
+  generate-type-context-rules : 
+    (ctx,[ValDef(Some(Public()),x,e) | defs]) -> 
+    [RDefNoArgs("imported-type-context-var", RuleNoCond(NoAnnoList(Str(x)), T)) | rulez]
+    where <typeOf> (ctx,e) => (T,[])
+        ; <generate-type-context-rules> (CtxBindVar(ctx,x,T),defs) => rulez
+
