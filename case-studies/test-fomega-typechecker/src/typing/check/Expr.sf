@@ -250,6 +250,8 @@ rules
                      | (x,<concat-strings> ["duplicate label ",x])) => errs4
 
   // *** Var ***
+  typeOf: // due to the condition `CtxEmpty`, local bindings shadow imported bindings
+    (CtxEmpty(),Var(x)) -> (<imported-type-context-var> x,[])
   typeOf:
     (CtxEmpty(),Var(x)) -> (TyUnknown(),[(x,<concat-strings> ["undefined identifier ",x])])
   typeOf:

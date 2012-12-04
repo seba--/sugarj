@@ -22,3 +22,6 @@ rules
   dom: CtxBindQVar(ctx,qx,T) -> [qx | <dom> ctx]
 
   freeIn: (x,ctx) -> <not(elem)> (x,xs) where <dom> ctx => xs
+
+  imported-type-context-tyvar = fail
+  imported-type-context-var = fail

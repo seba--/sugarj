@@ -131,6 +131,8 @@ rules
   kindOf:
     (ctx,TyBool()) -> (KiStar(),[])
 
+  kindOf: // due to the condition `CtxEmpty`, local bindings shadow imported bindings
+    (CtxEmpty(),TyVar(X)) -> (<imported-type-context-tyvar> X,[])
   kindOf:
     (CtxEmpty(),TyVar(X)) -> (KiUnknown(),[(X,<concat-strings> ["undefined identifier ",X])])
   kindOf:
