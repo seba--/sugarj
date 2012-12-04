@@ -1,0 +1,17 @@
+module tests.cases.Records01
+
+// Should give no errors.
+
+import typing.check.TypeChecker
+
+type NatPair = {fst:Nat,snd:Nat}
+
+val fstNat = \p:NatPair. p!fst
+
+val e1 = fstNat {snd=5,fst=1}
+
+val e2 = fstNat {fst=1,snd=5}
+
+val appNatProj = \p:NatPair->Nat.\v:{snd:Nat,fst:Nat}. p v
+
+val e3 = appNatProj fstNat

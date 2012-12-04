@@ -1,0 +1,42 @@
+module tests.cases.RecursiveTypes02
+
+import typing.check.TypeChecker
+
+// Should give no errors.
+
+type FixCBN = \A::*.mu R. R -> A
+
+val fixCBN = \A::*.\f:(A->A).
+  (\x:(FixCBN A). f ((unfold [FixCBN A] x) x))
+  (fold [FixCBN A]
+    (\x:(FixCBN A). f ((unfold [FixCBN A] x) x)))
+
+public val diverge = \A::*. fixCBN [A] (\x:A. x)
+
+type List = \A::*.mu ListA. <nil:{}, cons: {hd:A,tl:ListA}>
+type ListBody = \A::*. <nil:{}, cons: {hd:A,tl:List A}>
+
+val nil = \A::*. fold [List A] (<nil={}> as (ListBody A))
+
+val cons = \A::*.\x:A.\xs:List A.
+  fold [List A] (<cons={hd=x,tl=xs}> as (ListBody A))
+
+val isNil = \A::*.\xs:List A.
+  case unfold [List A] xs of
+    <nil=xs> => true;
+    <cons=xs> => false
+
+val isCons = \A::*.\xs:List A.
+  case unfold [List A] xs of
+    <nil=xs> => false;
+    <cons=xs> => true
+
+val head = \A::*.\xs:List A.
+  case unfold [List A] xs of
+    <nil=xs> => diverge [A];
+    <cons=xs> => xs!hd
+
+public val tail = \A::*.\xs:List A.
+  case unfold [List A] xs of
+    <nil=xs> => diverge [List A];
+    <cons=xs> => xs!tl

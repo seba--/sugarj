@@ -1,0 +1,7 @@
+module tests.cases.Variant01
+
+import typing.check.TypeChecker
+
+type Either = \A::*.\B::*. <left:A,right:B>
+
+val left = \A::*.\B::*.\a:A. <left=a> as Either A B
