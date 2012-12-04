@@ -1,4 +1,4 @@
-module typing.check.ConstraintError
+module typing.check.TypeChecker
 
 import typing.check.Module
 import typing.check.Context
