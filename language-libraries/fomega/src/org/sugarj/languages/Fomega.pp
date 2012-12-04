@@ -34,7 +34,7 @@
    QVar                      -- _1,
    Record                    -- KW["{"] _1 KW["}"],
    Record.1:iter-star-sep    -- _1 KW[","],
-   Variant                   -- KW["<"] _1 KW[">"],
+   Variant                   -- KW["<"] _1 KW[">"] KW["as"] _2,
    True                      -- KW["true"],
    False                     -- KW["false"],
    Nat                       -- _1,
