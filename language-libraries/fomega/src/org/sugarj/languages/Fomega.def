@@ -160,13 +160,17 @@ exports
       "fold" "[" Type "]" Expr -> Expr {cons("Fold")}
       "unfold" "[" Type "]" Expr -> Expr {cons("Unfold")}
     }
-    > Expr "as" Type -> Expr {cons("Ascription")}
+    > {
+      Expr "as" Type -> Expr {cons("Ascription")}
+      "<" Field ">" "as" Type -> Expr {cons("Variant")}
+    }
     > { 
       "\\" ID ":" Type "." Expr -> Expr {cons("Abs")}
       "\\" ID "::" Kind "." Expr -> Expr {cons("TAbs")}
       "if" Expr "then" Expr "else" Expr -> Expr {cons("Cond")}
       "case" Expr "of" {Branch ";"}+ -> Expr {cons("Case")}
     }
+
 
 module org/sugarj/languages/Fomega
 imports Fomega-Module [
