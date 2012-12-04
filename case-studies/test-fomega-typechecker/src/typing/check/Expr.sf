@@ -211,7 +211,7 @@ rules
 
   // *** Variant ***
   //
-  // Γ ⊢ T :: * Γ ⊢ e : S Γ ⊢ S ⇓ U Γ ⊢ T ⇓ <decls> x:U ∈ decls
+  // Γ ⊢ T :: *   Γ ⊢ e : S   Γ ⊢ S ⇓ U   Γ ⊢ T ⇓ <decls>   x:U ∈ decls
   // -------------------------------------------------------------------
   // Γ ⊢ <x=e> as T : T
   typeOf:
@@ -219,9 +219,9 @@ rules
     where <kindOf> (ctx,T) => (K,errs1)
         ; <kindEqStar> K => msgs2
         ; <msgsToErrs> (msgs2,T) => errs2
-        ; <typeOf> e => (S,errs3)
-        ; <norm> S => S'
-        ; <norm> T => T'
+        ; <typeOf> (ctx,e) => (S,errs3)
+        ; <norm> (ctx,S) => S'
+        ; <norm> (ctx,T) => T'
         ; <typeEqVariant> T' => (decls,msgs4)
         ; <msgsToErrs> (msgs4,T) => errs4
         ; <labType> (x,decls) => (U,msgs5)
