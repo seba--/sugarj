@@ -111,7 +111,8 @@ public class SDFCommands {
         cmd.add(nativePath(path.getAbsolutePath()));
       }
     
-    Context sdfContext = SugarJContexts.sdfContext(); 
+    // Pack-sdf requires a fresh context each time, because it caches grammars, which leads to a heap overflow.
+    Context sdfContext = org.strategoxt.tools.tools.init(); 
     try {
       sdfContext.setIOAgent(packSdfIOAgent);
       sdfContext.invokeStrategyCLI(main_pack_sdf_0_0.instance, "pack-sdf", cmd.toArray(new String[cmd.size()]));
@@ -119,8 +120,6 @@ public class SDFCommands {
       if (e.getValue() != 0) {
         throw new RuntimeException(e);
       }
-    } finally {
-      SugarJContexts.releaseContext(sdfContext);
     }
     
     if (!def.getFile().exists())

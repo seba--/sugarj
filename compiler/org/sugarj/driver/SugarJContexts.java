@@ -20,10 +20,6 @@ public class SugarJContexts {
     ctxCache.releaseContext(ctx);
   }
 
-  public static Context sdfContext() {
-    return ctxCache.acquireContext(org.strategoxt.tools.tools.class);
-  }
-
   public static Context makePermissiveContext() {
     return ctxCache.acquireContext(org.strategoxt.permissivegrammars.make_permissive.class);
   }
