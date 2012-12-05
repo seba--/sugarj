@@ -11,13 +11,16 @@ rules
     where <signatureOf> (CtxEmpty(),defs) => (sig,errors)
         ; if !errors; ?[] then fail else !errors end => result
 
-  generate-type-context =
-    CompilationUnit(
-      id, 
-      id,
-      \ [fb@FomegaBody(defs)] -> 
-        [fb, SugarBody([transformation-elem(Rules(<generate-type-context-rules> defs))])] \)
+desugarings
+  generate-type-context
+
+rules
+  generate-type-context :
+    fb@FomegaBody(defs) -> 
+    [Locked(fb), SugarBody([transformation-elem(Rules(<debug(!"defs:");generate-type-context-rules;debug(!"generated:")> defs))])]
   
+  generate-type-context-rules :
+    (_,[]) -> []
   generate-type-context-rules : 
     (ctx,[TypeDef(None(),X,T) | defs]) -> <generate-type-context-rules> (ctx,defs)
   generate-type-context-rules : 
