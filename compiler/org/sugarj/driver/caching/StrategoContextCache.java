@@ -25,7 +25,7 @@ public class StrategoContextCache {
   private final Map<Class<?>, Pair<? extends List<Context>, ? extends List<Context>>> cache
     = new HashMap<Class<?>, Pair<? extends List<Context>,? extends List<Context>>>();
   
-  private final Map<Class<? extends Context>, Class<?>> ctxToInit = new HashMap<Class<? extends Context>, Class<?>>();
+  private final Map<Context, Class<?>> ctxToInit = new HashMap<Context, Class<?>>();
   
   /**
    * Retrieves a free context from the cache or generates a new one.
@@ -35,8 +35,10 @@ public class StrategoContextCache {
    */
   public synchronized Context acquireContext(Class<?> initType) {
     Pair<? extends List<Context>,? extends List<Context>> p = cache.get(initType);
-    if (p == null)
+    if (p == null) {
       p = Pair.create(new ArrayList<Context>(), new ArrayList<Context>());
+      cache.put(initType, p);
+    }
     
     Context fresh;
     if (p.b.isEmpty())
@@ -57,7 +59,7 @@ public class StrategoContextCache {
       fresh = p.b.remove(0);
     
     p.a.add(fresh);
-    ctxToInit.put(fresh.getClass(), initType);
+    ctxToInit.put(fresh, initType);
     
     return fresh;
   }
@@ -66,7 +68,7 @@ public class StrategoContextCache {
    * Releases a previously acquired context.
    */
   public synchronized void releaseContext(Context ctx) {
-    Class<?> initType = ctxToInit.get(ctx.getClass());
+    Class<?> initType = ctxToInit.remove(ctx);
     
     Pair<? extends List<Context>,? extends List<Context>> p = cache.get(initType);
     if (p == null || !p.a.contains(ctx))
