@@ -19,8 +19,13 @@ desugarings
 rules
   generate-type-context :
     fb@FomegaBody(defs) -> 
-    [Locked(fb),
-     SugarBody([transformation-elem(Rules(<debug(!"defs:");generate-type-context-rules;debug(!"generated:")> (CtxEmpty(),defs)))])]
+    [ Locked(fb)
+    , <make-fomega-sugar> defs
+//    , <make-fomega-editor> defs
+    ]
+  
+  make-fomega-sugar = 
+    !SugarBody([transformation-elem(Rules(<debug(!"defs:");generate-type-context-rules;debug(!"generated:")> (CtxEmpty(),<id>)))])
   
   generate-type-context-rules :
     (_,[]) -> []

@@ -4,4 +4,8 @@ import typing.check.TypeChecker
 
 import tests.cases.Module01
 
-type N2 = N
+type NTest = N
+val ztest = z
+
+type PrivateFail = Private
+val privateFail = private
