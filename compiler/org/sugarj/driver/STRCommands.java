@@ -32,7 +32,6 @@ import org.sugarj.common.FileCommands;
 import org.sugarj.common.FilteringIOAgent;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
-import org.sugarj.common.path.RelativePath;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.transformations.extraction.extract_str_0_0;
@@ -65,7 +64,7 @@ public class STRCommands {
   /**
    *  Compiles a {@code *.str} file to a single {@code *.java} file. 
    */
-  private static void strj(boolean normalize, Path str, Path out, String main, Context strjContext, Collection<Path> paths, LanguageLib langLib) throws IOException {
+  private static void strj(boolean normalize, Path str, Path out, String main, Collection<Path> paths, LanguageLib langLib) throws IOException {
     
     /*
      * We can include as many paths as we want here, checking the
@@ -121,7 +120,6 @@ public class STRCommands {
                               String main,
                               Collection<Path> dependentFiles,
                               SGLR strParser,
-                              Context strjContext,
                               ModuleKeyCache<Path> strCache,
                               Environment environment,
                               LanguageLib langLib) throws IOException,
@@ -135,7 +133,7 @@ public class STRCommands {
     
     if (prog == null) {
       try {
-        prog = generateAssimilator(key, str, main, strjContext, environment.getIncludePath(), langLib);
+        prog = generateAssimilator(key, str, main, environment.getIncludePath(), langLib);
       } catch (StrategoException e) {
         prog = FAILED_COMPILATION_PATH;
         error = e;
@@ -154,7 +152,6 @@ public class STRCommands {
   private static Path generateAssimilator(ModuleKey key,
                                           Path str,
                                           String main,
-                                          Context strjContext,
                                           Collection<Path> paths,
                                           LanguageLib langLib) throws IOException {
     boolean success = false;
@@ -162,7 +159,7 @@ public class STRCommands {
     try {
       Path prog = FileCommands.newTempFile("ctree");
       log.log("calling STRJ", Log.TRANSFORM);
-      strj(true, str, prog, main, strjContext, paths, langLib);
+      strj(true, str, prog, main, paths, langLib);
       success = FileCommands.exists(prog);
       return prog;
     } finally {
@@ -282,14 +279,17 @@ public class STRCommands {
    * @param str result file
    * @throws InvalidParseTableException 
    */
-  public static IStrategoTerm extractSTR(IStrategoTerm term, Context context) throws IOException, InvalidParseTableException {
+  public static IStrategoTerm extractSTR(IStrategoTerm term) throws IOException, InvalidParseTableException {
     IStrategoTerm result = null;
+    Context extractionContext = SugarJContexts.extractionContext();
     try {
-      result = extract_str_0_0.instance.invoke(context, term);
+      result = extract_str_0_0.instance.invoke(extractionContext, term);
     }
     catch (StrategoExit e) {
       if (e.getValue() != 0 || result == null)
         throw new RuntimeException("Stratego extraction failed", e);
+    } finally {
+      SugarJContexts.releaseContext(extractionContext);
     }
     return result;
   }
