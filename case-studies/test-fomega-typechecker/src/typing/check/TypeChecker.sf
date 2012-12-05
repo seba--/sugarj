@@ -20,7 +20,7 @@ rules
   generate-type-context :
     fb@FomegaBody(defs) -> 
     [Locked(fb),
-     SugarBody([transformation-elem(Rules(<debug(!"defs:");generate-type-context-rules;debug(!"generated:")> (CtxEmpty,defs)))])]
+     SugarBody([transformation-elem(Rules(<debug(!"defs:");generate-type-context-rules;debug(!"generated:")> (CtxEmpty(),defs)))])]
   
   generate-type-context-rules :
     (_,[]) -> []
@@ -28,7 +28,7 @@ rules
     (ctx,[TypeDef(None(),X,T) | defs]) -> <generate-type-context-rules> (ctx,defs)
   generate-type-context-rules : 
     (ctx,[TypeDef(Some(Public()),X,T) | defs]) -> 
-    [RDefNoArgs("imported-type-context-tyvar", RuleNoCond(NoAnnoList(Str(X)), <MetaExplode> K)) | rulez]
+    [RDefNoArgs("imported-type-context-tyvar", RuleNoCond(NoAnnoList(Str(X)), <trm-explode> K)) | rulez]
     where <kindOf> (ctx,T) => (K,[])
         ; if !K; ?KiUnknown() then !T else <norm> (ctx,T) end => T'
         ; <generate-type-context-rules> (CtxBindTVarDef(ctx,X,K,T'),defs) => rulez
@@ -36,7 +36,7 @@ rules
     (ctx,[ValDef(None(),x,e) | defs]) -> <generate-type-context-rules> (ctx,defs)
   generate-type-context-rules : 
     (ctx,[ValDef(Some(Public()),x,e) | defs]) -> 
-    [RDefNoArgs("imported-type-context-var", RuleNoCond(NoAnnoList(Str(x)), <MetaExplode> T)) | rulez]
+    [RDefNoArgs("imported-type-context-var", RuleNoCond(NoAnnoList(Str(x)), <trm-explode> T)) | rulez]
     where <typeOf> (ctx,e) => (T,[])
         ; <generate-type-context-rules> (CtxBindVar(ctx,x,T),defs) => rulez
 
