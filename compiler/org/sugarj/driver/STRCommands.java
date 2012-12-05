@@ -242,10 +242,7 @@ public class STRCommands {
       
       if (interp.invoke(strategy)) {
         IStrategoTerm term = interp.current();
-        
-        // XXX does this improve memory consumption?
-        interp.reset();
-        
+                
 //        IToken left = ImploderAttachment.getLeftToken(in);
 //        IToken right = ImploderAttachment.getRightToken(in);
 //        String sort = ImploderAttachment.getSort(in);
