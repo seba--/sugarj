@@ -6,6 +6,8 @@ import typing.check.Context
 import org.sugarj.languages.Fomega
 import org.sugarj.languages.SugarFomega
 
+import typing.check.MetaExplode
+
 rules
   constraint-error: FomegaBody(defs) -> result
     where <signatureOf> (CtxEmpty(),defs) => (sig,errors)
@@ -17,7 +19,8 @@ desugarings
 rules
   generate-type-context :
     fb@FomegaBody(defs) -> 
-    [Locked(fb), SugarBody([transformation-elem(Rules(<debug(!"defs:");generate-type-context-rules;debug(!"generated:")> defs))])]
+    [Locked(fb),
+     SugarBody([transformation-elem(Rules(<debug(!"defs:");generate-type-context-rules;debug(!"generated:")> (CtxEmpty,defs)))])]
   
   generate-type-context-rules :
     (_,[]) -> []
@@ -25,7 +28,7 @@ rules
     (ctx,[TypeDef(None(),X,T) | defs]) -> <generate-type-context-rules> (ctx,defs)
   generate-type-context-rules : 
     (ctx,[TypeDef(Some(Public()),X,T) | defs]) -> 
-    [RDefNoArgs("imported-type-context-tyvar", RuleNoCond(NoAnnoList(Str(X)), K)) | rulez]
+    [RDefNoArgs("imported-type-context-tyvar", RuleNoCond(NoAnnoList(Str(X)), <MetaExplode> K)) | rulez]
     where <kindOf> (ctx,T) => (K,[])
         ; if !K; ?KiUnknown() then !T else <norm> (ctx,T) end => T'
         ; <generate-type-context-rules> (CtxBindTVarDef(ctx,X,K,T'),defs) => rulez
@@ -33,7 +36,7 @@ rules
     (ctx,[ValDef(None(),x,e) | defs]) -> <generate-type-context-rules> (ctx,defs)
   generate-type-context-rules : 
     (ctx,[ValDef(Some(Public()),x,e) | defs]) -> 
-    [RDefNoArgs("imported-type-context-var", RuleNoCond(NoAnnoList(Str(x)), T)) | rulez]
+    [RDefNoArgs("imported-type-context-var", RuleNoCond(NoAnnoList(Str(x)), <MetaExplode> T)) | rulez]
     where <typeOf> (ctx,e) => (T,[])
         ; <generate-type-context-rules> (CtxBindVar(ctx,x,T),defs) => rulez
 
