@@ -98,12 +98,11 @@ public class STRCommands {
     final ByteArrayOutputStream log = new ByteArrayOutputStream();
 
     try {
-      // XXX strj does not create Java file with non-fresh context
-      Context c = org.strategoxt.strj.strj.init();
+      Context ctx = SugarJContexts.strjContext();
       
-      c.setIOAgent(strjIOAgent);
+      ctx.setIOAgent(strjIOAgent);
       
-      c.invokeStrategyCLI(main_strj_0_0.instance, "strj", cmd.toArray(new String[cmd.size()]));
+      ctx.invokeStrategyCLI(main_strj_0_0.instance, "strj", cmd.toArray(new String[cmd.size()]));
     }
     catch (StrategoExit e) {
       if (e.getValue() != 0)
