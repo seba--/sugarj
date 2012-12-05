@@ -201,7 +201,7 @@ rules
                end) => Y
 
   // *** Capture-avoiding substitution ***
-  // μ-type
+  // ��-type
   subst: (X,S,TyMu(X,T)) -> TyMu(X,T)
   subst: (X,S,TyMu(Y,T)) -> TyMu(Y,<subst> (X,S,T))
          where <not(equal)> (X,Y)
@@ -221,7 +221,7 @@ rules
              ; <elem> (Y,<freeVars> S)
              ; <fresh> (Y,[T,S]) => Z
 
-  // ∀-type
+  // ���-type
   subst: (X,S,TyForall(X,K,T)) -> TyForall(X,K,T)
   subst: (X,S,TyForall(Y,K,T)) -> TyForall(Y,K,<subst> (X,S,T))
          where <not(equal)> (X,Y)
@@ -264,6 +264,8 @@ rules
   parReduce: (ctx,TyString()) -> TyString()
   parReduce: (ctx,TyBool()) -> TyBool()
 
+  parReduce: (CtxEmpty(),TyVar(X)) -> TyVar(X)
+             where <imported-type-context-tyvar> X
   parReduce: (CtxBindTVar(ctx,X,K),TyVar(X)) -> TyVar(X)
   parReduce: (CtxBindTVar(ctx,Y,K),TyVar(X)) -> <parReduce> (ctx,TyVar(X))
              where <not(equal)> (X,Y)
