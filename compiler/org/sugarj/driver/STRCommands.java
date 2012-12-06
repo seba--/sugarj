@@ -137,7 +137,7 @@ public class STRCommands {
         prog = FAILED_COMPILATION_PATH;
         error = e;
       } finally {
-        if (prog != null)
+        if (prog != null && FileCommands.exists(prog) && !FileCommands.isEmptyFile(prog))
           cacheAssimilator(strCache, key, prog, environment);
       }
 
