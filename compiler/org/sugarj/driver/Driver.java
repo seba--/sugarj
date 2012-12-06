@@ -40,11 +40,7 @@ import org.spoofax.jsglr_layout.shared.SGLRException;
 import org.spoofax.jsglr_layout.shared.TokenExpectedException;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
-import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoException;
-import org.strategoxt.permissivegrammars.make_permissive;
-import org.strategoxt.stratego_xtc.stratego_xtc;
-import org.strategoxt.tools.tools;
 import org.sugarj.LanguageLib;
 import org.sugarj.LanguageLibFactory;
 import org.sugarj.common.ATermCommands;
@@ -57,7 +53,6 @@ import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.driver.caching.ModuleKeyCache;
-import org.sugarj.driver.transformations.extraction.extraction;
 import org.sugarj.stdlib.StdLib;
 import org.sugarj.util.Pair;
 import org.sugarj.util.ProcessingListener;
@@ -71,15 +66,12 @@ public class Driver{
   private final static int PENDING_TIMEOUT = 30000;
 
   private static Map<Path, Result> resultCache = new HashMap<Path, Result>(); // new LRUMap(50);
+
   private static Map<Path, Entry<String, Driver>> pendingRuns = new HashMap<Path, Map.Entry<String,Driver>>();
-
   private static List<Path> pendingInputFiles = new ArrayList<Path>();
-
   private static List<Path> currentlyProcessing = new ArrayList<Path>();
-
   private static List<ProcessingListener> processingListener = new LinkedList<ProcessingListener>();
-  
-  
+
   private IProgressMonitor monitor;
   
   private Environment environment = new Environment();
@@ -110,12 +102,7 @@ public class Driver{
   private SGLR strParser;
   private SGLR editorServicesParser;
   private SGLR parser;
-  private Context sdfContext;
-  private Context makePermissiveContext;
-  private Context xtcContext;
-  private Context extractionContext;
-  private Context strjContext;
-  
+    
   private static Map<String,ModuleKeyCache<Path>> sdfCaches;
   private static Map<String,ModuleKeyCache<Path>> strCaches;
   
@@ -655,9 +642,9 @@ public class Driver{
   }
   
   
-  private IStrategoTerm currentParse(String remainingInput, boolean recovery) throws IOException,
-      InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
-    currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfContext, makePermissiveContext, xtcContext, sdfCache, environment, langLib);
+  private IStrategoTerm currentParse(String remainingInput, boolean recovery) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+    
+    currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfCache, environment, langLib);
 
     ParseTable table = ATermCommands.parseTableManager.loadFromFile(currentGrammarTBL.getAbsolutePath());
     
@@ -694,7 +681,7 @@ public class Driver{
 
     log.beginTask("desugaring", "DESUGAR toplevel declaration.", Log.CORE);
     try {
-      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment, langLib);
+      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strCache, environment, langLib);
 
       return STRCommands.assimilate(currentTransProg, term, langLib.getInterpreter());
     } catch (StrategoException e) {
@@ -926,8 +913,8 @@ public class Driver{
       
       IStrategoTerm sugarBody = langLib.getSugarBody(toplevelDecl);
 
-      IStrategoTerm sdfExtract = fixSDF(extractSDF(sugarBody, extractionContext), langLib.getInterpreter());
-      IStrategoTerm strExtract = extractSTR(sugarBody, extractionContext);
+      IStrategoTerm sdfExtract = fixSDF(extractSDF(sugarBody), langLib.getInterpreter());
+      IStrategoTerm strExtract = extractSTR(sugarBody);
       
       String sdfExtensionHead =
         "module " + fullExtName + "\n" 
@@ -937,7 +924,7 @@ public class Driver{
 
       String sdfExtensionContent = SDFCommands.prettyPrintSDF(sdfExtract, langLib.getInterpreter());
 
-      String sdfSource = SDFCommands.makePermissiveSdf(sdfExtensionHead + sdfExtensionContent, makePermissiveContext);
+      String sdfSource = SDFCommands.makePermissiveSdf(sdfExtensionHead + sdfExtensionContent);
       driverResult.generateFile(sdfExtension, sdfSource);
       availableSDFImports.add(fullExtName);
       
@@ -1013,7 +1000,7 @@ public class Driver{
     log.beginTask("checking grammar", "CHECK current grammar", Log.CORE);
     
     try {
-      SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfContext, makePermissiveContext, xtcContext, sdfCache, environment, langLib);
+      SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfCache, environment, langLib);
     } finally {
       log.endTask();
     }
@@ -1023,7 +1010,7 @@ public class Driver{
     log.beginTask("checking transformation", "CHECK current transformation", Log.CORE);
     
     try {
-      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strjContext, strCache, environment, langLib);
+      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strCache, environment, langLib);
     } catch (StrategoException e) {
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
       log.logErr(msg, Log.DETAIL);
@@ -1074,13 +1061,6 @@ public class Driver{
     sdfParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.sdfTbl.getPath()));
     strParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.strategoTbl.getPath()));
     editorServicesParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.editorServicesTbl.getPath()));
-    
-    sdfContext = tools.init();
-    makePermissiveContext = make_permissive.init();
-    xtcContext = stratego_xtc.init();
-    extractionContext = extraction.init();
-    strjContext = org.strategoxt.strj.strj.init();
-
   }
   
 

@@ -94,7 +94,7 @@ public class FilteringIOAgent extends IOAgent {
     
     private void pushMessageToLog() {
       if (msg.endsWith("\n")) {
-        if (msg.length() > 1)
+        if (msg.length() > 2)
           Log.log.log(msg.substring(0, msg.length() - 1), includeLogLevel);
         msg = new String();
       }
