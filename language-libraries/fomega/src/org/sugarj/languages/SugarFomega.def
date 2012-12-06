@@ -13,15 +13,12 @@ exports
   context-free syntax
     FomegaModuleDec FomegaImports FomegaOrSugarDec -> SugarCompilationUnit {cons("CompilationUnit")}
 
-    FomegaDefinitions LAYOUT? -> FomegaOrSugarDec
-    SugarDefElements LAYOUT? -> FomegaOrSugarDec
-    EditorServiceSections LAYOUT? -> FomegaOrSugarDec
+    FomegaDefinitions -> FomegaOrSugarDec {longest-match}
+    SugarDefElements -> FomegaOrSugarDec {longest-match}
+    EditorServiceSections -> FomegaOrSugarDec {longest-match}
 
     SugarDefElem+ -> SugarDefElements {cons("SugarBody")}
     EditorServiceSection+ -> EditorServiceSections {cons("EditorBody")}
-
-  context-free restrictions
-    FomegaOrSugarDec -/- ~[]    
 
   context-free syntax
     Grammar        -> SugarDefElem {cons("grammar-elem")}
