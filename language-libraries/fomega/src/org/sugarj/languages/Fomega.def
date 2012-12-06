@@ -175,7 +175,7 @@ exports
 module org/sugarj/languages/Fomega
 imports Fomega-Module [
     Definitions => FomegaDefinitions
-    ID => FomegaMID
+    MID => FomegaMID
     ID => FomegaID
     QID => FomegaQID
     NAT => FomegaNAT
