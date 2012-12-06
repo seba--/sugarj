@@ -375,4 +375,18 @@ public class FileCommands {
     
     return 0;
   }
+
+  public static boolean isEmptyFile(Path prog) throws IOException {
+    FileInputStream in = null;
+    
+    try {
+      in = new FileInputStream(prog.getFile());
+      if (in.read() == -1)
+        return true;
+      return false;
+    } finally {
+      if (in != null)
+        in.close();
+    }
+  }
 }
