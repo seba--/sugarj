@@ -1,0 +1,9 @@
+module tests.cases.Module03
+
+import typing.check.TypeChecker
+
+val n = 1
+
+val id = \n:Nat. n
+
+public val one = id n

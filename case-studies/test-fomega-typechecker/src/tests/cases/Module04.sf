@@ -1,0 +1,7 @@
+module tests.cases.Module04
+
+import typing.check.TypeChecker
+
+import tests.cases.Module03
+
+val onemore = one
