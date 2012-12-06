@@ -1,0 +1,31 @@
+definition
+module org/sugarj/languages/Sugar
+imports org/sugarj/languages/Sdf2
+        org/sugarj/languages/Stratego
+exports
+  context-free syntax
+    Sdf2Grammar  -> SugarDefElem {cons("grammar-elem")}
+    (StrategoDecl | DesugaringDecl) -> SugarDefElem {cons("transformation-elem")}
+
+  lexical syntax
+    "sorts"        -> StrategoId {reject}
+    "lexical"      -> StrategoId {reject}
+    "context-free" -> StrategoId {reject}
+    "variables"    -> StrategoId {reject}
+    "priorities"   -> StrategoId {reject}
+    "restrictions" -> StrategoId {reject}
+    "aliases"      -> StrategoId {reject}
+
+  lexical syntax
+    "desugarings" -> StrategoKeyword 
+
+  context-free syntax
+    "desugarings" Desugaring* -> DesugaringDecl {cons("Desugarings")}
+
+  context-free syntax
+    StrategoStrategy                                               -> Desugaring {cons("PureDesugaring")}
+    StrategoStrategy ":" Sdf2Symbol "->" Sdf2Symbol Sdf2Attributes -> Desugaring {cons("InjectDesugaring")}
+
+  lexical restrictions
+    "desugarings" -/- [a-zA-Z0-9\'\-\_]
+
