@@ -236,7 +236,7 @@ public class SugarJParser extends JSGLRI {
   }
   
   private IStrategoTerm parseCompletionTree(String input, String filename, Result result) throws IOException {
-
+    //TODO fix: adapt to parsing with parseMax
     RetractableTreeBuilder treeBuilder = new RetractableTreeBuilder();
     ParseTable table;
     try {
