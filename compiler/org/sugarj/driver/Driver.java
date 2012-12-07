@@ -634,7 +634,7 @@ public class Driver{
       parseResult = SDFCommands.parseImplode(
           table,
           remainingInput,
-          "NextToplevelDeclaration",
+          "ToplevelDeclaration",
           recovery,
           true,
           inputTreeBuilder);
