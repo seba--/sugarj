@@ -341,23 +341,29 @@ public class SDFCommands {
    * @throws BadTokenException 
    * @throws TokenExpectedException 
    */
-  private static Pair<SGLR, IStrategoTerm> sglr(ParseTable table, final String source, final String start, boolean useRecovery, ITreeBuilder treeBuilder) throws SGLRException {
+  private static Pair<SGLR, Pair<IStrategoTerm, Integer>> sglr(ParseTable table, final String source, final String start, boolean useRecovery, final boolean parseMax, ITreeBuilder treeBuilder) throws SGLRException {
     if (treeBuilder instanceof RetractableTreeBuilder && ((RetractableTreeBuilder) treeBuilder).isInitialized())
       ((RetractableTokenizer) treeBuilder.getTokenizer()).setKeywordRecognizer(table.getKeywordRecognizer());
     
     final SGLR parser = new SGLR(treeBuilder, table);
     parser.setUseStructureRecovery(useRecovery);
 
-    Callable<IStrategoTerm> parseCallable = new Callable<IStrategoTerm>() {
+    Callable<Pair<IStrategoTerm, Integer>> parseCallable = new Callable<Pair<IStrategoTerm, Integer>>() {
       @Override
-      public IStrategoTerm call() throws Exception {
-        return (IStrategoTerm) parser.parse(source, "toplevel declaration", start);
+      public Pair<IStrategoTerm, Integer> call() throws Exception {
+        Object o = parser.parse(source, "toplevel declaration", start, parseMax);
+        if (o instanceof IStrategoTerm)
+          return Pair.create((IStrategoTerm) o, source.length());
+        else {
+          Object[] os = (Object[]) o;
+          return Pair.create((IStrategoTerm) os[0], (Integer) os[1]);
+        }
     }};
     
-    Future<IStrategoTerm> res = parseExecutorService.submit(parseCallable);
+    Future<Pair<IStrategoTerm, Integer>> res = parseExecutorService.submit(parseCallable);
     try {
-      IStrategoTerm term = res.get(PARSE_TIMEOUT, TimeUnit.MILLISECONDS);
-      return Pair.create(parser, term);
+      Pair<IStrategoTerm, Integer> result = res.get(PARSE_TIMEOUT, TimeUnit.MILLISECONDS);
+      return Pair.create(parser, result);
     } catch (ExecutionException e) {
       if (e.getCause() instanceof SGLRException)
         throw (SGLRException) e.getCause();
@@ -370,16 +376,16 @@ public class SDFCommands {
     }
   }
   
-  public static Pair<SGLR, IStrategoTerm> parseImplode(ParseTable table, String source, String start, boolean useRecovery, ITreeBuilder treeBuilder) throws IOException, SGLRException {
-    return parseImplode(table, null, source, start, useRecovery, treeBuilder);
+  public static Pair<SGLR, Pair<IStrategoTerm, Integer>> parseImplode(ParseTable table, String source, String start, boolean useRecovery, boolean parseMax, ITreeBuilder treeBuilder) throws IOException, SGLRException {
+    return parseImplode(table, null, source, start, useRecovery, parseMax, treeBuilder);
   }
   
-  private static Pair<SGLR, IStrategoTerm> parseImplode(ParseTable table, Path tbl, String source, String start, boolean useRecovery, ITreeBuilder treeBuilder) throws IOException, SGLRException {
+  private static Pair<SGLR, Pair<IStrategoTerm, Integer>> parseImplode(ParseTable table, Path tbl, String source, String start, boolean useRecovery, boolean parseMax, ITreeBuilder treeBuilder) throws IOException, SGLRException {
     log.beginExecution("parsing", Log.PARSE);
 
-    Pair<SGLR, IStrategoTerm> result = null;
+    Pair<SGLR, Pair<IStrategoTerm, Integer>> result = null;
     try {
-      result = sglr(table, source, start, useRecovery, treeBuilder);
+      result = sglr(table, source, start, useRecovery, parseMax, treeBuilder);
     }
     finally {
       if (result != null && result.b != null)

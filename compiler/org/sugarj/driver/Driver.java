@@ -2,7 +2,6 @@ package org.sugarj.driver;
 
 import static org.sugarj.common.ATermCommands.fixSDF;
 import static org.sugarj.common.ATermCommands.getApplicationSubterm;
-import static org.sugarj.common.ATermCommands.getString;
 import static org.sugarj.common.ATermCommands.isApplication;
 import static org.sugarj.common.Log.log;
 import static org.sugarj.driver.SDFCommands.extractSDF;
@@ -417,50 +416,35 @@ public class Driver{
     int start = inputTreeBuilder.getTokenizer() == null ? 0 : inputTreeBuilder.getTokenizer().getStartOffset();
     log.beginTask("parsing", "PARSE next toplevel declaration.", Log.CORE);
     try {
-      IStrategoTerm remainingInputTerm = null;
+      Pair<IStrategoTerm, Integer> parseResult = null;
       
       try {
-        remainingInputTerm = currentParse(input, recovery);
+        parseResult = currentParse(input, recovery);
       } catch (Exception e) {
         if (recovery) {
           e.printStackTrace();
-          remainingInputTerm = currentParse(input, false);
+          parseResult = currentParse(input, false);
         }
         
-        if (remainingInputTerm == null)
+        if (parseResult == null)
           throw e;
       }
 
-      if (remainingInputTerm == null)
-        throw new ParseException("could not parse toplevel declaration in:\n"
-            + input, -1);
+      if (parseResult == null || parseResult.a == null)
+        throw new ParseException("could not parse toplevel declaration in:\n" + input, -1);
 
-//      remainingInputTerm = ATermCommands.pushAmbiguities(remainingInputTerm);
-      
-      if (!isApplication(remainingInputTerm, "NextToplevelDeclaration"))
-        throw new ATermCommands.MatchError(remainingInputTerm, "NextToplevelDeclaration");
-      
-      IStrategoTerm toplevelDecl = getApplicationSubterm(remainingInputTerm, "NextToplevelDeclaration", 0);
-      IStrategoTerm restTerm = getApplicationSubterm(remainingInputTerm, "NextToplevelDeclaration", 1);
-      if (isApplication(restTerm, "amb"))
-        restTerm = restTerm.getSubterm(0).getSubterm(0);
-      String rest = getString(restTerm);
+      IStrategoTerm toplevelDecl = parseResult.a;
+      String rest = input.substring(parseResult.b);
 
       if (input.equals(rest))
         throw new SGLRException(parser, "empty toplevel declaration parse rule");
       
-      try {
-        if (!rest.isEmpty())
-          inputTreeBuilder.retract(restTerm);
-      } catch (Throwable t) {
-        t.printStackTrace();
-      }
-      
-      if (toplevelDecl == null || rest == null)
-        throw new ParseException(
-            "could not parse next toplevel declaration in:\n"
-                + remainingInputTerm.toString(),
-            -1);
+//      try {
+//        if (!rest.isEmpty())
+//          inputTreeBuilder.retract(restTerm);
+//      } catch (Throwable t) {
+//        t.printStackTrace();
+//      }
       
       Path tmpFile = FileCommands.newTempFile("aterm");
       FileCommands.writeToFile(tmpFile, toplevelDecl.toString());
@@ -637,13 +621,13 @@ public class Driver{
   }
   
   
-  private IStrategoTerm currentParse(String remainingInput, boolean recovery) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  private Pair<IStrategoTerm, Integer> currentParse(String remainingInput, boolean recovery) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     
     currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfCache, environment, langLib);
 
     ParseTable table = ATermCommands.parseTableManager.loadFromFile(currentGrammarTBL.getAbsolutePath());
     
-    Pair<SGLR, IStrategoTerm> parseResult = null;
+    Pair<SGLR, Pair<IStrategoTerm, Integer>> parseResult = null;
 
     // read next toplevel decl and stop if that fails
     try {
@@ -652,6 +636,7 @@ public class Driver{
           remainingInput,
           "NextToplevelDeclaration",
           recovery,
+          true,
           inputTreeBuilder);
     } catch (SGLRException e) {
       this.parser = e.getParser();
