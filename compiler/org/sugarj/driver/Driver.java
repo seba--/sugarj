@@ -434,7 +434,7 @@ public class Driver{
         throw new ParseException("could not parse toplevel declaration in:\n" + input, -1);
 
       IStrategoTerm toplevelDecl = parseResult.a;
-      String rest = input.substring(parseResult.b);
+      String rest = input.substring(Math.min(parseResult.b, input.length()));
 
       if (input.equals(rest))
         throw new SGLRException(parser, "empty toplevel declaration parse rule");
