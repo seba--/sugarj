@@ -15,18 +15,14 @@ exports
 
     "module" HaskellModid HaskellExports? "where" -> HaskellModuleDec {cons("ModuleDec")}
 
-    HaskellOffsideTopdeclList LAYOUT?  -> SugarHaskellBody {cons("HaskellBody")}
-    SugarDefElem*             LAYOUT? -> SugarHaskellBody {cons("SugarBody")}
-    EditorServiceSection*     LAYOUT? -> SugarHaskellBody {cons("EditorBody")}
+    HaskellOffsideTopdeclList  -> SugarHaskellBody {cons("HaskellBody")}
+    SugarDefElem*              -> SugarHaskellBody {cons("SugarBody")}
+    EditorServiceSection*      -> SugarHaskellBody {cons("EditorBody")}
 
   context-free restrictions
     SugarHaskellBody -/- ~[]
 
   context-free syntax
-    HaskellModuleDec LAYOUT?    -> LayoutedToplevelDeclaration
-    HaskellImportdecl LAYOUT?   -> LayoutedToplevelDeclaration {enforce-newline, layout(gt(col(left(1)), col(first(1))))}
-    SugarHaskellBody LAYOUT?    -> LayoutedToplevelDeclaration
-
-    LayoutedToplevelDeclaration Rest
-      -> NextToplevelDeclaration {cons("NextToplevelDeclaration"), layout(eq(col(first(1)), col(first(2))))}
-
+    HaskellModuleDec LAYOUT?    -> ToplevelDeclaration
+    HaskellImportdecl LAYOUT?   -> ToplevelDeclaration {enforce-newline, layout(gt(col(left(1)), col(first(1))))}
+    SugarHaskellBody LAYOUT?    -> ToplevelDeclaration
