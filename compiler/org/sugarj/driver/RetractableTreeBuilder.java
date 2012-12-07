@@ -46,4 +46,12 @@ public class RetractableTreeBuilder extends TreeBuilder {
   public boolean isInitialized() {
     return isInitialized;
   }
+  
+  /**
+   * Do *not* recreate tree.
+   */
+  @Override
+  protected Object recreateWithAllTokens(Object tree) {
+    return tree;
+  }
 }
