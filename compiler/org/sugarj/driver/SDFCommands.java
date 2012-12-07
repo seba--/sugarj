@@ -77,6 +77,7 @@ public class SDFCommands {
   
   private static IOAgent packSdfIOAgent = new FilteringIOAgent(Log.PARSE | Log.DETAIL, "  including .*");
   private static IOAgent sdf2tableIOAgent = new FilteringIOAgent(Log.PARSE | Log.DETAIL, "Invoking native tool .*");
+  private static IOAgent makePermissiveIOAgent = new FilteringIOAgent(Log.PARSE | Log.DETAIL, "[ make_permissive | info ].*");
   
   // cai 27.09.12
   // convert path-separator to that of the OS
@@ -312,6 +313,7 @@ public class SDFCommands {
   private static void makePermissive(Path def, Path permissiveDef) throws IOException {
     log.beginExecution("make permissive", Log.PARSE, "-i", def.getAbsolutePath(), "-o", permissiveDef.getAbsolutePath());
     Context mpContext = SugarJContexts.makePermissiveContext();
+    mpContext.setIOAgent(makePermissiveIOAgent);
     try {
       make_permissive.mainNoExit(mpContext, "-i", def.getAbsolutePath(), "-o", permissiveDef.getAbsolutePath());
     }
