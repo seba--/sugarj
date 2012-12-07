@@ -638,10 +638,10 @@ public class Driver{
           recovery,
           true,
           inputTreeBuilder);
-    } catch (SGLRException e) {
-      this.parser = e.getParser();
-      log.logErr(e.getMessage(), Log.DETAIL);
-      return null;
+//    } catch (SGLRException e) {
+//      this.parser = e.getParser();
+//      log.logErr(e.getMessage(), Log.DETAIL);
+//      return null;
     } finally {
       if (parseResult != null)
         this.parser = parseResult.a;
