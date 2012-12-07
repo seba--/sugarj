@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -420,11 +421,9 @@ public class Driver{
       
       try {
         parseResult = currentParse(input, recovery);
-      } catch (Exception e) {
-        if (recovery) {
-          e.printStackTrace();
+      } catch (SGLRException e) {
+        if (e.getCause() instanceof TimeoutException)
           parseResult = currentParse(input, false);
-        }
         
         if (parseResult == null)
           throw e;
