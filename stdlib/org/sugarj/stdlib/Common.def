@@ -4,18 +4,7 @@ module org/sugarj/stdlib/Common
 imports org/sugarj/stdlib/LayoutSugar
 exports
 
-  context-free start-symbols NextToplevelDeclaration
-
-  context-free syntax %% NextToplevelDeclaration
-    ToplevelDeclaration Rest -> NextToplevelDeclaration {cons("NextToplevelDeclaration")}
-  
-  lexical syntax %% Rest
-    LAYOUT? ~[]* -> Rest
-    -> EOF
-  
-  lexical restrictions
-    Rest -/- ~[]
-    EOF -/- ~[]
+  context-free start-symbols ToplevelDeclaration
 
 
 module org/sugarj/stdlib/LayoutSugar
