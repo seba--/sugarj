@@ -436,7 +436,10 @@ public class Driver{
       String rest = input.substring(Math.min(parseResult.b, input.length()));
 
       if (input.equals(rest))
-        throw new SGLRException(parser, "empty toplevel declaration parse rule");
+        if (parser.getCollectedErrors().isEmpty())
+          throw new SGLRException(parser, "empty toplevel declaration parse rule");
+        else
+          throw parser.getCollectedErrors().iterator().next();
       
 //      try {
 //        if (!rest.isEmpty())
