@@ -16,8 +16,8 @@ exports
     "module" HaskellModid HaskellExports? "where" -> HaskellModuleDec {cons("ModuleDec")}
 
     HaskellOffsideTopdeclList  -> SugarHaskellBody {cons("HaskellBody")}
-    SugarDefElem*              -> SugarHaskellBody {cons("SugarBody")}
-    EditorServiceSection*      -> SugarHaskellBody {cons("EditorBody")}
+    SugarDefElem+              -> SugarHaskellBody {cons("SugarBody")}
+    EditorServiceSection+      -> SugarHaskellBody {cons("EditorBody")}
 
   context-free restrictions
     SugarHaskellBody -/- ~[]

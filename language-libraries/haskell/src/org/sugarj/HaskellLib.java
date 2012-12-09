@@ -49,7 +49,7 @@ public class HaskellLib extends LanguageLib {
   private IStrategoTerm ppTable;
 
   public String getVersion() {
-    return "haskell-0.1a";
+    return "haskell-0.1b";
   }
   
   @Override
