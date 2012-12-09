@@ -19,9 +19,6 @@ exports
     SugarDefElem+              -> SugarHaskellBody {cons("SugarBody")}
     EditorServiceSection+      -> SugarHaskellBody {cons("EditorBody")}
 
-  context-free restrictions
-    SugarHaskellBody -/- ~[]
-
   context-free syntax
     HaskellModuleDec LAYOUT?    -> ToplevelDeclaration
     HaskellImportdecl LAYOUT?   -> ToplevelDeclaration {enforce-newline, layout(gt(col(left(1)), col(first(1))))}
