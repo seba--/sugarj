@@ -97,20 +97,18 @@ public class STRCommands {
     
     final ByteArrayOutputStream log = new ByteArrayOutputStream();
 
+    Context ctx = SugarJContexts.strjContext();
     try {
-      Context ctx = SugarJContexts.strjContext();
-      
       ctx.setIOAgent(strjIOAgent);
-      
       ctx.invokeStrategyCLI(main_strj_0_0.instance, "strj", cmd.toArray(new String[cmd.size()]));
     }
     catch (StrategoExit e) {
       if (e.getValue() != 0)
         throw new StrategoException("STRJ failed", e);
     } finally {
+      SugarJContexts.releaseContext(ctx);
       if (log.size() > 0 && !log.toString().contains("Abstract syntax in"))
         throw new StrategoException(log.toString());
-
     }
   }
   
