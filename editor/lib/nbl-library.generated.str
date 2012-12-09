@@ -82,16 +82,16 @@ rules // Error checks
       <gt> (<length> defs, 1)
       
 rules // Type dependant lookup
-	
-	/**
+  
+  /**
    * Given an annotated AST node and a type, resolves it and checks if type equals given type, returning its definition.
    * Uses precise matching for names.
    *
-   * @param type	Only definitions with this type are returned.
+   * @param type  Only definitions with this type are returned.
    * @type "name"{uri} -> ?Def(uri')
    */
   index-lookup-typed(|type):
-    x{[namespace|path]} -> <index-lookup-internal(index-compare-nametype-equal(|name, type)|ns, path, name)> x
+    x{[namespace|path]} -> <index-lookup-internal(index-get-defs, index-compare-nametype-equal(|name, type)|ns, path, name)> x
     where
       ns := <index-namespace-unwrap> namespace;
       name := <strip-annos> x
@@ -102,11 +102,11 @@ rules // Type dependant lookup
    * Uses substring matching for names.
    *
    * @param prefix    Only definitions with a name that starts with this string are returned.
-   * @param type			Only definitions with this type are returned.
+   * @param type      Only definitions with this type are returned.
    * @type "name"{uri} -> List(Def(uri'))
    */
   index-lookup-all-typed(|prefix, type):
-    x{[namespace|path]} -> <index-lookup-all-internal(index-compare-nametype-substring(|prefix, type)|ns, path, prefix)> x
+    x{[namespace|path]} -> <index-lookup-all-internal(index-get-defs-prefix, index-compare-nametype-substring(|prefix, type)|ns, path, prefix)> x
     where
       ns := <index-namespace-unwrap> namespace
 
@@ -136,9 +136,9 @@ rules // Type dependant lookup
   
   /** @internal */
   nbl-get-type:
-  	uri -> <index-get-data(|Type())> Def(uri)
+    uri -> <index-get-data(|Type())> Def(uri)
   
   // TODO: Allow user defined type equality.
-  /** @internal */	
+  /** @internal */  
   nbl-type-eq(|type) = 
-  	<eq> (<id>, type)
+    <eq> (<id>, type)

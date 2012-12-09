@@ -100,7 +100,7 @@ rules // Compilation
   index-compilation-file:
     (path, subfile) -> None()
     with
-    	asts := <index-get-all-values> AST(subfile, ());
+      asts := <index-get-all-values> AST(subfile, ());
       <map(index-compilation-ast(|path, subfile))> asts
       
   /** @internal */    
@@ -109,10 +109,10 @@ rules // Compilation
     with
       asts := <index-get-all-values> AST(subfile, ());
       if 1 := <length> asts then
-      	ast := <?[<id>|_]> asts
-    	else
-    		ast := <try(index-combine-asts)> asts
-  		end;
+        ast := <?[<id>|_]> asts
+      else
+        ast := <try(index-combine-asts)> asts
+      end;
       <index-compilation-ast(|path, subfile)> ast
       
   /** @internal */
@@ -239,6 +239,6 @@ rules // Utility
 
   /** @internal */
   index-file-is-partial:
-  	file -> file
-  	where 
+    file -> file
+    where 
       Snd; index-uri; index-is-partial-ast
