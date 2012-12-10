@@ -2,6 +2,7 @@ module org/sugarj/stdlib/StdTrans
 imports libstrategolib
 
 imports org/sugarj/transformations/GenerateSignatures
+imports org/sugarj/transformations/LayoutSugar
 
 signature constructors
   NextToplevelDeclaration : ToplevelDeclaration * Rest -> NextToplevelDeclaration
