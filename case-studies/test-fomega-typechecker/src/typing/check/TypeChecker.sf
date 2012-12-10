@@ -13,8 +13,11 @@ rules
     where <signatureOf> (CtxEmpty(),defs) => (sig,errors)
         ; if !errors; ?[] then fail else !errors end => result
 
+  // constraint-note: CompilationUnit(mid,imps,body) -> [(imps,<write-to-string> imps)]
+
 desugarings
-  generate-type-context
+  // generate-type-context
+  generate-module-signature
 
 rules
   generate-type-context :
@@ -23,10 +26,24 @@ rules
     , <make-fomega-sugar> defs
 //    , <make-fomega-editor> defs
     ]
+  generate-module-signature :
+    cu@CompilationUnit(mid,imps,decs) ->
+      [ Locked(cu)
+      , <make-fomega-sugar> ["foo"] //(mid,defs)
+      ]
+    where <filter(?FomegaBody(_)); map(\FomegaBody(defs) -> defs\); concat> decs => defs
   
   make-fomega-sugar = 
-    !SugarBody([transformation-elem(Rules(<debug(!"defs:");generate-type-context-rules;debug(!"generated:")> (CtxEmpty(),<id>)))])
+    !SugarBody([transformation-elem(Rules(<debug(!"defs:");generate-module-signature-rule;debug(!"generated")> <id>))])
+    //!SugarBody([transformation-elem(Rules(<debug(!"defs:");generate-type-context-rules;debug(!"generated:")> (CtxEmpty(),<id>)))])
+
+  generate-module-signature-rule :
+    x -> [RDefNoArgs("module-signature", RuleNoCond(NoAnnoList(Str(<write-to-string> x)), NoAnnoList(Str("foo"))))]
+    // (mid,defs) -> [RDefNoArgs("module-signature", RuleNoCond(NoAnnoList(Str(mid)), NoAnnoList(Str("foo"))))]
+//    where <signatureOf> (CtxEmpty(),defs) => (sig,errors)
+
   
+
   generate-type-context-rules :
     (_,[]) -> []
   generate-type-context-rules : 
