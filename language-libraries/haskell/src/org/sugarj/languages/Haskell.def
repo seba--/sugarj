@@ -118,13 +118,13 @@ exports
 module Haskell-List-Comprehensions
 exports
   context-free syntax
-    "[" List "]" 	 -> Exp {cons("List")}
+    "[" List "]" 	 -> Exp {bracket}
     {Exp ","}+ -> List {cons("List")}
     Exp ".." -> List {cons("ListFrom")}
     Exp "," Exp ".." -> List {cons("ListFirstFrom")}
     Exp ".." Exp -> List {cons("ListFromTo")}
     Exp "," Exp ".." Exp -> List {cons("ListFirstFromTo")}
-    Exp "|" {Qual ","}+ -> List {cons("ListCompr")}    Exp 		 -> List
+    Exp "|" {Qual ","}+ -> List {cons("ListCompr")}
 
 module Haskell-Qualifiers
 exports
@@ -473,7 +473,7 @@ exports
   context-free syntax
   	{ Export "," }* -> Exportlist {cons("Exportlist")}
   	Exportlist "," -> Exportlist
-    "(" Exportlist ")" 		-> Exports
+    "(" Exportlist ")" 		-> Exports {cons("Exports")}
 
     Qvar 			-> Export
     Gtycon 			-> Export
@@ -491,7 +491,7 @@ exports
     "{-# SOURCE" "#-}" 		-> Src 		{cons("SOURCE")}
     "qualified" 		-> Qualified 	{cons("Qualified")}
     "as" Modid 			-> As 		{cons("As")}
-    "(" Exportlist ")" 		-> Impspec
+    "(" Exportlist ")" 		-> Impspec {cons("Impspec")}
     "hiding" "(" Exportlist ")" -> Impspec 	{cons("Hiding")}
 
 module Haskell-Modules

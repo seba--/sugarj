@@ -147,6 +147,8 @@
    TList                           -- KW["["] KW["]"],
    TProduct                        -- KW["("] _1 KW[")"],
    TProduct.1:iter                 -- KW[","],
+   Impspec                         -- KW["("] _1 KW[")"],
+   Exports                         -- KW["("] _1 KW[")"],
    Exportlist                      -- _1,
    Exportlist.1:iter-star-sep      -- _1 KW[","],
    ExportAllSub	                   -- _1 KW["(..)"],
