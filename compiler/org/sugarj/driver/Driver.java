@@ -29,6 +29,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.jsglr_layout.client.FilterException;
 import org.spoofax.jsglr_layout.client.InvalidParseTableException;
 import org.spoofax.jsglr_layout.client.ParseTable;
 import org.spoofax.jsglr_layout.client.SGLR;
@@ -459,7 +460,7 @@ public class Driver{
       
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
       
-      if (!(e instanceof StrategoException) && !(e instanceof SGLRException))
+      if (!(e instanceof StrategoException) && (!(e instanceof SGLRException) || (e instanceof FilterException)))
         e.printStackTrace();
       else
         log.logErr(msg, Log.DETAIL);
