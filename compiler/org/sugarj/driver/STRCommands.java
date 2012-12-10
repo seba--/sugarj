@@ -48,7 +48,8 @@ public class STRCommands {
 
   private static IOAgent strjIOAgent = new FilteringIOAgent(Log.CORE | Log.TRANSFORM, 
                                                             Pattern.quote("[ strj | info ]") + ".*", 
-                                                            Pattern.quote("[ strj | error ] Compilation failed") + ".*");
+                                                            Pattern.quote("[ strj | error ] Compilation failed") + ".*",
+                                                            Pattern.quote("[ strj | warning ] Nullary constructor") + ".*");
   
   private final static Pattern STR_FILE_PATTERN = Pattern.compile(".*\\.str");
   
