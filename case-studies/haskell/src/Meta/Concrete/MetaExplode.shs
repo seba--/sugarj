@@ -12,12 +12,12 @@ desugarings
   
 	signature
 	  constructors
-	    ToTerm       : a -> Term       // quotation
-	    FromTerm     : Term -> a       // antiquotation
+	    ToTerm       : a -> Term       -- quotation
+	    FromTerm     : Term -> a       -- antiquotation
 	
-	    ToBuild  : a -> Strategy   // quotation denoting !t
+	    ToBuild  : a -> Strategy   -- quotation denoting !t
 	
-	    FromApp      : Strategy -> a   // antiquotation denoting <s>
+	    FromApp      : Strategy -> a   -- antiquotation denoting <s>
 	
 	    ToStrategy   : a -> Strategy
 	    FromStrategy : Strategy -> a
@@ -46,7 +46,7 @@ desugarings
 	
 	rules
 	
-	  // There is no Wld/0 in asfix so this not buggy.
+	  -- There is no Wld/0 in asfix so this not buggy.
 	
 	  Clean :
 	    Op("Wld",[]) -> Wld()
@@ -110,13 +110,13 @@ desugarings
 	    <+ TrmCons 
 	    <+ TrmOp
 	
-	// match ToTerm nested in ToTerm; take structure literally
+	-- match ToTerm nested in ToTerm; take structure literally
 	
-	  // todo: what do various combinations mean
-	  // ToTerm(ToTerm(A(FromTerm(x))))
-	  // ToTerm(ToTerm(A(FromTerm(FromTerm(x)))))
+	  -- todo: what do various combinations mean
+	  -- ToTerm(ToTerm(A(FromTerm(x))))
+	  -- ToTerm(ToTerm(A(FromTerm(FromTerm(x)))))
 	
-	  // todo: does not cover all variants of quotation constructors 
+	  -- todo: does not cover all variants of quotation constructors 
 	 
 	  ToTermToTerm = 
 	    ?ToTerm(t); quoted-trm-explode
@@ -127,7 +127,7 @@ desugarings
 	  QuotedOp :
 	    op#(ts) -> Op(op, <map(quoted-trm-explode)> ts)
 	
-	// regular explode
+	-- regular explode
 	
 	  TrmOp : 
 	    op#(ts) -> Op(op, <map(trm-explode)> ts)
@@ -202,14 +202,14 @@ desugarings
 	  TrmConc :
 	    Conc(t1, t2) -> Op("Conc", [<trm-explode>t1, <trm-explode>t2])
 	
-	/*
+	{-
 	  TrmConc :
 	    Conc(ts1,ts2) -> t
 	    where <try(![<LstMetaVar>])
 	     ; foldr(!<TrmLMetaVar <+ trm-explode> ts2, 
 	       !NoAnnoList(Op("Cons", [<Fst>, <Snd>])), 
 	       trm-explode)> ts1 => t
-	*/
+	-}
 	
 	  TrmFromMangle : 
 	    ManglePrefix(x, y) -> App(Call(SVar("conc-strings"),[]), Tuple([Str(x), Var(y)]))
