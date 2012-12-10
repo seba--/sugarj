@@ -119,18 +119,12 @@ module Haskell-List-Comprehensions
 exports
   context-free syntax
     "[" List "]" 	 -> Exp {cons("List")}
-    Exp 		 -> List
-    Lexps 		 -> List
-    Exp ".." 		 -> List
-    Exp "," Exp ".." 	 -> List
-    Exp ".." Exp 	 -> List
-    Exp "," Exp ".." Exp -> List
-    Exp "|" Quals        -> List
-   
-    Lexps "," Exp 	 -> Lexps
-    Exp "," Exp   	 -> Lexps
-     
-
+    {Exp ","}+ -> List {cons("List")}
+    Exp ".." -> List {cons("ListFrom")}
+    Exp "," Exp ".." -> List {cons("ListFirstFrom")}
+    Exp ".." Exp -> List {cons("ListFromTo")}
+    Exp "," Exp ".." Exp -> List {cons("ListFirstFromTo")}
+    Exp "|" {Qual ","}+ -> List {cons("ListCompr")}    Exp 		 -> List
 
 module Haskell-Qualifiers
 exports
@@ -300,7 +294,7 @@ exports
     "(" Exp ")" -> Exp {bracket}
 
     {Exp ","}+ -> Exps
-    Exp "," {Exp ","}+ -> Exps2 {cons("Cons")}
+    Exp "," {Exp ","}+ -> Exps2 {cons("ECons")}
     APat+ -> Fargs
 
 
@@ -448,7 +442,7 @@ exports
 
   context-free syntax
     {Type ","}+ 	   -> Types
-    Type "," {Type ","}+   -> Types2 	{cons("Cons")}
+    Type "," {Type ","}+   -> Types2 	{cons("TCons")}
     
   context-free syntax
     Gtycon 		   -> AType 	{cons("TCon")}
@@ -968,6 +962,7 @@ imports GHC-Flexible-Stuff
         GHC-GeneralizedNewtypeDeriving
 exports
   sorts Module
+%%  context-free start-symbols Module
     
 module org/sugarj/languages/Haskell
 imports 

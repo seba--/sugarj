@@ -114,7 +114,7 @@ rules
 
   tuple : [] -> Constr(Unit())
   tuple : [e] -> e
-  tuple : [e|es] -> Product(e,es)
+  tuple : [e|es] -> Product(ECons(e,es))
 
   free-pat-vars = collect-all(?Var(_))
 
