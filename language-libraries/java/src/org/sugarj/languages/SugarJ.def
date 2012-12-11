@@ -55,6 +55,3 @@ exports
     StrategoTerm "=" StrategoTerm StrategoRuleCond+        -> CheckingRuleBody {cons("Rule"), avoid}
     "rules" StrategoDef*        -> CheckingRule {cons("Rules")}
 
-  lexical syntax
-         -> "}" {recover, reject}
-

@@ -4,65 +4,6 @@ module languages/java-15/expressions/Priorities
 imports languages/java-15/lexical/Identifiers languages/java-15/expressions/Main
 
 exports
-  sorts WATER WATERTOKEN WATERTOKENSTART WATERTOKENSEPARATOR WATERTOKENSTAR
-
-  lexical syntax
-    ~[A-Za-z0-9\_]                 -> WATERTOKENSTART     {recover, avoid}
-    WATERTOKENSTART [A-Za-z0-9\_]* -> WATERTOKEN          
-    ~[A-Za-z0-9\_\ \t\12\r\n\*]    -> WATERTOKENSEPARATOR {recover, avoid}
-    "*"                            -> WATERTOKENSTAR      {recover, avoid}
-    WATERTOKEN                     -> WATER               
-    WATERTOKENSEPARATOR            -> WATER               
-    WATERTOKENSTAR                 -> WATER               
-                                   -> WATEREOF            
-
-  lexical restrictions
-    WATERTOKEN -/- [A-Za-z0-9\_]
-    WATERTOKENSTAR -/- [\/]
-
-  context-free syntax
-    WATER -> LAYOUT {cons("WATER")}
-
-  (
-
-  sorts WATEREOF
-
-  lexical restrictions
-    WATEREOF -/- ~[]
-
-  lexical syntax
-    %% Lexical insertion recovery rules                 
-                                        -> "class"      {recover, cons("INSERTION")}
-                                        -> "import"     {recover, cons("INSERTION")}
-                                        -> ":"          {recover, cons("INSERTION")}
-                                        -> ";"          {recover, cons("INSERTION")}
-                                        -> "throws"     {recover, cons("INSERTION")}
-                                        -> ")"          {recover, cons("INSERTION")}
-                                        -> "]"          {recover, cons("INSERTION")}
-                                        -> "}"          {recover, cons("INSERTION")}
-                                        -> "implements" {recover, cons("INSERTION")}
-                                        -> "."          {recover, cons("INSERTION")}
-                                        -> "&"          {recover, cons("INSERTION")}
-                                        -> ">"          {recover, cons("INSERTION")}
-                                        -> ","          {recover, cons("INSERTION")}
-    "/*"                                -> INSERTSTART1 {recover}
-    INSERTSTART1 CommentPart* WATEREOF  -> Comment      {cons("INSERTEND")}
-    "/**"                               -> INSERTSTART0 {recover}
-    INSERTSTART0 CommentPart* WATEREOF  -> Comment      {cons("INSERTEND")}
-
-  syntax
-    %% Kernel syntax insertion recovery rules                     
-    "\""                                      -> INSERTOPENQUOTE1 {recover}
-    INSERTOPENQUOTE1 StringPart* "\n"         -> StringLiteral    {cons("INSERTEND")}
-    INSERTOPENQUOTE1 StringPart* WATEREOF     -> StringLiteral    {cons("INSERTEND")}
-    "'"                                       -> INSERTOPENQUOTE0 {recover}
-    INSERTOPENQUOTE0 CharContent "\n"         -> CharLiteral      {cons("INSERTEND")}
-    INSERTOPENQUOTE0 CharContent WATEREOF     -> CharLiteral      {cons("INSERTEND")}
-
-  )
-
-  (
-
   context-free priorities
     Expr "." "new" TypeArgs? Id TypeArgs? "(" {Expr ","}* ")" ClassBody? -> Expr
      >
@@ -154,7 +95,6 @@ exports
       LHS "|=" Expr -> Expr 
     }
 
-  )
 
 module languages/java-15/expressions/Restrictions
 exports
