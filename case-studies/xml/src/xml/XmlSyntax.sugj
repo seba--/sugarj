@@ -7,7 +7,6 @@ import editor.Editor;
  */
 public sugar XmlSyntax {
 
-
 %% module xml-attribute
   context-free syntax
     AttrName "=" AttValue -> Attribute {cons("Attribute")}
@@ -216,15 +215,6 @@ public sugar XmlSyntax {
   lexical restrictions
 
     Dash -/- [\-]
-
-%% module xml-whitespace
-
-  lexical syntax
-    [\ \t\n\13] -> LAYOUT
-
-  context-free restrictions
-    LAYOUT? -/- [\ \t\n\13]
-
 
 
 /*
