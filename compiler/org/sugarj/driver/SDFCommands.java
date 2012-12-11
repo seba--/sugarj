@@ -416,7 +416,7 @@ public class SDFCommands {
     if (string != null)
       return Term.asJavaString(string);
     
-    throw new RuntimeException("pretty printing SDF AST failed: " + ATermCommands.atermToFile(term));
+    throw new RuntimeException("pretty printing SDF AST failed");
   }
   
   /**
