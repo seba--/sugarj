@@ -13,9 +13,8 @@ context-free syntax
   ArrStmt -> ArrExplStmtList
   ArrStmt ";" ArrExplStmtList -> ArrExplStmtList {cons("ArrStmtSeq")}
 
-  ArrStmt -> ArrImplStmt {layout(1.first.left < 1.left.col)}
+  ArrStmt -> ArrImplStmt {layout(1.first.col < 1.left.col)}
 
   ArrImplStmt -> ArrImplStmtList
   ArrImplStmt ArrImplStmtList -> ArrImplStmtList
    {cons("ArrStmtSeq"), layout(1.first.col == 2.first.col)}
-
