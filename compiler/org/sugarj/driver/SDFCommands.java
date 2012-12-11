@@ -298,6 +298,9 @@ public class SDFCommands {
   }
   
   public static String makePermissiveSdf(String source) throws IOException {
+    if (true)
+      return source;
+    
     Path def = FileCommands.newTempFile("def");
     Path permissiveDef = FileCommands.newTempFile("def-permissive");
     

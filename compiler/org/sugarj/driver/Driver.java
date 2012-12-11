@@ -790,7 +790,7 @@ public class Driver{
               setErrorMessage(toplevelDecl, "problems while compiling " + importModuleName);
             }
               
-            log.log("CONTINUE PROCESSING'" + sourceFile + "'.", Log.IMPORT);
+            log.log("CONTINUE PROCESSING'" + sourceFile + "'.", Log.CORE);
           }
         }
         
