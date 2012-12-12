@@ -24,3 +24,22 @@ exports
     FomegaModuleDec -> ToplevelDeclaration
     FomegaImport -> ToplevelDeclaration
     FomegaOrSugarDec -> ToplevelDeclaration
+    
+  lexical syntax
+    Comment                                                   -> LAYOUT            
+    "//" ~[\n\r]* ([\n\r] | EOF)                              -> Comment           
+    "/*" CommentPart* "*/"                                    -> Comment           
+    ~[\*]                                                     -> CommentPart 
+    Asterisk                                                  -> CommentPart       
+    "*"                                                       -> Asterisk
+                                                              -> EOF          
+
+  lexical restrictions
+    "/**" -/- [\/]
+    "/*" -/- [\*]
+    Asterisk -/- [\/]
+    EOF -/- ~[]
+
+  context-free restrictions
+    LAYOUT? -/- [\/] . [\/]
+    LAYOUT? -/- [\/] . [\*]
