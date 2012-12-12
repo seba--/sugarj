@@ -43,7 +43,7 @@ public class FomegaLib extends LanguageLib {
   private IStrategoTerm ppTable;
 
   public String getVersion() {
-    return "fomega-0.1d";
+    return "fomega-0.1e";
   }
   
   @Override
