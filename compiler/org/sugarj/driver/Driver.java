@@ -1233,4 +1233,8 @@ public class Driver{
   public String getModuleName() {
     return FileCommands.fileName(sourceFile);
   }
+  
+  public List<IStrategoTerm> getSugaredImportDecls() {
+    return sugaredImportDecls;
+  }
 }
