@@ -1,5 +1,6 @@
 package org.sugarj.driver.caching;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,8 +23,8 @@ public class StrategoContextCache {
    * first List denotes currently used contexts,
    * second List denotes currently unused contexts.
    */
-  private final Map<Class<?>, Pair<? extends List<Context>, ? extends List<Context>>> cache
-    = new HashMap<Class<?>, Pair<? extends List<Context>,? extends List<Context>>>();
+  private final Map<Class<?>, Pair<? extends List<Context>, ? extends List<WeakReference<Context>>>> cache
+    = new HashMap<Class<?>, Pair<? extends List<Context>,? extends List<WeakReference<Context>>>>();
   
   private final Map<Context, Class<?>> ctxToInit = new HashMap<Context, Class<?>>();
   
@@ -34,14 +35,17 @@ public class StrategoContextCache {
    * @return a context of the given actual type.
    */
   public synchronized Context acquireContext(Class<?> initType) {
-    Pair<? extends List<Context>,? extends List<Context>> p = cache.get(initType);
+    Pair<? extends List<Context>,? extends List<WeakReference<Context>>> p = cache.get(initType);
     if (p == null) {
-      p = Pair.create(new ArrayList<Context>(), new ArrayList<Context>());
+      p = Pair.create(new ArrayList<Context>(), new ArrayList<WeakReference<Context>>());
       cache.put(initType, p);
     }
     
-    Context fresh;
-    if (p.b.isEmpty())
+    Context fresh = null;
+    while (fresh == null && !p.b.isEmpty())
+      fresh = p.b.remove(0).get();
+    
+    if (fresh == null)
       try {
         fresh = (Context) initType.getMethod("init").invoke(initType);
       } catch (IllegalAccessException e) {
@@ -55,8 +59,6 @@ public class StrategoContextCache {
       } catch (SecurityException e) {
         throw new IllegalArgumentException("Illegal actual type " + initType, e);
       }
-    else
-      fresh = p.b.remove(0);
     
     p.a.add(fresh);
     ctxToInit.put(fresh, initType);
@@ -70,11 +72,11 @@ public class StrategoContextCache {
   public synchronized void releaseContext(Context ctx) {
     Class<?> initType = ctxToInit.remove(ctx);
     
-    Pair<? extends List<Context>,? extends List<Context>> p = cache.get(initType);
+    Pair<? extends List<Context>,? extends List<WeakReference<Context>>> p = cache.get(initType);
     if (p == null || !p.a.contains(ctx))
       throw new IllegalArgumentException("unknown context from initializer " + initType);
     
     p.a.remove(ctx);
-    p.b.add(ctx);
+    p.b.add(new WeakReference<Context>(ctx));
   }
 }

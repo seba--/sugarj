@@ -48,7 +48,8 @@ public class STRCommands {
 
   private static IOAgent strjIOAgent = new FilteringIOAgent(Log.CORE | Log.TRANSFORM, 
                                                             Pattern.quote("[ strj | info ]") + ".*", 
-                                                            Pattern.quote("[ strj | error ] Compilation failed") + ".*");
+                                                            Pattern.quote("[ strj | error ] Compilation failed") + ".*",
+                                                            Pattern.quote("[ strj | warning ] Nullary constructor") + ".*");
   
   private final static Pattern STR_FILE_PATTERN = Pattern.compile(".*\\.str");
   
@@ -97,8 +98,9 @@ public class STRCommands {
     
     final ByteArrayOutputStream log = new ByteArrayOutputStream();
 
+    // Strj requires a fresh context each time.
+    Context ctx = org.strategoxt.strj.strj.init();
     try {
-      Context ctx = SugarJContexts.strjContext();
       ctx.setIOAgent(strjIOAgent);
       ctx.invokeStrategyCLI(main_strj_0_0.instance, "strj", cmd.toArray(new String[cmd.size()]));
     }
@@ -108,7 +110,6 @@ public class STRCommands {
     } finally {
       if (log.size() > 0 && !log.toString().contains("Abstract syntax in"))
         throw new StrategoException(log.toString());
-
     }
   }
   
@@ -240,6 +241,9 @@ public class STRCommands {
       
       if (interp.invoke(strategy)) {
         IStrategoTerm term = interp.current();
+
+        //XXX performance improvement?
+//        interp.reset();
                 
 //        IToken left = ImploderAttachment.getLeftToken(in);
 //        IToken right = ImploderAttachment.getRightToken(in);

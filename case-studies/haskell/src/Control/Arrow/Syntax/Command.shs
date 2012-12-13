@@ -39,7 +39,7 @@ context-free priorities
         "let" HaskellDeclbinds "in" ArrCommand -> ArrCommand 
         "if" HaskellExp "then" ArrCommand "else" ArrCommand -> ArrCommand
         "case" HaskellExp "of" AltList -> ArrCommand
-        "do" ArrCommandList -> ArrCommand
+        "do" ArrStmtList -> ArrCommand
 
         HaskellExp "-<" HaskellExp -> ArrCommand
         HaskellExp "-<<" HaskellExp -> ArrCommand
@@ -78,6 +78,6 @@ context-free priorities
         "\\" HaskellFargs "->" HaskellExp -> HaskellExp
        "let" HaskellDeclbinds "in" HaskellExp -> HaskellExp 
        "if" HaskellAnyExp "then" HaskellAnyExp "else" HaskellExp -> HaskellExp
-       "do" StmtList -> Exp {cons("Do"), longest-match}
-       "case" AnyExp "of" AltList          -> Exp  	{cons("Case"), longest-match}
+       "do" HaskellStmtList -> HaskellExp {cons("Do"), longest-match}
+       "case" HaskellAnyExp "of" HaskellAltList          -> HaskellExp  	{cons("Case"), longest-match}
       }

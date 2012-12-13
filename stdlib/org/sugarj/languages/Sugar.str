@@ -1,0 +1,9 @@
+module org/sugarj/languages/Sugar
+
+signature constructors
+    transformation-elem        : Transformation -> SugarDefElem
+    grammar-elem               : Grammar -> SugarDefElem
+    
+    Desugarings                : List(Desugaring) -> DesugaringDecl
+    InjectDesugaring           : StrategoId * Sdf2Symbol * Sdf2Symbol * Sdf2Attributes -> Desugaring
+    PureDesugaring             : StrategoId -> Desugaring

@@ -41,12 +41,12 @@ rules
     LayoutInt(i) -> int(i)
 
   layout-to-aterm :
-    LayoutSelect(c, f) -> appl(f, <layout-to-aterm> c)
+    LayoutSelect(c, f) -> appl(f, [<layout-to-aterm> c])
 
   layout-to-aterm :
     LayoutNot(c) -> appl(
                       unquoted("not")
-                    , <layout-to-aterm> c
+                    , [<layout-to-aterm> c]
                     )
 
   layout-to-aterm :

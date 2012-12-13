@@ -78,6 +78,7 @@ public class SDFCommands {
   
   private static IOAgent packSdfIOAgent = new FilteringIOAgent(Log.PARSE | Log.DETAIL, "  including .*");
   private static IOAgent sdf2tableIOAgent = new FilteringIOAgent(Log.PARSE | Log.DETAIL, "Invoking native tool .*");
+  private static IOAgent makePermissiveIOAgent = new FilteringIOAgent(Log.PARSE | Log.DETAIL, "[ make_permissive | info ].*");
   
   // cai 27.09.12
   // convert path-separator to that of the OS
@@ -298,6 +299,9 @@ public class SDFCommands {
   }
   
   public static String makePermissiveSdf(String source) throws IOException {
+    if (true)
+      return source;
+    
     Path def = FileCommands.newTempFile("def");
     Path permissiveDef = FileCommands.newTempFile("def-permissive");
     
@@ -313,6 +317,7 @@ public class SDFCommands {
   private static void makePermissive(Path def, Path permissiveDef) throws IOException {
     log.beginExecution("make permissive", Log.PARSE, "-i", def.getAbsolutePath(), "-o", permissiveDef.getAbsolutePath());
     Context mpContext = SugarJContexts.makePermissiveContext();
+    mpContext.setIOAgent(makePermissiveIOAgent);
     try {
       make_permissive.mainNoExit(mpContext, "-i", def.getAbsolutePath(), "-o", permissiveDef.getAbsolutePath());
     }
@@ -342,23 +347,29 @@ public class SDFCommands {
    * @throws BadTokenException 
    * @throws TokenExpectedException 
    */
-  private static Pair<SGLR, IStrategoTerm> sglr(ParseTable table, final String source, final String start, boolean useRecovery, ITreeBuilder treeBuilder) throws SGLRException {
+  private static Pair<SGLR, Pair<IStrategoTerm, Integer>> sglr(ParseTable table, final String source, final String start, boolean useRecovery, final boolean parseMax, ITreeBuilder treeBuilder) throws SGLRException {
     if (treeBuilder instanceof RetractableTreeBuilder && ((RetractableTreeBuilder) treeBuilder).isInitialized())
       ((RetractableTokenizer) treeBuilder.getTokenizer()).setKeywordRecognizer(table.getKeywordRecognizer());
     
     final SGLR parser = new SGLR(treeBuilder, table);
     parser.setUseStructureRecovery(useRecovery);
 
-    Callable<IStrategoTerm> parseCallable = new Callable<IStrategoTerm>() {
+    Callable<Pair<IStrategoTerm, Integer>> parseCallable = new Callable<Pair<IStrategoTerm, Integer>>() {
       @Override
-      public IStrategoTerm call() throws Exception {
-        return (IStrategoTerm) parser.parse(source, "toplevel declaration", start);
+      public Pair<IStrategoTerm, Integer> call() throws Exception {
+        Object o = parser.parse(source, "toplevel declaration", start, parseMax);
+        if (o instanceof IStrategoTerm)
+          return Pair.create((IStrategoTerm) o, source.length());
+        else {
+          Object[] os = (Object[]) o;
+          return Pair.create((IStrategoTerm) os[0], (Integer) os[1]);
+        }
     }};
     
-    Future<IStrategoTerm> res = parseExecutorService.submit(parseCallable);
+    Future<Pair<IStrategoTerm, Integer>> res = parseExecutorService.submit(parseCallable);
     try {
-      IStrategoTerm term = res.get(PARSE_TIMEOUT, TimeUnit.MILLISECONDS);
-      return Pair.create(parser, term);
+      Pair<IStrategoTerm, Integer> result = res.get(PARSE_TIMEOUT, TimeUnit.MILLISECONDS);
+      return Pair.create(parser, result);
     } catch (ExecutionException e) {
       if (e.getCause() instanceof SGLRException)
         throw (SGLRException) e.getCause();
@@ -371,16 +382,16 @@ public class SDFCommands {
     }
   }
   
-  public static Pair<SGLR, IStrategoTerm> parseImplode(ParseTable table, String source, String start, boolean useRecovery, ITreeBuilder treeBuilder) throws IOException, SGLRException {
-    return parseImplode(table, null, source, start, useRecovery, treeBuilder);
+  public static Pair<SGLR, Pair<IStrategoTerm, Integer>> parseImplode(ParseTable table, String source, String start, boolean useRecovery, boolean parseMax, ITreeBuilder treeBuilder) throws IOException, SGLRException {
+    return parseImplode(table, null, source, start, useRecovery, parseMax, treeBuilder);
   }
   
-  private static Pair<SGLR, IStrategoTerm> parseImplode(ParseTable table, Path tbl, String source, String start, boolean useRecovery, ITreeBuilder treeBuilder) throws IOException, SGLRException {
+  private static Pair<SGLR, Pair<IStrategoTerm, Integer>> parseImplode(ParseTable table, Path tbl, String source, String start, boolean useRecovery, boolean parseMax, ITreeBuilder treeBuilder) throws IOException, SGLRException {
     log.beginExecution("parsing", Log.PARSE);
 
-    Pair<SGLR, IStrategoTerm> result = null;
+    Pair<SGLR, Pair<IStrategoTerm, Integer>> result = null;
     try {
-      result = sglr(table, source, start, useRecovery, treeBuilder);
+      result = sglr(table, source, start, useRecovery, parseMax, treeBuilder);
     }
     finally {
       if (result != null && result.b != null)
@@ -413,7 +424,7 @@ public class SDFCommands {
         return ATermCommands.getString(textTerm);
     }
     
-    throw new ATermCommands.PrettyPrintError(term, "pretty printing SDF AST failed: " + ATermCommands.atermToFile(term));
+    throw new ATermCommands.PrettyPrintError(term, "pretty printing SDF AST failed");
   }
   
   /**

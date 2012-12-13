@@ -8,7 +8,7 @@ exports
     [\ \t\r\n] -> LAYOUT
 
   context-free restrictions
-    LAYOUT? -/- [\ \t\r\n]
+%%    LAYOUT? -/- [\ \t\r\n]
 
   lexical syntax
     [a-zA-Z][A-Za-z0-9]* -> ID

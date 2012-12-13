@@ -4,7 +4,7 @@ imports org/sugarj/languages/Fomega
         org/sugarj/languages/Sdf2
         org/sugarj/languages/Stratego
         org/sugarj/languages/EditorServices
-        org/sugarj/languages/Plain
+        org/sugarj/languages/Sugar
 
 exports
   context-free start-symbols
@@ -13,61 +13,33 @@ exports
   context-free syntax
     FomegaModuleDec FomegaImports FomegaOrSugarDec -> SugarCompilationUnit {cons("CompilationUnit")}
 
-    FomegaDefinitions -> FomegaOrSugarDec {longest-match}
-    SugarDefElements -> FomegaOrSugarDec {longest-match}
-    EditorServiceSections -> FomegaOrSugarDec {longest-match}
+    FomegaDefinitions -> FomegaOrSugarDec
+    SugarDefElements -> FomegaOrSugarDec
+    EditorServiceSections -> FomegaOrSugarDec
 
     SugarDefElem+ -> SugarDefElements {cons("SugarBody")}
     EditorServiceSection+ -> EditorServiceSections {cons("EditorBody")}
 
   context-free syntax
-    Grammar        -> SugarDefElem {cons("grammar-elem")}
-    Transformation -> SugarDefElem {cons("transformation-elem")}
-
-  context-free syntax
-    "sorts" Sdf2Symbols                            -> Grammar {cons("sorts")}
-    "syntax" Sdf2Productions                       -> Grammar {cons("syntax")}
-    "lexical" "syntax" Sdf2Productions             -> Grammar {cons("lexical-syntax")}
-    "context-free" "syntax" Sdf2Productions        -> Grammar {cons("context-free-syntax")}
-    "variables" Sdf2Productions                    -> Grammar {cons("variables")}
-    "lexical" "variables" Sdf2Productions          -> Grammar {cons("lexical-variables")}
-    "priorities" Sdf2Priorities                    -> Grammar {cons("priorities")}
-    "lexical" "priorities" Sdf2Priorities          -> Grammar {cons("lexical-priorities")}
-    "context-free" "priorities" Sdf2Priorities     -> Grammar {cons("context-free-priorities")}
-    "restrictions" Sdf2Restrictions                -> Grammar {cons("restrictions")}
-    "lexical" "restrictions" Sdf2Restrictions      -> Grammar {cons("lexical-restrictions")}
-    "context-free" "restrictions" Sdf2Restrictions -> Grammar {cons("context-free-restrictions")}
-    "aliases" Sdf2Aliases                          -> Grammar {cons("aliases")}
-
-  lexical syntax
-    "sorts"        -> StrategoId {reject}
-    "lexical"      -> StrategoId {reject}
-    "context-free" -> StrategoId {reject}
-    "variables"    -> StrategoId {reject}
-    "priorities"   -> StrategoId {reject}
-    "restrictions" -> StrategoId {reject}
-    "aliases"      -> StrategoId {reject}
-
-  context-free syntax
-    "strategies" StrategoDef*   -> Transformation {cons("Strategies")}
-    "signature" StrategoSdecl*  -> Transformation {cons("Signature")}
-    "rules" StrategoDef*        -> Transformation {cons("Rules")}
-    "overlays" StrategoOverlay* -> Transformation {cons("Overlays")}
-
-  lexical syntax
-    "desugarings" -> StrategoKeyword 
-
-  context-free syntax
-    "desugarings" Desugaring* -> Transformation {cons("Desugarings")}
-
-  context-free syntax
-    StrategoStrategy                                               -> Desugaring {cons("PureDesugaring")}
-    StrategoStrategy ":" Sdf2Symbol "->" Sdf2Symbol Sdf2Attributes -> Desugaring {cons("InjectDesugaring")}
-
-  lexical restrictions
-    "desugarings" -/- [a-zA-Z0-9\'\-\_]
-
-  context-free syntax
     FomegaModuleDec -> ToplevelDeclaration
     FomegaImport -> ToplevelDeclaration
     FomegaOrSugarDec -> ToplevelDeclaration
+    
+  lexical syntax
+    Comment                                                   -> LAYOUT            
+    "//" ~[\n\r]* ([\n\r] | EOF)                              -> Comment           
+    "/*" CommentPart* "*/"                                    -> Comment           
+    ~[\*]                                                     -> CommentPart 
+    Asterisk                                                  -> CommentPart       
+    "*"                                                       -> Asterisk
+                                                              -> EOF          
+
+  lexical restrictions
+    "/**" -/- [\/]
+    "/*" -/- [\*]
+    Asterisk -/- [\/]
+    EOF -/- ~[]
+
+  context-free restrictions
+    LAYOUT? -/- [\/] . [\/]
+    LAYOUT? -/- [\/] . [\*]

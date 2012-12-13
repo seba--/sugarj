@@ -39,7 +39,6 @@ double = Lam "x" (Add (Var "x") (Var "x"))
 
 t = n
 	where Num n = eval (If (Var "b")
-			(App (App k (App double (Var "x"))) (Var "x"))
-			(Add (Var "x") (Add (Var "x") (Var "x"))))
-		[("b", Bl True), ("x", Num 5)]
-
+                         (App (App k (App double (Var "x"))) (Var "x"))
+                         (Add (Var "x") (Add (Var "x") (Var "x"))))
+                       [("b", Bl True), ("x", Num 5)]

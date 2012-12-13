@@ -77,41 +77,41 @@ exports
     Pat "<-" Exp 	-> Stmt 	{cons("BindStmt")}
     Exp               	-> Stmt 	{cons("ExpStmt")}
     "let" Declbinds   	-> Stmt 	{cons("LetStmt")}
+    Qvar "=" Exp 	-> Fbind	{cons("FBind")}
 
   context-free syntax
   	NoOffsideStmtBlock -> StmtList {cons("StmtList")}
   	OffsideStmtList   -> StmtList {cons("StmtList")}
   	
-    "{" NoOffsideStmtList "}"  -> NoOffsideStmtBlock {bracket, ignore-indent}
+    "{" NoOffsideStmtListSem "}"  -> NoOffsideStmtBlock {bracket, ignore-layout}
 
   context-free priorities
     Stmt -> NoOffsideStmt
   >
-    NoOffsideStmt ";" -> NoOffsideStmt {prefer}
-%%  >
-%%    ";" NoOffsideStmt -> NoOffsideStmt
+    NoOffsideStmt ";" -> NoOffsideStmt
 
   context-free syntax
     NoOffsideStmt -> NoOffsideStmtList
     NoOffsideStmt ";" NoOffsideStmtList -> NoOffsideStmtList {cons("StmtSeq")}
 
+    NoOffsideStmtList  -> NoOffsideStmtListSem
+    ";" NoOffsideStmtListSem -> NoOffsideStmtListSem 
+
 
   context-free priorities
-    Stmt -> OffsideStmt {layout(gt(col(left(1)), col(first(1))))}
+    Stmt -> OffsideStmt {layout("1.first.col < 1.left.col")}
   >
-    OffsideStmt ";" -> OffsideStmt {prefer,layout(gt(col(first(2)), col(first(1))))}
+    OffsideStmt ";" -> OffsideStmt {layout("1.first.col < 2.first.col")}
   >
-    ";" OffsideStmt -> OffsideStmt {layout(gt(col(first(2)), col(first(1))))}
+    ";" OffsideStmt -> OffsideStmt {layout("1.first.col < 2.first.col")}
   >
-    Stmt ";" OffsideStmt -> OffsideStmt
+    OffsideStmt ";" OffsideStmt -> OffsideStmt
           {cons("StmtSeq"),
-           layout(and(gt(col(left(1)), col(first(1))),
-                  and(gt(col(first(2)), col(first(1))),
-                      gt(col(first(3)), col(first(1))))))}
+           layout("1.first.col < 2.first.col && 1.first.col < 3.first.col && 1.first.col < 3.left.col")}
   
   context-free syntax
     OffsideStmt -> OffsideStmtList
-    OffsideStmtNEWLINE OffsideStmtList -> OffsideStmtList {cons("StmtSeq"), layout(eq(col(first(1)), col(first(2))))}
+    OffsideStmtNEWLINE OffsideStmtList -> OffsideStmtList {cons("StmtSeq"), layout("1.first.col == 2.first.col")}
 
     OffsideStmt LAYOUT? -> OffsideStmtNEWLINE {enforce-newline}
 
@@ -119,19 +119,19 @@ module Haskell-List-Comprehensions
 exports
   context-free syntax
     "[" List "]" 	 -> Exp {bracket}
-    {Exp ","}+ 		 -> List {cons("List")}
-    Exp ".." 		 -> List {cons("ListFrom")}
-    Exp "," Exp ".." 	 -> List {cons("ListFirstFrom")}
-    Exp ".." Exp 	 -> List {cons("ListFromTo")}
+    {Exp ","}+ -> List {cons("List")}
+    Exp ".." -> List {cons("ListFrom")}
+    Exp "," Exp ".." -> List {cons("ListFirstFrom")}
+    Exp ".." Exp -> List {cons("ListFromTo")}
     Exp "," Exp ".." Exp -> List {cons("ListFirstFromTo")}
-    Exp "|" {Qual ","}+  -> List {cons("ListCompr")}
-   
+    Exp "|" {Qual ","}+ -> List {cons("ListCompr")}
 
 module Haskell-Qualifiers
 exports
   context-free syntax
+    {Qual ","}+ 	 -> Quals
     Pat "<-" Exp 	 -> Qual {cons("QualBind")}
-    Exp 	      	 -> Qual {cons("QualExp")}
+    Exp 	      	 -> Qual
     "let" Declbinds   	 -> Qual {cons("QualLet")}
 
 module Haskell-Patterns
@@ -139,14 +139,19 @@ exports
   context-free syntax
     LPat -> Pat
     
-  context-free priorities
-      Pat Qconop LPat -> Pat {cons("BinOpApp")}
-    > XPat ConsOp Pat -> Pat {cons("BinOpApp")}
-    
-  context-free syntax
-  	Pat Qconop LPat -> XPat {cons("BinOpApp")}
-  	LPat -> XPat
-  	
+%% with infix precedence:
+%%  context-free priorities
+%%      Pat QconopNoCons LPat -> Pat {cons("BinOpApp")}
+%%    > XPat ConsOp Pat -> Pat {cons("BinOpApp")}  
+%%  context-free syntax
+%%    Pat QconopNoCons LPat -> XPat {cons("BinOpApp")}
+%%    LPat -> XPat
+%%    Qconop -> QconopNoCons
+%%    ":" -> QconopNoCons  {reject}
+
+%% without precedence    
+    Pat Qconop LPat -> Pat {cons("BinOpApp")}
+
     APat -> LPat
     "-" Literal -> LPat {cons("Negation")}
     Gcon APat+ -> LPat {cons("ConstrApp")}
@@ -155,7 +160,7 @@ exports
     Var "@" APat -> APat {cons("Named")}
     Gcon -> APat {cons("Constr")}
     Qcon LabeledPat -> APat {cons("Labeled")}
-    "{" {FPat ","}* "}" -> LabeledPat {cons("LabeledPats"), ignore-indent}
+    "{" {FPat ","}* "}" -> LabeledPat {cons("LabeledPats"), ignore-layout}
     Literal -> APat
     "_" -> APat {cons("Wildcard")}
     "(" Pat ")" -> APat {bracket}
@@ -164,6 +169,11 @@ exports
     "~" APat -> APat {cons("Irrefutable")}
     
     Qvar "=" Pat -> FPat {cons("PatBind")}
+
+  lexical restrictions
+    "~" -/- [\!\#\$\%\&\*\+\.\/\<\=\>\?\@\\\^\|\-\~]
+    "-" -/- [\!\#\$\%\&\*\+\.\/\<\=\>\?\@\\\^\|\-\~]
+    "|" -/- [\!\#\$\%\&\*\+\.\/\<\=\>\?\@\\\^\|\-\~]
 
 module Haskell-Value-Definitions
 exports
@@ -194,34 +204,33 @@ exports
 
   context-free syntax
   	NoOffsideDeclBlock -> DeclList {cons("DeclList")}
-  	OffsideDeclList | Empty   -> DeclList {cons("DeclList")}
+  	OffsideDeclList | Empty   -> DeclList {cons("DeclList"), longest-match} 
   	
-    "{" NoOffsideDeclList | Empty "}"  -> NoOffsideDeclBlock {bracket, ignore-indent}
+    "{" NoOffsideDeclListSem | Empty "}"  -> NoOffsideDeclBlock {bracket, ignore-layout}
     
   context-free priorities
     Decl -> NoOffsideDecl
   >
-    NoOffsideDecl ";" -> NoOffsideDecl {prefer}
-%%  >
-%%    ";" NoOffsideStmt -> NoOffsideStmt
+    NoOffsideDecl ";" -> NoOffsideDecl
 
   context-free syntax
     NoOffsideDecl -> NoOffsideDeclList
     NoOffsideDecl ";" NoOffsideDeclList -> NoOffsideDeclList {cons("DeclSeq")}
+    
+    NoOffsideDeclList  -> NoOffsideDeclListSem
+    ";" NoOffsideDeclListSem -> NoOffsideDeclListSem 
 
 
   context-free priorities
     Decl -> OffsideDecl {layout(gt(col(left(1)), col(first(1))))}
   >
-    OffsideDecl ";" -> OffsideDecl {prefer, layout(gt(col(first(2)), col(first(1))))}
+    OffsideDecl ";" -> OffsideDecl {layout(gt(col(first(2)), col(first(1))))}
   >
     ";" OffsideDecl -> OffsideDecl {layout(gt(col(first(2)), col(first(1))))}
   >
-    Decl ";" OffsideDecl -> OffsideDecl
+    OffsideDecl ";" Decl -> OffsideDecl
           {cons("DeclSeq"),
-           layout(and(gt(col(left(1)), col(first(1))),
-                  and(gt(col(first(2)), col(first(1))),
-                      gt(col(first(3)), col(first(1))))))}
+           layout("1.first.col < 2.first.col && 1.first.col < 3.first.col && 1.first.col < 3.left.col")}
   
   context-free syntax
     OffsideDecl -> OffsideDeclList
@@ -241,19 +250,19 @@ exports
   	NoOffsideAltBlock -> AltList {cons("AltList")}
   	OffsideAltList   -> AltList {cons("AltList")}
   	
-    "{" NoOffsideAltList "}"  -> NoOffsideAltBlock {bracket, ignore-block}
+    "{" NoOffsideAltList "}"  -> NoOffsideAltBlock {bracket, ignore-layout}
     
   context-free priorities
     Alt -> NoOffsideAlt
   >
-    NoOffsideAlt ";" -> NoOffsideAlt {prefer}
-%%  >
-%%    ";" NoOffsideStmt -> NoOffsideStmt
+    NoOffsideAlt ";" -> NoOffsideAlt
 
   context-free syntax
     NoOffsideAlt -> NoOffsideAltList
     NoOffsideAlt ";" NoOffsideAltList -> NoOffsideAltList {cons("AltSeq")}
 
+    NoOffsideAltList  -> NoOffsideAltListSem
+    ";" NoOffsideAltListSem -> NoOffsideAltListSem 
 
   context-free priorities
     Alt -> OffsideAlt {layout(gt(col(left(1)), col(first(1))))}
@@ -262,11 +271,9 @@ exports
   >
     ";" OffsideAlt -> OffsideAlt {layout(gt(col(first(2)), col(first(1))))}
   >
-    Alt ";" OffsideAlt -> OffsideAlt
+    OffsideAlt ";" Alt -> OffsideAlt
           {cons("AltSeq"),
-           layout(and(gt(col(left(1)), col(first(1))),
-                  and(gt(col(first(2)), col(first(1))),
-                      gt(col(first(3)), col(first(1))))))}
+           layout("1.first.col < 2.first.col && 1.first.col < 3.first.col && 1.first.col < 3.left.col")}
   
   context-free syntax
     OffsideAlt -> OffsideAltList
@@ -275,61 +282,61 @@ exports
     OffsideAlt LAYOUT? -> OffsideAltNEWLINE {enforce-newline}
 
 module Haskell-Expressions
-exports   
+exports
   context-free syntax
-    Exp 				 -> AnyExp
+    Exp -> AnyExp
 
-    Qvar 				 -> Exp 	{cons("Var")}
-    Gcon 				 -> Exp 	{cons("Constr")}
-    Literal 				 -> Exp 	{cons("Lit")}
-    "(" Exp "," {Exp ","}+ ")" 			 -> Exp 	{cons("Product")}
-%%    "(#" Exps "#)" 			 -> Exp 	{cons("Unboxed?")}
-    "(" Exp ")" 			 -> Exp 	{bracket}
+    Qvar -> Exp {cons("Var")}
+    Gcon -> Exp {cons("Constr")}
+    Literal -> Exp {cons("Lit")}
+    "(" Exps2 ")" -> Exp {cons("Product")}
+%% "(#" Exps "#)" -> Exp {cons("Unboxed?")}
+    "(" Exp ")" -> Exp {bracket}
 
-    {Exp ","}+ 				 -> Exps
-    APat+				 -> Fargs
+    {Exp ","}+ -> Exps
+    Exp "," {Exp ","}+ -> Exps2 {cons("ECons")}
+    APat+ -> Fargs
 
 
   context-free syntax
-    "infix"  	   	  -> Infix 	{cons("Infix")}
-    "infixl" 	   	  -> Infix 	{cons("InfixL")}
-    "infixr" 	   	  -> Infix 	{cons("InfixR")}
-    INTEGER? 	   	  -> Prec
-    {Op ","}+ 	   	  -> Ops
-    Infix Prec Ops 	  -> Fixdecl 	{cons("FixDecl")}
-    Fixdecl 	   	  -> Decl 
+    "infix" -> Infix {cons("Infix")}
+    "infixl" -> Infix {cons("InfixL")}
+    "infixr" -> Infix {cons("InfixR")}
+    INTEGER? -> Prec
+    {Op ","}+ -> Ops
+    Infix Prec Ops -> Fixdecl {cons("FixDecl")}
+    Fixdecl -> Decl
 
-    "(" Exp Qop ")"  -> Exp 	{cons("LSection")}
-    "(" QopNoNeg Exp ")" -> Exp 	{cons("RSection")}
+    "(" Exp Qop ")" -> Exp {cons("LSection")}
+    "(" QopNoNeg Exp ")" -> Exp {cons("RSection")}
 
-    Qop -> QopNoNeg    
+    Qop -> QopNoNeg
     "-" -> QopNoNeg {reject}
  
-    Qvar "=" Exp 	-> Fbind	{cons("FBind")}
-    "{" {Fbind ","}* "}" -> LabelBinds {cons("LabelBinds"), ignore-indent}
+    "{" {Fbind ","}* "}" -> LabelBinds {cons("LabelBinds"), ignore-layout}
 
   context-free priorities
-    Qvar "@" Exp 			  -> Exp  	{cons("Named")}
-  > Exp LabelBinds 			  -> Exp  	{cons("Labeled")}
-  > Exp				  	  -> Aexp
-  > Exp Exp				  -> Exp 	{cons("AppBin"),left}
-  > Exp "::" Type 			  -> Exp 	{cons("Typed")}
-  > "-" Exp               -> Exp  {cons("Negation")}
+    Qvar "@" Exp -> Exp {cons("Named")}
+  > Exp LabelBinds -> Exp {cons("Labeled")}
+  > Exp -> Aexp
+  > Exp Exp -> Exp {cons("AppBin"),left}
+  > "-" Exp -> Exp {cons("Negation")}
   > Exp Qop Exp -> Exp {cons("OpApp"), right}
+  > Exp "::" Context? Type -> Exp {cons("Typed")}
 
 
   context-free syntax
-  	"\\" Fargs "->" Exp		  -> Exp 	{cons("Abs")}
-    "let" Declbinds "in" Exp 		  -> Exp 	{cons("Let")} 
-    "if" AnyExp "then" AnyExp "else" Exp -> Exp 	{cons("If")}
+   "\\" Fargs "->" Exp -> Exp {cons("Abs"), longest-match}
+    "let" Declbinds "in" Exp -> Exp {cons("Let"), longest-match}
+    "if" AnyExp "then" AnyExp "else" Exp -> Exp {cons("If"), longest-match}
     "do" StmtList -> Exp {cons("Do"), longest-match}
-    "case" AnyExp "of" AltList          -> Exp  	{cons("Case"), longest-match}
+    "case" AnyExp "of" AltList -> Exp {cons("Case"), longest-match}
 
   context-free priorities
-  	Exp Exp				  -> Exp 	{cons("AppBin"),left}
-  	> {
+   Exp Exp -> Exp {cons("AppBin"),left}
+   > {
         "\\" Fargs "->" Exp -> Exp
-       "let" Declbinds "in" Exp -> Exp 
+       "let" Declbinds "in" Exp -> Exp
        "if" AnyExp "then" AnyExp "else" Exp -> Exp
        "case" AnyExp "of" AltList -> Exp
        "do" StmtList -> Exp
@@ -339,26 +346,18 @@ exports
     Exp Qop Exp -> Exp
   <0>
   > {
-  	 "\\" Fargs "->" Exp -> Exp
-     "let" Declbinds "in" Exp -> Exp 
+   "\\" Fargs "->" Exp -> Exp
+     "let" Declbinds "in" Exp -> Exp
      "if" AnyExp "then" AnyExp "else" Exp -> Exp
     }
  
-  context-free priorities
-  	"-" Exp               -> Exp  {cons("Negation")}
-    >
-  	Exp Qop Exp -> Exp
-  
-  
-  
-%% Notes:
-%% AnyExp is used to prevent priorities from forbidding expressions
-%% where the do not cause ambiguities.
-%% Fargs is used instead of Aexp+ because of a bug in the SDF2 
-%% normalizer; regular expression expansion does not take into
-%% account symbols used only in priority rules.
-
-
+   context-free priorities
+    Exp "::" Context? Type -> Exp
+  .> {
+   "\\" Fargs "->" Exp -> Exp
+     "let" Declbinds "in" Exp -> Exp
+     "if" AnyExp "then" AnyExp "else" Exp -> Exp
+    }
 
 module Haskell-Signature-Declarations
 exports
@@ -371,6 +370,7 @@ exports
   context-free syntax
     "class" SContext? Tycls Tyvar MaybeWhere 		-> Topdecl {cons("Class")}
     "instance" SContext? Qtycls Inst* MaybeWhere 		-> Topdecl {cons("Instance")}
+    "instance" SContext? "(" Qtycls Inst* ")" MaybeWhere    -> Topdecl {cons("Instance")}
     "default"  "(" {Type ","}* ")" 	-> Topdecl {cons("Default")}
 
     Gtycon -> Inst {cons("InstCons")}
@@ -392,7 +392,7 @@ exports
 module Haskell-Type-Declarations
 exports
   context-free syntax
-    "type" Tycon Tyvar* "=" Type	  -> Topdecl {cons("TypeDecl")}
+    "type" Tycon Tyvar* "=" Type			  -> Topdecl {cons("TypeDecl")}
     "data" Context? Type Constrs Deriving 	  -> Topdecl {cons("Data")}
     "newtype" Context? Type "=" Newconstr Deriving -> Topdecl {cons("NewTypeDecl")}
 
@@ -404,13 +404,13 @@ exports
   context-free syntax
     -> Constrs {cons("NoConstrDecls")}
     "=" {Constr "|"}+ -> Constrs {cons("ConstrDecls")}
-
+    
     Conid Satype*       -> Constr {cons("ConstrDecl")}
     Sbtype Conop Sbtype -> Constr {cons("InfixConstr")}
 
     Conid Type 			 	 -> Newconstr
     Conid LabeledConstr 	 -> Newconstr
-    "{" Var "::" Type "}" -> LabeledConstr {cons("LabeledConstr"), ignore-indent}
+    "{" Var "::" Type "}" -> LabeledConstr {cons("LabeledConstr"), ignore-layout}
    
     AType 				 -> Satype
     "!" AType 				 -> Satype
@@ -442,13 +442,14 @@ exports
 
   context-free syntax
     {Type ","}+ 	   -> Types
+    Type "," {Type ","}+   -> Types2 	{cons("TCons")}
     
   context-free syntax
     Gtycon 		   -> AType 	{cons("TCon")}
     Tyvar 		   -> AType 	{cons("TVar")}
     "(" Type ")" 	   -> AType 	{bracket}
     "[" Type "]" 	   -> AType 	{cons("TList")}
-    "(" Type "," {Type ","}+ ")" 	   -> AType 	{cons("TProd")}
+    "(" Types2 ")" 	   -> AType 	{cons("TProd")}
 
     AType -> Type
     Type Type 	   	   -> Type 	{cons("TAppBin"),left}
@@ -472,14 +473,14 @@ exports
   context-free syntax
   	{ Export "," }* -> Exportlist {cons("Exportlist")}
   	Exportlist "," -> Exportlist
-    "(" Exportlist ")" 		-> Exports
+    "(" Exportlist ")" 		-> Exports {cons("Exports")}
 
     Qvar 			-> Export
     Gtycon 			-> Export
-    Gtycon "(" ".." ")" 	-> Export {cons("ExportAllSub")}
-    Gtycon "(" ")" 		-> Export {cons("ExportNoSub")}
-    Gtycon "("{Qcname ","}+ ")" -> Export {cons("ExportSomeSub")}
-    "module" Modid 		-> Export {cons("ExportModule")}
+    Gtycon "(" ".." ")" 	-> Export
+    Gtycon "(" ")" 		-> Export
+    Gtycon "("{Qcname ","}+ ")" -> Export
+    "module" Modid 		-> Export
 
     Qvar 			-> Qcname
     Gcon 			-> Qcname
@@ -502,15 +503,15 @@ exports
     Decl 		   	-> Topdecl
 
   context-free syntax
-  	"{" NoOffsideBody "}" -> Body {ignore-indent, bracket}
+  	"{" NoOffsideBody "}" -> Body {ignore-layout, bracket}
     OffsideBody           -> Body
   	
   	"" -> Empty {cons("Empty")}
   	
-  	Empty                       Empty                -> NoOffsideBody {cons("Body")}
-  	Empty                       NoOffsideTopdeclList -> NoOffsideBody {cons("Body")}
-  	NoOffsideImportdeclList     Empty                -> NoOffsideBody {cons("Body")}
-    NoOffsideImportdeclList ";" NoOffsideTopdeclList -> NoOffsideBody {cons("Body")}
+  	Empty                          Empty                   -> NoOffsideBody {cons("Body")}
+  	Empty                          NoOffsideTopdeclListSem -> NoOffsideBody {cons("Body")}
+  	NoOffsideImportdeclListSem     Empty                   -> NoOffsideBody {cons("Body")}
+    NoOffsideImportdeclListSem ";" NoOffsideTopdeclList -> NoOffsideBody {cons("Body")}
 
     Empty                 Empty              -> OffsideBody {cons("Body")}
     Empty                 OffsideTopdeclList -> OffsideBody {cons("Body")}
@@ -530,21 +531,21 @@ exports
     NoOffsideImportdecl -> NoOffsideImportdeclList
     NoOffsideImportdecl ";" NoOffsideImportdeclList -> NoOffsideImportdeclList {cons("ImportdeclSeq")}
 
+    NoOffsideImportdeclList  -> NoOffsideImportdeclListSem
+    ";" NoOffsideImportdeclListSem -> NoOffsideImportdeclListSem 
+
 %% No offside top declarations
   context-free priorities
     Topdecl -> NoOffsideTopdecl
   >
     NoOffsideTopdecl ";" -> NoOffsideTopdecl {prefer}
-%%  >
-%%    ";" NoOffsideTopdecl -> NoOffsideTopdecl
-
 
   context-free syntax
-%%    NoOffsideTopdecl -> NoOffsideTopdeclSeqs
-%%    ";" NoOffsideTopdeclSeqs -> NoOffsideTopdeclSeqs
-    
     NoOffsideTopdecl -> NoOffsideTopdeclList
     NoOffsideTopdecl ";" NoOffsideTopdeclList -> NoOffsideTopdeclList {cons("TopdeclSeq")}
+
+    NoOffsideTopdeclList  -> NoOffsideTopdeclListSem
+    ";" NoOffsideTopdeclListSem -> NoOffsideTopdeclListSem 
 
 
 %% Offside import declarations
@@ -707,7 +708,7 @@ exports
   context-free syntax
     "(" ")"        	-> Gcon 	{cons("Unit")}
     "[" "]"        	-> Gcon		{cons("EmptyList")}
-    "(" ","+ ")"   	-> Gcon		{cons("ProductCon")}
+    "(" ","+ ")"   	-> Gcon		{cons("Product")}
     Qcon           	-> Gcon		
 
   %% The following portion can be put into module Haskell-Infix
@@ -730,25 +731,37 @@ exports
 
     %% variable operators
 
-    Varsym        	-> Varop
-    Qvarsym        	-> Qvarop
     Varsym  		-> Qvarsym
     Qvarsym1 		-> Qvarsym
 
     %% constructor operators
 
-    Consym  		-> Qconsym
-    QCONSYM 		-> Qconsym
-    CONSYM 		-> Consym
-    Consym        	-> Conop
-    Qconsym -> Gconsym
-    Gconsym        	-> Qconop
+    Varsym        	-> Varop
+    "`" Varid "`" 	-> Varop 	{cons("PrefOp")}
 
-    CONSOP -> ConsOp {cons("ConsOp")}
-    ConsOp -> Qop
+    Qvarsym        	-> Qvarop
+    "`" Qvarid "`" 	-> Qvarop 	{cons("PrefOp")}
+
+    Consym        	-> Conop
+    "`" Conid "`" 	-> Conop 	{cons("PrefCon")}
+
+    Gconsym        	-> Qconop
+    "`" Qconid "`" 	-> Qconop 	{cons("PrefCon")}
+
     Qvarop 		  -> Qop
     Qconop 		  -> Qop
 
+    Qconsym -> Gconsym
+    ConsOp  -> Gconsym
+    CONSOP -> ConsOp {cons("ConsOp")}
+
+
+
+
+
+    Consym  		-> Qconsym
+    QCONSYM 		-> Qconsym
+    CONSYM 		-> Consym
 
     %% make prefix symbols from infix symbols
 
@@ -756,13 +769,6 @@ exports
     "(" Qvarsym ")" 	-> Qvar 	{cons("BinOp")}
     "(" Consym ")" 	-> Con 		{cons("BinCon")}
     "(" Qconsym ")" 	-> Qcon 	{cons("BinCon")}
-
-    %% make infix symbols from prefix symbols
-
-    "`" Varid "`" 	-> Varop 	{cons("PrefOp")}
-    "`" Qvarid "`" 	-> Qvarop 	{cons("PrefOp")}
-    "`" Conid "`" 	-> Conop 	{cons("PrefCon")}
-    "`" Qconid "`" 	-> Qconop 	{cons("PrefCon")}
     
 
   context-free syntax
@@ -811,8 +817,6 @@ exports
   syntax
     <CONID-LEX> "." <Modid-LEX> -> QModid {cons("QModId")}
     <CONID-LEX> "." QModid -> QModid {cons("QModId")}
-    <VARID-LEX> "." <Modid-LEX> -> QModid {cons("QModId")}
-    <VARID-LEX> "." QModid -> QModid {cons("QModId")}
     QModid -> Modid
     QModid -> <Modid-CF>
 
@@ -847,7 +851,7 @@ exports
     "then" 	 "type" 	 "where" 	
     "_" 
     "as" 	 "hiding" 	 "qualified" 	
-    "export" 	 "label" 	 "dynamic" -/- [a-zA-Z0-9]
+    "export" 	 "label" 	 "dynamic" -/- [a-zA-Z0-9\'\_]
 
 module Haskell-Identifiers
 exports
@@ -855,6 +859,9 @@ exports
     [a-z][A-Za-z0-9\'\_]*       -> VARID
     [\_][A-Za-z0-9\'\_]+ -> VARID
     [A-Z][A-Za-z0-9\'\_]*       -> CONID
+
+    %% Question: underscore in identifiers according to standard???
+    %% Answer: Underscore, "_", is treated as a lowercase letter, and can occur wherever a lowercase letter can. However, "_" all by itself is a reserved identifier, used as wild card in patterns.
 
     [\!\#\$\%\&\*\+\.\/]
     \/ [\<\=\>\?\@\\\^\|\-\~] -> Symbol
@@ -869,7 +876,7 @@ exports
     CONID VARID -/- [A-Za-z0-9\'\_]
     VARSYM      -/- [\!\#\$\%\&\*\+\.\/] \/ [\<\=\>\?\@\\\^\|\-\~]
     CONSYM      -/- [\!\#\$\%\&\*\+\.\/] \/ [\<\=\>\?\@\\\^\|\-\~]
-    CONSOP      -/- [\:]
+    CONSOP      -/- [\:] \/ [\!\#\$\%\&\*\+\.\/] \/ [\<\=\>\?\@\\\^\|\-\~]
 
 module Haskell-Layout
 exports
@@ -880,7 +887,11 @@ exports
 
     [\ \t\n\r]                      -> WhiteChar
 
-    "--" ~[\n\r]* ([\r\n] | EOF)    -> Comment
+    ~[\n\r] -> AnyNoSymbol
+    Symbol -> AnyNoSymbol {reject}
+    "--" [\-]* -> Dashes
+
+    Dashes (AnyNoSymbol ~[\n\r]*)? ([\r\n] | EOF)    -> Comment
     -> EOF
 
     "{-" NCommentContent* "-}" -> NComment
@@ -902,6 +913,7 @@ exports
     NoNewlineLayout? Newline LAYOUT -> NewLineLayout
     
   lexical restrictions
+  	Dashes -/- [\-]
     Hyphen    -/- [\}]
     CurlyOpen -/- [\-]
     EOF -/- ~[]
@@ -909,7 +921,7 @@ exports
     NCommentText -/- ~[\-\{] | [\-].~[\}] | [\{].~[\-]
 
   context-free restrictions
-    LAYOUT? -/- [\ \t\n\r] | [\-].[\-] | [\{].[\-]
+    LAYOUT? -/- [\ \t\n\r] | [\{].[\-] | [\-].[\-]
 
 module Haskell-Syntax
 imports Haskell-Layout
@@ -950,8 +962,8 @@ imports GHC-Flexible-Stuff
         GHC-GeneralizedNewtypeDeriving
 exports
   sorts Module
-
-
+%%  context-free start-symbols Module
+    
 module org/sugarj/languages/Haskell
 imports 
         Haskell
@@ -1147,3 +1159,8 @@ imports
             OffsideStmt                  => HaskellOffsideStmt
             Type                         => HaskellType
             Exp                          => HaskellExp ]
+exports
+  syntax
+    %% support lower-case package
+    <HaskellVARID-LEX> "." <HaskellModid-LEX> -> HaskellQModid {cons("QModId")}
+    <HaskellVARID-LEX> "." HaskellQModid -> HaskellQModid {cons("QModId")}

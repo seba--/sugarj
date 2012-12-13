@@ -5,7 +5,7 @@ import org.sugarj.languages.Haskell
 context-free syntax
   UndefinedBlock -> HaskellValdef
   "undefined" HaskellVar+ -> UndefinedBlock {cons("UndefinedBlock"),
-                                             layout(all(2,"x",eq(col(first("x")), col(first(2)))))} 
+                                             layout(all("x",2,eq(col(first("x")), col(first(2)))))} 
 
 desugarings
   desugar-undefined-block
@@ -15,3 +15,4 @@ rules
     ?UndefinedBlock(<id>);
     map(!Valdef(<id>, Var("undefined"), Where(DeclList(Empty()))));
     foldr1(?[<id>], \(x,y) -> TopdeclSeq(x,y)\)
+

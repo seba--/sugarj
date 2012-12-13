@@ -2,7 +2,6 @@ package org.sugarj.driver;
 
 import static org.sugarj.common.ATermCommands.fixSDF;
 import static org.sugarj.common.ATermCommands.getApplicationSubterm;
-import static org.sugarj.common.ATermCommands.getString;
 import static org.sugarj.common.ATermCommands.isApplication;
 import static org.sugarj.common.Log.log;
 import static org.sugarj.driver.SDFCommands.extractSDF;
@@ -26,9 +25,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.jsglr_layout.client.FilterException;
 import org.spoofax.jsglr_layout.client.InvalidParseTableException;
 import org.spoofax.jsglr_layout.client.ParseTable;
 import org.spoofax.jsglr_layout.client.SGLR;
@@ -422,50 +423,36 @@ public class Driver{
     int start = inputTreeBuilder.getTokenizer() == null ? 0 : inputTreeBuilder.getTokenizer().getStartOffset();
     log.beginTask("parsing", "PARSE next toplevel declaration.", Log.CORE);
     try {
-      IStrategoTerm remainingInputTerm = null;
+      Pair<IStrategoTerm, Integer> parseResult = null;
       
       try {
-        remainingInputTerm = currentParse(input, recovery);
-      } catch (Exception e) {
-        if (recovery) {
-          e.printStackTrace();
-          remainingInputTerm = currentParse(input, false);
-        }
+        parseResult = currentParse(input, recovery);
+      } catch (SGLRException e) {
+        if (e.getCause() instanceof TimeoutException)
+          parseResult = currentParse(input, false);
         
-        if (remainingInputTerm == null)
+        if (parseResult == null)
           throw e;
       }
 
-      if (remainingInputTerm == null)
-        throw new ParseException("could not parse toplevel declaration in:\n"
-            + input, -1);
+      if (parseResult == null || parseResult.a == null)
+        throw new ParseException("could not parse toplevel declaration in:\n" + input, -1);
 
-//      remainingInputTerm = ATermCommands.pushAmbiguities(remainingInputTerm);
-      
-      if (!isApplication(remainingInputTerm, "NextToplevelDeclaration"))
-        throw new ATermCommands.MatchError(remainingInputTerm, "NextToplevelDeclaration");
-      
-      IStrategoTerm toplevelDecl = getApplicationSubterm(remainingInputTerm, "NextToplevelDeclaration", 0);
-      IStrategoTerm restTerm = getApplicationSubterm(remainingInputTerm, "NextToplevelDeclaration", 1);
-      if (isApplication(restTerm, "amb"))
-        restTerm = restTerm.getSubterm(0).getSubterm(0);
-      String rest = getString(restTerm);
+      IStrategoTerm toplevelDecl = parseResult.a;
+      String rest = input.substring(Math.min(parseResult.b, input.length()));
 
       if (input.equals(rest))
-        throw new SGLRException(parser, "empty toplevel declaration parse rule");
+        if (parser.getCollectedErrors().isEmpty())
+          throw new SGLRException(parser, "empty toplevel declaration parse rule");
+        else
+          throw parser.getCollectedErrors().iterator().next();
       
-      try {
-        if (!rest.isEmpty())
-          inputTreeBuilder.retract(restTerm);
-      } catch (Throwable t) {
-        t.printStackTrace();
-      }
-      
-      if (toplevelDecl == null || rest == null)
-        throw new ParseException(
-            "could not parse next toplevel declaration in:\n"
-                + remainingInputTerm.toString(),
-            -1);
+//      try {
+//        if (!rest.isEmpty())
+//          inputTreeBuilder.retract(restTerm);
+//      } catch (Throwable t) {
+//        t.printStackTrace();
+//      }
       
       Path tmpFile = FileCommands.newTempFile("aterm");
       FileCommands.writeToFile(tmpFile, toplevelDecl.toString());
@@ -478,7 +465,7 @@ public class Driver{
       
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
       
-      if (!(e instanceof StrategoException) && !(e instanceof SGLRException))
+      if (!(e instanceof StrategoException) && (!(e instanceof SGLRException) || (e instanceof FilterException)))
         e.printStackTrace();
       else
         log.logErr(msg, Log.DETAIL);
@@ -642,26 +629,27 @@ public class Driver{
   }
   
   
-  private IStrategoTerm currentParse(String remainingInput, boolean recovery) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  private Pair<IStrategoTerm, Integer> currentParse(String remainingInput, boolean recovery) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     
     currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfCache, environment, langLib);
 
     ParseTable table = ATermCommands.parseTableManager.loadFromFile(currentGrammarTBL.getAbsolutePath());
     
-    Pair<SGLR, IStrategoTerm> parseResult = null;
+    Pair<SGLR, Pair<IStrategoTerm, Integer>> parseResult = null;
 
     // read next toplevel decl and stop if that fails
     try {
       parseResult = SDFCommands.parseImplode(
           table,
           remainingInput,
-          "NextToplevelDeclaration",
+          "ToplevelDeclaration",
           recovery,
+          true,
           inputTreeBuilder);
-    } catch (SGLRException e) {
-      this.parser = e.getParser();
-      log.logErr(e.getMessage(), Log.DETAIL);
-      return null;
+//    } catch (SGLRException e) {
+//      this.parser = e.getParser();
+//      log.logErr(e.getMessage(), Log.DETAIL);
+//      return null;
     } finally {
       if (parseResult != null)
         this.parser = parseResult.a;
@@ -807,7 +795,7 @@ public class Driver{
               setErrorMessage(toplevelDecl, "problems while compiling " + importModuleName);
             }
               
-            log.log("CONTINUE PROCESSING'" + sourceFile + "'.", Log.IMPORT);
+            log.log("CONTINUE PROCESSING'" + sourceFile + "'.", Log.CORE);
           }
         }
         

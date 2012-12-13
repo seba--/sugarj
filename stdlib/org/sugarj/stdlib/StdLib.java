@@ -5,6 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.core.runtime.FileLocator;
 
@@ -13,7 +15,7 @@ import org.eclipse.core.runtime.FileLocator;
  */
 public class StdLib {
 
-  public static final String VERSION = "stdlib-0.1a";
+  public static final String VERSION = "stdlib-0.1b";
   
   public static File stdLibDir;
   private static String stdLibTmpDir;
@@ -71,7 +73,6 @@ public class StdLib {
     return f;
   }
   
-
   public static File sdfDef = ensureFile("org/sugarj/languages/Sdf2.def");
   public static File sdfTbl = ensureFile("org/sugarj/languages/Sdf2.tbl");
   public static File strategoDef = ensureFile("org/sugarj/languages/Stratego.def");
@@ -80,7 +81,12 @@ public class StdLib {
   public static File editorServicesTbl = ensureFile("org/sugarj/languages/EditorServices.tbl");
   public static File plainDef = ensureFile("org/sugarj/languages/Plain.def");
   public static File commonDef = ensureFile("org/sugarj/stdlib/Common.def");
+  public static File sugarDef = ensureFile("org/sugarj/languages/Sugar.def");
   public static File failureTrans = ensureFile("failure-trans.jar");
+
+  public static List<File> stdGrammars() {
+    return Arrays.asList(new File[]{sdfDef, strategoDef, editorServicesDef, plainDef, commonDef, sugarDef});
+  }
 
   public static void main(String args[]) {
     exists(stdLibDir);
@@ -92,6 +98,7 @@ public class StdLib {
     exists(editorServicesTbl);
     exists(plainDef);
     exists(commonDef);
+    exists(sugarDef);
     exists(failureTrans);
   }
   
