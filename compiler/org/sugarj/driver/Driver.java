@@ -54,6 +54,7 @@ import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.driver.caching.ModuleKeyCache;
+import org.sugarj.driver.transformations.primitive.SugarJPrimitivesLibrary;
 import org.sugarj.stdlib.StdLib;
 import org.sugarj.util.Pair;
 import org.sugarj.util.ProcessingListener;
@@ -127,7 +128,9 @@ public class Driver{
     this.environment=env;
     this.langLib = langLibFactory.createLanguageLibrary();
 
-    langLib.setInterpreter(new HybridInterpreter());
+    HybridInterpreter interp = new HybridInterpreter();
+    interp.addOperatorRegistry(new SugarJPrimitivesLibrary(this));
+    langLib.setInterpreter(interp);
 
     try {      
       if (environment.getCacheDir() != null)
@@ -1217,5 +1220,17 @@ public class Driver{
         return imp1 ? -1 : 1;
       }
     });
+  }
+  
+  public IStrategoTerm getNamespaceDec() {
+    return sugaredPackageDecl;
+  }
+  
+  public LanguageLib getLanguageLib() {
+    return langLib;
+  }
+  
+  public String getModuleName() {
+    return FileCommands.fileName(sourceFile);
   }
 }
