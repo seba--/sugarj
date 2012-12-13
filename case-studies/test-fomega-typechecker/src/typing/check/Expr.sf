@@ -250,14 +250,8 @@ rules
                      | (x,<concat-strings> ["duplicate label ",x])) => errs4
 
   // *** Var ***
-  typeOf: // due to the condition `CtxEmpty`, local bindings shadow imported bindings
-    (CtxEmpty(),Var(x)) -> (<imported-type-context-var> x,[])
   typeOf:
     (CtxEmpty(),Var(x)) -> (TyUnknown(),[(x,<concat-strings> ["undefined identifier ",x])])
-  typeOf:
-    (CtxBindQVar(ctx,qy,T),Var(x)) -> <typeOf> (ctx,Var(x))
-  typeOf:
-    (CtxBindQTVarDef(ctx,qY,K,T),Var(x)) -> <typeOf> (ctx,Var(x))
   typeOf:
     (CtxBindTVar(ctx,Y,K),Var(x)) -> <typeOf> (ctx,Var(x))
   typeOf:
@@ -272,17 +266,13 @@ rules
   typeOf:
     (CtxEmpty(),QVar(qx)) -> (TyUnknown(),[(qx,<concat-strings> ["undefined identifier ",qx])])
   typeOf:
-    (CtxBindVar(ctx,y,T),QVar(qx)) -> <typeOf> (ctx,QVar(qx))
-  typeOf:
-    (CtxBindQTVarDef(ctx,qY,K,T),QVar(qx)) -> <typeOf> (ctx,QVar(qx))
-  typeOf:
     (CtxBindTVar(ctx,Y,K),QVar(qx)) -> <typeOf> (ctx,QVar(qx))
   typeOf:
     (CtxBindTVarDef(ctx,Y,K,T),QVar(qx)) -> <typeOf> (ctx,QVar(qx))
   typeOf:
-    (CtxBindQVar(ctx,qx,T),QVar(qx)) -> (T,[])
+    (CtxBindVar(ctx,qx,T),QVar(qx)) -> (T,[])
   typeOf:
-    (CtxBindQVar(ctx,qy,T),QVar(qx)) -> <typeOf> (ctx,QVar(qx))
+    (CtxBindVar(ctx,qy,T),QVar(qx)) -> <typeOf> (ctx,QVar(qx))
     where <not(equal)> (qy,qx)
 
 // *** Notes ***

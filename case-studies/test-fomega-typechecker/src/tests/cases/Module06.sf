@@ -1,0 +1,6 @@
+module tests.cases.Module06
+
+import typing.check.TypeChecker
+
+public val x = true
+

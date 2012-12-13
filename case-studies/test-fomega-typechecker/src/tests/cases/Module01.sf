@@ -1,6 +1,6 @@
 module tests.cases.Module01
 
-import typing.check.TypeChecker
+import qualified typing.check.TypeChecker
 
 public type N = Nat
 public val z = 0

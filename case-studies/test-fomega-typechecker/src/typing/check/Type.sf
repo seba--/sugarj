@@ -83,15 +83,11 @@ rules
   kindOf:
     (CtxBindTVar(ctx,Y,K),TyQVar(qX)) -> <kindOf> (ctx,TyQVar(qX))
   kindOf:
-    (CtxBindTVarDef(ctx,Y,K,T),TyQVar(qX)) -> <kindOf> (ctx,TyQVar(qX))
-  kindOf:
     (CtxBindVar(ctx,y,T),TyQVar(qX)) -> <kindOf> (ctx,TyQVar(qX))
   kindOf:
-    (CtxBindQVar(ctx,qy,T),TyQVar(qX)) -> <kindOf> (ctx,TyQVar(qX))
+    (CtxBindTVarDef(ctx,qX,K,T),TyQVar(qX)) -> (K,[])
   kindOf:
-    (CtxBindQTVarDef(ctx,qX,K,T),TyQVar(qX)) -> (K,[])
-  kindOf:
-    (CtxBindQTVarDef(ctx,qY,K,T),TyQVar(qX)) -> <kindOf> (ctx,TyQVar(qX))
+    (CtxBindTVarDef(ctx,qY,K,T),TyQVar(qX)) -> <kindOf> (ctx,TyQVar(qX))
     where <not(equal)> (qY,qX)
 
   kindOf:
@@ -131,16 +127,10 @@ rules
   kindOf:
     (ctx,TyBool()) -> (KiStar(),[])
 
-  kindOf: // due to the condition `CtxEmpty`, local bindings shadow imported bindings
-    (CtxEmpty(),TyVar(X)) -> (<imported-type-context-tyvar> X,[])
   kindOf:
     (CtxEmpty(),TyVar(X)) -> (KiUnknown(),[(X,<concat-strings> ["undefined identifier ",X])])
   kindOf:
     (CtxBindVar(ctx,y,T),TyVar(X)) -> <kindOf> (ctx,TyVar(X))
-  kindOf:
-    (CtxBindQVar(ctx,qy,T),TyVar(X)) -> <kindOf> (ctx,TyVar(X))
-  kindOf:
-    (CtxBindQTVarDef(ctx,qY,K,T),TyVar(X)) -> <kindOf> (ctx,TyVar(X))
   kindOf:
     (CtxBindTVar(ctx,X,K),TyVar(X)) -> (K,[])
   kindOf:
