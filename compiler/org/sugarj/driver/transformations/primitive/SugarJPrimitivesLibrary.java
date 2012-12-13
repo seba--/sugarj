@@ -15,6 +15,7 @@ public class SugarJPrimitivesLibrary extends AbstractStrategoOperatorRegistry {
   public SugarJPrimitivesLibrary(Driver driver) {
     add(new CurrentPackage(driver));
     add(new CurrentModule(driver));
+    add(new CurrentImports(driver));
   }
   
   @Override
