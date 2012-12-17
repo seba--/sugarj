@@ -168,8 +168,10 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
       Path includePath; 
       if (fullPath.isPrefixOf(path))
         includePath = p.isEmpty() ? root : new RelativePath(root, p);
-      else
+      else if (externalPath)
         includePath = new AbsolutePath(p);
+      else
+        includePath = new RelativePath(root, p);
       
       if (fragment.getKind() == IPackageFragmentRoot.K_SOURCE)
         env.getSourcePath().add(includePath);
