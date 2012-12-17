@@ -8,8 +8,8 @@ signature constructors
   TransDecHead : List(AnnoOrSugarMod) * JavaId -> TransformationDecHead
   TransBody : TransformationDef -> TransformationBody
 
-  TransApp : JavaTypeName * List(TransformationExpr) -> TransformationExpr
+  TransApp : TransformationExpr * TransformationExpr -> TransformationExpr
 
-  TransImportDec : TransformationExpr * ImportAs -> JavaImportDec
-  TypeImportAsDec : JavaTypeName * ImportAs -> JavaImportDec
+  TransImportDec : Option(ImportAs) * TransformationExpr -> JavaImportDec
+  TypeImportAsDec : ImportAs * JavaTypeName -> JavaImportDec
   ImportAs : JavaTypeName -> ImportAs

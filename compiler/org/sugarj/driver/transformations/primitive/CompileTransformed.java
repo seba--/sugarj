@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -21,7 +20,6 @@ import org.sugarj.driver.Driver;
 import org.sugarj.driver.Environment;
 import org.sugarj.driver.FileCommands;
 import org.sugarj.driver.ModuleSystemCommands;
-import org.sugarj.driver.Origin;
 import org.sugarj.driver.Result;
 import org.sugarj.driver.path.AbsolutePath;
 import org.sugarj.driver.path.Path;
@@ -60,16 +58,9 @@ class CompileTransformed extends AbstractPrimitive {
       String modelPath = ATermCommands.getString(tvars[0]);
       
       IStrategoTerm transformationsTerm = tvars[1];
-      List<RelativePath> transformationPaths = new LinkedList<RelativePath>(); 
-      if (ATermCommands.isString(transformationsTerm))
-        transformationPaths.add(new RelativePath(ATermCommands.getString(transformationsTerm)));
-      else
-        for (IStrategoTerm pathTerm : ATermCommands.getList(transformationsTerm)) {
-          String transPath = ATermCommands.getString(pathTerm);
-          transformationPaths.add(new RelativePath(transPath));
-        }
-  
-      RelativeSourceLocationPath source = ModuleSystemCommands.getTransformedModelSourceFilePath(modelPath, transformationPaths, environment);
+      RelativePath transformationPath = new RelativePath(ATermCommands.getString(transformationsTerm)); 
+      
+      RelativeSourceLocationPath source = ModuleSystemCommands.getTransformedModelSourceFilePath(modelPath, transformationPath, environment);
       List<Path> dependencies = null;
       
       try {
@@ -81,7 +72,7 @@ class CompileTransformed extends AbstractPrimitive {
           ATermCommands.atermToFile(generatedModel, source);
         
         RelativePath model = ModuleSystemCommands.searchFile(modelPath, ".model", environment);
-        dependencies = ModuleSystemCommands.getDependencies(environment, model, transformationPaths);
+        dependencies = ModuleSystemCommands.getDependencies(environment, model, transformationPath);
       } catch (IOException e) {
         driver.setErrorMessage(e.getLocalizedMessage());
       } catch (InvalidParseTableException e) {
@@ -116,7 +107,7 @@ class CompileTransformed extends AbstractPrimitive {
           return false;
         }
       
-        checkCommunicationIntegrity(modelPath, transformationPaths, source, res);
+        checkCommunicationIntegrity(modelPath, transformationPath, source, res);
       } catch (IOException e) {
         e.printStackTrace();
         driver.setErrorMessage(e.getMessage());
@@ -135,7 +126,7 @@ class CompileTransformed extends AbstractPrimitive {
     return true;
   }
   
-  private void checkCommunicationIntegrity(String modelPath, List<RelativePath> transformationPaths, RelativePath source, Result res) throws IOException, ClassNotFoundException {
+  private void checkCommunicationIntegrity(String modelPath, RelativePath transformationPath, RelativePath source, Result res) throws IOException, ClassNotFoundException {
     Path modelDep = ModuleSystemCommands.searchFile(FileCommands.dropExtension(modelPath), ".dep", environment);
     Collection<Path> modelDeps = new HashSet<Path>();
     Result modelResult = null;
@@ -147,13 +138,11 @@ class CompileTransformed extends AbstractPrimitive {
 
     Collection<Path> transDeps = new HashSet<Path>();
     Result transResult = null;
-    for (RelativePath transPath : transformationPaths) {
-      Path transDep = ModuleSystemCommands.searchFile(FileCommands.dropExtension(transPath.getRelativePath().replace('-', '$')), ".dep", environment);
-      if (transDep != null) {
-        transResult = Result.readDependencyFile(transDep, environment);
-        transDeps.addAll(transResult.getCircularFileDependencies(environment));
-        transDeps.addAll(transResult.getDirectlyGeneratedFiles()); 
-      }
+    Path transDep = ModuleSystemCommands.searchFile(FileCommands.dropExtension(transformationPath.getRelativePath().replace('-', '$')), ".dep", environment);
+    if (transDep != null) {
+      transResult = Result.readDependencyFile(transDep, environment);
+      transDeps.addAll(transResult.getCircularFileDependencies(environment));
+      transDeps.addAll(transResult.getDirectlyGeneratedFiles()); 
     }
 
     Collection<Path> transformedModelDeps = res.getCircularFileDependencies(environment);

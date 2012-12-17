@@ -43,11 +43,12 @@ module org/sugarj/languages/TransformationImport
 exports
   context-free syntax
     JavaTypeName -> TransformationExpr
-    TransformationExpr1 -> TransformationExpr
-    JavaTypeName "<" {TransformationExpr ","}+ ">" -> TransformationExpr1 {cons("TransApp")}  
+    TransformationAppExpr -> TransformationExpr
+    TransformationExpr "(" TransformationExpr ")" -> TransformationAppExpr {cons("TransApp")}
+      
     
-    "import" TransformationExpr1 ImportAs? ";" -> JavaImportDec {cons("TransImportDec")}
-    "import" JavaTypeName ImportAs ";"             -> JavaImportDec {cons("TypeImportAsDec")}
+    "import" ImportAs? TransformationAppExpr ";" -> JavaImportDec {cons("TransImportDec")}
+    "import" ImportAs  JavaTypeName "            -> JavaImportDec {cons("TypeImportAsDec")}
     
-    "as" JavaTypeName -> ImportAs {cons("ImportAs")}
+    JavaTypeName "=" -> ImportAs {cons("ImportAs")}
 

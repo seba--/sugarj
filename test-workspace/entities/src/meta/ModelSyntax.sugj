@@ -159,6 +159,6 @@ public transformation ModelSyntax {
     ensure-aux-import : imps -> <union> (imps, [auximp])
       where auximp := TypeImportDec(TypeName(PackageOrTypeName(Id("meta")), Id("ModelSyntaxAux")))
 
-    metamodel-signatures-import(|metamodel) : imp@ModelImportDec(type) -> TransImportDec(TransApp(type, [TypeName(PackageOrTypeName(Id("meta")), Id("Signatures"))]), None)
+    metamodel-signatures-import(|metamodel) : imp@ModelImportDec(type) -> TransImportDec(None, TransApp(TypeName(PackageOrTypeName(Id("meta")), Id("Signatures")), type))
       where <?TypeName(_, Id(metamodel)) <+ ?TypeName(Id(metamodel))> type
 }

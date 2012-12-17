@@ -16,6 +16,8 @@ rules
       map(SugarDec(id, SugarBody(!([transformation-elem(Rules([new-main]))], <id>); conc))));
     prim("SUGARJ_compile", model-path, trans-path)
 
+  recursively-transform-compile(trans) = recursively-transform(id, trans)
+
   recursively-transform(model-predicate, trans) = ?(model, model-path, trans-path); 
     {| Renamings, Stack: 
          rules ( Renamings := [] 
@@ -87,18 +89,21 @@ rules
           <elem> (def, <Stack>))
 
   get-imported-model(predicate) =
-    (?TypeImportDec(<id>) + ?TypeImportAsDec(<id>, _));
+    (?TypeImportDec(<id>) + ?TypeImportAsDec(_, <id>));
     import-model-path => (pkgs, name);
     <build-path> (pkgs, name) => path;
     prim("SUGARJ_resolve_model") => model;
     where(predicate);
-    (?TypeImportAsDec(_, <id>); !Some(<id>) + !None()) => local-name;
+    (?TypeImportAsDec(<id>, _); !Some(<id>) + !None()) => local-name;
     !(pkgs, name, local-name, path, model)
 
   ensure-import(|imp) = !(<id>, [imp]); union
 
   conforms-to-metamodel(|meta-model) =
-    where(collect-one(?ModelDecHead(_, _, meta-model)))
+    get-metamodel; ?meta-model
+
+  get-metamodel =
+    collect-one(?ModelDecHead(_, _, <id>))
 
   finally-do(s, final) = s < final + (final; fail)
 

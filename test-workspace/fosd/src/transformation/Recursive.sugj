@@ -87,12 +87,12 @@ rules
           <elem> (def, <Stack>))
 
   get-imported-model(predicate) =
-    (?TypeImportDec(<id>) + ?TypeImportAsDec(<id>, _));
+    (?TypeImportDec(<id>) + ?TypeImportAsDec(_, <id>));
     import-model-path => (pkgs, name);
     <build-path> (pkgs, name) => path;
     prim("SUGARJ_resolve_model") => model;
     where(predicate);
-    (?TypeImportAsDec(_, <id>); !Some(<id>) + !None()) => local-name;
+    (?TypeImportAsDec(<id>, _); !Some(<id>) + !None()) => local-name;
     !(pkgs, name, local-name, path, model)
 
   ensure-import(|imp) = !(<id>, [imp]); union

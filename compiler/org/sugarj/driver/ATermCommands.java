@@ -446,9 +446,9 @@ public class ATermCommands {
 
   public static String getLocalImportName(IStrategoTerm term, HybridInterpreter interp) throws IOException {
     if (isApplication(term, "TransImportDec"))
-      term = getApplicationSubterm(term, "TransImportDec", 1);
+      term = getApplicationSubterm(term, "TransImportDec", 0);
     else if (isApplication(term, "TypeImportAsDec"))
-      term = getApplicationSubterm(term, "TypeImportAsDec", 1);
+      term = getApplicationSubterm(term, "TypeImportAsDec", 0);
     else
       return null;
     
@@ -510,9 +510,9 @@ public class ATermCommands {
   private static IStrategoTerm makeImport(IStrategoTerm imp, String localName) {
     if (localName == null)
       return makeAppl("TypeImportDec", "ImportDec", 1, imp);
-    return makeAppl("TypeImportAsDec", "ImportDec", 2, 
-             imp,
-             makeAppl("ImportAs", "ImportAs", 1, 
-               makeAppl("Id", "Id", 1, makeString(localName, null))));
+    
+    IStrategoTerm importAs = makeAppl("ImportAs", "ImportAs", 1, 
+                               makeAppl("Id", "Id", 1, makeString(localName, null)));
+    return makeAppl("TypeImportAsDec", "ImportDec", 2, imp, importAs);
   }
 }

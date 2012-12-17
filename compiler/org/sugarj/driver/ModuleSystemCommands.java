@@ -173,22 +173,27 @@ public class ModuleSystemCommands {
       else if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
         name = SDFCommands.prettyPrintJava(toplevelDecl.getSubterm(0), interp) + ".*";
       else if (isApplication(toplevelDecl, "TransImportDec"))
-        name = SDFCommands.prettyPrintJava(ATermCommands.getApplicationSubterm(toplevelDecl.getSubterm(0), "TransApp", 0), interp);
+        name = extractTransImportedModuleName(toplevelDecl.getSubterm(1), interp);
     } finally {
       log.endTask(name);
     }
     return name;
   }
-  
-  public static List<IStrategoTerm> extractImportedTransformationNames(IStrategoTerm toplevelDecl) {
-    if (isApplication(toplevelDecl, "TransImportDec"))
-      return ATermCommands.getList(ATermCommands.getApplicationSubterm(toplevelDecl.getSubterm(0), "TransApp", 1));
 
-    return null;
+  private static String extractTransImportedModuleName(IStrategoTerm term, HybridInterpreter interp) throws IOException {
+    if (isApplication(term, "TransApp"))
+      return extractTransImportedModuleName(term.getSubterm(1), interp);
+    return SDFCommands.prettyPrintJava(term, interp);
   }
   
+  public static IStrategoTerm getTransImportModel(IStrategoTerm term) {
+    return ATermCommands.getApplicationSubterm(term, "TransImportDec", 1).getSubterm(1);
+  }
 
-  
+  public static IStrategoTerm getTransImportTrans(IStrategoTerm term) {
+    return ATermCommands.getApplicationSubterm(term, "TransImportDec", 1).getSubterm(0);
+  }
+
   /**
    * 
    * @param relativePath
@@ -292,13 +297,23 @@ public class ModuleSystemCommands {
     }
   }
 
-  public static RelativeSourceLocationPath getTransformedModelSourceFilePath(String modulePath, List<RelativePath> transformationPaths, Environment environment) {
-    if (transformationPaths == null || transformationPaths.isEmpty())
-      return new RelativeSourceLocationPath(new SourceLocation(environment.bin, environment), modulePath + ".model");
+  public static RelativeSourceLocationPath getTransformedModelSourceFilePath(String modelPath, RelativePath transformationPaths, Environment environment) {
+    if (transformationPaths == null)
+      return new RelativeSourceLocationPath(new SourceLocation(environment.bin, environment), modelPath + ".model");
     
     String transformationPathString = StringCommands.makeTransformationPathString(transformationPaths);
     
-    String transformedModelPath = modulePath + "$" + transformationPathString.replace('-', '$');
+    String transformedModelPath = modelPath + "$" + transformationPathString.replace('-', '$');
+    return new RelativeSourceLocationPath(new SourceLocation(environment.bin, environment), transformedModelPath + ".model");
+  }
+
+  public static RelativeSourceLocationPath getTransformedModelSourceFilePath(RelativePath modelPath, RelativePath transformationPaths, Environment environment) {
+    if (transformationPaths == null)
+      return new RelativeSourceLocationPath(new SourceLocation(environment.bin, environment), modelPath + ".model");
+    
+    String transformationPathString = StringCommands.makeTransformationPathString(transformationPaths);
+    
+    String transformedModelPath = modelPath.getRelativePath() + "$" + transformationPathString.replace('-', '$');
     return new RelativeSourceLocationPath(new SourceLocation(environment.bin, environment), transformedModelPath + ".model");
   }
   
@@ -317,20 +332,11 @@ public class ModuleSystemCommands {
     return FileCommands.dropExtension(transformationPath.getRelativePath().replace('/', '_'));
   }
   
-  public static RelativeSourceLocationPath locateTransformedModelSourceFile(String modulePath, List<RelativePath> transformationPaths, Environment environment) {
-    RelativeSourceLocationPath p = getTransformedModelSourceFilePath(modulePath, transformationPaths, environment);
-    
-    if (FileCommands.exists(p))
-      return p;
-    
-    return null;
-  } 
-  
-  public static Origin markGenerated(RelativePath generatedModel, Environment env, RelativePath model, List<RelativePath> transformations) throws IOException, ClassNotFoundException {
-    return markGenerated(generatedModel, null, env, model, transformations);
+  public static Origin markGenerated(RelativePath generatedModel, Environment env, RelativePath model, RelativePath transformation) throws IOException, ClassNotFoundException {
+    return markGenerated(generatedModel, null, env, model, transformation);
   }
   
-  public static List<Path> getDependencies(Environment env, RelativePath model, List<RelativePath> transformations) throws IOException {
+  public static List<Path> getDependencies(Environment env, RelativePath model, RelativePath transformation) throws IOException {
     List<Path> deps = new LinkedList<Path>();
     
     String modelPath = FileCommands.dropExtension(model.getRelativePath());
@@ -339,31 +345,27 @@ public class ModuleSystemCommands {
       throw new FileNotFoundException("Could not locate model dependency file " + modelPath + ".");
     deps.add(modelDep);
     
-    for (RelativePath trans : transformations) {
-      String transPath = FileCommands.dropExtension(trans.getRelativePath()).replace('-', '$');
-      Path transDep = searchFile(transPath, ".dep", env);
-      if (transDep == null)
-        throw new FileNotFoundException("Could not locate transformation dependency file " + transPath + ".");
-      deps.add(transDep);
-    }
+    String transPath = FileCommands.dropExtension(transformation.getRelativePath()).replace('-', '$');
+    Path transDep = searchFile(transPath, ".dep", env);
+    if (transDep == null)
+      throw new FileNotFoundException("Could not locate transformation dependency file " + transPath + ".");
+    deps.add(transDep);
     
     return deps;
   }
 
-  public static Origin markGenerated(RelativePath generatedModel, Result res, Environment env, RelativePath model, List<RelativePath> transformations) throws IOException, ClassNotFoundException {
+  public static Origin markGenerated(RelativePath generatedModel, Result res, Environment env, RelativePath model, RelativePath transformation) throws IOException, ClassNotFoundException {
     String modelPath = FileCommands.dropExtension(model.getRelativePath());
     Path modelDep = searchFile(modelPath, ".dep", env);
     if (modelDep == null)
       throw new FileNotFoundException("Could not locate model dependency file " + modelPath + ".");
     
     List<Path> transformationDeps = new LinkedList<Path>();
-    for (RelativePath trans : transformations) {
-      String transPath = FileCommands.dropExtension(trans.getRelativePath()).replace('-', '$');
-      Path transDep = searchFile(transPath, ".dep", env);
-      if (transDep == null)
-        throw new FileNotFoundException("Could not locate transformation dependency file " + transPath + ".");
-      transformationDeps.add(transDep);
-    }
+    String transPath = FileCommands.dropExtension(transformation.getRelativePath()).replace('-', '$');
+    Path transDep = searchFile(transPath, ".dep", env);
+    if (transDep == null)
+      throw new FileNotFoundException("Could not locate transformation dependency file " + transPath + ".");
+    transformationDeps.add(transDep);
     
     Origin origin = new Origin(modelDep, transformationDeps);
     

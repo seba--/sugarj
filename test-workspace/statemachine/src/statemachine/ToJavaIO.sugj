@@ -27,7 +27,7 @@ public template ToJavaIO {
   import java.util.List;
   import java.util.LinkedList;
 
-  import ${<pkg-type> pkg}.$classname<statemachine.ToJava> as Machine;
+  import Machine = statemachine.ToJava( ${<pkg-type> pkg}.$classname );
 
   public class $classname {
 

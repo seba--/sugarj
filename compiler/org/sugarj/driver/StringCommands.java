@@ -60,10 +60,14 @@ public class StringCommands {
     return res;
   }
   
+  public static String makeTransformationPathString(RelativePath path) {
+    return FileCommands.dropExtension(path.getRelativePath()).replace('/', '_');
+  }
+  
   public static String makeTransformationPathString(List<RelativePath> paths) {
     List<String> transformationPathStrings = new LinkedList<String>();
     for (RelativePath p : paths)
-      transformationPathStrings.add(FileCommands.dropExtension(p.getRelativePath()).replace('/', '_'));
+      transformationPathStrings.add(makeTransformationPathString(p));
     return StringCommands.printListSeparated(transformationPathStrings, "$");
   }
 

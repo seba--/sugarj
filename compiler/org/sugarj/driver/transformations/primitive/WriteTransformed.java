@@ -1,8 +1,6 @@
 package org.sugarj.driver.transformations.primitive;
 
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
 
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.InterpreterException;
@@ -48,16 +46,9 @@ class WriteTransformed extends AbstractPrimitive {
     String modelPath = ATermCommands.getString(tvars[0]);
     
     IStrategoTerm transformationsTerm = tvars[1];
-    List<RelativePath> transformationPaths = new LinkedList<RelativePath>(); 
-    if (ATermCommands.isString(transformationsTerm))
-      transformationPaths.add(new RelativePath(ATermCommands.getString(transformationsTerm)));
-    else
-      for (IStrategoTerm pathTerm : ATermCommands.getList(transformationsTerm)) {
-        String transPath = ATermCommands.getString(pathTerm);
-        transformationPaths.add(new RelativePath(transPath));
-      }
+    RelativePath transformationPath = new RelativePath(ATermCommands.getString(transformationsTerm));
     
-    RelativeSourceLocationPath source = ModuleSystemCommands.getTransformedModelSourceFilePath(modelPath, transformationPaths, environment);
+    RelativeSourceLocationPath source = ModuleSystemCommands.getTransformedModelSourceFilePath(modelPath, transformationPath, environment);
     try {
       Renaming ren = new Renaming(modelPath, source.getRelativePath());
       generatedModel = ATermCommands.renameDeclarations(generatedModel, ren, driver.getRenamingContext());
@@ -72,7 +63,7 @@ class WriteTransformed extends AbstractPrimitive {
     
     try {
       RelativePath model = ModuleSystemCommands.searchFile(modelPath, ".model", environment);
-      Origin origin = ModuleSystemCommands.markGenerated(source, environment, model, transformationPaths);
+      Origin origin = ModuleSystemCommands.markGenerated(source, environment, model, transformationPath);
       if (generateFiles) {
         Path p = new AbsolutePath(FileCommands.dropExtension(source.getAbsolutePath()) + ".origin");
         origin.write(p);
