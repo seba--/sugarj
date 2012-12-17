@@ -346,6 +346,8 @@ public class JavaLib extends LanguageLib implements Serializable {
 
   @Override
   public boolean isModuleResolvable(String relModulePath) {
+    if (relModulePath.endsWith("*"))
+      return true;
     try {
       return getClass().getClassLoader().loadClass(relModulePath.replace('/', '.')) != null;
     } catch (ClassNotFoundException e) {
