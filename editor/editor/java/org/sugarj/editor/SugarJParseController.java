@@ -173,7 +173,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
       else
         includePath = new RelativePath(root, p);
       
-      if (fragment.getKind() == IPackageFragmentRoot.K_SOURCE)
+      if (fragment.getKind() == IPackageFragmentRoot.K_SOURCE && fragment.getParent().equals(project))
         env.getSourcePath().add(includePath);
       else if (fragment.getKind() == IPackageFragmentRoot.K_BINARY)
         env.getIncludePath().add(includePath);
@@ -183,7 +183,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
       IJavaProject reqJavaProject = JavaCore.create(project.getProject().getWorkspace().getRoot().getProject(reqProject));
       if (reqJavaProject != null) {
         Environment projEnv = makeProjectEnvironment(reqJavaProject);
-        env.getSourcePath().addAll(projEnv.getSourcePath());
+//        env.getSourcePath().addAll(projEnv.getSourcePath());
         env.getIncludePath().add(projEnv.getBin());
       }
     }
