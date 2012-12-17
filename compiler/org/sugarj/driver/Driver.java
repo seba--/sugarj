@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.ref.WeakReference;
 import java.text.ParseException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public class Driver{
   
   private final static int PENDING_TIMEOUT = 30000;
 
-  private static Map<Path, Result> resultCache = new HashMap<Path, Result>(); // new LRUMap(50);
+  private static Map<Path, WeakReference<Result>> resultCache = new HashMap<Path, WeakReference<Result>>(); // new LRUMap(50);
 
   private static Map<Path, Entry<String, Driver>> pendingRuns = new HashMap<Path, Map.Entry<String,Driver>>();
   private static List<Path> pendingInputFiles = new ArrayList<Path>();
@@ -156,7 +157,10 @@ public class Driver{
   }  
   
   private static synchronized Result getResult(Path file) {
-    return (Result) resultCache.get(file);
+    WeakReference<Result> res = resultCache.get(file);
+    if (res != null)
+      return res.get();
+    return null;
   }
   
   private static synchronized Entry<String, Driver> getPendingRun(Path file) {
@@ -198,7 +202,7 @@ public class Driver{
   }
 
   private static synchronized void putResult(Path file, Result result) {
-    resultCache.put(file, result);
+    resultCache.put(file, new WeakReference<Result>(result));
   }
   
   public static Result compile(RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
