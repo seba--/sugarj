@@ -1,6 +1,6 @@
 package test.uses;
 
-import test.models.PersonEntity<test.ConstantBodyShorthands>;
+import test.ConstantBodyShorthands(test.models.PersonEntity);
 
 public class PersonEntity_ConstantBodyShorthands {
   public static void main(String[] args) {

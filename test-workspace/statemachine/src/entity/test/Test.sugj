@@ -1,7 +1,7 @@
 package entity.test;
 
-import entity.test.Account<entity.ToJava>;
-import entity.test.Customer<entity.ToJava>;
+import entity.ToJava(entity.test.Account);
+import entity.ToJava(entity.test.Customer);
 
 import java.util.HashSet;
  

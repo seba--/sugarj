@@ -1,6 +1,6 @@
 package test2;
 
-import test2.A<test2.Trans>;
+import test2.Trans(test2.A);
 
 public class Test {
   public A a = new A();   

@@ -1,7 +1,7 @@
 package statemachine.test;
 
-import statemachine.test.ATM<statemachine.ToJava>;
-import statemachine.test.ATM<statemachine.ToJavaIO> as ATM_IO;
+import statemachine.ToJava(statemachine.test.ATM);
+import ATM_IO = statemachine.ToJavaIO(statemachine.test.ATM);
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

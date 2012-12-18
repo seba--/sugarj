@@ -1,7 +1,7 @@
 package test;
 
-import test.Test<test.FeatureConfig<variability.ConfigTrans>>;
-import test.InterfaceTest<test.FeatureConfig<variability.ConfigTrans>>;
+import variability.ConfigTrans(test.FeatureConfig)(test.Test);
+import variability.ConfigTrans(test.FeatureConfig)(test.InterfaceTest);
 
 public class ImportTest implements InterfaceTest {	
 

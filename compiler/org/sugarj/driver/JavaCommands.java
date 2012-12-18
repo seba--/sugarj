@@ -86,7 +86,7 @@ public class JavaCommands {
     for (int i = 0; i < args.length; i++)
       cmd[i + 5] = args[i];
     
-    CommandExecution.executeWithPrefix(main, cmd);
+    new CommandExecution(true).executeWithPrefix(main, cmd);
   }
   
   
@@ -99,7 +99,7 @@ public class JavaCommands {
         "."
         };
     
-    CommandExecution.execute(cmd);
+    new CommandExecution(true).execute(cmd);
   }
   
 }

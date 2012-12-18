@@ -1,6 +1,6 @@
 package statemachine.test;
 
-import statemachine.test.ATMRef<statemachine.ToJava<transformation.Recursive>>;
+import transformation.Recursive(statemachine.ToJava)(statemachine.test.ATMRef);
 
 public class ATMRefTestRecursive {
   public static void main(String[] args) {

@@ -308,6 +308,8 @@ public class ModuleSystemCommands {
   }
 
   public static RelativeSourceLocationPath getTransformedModelSourceFilePath(RelativePath modelPath, RelativePath transformationPaths, Environment environment) {
+    if (modelPath == null)
+      return null;
     if (transformationPaths == null)
       return new RelativeSourceLocationPath(new SourceLocation(environment.bin, environment), modelPath + ".model");
     

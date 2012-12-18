@@ -2,7 +2,7 @@ package config;
 
 import variability.Config;
 import model.GraphFeatureModel;
-import model.GraphFeatureModel<variability.CheckConfig>;
+import variability.CheckConfig(model.GraphFeatureModel);
 
 /*
  * This feature configuration violates a number of

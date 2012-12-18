@@ -1,6 +1,6 @@
 package statemachine.test;
 
-import statemachine.test.ATMRef<statemachine.test.TransTest>;
+import statemachine.test.TransTest(statemachine.test.ATMRef);
 
 public class ATMRefTest {
   public static void main(String[] args) {

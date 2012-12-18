@@ -1,6 +1,6 @@
 package statemachine.test;
 
-import statemachine.test.ATM<statemachine.ToJava>;
+import statemachine.ToJava(statemachine.test.ATM);
 
 public class ATMTest { 
   public static void main(String[] args) {

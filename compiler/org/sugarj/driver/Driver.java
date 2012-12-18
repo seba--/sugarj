@@ -839,14 +839,14 @@ public class Driver {
   }
   
   private Pair<String, Boolean> transformModel(IStrategoTerm model, IStrategoTerm transformation, IStrategoTerm toplevelDecl) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    RelativePath modelPath = resolveModule(model, toplevelDecl);
-    RelativePath transformationPath = resolveModule(transformation, toplevelDecl);
+    RelativePath modelPath = resolveModule(model, toplevelDecl, true);
+    RelativePath transformationPath = resolveModule(transformation, toplevelDecl, false);
     
     RelativeSourceLocationPath transformedModelSourceFile = ModuleSystemCommands.getTransformedModelSourceFilePath(modelPath, transformationPath, environment);
     String transformedModelPath = ModuleSystemCommands.getModulePath(transformedModelSourceFile);
 
     Pair<String, Boolean> preparedImport = null;
-    if (model == null)
+    if (modelPath == null)
       setErrorMessage(toplevelDecl, "model not found " + modelPath);
     else if (ModuleSystemCommands.isModuleCompilationUpToDate(transformedModelPath, environment)) {
       ModuleSystemCommands.registerGeneratedFiles(transformedModelPath, driverResult, environment);
@@ -1110,7 +1110,7 @@ public class Driver {
   }
 
 
-  private RelativePath resolveModule(IStrategoTerm modelTerm, IStrategoTerm importTerm) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private RelativePath resolveModule(IStrategoTerm modelTerm, IStrategoTerm importTerm, boolean isModel) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     log.beginTask("Resolving transformation path for '" + modelTerm + "'.");
     try {
       if (!isApplication(modelTerm, "TransApp")) {
@@ -1122,6 +1122,12 @@ public class Driver {
             renamedPath = StringCommands.rename(renamedPath, ren);
           renamedPath = renamedPath.replace("$", "-");
 
+          if (isModel) {
+            // XXX TODO
+            setErrorMessage(importTerm, "could not resolve model '"+ path +"'");
+            return null;
+          }
+          
           for (RelativePath importPath : availableSTRImports) {
             if (FileCommands.dropExtension(importPath.getAbsolutePath()).endsWith(path) ||
                 FileCommands.dropExtension(importPath.getAbsolutePath()).endsWith(renamedPath)) {
@@ -1135,6 +1141,14 @@ public class Driver {
           RelativeSourceLocationPath importSourceFile = ModuleSystemCommands.locateCompilableFile(path, environment);
           prepareImport(path, importSourceFile, null, null, importTerm, false);
           
+          if (isModel) {
+            RelativePath p = ModuleSystemCommands.searchFile(path, ".model", environment);
+            if (p != null)
+              return p;
+            setErrorMessage(importTerm, "could not resolve model '"+ path +"'");
+            return null;
+          }
+
           RelativePath p = ModuleSystemCommands.searchFile(path, ".str", environment);
           if (p != null)
             return p;

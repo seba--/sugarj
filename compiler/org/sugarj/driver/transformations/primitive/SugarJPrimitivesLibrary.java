@@ -24,6 +24,10 @@ public class SugarJPrimitivesLibrary extends AbstractStrategoOperatorRegistry {
     add(new CompileTransformed(driver, generateFiles, env, monitor, currentlyProcessing));
     add(new WriteTransformed(driver, env, generateFiles));
     add(new RenameMainArgs());
+    
+    add(new ExecuteCommand());
+    add(new TempDir());
+    add(new TempFile());
   }
   
   @Override

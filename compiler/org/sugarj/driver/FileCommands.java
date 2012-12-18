@@ -43,7 +43,7 @@ public class FileCommands {
     File f =
         File.createTempFile(
             "sugarj",
-            suffix == null || suffix.isEmpty() ? suffix : "." + suffix);
+            suffix == null || suffix.isEmpty() ? "" : "." + suffix);
     final Path p = new AbsolutePath(f.getAbsolutePath());
     
     return p;

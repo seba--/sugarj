@@ -2,8 +2,7 @@ package test;
 
 import variability.Config;
 
-import test.FeatureModel;
-import test.FeatureModel<variability.CheckConfig>;
+import variability.CheckConfig(test.FeatureModel);
 
 public config FeatureConfig for FeatureModel {  
   enable A;

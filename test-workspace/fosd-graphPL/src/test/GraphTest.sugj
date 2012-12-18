@@ -1,7 +1,7 @@
 package test;
 
-import impl.Main <config.MinimalGraphConfig <variability.ConfigTrans>>;
-import impl.Main <config.FullGraphConfig <variability.ConfigTrans>> as Other;
+import variability.ConfigTrans(config.MinimalGraphConfig)(impl.Main);
+import Other = variability.ConfigTrans(config.FullGraphConfig)(impl.Main);
 
 
 public class GraphTest {

@@ -97,7 +97,8 @@ class CompileTransformed extends AbstractPrimitive {
         return false;
       
       try {
-        context.setCurrent(ATermCommands.atermFromFile(source.getAbsolutePath()));
+        if (FileCommands.exists(source))
+          context.setCurrent(ATermCommands.atermFromFile(source.getAbsolutePath()));
         
         if (res.hasFailed()) {
           for (BadTokenException e : res.getParseErrors())

@@ -1,6 +1,6 @@
 package test.uses;
 
-import test.models.PersonEntity<test.ConstantTarget>;
+import test.ConstantTarget(test.models.PersonEntity);
 
 public class PersonEntity_ConstantTarget {
   public static void main(String[] args) {
