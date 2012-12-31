@@ -10,7 +10,7 @@ rules
     prim("SUGARJ_rename_main_args") => (old-name, new-name);
     where(!SDefNoArgs(new-name, Call(SVar("recursively-transform"), [Id(), Call(SVar("try"), [CallNoArgs(SVar(old-name))])])) => new-main);
     !model;
-    SugarCompilationUnit(
+    CompilationUnit(
       id,
       ensure-import(|TypeImportDec(TypeName(PackageOrTypeName(Id("transformation")), Id("Recursive")))),
       map(SugarDec(id, SugarBody(!([transformation-elem(Rules([new-main]))], <id>); conc))));
