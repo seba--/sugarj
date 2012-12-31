@@ -1,0 +1,88 @@
+module org/sugarj/transformations/Renaming
+imports
+  libstratego-lib
+  org/sugarj/languages/Stratego
+  org/sugarj/languages/Java
+  org/sugarj/languages/SugarJ
+
+rules
+  rename-rules(|oname, nname) = topdown(try(rename-rule(|oname, nname))); topdown(try(SVar(?oname;!nname)))
+  
+  rename-rule(|oname, nname) :
+    RDefNoArgs(oname, rule) -> RDefNoArgs(nname, rule)
+    
+  rename-rule(|oname, nname) :
+    RDef(oname, typeids, rule) -> RDef(nname, typeids, rule)
+    
+  rename-rule(|oname, nname) :
+    RDefT(oname, typeids1,typeids2, rule ) -> RDefT(nname, typeids1, typeids2, rule)
+    
+  rename-rule(|oname, nname) :
+    SDefNoArgs(oname, strategy) -> SDefNoArgs(nname, strategy)
+    
+  rename-rule(|oname, nname) :
+    SDef(oname, typeids, strategy) -> SDef(nname, typeids, strategy)
+
+
+rules
+  apply-renaming(|pkgs, from, to) = 
+    topdown(
+      try(rename-java(|pkgs, from, to)); 
+      try(rename-sugardec(|from, to)); 
+      try(rename-modeldec(|from, to)); 
+      try(rename-editordec(|from, to)))
+
+  rename-java(|pkg, from, to) = do-rename-java(|pkg, from, to)
+  rename-sugardec(|from, to) : SugarDecHead(mods, Id(from)) -> SugarDecHead(mods, Id(to))
+  rename-modeldec(|from, to) : ModelDecHead(mods, Id(from), meta) -> ModelDecHead(mods, Id(to), meta)
+  rename-editordec(|from, to) : EditorServicesDecHead(mods, Id(from)) -> EditorServicesDecHead(mods, Id(to))
+
+rules
+  do-rename-java(|pkg, from, to) :
+       ClassDecHead(mods, Id(from), typeParams, super, interface)
+    -> ClassDecHead(mods, Id(to), typeParams, super, interface) 
+    
+  do-rename-java(|pkg, from, to) :
+       InterfaceDecHead(mods, Id(from), typeParams, interface)
+    -> InterfaceDecHead(mods, Id(to), typeParams, interface) 
+
+  do-rename-java(|pkg, from, to) :
+       EnumDecHead(mods, Id(from), interface)
+    -> EnumDecHead(mods, Id(to), interface) 
+    
+  do-rename-java(|pkg, from, to) :
+       AnnoDecHead(mods, Id(from))
+    -> AnnoDecHead(mods, Id(to)) 
+    
+  do-rename-java(|pkg, from, to) :
+       ConstrDecHead(mods, typeParams, Id(from), params, throws)
+    -> ConstrDecHead(mods, typeParams, Id(to), params, throws)
+
+  do-rename-java(|pkg, from, to) :
+       TypeName(Id(from))
+    -> TypeName(Id(to))
+
+  do-rename-java(|pkg, from, to) :
+       TypeName(qual, Id(from))
+    -> TypeName(qual, Id(to))
+    where
+     <match-pkgs-java> (pkg, qual)
+
+  do-rename-java(|pkg, from, to) :
+       PackageOrTypeName(Id(from))
+    -> PackageOrTypeName(Id(to))
+
+  do-rename-java(|pkg, from, to) :
+       PackageOrTypeName(qual, Id(from))
+    -> PackageOrTypeName(qual, Id(to))
+    where <match-pkgs-java> (pkg, qual)
+
+  do-rename-java(|pkg, from, to) :
+       AmbName(Id(from))
+    -> AmbName(Id(to))
+
+
+rules
+  match-pkgs-java = ?([pkg], PackageOrTypeName(Id(pkg)))
+  match-pkgs-java : (pkgs, PackageOrTypeName(jrest, Id(pkg))) -> <match-pkgs-java> (rest, jrest)
+    where <split-last> pkgs => (rest, pkg)
