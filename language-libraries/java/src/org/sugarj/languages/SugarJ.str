@@ -1,5 +1,6 @@
 module org/sugarj/languages/SugarJ
 imports org/sugarj/languages/Sugar
+        org/sugarj/languages/Model
 signature constructors
     CompilationUnit            : Option(JavaPackageDec) * List(JavaImportDec) * List(TypeOrSugarDec) -> SugarCompilationUnit
     CompileError               : String * Any -> CompileError
@@ -16,3 +17,10 @@ signature constructors
     ChecksDecHead      : List(Annos) * JavaId -> EditorServicesDecHead
     ChecksBody         : List(EditorServicesSection) -> EditorServiceBody
     
+    TransDec : TransformationDecHead * TransformationBody -> ToplevelDeclaration
+    TransDecHead : List(AnnoOrSugarMod) * JavaId -> TransformationDecHead
+    TransBody : TransformationDef -> TransformationBody
+
+    TransImportDec : Option(ImportAs) * TransformationExpr -> JavaImportDec
+    TypeImportAsDec : ImportAs * JavaTypeName -> JavaImportDec
+    ImportAs : JavaTypeName -> ImportAs

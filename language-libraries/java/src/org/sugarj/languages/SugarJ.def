@@ -6,6 +6,7 @@ imports org/sugarj/languages/Java
         org/sugarj/languages/Stratego
         org/sugarj/languages/EditorServices
         org/sugarj/languages/Sugar
+        org/sugarj/languages/Model
 
 exports
   lexical syntax
@@ -26,6 +27,7 @@ exports
   context-free syntax
     JavaPackageDec? JavaImportDec* (JavaTypeDec | SugarDec)* -> SugarCompilationUnit {cons("CompilationUnit")}
 
+  %% sugar declaration
   context-free syntax
     SugarDecHead SugarBody                 -> SugarDec {cons("SugarDec")}
 
@@ -39,11 +41,13 @@ exports
   lexical restrictions
     "sugar" -/- [a-zA-Z0-9\'\-\_]
 
+  %% editor service declaration
   context-free syntax
     EditorServicesDecHead EditorServicesBody   -> SugarDec              {cons("EditorServicesDec")}
     AnnoOrSugarMod* "editor" "services" JavaId -> EditorServicesDecHead {cons("EditorServicesDecHead")}
     "{" EditorServiceSection* "}"              -> EditorServicesBody    {cons("EditorServicesBody")}
 
+  %% check declarations
   context-free syntax
     ChecksDecHead ChecksBody   -> ToplevelDeclaration              {cons("ChecksDec")}
     AnnoOrSugarMod* "analysis" JavaId -> ChecksDecHead {cons("ChecksDecHead")}
@@ -57,4 +61,20 @@ exports
     StrategoTerm "=" StrategoTerm "where" StrategoStrategy -> CheckingRuleBody {cons("Rule")}
     StrategoTerm "=" StrategoTerm StrategoRuleCond+        -> CheckingRuleBody {cons("Rule"), avoid}
     "rules" StrategoDef*        -> CheckingRule {cons("Rules")}
+
+  %% MDD declarations
+  context-free syntax
+    ModelDecHead ModelBody         -> ToplevelDeclaration     {cons("ModelDec")}
+    AnnoOrSugarMod* "model" JavaId "instantiates" JavaId -> ModelDecHead {cons("ModelDecHead")}
+    "{" ModelTerm "}"              -> ModelBody    {cons("ModelBody")}
+
+    TransformationDecHead TransformationBody   -> ToplevelDeclaration {cons("TransDec")}
+    AnnoOrSugarMod* "transformation" JavaId -> TransformationDecHead {cons("TransDecHead")}
+    "{" TransformationDef "}" -> TransformationBody {cons("TransBody")}
+
+    JavaTypeName -> ModuleName          
+    ModuleName "=" -> ImportAs {cons("ImportAs")}
+    "import" ImportAs? TransformationAppExpr ";" -> JavaImportDec {cons("TransImportDec")}
+    "import" ImportAs  ModuleName            ";" -> JavaImportDec {cons("TypeImportAsDec")}
+ 
 
