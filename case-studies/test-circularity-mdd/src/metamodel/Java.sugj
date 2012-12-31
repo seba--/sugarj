@@ -1,0 +1,18 @@
+package metamodel;
+
+import org.sugarj.languages.Model;
+
+public sugar Java {
+  desugarings
+    desugar-class-model
+
+  rules
+    desugar-class-model :
+      ClassModelDec(mods, name, body) -> 
+      ModelDec(ModelDecHead(mods, name, "metamodel.Java"), ModelBody(body)) 
+
+  context-free syntax
+    ClassModel -> ToplevelDeclaration
+    AnnoOrSugarMod* "class-model" JavaId JavaClassBody -> ClassModel {cons("ClassModelDec")}
+
+}
