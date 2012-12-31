@@ -17,6 +17,11 @@ signature constructors
     ChecksDecHead      : List(Annos) * JavaId -> EditorServicesDecHead
     ChecksBody         : List(EditorServicesSection) -> EditorServiceBody
     
+    // MDD
+    ModelDec          : EditorServicesDecHead * EditorServicesDecBody -> SugarDec
+    ModelDecHead      : List(Annos) * JavaId * String -> EditorServicesDecHead
+    ModelBody         : Term -> EditorServiceBody
+
     TransDec : TransformationDecHead * TransformationBody -> ToplevelDeclaration
     TransDecHead : List(AnnoOrSugarMod) * JavaId -> TransformationDecHead
     TransBody : TransformationDef -> TransformationBody

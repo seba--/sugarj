@@ -48,7 +48,7 @@ public class JavaLib extends LanguageLib implements Serializable {
   private Path sourcePath;
 
   public String getVersion() {
-    return "java-0.1b";
+    return "java-0.2";
   }
 
   @Override
@@ -227,6 +227,16 @@ public class JavaLib extends LanguageLib implements Serializable {
   public boolean isNamespaceDec(IStrategoTerm decl) {
     return isApplication(decl, "PackageDec");
   }
+  
+  @Override
+  public boolean isModelDec(IStrategoTerm decl) {
+    return isApplication(decl, "ModelDec");
+  }
+
+  @Override
+  public boolean isTransformationDec(IStrategoTerm decl) {
+    return isApplication(decl, "TransDec");
+  }
 
   /**
    * Pretty prints the content of a Java AST in some file.
@@ -327,7 +337,6 @@ public class JavaLib extends LanguageLib implements Serializable {
   public String getSugarName(IStrategoTerm decl) throws IOException {
     IStrategoTerm head = getApplicationSubterm(decl, "SugarDec", 0);
     String extName = prettyPrint(getApplicationSubterm(head, "SugarDecHead", 1));
-
     return extName;
   }
 
@@ -335,7 +344,34 @@ public class JavaLib extends LanguageLib implements Serializable {
   public IStrategoTerm getSugarBody(IStrategoTerm decl) {
     IStrategoTerm body = getApplicationSubterm(decl, "SugarDec", 1);
     IStrategoTerm sugarBody = getApplicationSubterm(body, "SugarBody", 0);
+    return sugarBody;
+  }
 
+  @Override
+  public String getModelName(IStrategoTerm decl) throws IOException {
+    IStrategoTerm head = getApplicationSubterm(decl, "ModelDec", 0);
+    String extName = prettyPrint(getApplicationSubterm(head, "ModelDecHead", 1));
+    return extName;
+  }
+
+  @Override
+  public IStrategoTerm getModelBody(IStrategoTerm decl) {
+    IStrategoTerm body = getApplicationSubterm(decl, "ModelDec", 1);
+    IStrategoTerm sugarBody = getApplicationSubterm(body, "ModelBody", 0);
+    return sugarBody;
+  }
+
+  @Override
+  public String getTransformationName(IStrategoTerm decl) throws IOException {
+    IStrategoTerm head = getApplicationSubterm(decl, "TransDec", 0);
+    String extName = prettyPrint(getApplicationSubterm(head, "TransDecHead", 1));
+    return extName;
+  }
+
+  @Override
+  public IStrategoTerm getTransformationBody(IStrategoTerm decl) {
+    IStrategoTerm body = getApplicationSubterm(decl, "TransDec", 1);
+    IStrategoTerm sugarBody = getApplicationSubterm(body, "TransBody", 0);
     return sugarBody;
   }
 

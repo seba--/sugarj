@@ -123,7 +123,10 @@ public abstract class LanguageLib implements Serializable {
 	public abstract boolean isSugarDec(IStrategoTerm decl);
 	public abstract boolean isEditorServiceDec(IStrategoTerm decl);
 	public abstract boolean isImportDec(IStrategoTerm decl);
-	public abstract boolean isPlainDec(IStrategoTerm decl); 
+	public abstract boolean isPlainDec(IStrategoTerm decl);
+  public          boolean isModelDec(IStrategoTerm decl) { return false; }
+	public          boolean isTransformationDec(IStrategoTerm decl) { return false; }
+	
 	public abstract void processLanguageSpecific(IStrategoTerm toplevelDecl,
 	                                              Environment environment) throws IOException;
 	  
@@ -221,10 +224,15 @@ public abstract class LanguageLib implements Serializable {
 	
 	public abstract String getSugarName(IStrategoTerm decl) throws IOException;
 	public abstract IStrategoTerm getSugarBody(IStrategoTerm decl);
-	
+  
 	public abstract String getEditorName(IStrategoTerm decl) throws IOException;
 	public abstract IStrategoTerm getEditorServices(IStrategoTerm decl);
 
+  public          String getModelName(IStrategoTerm decl) throws IOException { return null; }
+  public          IStrategoTerm getModelBody(IStrategoTerm decl) { return null; }
+	public          String getTransformationName(IStrategoTerm decl) throws IOException { return null; }
+  public          IStrategoTerm getTransformationBody(IStrategoTerm decl) { return null; }
+  
 	protected void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IErrorLogger errorLog) {
 	  errorLog.logError(msg);
 	  ATermCommands.setErrorMessage(toplevelDecl, msg);
