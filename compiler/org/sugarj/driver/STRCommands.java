@@ -35,6 +35,7 @@ import org.sugarj.common.path.Path;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.transformations.extraction.extract_str_0_0;
+import org.sugarj.driver.transformations.renaming.rename_rules_0_2;
 import org.sugarj.stdlib.StdLib;
 
 /**
@@ -277,7 +278,7 @@ public class STRCommands {
    * @param str result file
    * @throws InvalidParseTableException 
    */
-  public static IStrategoTerm extractSTR(IStrategoTerm term) throws IOException, InvalidParseTableException {
+  public static IStrategoTerm extractSTR(IStrategoTerm term) throws IOException {
     IStrategoTerm result = null;
     Context extractionContext = SugarJContexts.extractionContext();
     try {
@@ -291,5 +292,22 @@ public class STRCommands {
     }
     return result;
   }
-  
+
+  public static IStrategoTerm renameRules(IStrategoTerm term, String oldName, String newName) throws IOException {
+    IStrategoTerm result = null;
+    Context renameRulesContext = SugarJContexts.renameRulesContext();
+    try {
+      IStrategoTerm toldName = renameRulesContext.getFactory().makeString(oldName);
+      IStrategoTerm tnewName = renameRulesContext.getFactory().makeString(newName);
+      result = rename_rules_0_2.instance.invoke(renameRulesContext, term, toldName, tnewName);
+    }
+    catch (StrategoExit e) {
+      if (e.getValue() != 0 || result == null)
+        throw new RuntimeException("Stratego extraction failed", e);
+    } finally {
+      SugarJContexts.releaseContext(renameRulesContext);
+    }
+    return result;
+  }
+
 }

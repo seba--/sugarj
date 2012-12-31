@@ -31,4 +31,9 @@ public class SugarJContexts {
   public static Context extractionContext() {
     return ctxCache.acquireContext(org.sugarj.driver.transformations.extraction.extraction.class);
   }
+  
+  public static Context renameRulesContext() {
+    return ctxCache.acquireContext(org.sugarj.driver.transformations.renaming.renaming.class);
+  }
+
 }

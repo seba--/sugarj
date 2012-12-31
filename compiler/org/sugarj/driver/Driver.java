@@ -509,6 +509,8 @@ public class Driver{
           processLanguageDec(toplevelDecl);
         else if (langLib.isSugarDec(toplevelDecl))
           processSugarDec(toplevelDecl);
+        else if (langLib.isTransformationDec(toplevelDecl))
+          processTransformationDec(toplevelDecl);
         else if (langLib.isEditorServiceDec(toplevelDecl)) 
           processEditorServicesDec(toplevelDecl);
         else if (langLib.isPlainDec(toplevelDecl))   // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
@@ -944,6 +946,53 @@ public class Driver{
         buildCompoundSdfModule();
       }
 
+      /*
+       * adapt current transformation
+       */
+      if (FileCommands.exists(strExtension))
+        buildCompoundStrModule();
+
+    } finally {
+      log.endTask();
+    }
+  }
+  
+  private void processTransformationDec(IStrategoTerm toplevelDecl) throws IOException {
+    log.beginTask("processing", "PROCESS transformation declaration.", Log.CORE);
+    try {
+      if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
+        sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+
+      String extName = langLib.getTransformationName(toplevelDecl);
+      String fullExtName = langLib.getRelativeNamespaceSep() + extName;
+      Path strExtension = environment.createBinPath(langLib.getRelativeNamespaceSep() + extName + ".str");
+      IStrategoTerm transBody = langLib.getTransformationBody(toplevelDecl);
+      
+      log.log("The name of the transformation is '" + extName + "'.", Log.DETAIL);
+      log.log("The full name of the transformation is '" + fullExtName + "'.", Log.DETAIL);
+      
+      String qualifiedMain = "main-" + fullExtName.replace('/', '_');
+      IStrategoTerm renamedTransBody = STRCommands.renameRules(transBody, "main", qualifiedMain);
+      
+      String strImports = " imports " + StringCommands.printListSeparated(availableSTRImports, " ") + "\n";
+      String strExtensionTerm = "Module(" + "\"" + fullExtName+ "\"" + ", " + renamedTransBody + ")" + "\n";
+      String strExtensionContent = SDFCommands.prettyPrintSTR(ATermCommands.atermFromString(strExtensionTerm), langLib.getInterpreter());
+      
+      int index = strExtensionContent.indexOf('\n');
+      if (index >= 0)
+        strExtensionContent =
+          strExtensionContent.substring(0, index + 1) + "\n"
+          + strImports + "\n"
+          + strExtensionContent.substring(index + 1);
+      else
+        strExtensionContent += strImports;
+            
+      driverResult.generateFile(strExtension, strExtensionContent);
+      availableSTRImports.add(fullExtName);
+      
+      if (generateFiles)
+        log.log("Wrote Stratego file to '" + strExtension.getAbsolutePath() + "'.", Log.DETAIL);
+      
       /*
        * adapt current transformation
        */
