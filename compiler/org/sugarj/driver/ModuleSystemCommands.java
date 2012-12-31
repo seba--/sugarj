@@ -257,11 +257,11 @@ public class ModuleSystemCommands {
     } catch (MalformedURLException e) {
       e.printStackTrace();
     } finally {
-      if (cl != null)
-        try {
-          cl.close();
-        } catch (IOException e) {
-        }
+//      if (cl != null)
+//        try {
+//          cl.close();
+//        } catch (IOException e) {
+//        }
     }
     
     return null;
