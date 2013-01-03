@@ -302,6 +302,8 @@ public class Driver{
    */
   private void process(ToplevelDeclarationProvider declProvider, RelativePath sourceFile, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     this.monitor = monitor;
+    List<Renaming> originalRenamings = new LinkedList<Renaming>(environment.getRenamings());
+    
     log.beginTask("processing", "Process " + sourceFile.getRelativePath(), Log.CORE);
     boolean success = false;
     try {
@@ -385,6 +387,7 @@ public class Driver{
     finally {
       log.endTask(success, "done processing " + sourceFile, "failed to process " + sourceFile);
       driverResult.setFailed(!success);
+      environment.setRenamings(originalRenamings);
     }
   }
 
@@ -485,6 +488,7 @@ public class Driver{
       
       String extName = langLib.getEditorName(toplevelDecl);
       String fullExtName = langLib.getRelativeNamespaceSep() + extName;
+      fullExtName = getRenamedDeclarationName(fullExtName);
 
       log.log("The name of the editor services is '" + extName + "'.", Log.DETAIL);
       log.log("The full name of the editor services is '" + fullExtName + "'.", Log.DETAIL);
@@ -535,7 +539,8 @@ public class Driver{
         extension = Term.asJavaString(getApplicationSubterm(getApplicationSubterm(head, "PlainDecHead", 2), "Some", 0));    
 
       String fullExtName = langLib.getRelativeNamespaceSep() + extName + (extension == null ? "" : ("." + extension));
- 
+      fullExtName = getRenamedDeclarationName(fullExtName);
+      
       log.log("The name is '" + extName + "'.", Log.DETAIL);
       log.log("The full name is '" + fullExtName + "'.", Log.DETAIL);
 
@@ -799,10 +804,10 @@ public class Driver{
       
       if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
         sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
-
       
       log.beginTask("Generate " + langLib.getLanguageName() + " code.", Log.LANGLIB);
       try {
+        toplevelDecl = langLib.applyRenaming(environment.getRenamings(), toplevelDecl);
         langLib.processLanguageSpecific(toplevelDecl, environment);
       } finally {
         log.endTask();
@@ -821,6 +826,7 @@ public class Driver{
 
       String extName = langLib.getSugarName(toplevelDecl);
       String fullExtName = langLib.getRelativeNamespaceSep() + extName;
+      fullExtName = getRenamedDeclarationName(fullExtName);
 
       log.log("The name of the sugar is '" + extName + "'.", Log.DETAIL);
       log.log("The full name of the sugar is '" + fullExtName + "'.", Log.DETAIL);
