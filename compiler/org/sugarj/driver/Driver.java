@@ -90,7 +90,6 @@ public class Driver{
   private String currentGrammarModule;
   private Path currentTransSTR;
   private String currentTransModule;
-  
   private List<String> availableSDFImports;
   private List<String> availableSTRImports;
   
@@ -118,7 +117,6 @@ public class Driver{
   
   private boolean interrupt = false;
   
-  private boolean generateFiles;
   private Path delegateCompilation = null;
   
   private boolean inDesugaredDeclList;
@@ -208,15 +206,17 @@ public class Driver{
     resultCache.put(file, new WeakReference<Result>(result));
   }
 
-  public static Result run(String source, RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    return run(new SourceToplevelDeclarationProvider(source), sourceFile, env, monitor, langLibFactory);
+  public static Result run(String source, RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    Driver driver = new Driver(env, langLibFactory);
+    return run(driver, new SourceToplevelDeclarationProvider(driver, source), sourceFile, env, monitor, langLibFactory);
   }
 
-  public static Result run(IStrategoTerm source, RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    return run(new TermToplevelDeclarationProvider(source), sourceFile, env, monitor, langLibFactory);
+  public static Result run(IStrategoTerm source, RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    Driver driver = new Driver(env, langLibFactory);
+    return run(driver, new TermToplevelDeclarationProvider(source), sourceFile, env, monitor, langLibFactory);
   }
   
-  public static Result run(RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  public static Result run(RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     if (env.doGenerateFiles())
       synchronized (currentlyProcessing) {
         currentlyProcessing.add(sourceFile);
@@ -226,7 +226,7 @@ public class Driver{
     
     try {
       String source = FileCommands.readFileAsString(sourceFile);
-      res = run(new SourceToplevelDeclarationProvider(source), sourceFile, env, monitor, langLibFactory);
+      res = run(source, sourceFile, env, monitor, langLibFactory);
     } finally {
       if (env.doGenerateFiles())
         synchronized (currentlyProcessing) {
@@ -238,13 +238,12 @@ public class Driver{
     return res;
   }
   
-  private static Result run(ToplevelDeclarationProvider declProvider, RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    Driver driver = new Driver(env, langLibFactory);
+  private static Result run(Driver driver, ToplevelDeclarationProvider declProvider, RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     Entry<ToplevelDeclarationProvider, Driver> pending = null;
     
     synchronized (Driver.class) {
       pending = getPendingRun(sourceFile);
-      if (pending != null && !pending.getKey().equals(declProvider) && pending.getValue().generateFiles == driver.generateFiles) {
+      if (pending != null && !pending.getKey().equals(declProvider) && pending.getValue().environment.doGenerateFiles() == env.doGenerateFiles()) {
         log.log("interrupting " + sourceFile, Log.CORE);
         pending.getValue().interrupt();
       }
@@ -261,7 +260,7 @@ public class Driver{
     
     if (pending != null) {
       waitForPending(sourceFile);
-      return run(declProvider, sourceFile, env, monitor, langLibFactory);
+      return run(driver, declProvider, sourceFile, env, monitor, langLibFactory);
     }
     
     try {
@@ -289,6 +288,35 @@ public class Driver{
     return driver.driverResult;
   }
   
+  private void init(ToplevelDeclarationProvider declProvider, RelativePath sourceFile) throws FileNotFoundException, IOException, InvalidParseTableException {
+    environment.getIncludePath().add(new AbsolutePath(langLib.getLibraryDirectory().getAbsolutePath()));
+  
+    depOutFile = null;
+  
+    this.sourceFile = sourceFile;
+    this.declProvider = declProvider;
+    
+    this.driverResult = new Result(environment.doGenerateFiles());
+  
+    currentGrammarSDF = new AbsolutePath(langLib.getInitGrammar().getPath());
+    currentGrammarModule = langLib.getInitGrammarModule();
+    
+    currentTransSTR = new AbsolutePath(langLib.getInitTrans().getPath());
+    currentTransModule = langLib.getInitTransModule();
+    
+    // list of imports that contain SDF extensions
+    availableSDFImports = new ArrayList<String>();    
+    availableSDFImports.add(langLib.getInitGrammarModule());
+  
+    // list of imports that contain Stratego extensions
+    availableSTRImports = new ArrayList<String>();
+    availableSTRImports.add(langLib.getInitTransModule());
+  
+    sdfParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.sdfTbl.getPath()));
+    strParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.strategoTbl.getPath()));
+    editorServicesParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.editorServicesTbl.getPath()));
+  }
+
   /**
    * Process the given Extensible Java file.
    * 
@@ -296,11 +324,10 @@ public class Driver{
    * @throws SGLRException 
    * @throws InvalidParseTableException 
    * @throws ParseException 
-   * @throws BadTokenException 
    * @throws TokenExpectedException 
    * @throws InterruptedException 
    */
-  private void process(ToplevelDeclarationProvider declProvider, RelativePath sourceFile, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private void process(ToplevelDeclarationProvider declProvider, RelativePath sourceFile, IProgressMonitor monitor) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     this.monitor = monitor;
     List<Renaming> originalRenamings = new LinkedList<Renaming>(environment.getRenamings());
     
@@ -374,7 +401,7 @@ public class Driver{
         driverResult.registerEditorDesugarings(currentTransProg);
       }
 
-      if (generateFiles)
+      if (environment.doGenerateFiles())
         driverResult.writeDependencyFile(depOutFile);
 
       success = true;
@@ -413,7 +440,7 @@ public class Driver{
   }
 
   private void processToplevelDeclaration(IStrategoTerm toplevelDecl)
-      throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
+      throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException {
     if (langLib.isNamespaceDec(toplevelDecl))
       processNamespaceDec(toplevelDecl);
     else {
@@ -558,7 +585,7 @@ public class Driver{
   }
   
   
-  public Pair<IStrategoTerm, Integer> currentParse(String remainingInput, ITreeBuilder treeBuilder, boolean recovery) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  public Pair<IStrategoTerm, Integer> currentParse(String remainingInput, ITreeBuilder treeBuilder, boolean recovery) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
     
     currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfCache, environment, langLib);
 
@@ -593,7 +620,7 @@ public class Driver{
   }
 
   private IStrategoTerm currentDesugar(IStrategoTerm term) throws IOException,
-      InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+      InvalidParseTableException, TokenExpectedException, SGLRException {
     // assimilate toplevelDec using current transformation
 
     log.beginTask("desugaring", "DESUGAR toplevel declaration.", Log.CORE);
@@ -628,7 +655,7 @@ public class Driver{
   }
 
   
-  private void processImportDecs(IStrategoTerm toplevelDecl) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
+  private void processImportDecs(IStrategoTerm toplevelDecl) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException {
     List<IStrategoTerm> pendingImports = new ArrayList<IStrategoTerm>();
     pendingImports.add(toplevelDecl);
     
@@ -698,7 +725,7 @@ public class Driver{
           importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath(), langLib);
 
         if (importSourceFile != null && (res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment))) {
-          if (!generateFiles) {
+          if (!environment.doGenerateFiles()) {
             setErrorMessage(toplevelDecl, "module outdated, compile first: " + importModuleName);
           }
           else {
@@ -756,7 +783,7 @@ public class Driver{
     }
   }
   
-  private Result subcompile(RelativePath importSourceFile) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private Result subcompile(RelativePath importSourceFile) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     storeCaches(environment);
     try {
       if (importSourceFile.getAbsolutePath().endsWith(".model")) {
@@ -817,8 +844,7 @@ public class Driver{
     }
   }
 
-  private void processSugarDec(IStrategoTerm toplevelDecl) throws IOException,
-      InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  private void processSugarDec(IStrategoTerm toplevelDecl) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
     log.beginTask("processing", "PROCESS sugar declaration.", Log.CORE);
     try {
       if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
@@ -856,7 +882,7 @@ public class Driver{
       driverResult.generateFile(sdfExtension, sdfSource);
       availableSDFImports.add(fullExtName);
       
-      if (CommandExecution.FULL_COMMAND_LINE && generateFiles)
+      if (CommandExecution.FULL_COMMAND_LINE && environment.doGenerateFiles())
         log.log("Wrote SDF file to '" + sdfExtension.getAbsolutePath() + "'.", Log.DETAIL);
       
       String strExtensionTerm = "Module(" + "\"" + fullExtName+ "\"" + ", " + strExtract + ")" + "\n";
@@ -875,7 +901,7 @@ public class Driver{
       driverResult.generateFile(strExtension, strExtensionContent);
       availableSTRImports.add(fullExtName);
       
-      if (CommandExecution.FULL_COMMAND_LINE && generateFiles)
+      if (CommandExecution.FULL_COMMAND_LINE && environment.doGenerateFiles())
         log.log("Wrote Stratego file to '" + strExtension.getAbsolutePath() + "'.", Log.DETAIL);
       
       /*
@@ -929,7 +955,7 @@ public class Driver{
       driverResult.generateFile(strExtension, strExtensionContent);
       availableSTRImports.add(fullExtName);
       
-      if (generateFiles)
+      if (environment.doGenerateFiles())
         log.log("Wrote Stratego file to '" + strExtension.getAbsolutePath() + "'.", Log.DETAIL);
       
       /*
@@ -950,7 +976,7 @@ public class Driver{
       fullExtName = StringCommands.rename(fullExtName, ren);
 
     fullExtName = fullExtName.replace("$", "-");
-    return FileCommands.fileName(new AbsolutePath(fullExtName));
+    return FileCommands.fileName(fullExtName);
   }
   
   private void processModelDec(IStrategoTerm toplevelDecl) throws IOException {
@@ -1013,7 +1039,7 @@ public class Driver{
     FileCommands.writeToFile(currentTransSTR, builder.toString());
   }
 
-  private void checkCurrentGrammar() throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  private void checkCurrentGrammar() throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
     log.beginTask("checking grammar", "CHECK current grammar", Log.CORE);
     
     try {
@@ -1023,7 +1049,7 @@ public class Driver{
     }
   }
   
-  private void checkCurrentTransformation() throws TokenExpectedException, BadTokenException, IOException, InvalidParseTableException, SGLRException {
+  private void checkCurrentTransformation() throws TokenExpectedException, IOException, InvalidParseTableException, SGLRException {
     log.beginTask("checking transformation", "CHECK current transformation", Log.CORE);
     
     try {
@@ -1037,7 +1063,7 @@ public class Driver{
     }
   }
     
-  private void initEditorServices() throws IOException, TokenExpectedException, BadTokenException, SGLRException, InterruptedException {
+  private void initEditorServices() throws IOException, TokenExpectedException, SGLRException, InterruptedException {
     IStrategoTerm initEditor = (IStrategoTerm) editorServicesParser.parse(FileCommands.readFileAsString(langLib.getInitEditor()), langLib.getInitEditor().getPath(), "Module");
 
     IStrategoTerm services = ATermCommands.getApplicationSubterm(initEditor, "Module", 2);
@@ -1049,36 +1075,6 @@ public class Driver{
       driverResult.addEditorService(service);
   }
   
-  private void init(ToplevelDeclarationProvider declProvider, RelativePath sourceFile) throws FileNotFoundException, IOException, InvalidParseTableException {
-    environment.getIncludePath().add(new AbsolutePath(langLib.getLibraryDirectory().getAbsolutePath()));
-
-    depOutFile = null;
-
-    this.sourceFile = sourceFile;
-    this.declProvider = declProvider;
-    
-    this.driverResult = new Result(generateFiles);
-
-    currentGrammarSDF = new AbsolutePath(langLib.getInitGrammar().getPath());
-    currentGrammarModule = langLib.getInitGrammarModule();
-    
-    currentTransSTR = new AbsolutePath(langLib.getInitTrans().getPath());
-    currentTransModule = langLib.getInitTransModule();
-    
-    // list of imports that contain SDF extensions
-    availableSDFImports = new ArrayList<String>();    
-    availableSDFImports.add(langLib.getInitGrammarModule());
-
-    // list of imports that contain Stratego extensions
-    availableSTRImports = new ArrayList<String>();
-    availableSTRImports.add(langLib.getInitTransModule());
-
-    sdfParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.sdfTbl.getPath()));
-    strParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.strategoTbl.getPath()));
-    editorServicesParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.editorServicesTbl.getPath()));
-  }
-  
-
   @SuppressWarnings("unchecked")
   private static synchronized void initializeCaches(Environment environment, boolean force) throws IOException {
     if (environment.getCacheDir() == null)
@@ -1223,7 +1219,7 @@ public class Driver{
   }
   
   private void clearGeneratedStuff() throws IOException {
-    if (generateFiles && driverResult.getGenerationLog() != null && FileCommands.exists(driverResult.getGenerationLog())) {
+    if (environment.doGenerateFiles() && driverResult.getGenerationLog() != null && FileCommands.exists(driverResult.getGenerationLog())) {
 
       ObjectInputStream ois = null;
       

@@ -1,6 +1,5 @@
 package org.sugarj.driver.declprovider;
 
-
 import static org.sugarj.common.Log.log;
 
 import java.io.IOException;
@@ -12,10 +11,8 @@ import org.spoofax.jsglr_layout.client.FilterException;
 import org.spoofax.jsglr_layout.client.InvalidParseTableException;
 import org.spoofax.jsglr_layout.client.imploder.IToken;
 import org.spoofax.jsglr_layout.client.imploder.ImploderAttachment;
-import org.spoofax.jsglr_layout.shared.BadTokenException;
 import org.spoofax.jsglr_layout.shared.SGLRException;
 import org.spoofax.jsglr_layout.shared.TokenExpectedException;
-import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.lang.StrategoException;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.FileCommands;
@@ -25,7 +22,6 @@ import org.sugarj.driver.Driver;
 import org.sugarj.driver.IncrementalParseResult;
 import org.sugarj.driver.RetractableTokenizer;
 import org.sugarj.driver.RetractableTreeBuilder;
-import org.sugarj.stdlib.StdLib;
 import org.sugarj.util.Pair;
 
 public class SourceToplevelDeclarationProvider implements ToplevelDeclarationProvider {
@@ -34,19 +30,14 @@ public class SourceToplevelDeclarationProvider implements ToplevelDeclarationPro
   private String lastRemainingInput;
   private String remainingInput;
   private final int hash;
-  private JSGLRI parser;
   private RetractableTreeBuilder treeBuilder;
 
-  public SourceToplevelDeclarationProvider(String source) {
+  public SourceToplevelDeclarationProvider(Driver driver, String source) {
+    this.driver = driver;
     this.remainingInput = source;
     this.treeBuilder = new RetractableTreeBuilder();
     hash = source.hashCode();
     // XXX need to load ANY parse table, preferably an empty one.
-    try {
-      parser = new JSGLRI(org.strategoxt.imp.runtime.Environment.loadParseTable(StdLib.sdfTbl.getPath()), "Sdf2Module");
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
   }
 
   @Override
@@ -58,7 +49,7 @@ public class SourceToplevelDeclarationProvider implements ToplevelDeclarationPro
   }
 
   private IncrementalParseResult parseNextToplevelDeclaration(String input, boolean recovery)
-      throws IOException, ParseException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+      throws IOException, ParseException, InvalidParseTableException, TokenExpectedException, SGLRException {
     int start = treeBuilder.getTokenizer() == null ? 0 : treeBuilder.getTokenizer().getStartOffset();
     log.beginTask("parsing", "PARSE next toplevel declaration.", Log.CORE);
     try {
@@ -81,10 +72,10 @@ public class SourceToplevelDeclarationProvider implements ToplevelDeclarationPro
       String rest = input.substring(Math.min(parseResult.b, input.length()));
 
       if (input.equals(rest))
-        if (parser.getCollectedErrors().isEmpty())
+        if (driver.getParser().getCollectedErrors().isEmpty())
           throw new SGLRException(driver.getParser(), "empty toplevel declaration parse rule");
         else
-          throw parser.getCollectedErrors().iterator().next();
+          throw driver.getParser().getCollectedErrors().iterator().next();
       
 //      try {
 //        if (!rest.isEmpty())

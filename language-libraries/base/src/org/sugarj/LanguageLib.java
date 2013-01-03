@@ -232,7 +232,7 @@ public abstract class LanguageLib implements Serializable {
   public          String getModelName(IStrategoTerm decl) throws IOException { return null; }
 	public          String getTransformationName(IStrategoTerm decl) throws IOException { return null; }
   public          IStrategoTerm getTransformationBody(IStrategoTerm decl) { return null; }
-  public          IStrategoTerm applyRenaming(List<Renaming> renamings, IStrategoTerm term) { return null; }
+  public          IStrategoTerm applyRenaming(List<Renaming> renamings, IStrategoTerm term) { return term; }
   
 	protected void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IErrorLogger errorLog) {
 	  errorLog.logError(msg);

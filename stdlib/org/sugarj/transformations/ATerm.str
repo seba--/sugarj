@@ -10,7 +10,7 @@
  */
 module org/sugarj/transformations/ATerm
 imports
-  org/sugarj/languages/ATerm
+  org/sugarj/languages/Sdf2
   libstratego-lib
 
 strategies
