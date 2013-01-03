@@ -30,7 +30,7 @@ public class Log {
   private Stack<Long> timings = new Stack<Long>();
   private Stack<Boolean> lightweight = new Stack<Boolean>();
   private int silent = -1;
-  private int loglevel = ALWAYS;
+  private int loglevel = CORE;
   
   public static PrintStream out = System.out;
   public static PrintStream err = System.err;
