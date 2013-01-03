@@ -355,13 +355,6 @@ public class JavaLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  public IStrategoTerm getModelBody(IStrategoTerm decl) {
-    IStrategoTerm body = getApplicationSubterm(decl, "ModelDec", 1);
-    IStrategoTerm sugarBody = getApplicationSubterm(body, "ModelBody", 0);
-    return sugarBody;
-  }
-
-  @Override
   public String getTransformationName(IStrategoTerm decl) throws IOException {
     IStrategoTerm head = getApplicationSubterm(decl, "TransDec", 0);
     String extName = prettyPrint(getApplicationSubterm(head, "TransDecHead", 1));

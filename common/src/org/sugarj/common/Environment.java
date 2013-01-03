@@ -4,6 +4,8 @@ package org.sugarj.common;
 import java.io.File;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -13,6 +15,7 @@ import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.stdlib.StdLib;
+import org.sugarj.util.Renaming;
 
 
 /**
@@ -53,6 +56,11 @@ public class Environment implements Serializable {
   
   private Set<Path> sourcePath = new HashSet<Path>();
   private Set<Path> includePath = new HashSet<Path>();
+  
+  /**
+   * List of renamings that need to be applied during compilation.
+   */
+  private List<Renaming> renamings = new LinkedList<Renaming>();
   
   public Environment() {
     includePath.add(bin);
@@ -140,5 +148,13 @@ public class Environment implements Serializable {
   
   public RelativePath createCachePath(String relativePath) {
     return new RelativePath(cacheDir, relativePath);
+  }
+  
+  public List<Renaming> getRenamings() {
+    return renamings;
+  }
+  
+  public void setRenamings(List<Renaming> renamings) {
+    this.renamings = renamings;
   }
 }

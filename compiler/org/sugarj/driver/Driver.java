@@ -57,6 +57,7 @@ import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.stdlib.StdLib;
 import org.sugarj.util.Pair;
 import org.sugarj.util.ProcessingListener;
+import org.sugarj.util.Renaming;
 
 
 /**
@@ -92,8 +93,10 @@ public class Driver{
   private List<String> availableSDFImports;
   private List<String> availableSTRImports;
   
-  private IStrategoTerm sugaredPackageDecl;
+  private IStrategoTerm sugaredNamespaceDecl;
+  private IStrategoTerm desugaredNamespaceDecl;
   private List<IStrategoTerm> sugaredImportDecls = new ArrayList<IStrategoTerm>();
+  private List<IStrategoTerm> desugaredImportDecls = new ArrayList<IStrategoTerm>();
   private List<IStrategoTerm> sugaredTypeOrSugarDecls = new ArrayList<IStrategoTerm>();
   
   private IStrategoTerm lastSugaredToplevelDecl;
@@ -491,7 +494,7 @@ public class Driver{
   private void processToplevelDeclaration(IStrategoTerm toplevelDecl)
       throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
     if (langLib.isNamespaceDec(toplevelDecl))
-      processModuleDec(toplevelDecl);
+      processNamespaceDec(toplevelDecl);
     else {
       if (depOutFile == null) {
         // does this ever occur?
@@ -509,12 +512,14 @@ public class Driver{
           processLanguageDec(toplevelDecl);
         else if (langLib.isSugarDec(toplevelDecl))
           processSugarDec(toplevelDecl);
-        else if (langLib.isTransformationDec(toplevelDecl))
-          processTransformationDec(toplevelDecl);
         else if (langLib.isEditorServiceDec(toplevelDecl)) 
           processEditorServicesDec(toplevelDecl);
         else if (langLib.isPlainDec(toplevelDecl))   // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
           processPlainDec(toplevelDecl);
+        else if (langLib.isTransformationDec(toplevelDecl))
+          processTransformationDec(toplevelDecl);
+        else if (langLib.isModelDec(toplevelDecl))
+          processModelDec(toplevelDecl);
         else if (ATermCommands.isList(toplevelDecl)) {
           /* 
            * Desugarings may generate lists of toplevel declarations.
@@ -684,10 +689,11 @@ public class Driver{
     }
   }
 
-  private void processModuleDec(IStrategoTerm toplevelDecl) throws IOException {
-    log.beginTask("processing", "PROCESS module declaration.", Log.CORE);
+  private void processNamespaceDec(IStrategoTerm toplevelDecl) throws IOException {
+    log.beginTask("processing", "PROCESS namespace declaration.", Log.CORE);
     try {
-      sugaredPackageDecl = lastSugaredToplevelDecl;
+      sugaredNamespaceDecl = lastSugaredToplevelDecl;
+      desugaredNamespaceDecl = toplevelDecl;
 
       langLib.processNamespaceDec(toplevelDecl, environment, driverResult, sourceFile, driverResult.getSourceFile());    
       if (depOutFile == null)
@@ -741,8 +747,11 @@ public class Driver{
 
   private void processImportDec(IStrategoTerm toplevelDecl) {
     
-    if (!inDesugaredDeclList && !sugaredImportDecls.contains(lastSugaredToplevelDecl))
-      sugaredImportDecls.add(lastSugaredToplevelDecl);
+    if (!inDesugaredDeclList) {
+      if (!sugaredImportDecls.contains(lastSugaredToplevelDecl))
+        sugaredImportDecls.add(lastSugaredToplevelDecl);
+      desugaredImportDecls.add(toplevelDecl);
+    }
     
     log.beginTask("processing", "PROCESS import declaration.", Log.CORE);
     try {
@@ -1004,6 +1013,50 @@ public class Driver{
     }
   }
   
+  private String getRenamedDeclarationName(String declName) {
+    String fullExtName = langLib.getRelativeNamespaceSep() + declName;
+    
+    for (Renaming ren : environment.getRenamings())
+      fullExtName = StringCommands.rename(fullExtName, ren);
+
+    fullExtName = fullExtName.replace("$", "-");
+    return FileCommands.fileName(new AbsolutePath(fullExtName));
+  }
+  
+  private void processModelDec(IStrategoTerm toplevelDecl) throws IOException {
+    log.beginTask("processing", "PROCESS model declaration.", Log.CORE);
+    try {
+      if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
+        sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+  
+      String modelName = langLib.getModelName(toplevelDecl);
+      modelName = getRenamedDeclarationName(modelName);
+  
+      log.log("The name of the model is '" + modelName + "'.", Log.DETAIL);
+//      checkToplevelDeclarationName(modelName.replace("-", "$"), "model", toplevelDecl);
+      
+      generateModel(modelName, toplevelDecl);
+    } finally {
+      log.endTask();
+    }
+  }
+  
+  private void generateModel(String modelName, IStrategoTerm body) throws IOException {
+    log.beginTask("Generate model.", Log.DETAIL);
+    try {
+      RelativePath modelOutFile = environment.createBinPath(langLib.getRelativeNamespaceSep() + modelName + ".model");
+      
+      IStrategoTerm modelTerm = makeDesugaredSyntaxTree(body);
+      String string = ATermCommands.atermToString(modelTerm);
+      driverResult.generateFile(modelOutFile, string);
+      
+      if (modelOutFile.equals(sourceFile))
+        driverResult.setSourceFile(sourceFile, string.hashCode());
+    } finally {
+      log.endTask();
+    }
+  }
+  
   private void buildCompoundSdfModule() throws IOException {
     FileCommands.deleteTempFiles(currentGrammarSDF);
     currentGrammarSDF = FileCommands.newTempFile("sdf");
@@ -1053,7 +1106,7 @@ public class Driver{
       log.endTask();
     }
   }
-  
+    
   private void initEditorServices() throws IOException, TokenExpectedException, BadTokenException, SGLRException, InterruptedException {
     IStrategoTerm initEditor = (IStrategoTerm) editorServicesParser.parse(FileCommands.readFileAsString(langLib.getInitEditor()), langLib.getInitEditor().getPath(), "Module");
 
@@ -1185,9 +1238,8 @@ public class Driver{
    * @return the non-desugared syntax tree of the complete file.
    */
   private IStrategoTerm makeSugaredSyntaxTree() {
-    
     // XXX empty lists => no tokens
-    IStrategoTerm packageDecl = ATermCommands.makeSome(sugaredPackageDecl, inputTreeBuilder.getTokenizer().getTokenAt(0));
+    IStrategoTerm packageDecl = ATermCommands.makeSome(sugaredNamespaceDecl, inputTreeBuilder.getTokenizer().getTokenAt(0));
     IStrategoTerm imports = 
       ATermCommands.makeList("JavaImportDec*", ImploderAttachment.getRightToken(packageDecl), sugaredImportDecls);
     IStrategoTerm body =
@@ -1204,6 +1256,26 @@ public class Driver{
     
     return term;
   }
+  
+  /**
+   * @return the desugared syntax tree of the complete file.
+   */
+  private IStrategoTerm makeDesugaredSyntaxTree(IStrategoTerm bodyTerm) {
+    IStrategoTerm packageDecl = ATermCommands.makeSome(desugaredNamespaceDecl, inputTreeBuilder.getTokenizer() == null ? null : inputTreeBuilder.getTokenizer().getTokenAt(0));
+    IStrategoTerm imports =
+      ATermCommands.makeList("JavaImportDec*", ImploderAttachment.getRightToken(packageDecl), desugaredImportDecls);
+    IStrategoTerm body =
+      ATermCommands.makeList("TypeOrSugarDec*", ImploderAttachment.getRightToken(imports), bodyTerm);
+    
+    IStrategoTerm term =
+      ATermCommands.makeAppl("CompilationUnit", "CompilationUnit", 3,
+        packageDecl,
+        imports,
+        body);
+    
+    return term;
+  }
+
   
   public synchronized void interrupt() {
     this.interrupt = true;

@@ -229,14 +229,13 @@ public abstract class LanguageLib implements Serializable {
 	public abstract IStrategoTerm getEditorServices(IStrategoTerm decl);
 
   public          String getModelName(IStrategoTerm decl) throws IOException { return null; }
-  public          IStrategoTerm getModelBody(IStrategoTerm decl) { return null; }
 	public          String getTransformationName(IStrategoTerm decl) throws IOException { return null; }
   public          IStrategoTerm getTransformationBody(IStrategoTerm decl) { return null; }
   
 	protected void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IErrorLogger errorLog) {
 	  errorLog.logError(msg);
 	  ATermCommands.setErrorMessage(toplevelDecl, msg);
-    }
+  }
 
 	public abstract boolean isModuleResolvable(String relModulePath);
 }
