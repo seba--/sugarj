@@ -514,8 +514,7 @@ public class Driver{
         sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
       
       String extName = langLib.getEditorName(toplevelDecl);
-      String fullExtName = langLib.getRelativeNamespaceSep() + extName;
-      fullExtName = getRenamedDeclarationName(fullExtName);
+      String fullExtName = getFullRenamedDeclarationName(extName);
 
       log.log("The name of the editor services is '" + extName + "'.", Log.DETAIL);
       log.log("The full name of the editor services is '" + fullExtName + "'.", Log.DETAIL);
@@ -565,8 +564,8 @@ public class Driver{
       if (head.getSubtermCount() >= 3 && isApplication(getApplicationSubterm(head, "PlainDecHead", 2), "Some"))
         extension = Term.asJavaString(getApplicationSubterm(getApplicationSubterm(head, "PlainDecHead", 2), "Some", 0));    
 
-      String fullExtName = langLib.getRelativeNamespaceSep() + extName + (extension == null ? "" : ("." + extension));
-      fullExtName = getRenamedDeclarationName(fullExtName);
+      String fullExtName = getFullRenamedDeclarationName(extName);
+      fullExtName = fullExtName + (extension == null ? "" : ("." + extension));
       
       log.log("The name is '" + extName + "'.", Log.DETAIL);
       log.log("The full name is '" + fullExtName + "'.", Log.DETAIL);
@@ -851,8 +850,7 @@ public class Driver{
         sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
 
       String extName = langLib.getSugarName(toplevelDecl);
-      String fullExtName = langLib.getRelativeNamespaceSep() + extName;
-      fullExtName = getRenamedDeclarationName(fullExtName);
+      String fullExtName = getFullRenamedDeclarationName(extName);
 
       log.log("The name of the sugar is '" + extName + "'.", Log.DETAIL);
       log.log("The full name of the sugar is '" + fullExtName + "'.", Log.DETAIL);
@@ -969,14 +967,14 @@ public class Driver{
     }
   }
   
-  private String getRenamedDeclarationName(String declName) {
+  private String getFullRenamedDeclarationName(String declName) {
     String fullExtName = langLib.getRelativeNamespaceSep() + declName;
     
     for (Renaming ren : environment.getRenamings())
       fullExtName = StringCommands.rename(fullExtName, ren);
 
     fullExtName = fullExtName.replace("$", "-");
-    return FileCommands.fileName(fullExtName);
+    return fullExtName;
   }
   
   private void processModelDec(IStrategoTerm toplevelDecl) throws IOException {
@@ -986,21 +984,21 @@ public class Driver{
         sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
   
       String modelName = langLib.getModelName(toplevelDecl);
-      modelName = getRenamedDeclarationName(modelName);
+      String fullModelName = getFullRenamedDeclarationName(modelName);
   
       log.log("The name of the model is '" + modelName + "'.", Log.DETAIL);
 //      checkToplevelDeclarationName(modelName.replace("-", "$"), "model", toplevelDecl);
       
-      generateModel(modelName, toplevelDecl);
+      generateModel(fullModelName, toplevelDecl);
     } finally {
       log.endTask();
     }
   }
   
-  private void generateModel(String modelName, IStrategoTerm body) throws IOException {
+  private void generateModel(String fullModelName, IStrategoTerm body) throws IOException {
     log.beginTask("Generate model.", Log.DETAIL);
     try {
-      RelativePath modelOutFile = environment.createBinPath(langLib.getRelativeNamespaceSep() + modelName + ".model");
+      RelativePath modelOutFile = environment.createBinPath(fullModelName + ".model");
       
       IStrategoTerm modelTerm = makeDesugaredSyntaxTree(body);
       String string = ATermCommands.atermToString(modelTerm);
