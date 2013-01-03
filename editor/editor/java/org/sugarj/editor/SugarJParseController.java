@@ -152,7 +152,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
   }
   
   private static Environment makeProjectEnvironment(IJavaProject project) throws JavaModelException {
-    Environment env = new Environment();
+    Environment env = new Environment(false);
     
     IPath fullPath = project.getProject().getFullPath();
     Path root = new AbsolutePath(project.getProject().getLocation().makeAbsolute().toString());
@@ -198,7 +198,6 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
       environment.setCacheDir(new RelativePath(environment.getRoot(), ".sugarjcache"));
     
     environment.setAtomicImportParsing(true);
-    environment.setGenerateJavaFile(true);
     
     environment.setNoChecking(true);
 

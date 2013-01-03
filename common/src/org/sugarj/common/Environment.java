@@ -32,6 +32,8 @@ public class Environment implements Serializable {
   public static String sep = "/";
   public static String classpathsep = File.pathSeparator;
   
+  private boolean generateFiles;
+  
   private Path cacheDir = null;
   
   private Path root = new AbsolutePath(".");
@@ -49,9 +51,6 @@ public class Environment implements Serializable {
    */
   private boolean noChecking = false;
 
-  private boolean generateJavaFile = false;
-  
-  
   private Path tmpDir = new AbsolutePath(System.getProperty("java.io.tmpdir"));
   
   private Set<Path> sourcePath = new HashSet<Path>();
@@ -62,9 +61,10 @@ public class Environment implements Serializable {
    */
   private List<Renaming> renamings = new LinkedList<Renaming>();
   
-  public Environment() {
+  public Environment(boolean generateFiles) {
     includePath.add(bin);
     includePath.add(new AbsolutePath(StdLib.stdLibDir.getAbsolutePath()));
+    this.generateFiles = generateFiles;
   }
   
   public Path getRoot() {
@@ -118,14 +118,6 @@ public class Environment implements Serializable {
     this.noChecking = noChecking;
   }
 
-  public boolean isGenerateJavaFile() {
-    return generateJavaFile;
-  }
-
-  public void setGenerateJavaFile(boolean generateJavaFile) {
-    this.generateJavaFile = generateJavaFile;
-  }
-
   public Path getTmpDir() {
     return tmpDir;
   }
@@ -156,5 +148,13 @@ public class Environment implements Serializable {
   
   public void setRenamings(List<Renaming> renamings) {
     this.renamings = renamings;
+  }
+
+  public boolean doGenerateFiles() {
+    return generateFiles;
+  }
+
+  public void setGenerateFiles(boolean b) {
+    this.generateFiles = b;
   }
 }

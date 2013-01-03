@@ -133,7 +133,6 @@ public class Builder extends IncrementalProjectBuilder {
         @Override
         public boolean visit(IResource resource) throws CoreException {
           Path root = new AbsolutePath(getProject().getLocation().makeAbsolute().toString());
-          Environment environment = this.environment;
           IPath relPath = resource.getFullPath().makeRelativeTo(getProject().getFullPath());
           if (!relPath.isEmpty() &&
               (environment.getBin().equals(new RelativePath(root, relPath.toString())) ||
@@ -165,6 +164,7 @@ public class Builder extends IncrementalProjectBuilder {
 
   private void build(IProgressMonitor monitor, final List<BuildInput> inputs, String what) {
     final Environment environment = SugarJParseController.makeProjectEnvironment(getProject());
+    environment.setGenerateFiles(true);
     
     CommandExecution.SILENT_EXECUTION = false;
     CommandExecution.SUB_SILENT_EXECUTION = false;
@@ -193,7 +193,7 @@ public class Builder extends IncrementalProjectBuilder {
             RelativePath depFile = new RelativePath(environment.getBin(), FileCommands.dropExtension(input.sourceFile.getRelativePath()) + ".dep");
             Result res = Result.readDependencyFile(depFile, environment);
             if (res == null || !res.isUpToDate(input.sourceFile, environment))
-              res = Driver.compile(input.sourceFile, environment, monitor, input.langLibFactory);
+              res = Driver.run(input.sourceFile, environment, monitor, input.langLibFactory);
             
             IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
             for (IWorkbenchWindow workbenchWindow : workbenchWindows)

@@ -26,15 +26,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.jsglr_layout.client.FilterException;
+import org.spoofax.jsglr_layout.client.ITreeBuilder;
 import org.spoofax.jsglr_layout.client.InvalidParseTableException;
 import org.spoofax.jsglr_layout.client.ParseTable;
 import org.spoofax.jsglr_layout.client.SGLR;
-import org.spoofax.jsglr_layout.client.imploder.IToken;
 import org.spoofax.jsglr_layout.client.imploder.ImploderAttachment;
 import org.spoofax.jsglr_layout.client.imploder.TreeBuilder;
 import org.spoofax.jsglr_layout.shared.BadTokenException;
@@ -54,6 +52,9 @@ import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.driver.caching.ModuleKeyCache;
+import org.sugarj.driver.declprovider.SourceToplevelDeclarationProvider;
+import org.sugarj.driver.declprovider.TermToplevelDeclarationProvider;
+import org.sugarj.driver.declprovider.ToplevelDeclarationProvider;
 import org.sugarj.stdlib.StdLib;
 import org.sugarj.util.Pair;
 import org.sugarj.util.ProcessingListener;
@@ -69,26 +70,26 @@ public class Driver{
 
   private static Map<Path, WeakReference<Result>> resultCache = new HashMap<Path, WeakReference<Result>>(); // new LRUMap(50);
 
-  private static Map<Path, Entry<String, Driver>> pendingRuns = new HashMap<Path, Map.Entry<String,Driver>>();
+  private static Map<Path, Entry<ToplevelDeclarationProvider, Driver>> pendingRuns = new HashMap<Path, Map.Entry<ToplevelDeclarationProvider,Driver>>();
   private static List<Path> pendingInputFiles = new ArrayList<Path>();
   private static List<Path> currentlyProcessing = new ArrayList<Path>();
   private static List<ProcessingListener> processingListener = new LinkedList<ProcessingListener>();
 
   private IProgressMonitor monitor;
   
-  private Environment environment = new Environment();
+  private Environment environment;
   
   private Result driverResult;
   
   private Path depOutFile;
 
   private RelativePath sourceFile;
+  private ToplevelDeclarationProvider declProvider;
 
   private Path currentGrammarSDF;
   private String currentGrammarModule;
   private Path currentTransSTR;
   private String currentTransModule;
-  private String remainingInput;
   
   private List<String> availableSDFImports;
   private List<String> availableSTRImports;
@@ -101,7 +102,6 @@ public class Driver{
   
   private IStrategoTerm lastSugaredToplevelDecl;
   
-  private RetractableTreeBuilder inputTreeBuilder;
   private SGLR sdfParser;
   private SGLR strParser;
   private SGLR editorServicesParser;
@@ -127,7 +127,7 @@ public class Driver{
   
   
   public Driver(Environment env, LanguageLibFactory langLibFactory) {
-    this.environment=env;
+    this.environment = env;
     this.langLib = langLibFactory.createLanguageLibrary();
 
     langLib.setInterpreter(new HybridInterpreter());
@@ -166,12 +166,12 @@ public class Driver{
     return null;
   }
   
-  private static synchronized Entry<String, Driver> getPendingRun(Path file) {
+  private static synchronized Entry<ToplevelDeclarationProvider, Driver> getPendingRun(Path file) {
     return pendingRuns.get(file);
   }
   
-  private static synchronized void putPendingRun(Path file, String source, Driver driver) {
-    pendingRuns.put(file, new AbstractMap.SimpleImmutableEntry<String, Driver>(source, driver));
+  private static synchronized void putPendingRun(Path file, ToplevelDeclarationProvider declProvider, Driver driver) {
+    pendingRuns.put(file, new AbstractMap.SimpleImmutableEntry<ToplevelDeclarationProvider, Driver>(declProvider, driver));
   }
   
   public static synchronized void addProcessingDoneListener(ProcessingListener listener) {
@@ -207,25 +207,17 @@ public class Driver{
   private static synchronized void putResult(Path file, Result result) {
     resultCache.put(file, new WeakReference<Result>(result));
   }
-  
-  public static Result compile(RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    return run(sourceFile, env, monitor, true, langLibFactory);
+
+  public static Result run(String source, RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    return run(new SourceToplevelDeclarationProvider(source), sourceFile, env, monitor, langLibFactory);
   }
 
-  public static Result parse(RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    return run(sourceFile, env, monitor, false, langLibFactory);
+  public static Result run(IStrategoTerm source, RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    return run(new TermToplevelDeclarationProvider(source), sourceFile, env, monitor, langLibFactory);
   }
   
-  public static Result compile(String source, RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    return run(source, sourceFile, env, monitor, true, langLibFactory);
-  }
-  
-  public static Result parse(String source, RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    return run(source, sourceFile, env, monitor, false, langLibFactory);
-  }
-
-  private static Result run(RelativePath sourceFile, Environment env, IProgressMonitor monitor, boolean generateFiles, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    if (generateFiles)
+  public static Result run(RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    if (env.doGenerateFiles())
       synchronized (currentlyProcessing) {
         currentlyProcessing.add(sourceFile);
       }
@@ -234,9 +226,9 @@ public class Driver{
     
     try {
       String source = FileCommands.readFileAsString(sourceFile);
-      res = run(source, sourceFile, env, monitor, generateFiles, langLibFactory);
+      res = run(new SourceToplevelDeclarationProvider(source), sourceFile, env, monitor, langLibFactory);
     } finally {
-      if (generateFiles)
+      if (env.doGenerateFiles())
         synchronized (currentlyProcessing) {
           currentlyProcessing.remove(sourceFile);
         }
@@ -246,30 +238,30 @@ public class Driver{
     return res;
   }
   
-  private static Result run(String source, RelativePath sourceFile, Environment env, IProgressMonitor monitor, boolean generateFiles, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private static Result run(ToplevelDeclarationProvider declProvider, RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     Driver driver = new Driver(env, langLibFactory);
-    Entry<String, Driver> pending = null;
+    Entry<ToplevelDeclarationProvider, Driver> pending = null;
     
     synchronized (Driver.class) {
       pending = getPendingRun(sourceFile);
-      if (pending != null && !pending.getKey().equals(source)) {
+      if (pending != null && !pending.getKey().equals(declProvider) && pending.getValue().generateFiles == driver.generateFiles) {
         log.log("interrupting " + sourceFile, Log.CORE);
         pending.getValue().interrupt();
       }
 
       if (pending == null) {
         Result result = getResult(sourceFile);
-        if (result != null && result.isUpToDate(source.hashCode(), env))
+        if (result != null && result.isUpToDate(declProvider.getSourceHashCode(), env))
           return result;
       }
       
       if (pending == null)
-        putPendingRun(sourceFile, source, driver);
+        putPendingRun(sourceFile, declProvider, driver);
     }
     
     if (pending != null) {
       waitForPending(sourceFile);
-      return run(source, sourceFile, env, monitor, generateFiles, langLibFactory);
+      return run(declProvider, sourceFile, env, monitor, langLibFactory);
     }
     
     try {
@@ -278,7 +270,7 @@ public class Driver{
           listener.processingStarts(sourceFile);
       }
     
-      driver.process(source, sourceFile, monitor, generateFiles);
+      driver.process(declProvider, sourceFile, monitor);
       Driver.storeCaches(env);
     
       synchronized (processingListener) {
@@ -289,8 +281,9 @@ public class Driver{
       org.strategoxt.imp.runtime.Environment.logException(e);
     } finally {
       pendingRuns.remove(sourceFile);
-      if (generateFiles)
-        putResult(sourceFile, driver.driverResult != null && driver.driverResult.getSugaredSyntaxTree() == null ? null : driver.driverResult);
+
+    //if (env.doGenerateFiles())
+      putResult(sourceFile, driver.driverResult != null && driver.driverResult.getSugaredSyntaxTree() == null ? null : driver.driverResult);
     }
 
     return driver.driverResult;
@@ -307,13 +300,13 @@ public class Driver{
    * @throws TokenExpectedException 
    * @throws InterruptedException 
    */
-  private void process(String source, RelativePath sourceFile, IProgressMonitor monitor, boolean generateFiles) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  private void process(ToplevelDeclarationProvider declProvider, RelativePath sourceFile, IProgressMonitor monitor) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     this.monitor = monitor;
     log.beginTask("processing", "Process " + sourceFile.getRelativePath(), Log.CORE);
     boolean success = false;
     try {
-      init(sourceFile, generateFiles);
-      driverResult.setSourceFile(this.sourceFile, source.hashCode());
+      init(declProvider, sourceFile);
+      driverResult.setSourceFile(this.sourceFile, declProvider.getSourceHashCode());
       
       if (sourceFile != null) {
         langLib.setupSourceFile(sourceFile, environment);
@@ -324,8 +317,6 @@ public class Driver{
         clearGeneratedStuff();
       }
 
-      remainingInput = source;
-  
       initEditorServices();
 
       boolean done = false;
@@ -333,9 +324,7 @@ public class Driver{
         stepped();
         
         // PARSE the next top-level declaration
-        IncrementalParseResult parseResult = parseNextToplevelDeclaration(remainingInput, true);
-        lastSugaredToplevelDecl = parseResult.getToplevelDecl();
-        remainingInput = parseResult.getRest();
+        lastSugaredToplevelDecl = declProvider.getNextToplevelDecl(true);
         
         stepped();
         
@@ -347,7 +336,7 @@ public class Driver{
         // PROCESS the assimilated top-level declaration
         processToplevelDeclaration(desugared);
 
-        done = parseResult.parsingFinished();
+        done = !declProvider.hasNextToplevelDecl();
       }
       
       stepped();
@@ -420,77 +409,6 @@ public class Driver{
     }
   }
 
-  private IncrementalParseResult parseNextToplevelDeclaration(String input, boolean recovery)
-      throws IOException, ParseException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
-    int start = inputTreeBuilder.getTokenizer() == null ? 0 : inputTreeBuilder.getTokenizer().getStartOffset();
-    log.beginTask("parsing", "PARSE next toplevel declaration.", Log.CORE);
-    try {
-      Pair<IStrategoTerm, Integer> parseResult = null;
-      
-      try {
-        parseResult = currentParse(input, recovery);
-      } catch (SGLRException e) {
-        if (e.getCause() instanceof TimeoutException)
-          parseResult = currentParse(input, false);
-        
-        if (parseResult == null)
-          throw e;
-      }
-
-      if (parseResult == null || parseResult.a == null)
-        throw new ParseException("could not parse toplevel declaration in:\n" + input, -1);
-
-      IStrategoTerm toplevelDecl = parseResult.a;
-      String rest = input.substring(Math.min(parseResult.b, input.length()));
-
-      if (input.equals(rest))
-        if (parser.getCollectedErrors().isEmpty())
-          throw new SGLRException(parser, "empty toplevel declaration parse rule");
-        else
-          throw parser.getCollectedErrors().iterator().next();
-      
-//      try {
-//        if (!rest.isEmpty())
-//          inputTreeBuilder.retract(restTerm);
-//      } catch (Throwable t) {
-//        t.printStackTrace();
-//      }
-      
-      Path tmpFile = FileCommands.newTempFile("aterm");
-      FileCommands.writeToFile(tmpFile, toplevelDecl.toString());
-      log.log("next toplevel declaration parsed: " + tmpFile, Log.PARSE);
-
-      return new IncrementalParseResult(toplevelDecl, rest);
-    } catch (Exception e) {
-      if (!recovery)
-        throw new SGLRException(parser, "parsing failed", e);
-      
-      String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
-      
-      if (!(e instanceof StrategoException) && (!(e instanceof SGLRException) || (e instanceof FilterException)))
-        e.printStackTrace();
-      else
-        log.logErr(msg, Log.DETAIL);
-      
-      if (inputTreeBuilder.getTokenizer().getStartOffset() > start) {
-        IToken token = inputTreeBuilder.getTokenizer().getTokenAtOffset(start);
-        ((RetractableTokenizer) inputTreeBuilder.getTokenizer()).retractTo(token.getIndex());
-        inputTreeBuilder.setOffset(start);
-      }
-      
-      IToken right = inputTreeBuilder.getTokenizer().makeToken(start + input.length() - 1, IToken.TK_STRING, true);
-      IToken left = inputTreeBuilder.getTokenizer().getTokenAtOffset(start);
-      inputTreeBuilder.getTokenizer().makeToken(inputTreeBuilder.getTokenizer().getStartOffset() - 1, IToken.TK_EOF, true);
-      IStrategoTerm term = ATermCommands.factory.makeString(input);
-      ImploderAttachment.putImploderAttachment(term, false, "String", left, right);
-      setErrorMessage(term, msg);
-      return new IncrementalParseResult(term, "");
-    } finally {
-      log.endTask();
-    }
-  }
-  
-  
   private void processToplevelDeclaration(IStrategoTerm toplevelDecl)
       throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException {
     if (langLib.isNamespaceDec(toplevelDecl))
@@ -635,7 +553,7 @@ public class Driver{
   }
   
   
-  private Pair<IStrategoTerm, Integer> currentParse(String remainingInput, boolean recovery) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  public Pair<IStrategoTerm, Integer> currentParse(String remainingInput, ITreeBuilder treeBuilder, boolean recovery) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     
     currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfCache, environment, langLib);
 
@@ -651,7 +569,7 @@ public class Driver{
           "ToplevelDeclaration",
           recovery,
           true,
-          inputTreeBuilder);
+          treeBuilder);
 //    } catch (SGLRException e) {
 //      this.parser = e.getParser();
 //      log.logErr(e.getMessage(), Log.DETAIL);
@@ -709,32 +627,24 @@ public class Driver{
     List<IStrategoTerm> pendingImports = new ArrayList<IStrategoTerm>();
     pendingImports.add(toplevelDecl);
     
-    while (true) {
-      IncrementalParseResult res = null;
+    while (declProvider.hasNextToplevelDecl()) {
       IStrategoTerm term = null;
       
       try {
         log.beginSilent();
-        res = parseNextToplevelDeclaration(remainingInput, false);
-        term = res.getToplevelDecl();
+        term = declProvider.getNextToplevelDecl(false);
       }
       catch (Throwable t) {
-        res = null;
         term = null;
       }
       finally {         
         log.endSilent(); 
       }
     
-      if (res != null &&
-          term != null &&
-          langLib.isImportDec(term)) {
-        remainingInput = res.getRest();
+      if (term != null && langLib.isImportDec(term))
         pendingImports.add(term);
-      }
       else {
-        if (term != null)
-          inputTreeBuilder.retract(term);
+        declProvider.retract(term);
         break;
       }
     }
@@ -797,7 +707,7 @@ public class Driver{
                 delegateCompilation = importSourceFile;
               }
               else {
-                res = compile(importSourceFile, environment, monitor, langLib.getFactoryForLanguage());
+                res = run(importSourceFile, environment, monitor, langLib.getFactoryForLanguage());
                 if (res.hasFailed())
                   setErrorMessage(toplevelDecl, "problems while compiling " + importModuleName);
               }
@@ -841,6 +751,20 @@ public class Driver{
     }
   }
   
+  private Result subcompile(RelativePath importSourceFile) throws IOException, TokenExpectedException, BadTokenException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    storeCaches(environment);
+    try {
+      if (importSourceFile.getAbsolutePath().endsWith(".model")) {
+        IStrategoTerm term = ATermCommands.atermFromFile(importSourceFile.getAbsolutePath());
+        return run(term, importSourceFile, environment, monitor, langLib.getFactoryForLanguage());
+      }
+      else
+        return run(importSourceFile, environment, monitor, langLib.getFactoryForLanguage());
+    } finally {
+      initializeCaches(environment, true);
+    }
+  }
+
   private boolean processImport(String modulePath, IStrategoTerm importTerm) throws IOException {
     boolean success = false;
     
@@ -1119,13 +1043,13 @@ public class Driver{
       driverResult.addEditorService(service);
   }
   
-  private void init(RelativePath sourceFile, boolean generateFiles) throws FileNotFoundException, IOException, InvalidParseTableException {
+  private void init(ToplevelDeclarationProvider declProvider, RelativePath sourceFile) throws FileNotFoundException, IOException, InvalidParseTableException {
     environment.getIncludePath().add(new AbsolutePath(langLib.getLibraryDirectory().getAbsolutePath()));
 
     depOutFile = null;
 
     this.sourceFile = sourceFile;
-    this.generateFiles = generateFiles;
+    this.declProvider = declProvider;
     
     this.driverResult = new Result(generateFiles);
 
@@ -1143,8 +1067,6 @@ public class Driver{
     availableSTRImports = new ArrayList<String>();
     availableSTRImports.add(langLib.getInitTransModule());
 
-    inputTreeBuilder = new RetractableTreeBuilder();
-    
     sdfParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.sdfTbl.getPath()));
     strParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.strategoTbl.getPath()));
     editorServicesParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.editorServicesTbl.getPath()));
@@ -1239,7 +1161,7 @@ public class Driver{
    */
   private IStrategoTerm makeSugaredSyntaxTree() {
     // XXX empty lists => no tokens
-    IStrategoTerm packageDecl = ATermCommands.makeSome(sugaredNamespaceDecl, inputTreeBuilder.getTokenizer().getTokenAt(0));
+    IStrategoTerm packageDecl = ATermCommands.makeSome(sugaredNamespaceDecl, declProvider.getStartToken());
     IStrategoTerm imports = 
       ATermCommands.makeList("JavaImportDec*", ImploderAttachment.getRightToken(packageDecl), sugaredImportDecls);
     IStrategoTerm body =
@@ -1261,7 +1183,7 @@ public class Driver{
    * @return the desugared syntax tree of the complete file.
    */
   private IStrategoTerm makeDesugaredSyntaxTree(IStrategoTerm bodyTerm) {
-    IStrategoTerm packageDecl = ATermCommands.makeSome(desugaredNamespaceDecl, inputTreeBuilder.getTokenizer() == null ? null : inputTreeBuilder.getTokenizer().getTokenAt(0));
+    IStrategoTerm packageDecl = ATermCommands.makeSome(desugaredNamespaceDecl, declProvider.getStartToken());
     IStrategoTerm imports =
       ATermCommands.makeList("JavaImportDec*", ImploderAttachment.getRightToken(packageDecl), desugaredImportDecls);
     IStrategoTerm body =
@@ -1319,7 +1241,7 @@ public class Driver{
     }
   }
   
-  private void setErrorMessage(IStrategoTerm toplevelDecl, String msg) {
+  public void setErrorMessage(IStrategoTerm toplevelDecl, String msg) {
     driverResult.logError(msg);
     ATermCommands.setErrorMessage(toplevelDecl, msg);
   }
@@ -1335,5 +1257,9 @@ public class Driver{
         return imp1 ? -1 : 1;
       }
     });
+  }
+
+  public SGLR getParser() {
+    return parser;
   }
 }

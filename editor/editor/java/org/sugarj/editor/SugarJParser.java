@@ -143,7 +143,7 @@ public class SugarJParser extends JSGLRI {
     SugarJConsole.activateConsoleOnce();
     
     try {
-      return Driver.parse(input, sourceFile, environment, monitor, factory);
+      return Driver.run(input, sourceFile, environment, monitor, factory);
     } catch (InterruptedException e) {
       throw e;
     } catch (Exception e) {
