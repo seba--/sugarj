@@ -30,6 +30,7 @@ import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.java.JavaSourceFileContent;
+import org.sugarj.util.Renaming;
 
 public class JavaLib extends LanguageLib implements Serializable {
 
@@ -394,6 +395,12 @@ public class JavaLib extends LanguageLib implements Serializable {
   public IStrategoTerm getEditorServices(IStrategoTerm decl) {
     IStrategoTerm body = getApplicationSubterm(decl, "EditorServicesDec", 1);
     return ATermCommands.getApplicationSubterm(body, "EditorServicesBody", 0);
+  }
+  
+  @Override
+  public IStrategoTerm applyRenaming(List<Renaming> renamings, IStrategoTerm term) {
+    // TODO Auto-generated method stub
+    return super.applyRenaming(renamings, term);
   }
 
 }
