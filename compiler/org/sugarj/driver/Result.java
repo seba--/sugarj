@@ -220,7 +220,7 @@ public class Result implements IErrorLogger {
   }
 
   public boolean isUpToDateShallow(int inputHash, Environment env) throws IOException {
-    if (hasPersistentVersionChanged())
+    if (hasPersistentVersionChanged() || persistentPath == null && env.doGenerateFiles())
       return false;
     
     if (hasSourceFileChanged(inputHash))

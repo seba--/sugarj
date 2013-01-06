@@ -396,11 +396,4 @@ public class JavaLib extends LanguageLib implements Serializable {
     IStrategoTerm body = getApplicationSubterm(decl, "EditorServicesDec", 1);
     return ATermCommands.getApplicationSubterm(body, "EditorServicesBody", 0);
   }
-  
-  @Override
-  public IStrategoTerm applyRenaming(List<Renaming> renamings, IStrategoTerm term) {
-    // TODO Auto-generated method stub
-    return super.applyRenaming(renamings, term);
-  }
-
 }

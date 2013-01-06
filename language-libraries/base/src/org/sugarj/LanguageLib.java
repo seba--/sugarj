@@ -23,7 +23,6 @@ import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.languagelib.SourceFileContent;
 import org.sugarj.stdlib.StdLib;
-import org.sugarj.util.Renaming;
 
 
 public abstract class LanguageLib implements Serializable {
@@ -232,7 +231,6 @@ public abstract class LanguageLib implements Serializable {
   public          String getModelName(IStrategoTerm decl) throws IOException { return null; }
 	public          String getTransformationName(IStrategoTerm decl) throws IOException { return null; }
   public          IStrategoTerm getTransformationBody(IStrategoTerm decl) { return null; }
-  public          IStrategoTerm applyRenaming(List<Renaming> renamings, IStrategoTerm term) { return term; }
   
 	protected void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IErrorLogger errorLog) {
 	  errorLog.logError(msg);

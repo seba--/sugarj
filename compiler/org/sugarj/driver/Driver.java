@@ -55,6 +55,7 @@ import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.declprovider.SourceToplevelDeclarationProvider;
 import org.sugarj.driver.declprovider.TermToplevelDeclarationProvider;
 import org.sugarj.driver.declprovider.ToplevelDeclarationProvider;
+import org.sugarj.driver.transformations.primitive.SugarJPrimitivesLibrary;
 import org.sugarj.stdlib.StdLib;
 import org.sugarj.util.Pair;
 import org.sugarj.util.ProcessingListener;
@@ -72,6 +73,9 @@ public class Driver{
 
   private static Map<Path, Entry<ToplevelDeclarationProvider, Driver>> pendingRuns = new HashMap<Path, Map.Entry<ToplevelDeclarationProvider,Driver>>();
   private static List<Path> pendingInputFiles = new ArrayList<Path>();
+  /*
+   * TODO make private field to safely detect cycles.
+   */
   private static List<Path> currentlyProcessing = new ArrayList<Path>();
   private static List<ProcessingListener> processingListener = new LinkedList<ProcessingListener>();
 
@@ -129,6 +133,7 @@ public class Driver{
     this.langLib = langLibFactory.createLanguageLibrary();
 
     langLib.setInterpreter(new HybridInterpreter());
+    langLib.getInterpreter().addOperatorRegistry(new SugarJPrimitivesLibrary(this, environment, monitor));
 
     try {      
       if (environment.getCacheDir() != null)
@@ -362,8 +367,13 @@ public class Driver{
         
         stepped();
         
+        // RENAME the desugared top-level declaration
+        IStrategoTerm renamed = currentRename(desugared);
+        
+        stepped();
+        
         // PROCESS the assimilated top-level declaration
-        processToplevelDeclaration(desugared);
+        processToplevelDeclaration(renamed);
 
         done = !declProvider.hasNextToplevelDecl();
       }
@@ -638,6 +648,26 @@ public class Driver{
     }
   }
 
+  /**
+   * Apply current renamings stored in environment to the given term.
+   */
+  private IStrategoTerm currentRename(IStrategoTerm term) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
+    log.beginTask("desugaring", "RENAME toplevel declaration.", Log.TRANSFORM);
+    try {
+      IStrategoTerm result = STRCommands.assimilate("apply-renamings", currentTransProg, term, langLib.getInterpreter());
+      return result == null ? term : result;
+    } catch (StrategoException e) {
+      String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
+
+      log.logErr(msg, Log.DETAIL);
+      setErrorMessage(term, msg);
+      return term;
+    } finally {
+      log.endTask();
+    }
+  }
+
+  
   private void processNamespaceDec(IStrategoTerm toplevelDecl) throws IOException {
     log.beginTask("processing", "PROCESS namespace declaration.", Log.CORE);
     try {
@@ -833,7 +863,6 @@ public class Driver{
       
       log.beginTask("Generate " + langLib.getLanguageName() + " code.", Log.LANGLIB);
       try {
-        toplevelDecl = langLib.applyRenaming(environment.getRenamings(), toplevelDecl);
         langLib.processLanguageSpecific(toplevelDecl, environment);
       } finally {
         log.endTask();
@@ -970,8 +999,8 @@ public class Driver{
   private String getFullRenamedDeclarationName(String declName) {
     String fullExtName = langLib.getRelativeNamespaceSep() + declName;
     
-    for (Renaming ren : environment.getRenamings())
-      fullExtName = StringCommands.rename(fullExtName, ren);
+//    for (Renaming ren : environment.getRenamings())
+//      fullExtName = StringCommands.rename(fullExtName, ren);
 
     fullExtName = fullExtName.replace("$", "-");
     return fullExtName;

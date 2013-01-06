@@ -14,12 +14,14 @@ rules
   name-suffix = !("$", <id>); conc-strings; string-replace(|"/","_")
 
   apply-renamings(|renamings) =
-    where(<?[(pkgs, from, to)|rest]> renamings)
-      < apply-renaming(|pkgs, <as-java-path> from, <as-java-path> to); apply-renamings(|rest)
-      + id
-
-  apply-renaming(|pkgs, from, to) =
-    topdown(try(rename-java(|pkgs, from, to)))
+    where(!renamings; is-list; make-renamings-hashtable => renamings-table);
+    apply-renamings(|renamings-table)
+  
+  make-renamings-hashtable : [] -> <new-hashtable>
+  make-renamings-hashtable : [(quals,from,to) | rest] -> table
+    where <make-renamings-hashtable> rest => table;
+          <hashtable-push(|from, to)> table;
+          <hashtable-push(|(quals, from), to)> table
 
   as-java-path = string-as-chars(map(try(?'-';!'$')))
 

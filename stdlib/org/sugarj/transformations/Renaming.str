@@ -4,7 +4,8 @@ imports
   org/sugarj/languages/Stratego
 
 rules
-  rename-module(|renamings) = fail 
+  apply-renamings = where(prim("SUGARJ_current_renamings") => renamings); rename-decl(|renamings)
+  rename-decl(|renamings) = fail 
 
 rules
   rename-rules(|oname, nname) = topdown(try(rename-rule(|oname, nname))); topdown(try(SVar(?oname;!nname)))
