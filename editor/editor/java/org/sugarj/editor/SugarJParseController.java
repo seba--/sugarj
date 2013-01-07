@@ -41,13 +41,12 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
   public IParseController getWrapped() {
     initDescriptor();
     IParseController result = super.getWrapped();
+    
     if (result instanceof SGLRParseController) {
       JSGLRI parser = ((SGLRParseController) result).getParser();
       if (!(parser instanceof SugarJParser)) {
         sugarjParser = new SugarJParser(parser);
-
-        sugarjParser.setEnvironment(environment);
-        
+        sugarjParser.setEnvironment(environment);        
         ((SGLRParseController) result).setParser(sugarjParser);
       }
     }
@@ -129,12 +128,17 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
     super.initialize(filePath, project, handler);
     
     if (project != null)
-      environment = makeProjectEnvironment(project.getRawProject());
+      initializeEnvironment(project.getRawProject());
+  }
+  
+  private void initializeEnvironment(IProject project) {
+    if (project != null)
+      environment = makeProjectEnvironment(project);
     
     if (sugarjParser != null)
       sugarjParser.setEnvironment(environment);
   }
-  
+
   public static Environment makeProjectEnvironment(IProject project) {
     IJavaProject javaProject = JavaCore.create(project);
     if (javaProject == null)

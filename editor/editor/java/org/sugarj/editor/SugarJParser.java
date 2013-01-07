@@ -68,6 +68,8 @@ public class SugarJParser extends JSGLRI {
   @Override
   protected IStrategoTerm doParse(String input, String filename) throws IOException {
     
+    if (environment == null && getController().getProject() != null)
+      environment = SugarJParseController.makeProjectEnvironment(getController().getProject().getRawProject());
     assert environment != null;
     
     if (!LanguageLibRegistry.getInstance().isRegistered(FileCommands.getExtension(filename)))
@@ -102,6 +104,8 @@ public class SugarJParser extends JSGLRI {
     }
     
     final RelativePath sourceFile = ModuleSystemCommands.locateSourceFile(filename, environment.getSourcePath());
+    assert sourceFile != null;
+    
     final LanguageLibFactory factory = LanguageLibRegistry.getInstance().getLanguageLib(FileCommands.getExtension(filename));
 
     SugarJParser.setPending(filename, true);

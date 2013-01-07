@@ -135,11 +135,13 @@ public class ModuleSystemCommands {
 
 
   public static RelativePath locateSourceFile(String path, Set<Path> sourcePath) {
-    if (path.startsWith("org/sugarj"))
-      return null;
-    
-    RelativePath result = searchFileInSourceLocationPath(FileCommands.dropExtension(path), FileCommands.getExtension(path), sourcePath);
-        
+    return locateSourceFile (FileCommands.dropExtension(path), FileCommands.getExtension(path), sourcePath);
+  }
+
+  public static RelativePath locateSourceFile(String modulePath, Set<Path> sourcePath, LanguageLib langLib) {
+    RelativePath result = locateSourceFile(modulePath, langLib.getSugarFileExtension(), sourcePath);
+    if (result == null && langLib.getOriginalFileExtension() != null)
+      result = locateSourceFile(modulePath, langLib.getOriginalFileExtension(), sourcePath);
     return result;
   }
 
@@ -147,22 +149,8 @@ public class ModuleSystemCommands {
     if (modulePath.startsWith("org/sugarj"))
       return null;
     
-    RelativePath result = searchFileInSourceLocationPath(modulePath, extension, sourcePath);
-        
-    return result;
+    return searchFileInSourceLocationPath(modulePath, extension, sourcePath);
   }
-  
-  public static RelativePath locateSourceFile(String modulePath, Set<Path> sourcePath, LanguageLib langLib) {
-    if (modulePath.startsWith("org/sugarj"))
-      return null;
-    
-    RelativePath result = searchFileInSourceLocationPath(modulePath, langLib.getSugarFileExtension(), sourcePath);
-    if (result == null && langLib.getOriginalFileExtension() != null)
-      result = searchFileInSourceLocationPath(modulePath, langLib.getOriginalFileExtension(), sourcePath);
-        
-    return result;
-  }
-  
   
   /**
    * 
