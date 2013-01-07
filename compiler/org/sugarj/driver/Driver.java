@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -73,12 +74,12 @@ public class Driver{
 
   private static Map<Path, Entry<ToplevelDeclarationProvider, Driver>> pendingRuns = new HashMap<Path, Map.Entry<ToplevelDeclarationProvider,Driver>>();
   private static List<Path> pendingInputFiles = new ArrayList<Path>();
-  /*
-   * TODO make private field to safely detect cycles.
-   */
-  private static List<Path> currentlyProcessing = new ArrayList<Path>();
   private static List<ProcessingListener> processingListener = new LinkedList<ProcessingListener>();
 
+  private List<Driver> currentlyProcessing;
+  private Set<Path> potentialCompilationDelegates = null;
+
+  
   private IProgressMonitor monitor;
   
   private Environment environment;
@@ -121,16 +122,15 @@ public class Driver{
   
   private boolean interrupt = false;
   
-  private Path delegateCompilation = null;
-  
   private boolean inDesugaredDeclList;
   
   private LanguageLib langLib;
   
   
-  public Driver(Environment env, LanguageLibFactory langLibFactory) {
+  public Driver(Environment env, LanguageLibFactory langLibFactory, List<Driver> currentlyProcessing) {
     this.environment = env;
     this.langLib = langLibFactory.createLanguageLibrary();
+    this.currentlyProcessing = currentlyProcessing;
 
     langLib.setInterpreter(new HybridInterpreter());
     langLib.getInterpreter().addOperatorRegistry(new SugarJPrimitivesLibrary(this, environment, monitor));
@@ -211,36 +211,26 @@ public class Driver{
     resultCache.put(file, new WeakReference<Result>(result));
   }
 
+  public static Result run(RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    return run(sourceFile, env, monitor, langLibFactory, new LinkedList<Driver>());
+  }
+
+  public static Result run(RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory, List<Driver> currentlyProcessing) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    return run(FileCommands.readFileAsString(sourceFile), sourceFile, env, monitor, langLibFactory, currentlyProcessing);
+  }
+
   public static Result run(String source, RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    Driver driver = new Driver(env, langLibFactory);
+    return run(source, sourceFile, env, monitor, langLibFactory, new LinkedList<Driver>());
+  }
+  
+  public static Result run(String source, RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory, List<Driver> currentlyProcessing) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    Driver driver = new Driver(env, langLibFactory, currentlyProcessing);
     return run(driver, new SourceToplevelDeclarationProvider(driver, source), sourceFile, env, monitor, langLibFactory);
   }
 
-  public static Result run(IStrategoTerm source, RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    Driver driver = new Driver(env, langLibFactory);
+  public static Result run(IStrategoTerm source, RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory, List<Driver> currentlyProcessing) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    Driver driver = new Driver(env, langLibFactory, currentlyProcessing);
     return run(driver, new TermToplevelDeclarationProvider(source), sourceFile, env, monitor, langLibFactory);
-  }
-  
-  public static Result run(RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    if (env.doGenerateFiles())
-      synchronized (currentlyProcessing) {
-        currentlyProcessing.add(sourceFile);
-      }
-
-    Result res;
-    
-    try {
-      String source = FileCommands.readFileAsString(sourceFile);
-      res = run(source, sourceFile, env, monitor, langLibFactory);
-    } finally {
-      if (env.doGenerateFiles())
-        synchronized (currentlyProcessing) {
-          currentlyProcessing.remove(sourceFile);
-        }
-      pendingInputFiles.remove(sourceFile);
-    }
-
-    return res;
   }
   
   private static Result run(Driver driver, ToplevelDeclarationProvider declProvider, RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
@@ -293,7 +283,8 @@ public class Driver{
     return driver.driverResult;
   }
   
-  private void init(ToplevelDeclarationProvider declProvider, RelativePath sourceFile) throws FileNotFoundException, IOException, InvalidParseTableException {
+  private void init(ToplevelDeclarationProvider declProvider, RelativePath sourceFile, IProgressMonitor monitor) throws FileNotFoundException, IOException, InvalidParseTableException {
+    this.monitor = monitor;
     environment.getIncludePath().add(new AbsolutePath(langLib.getLibraryDirectory().getAbsolutePath()));
   
     depOutFile = null;
@@ -333,13 +324,13 @@ public class Driver{
    * @throws InterruptedException 
    */
   private void process(ToplevelDeclarationProvider declProvider, RelativePath sourceFile, IProgressMonitor monitor) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    this.monitor = monitor;
     List<Renaming> originalRenamings = new LinkedList<Renaming>(environment.getRenamings());
+    currentlyProcessing.add(this);
     
     log.beginTask("processing", "Process " + sourceFile.getRelativePath(), Log.CORE);
     boolean success = false;
     try {
-      init(declProvider, sourceFile);
+      init(declProvider, sourceFile, monitor);
       driverResult.setSourceFile(this.sourceFile, declProvider.getSourceHashCode());
       
       if (sourceFile != null) {
@@ -424,6 +415,7 @@ public class Driver{
     finally {
       log.endTask(success, "done processing " + sourceFile, "failed to process " + sourceFile);
       driverResult.setFailed(!success);
+      currentlyProcessing.remove(sourceFile);
       environment.setRenamings(originalRenamings);
     }
   }
@@ -732,7 +724,7 @@ public class Driver{
       String modulePath = langLib.getImportedModulePath(toplevelDecl);
       String importModuleName = FileCommands.fileName(modulePath);
       
-      boolean skipProcessImport = false;
+      boolean isCircularImport = false;
       
       if (!modulePath.startsWith("org/sugarj")) { // module is not in sugarj standard library
         Path dep = ModuleSystemCommands.searchFile(modulePath, "dep", environment);
@@ -761,14 +753,14 @@ public class Driver{
             log.log("Need to compile imported module " + modulePath + " first.", Log.IMPORT);
             
             try {
-              if (currentlyProcessing.contains(importSourceFile)) {
+              if (isCircularImport(importSourceFile)) {
                 // assume source file does not provide syntactic sugar
                 langLib.addImportModule(toplevelDecl, false);
-                skipProcessImport = true;
-                delegateCompilation = importSourceFile;
+                isCircularImport = true;
+                potentialCompilationDelegates.add(importSourceFile);
               }
               else {
-                res = run(importSourceFile, environment, monitor, langLib.getFactoryForLanguage());
+                res = run(importSourceFile, environment, monitor, langLib.getFactoryForLanguage(), currentlyProcessing);
                 if (res.hasFailed())
                   setErrorMessage(toplevelDecl, "problems while compiling " + importModuleName);
               }
@@ -786,21 +778,24 @@ public class Driver{
         if (res == null && dep != null)
           res = Result.readDependencyFile(dep, environment);
         
-        if (dep != null && res != null && !skipProcessImport)
+        if (dep != null && res != null && !isCircularImport)
           driverResult.addDependency(dep, environment);
         
-        if (res != null && res.hasDelegatedCompilation(sourceFile)) {
-          delegateCompilation = res.getSourceFile();
-          langLib.addImportModule(toplevelDecl, false);
-          skipProcessImport = true;
-        }
-        else if (driverResult.hasDelegatedCompilation(importSourceFile)) {
-          langLib.addImportModule(toplevelDecl, false);
-          skipProcessImport = true;
-        }
+        if (!isCircularImport && importSourceFile != null)
+          // if importSourceFile is delegated to something currently being processed
+          for (Driver dr : currentlyProcessing)
+            if (dr.driverResult.isDelegateOf(importSourceFile)) {
+              langLib.addImportModule(toplevelDecl, false);
+              isCircularImport = true;
+              
+              if (dr != this)
+                potentialCompilationDelegates.add(dr.sourceFile);
+              
+              break;
+            }
       }
 
-      boolean success = skipProcessImport || processImport(modulePath, toplevelDecl);
+      boolean success = isCircularImport || processImport(modulePath, toplevelDecl);
       
       if (!success)
         setErrorMessage(toplevelDecl, "module not found: " + importModuleName);
@@ -812,15 +807,19 @@ public class Driver{
     }
   }
   
+  private boolean isCircularImport(RelativePath importSourceFile) {
+    return currentlyProcessing.contains(importSourceFile);
+  }
+
   private Result subcompile(RelativePath importSourceFile) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     storeCaches(environment);
     try {
       if (importSourceFile.getAbsolutePath().endsWith(".model")) {
         IStrategoTerm term = ATermCommands.atermFromFile(importSourceFile.getAbsolutePath());
-        return run(term, importSourceFile, environment, monitor, langLib.getFactoryForLanguage());
+        return run(term, importSourceFile, environment, monitor, langLib.getFactoryForLanguage(), currentlyProcessing);
       }
       else
-        return run(importSourceFile, environment, monitor, langLib.getFactoryForLanguage());
+        return run(importSourceFile, environment, monitor, langLib.getFactoryForLanguage(), currentlyProcessing);
     } finally {
       initializeCaches(environment, true);
     }

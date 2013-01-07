@@ -305,8 +305,13 @@ public class Result implements IErrorLogger {
     deferredSourceFiles.put(delegate, sourceFiles);
   }
   
-  public boolean hasDelegatedCompilation(Path compileFile) {
-    return deferredSourceFiles.containsKey(sourceFile) && deferredSourceFiles.get(sourceFile).containsKey(compileFile);
+  boolean isDelegateOf(Path compileFile) {
+    return deferredSourceFiles.containsKey(compileFile);
+  }
+  
+  void resetDelegation() {
+    availableGeneratedFiles.clear();
+    deferredSourceFiles.clear();
   }
   
   public void registerParseTable(Path tbl) {
