@@ -23,41 +23,52 @@ rules
     |[ rules
          typeOf :
            (term~tC, term~te) -> (term~tT, [])
-           where strategy~(<translate-premises> premises)
+           where strategy~premises-implementation
     ]|
     where <trm-explode> C => tC
         ; <trm-explode> e => te
         ; <trm-explode> T => tT
+        ; <premises-to-list> premises => premises-list
+        ; <translate-premises> (0, premises-list) => (n, premises-implementation)
+
+  premises-to-list :
+    NoPremises -> []
+  premises-to-list :
+    PremiseList(premises) -> <premises-to-list> premises
+  premises-to-list :
+    PremiseCons(judgment, premises) ->
+      [judgment | <premises-to-list> premises]
+  premises-to-list :
+    judgment -> [judgment]
+    where if (!judgment; ?PremiseCons(_,_)) then fail else id end
 
   translate-premises :
-    NoPremises -> |[ id ]|
+    (n, []) -> (n, |[ id ]|)
 
   translate-premises :
-    PremiseList(premises) -> <translate-judgments> premises
+    (n, [judgment | judgments]) ->
+      (n2, |[ strategy~judgment-implementation ; strategy~judgments-implementation ]|)
+    where <translate-judgment> (n, judgment)   => (n1, judgment-implementation)
+        ; <translate-premises> (n1, judgments) => (n2, judgments-implementation)
 
-  translate-judgments :
-    PremiseCons(judgment, judgments) ->
-      |[   strategy~(<translate-judgments> judgment)
-         ; strategy~(<translate-judgments> judgments)
-      ]|
+  translate-judgment :
+    (n, TypingJudgment(C, e, T)) -> (n, |[ <typeOf> (term~tC, term~te) => term~tT ]|)
+    where <trm-explode> C => tC
+        ; <trm-explode> e => te
+        ; <trm-explode> T => tT
 
-  translate-judgments :
-    TypingJudgment(C, e, T) -> |[ <typeOf> (term~tC, term~te) => term~tT ]|
-      where <trm-explode> C => tC
-          ; <trm-explode> e => te
-          ; <trm-explode> T => tT
+  translate-judgment :
+    (n, KindingJudgment(C, T, K)) -> (n, |[ <kindOf> (term~tC, term~tT) => term~tK ]|)
+    where <trm-explode> C => tC
+        ; <trm-explode> T => tT
+        ; <trm-explode> K => tK
 
-  translate-judgments :
-    KindingJudgment(C, T, K) -> |[ <kindOf> (term~tC, term~tT) => term~tK ]|
-      where <trm-explode> C => tC
-          ; <trm-explode> T => tT
-          ; <trm-explode> K => tK
-
-  translate-judgments :
-    NormalizationJudgment(C, T, T') -> |[ <norm> (term~tC, term~tT) => term~tT' ]|
-      where <trm-explode> C  => tC
-          ; <trm-explode> T  => tT
-          ; <trm-explode> T' => tT'
+  translate-judgment :
+    (n, NormalizationJudgment(C, T, T')) ->
+      (n, |[ <norm> (term~tC, term~tT) => term~tT' ]|)
+    where <trm-explode> C  => tC
+        ; <trm-explode> T  => tT
+        ; <trm-explode> T' => tT'
 
       // |[ rules foo: 1 -> [1,2,3] ]|
 
