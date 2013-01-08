@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -23,6 +22,7 @@ import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.languagelib.SourceFileContent;
 import org.sugarj.stdlib.StdLib;
+import org.sugarj.util.Pair;
 
 
 public abstract class LanguageLib implements Serializable {
@@ -159,54 +159,50 @@ public abstract class LanguageLib implements Serializable {
 	
 	public abstract String getImportedModulePath(IStrategoTerm toplevelDecl) throws IOException;
 	
-	
-	public void compile(Path outFile, SourceFileContent source, Path bin, List<Path> path,
-			Set<RelativePath> generatedBinFiles,
+	public void compile(
+	    Path outFile, 
+	    SourceFileContent source, 
+	    Path bin,
+	    List<Path> path,
+			Set<RelativePath> previouslyGeneratedFiles,
 			Map<Path, Set<RelativePath>> availableGeneratedFilesForSourceFile,
-			Map<Path, Map<Path, SourceFileContent>> deferredSourceFilesForSourceFile,
+			Map<Path, Pair<Path, SourceFileContent>> deferredSourceFilesForSourceFile,
 			Map<Path, Integer> generatedFileHashes,
-			boolean generateFiles
+			boolean generateFiles,
+			HybridInterpreter interp
 			) throws IOException, ClassNotFoundException {
+	  Set<RelativePath> generatedFiles = new HashSet<RelativePath>(previouslyGeneratedFiles);
+	  
+	  for (Set<RelativePath> files: availableGeneratedFilesForSourceFile.values())
+      for (RelativePath file : files)
+        if (getGeneratedFileExtension().equals(FileCommands.getExtension(file)))
+          generatedFiles.add(file);
 
-		
-		Map<Path, Set<RelativePath>> generatedFiles = availableGeneratedFilesForSourceFile; //result.getAvailableGeneratedFiles().get(result.getSourceFile());
-		Set<RelativePath> generatedClasses = new HashSet<RelativePath>(generatedBinFiles);
+    List<Path> javaOutFiles = new ArrayList<Path>();
+    javaOutFiles.add(outFile);
 
-		if (generatedFiles != null) {
-			for (Set<RelativePath> files: generatedFiles.values())
-				for (RelativePath file : files)
-					if ("class".equals(FileCommands.getExtension(file)))
-						generatedClasses.add(file);
-		}
-
-		Map<Path, Map<Path, SourceFileContent>> sourceFiles = deferredSourceFilesForSourceFile; //result.getDeferredSourceFiles().get(result.getSourceFile());
-		List<Path> javaOutFiles = new ArrayList<Path>();
-		javaOutFiles.add(outFile);
-
-		if (sourceFiles != null)
-			for (Entry<Path, Map<Path, SourceFileContent>> sources : sourceFiles.entrySet())
-				for (Entry<Path, SourceFileContent> currentSource : sources.getValue().entrySet())
-					if (currentSource.getValue() instanceof SourceFileContent) {
-						SourceFileContent otherSource = (SourceFileContent) currentSource.getValue();
-						try {
-							writeToFile(generateFiles, generatedFileHashes, currentSource.getKey(), otherSource.getCode(generatedClasses, interp, currentSource.getKey()));
-
-
-						} catch (ClassNotFoundException e) {
-							throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + currentSource.getKey());
-						}
-					}
-
-		
-		if (source.isEmpty())	// if empty flag ist set, do not compile source
-			return;
-		
-		writeToFile(generateFiles, generatedFileHashes, outFile, source.getCode(generatedClasses, interp, outFile));
-		
+    for (Pair<Path, SourceFileContent> source2 : deferredSourceFilesForSourceFile.values()) {
+      try { 
+        String code = source2.b.getCode(generatedFiles, interp, source2.a);
+        writeToFile(generateFiles, generatedFileHashes, source2.a, code);
+      } catch (ClassNotFoundException e) {
+        throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + outFile);
+      }
+    }
+    
+    if (source.isEmpty())	// if empty flag is set, do not compile source
+      return;
+    
+    try {
+      String code = source.getCode(generatedFiles, interp, outFile);
+      writeToFile(generateFiles, generatedFileHashes, outFile, code);
+    } catch (ClassNotFoundException e) {
+      throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + outFile);
+    }
+    
 		this.compile(javaOutFiles, bin, path, generateFiles);
-		for (Path cl : generatedClasses)
+		for (Path cl : generatedFiles)
 			generatedFileHashes.put(cl, FileCommands.fileHash(cl));
-
 	}
 
 	private void writeToFile(boolean generateFiles, Map<Path, Integer> generatedFileHashes, Path file, String content) throws IOException { 

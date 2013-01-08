@@ -30,7 +30,6 @@ import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.java.JavaSourceFileContent;
-import org.sugarj.util.Renaming;
 
 public class JavaLib extends LanguageLib implements Serializable {
 
