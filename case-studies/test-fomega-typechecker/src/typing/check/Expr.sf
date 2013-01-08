@@ -288,7 +288,6 @@ rules
 // * Γ ⊢ T :: K
 // * Γ ⊢ T ⇓ S
 // * Γ | <decls> ⊢ brs : T
-// * error(<msg>)
 //
 // Structural equality of types modulo α-conversion, record/variant permutation,
 // and with TyUnknown equal to any type.

@@ -1,0 +1,67 @@
+module typing.rules.ExprTypeRules
+
+import typing.rules.Syntax
+import typing.rules.Desugaring
+
+// TODO: fold/unfold, case/variant, record/selection, strings, nats
+
+~C |- ~e1 : ~T1
+~C |- ~e2 : ~T2
+~C |- ~e3 : ~T3
+~C |- ~T1 ~> Bool
+~C |- ~T2 ~> ~U
+~C |- ~T3 ~> ~U
+=================================== T-If
+~C |- if ~e1 then ~e2 else ~e3 : ~U
+
+
+(~C;~%X::~K1) |- ~e2 : ~T2
+========================================= T-TAbs
+~C |- \~%X::~K1. ~e2 : forall ~%X::~K1. ~T2
+
+
+(~C;~%x:~T1) |- ~e2 : ~T2
+~C |- ~T1 :: *
+================================ T-Abs
+~C |- \~%x::~T1. ~e2 : ~T1 -> ~T2
+
+
+~C |- ~e : ~S
+~C |- ~T :: *
+~C |- ~S ~> ~U
+~C |- ~S ~> ~U
+=================== T-As
+~C |- ~e as ~T : ~T
+
+
+// ~C |- ~e1 : ~T1
+// ~C |- ~T1 ~> forall ~%X::~K11. ~T12
+// ~C |- ~T2 :: ~K11
+// =================================== T-TApp
+// ~C |- ~e1 [~T2] : [~%X |-> ~T2]~T12
+
+
+// ~C |- ~e1 : ~T1
+// ~C |- ~e2 : ~T2
+// ~C |- ~T1 ~> ~T11 -> ~T12
+// ~C |- ~T2 ~> ~T11
+// ========================= T-App
+// ~C |- ~e1 ~e2 : ~T12
+
+
+// ================= T-True
+// ~C |- true : Bool
+
+
+// ================= T-False
+// ~C |- false : Bool
+
+
+// ~%x:~T in ~C
+// ============== T-Var
+// ~C |- ~%x : ~T
+
+
+// ~&qx:~T in ~C
+// =============== T-QVar
+// ~C |- ~&qx : ~T

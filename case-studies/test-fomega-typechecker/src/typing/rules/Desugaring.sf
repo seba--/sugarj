@@ -1,0 +1,79 @@
+module typing.rules.Desugaring
+
+import org.sugarj.languages.Fomega
+
+import typing.rules.Syntax
+import typing.check.Type
+import typing.check.TypeOperations
+
+import concretesyntax.Stratego
+
+rules
+  desugar-type-rule :
+    TypeRule(premises, RuleName(sep, optional-name), conclusion) ->
+      transformation-elem(<translate-type-rule> (optional-name, premises, conclusion))
+
+rules
+    // TypeRule(premises, RuleName(x, Some(Var(name))), conclusion) ->
+    //   [RDefNoArgs("foo", RuleNoCond(NoAnnoList(Str(name)), <trm-explode> (premises, conclusion)))]
+
+  translate-type-rule :
+    (Some(Var(name)), premises, TypingJudgment(C, e, T)) ->
+    stratego-decl
+    |[ rules
+         typeOf :
+           (term~tC, term~te) -> (term~tT, [])
+           where strategy~(<translate-premises> premises)
+    ]|
+    where <trm-explode> C => tC
+        ; <trm-explode> e => te
+        ; <trm-explode> T => tT
+
+  translate-premises :
+    NoPremises -> |[ id ]|
+
+  translate-premises :
+    PremiseList(premises) -> <translate-judgments> premises
+
+  translate-judgments :
+    PremiseCons(judgment, judgments) ->
+      |[   strategy~(<translate-judgments> judgment)
+         ; strategy~(<translate-judgments> judgments)
+      ]|
+
+  translate-judgments :
+    TypingJudgment(C, e, T) -> |[ <typeOf> (term~tC, term~te) => term~tT ]|
+      where <trm-explode> C => tC
+          ; <trm-explode> e => te
+          ; <trm-explode> T => tT
+
+  translate-judgments :
+    KindingJudgment(C, T, K) -> |[ <kindOf> (term~tC, term~tT) => term~tK ]|
+      where <trm-explode> C => tC
+          ; <trm-explode> T => tT
+          ; <trm-explode> K => tK
+
+  translate-judgments :
+    NormalizationJudgment(C, T, T') -> |[ <norm> (term~tC, term~tT) => term~tT' ]|
+      where <trm-explode> C  => tC
+          ; <trm-explode> T  => tT
+          ; <trm-explode> T' => tT'
+
+      // |[ rules foo: 1 -> [1,2,3] ]|
+
+
+
+
+    //TypeRule(premises,RuleName(x,Some(Var(name))),conclusion) ->
+      // [RDefNoArgs("foo", RuleNoCond(NoAnnoList(Str(name)), <trm-explode> (premises,conclusion)))]
+
+  // desugar-type-rule0:
+  //   any -> ValDef(None(),"foo",1)
+
+
+desugarings
+  desugar-type-rule
+
+rules
+  TrmFromTerm = 
+    ?Metavar(<MetaExplode>)

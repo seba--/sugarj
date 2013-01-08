@@ -1,0 +1,90 @@
+module typing.rules.Syntax
+
+import org.sugarj.languages.Stratego
+import org.sugarj.languages.Fomega
+import concretesyntax.Stratego
+
+// *** Syntax for typing rules ***
+
+context-free syntax
+  TypeRule -> SugarDefElem
+
+  RulePremises RuleSepName RuleConsequence
+    -> TypeRule {cons("TypeRule"),
+                 layout(1.first.col == 2.first.col &&
+                        2.first.col == 3.first.col)}
+
+  PremiseList -> RulePremises {cons("PremiseList")}
+              -> RulePremises {cons("NoPremises")}
+
+  OffTypeRuleJudgment -> RuleConsequence
+
+  OffTypeRuleJudgment -> PremiseList
+  OffTypeRuleJudgment PremiseList -> PremiseList {cons("PremiseCons"), layout(1.first.col == 2.first.col)}
+
+  TypeRuleJudgment -> OffTypeRuleJudgment {layout(1.first.col < 1.left.col)}
+
+lexical syntax
+  "===" "="* -> RuleSep
+
+lexical restrictions
+  RuleSep -/- [\=]
+
+context-free syntax
+  RuleSep StrategoVar? -> RuleSepName {cons("RuleName"), layout(1.first.line == 2.last.line)}
+
+
+// *** Syntax for contexts ***
+
+context-free syntax
+  "()"                                                        -> Context {cons("CtxEmpty")}
+  "(" Context ";" FomegaID ":" FomegaType ")"                 -> Context {cons("CtxBindVar")}
+  "(" Context ";" FomegaID "::" FomegaKind ")"                -> Context {cons("CtxBindTVar")}
+  "(" Context ";" FomegaID "::" FomegaKind "=" FomegaType ")" -> Context {cons("CtxBindTVarDef")}
+
+
+// *** Syntax for judgments ***
+
+context-free syntax
+  Context "|-" FomegaType "::" FomegaKind -> TypeRuleJudgment {cons("KindingJudgment")}
+  Context "|-" FomegaExpr ":" FomegaType  -> TypeRuleJudgment {cons("TypingJudgment")}
+  Context "|-" FomegaType "~>" FomegaType -> TypeRuleJudgment {cons("NormalizationJudgment")}
+
+  "lab" "(" FomegaTypeDecls ")" "~=" "tag" "(" FomegaBranches ")" ->
+    TypeRuleJudgment {cons("LabelTagJudgment")}
+
+  FomegaID "notin" "tag" "(" FomegaBranches ")" -> TypeRuleJudgment {cons("NotinTagJudgment")}
+
+  FomegaID "notin" "sel" "(" FomegaFields ")" -> TypeRuleJudgment {cons("NotinSelJudgment")}
+
+  // FomegaID ":" FomegaType "in" FomegaTypeDecls -> TypeRuleJudgment {cons("InDeclJudgment")}
+
+  FomegaID ":" FomegaType "in" Context -> TypeRuleJudgment {cons("VarInContextJudgment")}
+
+  FomegaQID ":" FomegaType "in" Context -> TypeRuleJudgment {cons("QVarInContextJudgment")}
+
+  FomegaQID "/=" FomegaQID -> TypeRuleJudgment {cons("UnequalQIDJudgment")}
+  FomegaID "/=" FomegaID   -> TypeRuleJudgment {cons("UnequalIDJudgment")}
+
+  Context "|" FomegaTypeDecls "|-" FomegaBranches ":" FomegaType ->
+  TypeRuleJudgment {cons("BranchTypingJudgment")}
+
+// *** Substitution on level of types
+
+context-free syntax
+  "[" FomegaID "|->" FomegaType "]" FomegaType -> FomegaType {const("Subst")}
+
+
+// *** Meta variables ***
+
+context-free syntax
+  "~" StrategoVar -> Context         {cons("Metavar")}
+  "~" StrategoVar -> FomegaTypeDecls {cons("Metavar")}
+  "~" StrategoVar -> FomegaBranches  {cons("Metavar")}
+  "~" StrategoVar -> FomegaFields    {cons("Metavar")}
+  "~" StrategoVar -> FomegaExpr      {cons("Metavar")}
+  "~" StrategoVar -> FomegaType      {cons("Metavar")}
+  "~" StrategoVar -> FomegaKind      {cons("Metavar")}
+
+  "~%" StrategoVar -> FomegaID       {cons("Metavar")}
+  "~&" StrategoVar -> FomegaQID      {cons("Metavar")}
