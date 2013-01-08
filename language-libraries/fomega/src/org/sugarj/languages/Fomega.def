@@ -63,18 +63,19 @@ module Fomega-Type
 imports Fomega-Lexical
 
 exports
-  sorts Type TypeDecl Kind
+  sorts Type TypeDecl TypeDecls Kind
 
   context-free syntax
     ID -> Type {cons("TyVar")}
     "Nat" -> Type {cons("TyNat")}
     "Bool" -> Type {cons("TyBool")}
     "String" -> Type {cons("TyString")}
-    "{" {TypeDecl ","}* "}" -> Type {cons("TyRecord")}
-    "<" {TypeDecl ","}* ">" -> Type {cons("TyVariant")}
-	"(" Type ")" -> Type {bracket}
+    "{" TypeDecls "}" -> Type {cons("TyRecord")}
+    "<" TypeDecls ">" -> Type {cons("TyVariant")}
+    "(" Type ")" -> Type {bracket}
 
     ID ":" Type -> TypeDecl {cons("TyDecl")}
+    {TypeDecl ","}* -> TypeDecls
 
     "*" -> Kind {cons("KiStar")}
     Kind "=>" Kind -> Kind {cons("KiArrow")}        
@@ -124,13 +125,13 @@ imports Fomega-Lexical
 imports Fomega-Type
 
 exports
-  sorts Expr Field Branch
+  sorts Expr Field Fields Branch Branches
 
   context-free syntax
     ID -> Expr {cons("Var")}
 	QID -> Expr {cons("QVar")}
     "(" Expr ")" -> Expr {bracket}
-    "{" {Field ","}* "}" -> Expr {cons("Record")}
+    "{" Fields "}" -> Expr {cons("Record")}
     "<" Field ">" "as" Type -> Expr {cons("Variant")}
     "true" -> Expr {cons("True")}
     "false" -> Expr {cons("False")}
@@ -138,8 +139,10 @@ exports
     STRING -> Expr {cons("String")}
 
     ID "=" Expr -> Field {cons("Field")}
+    {Field ","}* -> Fields
 
     "<" ID "=" ID ">" "=>" Expr -> Branch {cons("Branch")}
+    {Branch ";"}+ -> Branches
 
     Expr "!" ID -> Expr {cons("SelectRcd")}
     Expr Expr -> Expr {cons("App"), left}
@@ -150,7 +153,7 @@ exports
     "\\" ID ":" Type "." Expr -> Expr {cons("Abs")}
     "\\" ID "::" Kind "." Expr -> Expr {cons("TAbs")}
     "if" Expr "then" Expr "else" Expr -> Expr {cons("Cond")}
-    "case" Expr "of" {Branch ";"}+ -> Expr {cons("Case")}
+    "case" Expr "of" Branches -> Expr {cons("Case")}
 
   context-free priorities
       Expr "!" ID -> Expr {cons("SelectRcd")}
@@ -184,13 +187,16 @@ imports Fomega-Module [
     PrimitiveType => FomegaPrimitiveType    
     Type => FomegaType
     TypeDecl => FomegaTypeDecl
+    TypeDecls => FomegaTypeDecls
     Kind => FomegaKind
     Module => FomegaModule
     Def => FomegaDef
     Import => FomegaImport
     Expr => FomegaExpr
     Field => FomegaField
+    Fields => FomegaFields
     ModuleDec => FomegaModuleDec
     Branch => FomegaBranch
+    Branches => FomegaBranches
     Qualified => FomegaQualified
     Public => FomegaPublic ]
