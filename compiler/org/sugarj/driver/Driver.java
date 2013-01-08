@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -77,9 +78,8 @@ public class Driver{
   private static List<ProcessingListener> processingListener = new LinkedList<ProcessingListener>();
 
   private List<Driver> currentlyProcessing;
-  private Set<Path> potentialCompilationDelegates = null;
+  private Set<Path> circularLinks = new HashSet<Path>();
 
-  
   private IProgressMonitor monitor;
   
   private Environment environment;
@@ -245,6 +245,11 @@ public class Driver{
 
       if (pending == null) {
         Result result = getResult(sourceFile);
+        if (result != null && result.hasPersistentVersionChanged()) {
+          result = Result.readDependencyFile(result.getPersistentPath());
+          putResult(sourceFile, result);
+        }
+        
         if (result != null && result.isUpToDate(declProvider.getSourceHashCode(), env))
           return result;
       }
@@ -384,11 +389,23 @@ public class Driver{
       stepped();
       
       // COMPILE the generated java file
-      if (delegateCompilation == null)
+      if (circularLinks.isEmpty())
         compileGeneratedJavaFiles();
       else {
-        driverResult.delegateCompilation(delegateCompilation, langLib.getOutFile(), langLib.getSource(), langLib.getGeneratedFiles());
+        Result delegate = null;
+        for (Driver dr : currentlyProcessing)
+          if (circularLinks.contains(dr.sourceFile)) {
+            delegate = dr.driverResult;
+            break;
+          }
+        if (delegate != null)
+          driverResult.delegateCompilation(delegate, langLib.getOutFile(), langLib.getSource(), langLib.getGeneratedFiles());
+        else
+          assert dependsOnModel;
       }
+//      else {
+//        driverResult.delegateCompilation(delegateCompilation, langLib.getOutFile(), langLib.getSource(), langLib.getGeneratedFiles());
+//      }
         
       driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
       
@@ -425,10 +442,14 @@ public class Driver{
     log.beginTask("compilation", "COMPILE generated " + langLib.getLanguageName() + " files", Log.CORE);
     try {
       try {
-        langLib.compile(langLib.getOutFile(), langLib.getSource(),
-            environment.getBin(), new ArrayList<Path>(environment.getIncludePath()), langLib.getGeneratedFiles(),
-            driverResult.getAvailableGeneratedFiles().get(driverResult.getSourceFile()),
-            driverResult.getDeferredSourceFiles().get(driverResult.getSourceFile()),
+        langLib.compile(
+            langLib.getOutFile(), 
+            langLib.getSource(),
+            environment.getBin(), 
+            new ArrayList<Path>(environment.getIncludePath()), 
+            langLib.getGeneratedFiles(),
+            driverResult.getAvailableGeneratedFiles(),
+            driverResult.getDeferredSourceFiles(),
             driverResult.getGeneratedFileHashes(), 
             driverResult.isGenerateFiles());
       } catch (ClassNotFoundException e) {
@@ -733,7 +754,7 @@ public class Driver{
         
         if (dep != null) {
           try {
-            res = Result.readDependencyFile(dep, environment);
+            res = Result.readDependencyFile(dep);
           } catch (IOException e) {
             log.logErr("could not read dependency file " + dep, Log.DETAIL);
           }
@@ -757,7 +778,7 @@ public class Driver{
                 // assume source file does not provide syntactic sugar
                 langLib.addImportModule(toplevelDecl, false);
                 isCircularImport = true;
-                potentialCompilationDelegates.add(importSourceFile);
+                circularLinks.add(importSourceFile);
               }
               else {
                 res = run(importSourceFile, environment, monitor, langLib.getFactoryForLanguage(), currentlyProcessing);
@@ -776,7 +797,7 @@ public class Driver{
           dep = ModuleSystemCommands.searchFile(modulePath, "dep", environment);
         
         if (res == null && dep != null)
-          res = Result.readDependencyFile(dep, environment);
+          res = Result.readDependencyFile(dep);
         
         if (dep != null && res != null && !isCircularImport)
           driverResult.addDependency(dep, environment);
@@ -789,7 +810,7 @@ public class Driver{
               isCircularImport = true;
               
               if (dr != this)
-                potentialCompilationDelegates.add(dr.sourceFile);
+                circularLinks.add(dr.sourceFile);
               
               break;
             }
