@@ -191,7 +191,7 @@ public class Builder extends IncrementalProjectBuilder {
             monitor.beginTask("compile " + input.sourceFile.getRelativePath(), IProgressMonitor.UNKNOWN);
 
             RelativePath depFile = new RelativePath(environment.getBin(), FileCommands.dropExtension(input.sourceFile.getRelativePath()) + ".dep");
-            Result res = Result.readDependencyFile(depFile, environment);
+            Result res = Result.readDependencyFile(depFile);
             if (res == null || !res.isUpToDate(input.sourceFile, environment))
               res = Driver.run(input.sourceFile, environment, monitor, input.langLibFactory);
             

@@ -168,8 +168,7 @@ public abstract class LanguageLib implements Serializable {
 			Map<Path, Set<RelativePath>> availableGeneratedFilesForSourceFile,
 			Map<Path, Pair<Path, SourceFileContent>> deferredSourceFilesForSourceFile,
 			Map<Path, Integer> generatedFileHashes,
-			boolean generateFiles,
-			HybridInterpreter interp
+			boolean generateFiles
 			) throws IOException, ClassNotFoundException {
 	  Set<RelativePath> generatedFiles = new HashSet<RelativePath>(previouslyGeneratedFiles);
 	  
@@ -183,7 +182,7 @@ public abstract class LanguageLib implements Serializable {
 
     for (Pair<Path, SourceFileContent> source2 : deferredSourceFilesForSourceFile.values()) {
       try { 
-        String code = source2.b.getCode(generatedFiles, interp, source2.a);
+        String code = source2.b.getCode(generatedFiles, getInterpreter(), source2.a);
         writeToFile(generateFiles, generatedFileHashes, source2.a, code);
       } catch (ClassNotFoundException e) {
         throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + outFile);
@@ -194,7 +193,7 @@ public abstract class LanguageLib implements Serializable {
       return;
     
     try {
-      String code = source.getCode(generatedFiles, interp, outFile);
+      String code = source.getCode(generatedFiles, getInterpreter(), outFile);
       writeToFile(generateFiles, generatedFileHashes, outFile, code);
     } catch (ClassNotFoundException e) {
       throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + outFile);

@@ -79,6 +79,7 @@ public class Driver{
 
   private List<Driver> currentlyProcessing;
   private Set<Path> circularLinks = new HashSet<Path>();
+  private boolean dependsOnModel = false;
 
   private IProgressMonitor monitor;
   
@@ -390,7 +391,7 @@ public class Driver{
       
       // COMPILE the generated java file
       if (circularLinks.isEmpty())
-        compileGeneratedJavaFiles();
+        compileGeneratedFiles();
       else {
         Result delegate = null;
         for (Driver dr : currentlyProcessing)
@@ -437,7 +438,7 @@ public class Driver{
     }
   }
 
-  private void compileGeneratedJavaFiles() throws IOException {
+  private void compileGeneratedFiles() throws IOException {
     boolean good = false;
     log.beginTask("compilation", "COMPILE generated " + langLib.getLanguageName() + " files", Log.CORE);
     try {
@@ -781,7 +782,7 @@ public class Driver{
                 circularLinks.add(importSourceFile);
               }
               else {
-                res = run(importSourceFile, environment, monitor, langLib.getFactoryForLanguage(), currentlyProcessing);
+                res = subcompile(importSourceFile);
                 if (res.hasFailed())
                   setErrorMessage(toplevelDecl, "problems while compiling " + importModuleName);
               }
@@ -833,17 +834,12 @@ public class Driver{
   }
 
   private Result subcompile(RelativePath importSourceFile) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    storeCaches(environment);
-    try {
-      if (importSourceFile.getAbsolutePath().endsWith(".model")) {
-        IStrategoTerm term = ATermCommands.atermFromFile(importSourceFile.getAbsolutePath());
-        return run(term, importSourceFile, environment, monitor, langLib.getFactoryForLanguage(), currentlyProcessing);
-      }
-      else
-        return run(importSourceFile, environment, monitor, langLib.getFactoryForLanguage(), currentlyProcessing);
-    } finally {
-      initializeCaches(environment, true);
+    if (importSourceFile.getAbsolutePath().endsWith(".model")) {
+      IStrategoTerm term = ATermCommands.atermFromFile(importSourceFile.getAbsolutePath());
+      return run(term, importSourceFile, environment, monitor, langLib.getFactoryForLanguage(), currentlyProcessing);
     }
+    else
+      return run(importSourceFile, environment, monitor, langLib.getFactoryForLanguage(), currentlyProcessing);
   }
 
   private boolean processImport(String modulePath, IStrategoTerm importTerm) throws IOException {
