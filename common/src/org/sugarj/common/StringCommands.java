@@ -1,14 +1,13 @@
 /**
  * 
  */
-package org.sugarj.driver;
+package org.sugarj.common;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.sugarj.common.Environment;
-import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.util.Renaming;
 
@@ -17,7 +16,7 @@ import org.sugarj.util.Renaming;
  */
 public class StringCommands {
 
-  public static String printListSeparated(List<String> l, String sep) {
+  public static String printListSeparated(Collection<String> l, String sep) {
     StringBuilder b = new StringBuilder();
   
     for (Iterator<String> it = l.iterator(); it.hasNext();) {

@@ -194,7 +194,6 @@ public class ModuleSystemCommands {
     return null;
   }
 
-  @SuppressWarnings("resource")
   private static RelativePath searchFile(Path base, String relativePath, String extension) {
     if (relativePath.startsWith(base.getAbsolutePath())) {
       int sepOffset = relativePath.endsWith(Environment.sep) ? 0 : 1;
@@ -250,5 +249,19 @@ public class ModuleSystemCommands {
       RelativePath p = new RelativePath(searchPath, relPath + "." + extension);
       driverResult.addFileDependency(p);
     }
+  }
+
+  public static Result locateResult(String modulePath, Environment environment) {
+    Path dep = ModuleSystemCommands.searchFile(modulePath, "dep", environment);
+    Result res = null;
+    
+    if (dep != null)
+      try {
+        res = Result.readDependencyFile(dep);
+      } catch (IOException e) {
+        log.logErr("could not read dependency file " + dep, Log.DETAIL);
+      }
+    
+    return res;
   }
 }

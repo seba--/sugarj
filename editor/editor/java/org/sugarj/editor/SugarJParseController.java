@@ -25,10 +25,10 @@ import org.strategoxt.imp.runtime.parser.SGLRParseController;
 import org.sugarj.LanguageLibRegistry;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
+import org.sugarj.common.StringCommands;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.driver.StringCommands;
 
 public class SugarJParseController extends SugarJParseControllerGenerated {
   

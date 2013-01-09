@@ -50,6 +50,7 @@ import org.sugarj.common.CommandExecution;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.Log;
+import org.sugarj.common.StringCommands;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
@@ -749,22 +750,11 @@ public class Driver{
       boolean isCircularImport = false;
       
       if (!modulePath.startsWith("org/sugarj")) { // module is not in sugarj standard library
-        Path dep = ModuleSystemCommands.searchFile(modulePath, "dep", environment);
-        Result res = null;
-        RelativePath importSourceFile = null;
-        
-        if (dep != null) {
-          try {
-            res = Result.readDependencyFile(dep);
-          } catch (IOException e) {
-            log.logErr("could not read dependency file " + dep, Log.DETAIL);
-          }
-          
-          if (res != null && res.getSourceFile() != null)
-            importSourceFile = res.getSourceFile();
-        }
-        
-        if (importSourceFile == null)
+        Result res = ModuleSystemCommands.locateResult(modulePath, environment);
+        RelativePath importSourceFile;
+        if (res != null && res.getSourceFile() != null)
+          importSourceFile = res.getSourceFile();
+        else
           importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath(), langLib);
 
         if (importSourceFile != null && (res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment))) {
@@ -794,14 +784,8 @@ public class Driver{
           }
         }
         
-        if (dep == null)
-          dep = ModuleSystemCommands.searchFile(modulePath, "dep", environment);
-        
-        if (res == null && dep != null)
-          res = Result.readDependencyFile(dep);
-        
-        if (dep != null && res != null && !isCircularImport)
-          driverResult.addDependency(dep, environment);
+        if (res != null && !isCircularImport)
+          driverResult.addDependency(res, environment);
         
         if (!isCircularImport && importSourceFile != null)
           // if importSourceFile is delegated to something currently being processed
@@ -830,7 +814,11 @@ public class Driver{
   }
   
   private boolean isCircularImport(RelativePath importSourceFile) {
-    return currentlyProcessing.contains(importSourceFile);
+    for (Driver dr : currentlyProcessing)
+      if (dr.sourceFile.equals(importSourceFile))
+        return true;
+    
+    return false;
   }
 
   private Result subcompile(RelativePath importSourceFile) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {

@@ -233,8 +233,6 @@ public class PrologLib extends LanguageLib implements Serializable {
 	public void setupSourceFile(RelativePath sourceFile, Environment environment) {
 		prologOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + getGeneratedFileExtension());
 		prologSource = new PrologSourceFileContent(this);
-		prologSource.setOptionalImport(false);
-		
 	}
 
 

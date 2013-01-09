@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,6 +19,7 @@ import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.Log;
+import org.sugarj.common.StringCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.languagelib.SourceFileContent;
@@ -166,7 +168,7 @@ public abstract class LanguageLib implements Serializable {
 	    List<Path> path,
 			Set<RelativePath> previouslyGeneratedFiles,
 			Map<Path, Set<RelativePath>> availableGeneratedFilesForSourceFile,
-			Map<Path, Pair<Path, SourceFileContent>> deferredSourceFilesForSourceFile,
+			Map<Path, Pair<Path, SourceFileContent.Generated>> deferredSourceFilesForSourceFile,
 			Map<Path, Integer> generatedFileHashes,
 			boolean generateFiles
 			) throws IOException, ClassNotFoundException {
@@ -180,9 +182,10 @@ public abstract class LanguageLib implements Serializable {
     List<Path> javaOutFiles = new ArrayList<Path>();
     javaOutFiles.add(outFile);
 
-    for (Pair<Path, SourceFileContent> source2 : deferredSourceFilesForSourceFile.values()) {
+    for (Pair<Path, SourceFileContent.Generated> source2 : deferredSourceFilesForSourceFile.values()) {
       try { 
-        String code = source2.b.getCode(generatedFiles, getInterpreter(), source2.a);
+        String code = source2.b.code;
+        checkRequiredPaths(source2.b.requiredPaths, generatedFiles);
         writeToFile(generateFiles, generatedFileHashes, source2.a, code);
       } catch (ClassNotFoundException e) {
         throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + outFile);
@@ -193,7 +196,9 @@ public abstract class LanguageLib implements Serializable {
       return;
     
     try {
-      String code = source.getCode(generatedFiles, getInterpreter(), outFile);
+      SourceFileContent.Generated generated = source.getCode(outFile);
+      String code = generated.code;
+      checkRequiredPaths(generated.requiredPaths, generatedFiles);
       writeToFile(generateFiles, generatedFileHashes, outFile, code);
     } catch (ClassNotFoundException e) {
       throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + outFile);
@@ -204,7 +209,24 @@ public abstract class LanguageLib implements Serializable {
 			generatedFileHashes.put(cl, FileCommands.fileHash(cl));
 	}
 
-	private void writeToFile(boolean generateFiles, Map<Path, Integer> generatedFileHashes, Path file, String content) throws IOException { 
+	private void checkRequiredPaths(List<String> requiredPaths, Set<RelativePath> generatedFiles) throws ClassNotFoundException {
+	  List<String> failed = new LinkedList<String>();
+	  for (String requiredPath : requiredPaths) {
+	    boolean ok = false;
+	    for (RelativePath generatedFile : generatedFiles)
+	      if (generatedFile.getRelativePath().equals(requiredPath + "." + getGeneratedFileExtension())) {
+	        ok = true;
+	        break;
+	      }
+	    if (!ok)
+	      failed.add(requiredPath);
+	  }
+	  
+	  if (!failed.isEmpty())
+	    throw new ClassNotFoundException(StringCommands.printListSeparated(failed, ", "));
+  }
+
+  private void writeToFile(boolean generateFiles, Map<Path, Integer> generatedFileHashes, Path file, String content) throws IOException { 
 		if (generateFiles) {
 			FileCommands.writeToFile(file, content);
 			generatedFileHashes.put(file, FileCommands.fileHash(file));

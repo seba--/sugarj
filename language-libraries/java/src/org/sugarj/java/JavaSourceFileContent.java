@@ -2,13 +2,9 @@ package org.sugarj.java;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
-import org.strategoxt.HybridInterpreter;
 import org.sugarj.common.Environment;
-import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.Path;
-import org.sugarj.common.path.RelativePath;
 import org.sugarj.languagelib.SourceFileContent;
 
 /**
@@ -16,12 +12,9 @@ import org.sugarj.languagelib.SourceFileContent;
  * 
  */
 public class JavaSourceFileContent extends SourceFileContent {
-  private static final long serialVersionUID = -3684457648615950708L;
-
   String packageDecl = "";
   List<String> imports = new LinkedList<String>();
   List<String> checkedImports = new LinkedList<String>();
-  boolean importsOptional;
   List<String> bodyDecls = new LinkedList<String>();
 
   public JavaSourceFileContent() {
@@ -44,18 +37,12 @@ public class JavaSourceFileContent extends SourceFileContent {
     checkedImports.add(imp);
   }
 
-  public void setOptionalImport(boolean isOptional) {
-    this.importsOptional = isOptional;
-  }
-
   public void addBodyDecl(String bodyDecl) {
     bodyDecls.add(bodyDecl);
   }
 
-  public String getCode(Set<RelativePath> generatedClasses, HybridInterpreter interp, Path outFile) throws ClassNotFoundException {
-    List<String> classes = new LinkedList<String>();
-    for (RelativePath p : generatedClasses)
-      classes.add(FileCommands.dropExtension(p.getRelativePath()).replace(Environment.sep, "."));
+  public SourceFileContent.Generated getCode(Path outFile) {
+    List<String> requiredPaths = new LinkedList<String>();
 
     StringBuilder code = new StringBuilder();
     code.append(packageDecl);
@@ -64,16 +51,15 @@ public class JavaSourceFileContent extends SourceFileContent {
     for (String imp : checkedImports)
       code.append("import ").append(imp).append(";\n");
 
-    for (String imp : imports)
-      if (classes.contains(imp))
-        code.append("import ").append(imp).append(";\n");
-      else if (!importsOptional)
-        throw new ClassNotFoundException(imp);
+    for (String imp : imports) {
+      code.append("import ").append(imp).append(";\n");
+      requiredPaths.add(imp.replace(".", Environment.sep));
+    }
 
     for (String bodyDecl : bodyDecls)
       code.append(bodyDecl);
 
-    return code.toString();
+    return new SourceFileContent.Generated(code.toString(), requiredPaths);
   }
 
   public int hashCode() {
@@ -85,6 +71,6 @@ public class JavaSourceFileContent extends SourceFileContent {
       return false;
 
     JavaSourceFileContent other = (JavaSourceFileContent) o;
-    return other.packageDecl.equals(packageDecl) && other.checkedImports.equals(checkedImports) && other.imports.equals(imports) && other.importsOptional == importsOptional && other.bodyDecls.equals(bodyDecls);
+    return other.packageDecl.equals(packageDecl) && other.checkedImports.equals(checkedImports) && other.imports.equals(imports) && other.bodyDecls.equals(bodyDecls);
   }
 }

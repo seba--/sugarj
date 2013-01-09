@@ -294,7 +294,6 @@ public class JavaLib extends LanguageLib implements Serializable {
   public void setupSourceFile(RelativePath sourceFile, Environment environment) {
     javaOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + getOriginalFileExtension());
     javaSource = new JavaSourceFileContent();
-    javaSource.setOptionalImport(false);
     
     for (Path dir : environment.getSourcePath())
       if (sourceFile.getBasePath().equals(dir))

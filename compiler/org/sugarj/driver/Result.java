@@ -74,7 +74,7 @@ public class Result implements IErrorLogger {
    * deferred source files (*.sugj) -> 
    * to-be-compiled source files (e.g., *.java + JavaSourceFileContent) 
    */
-  private Map<Path, Pair<Path, SourceFileContent>> deferredSourceFiles = new HashMap<Path, Pair<Path, SourceFileContent>>();
+  private Map<Path, Pair<Path, SourceFileContent.Generated>> deferredSourceFiles = new HashMap<Path, Pair<Path, SourceFileContent.Generated>>();
   
   private final static Result OUTDATED_RESULT = new Result(true) {
     @Override
@@ -99,6 +99,16 @@ public class Result implements IErrorLogger {
   
   void addCircularDependency(Path depFile) throws IOException {
     circularDependencies.add(depFile);
+  }
+  
+  void addDependency(Result result, Environment env) throws IOException {
+    if (result.persistentPath == null)
+      throw new IllegalArgumentException("Expected result with persistent path.");
+    if (result.hasPersistentVersionChanged())
+      throw new IllegalArgumentException("Expected result that consistent with persisten version.");
+    
+    dependencies.put(result.persistentPath, result.persistentHash);
+    allDependentFiles.addAll(result.getFileDependencies(env));
   }
   
   void addDependency(Path depFile, Environment env) throws IOException {
@@ -311,7 +321,7 @@ public class Result implements IErrorLogger {
     
     delegate.deferredSourceFiles.putAll(deferredSourceFiles);
     if (!fileContent.isEmpty())
-      delegate.deferredSourceFiles.put(sourceFile, Pair.create(compileFile, fileContent));
+      delegate.deferredSourceFiles.put(sourceFile, Pair.create(compileFile, fileContent.getCode(compileFile)));
   }
   
   boolean isDelegateOf(Path compileFile) {
@@ -378,7 +388,7 @@ public class Result implements IErrorLogger {
     return availableGeneratedFiles;
   }
 
-  public Map<Path, Pair<Path, SourceFileContent>> getDeferredSourceFiles() {
+  public Map<Path, Pair<Path, SourceFileContent.Generated>> getDeferredSourceFiles() {
     return deferredSourceFiles;
   }
 
@@ -463,7 +473,7 @@ public class Result implements IErrorLogger {
       result.dependingFileHashes = (Map<Path, Integer>) ois.readObject();
 
       result.availableGeneratedFiles = (Map<Path, Set<RelativePath>>) ois.readObject();
-      result.deferredSourceFiles = (Map<Path, Pair<Path, SourceFileContent>>) ois.readObject();
+      result.deferredSourceFiles = (Map<Path, Pair<Path, SourceFileContent.Generated>>) ois.readObject();
     } catch (FileNotFoundException e) {
       return OUTDATED_RESULT;
     } catch (ClassNotFoundException e) {
