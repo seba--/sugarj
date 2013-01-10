@@ -3,6 +3,9 @@ module typing.check.TypeOperations
 import typing.check.Type
 import org.sugarj.languages.Fomega
 
+import concretesyntax.Stratego
+
+
 signature
   constructors
     TyUnknown: FomegaType
@@ -202,6 +205,7 @@ rules
 
   // *** Capture-avoiding substitution ***
   // ��-type
+  subst: (X,S,Metavar(mvar)) -> Metavar(mvar)
   subst: (X,S,TyMu(X,T)) -> TyMu(X,T)
   subst: (X,S,TyMu(Y,T)) -> TyMu(Y,<subst> (X,S,T))
          where <not(equal)> (X,Y)
