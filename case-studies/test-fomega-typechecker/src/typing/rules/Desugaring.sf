@@ -59,11 +59,10 @@ rules
             ]|)
     where <trm-explode> C => tC
         ; <trm-explode> e => te
-
         ; <fresh-result-var> ts => (ts1, result-var)
         ; <fresh-errs-var> ts1 => (ts2, errs-var)
         ; <ts-append-errs-var> (ts2, errs-var) => ts3
-        ; <translate-expected-result> (ts3, result-var, T) => (ts4, inspect-result)
+        ; <translate-expected-result> (ts3, result-var, [], T, []) => (ts4, inspect-result)
 
   // translate-judgment :
   //   (n, KindingJudgment(C, T, K)) -> (n, |[ <kindOf> (term~tC, term~tT) => term~tK ]|)
