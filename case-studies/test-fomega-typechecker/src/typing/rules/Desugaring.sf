@@ -28,7 +28,7 @@ rules
         ; <trm-explode> T => tT
         ; <premises-to-list> premises => premises-list
         ; <translate-premises> (<ts-initial> (), premises-list) => (ts1, premises-implementation)
-        ; <debug(!"TS");ts-get-errs> ts1 => errs
+        ; <ts-get-errs> ts1 => errs
         ; <foldr( ! stratego-term |[ [] ]|
                 , \ (hd,tl) -> |[ [term~hd | term~tl] ]| \ )> errs => errors
 
@@ -226,8 +226,8 @@ rules // Translation state handling
 
   ts-append-errs-var :
     (ts, errs-var) -> ts1
-    where <debug(!"A");ts-get-errs;debug(!"B")> ts => errs-old
-        ; <debug(!"C");ts-set-errs;debug(!"D")> (ts, <concat> [errs-old, [errs-var]]) => ts1
+    where <ts-get-errs> ts => errs-old
+        ; <ts-set-errs> (ts, <concat> [errs-old, [errs-var]]) => ts1
 
   ts-get-eqs :
     (n, eqs, errs) -> eqs
