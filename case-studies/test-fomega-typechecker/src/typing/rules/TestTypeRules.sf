@@ -1,0 +1,25 @@
+module typing.rules.TestTypeRules
+
+import typing.rules.Syntax
+import typing.rules.Desugaring
+
+~C |- ~T ~> ~U
+~C |- ~S ~> ~U
+~C |- ~V ~> ~U
+=================== T-As
+~C |- ~e as ~T : ~T
+
+~C |- ~e1 : ~T1
+~C |- ~e2 : ~T2
+~C |- ~T1 ~> ~T11 -> ~T12
+~C |- ~T2 ~> ~T11
+========================= T-App
+~C |- ~e1 ~e2 : ~T12
+
+~C |- ~e1 : ~T1
+~C |- ~T1 ~> forall ~%X::~K11. ~T12
+~C |- ~U ~> forall ~%X::~K11. ~T12
+=================================== T-TApp
+~C |- ~e1 [~T2] : ~T12
+//~C |- ~T2 :: ~K11
+//~C |- ~e1 [~T2] : [~%X |-> ~T2]~T12
