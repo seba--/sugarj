@@ -1,15 +1,14 @@
 module typing.check.TypeOperations
 
 import typing.check.Type
+import typing.check.Context
+import typing.check.Unknowns
+import typing.rules.Syntax
+
 import org.sugarj.languages.Fomega
 
 import concretesyntax.Stratego
 
-
-signature
-  constructors
-    TyUnknown: FomegaType
-    IDUnknown: FomegaID
 
 rules
   labType: (x,T) -> (TyUnknown(), ["not a variant or record type"])

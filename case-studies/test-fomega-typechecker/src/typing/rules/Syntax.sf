@@ -2,6 +2,7 @@ module typing.rules.Syntax
 
 import org.sugarj.languages.Stratego
 import org.sugarj.languages.Fomega
+
 import concretesyntax.Stratego
 
 // *** Syntax for typing rules ***
@@ -88,3 +89,7 @@ context-free syntax
 
   "~%" StrategoVar -> FomegaID       {cons("Metavar")}
   "~&" StrategoVar -> FomegaQID      {cons("Metavar")}
+
+signature
+  constructors
+    Metavar: String -> Term

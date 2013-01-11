@@ -100,7 +100,8 @@ rules // Translate a judgment
         ; <trm-explode> x => tx
         ; <fresh-result-var> ts => (ts1, result-var)
         ; <fresh-errs-var> ts1 => (ts2, errs-var)
-        ; <translate-type-expectation> (ts2, result-var, [], T, []) => (ts3, inspect-result)
+        ; <ts-append-errs-var> (ts2, errs-var) => ts3
+        ; <translate-type-expectation> (ts3, result-var, [], T, []) => (ts4, inspect-result)
 
    translate-judgment :
      (ts, QVarInContextJudgment(qx, T, C)) -> <translate-judgment> (ts, VarInContextJudgment(qx, T, C))
@@ -321,6 +322,9 @@ rules // Translation state handling
 
   ts-in-eqs = ?(ts, var); where(<ts-get-eqs> ts => eqs); <elem> (var, eqs)
 
+
+rules // TODO: proper error origin tracking:
+  msgsToErrsDummy : msgs -> <map(\ msg -> (TyUnknown(), msgs) \)> msgs
 
 
 desugarings

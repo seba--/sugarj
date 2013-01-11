@@ -2,7 +2,7 @@ module typing.check.Context
 
 import org.sugarj.languages.Fomega
 
-import typing.check.TypeOperations
+import typing.check.Unknowns
 
 signature
   sorts Context
