@@ -402,12 +402,9 @@ public class Driver{
           }
         if (delegate != null)
           driverResult.delegateCompilation(delegate, langLib.getOutFile(), langLib.getSource(), langLib.getGeneratedFiles());
-        else
-          assert dependsOnModel;
+        else if (!dependsOnModel)
+          throw new IllegalStateException("Could not delegate compilation of circular dependency to other compiler instance.");
       }
-//      else {
-//        driverResult.delegateCompilation(delegateCompilation, langLib.getOutFile(), langLib.getSource(), langLib.getGeneratedFiles());
-//      }
         
       driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
       
@@ -426,11 +423,6 @@ public class Driver{
 
       success = true;
     } 
-    catch (CommandExecution.ExecutionError e) {
-      // TODO do something more sensible
-      e.printStackTrace();
-      success = false;
-    }
     finally {
       log.endTask(success, "done processing " + sourceFile, "failed to process " + sourceFile);
       driverResult.setFailed(!success);
@@ -741,9 +733,6 @@ public class Driver{
     
     log.beginTask("processing", "PROCESS import declaration.", Log.CORE);
     try {
-
-      // TODO handle import declarations with asterisks, e.g. import foo.*;
-            
       String modulePath = langLib.getImportedModulePath(toplevelDecl);
       String importModuleName = FileCommands.fileName(modulePath);
       
