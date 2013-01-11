@@ -179,32 +179,31 @@ public abstract class LanguageLib implements Serializable {
         if (getGeneratedFileExtension().equals(FileCommands.getExtension(file)))
           generatedFiles.add(file);
 
-    List<Path> javaOutFiles = new ArrayList<Path>();
-    javaOutFiles.add(outFile);
+    List<Path> outFiles = new ArrayList<Path>();
+    if (!source.isEmpty())
+      outFiles.add(outFile);
 
-    for (Pair<Path, SourceFileContent.Generated> source2 : deferredSourceFilesForSourceFile.values()) {
+    for (Pair<Path, SourceFileContent.Generated> deferredSource : deferredSourceFilesForSourceFile.values()) {
       try { 
-        String code = source2.b.code;
-        checkRequiredPaths(source2.b.requiredPaths, generatedFiles);
-        writeToFile(generateFiles, generatedFileHashes, source2.a, code);
+        String code = deferredSource.b.code;
+        checkRequiredPaths(deferredSource.b.requiredPaths, generatedFiles);
+        writeToFile(generateFiles, generatedFileHashes, deferredSource.a, code);
       } catch (ClassNotFoundException e) {
         throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + outFile);
       }
     }
-    
-    if (source.isEmpty())	// if empty flag is set, do not compile source
-      return;
-    
+
     try {
       SourceFileContent.Generated generated = source.getCode(outFile);
       String code = generated.code;
       checkRequiredPaths(generated.requiredPaths, generatedFiles);
-      writeToFile(generateFiles, generatedFileHashes, outFile, code);
+      if (!source.isEmpty())
+        writeToFile(generateFiles, generatedFileHashes, outFile, code);
     } catch (ClassNotFoundException e) {
       throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + outFile);
     }
     
-		this.compile(javaOutFiles, bin, path, generateFiles);
+		this.compile(outFiles, bin, path, generateFiles);
 		for (Path cl : generatedFiles)
 			generatedFileHashes.put(cl, FileCommands.fileHash(cl));
 	}
