@@ -92,9 +92,14 @@ public class Result implements IErrorLogger {
     this.generateFiles = generateFiles;
   }
   
-  public void addFileDependency(Path file) throws IOException {
+  public void addFileDependency(Path file) {
     allDependentFiles.add(file);
-    generatedFileHashes.put(file, FileCommands.fileHash(file));
+    try {
+      dependingFileHashes.put(file, FileCommands.fileHash(file));
+    } catch (IOException e) {
+      e.printStackTrace();
+      dependingFileHashes.put(file, -1);
+    }
   }
   
   void addCircularDependency(Path depFile) throws IOException {

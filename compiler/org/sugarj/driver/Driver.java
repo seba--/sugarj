@@ -822,27 +822,23 @@ public class Driver{
   private boolean processImport(String modulePath, IStrategoTerm importTerm) throws IOException {
     boolean success = false;
     
-    success |= ModuleSystemCommands.importBinFile(modulePath, importTerm, environment, langLib);
-    ModuleSystemCommands.registerSearchedClassFiles(modulePath, driverResult, environment, langLib);
+    success |= ModuleSystemCommands.importBinFile(modulePath, importTerm, environment, langLib, driverResult);
 
-    Path sdf = ModuleSystemCommands.importSdf(modulePath, environment);
-    ModuleSystemCommands.registerSearchedSdfFiles(modulePath, driverResult, environment);
+    Path sdf = ModuleSystemCommands.importSdf(modulePath, environment, driverResult);
     if (sdf != null) {
       success = true;
       availableSDFImports.add(modulePath);
       buildCompoundSdfModule();
     }
     
-    Path str = ModuleSystemCommands.importStratego(modulePath, environment);
-    ModuleSystemCommands.registerSearchedStrategoFiles(modulePath, driverResult, environment);
+    Path str = ModuleSystemCommands.importStratego(modulePath, environment, driverResult);
     if (str != null) {
       success = true;
       availableSTRImports.add(modulePath);
       buildCompoundStrModule();
     }
     
-    success |= ModuleSystemCommands.importEditorServices(modulePath, driverResult, environment);
-    ModuleSystemCommands.registerSearchedEditorServicesFiles(modulePath, driverResult, environment);
+    success |= ModuleSystemCommands.importEditorServices(modulePath, environment, driverResult);
     
     return success;
   }
