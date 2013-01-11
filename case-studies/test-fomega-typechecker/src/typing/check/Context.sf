@@ -2,6 +2,8 @@ module typing.check.Context
 
 import org.sugarj.languages.Fomega
 
+import typing.check.TypeOperations
+
 signature
   sorts Context
 
@@ -19,5 +21,8 @@ rules
 
   freeIn: (x,ctx) -> <not(elem)> (x,xs) where <dom> ctx => xs
 
-  imported-type-context-tyvar = fail
-  imported-type-context-var = fail
+  lookup-expr-var: (x, CtxEmpty()) -> (TyUnknown(), [(x, <concat-strings> ["undefined identifier ", x])])
+  lookup-expr-var: (x, CtxBindTVar(ctx, Y, K)) -> <lookup-expr-var> (x, ctx)
+  lookup-expr-var: (x, CtxBindTVarDef(ctx, Y, K, T)) -> <lookup-expr-var> (x, ctx)
+  lookup-expr-var: (x, CtxBindVar(ctx, x, T)) -> (T, [])
+  lookup-expr-var: (x, CtxBindVar(ctx, y, T)) -> <lookup-expr-var> (x, ctx) where <not(equal)> (y,x)

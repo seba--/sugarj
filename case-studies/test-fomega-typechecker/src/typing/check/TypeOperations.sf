@@ -269,7 +269,6 @@ rules
   parReduce: (ctx,TyBool()) -> TyBool()
 
   parReduce: (CtxEmpty(),TyVar(X)) -> TyVar(X)
-             where <imported-type-context-tyvar> X
   parReduce: (CtxBindTVar(ctx,X,K),TyVar(X)) -> TyVar(X)
   parReduce: (CtxBindTVar(ctx,Y,K),TyVar(X)) -> <parReduce> (ctx,TyVar(X))
              where <not(equal)> (X,Y)

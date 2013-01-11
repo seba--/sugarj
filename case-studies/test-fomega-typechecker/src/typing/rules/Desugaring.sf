@@ -4,6 +4,8 @@ import org.sugarj.languages.Fomega
 import org.sugarj.languages.Stratego
 
 import typing.rules.Syntax
+
+import typing.check.Context
 import typing.check.Type
 import typing.check.TypeOperations
 
@@ -52,6 +54,9 @@ rules
     where <translate-judgment> (ts, judgment)   => (ts1, judgment-implementation)
         ; <translate-premises> (ts1, judgments) => (ts2, judgments-implementation)
 
+
+rules // Translate a judgment
+
   translate-judgment :
     (ts, TypingJudgment(C, e, T)) ->
       (ts4, |[   <typeOf> (term~tC, term~te) => (term~result-var, term~errs-var)
@@ -64,22 +69,44 @@ rules
         ; <ts-append-errs-var> (ts2, errs-var) => ts3
         ; <translate-type-expectation> (ts3, result-var, [], T, []) => (ts4, inspect-result)
 
-  // translate-judgment :
-  //   (n, KindingJudgment(C, T, K)) -> (n, |[ <kindOf> (term~tC, term~tT) => term~tK ]|)
-  //   where <trm-explode> C => tC
-  //       ; <trm-explode> T => tT
-  //       ; <trm-explode> K => tK
+  translate-judgment :
+    (ts, KindingJudgment(C, T, K)) ->
+      (ts4, |[   <kindOf> (term~tC, term~tT) => (term~result-var, term~errs-var)
+               ; strategy~inspect-result
+            ]|)
+    where <trm-explode> C => tC
+        ; <trm-explode> T => tT
+        ; <fresh-result-var> ts => (ts1, result-var)
+        ; <fresh-errs-var> ts1 => (ts2, errs-var)
+        ; <ts-append-errs-var> (ts2, errs-var) => ts3
+        ; <translate-kind-expectation> (ts3, result-var, K) => (ts4, inspect-result)
 
   translate-judgment :
     (ts, NormalizationJudgment(C, T, T')) ->
       (ts2, |[   <norm> (term~tC, term~tT) => term~result-var
                ; strategy~inspect-result
             ]|)
-    where <trm-explode> C  => tC
-        ; <trm-explode> T  => tT
+    where <trm-explode> C => tC
+        ; <trm-explode> T => tT
         ; <fresh-result-var> ts => (ts1, result-var)
         ; <translate-type-expectation> (ts1, result-var, [], T', []) => (ts2, inspect-result)
 
+  translate-judgment :
+    (ts, VarInContextJudgment(x, T, C)) ->
+      (ts3, |[   <lookup-expr-var> (term~tx, term~tC) => (term~result-var, term~errs-var)
+               ; strategy~inspect-result
+            ]|)
+    where <trm-explode> C => tC
+        ; <trm-explode> x => tx
+        ; <fresh-result-var> ts => (ts1, result-var)
+        ; <fresh-errs-var> ts1 => (ts2, errs-var)
+        ; <translate-type-expectation> (ts2, result-var, [], T, []) => (ts3, inspect-result)
+
+   translate-judgment :
+     (ts, QVarInContextJudgment(qx, T, C)) -> <translate-judgment> (ts, VarInContextJudgment(qx, T, C))
+
+
+rules // Translate a type expectation
 
   translate-type-expectation :
     (ts, result-var, fv1, Metavar(mvar), fv2) ->
@@ -164,6 +191,9 @@ rules
                                        , <concat> [fv2, [tX]]
                                        ) => (ts8, inspect-result3)
 
+
+rules // Generate code to handle free variables in type expressions
+
   translate-fv-subst :
     (ts, T, Ts, []) -> (ts, |[ id ]|, T)
 
@@ -183,7 +213,9 @@ rules
         ; <translate-fv-subst> (ts2, result-var2, [TyVar(result-var1) | Ts], Xs) =>
             (ts3, subst-rest, result-var)
 
-rules
+
+rules // Translate a kind expectation
+
   translate-kind-expectation :
     (ts, result-var, Metavar(mvar)) ->
       (<ts-append-eq> (ts, mvar), |[ !term~result-var; ?term~mvar ]|)
@@ -223,7 +255,8 @@ rules
         ; <translate-kind-expectation> (ts6, result-var2, K2) => (ts7, inspect-result2)
 
 
-  // *** Debug definitions to find rewrite failures ***
+rules // Debug definitions to find rewrite failures
+
   translate-judgment :
     (ts, x) -> (ts, |[ !("fail in translate-judgment1") ]|)
     where !(ts, x); debug(!"FOO")
@@ -238,6 +271,7 @@ rules
 
 
 rules // Fresh variables
+
   fresh-var(|prefix) :
     ts -> ( <ts-inc-counter> ts
           , Var(<concat-strings> [prefix, "_", <write-to-string> (<ts-get-counter> ts)]))
@@ -250,6 +284,7 @@ rules // Fresh variables
 
 
 rules // Translation state handling
+
   ts-initial :
     () -> (0, [], [])
 
@@ -286,17 +321,6 @@ rules // Translation state handling
 
   ts-in-eqs = ?(ts, var); where(<ts-get-eqs> ts => eqs); <elem> (var, eqs)
 
-
-      // |[ rules foo: 1 -> [1,2,3] ]|
-
-
-
-
-    //TypeRule(premises,RuleName(x,Some(Var(name))),conclusion) ->
-      // [RDefNoArgs("foo", RuleNoCond(NoAnnoList(Str(name)), <trm-explode> (premises,conclusion)))]
-
-  // desugar-type-rule0:
-  //   any -> ValDef(None(),"foo",1)
 
 
 desugarings
