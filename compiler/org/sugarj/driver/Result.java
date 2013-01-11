@@ -72,7 +72,7 @@ public class Result implements IErrorLogger {
   
   /**
    * deferred source files (*.sugj) -> 
-   * to-be-compiled source files (e.g., *.java + JavaSourceFileContent) 
+   * to-be-compiled source files (e.g., *.java + generated SourceFileContent) 
    */
   private Map<Path, Pair<Path, SourceFileContent.Generated>> deferredSourceFiles = new HashMap<Path, Pair<Path, SourceFileContent.Generated>>();
   
@@ -240,6 +240,9 @@ public class Result implements IErrorLogger {
   }
 
   public boolean isUpToDateShallow(int inputHash, Environment env) throws IOException {
+    if (env.doGenerateFiles() && !generateFiles)
+      return false;
+    
     if (hasPersistentVersionChanged())
       return false;
     
