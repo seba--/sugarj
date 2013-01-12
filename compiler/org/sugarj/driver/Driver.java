@@ -734,59 +734,7 @@ public class Driver{
       String modulePath = langLib.getImportedModulePath(toplevelDecl);
       String importModuleName = FileCommands.fileName(modulePath);
       
-      boolean isCircularImport = false;
-      
-      if (!modulePath.startsWith("org/sugarj")) { // module is not in sugarj standard library
-        Result res = ModuleSystemCommands.locateResult(modulePath, environment);
-        RelativePath importSourceFile;
-        if (res != null && res.getSourceFile() != null)
-          importSourceFile = res.getSourceFile();
-        else
-          importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath(), langLib);
-
-        if (importSourceFile != null && (res == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment))) {
-          if (!environment.doGenerateFiles()) {
-            setErrorMessage(toplevelDecl, "module outdated, compile first: " + importModuleName);
-          }
-          else {
-            log.log("Need to compile imported module " + modulePath + " first.", Log.IMPORT);
-            
-            try {
-              if (isCircularImport(importSourceFile)) {
-                // assume source file does not provide syntactic sugar
-                langLib.addImportModule(toplevelDecl, false);
-                isCircularImport = true;
-                circularLinks.add(importSourceFile);
-              }
-              else {
-                res = subcompile(importSourceFile);
-                if (res.hasFailed())
-                  setErrorMessage(toplevelDecl, "problems while compiling " + importModuleName);
-              }
-            } catch (Exception e) {
-              setErrorMessage(toplevelDecl, "problems while compiling " + importModuleName);
-            }
-              
-            log.log("CONTINUE PROCESSING'" + sourceFile + "'.", Log.CORE);
-          }
-        }
-        
-        if (res != null && !isCircularImport)
-          driverResult.addDependency(res, environment);
-        
-        if (!isCircularImport && importSourceFile != null)
-          // if importSourceFile is delegated to something currently being processed
-          for (Driver dr : currentlyProcessing)
-            if (dr.driverResult.isDelegateOf(importSourceFile)) {
-              langLib.addImportModule(toplevelDecl, false);
-              isCircularImport = true;
-              
-              if (dr != this)
-                circularLinks.add(dr.sourceFile);
-              
-              break;
-            }
-      }
+      boolean isCircularImport = prepareImport(toplevelDecl, modulePath, importModuleName);
 
       boolean success = isCircularImport || processImport(modulePath, toplevelDecl);
       
@@ -799,6 +747,80 @@ public class Driver{
       log.endTask();
     }
   }
+
+  /**
+   * Prepare import:
+   *  - locate pre-existing result and/or source file
+   *  - determine whether the import is circular
+   *  - initiate subcompilation of imported source file if necessary
+   *  - add appropriate dependencies to driverResult 
+   * 
+   * @param toplevelDecl
+   * @param modulePath
+   * @param importModuleName
+   * @return true iff the import is circular.
+   * @throws IOException
+   * @throws InterruptedException 
+   * @throws SGLRException 
+   * @throws InvalidParseTableException 
+   * @throws ParseException 
+   * @throws TokenExpectedException 
+   */
+  private boolean prepareImport(IStrategoTerm toplevelDecl, String modulePath, String importModuleName) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    boolean isCircularImport = false;
+    
+    if (!modulePath.startsWith("org/sugarj")) { // module is not in sugarj standard library
+      Result res = ModuleSystemCommands.locateResult(modulePath, environment);
+      RelativePath importSourceFile;
+      if (res != null && res.getSourceFile() != null)
+        importSourceFile = res.getSourceFile();
+      else
+        importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath(), langLib);
+
+      boolean sourceFileAvailable = importSourceFile != null;
+      boolean requiresUpdate = res == null || res.getSourceFile() == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment);
+      
+      if (sourceFileAvailable && requiresUpdate && !environment.doGenerateFiles()) {
+        // This is a parser run. Required module needs to be compiled before.
+        log.log("Module outdated, compile first: " + modulePath + ".", Log.IMPORT);
+        setErrorMessage(toplevelDecl, "module outdated, compile first: " + importModuleName);
+      }
+      else if (sourceFileAvailable && requiresUpdate && isCircularImport(importSourceFile)) {
+        // Circular import. Assume source file does not provide syntactic sugar.
+        log.log("Circular import detected: " + modulePath + ".", Log.IMPORT);
+        langLib.addImportModule(toplevelDecl, false);
+        isCircularImport = true;
+        circularLinks.add(importSourceFile);
+      }
+      else if (sourceFileAvailable && requiresUpdate && environment.doGenerateFiles()) {
+        // This is a compiler run. Required module needs recompilation.
+        log.log("Need to compile imported module " + modulePath + " first.", Log.IMPORT);
+        
+        res = subcompile(toplevelDecl, importSourceFile);
+        if (res.hasFailed())
+          setErrorMessage(toplevelDecl, "Problems while compiling " + importModuleName);
+          
+        log.log("CONTINUE PROCESSING'" + sourceFile + "'.", Log.CORE);
+      }
+      
+      if (res != null && !isCircularImport)
+        driverResult.addDependency(res, environment);
+      
+      if (!isCircularImport && importSourceFile != null)
+        // if importSourceFile is delegated to something currently being processed
+        for (Driver dr : currentlyProcessing)
+          if (dr.driverResult.isDelegateOf(importSourceFile)) {
+            langLib.addImportModule(toplevelDecl, false);
+            isCircularImport = true;
+            
+            if (dr != this)
+              circularLinks.add(dr.sourceFile);
+            
+            break;
+          }
+    }
+    return isCircularImport;
+  }
   
   private boolean isCircularImport(RelativePath importSourceFile) {
     for (Driver dr : currentlyProcessing)
@@ -808,13 +830,27 @@ public class Driver{
     return false;
   }
 
-  private Result subcompile(RelativePath importSourceFile) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    if (importSourceFile.getAbsolutePath().endsWith(".model")) {
-      IStrategoTerm term = ATermCommands.atermFromFile(importSourceFile.getAbsolutePath());
-      return run(term, importSourceFile, environment, monitor, langLib.getFactoryForLanguage(), currentlyProcessing);
+  private Result subcompile(IStrategoTerm toplevelDecl, RelativePath importSourceFile) throws InterruptedException {
+    try {
+      if (importSourceFile.getAbsolutePath().endsWith(".model")) {
+        IStrategoTerm term = ATermCommands.atermFromFile(importSourceFile.getAbsolutePath());
+        return run(term, importSourceFile, environment, monitor, langLib.getFactoryForLanguage(), currentlyProcessing);
+      }
+      else
+        return run(importSourceFile, environment, monitor, langLib.getFactoryForLanguage(), currentlyProcessing);
+    } catch (IOException e) {
+      setErrorMessage(toplevelDecl, "Problems while compiling " + importSourceFile);
+    } catch (TokenExpectedException e) {
+      setErrorMessage(toplevelDecl, "Problems while compiling " + importSourceFile);
+    } catch (ParseException e) {
+      setErrorMessage(toplevelDecl, "Problems while compiling " + importSourceFile);
+    } catch (InvalidParseTableException e) {
+      setErrorMessage(toplevelDecl, "Problems while compiling " + importSourceFile);
+    } catch (SGLRException e) {
+      setErrorMessage(toplevelDecl, "Problems while compiling " + importSourceFile);
     }
-    else
-      return run(importSourceFile, environment, monitor, langLib.getFactoryForLanguage(), currentlyProcessing);
+    
+    return null;
   }
 
   private boolean processImport(String modulePath, IStrategoTerm importTerm) throws IOException {
