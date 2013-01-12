@@ -725,11 +725,9 @@ public class Driver{
 
   private void processImportDec(IStrategoTerm toplevelDecl) {
     
-    if (!inDesugaredDeclList) {
-      if (!sugaredImportDecls.contains(lastSugaredToplevelDecl))
-        sugaredImportDecls.add(lastSugaredToplevelDecl);
-      desugaredImportDecls.add(toplevelDecl);
-    }
+    if (!sugaredImportDecls.contains(lastSugaredToplevelDecl))
+      sugaredImportDecls.add(lastSugaredToplevelDecl);
+    desugaredImportDecls.add(toplevelDecl);
     
     log.beginTask("processing", "PROCESS import declaration.", Log.CORE);
     try {
@@ -841,6 +839,16 @@ public class Driver{
     success |= ModuleSystemCommands.importEditorServices(modulePath, environment, driverResult);
     
     return success;
+  }
+  
+  private boolean processModelImport(String modulePath) throws IOException {
+    RelativePath model = ModuleSystemCommands.importModel(modulePath, environment, driverResult);
+    if (model != null) {
+//      availableModels.add(model);
+      return true;
+    }
+    
+    return false;
   }
 
   private void processLanguageDec(IStrategoTerm toplevelDecl) throws IOException {

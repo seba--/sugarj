@@ -3,7 +3,6 @@ package org.sugarj.driver;
 import static org.sugarj.common.Log.log;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -98,7 +97,7 @@ public class ModuleSystemCommands {
     
     BufferedReader reader = null;
     
-    log.beginTask("Incorporation", "Incorporate the imported editor services " + modulePath, Log.IMPORT);
+    log.beginTask("Incorporation", "Found editor services for " + modulePath, Log.IMPORT);
     try {
       reader = new BufferedReader(new FileReader(serv.getFile()));
       String line;
@@ -113,6 +112,16 @@ public class ModuleSystemCommands {
       
       log.endTask();
     }
+  }
+  
+  public static RelativePath importModel(String modulePath, Environment environment, Result driverResult) throws IOException {
+    RelativePath model = searchFile(modulePath, ".model", environment, driverResult);
+    
+    if (model == null)
+      return null;
+
+    log.log("Found model for " + modulePath, Log.IMPORT);
+    return model;
   }
   
   public static RelativePath locateSourceFile(String path, Set<Path> sourcePath) {

@@ -180,14 +180,13 @@ public abstract class LanguageLib implements Serializable {
           generatedFiles.add(file);
 
     List<Path> outFiles = new ArrayList<Path>();
-    if (!source.isEmpty())
-      outFiles.add(outFile);
 
     for (Pair<Path, SourceFileContent.Generated> deferredSource : deferredSourceFilesForSourceFile.values()) {
       try { 
         String code = deferredSource.b.code;
         checkRequiredPaths(deferredSource.b.requiredPaths, generatedFiles);
         writeToFile(generateFiles, generatedFileHashes, deferredSource.a, code);
+        outFiles.add(deferredSource.a);
       } catch (ClassNotFoundException e) {
         throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + outFile);
       }
@@ -197,13 +196,16 @@ public abstract class LanguageLib implements Serializable {
       SourceFileContent.Generated generated = source.getCode(outFile);
       String code = generated.code;
       checkRequiredPaths(generated.requiredPaths, generatedFiles);
-      if (!source.isEmpty())
+      if (!source.isEmpty()) {
         writeToFile(generateFiles, generatedFileHashes, outFile, code);
+        outFiles.add(outFile);
+      }
     } catch (ClassNotFoundException e) {
       throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + outFile);
     }
     
-		this.compile(outFiles, bin, path, generateFiles);
+    if (!outFiles.isEmpty())
+      this.compile(outFiles, bin, path, generateFiles);
 		for (Path cl : generatedFiles)
 			generatedFileHashes.put(cl, FileCommands.fileHash(cl));
 	}
