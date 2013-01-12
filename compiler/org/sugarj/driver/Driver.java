@@ -735,8 +735,14 @@ public class Driver{
       String importModuleName = FileCommands.fileName(modulePath);
       
       boolean isCircularImport = prepareImport(toplevelDecl, modulePath, importModuleName);
-
-      boolean success = isCircularImport || processImport(modulePath, toplevelDecl);
+      if (isCircularImport)
+        return;
+      
+      boolean codeImportSuccess = processImport(modulePath, toplevelDecl);
+      boolean modelImportSuccess = processModelImport(modulePath);
+      if (modelImportSuccess && !codeImportSuccess)
+        dependsOnModel = true;
+      boolean success = codeImportSuccess || modelImportSuccess;
       
       if (!success)
         setErrorMessage(toplevelDecl, "module not found: " + importModuleName);
