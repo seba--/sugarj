@@ -115,7 +115,7 @@ public class ModuleSystemCommands {
   }
   
   public static RelativePath importModel(String modulePath, Environment environment, Result driverResult) throws IOException {
-    RelativePath model = searchFile(modulePath, ".model", environment, driverResult);
+    RelativePath model = searchFile(modulePath, "model", environment, driverResult);
     
     if (model == null)
       return null;
@@ -147,7 +147,7 @@ public class ModuleSystemCommands {
    * so that the emergence of a file triggers recompilation.
    * 
    * @param relativePath without extension
-   * @param fileExtension including leading "."
+   * @param fileExtension without leading "."
    * @return RelativePath or null.
    * @throws IOException 
    */
