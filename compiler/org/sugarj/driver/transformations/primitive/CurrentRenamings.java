@@ -44,7 +44,7 @@ class CurrentRenamings extends AbstractPrimitive {
       map.put(ATermCommands.makeTuple(quals, from), to);
     }
     
-    context.setCurrent(map);
+    context.setCurrent(ATermCommands.makeAppl("Hashtable", "", 1, map));
     return true;
   }
   

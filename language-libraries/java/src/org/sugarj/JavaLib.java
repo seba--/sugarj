@@ -347,6 +347,25 @@ public class JavaLib extends LanguageLib implements Serializable {
   }
   
   @Override
+  public IStrategoTerm reconstructImport(String modulePath, IStrategoTerm decl) {
+    IStrategoTerm localName = null;
+    if (isApplication(decl, "TransImportDec")) 
+      localName = getApplicationSubterm(decl, "TransImportDec", 0);
+    else if (isApplication(decl, "TypeImportAsDec"))
+      localName = getApplicationSubterm(decl, "TypeImportAsDec", 0);
+    
+    if (localName == null || isApplication(localName, "None"))
+      return
+        ATermCommands.makeAppl("TypeImportDec", "TypeImportDec", 1, 
+          ATermCommands.makeAppl("Id", "Id", 1, ATermCommands.makeString(modulePath)));
+
+    return 
+      ATermCommands.makeAppl("TypeImportAsDec", "TypeImportAsDec", 2,
+        localName,
+        ATermCommands.makeAppl("Id", "Id", 1, ATermCommands.makeString(modulePath)));
+  }
+  
+  @Override
   public String getModulePath(IStrategoTerm decl) {
     return getRelativeModulePath(prettyPrint(decl));
   }

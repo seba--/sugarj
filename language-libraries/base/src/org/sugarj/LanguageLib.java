@@ -230,6 +230,7 @@ public abstract class LanguageLib implements Serializable {
   public          boolean isTransformationApplication(IStrategoTerm decl) { return false; }
   public          IStrategoTerm getTransformationApplication(IStrategoTerm decl) { return null; }
   public          String getModulePath(IStrategoTerm decl) { return null; }
+  public          IStrategoTerm reconstructImport(String modulePath, IStrategoTerm original) { return null; }
 	
 	public abstract String getSugarName(IStrategoTerm decl) throws IOException;
 	public abstract IStrategoTerm getSugarBody(IStrategoTerm decl);

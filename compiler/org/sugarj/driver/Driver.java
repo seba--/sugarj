@@ -661,6 +661,9 @@ public class Driver{
   public IStrategoTerm currentRename(IStrategoTerm term) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
     log.beginTask("desugaring", "RENAME toplevel declaration.", Log.TRANSFORM);
     try {
+      if (currentTransProg == null)
+        return term;
+      
       IStrategoTerm result = STRCommands.assimilate("apply-renamings", currentTransProg, term, langLib.getInterpreter());
       return result == null ? term : result;
     } catch (StrategoException e) {
@@ -761,6 +764,11 @@ public class Driver{
           environment.getRenamings().add(0, new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(modulePath)));
         else
           environment.getRenamings().add(0, new Renaming(ImportCommands.getTransformationApplicationModelPath(appl, langLib), modulePath));
+        
+        IStrategoTerm reconstructedImport = langLib.reconstructImport(modulePath, toplevelDecl);
+        desugaredImportDecls.remove(toplevelDecl);
+        desugaredImportDecls.add(reconstructedImport);
+        toplevelDecl = reconstructedImport;
       }
       
       if (isCircularImport)
@@ -889,7 +897,11 @@ public class Driver{
   private boolean processImport(String modulePath, IStrategoTerm importTerm) throws IOException {
     boolean success = false;
     
-    success |= ModuleSystemCommands.importBinFile(modulePath, importTerm, environment, langLib, driverResult);
+    Path clazz = ModuleSystemCommands.importBinFile(modulePath, environment, langLib, driverResult);
+    if (clazz != null) {
+      success = true;
+      langLib.addImportedModule(importTerm, true);
+    }
 
     Path sdf = ModuleSystemCommands.importSdf(modulePath, environment, driverResult);
     if (sdf != null) {
@@ -1268,8 +1280,10 @@ public class Driver{
         imports,
         body);
     
-    ImploderAttachment.getTokenizer(term).setAst(term);
-    ImploderAttachment.getTokenizer(term).initAstNodeBinding();
+    if (ImploderAttachment.getTokenizer(term) != null) {
+      ImploderAttachment.getTokenizer(term).setAst(term);
+      ImploderAttachment.getTokenizer(term).initAstNodeBinding();
+    }
     
     return term;
   }

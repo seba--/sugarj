@@ -6,7 +6,7 @@ imports
 
 rules
   
-  rename-decl(|renamings) =
+  rename-decl(|renamings) = 
     rename-sugardec(|renamings) <+ 
     rename-modeldec(|renamings) <+
     rename-editordec(|renamings) <+
@@ -20,13 +20,13 @@ rules
   rename-editordec(|renamings) = oncetd( \ EditorServicesDecHead(mods, Id(from)) -> EditorServicesDecHead(mods, Id(to))  
                                            where <hashtable-get(|from)> renamings => to \)
 
-  rename-languagedec(|renamings) = topdown(rename-java(|renamings))
+  rename-languagedec(|renamings) = topdown(try(rename-java(|renamings)))
   
 rules
   rename-java(|renamings) :
-       ClassDecHead(mods, Id(from), typeParams, super, interface)
+       t@ClassDecHead(mods, Id(from), typeParams, super, interface)
     -> ClassDecHead(mods, Id(to), typeParams, super, interface)
-  where <hashtable-get(|from)> renamings => to 
+  where <hashtable-get(|from)> renamings => to
     
   rename-java(|renamings) :
        InterfaceDecHead(mods, Id(from), typeParams, interface)

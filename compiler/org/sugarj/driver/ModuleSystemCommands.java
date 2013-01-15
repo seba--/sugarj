@@ -10,7 +10,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Set;
 
-import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.sugarj.LanguageLib;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
@@ -35,13 +34,13 @@ public class ModuleSystemCommands {
      * @return true iff a class file existed.
      * @throws IOException
      */
-    public static boolean importBinFile(String modulePath, IStrategoTerm toplevelDecl, Environment environment, LanguageLib langLib, Result driverResult) throws IOException {
+    public static RelativePath importBinFile(String modulePath, Environment environment, LanguageLib langLib, Result driverResult) throws IOException {
       RelativePath clazz = searchFile(modulePath, langLib.getGeneratedFileExtension(), environment, driverResult);
       if (clazz == null && !langLib.isModuleResolvable(modulePath))
-        return false;
+        return null;
       
-      langLib.addImportedModule(toplevelDecl, true);
-      return true;
+      log.log("Found language-specific declaration for " + modulePath, Log.IMPORT);
+      return clazz;
     }
     
   /**
