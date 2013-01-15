@@ -250,12 +250,12 @@ public class HaskellLib extends LanguageLib {
   }
 
   @Override
-  public String getImportedModulePath(IStrategoTerm toplevelDecl) throws IOException {
+  public String getImportedModulePath(IStrategoTerm toplevelDecl) {
     return prettyPrint(getApplicationSubterm(toplevelDecl, "Import", 2)).replace('.', '/');
   }
   
   @Override
-  public void addImportModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
+  public void addImportedModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
     SourceImport imp = new SourceImport(getImportedModulePath(toplevelDecl), prettyPrint(toplevelDecl));
     if (checked)
       sourceContent.addCheckedImport(imp);
@@ -274,7 +274,7 @@ public class HaskellLib extends LanguageLib {
   }
 
   @Override
-  public String prettyPrint(IStrategoTerm term) throws IOException {
+  public String prettyPrint(IStrategoTerm term) {
     if (ppTable == null) 
       ppTable = ATermCommands.readPrettyPrintTable(ensureFile("org/sugarj/languages/Haskell.pp").getAbsolutePath());
     

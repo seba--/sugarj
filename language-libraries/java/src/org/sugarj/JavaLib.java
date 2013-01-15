@@ -159,12 +159,16 @@ public class JavaLib extends LanguageLib implements Serializable {
     }
   }
 
-  public String extractImportedModuleName(IStrategoTerm toplevelDecl) throws IOException {
+  public String extractImportedModuleName(IStrategoTerm toplevelDecl) {
     String name = null;
     if (isApplication(toplevelDecl, "TypeImportDec"))
       name = prettyPrint(toplevelDecl.getSubterm(0));
     else if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
       name = prettyPrint(toplevelDecl.getSubterm(0)) + ".*";
+    else if (isApplication(toplevelDecl, "TypeImportAsDec"))
+      name = prettyPrint(toplevelDecl.getSubterm(1));
+    else if (isApplication(toplevelDecl, "TransImportDec"))
+      name = null;
     return name;
   }
 
@@ -205,7 +209,10 @@ public class JavaLib extends LanguageLib implements Serializable {
 
   @Override
   public boolean isImportDec(IStrategoTerm decl) {
-    return isApplication(decl, "TypeImportDec") || isApplication(decl, "TypeImportOnDemandDec");
+    return 
+        isApplication(decl, "TypeImportDec") || 
+        isApplication(decl, "TypeImportOnDemandDec") ||
+        isApplication(decl, "TypeImportAsDec");
   }
 
     @Override
@@ -247,7 +254,7 @@ public class JavaLib extends LanguageLib implements Serializable {
    * @throws IOException
    */
   @Override
-  public String prettyPrint(IStrategoTerm term) throws IOException {
+  public String prettyPrint(IStrategoTerm term) {
     Context ctx = interp.getCompiledContext();
     IStrategoTerm string = pp_java_string_0_0.instance.invoke(ctx, term);
     if (string != null)
@@ -312,19 +319,50 @@ public class JavaLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  public String getImportedModulePath(IStrategoTerm toplevelDecl) throws IOException {
+  public String getImportedModulePath(IStrategoTerm toplevelDecl) {
     String importModule = extractImportedModuleName(toplevelDecl);
     String modulePath = getRelativeModulePath(importModule);
 
     return modulePath;
   }
+  
+  @Override
+  public boolean isTransformationApplication(IStrategoTerm decl) {
+    return isApplication(decl, "TransImportDec");
+  }
+  
+  @Override
+  public IStrategoTerm getTransformationApplication(IStrategoTerm decl) {
+    return getApplicationSubterm(decl, "TransImportDec", 1);
+  }
+  
+  @Override
+  public String getImportLocalName(IStrategoTerm decl) {
+    IStrategoTerm opt = null;
+    if (isApplication(decl, "TransImportDec")) 
+      opt = getApplicationSubterm(decl, "TransImportDec", 0);
+    else if (isApplication(decl, "TypeImportAsDec"))
+      opt = getApplicationSubterm(decl, "TypeImportAsDec", 0);
+    
+    if (opt != null && isApplication(opt, "Some"))
+      return getModulePath(getApplicationSubterm(opt, "Some", 0));
+    
+    return null;
+  }
+  
+  @Override
+  public String getModulePath(IStrategoTerm decl) {
+    return getRelativeModulePath(prettyPrint(decl));
+  }
 
   private String getRelativeModulePath(String module) {
+    if (module == null)
+      return null;
     return module.replace(".", Environment.sep);
   }
 
   @Override
-  public void addImportModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
+  public void addImportedModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
     String imp = extractImportedModuleName(toplevelDecl).replace('/', '.');
     if (checked)
       javaSource.addCheckedImport(imp);

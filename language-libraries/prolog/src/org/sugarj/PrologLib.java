@@ -224,7 +224,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 	
 	@Override
-	public String prettyPrint(IStrategoTerm term) throws IOException {
+	public String prettyPrint(IStrategoTerm term) {
 		IStrategoTerm ppTable = initializePrettyPrinter(interp.getCompiledContext());
 		return ATermCommands.prettyPrint(ppTable, term, interp);
 	}
@@ -291,7 +291,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 	
 	@Override
-	public String getImportedModulePath(IStrategoTerm toplevelDecl) throws IOException {
+	public String getImportedModulePath(IStrategoTerm toplevelDecl) {
 		String modulePath = prettyPrint(toplevelDecl.getSubterm(0).getSubterm(0));
 		
 		return modulePath;		
@@ -302,7 +302,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 	
 	@Override
-	public void addImportModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
+	public void addImportedModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
 		
 		String importedModuleName = prettyPrint(toplevelDecl.getSubterm(0).getSubterm(0));
 		PrologModuleImport imp = prologSource.getImport(importedModuleName, toplevelDecl);

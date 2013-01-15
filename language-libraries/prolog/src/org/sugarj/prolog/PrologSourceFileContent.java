@@ -1,6 +1,5 @@
 package org.sugarj.prolog;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -95,12 +94,7 @@ public class PrologSourceFileContent extends SourceFileContent {
 		if (module.productionDecl == null) 
 			return "";
 		
-		try {
-      return ", " + pLib.prettyPrint(module.productionDecl.getSubterm(1));
-    } catch (IOException e) {
-      e.printStackTrace();
-      return "";
-    }
+    return ", " + pLib.prettyPrint(module.productionDecl.getSubterm(1));
 	}
 	
 	public PrologModuleImport getImport(String importName, IStrategoTerm decl) {

@@ -467,7 +467,7 @@ public class Driver{
         depOutFile = environment.createBinPath(langLib.getRelativeNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       }
       try {
-        if (langLib.isImportDec(toplevelDecl)) {
+        if (langLib.isImportDec(toplevelDecl) || langLib.isTransformationApplication(toplevelDecl)) {
           if (inDesugaredDeclList || !environment.isAtomicImportParsing())
             processImportDec(toplevelDecl);
           else 
@@ -490,7 +490,7 @@ public class Driver{
            * Desugarings may generate lists of toplevel declarations.
            */
           List<IStrategoTerm> list = ATermCommands.getList(toplevelDecl);
-          sortForImports(list);
+//          sortForImports(list);
 
           boolean old = inDesugaredDeclList;
           inDesugaredDeclList = true;
@@ -709,7 +709,7 @@ public class Driver{
         log.endSilent(); 
       }
     
-      if (term != null && langLib.isImportDec(term))
+      if (term != null && (langLib.isImportDec(term) || langLib.isTransformationApplication(term)))
         pendingImports.add(term);
       else {
         declProvider.retract(term);
@@ -794,7 +794,7 @@ public class Driver{
       else if (sourceFileAvailable && requiresUpdate && isCircularImport(importSourceFile)) {
         // Circular import. Assume source file does not provide syntactic sugar.
         log.log("Circular import detected: " + modulePath + ".", Log.IMPORT);
-        langLib.addImportModule(toplevelDecl, false);
+        langLib.addImportedModule(toplevelDecl, false);
         isCircularImport = true;
         circularLinks.add(importSourceFile);
       }
@@ -816,7 +816,7 @@ public class Driver{
         // if importSourceFile is delegated to something currently being processed
         for (Driver dr : currentlyProcessing)
           if (dr.driverResult.isDelegateOf(importSourceFile)) {
-            langLib.addImportModule(toplevelDecl, false);
+            langLib.addImportedModule(toplevelDecl, false);
             isCircularImport = true;
             
             if (dr != this)

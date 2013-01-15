@@ -40,7 +40,7 @@ public class ModuleSystemCommands {
       if (clazz == null && !langLib.isModuleResolvable(modulePath))
         return false;
       
-      langLib.addImportModule(toplevelDecl, true);
+      langLib.addImportedModule(toplevelDecl, true);
       return true;
     }
     

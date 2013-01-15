@@ -128,6 +128,7 @@ public abstract class LanguageLib implements Serializable {
 	public abstract boolean isPlainDec(IStrategoTerm decl);
   public          boolean isModelDec(IStrategoTerm decl) { return false; }
 	public          boolean isTransformationDec(IStrategoTerm decl) { return false; }
+	public          boolean isTransformationImportDec(IStrategoTerm decl) { return false; }
 	
 	public abstract void processLanguageSpecific(IStrategoTerm toplevelDecl,
 	                                              Environment environment) throws IOException;
@@ -158,8 +159,6 @@ public abstract class LanguageLib implements Serializable {
 	public abstract void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativePath sourceFile, RelativePath sourceFileFromResult) throws IOException;
 
 	public abstract LanguageLibFactory getFactoryForLanguage();
-	
-	public abstract String getImportedModulePath(IStrategoTerm toplevelDecl) throws IOException;
 	
 	public void compile(
 	    Path outFile, 
@@ -234,11 +233,14 @@ public abstract class LanguageLib implements Serializable {
 		}
 	}
 
+  public abstract void addImportedModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException;
 	protected abstract void compile(List<Path> outFiles, Path bin, List<Path> path, boolean generateFiles) throws IOException;
 
-	
-	public abstract void addImportModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException;
-	
+  public abstract String getImportedModulePath(IStrategoTerm decl);
+  public          String getImportLocalName(IStrategoTerm decl) { return null; }
+  public          boolean isTransformationApplication(IStrategoTerm decl) { return false; }
+  public          IStrategoTerm getTransformationApplication(IStrategoTerm decl) { return null; }
+  public          String getModulePath(IStrategoTerm decl) { return null; }
 	
 	public abstract String getSugarName(IStrategoTerm decl) throws IOException;
 	public abstract IStrategoTerm getSugarBody(IStrategoTerm decl);
