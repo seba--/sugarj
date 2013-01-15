@@ -106,7 +106,7 @@ public class Result implements IErrorLogger {
     circularDependencies.add(depFile);
   }
   
-  void addDependency(Result result) throws IOException {
+  public void addDependency(Result result) throws IOException {
     if (result.persistentPath == null)
       throw new IllegalArgumentException("Expected result with persistent path.");
     if (result.hasPersistentVersionChanged())
@@ -116,7 +116,7 @@ public class Result implements IErrorLogger {
     allDependentFiles.addAll(result.getFileDependencies());
   }
   
-  void addDependency(Path depFile) throws IOException {
+  public void addDependency(Path depFile) throws IOException {
     dependencies.put(depFile, FileCommands.fileHash(depFile));
     Result result = readDependencyFile(depFile);
     allDependentFiles.addAll(result.getFileDependencies());

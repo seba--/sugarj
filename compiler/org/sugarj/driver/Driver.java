@@ -658,7 +658,7 @@ public class Driver{
   /**
    * Apply current renamings stored in environment to the given term.
    */
-  private IStrategoTerm currentRename(IStrategoTerm term) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
+  public IStrategoTerm currentRename(IStrategoTerm term) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
     log.beginTask("desugaring", "RENAME toplevel declaration.", Log.TRANSFORM);
     try {
       IStrategoTerm result = STRCommands.assimilate("apply-renamings", currentTransProg, term, langLib.getInterpreter());
@@ -863,7 +863,7 @@ public class Driver{
     return false;
   }
 
-  private Result subcompile(IStrategoTerm toplevelDecl, RelativePath importSourceFile) throws InterruptedException {
+  public Result subcompile(IStrategoTerm toplevelDecl, RelativePath importSourceFile) throws InterruptedException {
     try {
       if (importSourceFile.getAbsolutePath().endsWith(".model")) {
         IStrategoTerm term = ATermCommands.atermFromFile(importSourceFile.getAbsolutePath());
@@ -1340,7 +1340,12 @@ public class Driver{
     driverResult.logError(msg);
     ATermCommands.setErrorMessage(toplevelDecl, msg);
   }
-  
+
+  public void setErrorMessage(String msg) {
+    driverResult.logError(msg);
+    ATermCommands.setErrorMessage(lastSugaredToplevelDecl, msg);
+  }
+
   private void sortForImports(List<IStrategoTerm> list) {
     Collections.sort(list, new Comparator<IStrategoTerm>() {
       @Override
@@ -1356,5 +1361,9 @@ public class Driver{
 
   public SGLR getParser() {
     return parser;
+  }
+
+  public IStrategoTerm getTreeForErrorMarking() {
+    return lastSugaredToplevelDecl;
   }
 }

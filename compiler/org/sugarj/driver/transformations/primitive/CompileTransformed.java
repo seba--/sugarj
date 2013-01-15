@@ -1,0 +1,178 @@
+package org.sugarj.driver.transformations.primitive;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.TreeSet;
+
+import org.spoofax.interpreter.core.IContext;
+import org.spoofax.interpreter.core.InterpreterException;
+import org.spoofax.interpreter.library.AbstractPrimitive;
+import org.spoofax.interpreter.stratego.Strategy;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.jsglr_layout.client.InvalidParseTableException;
+import org.spoofax.jsglr_layout.shared.BadTokenException;
+import org.sugarj.common.ATermCommands;
+import org.sugarj.common.Environment;
+import org.sugarj.common.FileCommands;
+import org.sugarj.common.path.AbsolutePath;
+import org.sugarj.common.path.Path;
+import org.sugarj.common.path.RelativePath;
+import org.sugarj.driver.Driver;
+import org.sugarj.driver.ImportCommands;
+import org.sugarj.driver.ModuleSystemCommands;
+import org.sugarj.driver.Result;
+import org.sugarj.util.Renaming;
+
+/**
+ * Primitive for looking up and loading a model according to the current environment.
+ * If successful, this primitive returns the loaded model as a term.
+ * 
+ * @author seba
+ */
+class CompileTransformed extends AbstractPrimitive {
+
+  private boolean generateFiles;
+  private Driver driver;
+  private Environment environment;
+  
+  public CompileTransformed(Driver driver, Environment environment) {
+    super("SUGARJ_compile", 0, 2);
+    this.driver = driver;
+    this.environment = environment;
+    this.generateFiles = environment.doGenerateFiles();
+  }
+
+  @Override
+  public boolean call(IContext context, Strategy[] svars, IStrategoTerm[] tvars) throws InterpreterException {
+    try {
+      IStrategoTerm generatedModel = context.current();
+      
+      String modelPath = ATermCommands.getString(tvars[0]);
+      RelativePath modelRelativePath = new RelativePath(modelPath);
+      
+      IStrategoTerm transformationsTerm = tvars[1];
+      RelativePath transformationPath = new RelativePath(ATermCommands.getString(transformationsTerm)); 
+      
+      RelativePath source = ImportCommands.getTransformedModelSourceFilePath(modelRelativePath, transformationPath, environment);
+      
+      try {
+        Renaming ren = new Renaming(modelPath, source.getRelativePath());
+        environment.getRenamings().add(0, ren);
+        generatedModel = driver.currentRename(generatedModel);
+  
+        if (generateFiles)
+          ATermCommands.atermToFile(generatedModel, source);
+      } catch (IOException e) {
+        driver.setErrorMessage(e.getLocalizedMessage());
+      } catch (InvalidParseTableException e) {
+        driver.setErrorMessage(e.getLocalizedMessage());
+      }
+      
+      Result res;
+      try {
+        res = driver.subcompile(driver.getTreeForErrorMarking(), source);
+        
+        if (res != null) {
+          res.setGenerated(true);
+          Result modelResult = ModuleSystemCommands.locateResult(FileCommands.dropExtension(modelPath), environment);
+          if (modelResult != null)
+            res.addDependency(modelResult);
+          Result transformationResult = ModuleSystemCommands.locateResult(FileCommands.dropExtension(transformationPath.getRelativePath()), environment);
+          if (transformationResult != null)
+            res.addDependency(transformationResult);
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+        driver.setErrorMessage(e.getMessage());
+        return false;
+      } finally {
+        environment.getRenamings().remove(0);
+      }
+      
+      if (res == null)
+        return false;
+      
+      try {
+        if (FileCommands.exists(source))
+          context.setCurrent(ATermCommands.atermFromFile(source.getAbsolutePath()));
+        
+        if (res.hasFailed()) {
+          for (BadTokenException e : res.getParseErrors())
+            driver.setErrorMessage("line " + e.getLineNumber() + ": " + e.getLocalizedMessage());
+          for (String err : res.getCollectedErrors())
+            driver.setErrorMessage(err);
+          return false;
+        }
+      
+        checkCommunicationIntegrity(modelPath, transformationPath, source, res);
+      } catch (IOException e) {
+        e.printStackTrace();
+        driver.setErrorMessage(e.getMessage());
+      } catch (ClassNotFoundException e) {
+        e.printStackTrace();
+        driver.setErrorMessage(e.getMessage());
+      } catch (Exception e) {
+        e.printStackTrace();
+        driver.setErrorMessage(e.getMessage());
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      driver.setErrorMessage(e.getMessage());
+    }
+    
+    return true;
+  }
+  
+  private void checkCommunicationIntegrity(String modelPath, RelativePath transformationPath, RelativePath source, Result res) throws IOException, ClassNotFoundException {
+    Path modelDep = ModuleSystemCommands.searchFile(FileCommands.dropExtension(modelPath), ".dep", environment, null);
+    Collection<Path> modelDeps = new HashSet<Path>();
+    Result modelResult = null;
+    if (modelDep != null) {
+      modelResult = Result.readDependencyFile(modelDep);
+      modelDeps.addAll(modelResult.getCircularFileDependencies(environment));
+      modelDeps.addAll(modelResult.getDirectlyGeneratedFiles()); 
+    }
+
+    Collection<Path> transDeps = new HashSet<Path>();
+    Result transResult = null;
+    Path transDep = ModuleSystemCommands.searchFile(FileCommands.dropExtension(transformationPath.getRelativePath()), ".dep", environment, null);
+    if (transDep != null) {
+      transResult = Result.readDependencyFile(transDep);
+      transDeps.addAll(transResult.getCircularFileDependencies(environment));
+      transDeps.addAll(transResult.getDirectlyGeneratedFiles()); 
+    }
+
+    Collection<Path> transformedModelDeps = res.getCircularFileDependencies(environment);
+    TreeSet<String> failed = new TreeSet<String>();
+    
+    for (Path p : transformedModelDeps) {
+      boolean ok = false || 
+          source.equals(p) ||
+          res.getDirectlyGeneratedFiles().contains(p) ||
+          modelDeps.contains(p) || 
+          transDeps.contains(p);
+      Result pRes = null;
+      if (!ok) {
+        // transformations may generate other artifacts, given that their dependencies in turn are marked in the current result
+        Path dep = new AbsolutePath(FileCommands.dropExtension(p.getAbsolutePath()) + ".dep");
+        if (FileCommands.exists(dep)) {
+          pRes = Result.readDependencyFile(dep);
+          if (pRes != null && pRes.isGenerated()) {
+            boolean isContained = transformedModelDeps.containsAll(pRes.getCircularFileDependencies(environment));
+            ok = isContained;
+          }
+        }
+      }
+      if (!ok)
+        failed.add(FileCommands.dropExtension(p.getAbsolutePath()));
+    }
+
+    if (!failed.isEmpty()) {
+      StringBuilder b = new StringBuilder("Violation of communication integrity in " + source.getRelativePath() + ": Generated model refers to the following artifacts, which neither the model nor the transformation refers to.\n");
+      for (String p : failed)
+        b.append("  ").append(p).append('\n');
+      driver.setErrorMessage(b.toString());
+    }
+  }
+}
