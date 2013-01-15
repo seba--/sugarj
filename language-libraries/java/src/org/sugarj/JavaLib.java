@@ -246,15 +246,11 @@ public class JavaLib extends LanguageLib implements Serializable {
   }
 
   /**
-   * Pretty prints the content of a Java AST in some file.
+   * Pretty prints the content of a Java AST.
    * 
    * @param aterm
-   *          the name of a file which contains an aterm which encodes a Java
-   *          AST
-   * @throws IOException
    */
-  @Override
-  public String prettyPrint(IStrategoTerm term) {
+  private String prettyPrint(IStrategoTerm term) {
     Context ctx = interp.getCompiledContext();
     IStrategoTerm string = pp_java_string_0_0.instance.invoke(ctx, term);
     if (string != null)

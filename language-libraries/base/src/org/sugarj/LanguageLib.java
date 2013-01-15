@@ -132,17 +132,6 @@ public abstract class LanguageLib implements Serializable {
 	
 	public abstract void processLanguageSpecific(IStrategoTerm toplevelDecl,
 	                                              Environment environment) throws IOException;
-	  
-	/**
-	 * Pretty prints the content of an AST in some file.
-	 * 
-	 * @param aterm the name of a file which contains an aterm which encodes an AST
-	 * @throws IOException 
-	 */
-	public abstract String prettyPrint(IStrategoTerm term) throws IOException;
-	
-	  
-	
 	
 	public abstract void setupSourceFile(RelativePath sourceFile, Environment environment);
 

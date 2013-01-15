@@ -223,7 +223,6 @@ public class PrologLib extends LanguageLib implements Serializable {
 		return pptable;
 	}
 	
-	@Override
 	public String prettyPrint(IStrategoTerm term) {
 		IStrategoTerm ppTable = initializePrettyPrinter(interp.getCompiledContext());
 		return ATermCommands.prettyPrint(ppTable, term, interp);

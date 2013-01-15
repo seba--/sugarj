@@ -575,7 +575,7 @@ public class Driver{
       IStrategoTerm head = getApplicationSubterm(toplevelDecl, "PlainDec", 0);
       IStrategoTerm body= getApplicationSubterm(toplevelDecl, "PlainDec", 1);
       
-      String extName = langLib.prettyPrint(getApplicationSubterm(head, "PlainDecHead", 1));    
+      String extName = ATermCommands.getString(getApplicationSubterm(head, "PlainDecHead", 1));    
 
       String extension = null;
       if (head.getSubtermCount() >= 3 && isApplication(getApplicationSubterm(head, "PlainDecHead", 2), "Some"))

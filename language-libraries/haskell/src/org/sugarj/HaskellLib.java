@@ -273,8 +273,7 @@ public class HaskellLib extends LanguageLib {
     return getApplicationSubterm(decl, "SugarBody", 0);
   }
 
-  @Override
-  public String prettyPrint(IStrategoTerm term) {
+  private String prettyPrint(IStrategoTerm term) {
     if (ppTable == null) 
       ppTable = ATermCommands.readPrettyPrintTable(ensureFile("org/sugarj/languages/Haskell.pp").getAbsolutePath());
     
