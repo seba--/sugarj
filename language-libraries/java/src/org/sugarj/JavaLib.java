@@ -48,7 +48,7 @@ public class JavaLib extends LanguageLib implements Serializable {
   private Path sourcePath;
 
   public String getVersion() {
-    return "java-0.1a";
+    return "java-0.1b";
   }
 
   @Override

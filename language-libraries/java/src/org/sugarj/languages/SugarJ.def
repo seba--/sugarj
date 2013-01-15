@@ -11,6 +11,9 @@ exports
   lexical syntax
     [\ \t\12\r\n] -> LAYOUT
 
+  context-free restrictions
+    LAYOUT? -/- [\ \t\12\r\n]
+
   context-free syntax %% ToplevelDeclaration
     JavaPackageDec -> ToplevelDeclaration
     JavaImportDec -> ToplevelDeclaration

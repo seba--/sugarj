@@ -47,7 +47,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 	private File prettyPrint = null;
 
   public String getVersion() {
-    return "prolog-0.1";
+    return "prolog-0.1a";
   }
 
 	private File getPrettyPrint() {

@@ -8,10 +8,6 @@ imports org/sugarj/languages/Prolog
         org/sugarj/languages/Sugar
 
 exports
-  lexical syntax
-    PrologLayoutText          -> LAYOUT
-
-
   context-free syntax
     SugarModuleDec PrologModuleImport* SugarBody   -> SugarCompilationUnit {cons("CompilationUnit")}     
     PrologProgram                                -> SugarCompilationUnit {cons("CompilationUnit")}
