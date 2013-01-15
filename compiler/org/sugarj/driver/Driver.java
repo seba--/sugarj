@@ -603,7 +603,7 @@ public class Driver{
   
   public Pair<IStrategoTerm, Integer> currentParse(String remainingInput, ITreeBuilder treeBuilder, boolean recovery) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
     
-    currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfCache, environment, langLib);
+    currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfCache, environment, langLib);
 
     ParseTable table = ATermCommands.parseTableManager.loadFromFile(currentGrammarTBL.getAbsolutePath());
     
@@ -641,7 +641,7 @@ public class Driver{
 
     log.beginTask("desugaring", "DESUGAR toplevel declaration.", Log.CORE);
     try {
-      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strCache, environment, langLib);
+      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(), strParser, strCache, environment, langLib);
 
       return STRCommands.assimilate(currentTransProg, term, langLib.getInterpreter());
     } catch (StrategoException e) {
@@ -731,12 +731,25 @@ public class Driver{
     
     log.beginTask("processing", "PROCESS import declaration.", Log.CORE);
     try {
-      String modulePath = langLib.getImportedModulePath(toplevelDecl);
-      String importModuleName = FileCommands.fileName(modulePath);
-      
-      boolean isCircularImport = prepareImport(toplevelDecl, modulePath, importModuleName);
-      if (isCircularImport)
-        return;
+      String modulePath;
+      if (!langLib.isTransformationApplication(toplevelDecl)) {
+        modulePath = langLib.getImportedModulePath(toplevelDecl);
+        
+        boolean isCircularImport = prepareImport(toplevelDecl, modulePath);
+        if (isCircularImport)
+          return;
+      } else {
+        IStrategoTerm appl = langLib.getTransformationApplication(toplevelDecl);
+        
+        String localModelName = langLib.getImportLocalName(toplevelDecl);
+        
+        if (localModelName != null)
+          environment.getRenamings().add(0, new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(transformedModelPath)));
+        else
+          environment.getRenamings().add(0, new Renaming(ImportCommands.getTransformationApplicationModelPath(appl, langLib), transformedModelPath));
+        
+
+      }
       
       boolean codeImportSuccess = processImport(modulePath, toplevelDecl);
       boolean modelImportSuccess = processModelImport(modulePath);
@@ -745,7 +758,7 @@ public class Driver{
       boolean success = codeImportSuccess || modelImportSuccess;
       
       if (!success)
-        setErrorMessage(toplevelDecl, "module not found: " + importModuleName);
+        setErrorMessage(toplevelDecl, "module not found: " + modulePath);
       
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -772,7 +785,7 @@ public class Driver{
    * @throws ParseException 
    * @throws TokenExpectedException 
    */
-  private boolean prepareImport(IStrategoTerm toplevelDecl, String modulePath, String importModuleName) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  protected boolean prepareImport(IStrategoTerm toplevelDecl, String modulePath) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     boolean isCircularImport = false;
     
     if (!modulePath.startsWith("org/sugarj")) { // module is not in sugarj standard library
@@ -789,7 +802,7 @@ public class Driver{
       if (sourceFileAvailable && requiresUpdate && !environment.doGenerateFiles()) {
         // This is a parser run. Required module needs to be compiled before.
         log.log("Module outdated, compile first: " + modulePath + ".", Log.IMPORT);
-        setErrorMessage(toplevelDecl, "module outdated, compile first: " + importModuleName);
+        setErrorMessage(toplevelDecl, "module outdated, compile first: " + modulePath);
       }
       else if (sourceFileAvailable && requiresUpdate && isCircularImport(importSourceFile)) {
         // Circular import. Assume source file does not provide syntactic sugar.
@@ -804,13 +817,13 @@ public class Driver{
         
         res = subcompile(toplevelDecl, importSourceFile);
         if (res.hasFailed())
-          setErrorMessage(toplevelDecl, "Problems while compiling " + importModuleName);
+          setErrorMessage(toplevelDecl, "Problems while compiling " + modulePath);
           
         log.log("CONTINUE PROCESSING'" + sourceFile + "'.", Log.CORE);
       }
       
       if (res != null && !isCircularImport)
-        driverResult.addDependency(res, environment);
+        driverResult.addDependency(res);
       
       if (!isCircularImport && importSourceFile != null)
         // if importSourceFile is delegated to something currently being processed
@@ -1041,7 +1054,7 @@ public class Driver{
 //    for (Renaming ren : environment.getRenamings())
 //      fullExtName = StringCommands.rename(fullExtName, ren);
 
-    fullExtName = fullExtName.replace("$", "-");
+//    fullExtName = fullExtName.replace("$", "-");
     return fullExtName;
   }
   
@@ -1109,7 +1122,7 @@ public class Driver{
     log.beginTask("checking grammar", "CHECK current grammar", Log.CORE);
     
     try {
-      SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(environment), sdfParser, sdfCache, environment, langLib);
+      SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfCache, environment, langLib);
     } finally {
       log.endTask();
     }
@@ -1119,7 +1132,7 @@ public class Driver{
     log.beginTask("checking transformation", "CHECK current transformation", Log.CORE);
     
     try {
-      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(environment), strParser, strCache, environment, langLib);
+      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(), strParser, strCache, environment, langLib);
     } catch (StrategoException e) {
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
       log.logErr(msg, Log.DETAIL);

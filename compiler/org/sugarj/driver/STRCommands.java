@@ -46,6 +46,7 @@ import org.sugarj.stdlib.StdLib;
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
 public class STRCommands {
+  
 
   private static IOAgent strjIOAgent = new FilteringIOAgent(Log.CORE | Log.TRANSFORM, 
                                                             Pattern.quote("[ strj | info ]") + ".*", 
@@ -62,6 +63,22 @@ public class STRCommands {
       throw new IllegalStateException(e);
     }
   }
+
+  
+  private SGLR strParser;
+  private ModuleKeyCache<Path> strCache;
+  private Environment environment;
+  private LanguageLib langLib;
+  private HybridInterpreter interp;
+  
+
+  public STRCommands(SGLR strParser, ModuleKeyCache<Path> strCache, Environment environment, LanguageLib langLib) {
+    this.strParser = strParser;
+    this.strCache = strCache;
+    this.environment = environment;
+    this.langLib = langLib;
+  }
+
 
   /**
    *  Compiles a {@code *.str} file to a single {@code *.java} file. 
@@ -114,6 +131,10 @@ public class STRCommands {
     }
   }
   
+  
+  public Path compile(Path str, String main, Collection<Path> dependentFiles) throws TokenExpectedException, BadTokenException, IOException, InvalidParseTableException, SGLRException {
+    return STRCommands.compile(str, main, dependentFiles, strParser, strCache, environment, langLib);
+  }
   
   public static Path compile(Path str,
                               String main,
@@ -229,6 +250,10 @@ public class STRCommands {
       log.endTask();
     }
     
+  }
+  
+  public IStrategoTerm assimilate(String strategy, Path ctree, IStrategoTerm in) throws IOException {
+    return STRCommands.assimilate(strategy, ctree, in, interp);
   }
 
   public static IStrategoTerm assimilate(Path ctree, IStrategoTerm in, HybridInterpreter interp) throws IOException {

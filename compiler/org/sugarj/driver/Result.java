@@ -106,20 +106,20 @@ public class Result implements IErrorLogger {
     circularDependencies.add(depFile);
   }
   
-  void addDependency(Result result, Environment env) throws IOException {
+  void addDependency(Result result) throws IOException {
     if (result.persistentPath == null)
       throw new IllegalArgumentException("Expected result with persistent path.");
     if (result.hasPersistentVersionChanged())
       throw new IllegalArgumentException("Expected result that consistent with persisten version.");
     
     dependencies.put(result.persistentPath, result.persistentHash);
-    allDependentFiles.addAll(result.getFileDependencies(env));
+    allDependentFiles.addAll(result.getFileDependencies());
   }
   
-  void addDependency(Path depFile, Environment env) throws IOException {
+  void addDependency(Path depFile) throws IOException {
     dependencies.put(depFile, FileCommands.fileHash(depFile));
     Result result = readDependencyFile(depFile);
-    allDependentFiles.addAll(result.getFileDependencies(env));
+    allDependentFiles.addAll(result.getFileDependencies());
   }
   
   public boolean hasDependency(Path otherDep, Environment env) throws IOException {
@@ -131,12 +131,12 @@ public class Result implements IErrorLogger {
     return false;
   }
 
-  public Collection<Path> getFileDependencies(Environment env) throws IOException {
+  public Collection<Path> getFileDependencies() throws IOException {
     if (allDependentFiles == null) {
       HashSet<Path> deps = new HashSet<Path>(generatedFileHashes.keySet());
       deps.addAll(dependingFileHashes.keySet());
       for (Path depFile : dependencies.keySet())
-        deps.addAll(readDependencyFile(depFile).getFileDependencies(env));
+        deps.addAll(readDependencyFile(depFile).getFileDependencies());
       synchronized(this) { allDependentFiles = deps; }
     }
 
@@ -238,6 +238,10 @@ public class Result implements IErrorLogger {
   
   public boolean isUpToDateShallow(Path inputFile, Environment env) throws IOException {
     return isUpToDateShallow(FileCommands.fileHash(inputFile), env);
+  }
+  
+  public boolean isUpToDate(Environment env) throws IOException {
+    return isUpToDate(persistentPath, env);
   }
   
   public boolean isUpToDate(Path inputFile, Environment env) throws IOException {
