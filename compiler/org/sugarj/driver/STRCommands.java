@@ -69,9 +69,7 @@ public class STRCommands {
   private ModuleKeyCache<Path> strCache;
   private Environment environment;
   private LanguageLib langLib;
-  private HybridInterpreter interp;
   
-
   public STRCommands(SGLR strParser, ModuleKeyCache<Path> strCache, Environment environment, LanguageLib langLib) {
     this.strParser = strParser;
     this.strCache = strCache;
@@ -253,7 +251,7 @@ public class STRCommands {
   }
   
   public IStrategoTerm assimilate(String strategy, Path ctree, IStrategoTerm in) throws IOException {
-    return STRCommands.assimilate(strategy, ctree, in, interp);
+    return STRCommands.assimilate(strategy, ctree, in, langLib.getInterpreter());
   }
 
   public static IStrategoTerm assimilate(Path ctree, IStrategoTerm in, HybridInterpreter interp) throws IOException {

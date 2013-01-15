@@ -5,6 +5,7 @@ imports
 
 rules
   apply-renamings = where(prim("SUGARJ_current_renamings") => renamings); rename-decl(|renamings)
+  apply-renamings(|renamings) = rename-decl(|renamings)
   rename-decl(|renamings) = fail 
 
 rules

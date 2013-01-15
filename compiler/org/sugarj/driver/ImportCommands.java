@@ -90,18 +90,19 @@ public class ImportCommands {
     RelativePath modelPath = resolveModule(model, toplevelDecl, true);
     RelativePath transformationPath = resolveModule(transformation, toplevelDecl, false);
     
+    if (modelPath == null) {
+      // something's wrong
+      driver.setErrorMessage(toplevelDecl, "model not found " + modelPath);
+      return null;
+    }
+
     Log.log.beginTask("Transform model " + FileCommands.fileName(modelPath) + " with transformation " + FileCommands.fileName(transformationPath), Log.TRANSFORM);
     try {
       RelativePath transformedModelSourceFile = getTransformedModelSourceFilePath(modelPath, transformationPath, environment);
       String transformedModelPath = FileCommands.dropExtension(transformedModelSourceFile.getRelativePath());
       Result transformedModelResult = ModuleSystemCommands.locateResult(transformedModelPath, environment);
   
-      if (modelPath == null) {
-        // something's wrong
-        driver.setErrorMessage(toplevelDecl, "model not found " + modelPath);
-        return null;
-      }
-      else if (transformedModelResult.isUpToDate(environment)) {
+      if (transformedModelResult != null && transformedModelResult.isUpToDate(environment)) {
         // result of transformation is already up-to-date, nothing to do here.
         driverResult.addDependency(transformedModelResult);
         return Pair.create(transformedModelPath, false);
@@ -129,7 +130,7 @@ public class ImportCommands {
   private static IStrategoTerm executeTransformation(RelativePath model, RelativePath transformationPath, IStrategoTerm toplevelDecl, Environment environment, STRCommands str, Driver driver) throws IOException, TokenExpectedException, BadTokenException, InvalidParseTableException, SGLRException {
     IStrategoTerm modelTerm = ATermCommands.atermFromFile(model.getAbsolutePath());
     String strat = "main-" + FileCommands.dropExtension(transformationPath.getRelativePath()).replace('/', '_');
-    Result transformationResult = ModuleSystemCommands.locateResult(transformationPath.getRelativePath(), environment);
+    Result transformationResult = ModuleSystemCommands.locateResult(FileCommands.dropExtension(transformationPath.getRelativePath()), environment);
     
     Path trans = str.compile(transformationPath, strat, transformationResult.getFileDependencies());
     
@@ -164,8 +165,8 @@ public class ImportCommands {
     if (transformationPath == null)
       return environment.createBinPath(modelPath + ".model");
     
-    String transformationPathString = transformationPath.getRelativePath();
-    String transformedModelPath = modelPath.getRelativePath() + "__" + transformationPathString.replace('/', '_');
+    String transformationPathString = FileCommands.dropExtension(transformationPath.getRelativePath());
+    String transformedModelPath = FileCommands.dropExtension(modelPath.getRelativePath()) + "__" + transformationPathString.replace('/', '_');
     return environment.createBinPath(transformedModelPath + ".model");
   }
   

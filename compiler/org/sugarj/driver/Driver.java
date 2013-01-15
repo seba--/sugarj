@@ -135,7 +135,7 @@ public class Driver{
     this.currentlyProcessing = currentlyProcessing;
 
     langLib.setInterpreter(new HybridInterpreter());
-    langLib.getInterpreter().addOperatorRegistry(new SugarJPrimitivesLibrary(this, environment, monitor));
+    langLib.getInterpreter().addOperatorRegistry(new SugarJPrimitivesLibrary(this, environment, driverResult, monitor));
 
     try {      
       if (environment.getCacheDir() != null)
@@ -744,11 +744,14 @@ public class Driver{
           environment.getRenamings().add(0, new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(modulePath)));
       } else {
         IStrategoTerm appl = langLib.getTransformationApplication(toplevelDecl);
-        IStrategoTerm model = getApplicationSubterm(appl, "TransApp", 0);
-        IStrategoTerm transformation = getApplicationSubterm(appl, "TransApp", 1);
+        IStrategoTerm model = getApplicationSubterm(appl, "TransApp", 1);
+        IStrategoTerm transformation = getApplicationSubterm(appl, "TransApp", 0);
         
         ImportCommands imp = new ImportCommands(langLib, environment, this, driverResult, new STRCommands(strParser, strCache, environment, langLib));
         Pair<String, Boolean> transformationResult = imp.transformModel(model, transformation, toplevelDecl);
+        if (transformationResult == null)
+          return ;
+        
         modulePath = transformationResult.a;
         isCircularImport = transformationResult.b;
         

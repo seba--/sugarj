@@ -4,6 +4,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.spoofax.interpreter.library.AbstractStrategoOperatorRegistry;
 import org.sugarj.common.Environment;
 import org.sugarj.driver.Driver;
+import org.sugarj.driver.Result;
 
 /**
  * Provides Stratego primitives for SugarJ.
@@ -14,8 +15,9 @@ public class SugarJPrimitivesLibrary extends AbstractStrategoOperatorRegistry {
 
   public static final String REGISTRY_NAME = "SUGARJ";
   
-  public SugarJPrimitivesLibrary(Driver driver, Environment environment, IProgressMonitor monitor) {
+  public SugarJPrimitivesLibrary(Driver driver, Environment environment, Result driverResult, IProgressMonitor monitor) {
     add(new CurrentRenamings(environment));
+    add(new ResolveModel(environment, driverResult));
   }
   
   @Override
