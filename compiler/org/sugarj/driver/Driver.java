@@ -732,25 +732,36 @@ public class Driver{
     log.beginTask("processing", "PROCESS import declaration.", Log.CORE);
     try {
       String modulePath;
+      boolean isCircularImport;
       if (!langLib.isTransformationApplication(toplevelDecl)) {
         modulePath = langLib.getImportedModulePath(toplevelDecl);
         
-        boolean isCircularImport = prepareImport(toplevelDecl, modulePath);
-        if (isCircularImport)
-          return;
-      } else {
-        IStrategoTerm appl = langLib.getTransformationApplication(toplevelDecl);
+        isCircularImport = prepareImport(toplevelDecl, modulePath);
         
         String localModelName = langLib.getImportLocalName(toplevelDecl);
         
         if (localModelName != null)
-          environment.getRenamings().add(0, new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(transformedModelPath)));
-        else
-          environment.getRenamings().add(0, new Renaming(ImportCommands.getTransformationApplicationModelPath(appl, langLib), transformedModelPath));
+          environment.getRenamings().add(0, new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(modulePath)));
+      } else {
+        IStrategoTerm appl = langLib.getTransformationApplication(toplevelDecl);
+        IStrategoTerm model = getApplicationSubterm(appl, "TransApp", 0);
+        IStrategoTerm transformation = getApplicationSubterm(appl, "TransApp", 1);
         
-
+        ImportCommands imp = new ImportCommands(langLib, environment, this, driverResult, new STRCommands(strParser, strCache, environment, langLib));
+        Pair<String, Boolean> transformationResult = imp.transformModel(model, transformation, toplevelDecl);
+        modulePath = transformationResult.a;
+        isCircularImport = transformationResult.b;
+        
+        String localModelName = langLib.getImportLocalName(toplevelDecl);
+        
+        if (localModelName != null)
+          environment.getRenamings().add(0, new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(modulePath)));
+        else
+          environment.getRenamings().add(0, new Renaming(ImportCommands.getTransformationApplicationModelPath(appl, langLib), modulePath));
       }
       
+      if (isCircularImport)
+        return;
       boolean codeImportSuccess = processImport(modulePath, toplevelDecl);
       boolean modelImportSuccess = processModelImport(modulePath);
       if (modelImportSuccess && !codeImportSuccess)
@@ -794,7 +805,7 @@ public class Driver{
       if (res != null && res.getSourceFile() != null)
         importSourceFile = res.getSourceFile();
       else
-        importSourceFile = ModuleSystemCommands.locateSourceFile(modulePath, environment.getSourcePath(), langLib);
+        importSourceFile = ModuleSystemCommands.locateSourceFileOrModel(modulePath, environment.getSourcePath(), langLib, environment);
 
       boolean sourceFileAvailable = importSourceFile != null;
       boolean requiresUpdate = res == null || res.getSourceFile() == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment);

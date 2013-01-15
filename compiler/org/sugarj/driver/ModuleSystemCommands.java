@@ -114,7 +114,7 @@ public class ModuleSystemCommands {
     }
   }
   
-  public static RelativePath importModel(String modulePath, Environment environment, Result driverResult) throws IOException {
+  public static RelativePath importModel(String modulePath, Environment environment, Result driverResult) {
     RelativePath model = searchFile(modulePath, "model", environment, driverResult);
     
     if (model == null)
@@ -128,8 +128,10 @@ public class ModuleSystemCommands {
     return locateSourceFile (FileCommands.dropExtension(path), FileCommands.getExtension(path), sourcePath);
   }
 
-  public static RelativePath locateSourceFile(String modulePath, Set<Path> sourcePath, LanguageLib langLib) {
+  public static RelativePath locateSourceFileOrModel(String modulePath, Set<Path> sourcePath, LanguageLib langLib, Environment environment) {
     RelativePath result = locateSourceFile(modulePath, langLib.getSugarFileExtension(), sourcePath);
+    if (result == null)
+      result = searchBinFile(modulePath, "model", environment, null);
     if (result == null && langLib.getOriginalFileExtension() != null)
       result = locateSourceFile(modulePath, langLib.getOriginalFileExtension(), sourcePath);
     return result;

@@ -1,6 +1,7 @@
 package org.sugarj.driver;
 
 import java.io.IOException;
+import java.text.ParseException;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr_layout.client.InvalidParseTableException;
@@ -21,6 +22,60 @@ import org.sugarj.util.Pair;
  * @author seba
  */
 public class ImportCommands {
+  
+  private LanguageLib langLib;
+  private Environment environment;
+  private Driver driver;
+  private Result driverResult;
+  private STRCommands str; 
+  
+  public ImportCommands(LanguageLib langLib, Environment environment, Driver driver, Result driverResult, STRCommands str) {
+    this.langLib = langLib;
+    this.environment = environment;
+    this.driver = driver;
+    this.driverResult = driverResult;
+    this.str = str;
+  }
+
+  /**
+   * Resolve module
+   * 
+   * @param term 
+   * @param toplevelDecl
+   * @param asModel If true, looks for models. If false, looks for transformations.
+   * @return
+   */
+  private RelativePath resolveModule(IStrategoTerm term, IStrategoTerm toplevelDecl, boolean asModel) throws TokenExpectedException, IOException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    if (ATermCommands.isApplication(term, "TransApp")) {
+      IStrategoTerm model = ATermCommands.getApplicationSubterm(term, "TransApp", 1);
+      IStrategoTerm transformation = ATermCommands.getApplicationSubterm(term, "TransApp", 0);
+      Pair<String, Boolean> transformedModel = transformModel(model, transformation, toplevelDecl);
+      if (transformedModel != null) {
+        if (asModel)
+          return ModuleSystemCommands.importModel(transformedModel.a, environment, driverResult);
+        else
+          return ModuleSystemCommands.importStratego(transformedModel.a, environment, driverResult);
+      }
+      return null;
+    }
+    
+    String path = langLib.getModulePath(term);
+    if (path.contains("/")) {
+      boolean isCircularImport = driver.prepareImport(toplevelDecl, path);
+      if (isCircularImport)
+        return null;
+      
+      if (asModel)
+        return ModuleSystemCommands.importModel(path, environment, driverResult);
+      else
+        return ModuleSystemCommands.importStratego(path, environment, driverResult);
+    }
+    
+    // TODO support non-qualifed transformations and model paths
+    
+    return null;
+  }
+
   /**
    * Transforms the given model with the given transformation.
    * 
@@ -31,7 +86,7 @@ public class ImportCommands {
    * @param driver
    * @return a pair consisting of the path to the transformed model and a flag indicating a circular import (if true). 
    */
-  public static Pair<String, Boolean> transformModel(IStrategoTerm model, IStrategoTerm transformation, IStrategoTerm toplevelDecl, Environment environment, Result driverResult, STRCommands str, Driver driver) {
+  public Pair<String, Boolean> transformModel(IStrategoTerm model, IStrategoTerm transformation, IStrategoTerm toplevelDecl) throws TokenExpectedException, IOException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     RelativePath modelPath = resolveModule(model, toplevelDecl, true);
     RelativePath transformationPath = resolveModule(transformation, toplevelDecl, false);
     
