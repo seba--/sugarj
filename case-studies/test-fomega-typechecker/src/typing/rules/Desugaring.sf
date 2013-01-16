@@ -27,7 +27,7 @@ rules
     ]|
     where <trm-explode> C => tC
         ; <trm-explode> e => te
-        ; <trm-explode> T => tT
+        ; <translate-subst> T => tT
         ; <premises-to-list> premises => premises-list
         ; <translate-premises> (<ts-initial> (), premises-list) => (ts1, premises-implementation)
         ; <ts-get-errs> ts1 => errs
@@ -107,6 +107,31 @@ rules // Translate a judgment
      (ts, QVarInContextJudgment(qx, T, C)) -> <translate-judgment> (ts, VarInContextJudgment(qx, T, C))
 
 
+rules // Translate a substitution operator in a type
+
+  translate-subst :
+    Subst(X, S, T) ->
+      stratego-term |[ <subst> (X, term~(<translate-subst> S), term~(<translate-subst> T)) ]|
+
+  translate-subst :
+    TyArrow(T1, T2) -> stratego-term |[ TyArrow(term~(<translate-subst> T1), term~(<translate-subst> T2)) ]|
+
+  translate-subst :
+    TyForall(X, K1, T2) -> stratego-term |[ TyForall(term~tX, term~tK1, term~(<translate-subst> T2)) ]|
+    where <trm-explode> X => tX
+        ; <trm-explode> K1 => tK1
+
+  translate-subst :
+    Metavar(mvar) -> mvar
+
+  translate-subst :
+    TyVar(X) -> stratego-term |[ TyVar(tX) ]|
+    where <trm-explode> X => tX
+
+  translate-subst :
+    TyBool() -> stratego-term |[ TyBool() ]|
+
+
 rules // Translate a type expectation
 
   translate-type-expectation :
@@ -127,7 +152,7 @@ rules // Translate a type expectation
   translate-type-expectation :
     (ts, result-var, fv1, Metavar(mvar), fv2) ->
       (<ts-append-eq> (ts, mvar), |[ !term~result-var; ?term~mvar ]|)
-    where <not(ts-in-eqs)> (ts, result-var)
+    where <not(ts-in-eqs)> (ts, mvar)
 
   translate-type-expectation :
     (ts, result-var, fv1, TyArrow(T1, T2), fv2) ->
@@ -170,9 +195,10 @@ rules // Translate a type expectation
 
   translate-type-expectation :
     (ts, result-var, fv1, TyForall(X, K, T), fv2) ->
-      (ts8, |[   <typeEqForall> term~result-var =>
+      (ts9, |[   <typeEqForall> term~result-var =>
                    (term~result-var1, term~result-var2, term~result-var3, term~msgs-var)
                ; <msgsToErrsDummy> term~msgs-var => term~errs-var
+               ; strategy~inspect-result1
                ; strategy~inspect-result2
                ; strategy~inspect-result3
             ]|)
@@ -184,6 +210,7 @@ rules // Translate a type expectation
         ; <fresh-result-var> ts3 => (ts4, result-var4)
         ; <fresh-msgs-var> ts4 => (ts5, msgs-var)
         ; <fresh-errs-var> ts5 => (ts6, errs-var)
+        ; <translate-bound-variable> (ts6, result-var1, X) => inspect-result1
         ; <translate-kind-expectation> (ts6, result-var2, K) => (ts7, inspect-result2)
         ; <translate-type-expectation> ( ts7
                                        , result-var3
@@ -191,6 +218,21 @@ rules // Translate a type expectation
                                        , T
                                        , <concat> [fv2, [tX]]
                                        ) => (ts8, inspect-result3)
+        ; <ts-append-eq> (ts8, X) => ts9
+
+
+rules
+
+  translate-bound-variable :
+    (ts, result-var, Metavar(mvar)) -> stratego-strategy |[ !term~result-var; ?term~mvar ]|
+    where <not(ts-in-eqs)> (ts, mvar)
+
+  translate-bound-variable :
+    (ts, result-var, Metavar(mvar)) -> |[ id ]|
+    where <ts-in-eqs> (ts, mvar)
+
+  translate-bound-variable :
+    (ts, x) -> stratego-strategy |[ !"fail foo" ]|
 
 
 rules // Generate code to handle free variables in type expressions
@@ -220,7 +262,7 @@ rules // Translate a kind expectation
   translate-kind-expectation :
     (ts, result-var, Metavar(mvar)) ->
       (<ts-append-eq> (ts, mvar), |[ !term~result-var; ?term~mvar ]|)
-    where <not(ts-in-eqs)> (ts, result-var)
+    where <not(ts-in-eqs)> (ts, mvar)
 
   translate-kind-expectation :
     (ts, result-var, Metavar(mvar)) ->
