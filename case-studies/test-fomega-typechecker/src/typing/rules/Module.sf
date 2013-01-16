@@ -1,0 +1,54 @@
+module typing.rules.Module
+
+import typing.check.Context
+import typing.check.Type
+import typing.check.Signature
+import typing.rules.ExprTypeRules
+import typing.check.ErrorHandling
+
+import org.sugarj.languages.Fomega
+
+rules
+  signatureOf: (ctx,[]) -> (SigEmpty(),[])
+
+  signatureOf:
+    (ctx,[TypeDef(None(),X,T) | defs]) -> (sig,<conc> (msgs1,msgs2,msgs3))
+    where errorUnless(<not(elem)> (X,<dom> ctx) | (X,<concat-strings> [X," already defined."])) => msgs1
+        ; <kindOf;debug(!(<concat-strings> ["type ",X," :: "]))> (ctx,T) => (K,msgs2)
+        ; if !K; ?KiUnknown() then !T else <norm> (ctx,T) end => T'
+        ; if !msgs1; ?[] then
+            <signatureOf> (CtxBindTVarDef(ctx,X,K,T'),defs)
+          else
+            <signatureOf> (ctx,defs)
+          end => (sig,msgs3)
+
+  signatureOf:
+    (ctx,[TypeDef(Some(Public()),X,T) | defs]) -> (SigBindTVarDef(X,K,T,sig),<conc> (msgs1,msgs2,msgs3))
+    where errorUnless(<not(elem)> (X,<dom> ctx) | (X,<concat-strings> [X," already defined."])) => msgs1
+        ; <kindOf;debug(!(<concat-strings> ["public type ",X," :: "]))> (ctx,T) => (K,msgs2)
+        ; if !K; ?KiUnknown() then !T else <norm> (ctx,T) end => T'
+        ; if !msgs1; ?[] then
+            <signatureOf> (CtxBindTVarDef(ctx,X,K,T'),defs)
+          else
+            <signatureOf> (ctx,defs)
+          end => (sig,msgs3)
+
+  signatureOf:
+    (ctx,[ValDef(None(),x,e) | defs]) -> (sig,<conc> (msgs1,msgs2,msgs3))
+    where errorUnless(<not(elem)> (x,<dom> ctx) | (x,<concat-strings> [x," already defined."])) => msgs1
+        ; <typeOf;debug(!(<concat-strings> ["val ",x," : "]))> (ctx,e) => (T,msgs2)
+        ; if !msgs1; ?[] then
+            <signatureOf> (CtxBindVar(ctx,x,T),defs)
+          else
+            <signatureOf> (ctx,defs)
+          end => (sig,msgs3)
+
+  signatureOf:
+    (ctx,[ValDef(Some(Public()),x,e) | defs]) -> (SigBindVar(x,T,sig),<conc> (msgs1,msgs2,msgs3))
+    where errorUnless(<not(elem)> (x,<dom> ctx) | (x,<concat-strings> [x," already defined."])) => msgs1
+        ; <typeOf;debug(!(<concat-strings> ["public val ",x," : "]))> (ctx,e) => (T,msgs2)
+        ; if !msgs1; ?[] then
+            <signatureOf> (CtxBindVar(ctx,x,T),defs)
+          else
+            <signatureOf> (ctx,defs)
+          end => (sig,msgs3)

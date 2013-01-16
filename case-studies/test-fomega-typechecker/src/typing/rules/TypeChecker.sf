@@ -1,0 +1,111 @@
+module typing.rules.TypeChecker
+
+import typing.rules.Module
+import typing.check.Context
+import typing.check.Signature
+
+import org.sugarj.languages.Fomega
+import org.sugarj.languages.SugarFomega
+
+import typing.check.MetaExplode
+
+rules
+  // *** Type check a module and display errors ***
+  constraint-error :
+    CompilationUnit(mid, imps, toplevel-defs) -> result
+    where <context-from-imports> (CtxEmpty(), imps) => (ctx1, errs1)
+        ; <filter(?FomegaBody(_));
+           map(\FomegaBody(defs) -> defs\);
+           concat> toplevel-defs => defs
+        ; <signatureOf> (ctx1, defs) => (sig2, errs2)
+        ; <conc> (errs1, errs2) => errs
+        ; if !errs; ?[] then fail else !errs end => result
+
+  // *** Build the context from the imported modules ***
+  context-from-imports :
+    (ctx, []) -> (ctx, [])
+
+  context-from-imports :
+    (ctx, [Import(Some(Qualified()), mid) | imps]) -> (ctx5, <conc> (errs4, errs5))
+    where <module-signature> mid => sig1
+        ; <qualify-signature> (mid, sig1) => sig2
+        ; <add-signature-to-context> (sig2, ctx) => (ctx3, msgs3)
+        ; <msgsToErrs> (msgs3, Import(Some(Qualified()), mid)) => errs4
+        ; <context-from-imports> (ctx3, imps) => (ctx5, errs5)
+
+  context-from-imports :
+    (ctx, [Import(None, mid) | imps]) -> (ctx2, <conc> (errs1, errs2))
+    where <module-signature> mid => sig
+        ; <add-signature-to-context> (sig, ctx) => (ctx1, msgs1)
+        ; <msgsToErrs> (msgs1, Import(None, mid)) => errs1
+        ; <context-from-imports> (ctx1, imps) => (ctx2, errs2)
+
+  // *** Qualifiy all the names in a signature by a module identifier ***
+  qualify-signature :
+    (mid, SigEmpty()) -> SigEmpty()
+
+  qualifiy-signature :
+    (mid, SigBindTVarDef(X, K, T, sig)) ->
+    SigBindTVarDef(<concat-strings> [mid, ".", X], K, T, sig1)
+    where <qualify-signature> (mid, sig) => sig1
+
+  qualify-signature :
+    (mid, SigBindVar(x, T, sig)) ->
+    SigBindVar(<concat-strings> [mid, ".", x], T, sig1)
+    where <qualify-signature> (mid, sig) => sig1
+
+  // *** A all bindings of a module signature to a given context ***
+  add-signature-to-context :
+    (SigEmpty(), ctx) -> (ctx, [])
+
+  add-signature-to-context :
+    (SigBindTVarDef(X, K, T, sig), ctx) -> (ctx2, <conc> (msgs1, msgs2))
+    where errorUnless( <not(elem)> (X, <dom> ctx)
+                     | <concat-strings> [X, " already defined"]) => msgs1
+        ; if !msgs1; ?[] then 
+            <add-signature-to-context> (sig, CtxBindTVarDef(ctx, X, K, T))
+          else
+            <add-signature-to-context> (sig, ctx)
+          end => (ctx2, msgs2)
+
+  add-signature-to-context :
+    (SigBindVar(x, T, sig), ctx) -> (ctx2, <conc> (msgs1, msgs2))
+    where errorUnless( <not(elem)> (x, <dom> ctx)
+                     | <concat-strings> [x, " already defined"]) => msgs1
+        ; if !msgs1; ?[] then 
+            <add-signature-to-context> (sig, CtxBindVar(ctx, x, T))
+          else
+            <add-signature-to-context> (sig, ctx)
+          end => (ctx2, msgs2)
+    
+
+// *** Write the signature of a module to the desugarings of that module ***
+desugarings
+  generate-module-signature
+
+rules
+  generate-module-signature :
+    fb@FomegaBody(defs) ->
+      [ Locked(fb)
+      , <make-fomega-sugar> (mid, defs)
+      ]
+    where prim("SUGARJ_current_package"); ?current-package
+        ; <string-replace(|"/", ".")> current-package => module-qualifier
+        ; prim("SUGARJ_current_module"); ?current-module
+        ; <concat-strings> [module-qualifier, ".", current-module] => mid
+
+  make-fomega-sugar = 
+    !SugarBody([transformation-elem(Rules(<generate-module-signature-rule> <id>))])
+
+  // *** Calculate signature of module and write a rule for module-signature ***
+  generate-module-signature-rule :
+    (mid,defs) ->
+      [RDefNoArgs("module-signature", RuleNoCond(NoAnnoList(Str(mid)), <trm-explode> sig2))]
+    where prim("SUGARJ_current_imports"); ?imps
+        ; <context-from-imports> (CtxEmpty(), imps) => (ctx1, errs1)
+        ; <signatureOf> (ctx1,defs) => (sig2,errs2)
+
+
+  // *** The type checker itself does not export Fomega definitions ***
+  module-signature :
+    "typing.rules.TypeChecker" -> SigEmpty()
