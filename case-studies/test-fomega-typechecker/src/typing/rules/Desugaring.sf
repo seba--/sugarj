@@ -25,7 +25,7 @@ rules // Translate a type rule
     (Some(Var(name)), premises, TypingJudgment(C, e, T)) ->
     stratego-decl
     |[ rules
-         typeOf :
+         typeOfKnown :
            (term~tC, term~te) -> (term~tT, <concat> term~errors)
            where strategy~premises-implementation
     ]|

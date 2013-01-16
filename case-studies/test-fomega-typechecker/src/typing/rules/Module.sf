@@ -3,8 +3,10 @@ module typing.rules.Module
 import typing.check.Context
 import typing.check.Type
 import typing.check.Signature
-import typing.rules.ExprTypeRules
 import typing.check.ErrorHandling
+
+import typing.rules.ExprTypeRules
+
 
 import org.sugarj.languages.Fomega
 
