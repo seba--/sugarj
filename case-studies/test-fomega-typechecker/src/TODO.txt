@@ -1,11 +1,22 @@
 * Fix pretty printer: parentheses are missing. See for example
-  the output Let.pts from tests.extensions.Let
-
-* Why can't we define the entire "let-extension" in one file? See
-  TODO in typing.extensions.Let.
+  the output Let.pts from tests.extensions.Let.
 
 * Can we replace the ugly quotes ~%, ~&, ~$, ~# by V~, Q~, N~, S~?
-  I got an ambiguity with ~V and application, I think.
+  I got an ambiguity with V~ and application, I think.
 
 * Proper tracking of error locations by attaching a source annotation
   to types (see TODO in typing.rules.Desugaring).
+
+* Recursive types, i. e. substitution in types mentioned in
+  premises.
+
+* A (bogus) type rule like
+
+    ~C |- ~e1 : forall ~%X::~K1. ~T2
+    ~C |- ~e2 : forall ~%Y::~K1. ~T2
+    ================================ T-Bogus
+    ~C |- ~e1 ~e2 : Nat
+
+  currently does not work. Intuitively, both forall
+  types denote the same type but the translation will
+  not detect this alpha-equivalence.
