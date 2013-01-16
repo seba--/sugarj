@@ -1,0 +1,8 @@
+module typing.check.Unknowns
+
+import org.sugarj.languages.Fomega
+
+signature
+  constructors
+    TyUnknown: FomegaType
+    IDUnknown: FomegaID
