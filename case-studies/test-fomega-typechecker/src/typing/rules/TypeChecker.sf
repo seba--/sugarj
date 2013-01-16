@@ -92,6 +92,8 @@ rules
     
 
 // *** Write the signature of a module to the desugarings of that module ***
+// Note: this signature analysis sees the desugared code, not the original
+// input (unlike constraint-error).
 desugarings
   generate-module-signature
 
