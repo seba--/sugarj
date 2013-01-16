@@ -124,7 +124,7 @@ rules
   typeEqBool: TyUnknown() -> []
   typeEqBool: TyBool() -> []
   typeEqBool:
-    T -> [<concat-strings> ["type mismatch, expected Bool but found"
+    T -> [<concat-strings> ["type mismatch, expected Bool but found "
                            ,<write-to-string> T]]
     where if (!T; ?TyBool()) then fail else if (!T; ?TyUnknown()) then fail else id end end
 
