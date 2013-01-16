@@ -6,3 +6,5 @@
 
 * Recursive types, i. e. substitution in types mentioned in
   premises.
+
+* Variants, records (require additional judgments)
