@@ -139,7 +139,7 @@ rules // Translate a type expectation
       ( ts5
       , |[   strategy~subst-fvs1
            ; strategy~subst-fvs2
-           ; <typeEq> (term~result-var1, term~result-var2) => term~msgs-var
+           ; <typeEq> (term~result-var2, term~result-var1) => term~msgs-var
            ; <msgsToErrsDummy> term~msgs-var => term~errs-var
         ]|)
     where <ts-in-eqs> (ts, mvar)
@@ -171,27 +171,30 @@ rules // Translate a type expectation
 
   translate-type-expectation :
     (ts, result-var, fv1, TyNat(), fv2) ->
-      (ts2, |[   <typeEqNat> term~result-var => term~msgs-var
+      (ts3, |[   <typeEqNat> term~result-var => term~msgs-var
                ; <msgsToErrsDummy> term~msgs-var => term~errs-var
             ]|)
     where <fresh-msgs-var> ts => (ts1, msgs-var)
         ; <fresh-errs-var> ts1 => (ts2, errs-var)
+        ; <ts-append-errs-var> (ts2, errs-var) => ts3
 
   translate-type-expectation :
     (ts, result-var, fv1, TyBool(), fv2) ->
-      (ts2, |[   <typeEqBool> term~result-var => term~msgs-var
+      (ts3, |[   <typeEqBool> term~result-var => term~msgs-var
                ; <msgsToErrsDummy> term~msgs-var => term~errs-var
             ]|)
     where <fresh-msgs-var> ts => (ts1, msgs-var)
         ; <fresh-errs-var> ts1 => (ts2, errs-var)
+        ; <ts-append-errs-var> (ts2, errs-var) => ts3
 
   translate-type-expectation :
     (ts, result-var, fv1, TyString(), fv2) ->
-      (ts2, |[   <typeEqString> term~result-var => term~msgs-var
+      (ts3, |[   <typeEqString> term~result-var => term~msgs-var
                ; <msgsToErrsDummy> term~msgs-var => term~errs-var
             ]|)
     where <fresh-msgs-var> ts => (ts1, msgs-var)
         ; <fresh-errs-var> ts1 => (ts2, errs-var)
+        ; <ts-append-errs-var> (ts2, errs-var) => ts3
 
   translate-type-expectation :
     (ts, result-var, fv1, TyForall(X, K, T), fv2) ->
@@ -366,7 +369,7 @@ rules // Translation state handling
 
 
 rules // TODO: proper error origin tracking:
-  msgsToErrsDummy : msgs -> <map(\ msg -> (TyUnknown(), msgs) \)> msgs
+  msgsToErrsDummy : msgs -> <map(\ msg -> (TyUnknown(), msg) \)> msgs
 
 
 desugarings
