@@ -73,8 +73,11 @@ context-free syntax
 // *** Substitution on level of types
 
 context-free syntax
-  "[" FomegaID "|->" FomegaType "]" FomegaType -> FomegaType {const("Subst")}
+  "[" FomegaID "|->" FomegaType "]" FomegaType -> FomegaType {cons("Subst")}
 
+signature
+  constructors
+    Subst: FomegaID * FomegaType * FomegaType -> FomegaType
 
 // *** Meta variables ***
 
