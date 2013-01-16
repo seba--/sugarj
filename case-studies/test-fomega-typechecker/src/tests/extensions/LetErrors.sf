@@ -1,0 +1,20 @@
+module tests.extensions.LetErrors
+
+import typing.rules.TypeChecker
+
+import typing.extensions.let.Syntax
+import typing.extensions.let.Typing
+import typing.extensions.let.Desugaring
+
+
+val val1 =
+  let
+    x:Bool = \x:Nat. x
+  in
+    if x then true else false
+
+val val2 =
+  let
+    f:Nat->Nat = \x:Nat. x
+  in
+    f false

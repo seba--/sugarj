@@ -135,6 +135,12 @@ rules // Translate a substitution operator in a type
   translate-subst :
     TyBool() -> stratego-term |[ TyBool() ]|
 
+  translate-subst :
+    TyNat() -> stratego-term |[ TyNat() ]|
+
+  translate-subst :
+    TyString() -> stratego-term |[ TyString() ]|
+
 
 rules // Translate a type expectation
 

@@ -1,0 +1,17 @@
+module typing.extensions.let.Syntax
+
+import org.sugarj.languages.Fomega
+
+context-free syntax
+  "let" FomegaID ":" FomegaType "=" FomegaExpr "in" FomegaExpr -> FomegaExpr {cons("Let")}
+
+context-free priorities
+  FomegaExpr FomegaExpr -> FomegaExpr >
+  "let" FomegaID ":" FomegaType "=" FomegaExpr "in" FomegaExpr -> FomegaExpr
+
+lexical syntax
+  "let" -> Keyword
+  "in"  -> Keyword
+
+lexical restrictions
+  "let" "in" -/- [A-Za-z0-9]

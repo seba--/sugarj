@@ -1,0 +1,14 @@
+module typing.extensions.let.Typing
+
+import typing.rules.Syntax
+import typing.rules.Desugaring
+import typing.extensions.let.Syntax
+
+
+~C |- ~e1 : ~T1
+~C |- ~S :: *
+~C |- ~S ~> ~U
+~C |- ~T1 ~> ~U
+(~C;~%x:~U) |- ~e2 : ~T2
+======================================= T-Let
+~C |- (let ~%x : ~S = ~e1 in ~e2) : ~T2

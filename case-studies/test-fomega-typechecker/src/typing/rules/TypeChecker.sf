@@ -34,11 +34,23 @@ rules
         ; <context-from-imports> (ctx3, imps) => (ctx5, errs5)
 
   context-from-imports :
-    (ctx, [Import(None, mid) | imps]) -> (ctx2, <conc> (errs1, errs2))
+    (ctx, [Import(None(), mid) | imps]) -> (ctx2, <conc> (errs1, errs2))
     where <module-signature> mid => sig
         ; <add-signature-to-context> (sig, ctx) => (ctx1, msgs1)
         ; <msgsToErrs> (msgs1, Import(None, mid)) => errs1
         ; <context-from-imports> (ctx1, imps) => (ctx2, errs2)
+
+  // Modules that do not contain any Fomega definition do not have
+  // a module-signature line in the Stratego output. We produce an
+  // empty context in these cases.
+  context-from-imports :
+    (ctx, [Import(Some(Qualified()), mid) | imps]) -> (ctx1, errs1)
+    where <not(module-signature)> mid
+        ; <context-from-imports> (ctx, imps) => (ctx1, errs1)
+  context-from-imports :
+    (ctx, [Import(None(), mid) | imps]) -> (ctx1, errs1)
+    where <not(module-signature)> mid
+        ; <context-from-imports> (ctx, imps) => (ctx1, errs1)
 
   // *** Qualifiy all the names in a signature by a module identifier ***
   qualify-signature :

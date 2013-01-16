@@ -13,3 +13,5 @@ val val4 = \A::*.\x:A. true
 val val5 = val4 [Nat]
 
 val val6 = if val4 [(\Z::*. Z) (forall A::*. A -> A)] (\B::*.\x:B. x) then val1 else val3
+
+val val7 = 6

@@ -93,6 +93,9 @@ context-free syntax
   "~%" StrategoVar -> FomegaID       {cons("Metavar")}
   "~&" StrategoVar -> FomegaQID      {cons("Metavar")}
 
+  "~#" StrategoVar -> FomegaNAT      {cons("Metavar")}
+  "~$" StrategoVar -> FomegaSTRING   {cons("Metavar")}
+
 signature
   constructors
     Metavar: String -> Term

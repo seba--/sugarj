@@ -1,0 +1,11 @@
+* Fix pretty printer: parentheses are missing. See for example
+  the output Let.pts from tests.extensions.Let
+
+* Why can't we define the entire "let-extension" in one file? See
+  TODO in typing.extensions.Let.
+
+* Can we replace the ugly quotes ~%, ~&, ~$, ~# by V~, Q~, N~, S~?
+  I got an ambiguity with ~V and application, I think.
+
+* Proper tracking of error locations by attaching a source annotation
+  to types (see TODO in typing.rules.Desugaring).

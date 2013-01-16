@@ -1,0 +1,26 @@
+module tests.extensions.Let
+
+import typing.rules.TypeChecker
+
+import typing.extensions.let.Syntax
+import typing.extensions.let.Typing
+import typing.extensions.let.Desugaring
+
+
+val val1 =
+  let
+    x:Bool = true
+  in
+    if x then true else false
+
+val val2 =
+  let
+    x:Bool = true
+  in
+    if x then true else false
+
+val val3 =
+  let
+    f:Bool->Bool = \x:Bool. x
+  in
+    f false
