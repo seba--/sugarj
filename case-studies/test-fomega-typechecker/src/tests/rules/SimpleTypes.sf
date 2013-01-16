@@ -1,0 +1,15 @@
+module tests.rules.SimpleTypes
+
+import typing.rules.TypeChecker
+
+val val1 = true
+
+val val2 = \x:Bool. x
+
+val val3 = val2 false
+
+val val4 = \A::*.\x:A. true
+
+val val5 = val4 [Nat]
+
+val val6 = if val4 [(\Z::*. Z) (forall A::*. A -> A)] (\B::*.\x:B. x) then val1 else val3
