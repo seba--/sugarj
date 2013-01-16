@@ -11,3 +11,5 @@ val val3 = if true then (\x:String. true) else (\x:String. x)
 val val4 = if true then val1 else true
 
 val val5 = if treu then (\x:String. true) else true
+
+val val6 = (\X::*.\x:X. x) [\X::*.X]

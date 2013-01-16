@@ -11,12 +11,16 @@ import typing.check.TypeOperations
 
 import concretesyntax.Stratego
 
+
 rules
+
   desugar-type-rule :
     TypeRule(premises, RuleName(sep, optional-name), conclusion) ->
       transformation-elem(<translate-type-rule> (optional-name, premises, conclusion))
 
-rules
+
+rules // Translate a type rule
+
   translate-type-rule :
     (Some(Var(name)), premises, TypingJudgment(C, e, T)) ->
     stratego-decl
@@ -269,21 +273,23 @@ rules // Translate a kind expectation
 
   translate-kind-expectation :
     (ts, result-var, Metavar(mvar)) ->
-      ( ts2
-      , |[   <kindEq> (term~result-var, term~mvar) => term~msgs-var
+      ( ts3
+      , |[   <kindEq> (term~mvar, term~result-var) => term~msgs-var
            ; <msgsToErrsDummy> term~msgs-var => term~errs-var
         ]|)
     where <ts-in-eqs> (ts, mvar)
         ; <fresh-msgs-var> ts => (ts1, msgs-var)
         ; <fresh-errs-var> ts1 => (ts2, errs-var)
+        ; <ts-append-errs-var> (ts2, errs-var) => ts3
 
   translate-kind-expectation :
     (ts, result-var, KiStar()) ->
-      (ts2, |[   <kindEqStar> term~result-var => term~msgs-var
+      (ts3, |[   <kindEqStar> term~result-var => term~msgs-var
                ; <msgsToErrsDummy> term~msgs-var => term~errs-var
             ]|)
     where <fresh-msgs-var> ts => (ts1, msgs-var)
         ; <fresh-errs-var> ts1 => (ts2, errs-var)
+        ; <ts-append-errs-var> (ts2, errs-var) => ts3
 
   translate-kind-expectation :
     (ts, result-var, KiArrow(K1, K2)) ->
