@@ -38,8 +38,7 @@ import typing.rules.Desugaring
 ~C |- ~T1 ~> forall ~%X::~K11. ~T12
 ~C |- ~T2 :: ~K11
 =================================== T-TApp
-~C |- ~e1 [~T2] : ~T12
-// ~C |- ~e1 [~T2] : [~%X |-> ~T2]~T12
+~C |- ~e1 [~T2] : [~%X |-> ~T2]~T12
 
 
 ~C |- ~e1 : ~T1
