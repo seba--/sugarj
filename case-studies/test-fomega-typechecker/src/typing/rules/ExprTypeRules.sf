@@ -53,7 +53,7 @@ import typing.rules.Desugaring
 ~C |- true : Bool
 
 
-================= T-False
+================== T-False
 ~C |- false : Bool
 
 
