@@ -36,7 +36,7 @@ public class ModuleSystemCommands {
      */
     public static RelativePath importBinFile(String modulePath, Environment environment, LanguageLib langLib, Result driverResult) throws IOException {
       RelativePath clazz = searchFile(modulePath, langLib.getGeneratedFileExtension(), environment, driverResult);
-      if (clazz == null && !langLib.isModuleResolvable(modulePath))
+      if (clazz == null)
         return null;
       
       log.log("Found language-specific declaration for " + modulePath, Log.IMPORT);

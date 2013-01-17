@@ -899,7 +899,7 @@ public class Driver{
     boolean success = false;
     
     Path clazz = ModuleSystemCommands.importBinFile(modulePath, environment, langLib, driverResult);
-    if (clazz != null) {
+    if (clazz != null || langLib.isModuleResolvable(modulePath)) {
       success = true;
       langLib.addImportedModule(importTerm, true);
     }
