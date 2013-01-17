@@ -1,6 +1,5 @@
 module org/sugarj/languages/SugarJ
 imports org/sugarj/languages/Sugar
-        org/sugarj/languages/Model
 signature constructors
     CompilationUnit            : Option(JavaPackageDec) * List(JavaImportDec) * List(TypeOrSugarDec) -> SugarCompilationUnit
     CompileError               : String * Any -> CompileError
