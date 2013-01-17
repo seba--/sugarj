@@ -785,11 +785,6 @@ public class Driver{
     }
   }
 
-  
-  protected boolean prepareImport(IStrategoTerm toplevelDecl, String modulePath) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
-    return prepareImport(toplevelDecl, modulePath, null, null);
-  }
-  
   /**
    * Prepare import:
    *  - locate pre-existing result and/or source file
@@ -799,8 +794,6 @@ public class Driver{
    * 
    * @param toplevelDecl
    * @param modulePath
-   * @param modelPath path to original model, or null
-   * @param transformationPath path to generating transformation, or null
    * @return true iff the import is circular.
    * @throws IOException
    * @throws InterruptedException 
@@ -809,7 +802,7 @@ public class Driver{
    * @throws ParseException 
    * @throws TokenExpectedException 
    */
-  protected boolean prepareImport(IStrategoTerm toplevelDecl, String modulePath, RelativePath modelPath, RelativePath transformationPath) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+  protected boolean prepareImport(IStrategoTerm toplevelDecl, String modulePath) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     boolean isCircularImport = false;
     
     if (!modulePath.startsWith("org/sugarj")) { // module is not in sugarj standard library
@@ -839,11 +832,7 @@ public class Driver{
         // This is a compiler run. Required module needs recompilation.
         log.log("Need to compile imported module " + modulePath + " first.", Log.IMPORT);
         
-        if (modelPath == null && transformationPath == null)
-          res = subcompile(toplevelDecl, importSourceFile);
-        else
-          res = subcompile(toplevelDecl, importSourceFile, modelPath, transformationPath);
-        
+        res = subcompile(toplevelDecl, importSourceFile);
         if (res.hasFailed())
           setErrorMessage(toplevelDecl, "Problems while compiling " + modulePath);
           
@@ -886,7 +875,12 @@ public class Driver{
    */
   public Result subcompile(IStrategoTerm toplevelDecl, RelativePath importSourceFile) throws InterruptedException {
     try {
-      return run(importSourceFile, environment, monitor, langLib.getFactoryForLanguage(), currentlyProcessing);
+      if ("model".equals(FileCommands.getExtension(importSourceFile))) {
+        IStrategoTerm term = ATermCommands.atermFromFile(importSourceFile.getAbsolutePath());
+        return run(term, importSourceFile, environment, monitor, langLib.getFactoryForLanguage(), currentlyProcessing);
+      }
+      else
+        return run(importSourceFile, environment, monitor, langLib.getFactoryForLanguage(), currentlyProcessing);
     } catch (IOException e) {
       setErrorMessage(toplevelDecl, "Problems while compiling " + importSourceFile);
     } catch (TokenExpectedException e) {
@@ -901,34 +895,6 @@ public class Driver{
     return null;
   }
   
-  public Result subcompile(IStrategoTerm toplevelDecl, RelativePath importSourceFile, RelativePath modelPath, RelativePath transformationPath) throws InterruptedException, IOException {
-    Driver driver = new Driver(environment, langLib.getFactoryForLanguage(), currentlyProcessing);
-    driver.driverResult.setGenerated(true);
-    
-    Result modelResult = ModuleSystemCommands.locateResult(FileCommands.dropExtension(modelPath.getRelativePath()), environment);
-    if (modelResult != null)
-      driver.driverResult.addDependency(modelResult);
-    Result transformationResult = ModuleSystemCommands.locateResult(FileCommands.dropExtension(transformationPath.getRelativePath()), environment);
-    if (transformationResult != null)
-      driver.driverResult.addDependency(transformationResult);
-    
-    try {
-      return run(driver, new TermToplevelDeclarationProvider(ATermCommands.atermFromFile(importSourceFile.getAbsolutePath())), importSourceFile, monitor);
-    } catch (IOException e) {
-      setErrorMessage(toplevelDecl, "Problems while compiling " + importSourceFile);
-    } catch (TokenExpectedException e) {
-      setErrorMessage(toplevelDecl, "Problems while compiling " + importSourceFile);
-    } catch (ParseException e) {
-      setErrorMessage(toplevelDecl, "Problems while compiling " + importSourceFile);
-    } catch (InvalidParseTableException e) {
-      setErrorMessage(toplevelDecl, "Problems while compiling " + importSourceFile);
-    } catch (SGLRException e) {
-      setErrorMessage(toplevelDecl, "Problems while compiling " + importSourceFile);
-    }
-
-    return null;
-  }
-
   private boolean processImport(String modulePath, IStrategoTerm importTerm) throws IOException {
     boolean success = false;
     

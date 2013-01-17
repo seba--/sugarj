@@ -60,6 +60,7 @@ class CompileTransformed extends AbstractPrimitive {
         Renaming ren = new Renaming(modelPath, source.getRelativePath());
         environment.getRenamings().add(0, ren);
         generatedModel = driver.currentRename(generatedModel);
+        context.setCurrent(generatedModel);
   
         if (generateFiles)
           driver.getCurrentResult().generateFile(source, ATermCommands.atermToString(generatedModel));
@@ -71,7 +72,7 @@ class CompileTransformed extends AbstractPrimitive {
       
       Result res;
       try {
-        res = driver.subcompile(driver.getTreeForErrorMarking(), source, true);
+        res = driver.subcompile(driver.getTreeForErrorMarking(), source);
         
         if (res != null) {
           Result modelResult = ModuleSystemCommands.locateResult(FileCommands.dropExtension(modelPath), environment);
@@ -93,9 +94,6 @@ class CompileTransformed extends AbstractPrimitive {
         return false;
       
       try {
-        if (FileCommands.exists(source))
-          context.setCurrent(ATermCommands.atermFromFile(source.getAbsolutePath()));
-        
         if (res.hasFailed()) {
           for (BadTokenException e : res.getParseErrors())
             driver.setErrorMessage("line " + e.getLineNumber() + ": " + e.getLocalizedMessage());

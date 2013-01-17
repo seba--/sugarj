@@ -45,7 +45,6 @@ public class Result implements IErrorLogger {
   private Path persistentPath;
   private Integer persistentHash = null;
   
-  private boolean isGenerated;
   private boolean generateFiles;
   
   private Map<Path, Integer> dependencies = new HashMap<Path, Integer>();
@@ -389,11 +388,7 @@ public class Result implements IErrorLogger {
   }
   
   public boolean isGenerated() {
-    return isGenerated;
-  }
-
-  public void setGenerated(boolean isGenerated) {
-    this.isGenerated = isGenerated;
+    return sourceFile != null && "model".equals(FileCommands.getExtension(sourceFile));
   }
 
   public Map<Path, Set<RelativePath>> getAvailableGeneratedFiles() {
@@ -427,7 +422,6 @@ public class Result implements IErrorLogger {
       FileCommands.createFile(dep);
       oos = new ObjectOutputStream(new FileOutputStream(dep.getFile()));
       
-      oos.writeBoolean(isGenerated);
       oos.writeBoolean(generateFiles);
       
       oos.writeObject(sourceFile);
@@ -471,7 +465,6 @@ public class Result implements IErrorLogger {
     try {
       ois = new ObjectInputStream(new FileInputStream(dep.getFile()));
       
-      result.isGenerated = ois.readBoolean();
       result.generateFiles = ois.readBoolean();
       
       result.sourceFile = (RelativePath) ois.readObject();
@@ -485,12 +478,12 @@ public class Result implements IErrorLogger {
       result.availableGeneratedFiles = (Map<Path, Set<RelativePath>>) ois.readObject();
       result.deferredSourceFiles = (Map<Path, Pair<Path, SourceFileContent.Generated>>) ois.readObject();
     } catch (FileNotFoundException e) {
-      return OUTDATED_RESULT;
+      return null;
     } catch (ClassNotFoundException e) {
       e.printStackTrace();
       throw new IOException(e);
     } catch (Exception e) {
-      return OUTDATED_RESULT;
+      return null;
     } finally {
       if (ois != null)
         ois.close();

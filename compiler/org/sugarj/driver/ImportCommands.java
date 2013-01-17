@@ -114,7 +114,7 @@ public class ImportCommands {
         String transformedModelText = ATermCommands.atermToString(transformedModel);
         driverResult.generateFile(transformedModelSourceFile, transformedModelText);
         
-        boolean isCircularImport = driver.prepareImport(toplevelDecl, transformedModelPath, modelPath, transformationPath);
+        boolean isCircularImport = driver.prepareImport(toplevelDecl, transformedModelPath);
         return Pair.create(transformedModelPath, isCircularImport);
       }
     } finally {
@@ -124,6 +124,8 @@ public class ImportCommands {
   
   /**
    * Apply the transformation to the model and return the result.
+   * 
+   * Assumes that the model and transformation are already registered as dependencies with the current driver result.
    * 
    * @param model Path to the *.model file that contains the Aterm model.
    * @param transformationPath Path to the *.str transformation.
