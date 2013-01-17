@@ -5,7 +5,6 @@ import typing.rules.Desugaring // for premises-to-list
 
 // import typing.rules.ExprTypeRules
 
-
 rules
 
   constraint-error = verify-type-rule
@@ -21,7 +20,7 @@ rules
         ; <premises-to-list> premises => premises-list
         ; {| Dynamic-Axioms:
                <activate-dynamic-axioms> premises-list
-             ; <typeOf> (C, des-e) => (U, errs)
+             ; <debug(!"TC of "); typeOf> (C, des-e) => (U, errs)
           |}
         ; <debug(!"Expected type: ")> T
         ; <debug(!"Actual type: ")> U
