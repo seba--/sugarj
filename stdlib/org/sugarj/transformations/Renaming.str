@@ -4,7 +4,7 @@ imports
   org/sugarj/languages/Stratego
 
 rules
-  apply-renamings = where(prim("SUGARJ_current_renamings") => renamings); rename-decl(|renamings)
+  apply-renamings = where(prim("SUGARJ_current_renamings") => renamings); try(rename-decl(|renamings))
   apply-renamings(|renamings) = rename-decl(|renamings)
   rename-decl(|renamings) = fail 
 
