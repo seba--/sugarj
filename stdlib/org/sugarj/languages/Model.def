@@ -10,7 +10,7 @@ exports
     ModelTransformation*  -> TransformationDef  {ast("TransformationDef([],<1>)")}
     DirectTransformation ModelTransformation*  -> TransformationDef {cons("TransformationDef")} 
 
-    StrategoDef+ -> DirectTransformation {cons("Rules")}
+    StrategoDef+ -> DirectTransformation
     "strategies" StrategoDef*   -> ModelTransformation {cons("Strategies")}
     "signature" StrategoSdecl*  -> ModelTransformation {cons("Signature")}
     "rules" StrategoDef*        -> ModelTransformation {cons("Rules")}
