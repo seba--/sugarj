@@ -24,6 +24,9 @@ rules
                                ," but found "
                                ,<write-to-string> T]]
 
+  typeEqProper: (Metavar(mvar),Metavar(mvar)) -> []
+  typeEqProper: (Metavar(mvar1),Metavar(mvar2)) -> <typeMismatch> (Metavar(mvar1),Metavar(mvar2))
+    where <not(equal)> (mvar1,mvar2)
   typeEqProper: (TyString(),T) -> msgs
     where if !T; ?TyString() then ![] else !(<typeMismatch> (TyString(),T)) end => msgs
   typeEqProper: (TyBool(),T) -> msgs
@@ -262,11 +265,12 @@ rules
               end => T'
 
   // Parallel reduction
+  
   parReduce: (ctx,TyUnknown()) -> TyUnknown()
   parReduce: (ctx,TyNat()) -> TyNat()
   parReduce: (ctx,TyString()) -> TyString()
   parReduce: (ctx,TyBool()) -> TyBool()
-
+  parReduce: (ctx,Metavar(mvar)) -> Metavar(mvar)
   parReduce: (CtxEmpty(),TyVar(X)) -> TyVar(X)
   parReduce: (CtxBindTVar(ctx,X,K),TyVar(X)) -> TyVar(X)
   parReduce: (CtxBindTVar(ctx,Y,K),TyVar(X)) -> <parReduce> (ctx,TyVar(X))

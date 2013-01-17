@@ -2,13 +2,19 @@ module typing.extensions.let.Typing
 
 import typing.rules.Syntax
 import typing.rules.Desugaring
+// import typing.rules.ExprTypeRules
+import typing.rules.Verification
+
 import typing.extensions.let.Syntax
+
+// import typing.extensions.let.Desugaring
+// Otherwise the conclusion term in T-Let is desugared!
 
 
 ~C |- ~e1 : ~T1
 ~C |- ~S :: *
 ~C |- ~S ~> ~U
 ~C |- ~T1 ~> ~U
-(~C;~%x:~U) |- ~e2 : ~T2
+(~C;~%x:~S) |- ~e2 : ~T2
 ======================================= T-Let
 ~C |- (let ~%x : ~S = ~e1 in ~e2) : ~T2
