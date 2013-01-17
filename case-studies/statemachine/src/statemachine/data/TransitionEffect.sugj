@@ -3,7 +3,7 @@ package statemachine.data;
 import statemachine.Metamodel;
 import statemachine.data.EntityExp;
 
-public metamodel TransitionEffect {
+public sugar TransitionEffect {
   context-free syntax
     StateName Effect -> TransitionTo {cons("WithEffect")}
 

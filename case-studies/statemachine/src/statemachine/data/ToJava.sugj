@@ -12,6 +12,8 @@ import statemachine.data.TransitionEffect;
 
 import transformation.Recursive;
 
+import template.Language;
+
 public transformation ToJava {
   rules
     main =

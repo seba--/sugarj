@@ -5,7 +5,7 @@ import entity.Metamodel;
 
 import statemachine.data.EntityExp;
 
-public metamodel InternalData {
+public sugar InternalData {
   context-free syntax
     InitialState DataDec+ EventsDec StateDec* -> StatemachineBody {cons("StatemachineBody")}
 
