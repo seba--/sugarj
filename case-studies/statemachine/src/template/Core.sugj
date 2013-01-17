@@ -12,7 +12,7 @@ public sugar Core {
   rules
     template-to-sugar :
       TemplateDec(mods, name, body) ->
-      TransDec(TransDecHead(mods, name), TransBody([Rules([main-strategy, main-strategy2])]))
+      TransDec(TransDecHead(mods, name), TransBody(TransformationDef([],[Rules([main-strategy, main-strategy2])])))
     where
       <compile-template-body> body => compiled-body;
       main-strategy  := SDefNoArgs("main", Call(SVar("recursively-transform"), [Id(), CallNoArgs(SVar("main"))]));
