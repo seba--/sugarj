@@ -62,14 +62,11 @@ class CompileTransformed extends AbstractPrimitive {
       try {
         Renaming ren = new Renaming(modelPath, source.getRelativePath());
         environment.getRenamings().add(0, ren);
-        generatedModel = driver.currentRename(generatedModel);
-        context.setCurrent(generatedModel);
-  
+//        generatedModel = driver.currentRename(generatedModel);
+        
         if (generateFiles)
           driver.getCurrentResult().generateFile(source, ATermCommands.atermToString(generatedModel));
       } catch (IOException e) {
-        driver.setErrorMessage(e.getLocalizedMessage());
-      } catch (InvalidParseTableException e) {
         driver.setErrorMessage(e.getLocalizedMessage());
       }
       
@@ -78,6 +75,8 @@ class CompileTransformed extends AbstractPrimitive {
         res = driver.subcompile(driver.getTreeForErrorMarking(), source);
         
         if (res != null) {
+          context.setCurrent(ATermCommands.atermFromFile(source.getAbsolutePath()));
+          
           Result modelResult = ModuleSystemCommands.locateResult(FileCommands.dropExtension(modelPath), environment);
           if (modelResult != null)
             res.addDependency(modelResult);

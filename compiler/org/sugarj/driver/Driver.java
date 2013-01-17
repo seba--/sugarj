@@ -346,7 +346,7 @@ public class Driver{
         depOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".dep");
         Path genLog = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".gen");
         driverResult.setGenerationLog(genLog);
-        clearGeneratedStuff();
+//        clearGeneratedStuff();
       }
 
       initEditorServices();

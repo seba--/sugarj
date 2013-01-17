@@ -51,17 +51,11 @@ class WriteTransformed extends AbstractPrimitive {
     try {
       Renaming ren = new Renaming(modelPath, source.getRelativePath());
       environment.getRenamings().add(0, ren);
-      generatedModel = driver.currentRename(generatedModel);
+//      generatedModel = driver.currentRename(generatedModel);
       
       if (generateFiles)
         driver.getCurrentResult().generateFile(source, ATermCommands.atermToString(generatedModel));
     } catch (IOException e) {
-      driver.setErrorMessage(e.getLocalizedMessage());
-    } catch (TokenExpectedException e) {
-      driver.setErrorMessage(e.getLocalizedMessage());
-    } catch (InvalidParseTableException e) {
-      driver.setErrorMessage(e.getLocalizedMessage());
-    } catch (SGLRException e) {
       driver.setErrorMessage(e.getLocalizedMessage());
     }
     return true;
