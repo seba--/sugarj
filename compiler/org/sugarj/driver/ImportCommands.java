@@ -93,12 +93,24 @@ public class ImportCommands {
     
     if (modelPath == null) {
       // something's wrong
-      driver.setErrorMessage(toplevelDecl, "model not found " + langLib.getModulePath(model));
+      String name;
+      try {
+        name = langLib.getModulePath(model);
+      } catch (Exception e) {
+        name = model.toString();
+      }
+      driver.setErrorMessage(toplevelDecl, "model not found " + name);
       return null;
     }
     if (transformationPath == null) {
       // something's wrong
-      driver.setErrorMessage(toplevelDecl, "transformation not found " + langLib.getModulePath(transformation));
+      String name;
+      try {
+        name = langLib.getModulePath(transformation);
+      } catch (Exception e) {
+        name = transformation.toString();
+      }
+      driver.setErrorMessage(toplevelDecl, "transformation not found " + name);
       return null;
     }
 

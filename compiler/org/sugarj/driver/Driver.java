@@ -30,6 +30,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr_layout.client.ITreeBuilder;
 import org.spoofax.jsglr_layout.client.InvalidParseTableException;
@@ -535,6 +536,10 @@ public class Driver{
       log.log("The name of the editor services is '" + extName + "'.", Log.DETAIL);
       log.log("The full name of the editor services is '" + fullExtName + "'.", Log.DETAIL);
     
+      generateModel(fullExtName, toplevelDecl);
+      if (dependsOnModel)
+        return;
+      
       IStrategoTerm services = langLib.getEditorServices(toplevelDecl);
       
       if (!ATermCommands.isList(services))
@@ -586,6 +591,10 @@ public class Driver{
       log.log("The name is '" + extName + "'.", Log.DETAIL);
       log.log("The full name is '" + fullExtName + "'.", Log.DETAIL);
 
+      generateModel(fullExtName, toplevelDecl);
+      if (dependsOnModel)
+        return;
+      
       String plainContent = Term.asJavaString(ATermCommands.getApplicationSubterm(body, "PlainBody", 0));
       
       String ext = extension == null ? "" : ("." + extension);
@@ -967,6 +976,10 @@ public class Driver{
       log.log("The name of the sugar is '" + extName + "'.", Log.DETAIL);
       log.log("The full name of the sugar is '" + fullExtName + "'.", Log.DETAIL);
       
+      generateModel(fullExtName, toplevelDecl);
+      if (dependsOnModel)
+        return;
+      
       Path sdfExtension = environment.createBinPath(langLib.getRelativeNamespaceSep() + extName + ".sdf");
       Path strExtension = environment.createBinPath(langLib.getRelativeNamespaceSep() + extName + ".str");
       
@@ -1042,9 +1055,15 @@ public class Driver{
       String fullExtName = langLib.getRelativeNamespaceSep() + extName;
       Path strExtension = environment.createBinPath(langLib.getRelativeNamespaceSep() + extName + ".str");
       IStrategoTerm transBody = langLib.getTransformationBody(toplevelDecl);
+      if (isApplication(transBody, "TransformationDef")) 
+        transBody = ATermCommands.factory.makeListCons(ATermCommands.makeAppl("Rules", "Rules", 1, transBody.getSubterm(0)), (IStrategoList) transBody.getSubterm(1));
       
       log.log("The name of the transformation is '" + extName + "'.", Log.DETAIL);
       log.log("The full name of the transformation is '" + fullExtName + "'.", Log.DETAIL);
+      
+      generateModel(fullExtName, toplevelDecl);
+      if (dependsOnModel)
+        return;
       
       String qualifiedMain = "main-" + fullExtName.replace('/', '_');
       IStrategoTerm renamedTransBody = STRCommands.renameRules(transBody, "main", qualifiedMain);
