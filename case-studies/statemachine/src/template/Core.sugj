@@ -24,3 +24,5 @@ public sugar Core {
     TemplateDec -> ToplevelDeclaration
     AnnoOrSugarMod* "template" JavaId "{" TemplateBody "}" -> TemplateDec {cons("TemplateDec")}
 }
+
+

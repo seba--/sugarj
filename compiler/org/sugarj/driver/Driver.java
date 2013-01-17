@@ -1056,7 +1056,7 @@ public class Driver{
       Path strExtension = environment.createBinPath(langLib.getRelativeNamespaceSep() + extName + ".str");
       IStrategoTerm transBody = langLib.getTransformationBody(toplevelDecl);
       if (isApplication(transBody, "TransformationDef")) 
-        transBody = ATermCommands.factory.makeListCons(ATermCommands.makeAppl("Rules", "Rules", 1, transBody.getSubterm(0)), (IStrategoList) transBody.getSubterm(1));
+        transBody = ATermCommands.factory.makeListCons(transBody.getSubterm(0), (IStrategoList) transBody.getSubterm(1));
       
       log.log("The name of the transformation is '" + extName + "'.", Log.DETAIL);
       log.log("The full name of the transformation is '" + fullExtName + "'.", Log.DETAIL);
