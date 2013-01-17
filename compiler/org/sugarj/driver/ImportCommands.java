@@ -71,9 +71,10 @@ public class ImportCommands {
         return ModuleSystemCommands.importStratego(path, environment, driverResult);
     }
     
+    throw new RuntimeException("TODO support non-qualifed transformations and model paths");
     // TODO support non-qualifed transformations and model paths
     
-    return null;
+//    return null;
   }
 
   /**
@@ -113,7 +114,7 @@ public class ImportCommands {
         String transformedModelText = ATermCommands.atermToString(transformedModel);
         driverResult.generateFile(transformedModelSourceFile, transformedModelText);
         
-        boolean isCircularImport = driver.prepareImport(toplevelDecl, transformedModelPath);
+        boolean isCircularImport = driver.prepareImport(toplevelDecl, transformedModelPath, modelPath, transformationPath);
         return Pair.create(transformedModelPath, isCircularImport);
       }
     } finally {
