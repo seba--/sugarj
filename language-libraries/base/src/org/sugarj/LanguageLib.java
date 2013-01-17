@@ -249,4 +249,15 @@ public abstract class LanguageLib implements Serializable {
 
 	public abstract boolean isModuleResolvable(String relModulePath);
 
+  /**
+   * Computes the path of the given transformation application term.
+   */
+  public String getTransformedModulePath(IStrategoTerm appl) {
+    if (ATermCommands.isApplication(appl, "TransApp")) {
+      String trans = getTransformedModulePath(appl.getSubterm(0));
+      String model = getTransformedModulePath(appl.getSubterm(1));
+      return model + "__" + trans.replace('/', '_');
+    }
+    return getModulePath(appl);
+  }
 }

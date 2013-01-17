@@ -1,7 +1,7 @@
 module org/sugarj/languages/SugarProlog
 imports org/sugarj/languages/Sugar
 signature constructors
-    CompilationUnit            : SugarModuleDec * List(PrologModuleImport) * SugarBody -> SugarCompilationUnit
+    CompilationUnit            : SugarModuleDec * List(PrologModuleImport) * SugarBody -> CompilationUnit
     CompilationUnit            : PrologProgram -> SugarCompilationUnit
     SugarModuleDec : String -> SugarModuleDec
     SugarBody              : SugarDef -> SugarBody

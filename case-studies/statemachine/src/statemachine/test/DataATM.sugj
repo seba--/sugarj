@@ -1,0 +1,55 @@
+package statemachine.test;
+
+import statemachine.data.Metamodel;
+
+import entity.test.Account;
+
+public statemachine DataATM {
+  initial state Init 
+
+  data acc :: Account
+  data pinCount :: Integer
+
+  events InsertCard(Account), Cancel, Pin(String), Amount(Integer), MoneyTaken, CardTaken, CardRevoked
+
+  state Init {
+    InsertCard(clientAcc) => Withdraw {
+      acc := clientAcc
+      pinCount := 0
+    }
+
+    Cancel => Init
+  }
+
+  state Withdraw { 
+    Pin(p) if p == acc.pin
+      => HowMuch
+
+    Pin(p) if pinCount < 2 && p != acc.pin
+      => Withdraw { pinCount := pinCount + 1 }
+
+    Pin(p) if pinCount >= 2 && p != acc.pin
+      => RevokeCard
+
+    Cancel => ReturnCard
+  }
+
+  state HowMuch {
+    Amount(amount) if amount < acc.balance
+      => GiveMoney { acc.balance := acc.balance - amount }
+
+    Cancel => ReturnCard
+  }
+
+  state GiveMoney {
+    MoneyTaken => ReturnCard
+  }
+
+  state ReturnCard {
+    CardTaken => Init { acc := null }
+  }
+
+  state RevokeCard {
+    CardRevoked => Init { acc := null }
+  }
+}

@@ -168,7 +168,7 @@ public class JavaLib extends LanguageLib implements Serializable {
     else if (isApplication(toplevelDecl, "TypeImportAsDec"))
       name = prettyPrint(toplevelDecl.getSubterm(1));
     else if (isApplication(toplevelDecl, "TransImportDec"))
-      name = null;
+      name = getTransformedModulePath(toplevelDecl.getSubterm(1));
     return name;
   }
 
@@ -341,7 +341,7 @@ public class JavaLib extends LanguageLib implements Serializable {
       opt = getApplicationSubterm(decl, "TypeImportAsDec", 0);
     
     if (opt != null && isApplication(opt, "Some"))
-      return getModulePath(getApplicationSubterm(opt, "Some", 0));
+      return getModulePath(getApplicationSubterm(getApplicationSubterm(opt, "Some", 0), "ImportAs", 0));
     
     return null;
   }

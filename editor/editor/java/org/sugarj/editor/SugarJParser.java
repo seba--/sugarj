@@ -228,7 +228,7 @@ public class SugarJParser extends JSGLRI {
 
     Tokenizer tokenizer = new Tokenizer(" ", " ", new KeywordRecognizer(pt) {});
     Token tok = tokenizer.makeToken(0, IToken.TK_UNKNOWN, true);
-    IStrategoTerm term = ATermCommands.makeList("SugarCompilationUnit", tok);
+    IStrategoTerm term = ATermCommands.makeList("CompilationUnit", tok);
     
     Result r = new Result(true) {
       public boolean isUpToDateShallow(int h, Environment env) { return false; }

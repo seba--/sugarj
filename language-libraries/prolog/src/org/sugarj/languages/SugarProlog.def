@@ -9,8 +9,8 @@ imports org/sugarj/languages/Prolog
 
 exports
   context-free syntax
-    SugarModuleDec PrologModuleImport* SugarBody   -> SugarCompilationUnit {cons("CompilationUnit")}     
-    PrologProgram                                -> SugarCompilationUnit {cons("CompilationUnit")}
+    SugarModuleDec PrologModuleImport* SugarBody   -> CompilationUnit {cons("CompilationUnit")}     
+    PrologProgram                                -> CompilationUnit {cons("CompilationUnit")}
 
   context-free syntax
     ":-" "sugar_module(" PrologWord ")" "."             -> SugarModuleDec   {cons("SugarModuleDec")}         %% used like module(...)

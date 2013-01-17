@@ -1,0 +1,17 @@
+package template.util;
+
+import org.sugarj.languages.Stratego;
+
+public sugar AutoScopeRules {
+  desugarings
+    auto-scope-rule
+
+  rules
+    auto-scope-rule : LRule(r) -> Scope(<collect-all(stratego-bound-vars); concat> r, SRule(r))
+    
+    stratego-bound-vars : RuleNoCond(t,_) -> <collect-all(?Var(<id>))> t
+    stratego-bound-vars : Rule(t,_,s) -> <collect-all(?Var(<id>))> t
+    stratego-bound-vars : Assign(t,_) -> <collect-all(?Var(<id>))> t
+    stratego-bound-vars : AM(s,t) -> <collect-all(?Var(<id>))> t
+    stratego-bound-vars : Match(t) -> <collect-all(?Var(<id>))> t
+}

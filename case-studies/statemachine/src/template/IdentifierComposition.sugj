@@ -1,0 +1,20 @@
+package template;
+
+public sugar IdentifierComposition {
+  syntax
+    <JavaId-CF> "#" <JavaId-CF> -> <JavaId-CF> {ast("FromMetaExpr(IdComposition(ToMetaExpr(<1>), ToMetaExpr(<2>)))"), left}
+
+  signature constructors
+    IdComposition : Id * Id -> Id
+
+  desugarings
+    desugar-id-composition
+
+  rules
+    desugar-id-composition :
+      IdComposition(id1, id2) ->
+      NoAnnoList(Op("Id",
+        [App(CallNoArgs(SVar("conc-strings")), NoAnnoList(Tuple(
+          [App(Match(NoAnnoList(Op("Id", [RootApp(Id())]))), id1),
+           App(Match(NoAnnoList(Op("Id", [RootApp(Id())]))), id2)])))]))
+}

@@ -22,10 +22,10 @@ exports
     SugarDec -> ToplevelDeclaration
 
   context-free start-symbols
-  	SugarCompilationUnit
+  	CompilationUnit
 
   context-free syntax
-    JavaPackageDec? JavaImportDec* (JavaTypeDec | SugarDec)* -> SugarCompilationUnit {cons("CompilationUnit")}
+    JavaPackageDec? JavaImportDec* (JavaTypeDec | SugarDec)* -> CompilationUnit {cons("CompilationUnit")}
 
   %% sugar declaration
   context-free syntax
