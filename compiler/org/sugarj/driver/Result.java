@@ -205,7 +205,7 @@ public class Result implements IErrorLogger {
     }
   }
 
-  void generateFile(Path file, String content) throws IOException {
+  public void generateFile(Path file, String content) throws IOException {
     if (generateFiles) {
       FileCommands.writeToFile(file, content);
       generatedFileHashes.put(file, FileCommands.fileHash(file));
