@@ -62,4 +62,11 @@ public class RelativePath extends Path {
     base = (Path) in.readObject();
     relativePath = (String) in.readObject();
   }
+  
+  @Override
+  public String toString() {
+    if (base == null)
+      return relativePath;
+    return getAbsolutePath();
+  }
 }

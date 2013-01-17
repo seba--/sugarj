@@ -659,7 +659,6 @@ public class Driver{
    * Apply current renamings stored in environment to the given term.
    */
   public IStrategoTerm currentRename(IStrategoTerm term) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
-    log.beginTask("desugaring", "RENAME toplevel declaration.", Log.TRANSFORM);
     try {
       if (currentTransProg == null)
         return term;
@@ -672,8 +671,6 @@ public class Driver{
       log.logErr(msg, Log.DETAIL);
       setErrorMessage(term, msg);
       return term;
-    } finally {
-      log.endTask();
     }
   }
 

@@ -419,36 +419,34 @@ public class Result implements IErrorLogger {
   }
   
   public void writeDependencyFile(Path dep) throws IOException {
-    if (generateFiles) {
-      logGeneration(dep);
-  
-      ObjectOutputStream oos = null;
+    logGeneration(dep);
+
+    ObjectOutputStream oos = null;
+    
+    try {
+      FileCommands.createFile(dep);
+      oos = new ObjectOutputStream(new FileOutputStream(dep.getFile()));
       
-      try {
-        FileCommands.createFile(dep);
-        oos = new ObjectOutputStream(new FileOutputStream(dep.getFile()));
-        
-        oos.writeBoolean(isGenerated);
-        oos.writeBoolean(generateFiles);
-        
-        oos.writeObject(sourceFile);
-        oos.writeInt(sourceFileHash);
-        
-        oos.writeObject(dependencies);
-        oos.writeObject(circularDependencies);
-        oos.writeObject(generatedFileHashes);
-        oos.writeObject(dependingFileHashes);
-        
-        oos.writeObject(availableGeneratedFiles);
-        oos.writeObject(deferredSourceFiles);
-        
-        synchronized (results) {
-          results.put(dep, new WeakReference<Result>(this));
-        }
-      } finally {
-        if (oos != null)
-          oos.close();
+      oos.writeBoolean(isGenerated);
+      oos.writeBoolean(generateFiles);
+      
+      oos.writeObject(sourceFile);
+      oos.writeInt(sourceFileHash);
+      
+      oos.writeObject(dependencies);
+      oos.writeObject(circularDependencies);
+      oos.writeObject(generatedFileHashes);
+      oos.writeObject(dependingFileHashes);
+      
+      oos.writeObject(availableGeneratedFiles);
+      oos.writeObject(deferredSourceFiles);
+      
+      synchronized (results) {
+        results.put(dep, new WeakReference<Result>(this));
       }
+    } finally {
+      if (oos != null)
+        oos.close();
     }
     
     setPersistentPath(dep);

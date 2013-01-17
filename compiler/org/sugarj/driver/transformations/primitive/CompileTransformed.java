@@ -125,20 +125,16 @@ class CompileTransformed extends AbstractPrimitive {
   }
   
   private void checkCommunicationIntegrity(String modelPath, RelativePath transformationPath, RelativePath source, Result res) throws IOException, ClassNotFoundException {
-    Path modelDep = ModuleSystemCommands.searchFile(FileCommands.dropExtension(modelPath), ".dep", environment, null);
     Collection<Path> modelDeps = new HashSet<Path>();
-    Result modelResult = null;
-    if (modelDep != null) {
-      modelResult = Result.readDependencyFile(modelDep);
+    Result modelResult = ModuleSystemCommands.locateResult(FileCommands.dropExtension(modelPath), environment);
+    if (modelResult != null) {
       modelDeps.addAll(modelResult.getCircularFileDependencies(environment));
       modelDeps.addAll(modelResult.getDirectlyGeneratedFiles()); 
     }
 
     Collection<Path> transDeps = new HashSet<Path>();
-    Result transResult = null;
-    Path transDep = ModuleSystemCommands.searchFile(FileCommands.dropExtension(transformationPath.getRelativePath()), ".dep", environment, null);
-    if (transDep != null) {
-      transResult = Result.readDependencyFile(transDep);
+    Result transResult = ModuleSystemCommands.locateResult(FileCommands.dropExtension(transformationPath.getRelativePath()), environment);
+    if (transResult != null) {
       transDeps.addAll(transResult.getCircularFileDependencies(environment));
       transDeps.addAll(transResult.getDirectlyGeneratedFiles()); 
     }
