@@ -40,7 +40,9 @@ class CurrentRenamings extends AbstractPrimitive {
       IStrategoTerm from = ATermCommands.makeString(r.from);
       IStrategoTerm to = ATermCommands.makeString(r.to);
       
-      map.put(from, to);
+      if (!map.containsKey(from))
+        map.put(from, to);
+      if (!map.containsKey(ATermCommands.makeTuple(quals, from)))
       map.put(ATermCommands.makeTuple(quals, from), to);
     }
     
