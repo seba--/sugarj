@@ -48,6 +48,9 @@ class CompileTransformed extends AbstractPrimitive {
     try {
       IStrategoTerm generatedModel = context.current();
       
+      if (!ATermCommands.isString(tvars[0]) || !ATermCommands.isString(tvars[1]))
+        return false;
+      
       String modelPath = ATermCommands.getString(tvars[0]);
       RelativePath modelRelativePath = new RelativePath(modelPath);
       

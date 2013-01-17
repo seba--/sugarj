@@ -426,7 +426,7 @@ public class Driver{
     finally {
       log.endTask(success, "done processing " + sourceFile, "failed to process " + sourceFile);
       driverResult.setFailed(!success);
-      currentlyProcessing.remove(sourceFile);
+      currentlyProcessing.remove(this);
       environment.setRenamings(originalRenamings);
     }
   }
@@ -1052,11 +1052,11 @@ public class Driver{
         sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
 
       String extName = langLib.getTransformationName(toplevelDecl);
-      String fullExtName = langLib.getRelativeNamespaceSep() + extName;
+      String fullExtName = getFullRenamedDeclarationName(extName);
       Path strExtension = environment.createBinPath(langLib.getRelativeNamespaceSep() + extName + ".str");
       IStrategoTerm transBody = langLib.getTransformationBody(toplevelDecl);
       if (isApplication(transBody, "TransformationDef")) 
-        transBody = ATermCommands.factory.makeListCons(transBody.getSubterm(0), (IStrategoList) transBody.getSubterm(1));
+        transBody = ATermCommands.factory.makeListCons(ATermCommands.makeAppl("Rules", "Rules", 1, transBody.getSubterm(0)), (IStrategoList) transBody.getSubterm(1));
       
       log.log("The name of the transformation is '" + extName + "'.", Log.DETAIL);
       log.log("The full name of the transformation is '" + fullExtName + "'.", Log.DETAIL);
