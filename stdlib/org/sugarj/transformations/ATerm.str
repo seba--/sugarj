@@ -20,6 +20,7 @@ strategies
  * instead as soon as this bug in STRJ is fixed: http://yellowgrass.org/issue/Spoofax/487
  */
 rules
+  desugar : ConsRules(t, ts) -> [t|ts]
   desugar : ToModelTerm(t) -> <implode-aterm> t
 
   explode-aterm =

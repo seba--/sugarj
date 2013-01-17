@@ -238,7 +238,8 @@ public abstract class LanguageLib implements Serializable {
 	public abstract String getEditorName(IStrategoTerm decl) throws IOException;
 	public abstract IStrategoTerm getEditorServices(IStrategoTerm decl);
 
-  public          String getModelName(IStrategoTerm decl) throws IOException { return null; }
+	public          String getLanguageDeclName(IStrategoTerm toplevelDecl) { return null; }
+	public          String getModelName(IStrategoTerm decl) throws IOException { return null; }
 	public          String getTransformationName(IStrategoTerm decl) throws IOException { return null; }
   public          IStrategoTerm getTransformationBody(IStrategoTerm decl) { return null; }
   

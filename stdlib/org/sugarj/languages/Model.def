@@ -8,7 +8,7 @@ exports
  
   context-free syntax
     ModelTransformation*  -> TransformationDef
-    DirectTransformation ModelTransformation*  -> TransformationDef {ast("Cons(<1>, <2>)")} 
+    DirectTransformation ModelTransformation*  -> TransformationDef {cons("ConsRules")} 
 
     StrategoDef+ -> DirectTransformation {cons("Rules")}
     "strategies" StrategoDef*   -> ModelTransformation {cons("Strategies")}

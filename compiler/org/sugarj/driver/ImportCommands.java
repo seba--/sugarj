@@ -98,7 +98,7 @@ public class ImportCommands {
     }
     if (transformationPath == null) {
       // something's wrong
-      driver.setErrorMessage(toplevelDecl, "transformation not found " + transformation);
+      driver.setErrorMessage(toplevelDecl, "transformation not found " + langLib.getModulePath(transformation));
       return null;
     }
 

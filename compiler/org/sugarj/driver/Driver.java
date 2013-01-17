@@ -940,6 +940,10 @@ public class Driver{
       if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
         sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
       
+      generateModel(FileCommands.dropExtension(sourceFile.getRelativePath()), toplevelDecl);
+      if (dependsOnModel)
+        return;
+      
       log.beginTask("Generate " + langLib.getLanguageName() + " code.", Log.LANGLIB);
       try {
         langLib.processLanguageSpecific(toplevelDecl, environment);

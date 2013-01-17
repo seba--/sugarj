@@ -398,6 +398,15 @@ public class JavaLib extends LanguageLib implements Serializable {
     IStrategoTerm sugarBody = getApplicationSubterm(body, "SugarBody", 0);
     return sugarBody;
   }
+  
+  @Override
+  public String getLanguageDeclName(IStrategoTerm toplevelDecl) {
+    if (isApplication(toplevelDecl, "ClassDec"))
+      return prettyPrint(getApplicationSubterm(toplevelDecl.getSubterm(0), "ClassDecHead", 1));
+    if (isApplication(toplevelDecl, "InterfaceDec"))
+      return prettyPrint(getApplicationSubterm(toplevelDecl.getSubterm(0), "InterfaceDecHead", 1));
+    return null;
+  }
 
   @Override
   public String getModelName(IStrategoTerm decl) throws IOException {
