@@ -108,13 +108,17 @@ public class SugarJParser extends JSGLRI {
       return ATermCommands.fixTokenizer(parseCompletionTree(input, filename, result));
     }
 
-    if (result.isUpToDateShallow(input.hashCode(), environment)) {
+    if (result.getSugaredSyntaxTree() != null && result.isUpToDateShallow(input.hashCode(), environment)) {
       this.result = result;
       return result.getSugaredSyntaxTree();
     }
+
+    if (result.getSugaredSyntaxTree() == null)
+      return parseFailureResult(filename).getSugaredSyntaxTree();
     
     if (!isPending(filename)) 
       scheduleParse(input, filename);
+    
     
     return result.getSugaredSyntaxTree();
   }
