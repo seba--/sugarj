@@ -12,7 +12,7 @@ import variability.CheckConfigAux;
 
 public transformation CheckConfig {
   rules
-    main = compile-after(SugarCompilationUnit(id,ensure-aux-import,map(featuremodel-to-sugar)))
+    main = compile-after(CompilationUnit(id,ensure-aux-import,map(featuremodel-to-sugar)))
 
     featuremodel-to-sugar :
       ModelDec(ModelDecHead(mods, Id(n), "variability.Model"), ModelBody((features, requirements)))

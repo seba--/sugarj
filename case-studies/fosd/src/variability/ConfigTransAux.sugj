@@ -9,7 +9,7 @@ public transformation ConfigTransAux {
   rules 
     eliminate-variability = downup(empty-variable-type <+ configure-node <+ id,
                                    try(filter(not(?VariabilityHole))));
-                            SugarCompilationUnit(id,id,map(try(no-variability)));
+                            CompilationUnit(id,id,map(try(no-variability)));
                             topdown(try(empty-interface-list))
 
     no-variability :

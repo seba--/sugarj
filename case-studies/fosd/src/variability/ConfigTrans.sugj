@@ -18,13 +18,13 @@ public transformation ConfigTrans {
       recursively-transform(
         conforms-to-metamodel(|"variability.Config") + conforms-to-metamodel(|"variability.Model"),
         conforms-to-metamodel(|"variability.Config")
-          < SugarCompilationUnit(?pkg,ensure-aux-import,map(featureconfig-to-trans(|pkg)))
+          < CompilationUnit(?pkg,ensure-aux-import,map(featureconfig-to-trans(|pkg)))
           + ignore-featuremodel)
 
     featureconfig-to-trans(|pkg) :
       ModelDec(ModelDecHead(mods, name, "variability.Config"), ModelBody((model, configs)))
       ->
-      SugarDec(SugarDecHead(mods, name), SugarBody([transformation-elem(body)]))
+      TransDec(TransDecHead(mods, name), TransBody([body]))
     where
       <get-feature-config> configs => (enabled, disabled);
       <(map(feature-enabled2rule), map(feature-disabled2rule)); conc> (enabled, disabled) => rulez;
@@ -33,7 +33,7 @@ public transformation ConfigTrans {
       main-rule2 := SDefNoArgs("main", Call(SVar("recursively-transform"), [conforms-call, CallNoArgs(SVar("main"))]));
 
       Input => (_,model-path, trans-path);
-      <rename-main-rules(|model-path, trans-path)> Rules([main-rule1, main-rule2 | rulez]) => body
+      !Rules([main-rule1, main-rule2 | rulez]) => body
 
     feature-enabled2rule = !SDefNoArgs("feature-enabled", Match(NoAnnoList(Str(<id>))))
     feature-disabled2rule = !SDefNoArgs("feature-disabled", Match(NoAnnoList(Str(<id>))))
@@ -43,7 +43,7 @@ public transformation ConfigTrans {
             auximp2 := |[ import transformation.Recursive; ]| 
 
     ignore-featuremodel =
-      SugarCompilationUnit(id, ![], map(
+      CompilationUnit(id, ![], map(
         \  ModelDec(ModelDecHead(mods, name, "variability.Model"), _)
         -> ClassDec(ClassDecHead(mods, name, None, None, None), ClassBody([])) \))
 

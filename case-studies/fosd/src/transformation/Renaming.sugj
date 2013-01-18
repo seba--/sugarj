@@ -11,17 +11,20 @@ rules
   build-path : ([], name) -> name
   build-path : ([pkg|pkgs], name) -> <conc-strings> (pkg, "/", <build-path> (pkgs, name))
 
-  name-suffix = !("$", <id>); conc-strings; string-replace(|"/","_")
+  name-suffix = !("__", <id>); conc-strings; string-replace(|"/","_")
 
   apply-renamings(|renamings) =
-    where(<?[(pkgs, from, to)|rest]> renamings)
-      < apply-renaming(|pkgs, <as-java-path> from, <as-java-path> to); apply-renamings(|rest)
-      + id
+    where(!renamings; is-list; make-renamings-hashtable => renamings-table);
+    apply-renamings(|renamings-table)
+  
+  make-renamings-hashtable : [] -> <new-hashtable>
+  make-renamings-hashtable : [(quals,from,to) | rest] -> table
+    where <make-renamings-hashtable> rest => table;
+          <hashtable-put(|from, to)> table;
+          <hashtable-put(|(quals, from), to)> table;
+          <hashtable-get(|from)> table
 
-  apply-renaming(|pkgs, from, to) =
-    topdown(try(rename-java(|pkgs, from, to)))
-
-  as-java-path = string-as-chars(map(try(?'-';!'$')))
+  as-java-path = string-as-chars(map(try(?'-';!'_')))
 
   split-packages-decname =
     where(!(<id>, "/"); not(split-before));
@@ -34,9 +37,4 @@ rules
 
   compose-path : ([], name) -> <as-java-path> name
   compose-path : ([pkg|pkgs], name) -> <conc-strings> (pkg, "/", <compose-path> (pkgs, name))
-
-  rename-main-rules(|model-path, transformation-path) =
-    where(!(model-path, transformation-path);
-          prim("SUGARJ_rename_main_args") => (_, new-name));
-    rename-rules(|"main", new-name)
 }
