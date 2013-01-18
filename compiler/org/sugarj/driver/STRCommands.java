@@ -285,7 +285,7 @@ public class STRCommands {
         throw new RuntimeException("hybrid interpreter failed");
     }
     catch (InterpreterException e) {
-      throw new StrategoException("desugaring failed: " + e.getCause().getMessage(), e);
+      throw new StrategoException("desugaring failed: " + (e.getCause() == null ? e : e.getCause()).getMessage(), e);
     }
     catch (Exception e) {
       throw new StrategoException("desugaring failed", e);
