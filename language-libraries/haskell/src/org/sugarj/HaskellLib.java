@@ -50,7 +50,7 @@ public class HaskellLib extends LanguageLib {
 
   @Override
   public List<File> getDefaultGrammars() {
-    List<File> grammars = new LinkedList<File>(getDefaultGrammars());
+    List<File> grammars = new LinkedList<File>(super.getDefaultGrammars());
     grammars.add(ensureFile("org/sugarj/languages/SugarHaskell.def"));
     grammars.add(ensureFile("org/sugarj/languages/Haskell.def"));
     return Collections.unmodifiableList(grammars);

@@ -49,7 +49,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 
   @Override
   public List<File> getDefaultGrammars() {
-    List<File> grammars = new LinkedList<File>(getDefaultGrammars());
+    List<File> grammars = new LinkedList<File>(super.getDefaultGrammars());
     grammars.add(ensureFile("org/sugarj/languages/SugarJ.def"));
     grammars.add(ensureFile("org/sugarj/languages/Java-15.def"));
     return Collections.unmodifiableList(grammars);
