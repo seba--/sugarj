@@ -75,18 +75,6 @@ public class Result implements IErrorLogger {
    */
   private Map<Path, Pair<Path, SourceFileContent.Generated>> deferredSourceFiles = new HashMap<Path, Pair<Path, SourceFileContent.Generated>>();
   
-  private final static Result OUTDATED_RESULT = new Result(true) {
-    @Override
-    public boolean isUpToDate(Path file, Environment env) {
-      return false;
-    }
-
-    @Override
-    public boolean isUpToDate(int hash, Environment env) {
-      return false;
-    }
-  };
-  
   public Result(boolean generateFiles) {
     this.generateFiles = generateFiles;
   }

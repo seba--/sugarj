@@ -830,7 +830,7 @@ public class Driver{
         log.log("Module outdated, compile first: " + modulePath + ".", Log.IMPORT);
         setErrorMessage(toplevelDecl, "module outdated, compile first: " + modulePath);
       }
-      else if (sourceFileAvailable && requiresUpdate && isCircularImport(importSourceFile)) {
+      else if (sourceFileAvailable && requiresUpdate && getCircularImportResult(importSourceFile) != null) {
         // Circular import. Assume source file does not provide syntactic sugar.
         log.log("Circular import detected: " + modulePath + ".", Log.IMPORT);
         langLib.addImportedModule(toplevelDecl, false);
@@ -848,7 +848,11 @@ public class Driver{
         log.log("CONTINUE PROCESSING'" + sourceFile + "'.", Log.CORE);
       }
       
-      if (res != null && !isCircularImport) {
+      if (isCircularImport) {
+        driverResult.addCircularDependency(getCircularImportResult(importSourceFile));
+      }
+      
+      if (!isCircularImport && res != null) {
         if (res.getPersistentPath() == null || res.hasPersistentVersionChanged())
           setErrorMessage(toplevelDecl, "Result is inconsitent with persistent version.");
         driverResult.addDependency(res);
@@ -867,15 +871,22 @@ public class Driver{
             break;
           }
     }
+    
     return isCircularImport;
   }
   
-  private boolean isCircularImport(RelativePath importSourceFile) {
+  /**
+   * Checks if the given source file is a circular import.
+   * Checks the ongoing driver runs to determine whether the source file in turn imports the current source file.
+   * 
+   * @return null if the import is not circular. The path to the imported file's driver result otherwise.
+   */
+  private Path getCircularImportResult(RelativePath importSourceFile) {
     for (Driver dr : currentlyProcessing)
       if (dr.sourceFile.equals(importSourceFile))
-        return true;
+        return dr.depOutFile;
     
-    return false;
+    return null;
   }
 
   /**
