@@ -94,7 +94,7 @@ public class SugarJParser extends JSGLRI {
     
     if (!LanguageLibRegistry.getInstance().isRegistered(FileCommands.getExtension(filename))) {
       Log.log.logErr("Unknown source-file extension " + FileCommands.getExtension(filename), Log.ALWAYS);
-      return null;
+      return parseFailureResult(filename).getSugaredSyntaxTree();
     }
 
     this.result = null;
@@ -118,7 +118,6 @@ public class SugarJParser extends JSGLRI {
     
     if (!isPending(filename)) 
       scheduleParse(input, filename);
-    
     
     return result.getSugaredSyntaxTree();
   }
