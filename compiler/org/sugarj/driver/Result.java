@@ -106,12 +106,8 @@ public class Result implements IErrorLogger {
   }
   
   public void addDependency(Result result) throws IOException {
-    if (result.persistentPath == null)
-      throw new IllegalArgumentException("Expected result with persistent path.");
-    if (result.hasPersistentVersionChanged())
-      throw new IllegalArgumentException("Expected result that consistent with persisten version.");
-    
-    dependencies.put(result.persistentPath, result.persistentHash);
+    if (result.persistentPath != null && !result.hasPersistentVersionChanged())
+      dependencies.put(result.persistentPath, result.persistentHash);
     allDependentFiles.addAll(result.getFileDependencies());
   }
   
