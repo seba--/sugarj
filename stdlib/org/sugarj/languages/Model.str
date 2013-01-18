@@ -1,6 +1,5 @@
 module org/sugarj/languages/Model
 
 signature constructors
-  ToModelTerm : ATerm -> ModelTerm
   TransApp : TransformationExpr * TransformationExpr -> TransformationExpr
   TransformationDef : x * y -> z

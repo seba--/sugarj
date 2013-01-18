@@ -19,6 +19,10 @@ strategies
  *   import libstratego-aterm
  * instead as soon as this bug in STRJ is fixed: http://yellowgrass.org/issue/Spoofax/487
  */
+ 
+signature constructors
+  ToModelTerm : ATerm -> ModelTerm
+ 
 rules
   desugar : ToModelTerm(t) -> <implode-aterm> t
 
