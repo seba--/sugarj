@@ -14,6 +14,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoString;
@@ -55,6 +56,25 @@ public class SugarJParser extends JSGLRI {
   
   private static Map<String, Result> results = new HashMap<String, Result>();
   private static Set<String> pending = new HashSet<String>();
+  
+  private final static int PARELLEL_PARSES = 3;
+  private final static List<ISchedulingRule> schedulingRules = new LinkedList<ISchedulingRule>();
+  private static int nextSchedulingRule = 0;
+  static {
+    for (int i = 0; i < PARELLEL_PARSES; i++) {
+      schedulingRules.add(new ISchedulingRule() {
+        @Override
+        public boolean isConflicting(ISchedulingRule rule) { return rule == this; }
+        @Override
+        public boolean contains(ISchedulingRule rule) { return rule == this; }
+      });
+    }
+  }
+  private synchronized static ISchedulingRule nextSchedulingRule() {
+    if (nextSchedulingRule >= schedulingRules.size())
+      nextSchedulingRule = 0;
+    return schedulingRules.get(nextSchedulingRule++);
+  }
   
   private Result result;
 //  private JSGLRI parser;
@@ -134,6 +154,8 @@ public class SugarJParser extends JSGLRI {
         return Status.OK_STATUS;
       }
     };
+    
+    parseJob.setRule(nextSchedulingRule());
     parseJob.schedule();
   }
   
