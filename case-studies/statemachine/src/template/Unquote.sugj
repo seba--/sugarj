@@ -1,0 +1,60 @@
+package template;
+
+import org.sugarj.languages.Stratego;
+
+import template.Core;
+import template.ConcreteSyntax;
+import template.util.MetaExplode;
+
+public sugar Unquote { 
+  context-free syntax
+    Unquote -> JavaPackageDec
+    Unquote -> JavaPackageName
+    Unquote -> JavaPackageOrTypeName
+    Unquote -> JavaImportDec
+    Unquote -> JavaType
+
+    "id" Unquote -> JavaId
+    Unquote -> JavaId {avoid}
+
+    Unquote -> JavaBlockStm
+    Unquote -> JavaExpr
+
+    "${" Unquoted "}" -> Unquote {cons("FromMetaExpr")}
+    StrategoStrategy -> Unquoted {cons("Unquoted")}
+
+  context-free priorities
+    JavaId -> JavaTypeName
+  > Unquote -> JavaId
+
+  desugarings
+    unquote-desugar
+
+  rules
+    unquote-desugar :
+      SDefNoArgs(s, body) -> 
+      SDefNoArgs(s, Seq(Match(Var(modelvar)), body'))
+    where
+      <oncetd(?Unquoted(_))> body;
+      modelvar := "this__";
+      <topdown(try(unquoted-app(|modelvar)))> body => body'
+
+    unquote-desugar :
+      RuleNoCond(t1, t2) -> 
+      RuleNoCond(As(Var(modelvar), t1), t2')
+    where
+      <oncetd(?Unquoted(_))> t2;
+      modelvar := "this__";
+      <topdown(try(unquoted-app(|modelvar)))> t2 => t2'
+
+    unquote-desugar :
+      Rule(t1, t2, conds) -> 
+      Rule(As(Var(modelvar), t1), t2', conds')
+    where
+      <oncetd(?Unquoted(_))> t2;
+      modelvar := "this__";
+      <topdown(try(unquoted-app(|modelvar)))> t2 => t2';
+      <topdown(try(unquoted-app(|modelvar)))> conds => conds'
+
+    unquoted-app(|modelvar) : Unquoted(strat) -> App(strat, Var(modelvar))
+}

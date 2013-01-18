@@ -6,11 +6,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -20,10 +19,12 @@ import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.Log;
+import org.sugarj.common.StringCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.languagelib.SourceFileContent;
 import org.sugarj.stdlib.StdLib;
+import org.sugarj.util.Pair;
 
 public abstract class LanguageLib implements ILanguageLib, Serializable {
 
@@ -39,6 +40,10 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
     return interp;
   }
 
+  public List<File> getDefaultGrammars() {
+    return StdLib.stdGrammars();
+  }
+  
   private transient File libTmpDir;
   protected File ensureFile(String resource) {
     File f = new File(getLibraryDirectory().getPath() + File.separator + resource);
@@ -80,66 +85,117 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
     return f;
   }
   
-  protected List<File> getDefaultGrammars() {
-    return Arrays.asList(new File[] { StdLib.sdfDef, StdLib.strategoDef, StdLib.editorServicesDef, StdLib.plainDef, StdLib.commonDef });
-  }
+  public          boolean isModelDec(IStrategoTerm decl) { return false; }
+	public          boolean isTransformationDec(IStrategoTerm decl) { return false; }
+	public          boolean isTransformationImportDec(IStrategoTerm decl) { return false; }
+	
+	public String getRelativeNamespaceSep() {
+		String rel = getRelativeNamespace();
+		if (rel == null || rel.isEmpty())
+			return "";
+		return rel + Environment.sep;
+	}
+	
+	
+	public void compile(
+	    Path outFile, 
+	    SourceFileContent source, 
+	    Path bin,
+	    List<Path> path,
+			Set<RelativePath> previouslyGeneratedFiles,
+			Map<Path, Set<RelativePath>> availableGeneratedFilesForSourceFile,
+			Map<Path, Pair<Path, SourceFileContent.Generated>> deferredSourceFilesForSourceFile,
+			Map<Path, Integer> generatedFileHashes,
+			boolean generateFiles
+			) throws IOException, ClassNotFoundException {
+	  Set<RelativePath> generatedFiles = new HashSet<RelativePath>(previouslyGeneratedFiles);
+	  
+	  for (Set<RelativePath> files: availableGeneratedFilesForSourceFile.values())
+      for (RelativePath file : files)
+        if (getFactoryForLanguage().getGeneratedFileExtension().equals(FileCommands.getExtension(file)))
+          generatedFiles.add(file);
 
-  public String getRelativeNamespaceSep() {
-    String rel = getRelativeNamespace();
-    if (rel == null || rel.isEmpty())
-      return "";
-    return rel + Environment.sep;
-  }
+    List<Path> outFiles = new ArrayList<Path>();
 
-  public void compileAll(Path outFile, SourceFileContent source, Path bin, List<Path> path, Set<RelativePath> generatedBinFiles, Map<Path, Set<RelativePath>> availableGeneratedFilesForSourceFile, Map<Path, Map<Path, SourceFileContent>> deferredSourceFilesForSourceFile, Map<Path, Integer> generatedFileHashes, boolean generateFiles) throws IOException, ClassNotFoundException {
-
-    Map<Path, Set<RelativePath>> generatedFiles = availableGeneratedFilesForSourceFile; // result.getAvailableGeneratedFiles().get(result.getSourceFile());
-    Set<RelativePath> generatedClasses = new HashSet<RelativePath>(generatedBinFiles);
-
-    if (generatedFiles != null) {
-      for (Set<RelativePath> files : generatedFiles.values())
-        for (RelativePath file : files)
-          if ("class".equals(FileCommands.getExtension(file)))
-            generatedClasses.add(file);
+    for (Pair<Path, SourceFileContent.Generated> deferredSource : deferredSourceFilesForSourceFile.values()) {
+      try { 
+        String code = deferredSource.b.code;
+        checkRequiredPaths(deferredSource.b.requiredPaths, generatedFiles);
+        writeToFile(generateFiles, generatedFileHashes, deferredSource.a, code);
+        outFiles.add(deferredSource.a);
+      } catch (ClassNotFoundException e) {
+        throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + outFile);
+      }
     }
 
-    Map<Path, Map<Path, SourceFileContent>> sourceFiles = deferredSourceFilesForSourceFile; // result.getDeferredSourceFiles().get(result.getSourceFile());
-    List<Path> javaOutFiles = new ArrayList<Path>();
-    javaOutFiles.add(outFile);
-
-    if (sourceFiles != null)
-      for (Entry<Path, Map<Path, SourceFileContent>> sources : sourceFiles.entrySet())
-        for (Entry<Path, SourceFileContent> currentSource : sources.getValue().entrySet())
-          if (currentSource.getValue() instanceof SourceFileContent) {
-            SourceFileContent otherSource = (SourceFileContent) currentSource.getValue();
-            try {
-              writeToFile(generateFiles, generatedFileHashes, currentSource.getKey(), otherSource.getCode(generatedClasses, interp, currentSource.getKey()));
-
-            } catch (ClassNotFoundException e) {
-              throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + currentSource.getKey());
-            }
-          }
-
-    if (source.isEmpty()) // if empty flag ist set, do not compile source
-      return;
-
-    writeToFile(generateFiles, generatedFileHashes, outFile, source.getCode(generatedClasses, interp, outFile));
-
-    compile(javaOutFiles, bin, path, generateFiles);
-    for (Path cl : generatedClasses)
-      generatedFileHashes.put(cl, FileCommands.fileHash(cl));
-
-  }
-
-  private void writeToFile(boolean generateFiles, Map<Path, Integer> generatedFileHashes, Path file, String content) throws IOException {
-    if (generateFiles) {
-      FileCommands.writeToFile(file, content);
-      generatedFileHashes.put(file, FileCommands.fileHash(file));
+    try {
+      SourceFileContent.Generated generated = source.getCode(outFile);
+      String code = generated.code;
+      checkRequiredPaths(generated.requiredPaths, generatedFiles);
+      if (!source.isEmpty()) {
+        writeToFile(generateFiles, generatedFileHashes, outFile, code);
+        outFiles.add(outFile);
+      }
+    } catch (ClassNotFoundException e) {
+      throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + outFile);
     }
+    
+    if (!outFiles.isEmpty())
+      this.compile(outFiles, bin, path, generateFiles);
+		for (Path cl : generatedFiles)
+			generatedFileHashes.put(cl, FileCommands.fileHash(cl));
+	}
+
+	private void checkRequiredPaths(List<String> requiredPaths, Set<RelativePath> generatedFiles) throws ClassNotFoundException {
+	  List<String> failed = new LinkedList<String>();
+	  for (String requiredPath : requiredPaths) {
+	    boolean ok = false;
+	    for (RelativePath generatedFile : generatedFiles)
+	      if (generatedFile.getRelativePath().equals(requiredPath + "." + getFactoryForLanguage().getGeneratedFileExtension())) {
+	        ok = true;
+	        break;
+	      }
+	    if (!ok)
+	      failed.add(requiredPath);
+	  }
+	  
+	  if (!failed.isEmpty())
+	    throw new ClassNotFoundException(StringCommands.printListSeparated(failed, ", "));
   }
 
-  protected void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IErrorLogger errorLog) {
-    errorLog.logError(msg);
-    ATermCommands.setErrorMessage(toplevelDecl, msg);
+  private void writeToFile(boolean generateFiles, Map<Path, Integer> generatedFileHashes, Path file, String content) throws IOException { 
+		if (generateFiles) {
+			FileCommands.writeToFile(file, content);
+			generatedFileHashes.put(file, FileCommands.fileHash(file));
+		}
+	}
+
+  public          String getImportLocalName(IStrategoTerm decl) { return null; }
+  public          boolean isTransformationApplication(IStrategoTerm decl) { return false; }
+  public          IStrategoTerm getTransformationApplication(IStrategoTerm decl) { return null; }
+  public          String getModulePath(IStrategoTerm decl) { return null; }
+  public          IStrategoTerm reconstructImport(String modulePath, IStrategoTerm original) { return null; }
+	
+	public          String getModelName(IStrategoTerm decl) throws IOException { return null; }
+	public          String getTransformationName(IStrategoTerm decl) throws IOException { return null; }
+  public          IStrategoTerm getTransformationBody(IStrategoTerm decl) { return null; }
+  
+	protected void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IErrorLogger errorLog) {
+	  errorLog.logError(msg);
+	  ATermCommands.setErrorMessage(toplevelDecl, msg);
+  }
+
+	public abstract boolean isModuleResolvable(String relModulePath);
+
+  /**
+   * Computes the path of the given transformation application term.
+   */
+  public String getTransformedModulePath(IStrategoTerm appl) {
+    if (ATermCommands.isApplication(appl, "TransApp")) {
+      String trans = getTransformedModulePath(appl.getSubterm(0));
+      String model = getTransformedModulePath(appl.getSubterm(1));
+      return model + "__" + trans.replace('/', '_');
+    }
+    return getModulePath(appl);
   }
 }

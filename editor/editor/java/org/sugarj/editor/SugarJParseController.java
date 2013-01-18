@@ -25,10 +25,10 @@ import org.strategoxt.imp.runtime.parser.SGLRParseController;
 import org.sugarj.LanguageLibRegistry;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
+import org.sugarj.common.StringCommands;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.driver.StringCommands;
 
 public class SugarJParseController extends SugarJParseControllerGenerated {
   
@@ -41,13 +41,12 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
   public IParseController getWrapped() {
     initDescriptor();
     IParseController result = super.getWrapped();
+    
     if (result instanceof SGLRParseController) {
       JSGLRI parser = ((SGLRParseController) result).getParser();
       if (!(parser instanceof SugarJParser)) {
         sugarjParser = new SugarJParser(parser);
-
-        sugarjParser.setEnvironment(environment);
-        
+        sugarjParser.setEnvironment(environment);        
         ((SGLRParseController) result).setParser(sugarjParser);
       }
     }
@@ -129,12 +128,17 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
     super.initialize(filePath, project, handler);
     
     if (project != null)
-      environment = makeProjectEnvironment(project.getRawProject());
+      initializeEnvironment(project.getRawProject());
+  }
+  
+  private void initializeEnvironment(IProject project) {
+    if (project != null)
+      environment = makeProjectEnvironment(project);
     
     if (sugarjParser != null)
       sugarjParser.setEnvironment(environment);
   }
-  
+
   public static Environment makeProjectEnvironment(IProject project) {
     IJavaProject javaProject = JavaCore.create(project);
     if (javaProject == null)
@@ -152,7 +156,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
   }
   
   private static Environment makeProjectEnvironment(IJavaProject project) throws JavaModelException {
-    Environment env = new Environment();
+    Environment env = new Environment(false);
     
     IPath fullPath = project.getProject().getFullPath();
     Path root = new AbsolutePath(project.getProject().getLocation().makeAbsolute().toString());
@@ -168,10 +172,12 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
       Path includePath; 
       if (fullPath.isPrefixOf(path))
         includePath = p.isEmpty() ? root : new RelativePath(root, p);
-      else
+      else if (externalPath)
         includePath = new AbsolutePath(p);
+      else
+        includePath = new RelativePath(root, p);
       
-      if (fragment.getKind() == IPackageFragmentRoot.K_SOURCE)
+      if (fragment.getKind() == IPackageFragmentRoot.K_SOURCE && fragment.getParent().equals(project))
         env.getSourcePath().add(includePath);
       else if (fragment.getKind() == IPackageFragmentRoot.K_BINARY)
         env.getIncludePath().add(includePath);
@@ -181,7 +187,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
       IJavaProject reqJavaProject = JavaCore.create(project.getProject().getWorkspace().getRoot().getProject(reqProject));
       if (reqJavaProject != null) {
         Environment projEnv = makeProjectEnvironment(reqJavaProject);
-        env.getSourcePath().addAll(projEnv.getSourcePath());
+//        env.getSourcePath().addAll(projEnv.getSourcePath());
         env.getIncludePath().add(projEnv.getBin());
       }
     }
@@ -196,7 +202,6 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
       environment.setCacheDir(new RelativePath(environment.getRoot(), ".sugarjcache"));
     
     environment.setAtomicImportParsing(true);
-    environment.setGenerateJavaFile(true);
     
     environment.setNoChecking(true);
 

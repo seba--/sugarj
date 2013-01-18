@@ -54,7 +54,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 		
 	@Override
-	public List<File> getGrammars() {
+	public List<File> getDefaultGrammars() {
 		List<File> grammars = new LinkedList<File>(getDefaultGrammars());
 		grammars.add(ensureFile("org/sugarj/languages/SugarProlog.def"));
 		grammars.add(ensureFile("org/sugarj/languages/Prolog.def"));
@@ -118,7 +118,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 	  public static void main(String args[]) throws URISyntaxException {
 		PrologLib pl = new PrologLib();
 		
-		for (File file : pl.getGrammars()) 
+		for (File file : pl.getDefaultGrammars()) 
 			exists(file);
 
 
@@ -209,8 +209,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 		return pptable;
 	}
 	
-	@Override
-	public String prettyPrint(IStrategoTerm term) throws IOException {
+	public String prettyPrint(IStrategoTerm term) {
 		IStrategoTerm ppTable = initializePrettyPrinter(interp.getCompiledContext());
 		return ATermCommands.prettyPrint(ppTable, term, interp);
 	}
@@ -219,8 +218,6 @@ public class PrologLib extends LanguageLib implements Serializable {
 	public void setupSourceFile(RelativePath sourceFile, Environment environment) {
 		prologOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + PrologLibFactory.getInstance().getGeneratedFileExtension());
 		prologSource = new PrologSourceFileContent(this);
-		prologSource.setOptionalImport(false);
-		
 	}
 
 
@@ -275,7 +272,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 	
 	@Override
-	public String getImportedModulePath(IStrategoTerm toplevelDecl) throws IOException {
+	public String getImportedModulePath(IStrategoTerm toplevelDecl) {
 		String modulePath = prettyPrint(toplevelDecl.getSubterm(0).getSubterm(0));
 		
 		return modulePath;		
@@ -286,7 +283,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 	
 	@Override
-	public void addImportModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
+	public void addImportedModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
 		
 		String importedModuleName = prettyPrint(toplevelDecl.getSubterm(0).getSubterm(0));
 		PrologModuleImport imp = prologSource.getImport(importedModuleName, toplevelDecl);

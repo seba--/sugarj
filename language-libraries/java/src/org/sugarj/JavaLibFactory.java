@@ -22,7 +22,7 @@ public class JavaLibFactory extends LanguageLibFactory {
 
   @Override
   public String getVersion() {
-    return "java-0.1";
+    return "java-0.2";
   }
 
   @Override

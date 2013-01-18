@@ -1,0 +1,46 @@
+package entity;
+
+import template.Language;
+
+import entity.Metamodel;
+import org.sugarj.languages.Java;
+
+public template ToJava {
+  $$first-upper = string-as-chars([to-upper|id])
+  $$sort-to-type : SimpleSort(name) -> ClassOrInterfaceType(TypeName(name), None)
+  $$sort-to-type : GenericSort(tyop, tyargs) ->
+                   ClassOrInterfaceType(TypeName(tyop),
+                                        Some(TypeArgs(<map(sort-to-type)> tyargs)))
+  
+  $pkg = collect-one(?PackageDec(_,<id>))
+  $classname = collect-one(?ModelDecHead(_,<id>,_))
+
+  package $pkg;
+
+  $*{?CompilationUnit(_,<id>,_)}
+
+  public class $classname {
+    $for(Property(name, sort) in collect-all(?Property(_,_))) {
+      $type = <sort-to-type> sort
+      $uppername = <Id(first-upper)> name
+      
+      private $type $name; 
+
+      public $type get#$uppername() {
+        return $name;
+      }
+
+      public void set#$uppername($type $name) {
+        this.$name = $name;
+      }
+    }
+
+    public $classname($for(Property(name, sort) in collect-all(?Property(_,_))) {
+                        ${<sort-to-type> sort} $name
+                      }) {
+      $for(Property(name, _) in collect-all(?Property(_,_))) {
+        this.$name = $name;
+      }
+    }
+  }
+}

@@ -10,7 +10,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Set;
 
-import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.sugarj.LanguageLib;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
@@ -35,20 +34,15 @@ public class ModuleSystemCommands {
      * @return true iff a class file existed.
      * @throws IOException
      */
-    public static boolean importBinFile(String modulePath, IStrategoTerm toplevelDecl, Environment environment, LanguageLib langLib) throws IOException {
-      RelativePath clazz = searchFile(modulePath, langLib.getFactoryForLanguage().getGeneratedFileExtension(), environment);
-      if (clazz == null && !langLib.isModuleResolvable(modulePath))
-        return false;
+    public static RelativePath importBinFile(String modulePath, Environment environment, LanguageLib langLib, Result driverResult) throws IOException {
+      RelativePath clazz = searchFile(modulePath, langLib.getFactoryForLanguage().getGeneratedFileExtension(), environment, driverResult);
+      if (clazz == null)
+        return null;
       
-      langLib.addImportModule(toplevelDecl, true);
-      return true;
+      log.log("Found language-specific declaration for " + modulePath, Log.IMPORT);
+      return clazz;
     }
     
-    public static void registerSearchedClassFiles(String modulePath, Result driverResult, Environment environment, LanguageLib langLib) throws IOException {
-      registerSearchedFiles(modulePath, langLib.getFactoryForLanguage().getGeneratedFileExtension(), driverResult, environment);
-    }
-
-  
   /**
    * 
    * @param modulePath
@@ -58,8 +52,8 @@ public class ModuleSystemCommands {
    * @return path to new grammar or null if no sdf file existed.
    * @throws IOException 
    */
-  public static RelativePath importSdf(String modulePath, Environment environment) throws IOException {
-    RelativePath sdf = searchFile(modulePath, "sdf", environment);
+  public static RelativePath importSdf(String modulePath, Environment environment, Result driverResult) {
+    RelativePath sdf = searchFile(modulePath, "sdf", environment, driverResult);
     
     if (sdf == null)
       return null;
@@ -67,11 +61,6 @@ public class ModuleSystemCommands {
     log.log("Found syntax definition for " + modulePath, Log.IMPORT);
     return sdf;
   }
-  
-  public static void registerSearchedSdfFiles(String modulePath, Result driverResult, Environment environment) throws IOException {
-    registerSearchedFiles(modulePath, "sdf", driverResult, environment);
-  }
-
   
   /**
    * 
@@ -82,8 +71,8 @@ public class ModuleSystemCommands {
    * @return path to new Stratego module or null of no str file existed
    * @throws IOException 
    */
-  public static RelativePath importStratego(String modulePath, Environment environment) throws IOException {
-    RelativePath str = searchFile(modulePath, "str", environment);
+  public static RelativePath importStratego(String modulePath, Environment environment, Result driverResult) {
+    RelativePath str = searchFile(modulePath, "str", environment, driverResult);
     
     if (str == null)
       return null;
@@ -92,11 +81,6 @@ public class ModuleSystemCommands {
     return str;
   }
   
-  public static void registerSearchedStrategoFiles(String modulePath, Result driverResult, Environment environment) throws IOException {
-    registerSearchedFiles(modulePath, "str", driverResult, environment);
-  }
-
-  
   /**
    * 
    * @param modulePath
@@ -104,15 +88,15 @@ public class ModuleSystemCommands {
    * @return true iff a serv file existed.
    * @throws IOException
    */
-  public static boolean importEditorServices(String modulePath, Result driverResult, Environment environment) throws IOException {
-    RelativePath serv = searchFile(modulePath, "serv", environment);
+  public static boolean importEditorServices(String modulePath, Environment environment, Result driverResult) throws IOException {
+    RelativePath serv = searchFile(modulePath, "serv", environment, driverResult);
     
     if (serv == null)
       return false;
     
     BufferedReader reader = null;
     
-    log.beginTask("Incorporation", "Incorporate the imported editor services " + modulePath, Log.IMPORT);
+    log.beginTask("Incorporation", "Found editor services for " + modulePath, Log.IMPORT);
     try {
       reader = new BufferedReader(new FileReader(serv.getFile()));
       String line;
@@ -129,17 +113,26 @@ public class ModuleSystemCommands {
     }
   }
   
-  public static void registerSearchedEditorServicesFiles(String modulePath, Result driverResult, Environment environment) throws IOException {
-    registerSearchedFiles(modulePath, "serv", driverResult, environment);
+  public static RelativePath importModel(String modulePath, Environment environment, Result driverResult) {
+    RelativePath model = searchFile(modulePath, "model", environment, driverResult);
+    
+    if (model == null)
+      return null;
+
+    log.log("Found model for " + modulePath, Log.IMPORT);
+    return model;
+  }
+  
+  public static RelativePath locateSourceFile(String path, Set<Path> sourcePath) {
+    return locateSourceFile (FileCommands.dropExtension(path), FileCommands.getExtension(path), sourcePath);
   }
 
-
-  public static RelativePath locateSourceFile(String path, Set<Path> sourcePath) {
-    if (path.startsWith("org/sugarj"))
-      return null;
-    
-    RelativePath result = searchFileInSourceLocationPath(FileCommands.dropExtension(path), FileCommands.getExtension(path), sourcePath);
-        
+  public static RelativePath locateSourceFileOrModel(String modulePath, Set<Path> sourcePath, LanguageLib langLib, Environment environment) {
+    RelativePath result = locateSourceFile(modulePath, langLib.getFactoryForLanguage().getSugarFileExtension(), sourcePath);
+    if (result == null)
+      result = searchBinFile(modulePath, "model", environment, null);
+    if (result == null && langLib.getFactoryForLanguage().getOriginalFileExtension() != null)
+      result = locateSourceFile(modulePath, langLib.getFactoryForLanguage().getOriginalFileExtension(), sourcePath);
     return result;
   }
 
@@ -147,48 +140,39 @@ public class ModuleSystemCommands {
     if (modulePath.startsWith("org/sugarj"))
       return null;
     
-    RelativePath result = searchFileInSourceLocationPath(modulePath, extension, sourcePath);
-        
-    return result;
+    return searchFileInSourceLocationPath(modulePath, extension, sourcePath, null);
   }
-  
-  public static RelativePath locateSourceFile(String modulePath, Set<Path> sourcePath, LanguageLib langLib) {
-    if (modulePath.startsWith("org/sugarj"))
-      return null;
-    
-    RelativePath result = searchFileInSourceLocationPath(modulePath, langLib.getFactoryForLanguage().getSugarFileExtension(), sourcePath);
-    if (result == null && langLib.getFactoryForLanguage().getOriginalFileExtension() != null)
-      result = searchFileInSourceLocationPath(modulePath, langLib.getFactoryForLanguage().getOriginalFileExtension(), sourcePath);
-        
-    return result;
-  }
-  
   
   /**
+   * Registers searched files in the driverResult. Existing and non-existent files are registers,
+   * so that the emergence of a file triggers recompilation.
    * 
-   * @param relativePath
-   * @param fileExtension including leading "."
-   * @return URI or null.
+   * @param relativePath without extension
+   * @param fileExtension without leading "."
+   * @return RelativePath or null.
+   * @throws IOException 
    */
-  public static RelativePath searchFile(String relativePath, String fileExtension, Environment environment) {
-    RelativePath p = searchBinFile(relativePath, fileExtension, environment);
+  public static RelativePath searchFile(String relativePath, String fileExtension, Environment environment, Result driverResult) {
+    RelativePath p = searchBinFile(relativePath, fileExtension, environment, driverResult);
     if (p != null)
       return p;
     
-    return searchFileInSearchPath(relativePath, fileExtension, environment.getIncludePath());
+    return searchFileInSearchPath(relativePath, fileExtension, environment.getIncludePath(), driverResult);
   }
 
-  private static RelativePath searchBinFile(String relativePath, String extension, Environment environment) {
+  private static RelativePath searchBinFile(String relativePath, String extension, Environment environment, Result driverResult) {
     RelativePath result = environment.createBinPath(relativePath + "." + extension);
+    if (driverResult != null)
+      driverResult.addFileDependency(result);
     if (result.getFile().exists())
       return result;
     
     return null;
   }
   
-  private static RelativePath searchFileInSearchPath(String relativePath, String extension, Set<Path> searchPath) {
+  private static RelativePath searchFileInSearchPath(String relativePath, String extension, Set<Path> searchPath, Result driverResult) {
     for (Path base : searchPath) {
-      RelativePath p = searchFile(base, relativePath, extension);
+      RelativePath p = searchFile(base, relativePath, extension, driverResult);
       if (p != null)
         return p;
     }
@@ -196,9 +180,9 @@ public class ModuleSystemCommands {
     return null;
   }
 
-  private static RelativePath searchFileInSourceLocationPath(String relativePath, String extension, Set<Path> searchPath) {
+  private static RelativePath searchFileInSourceLocationPath(String relativePath, String extension, Set<Path> searchPath, Result driverResult) {
     for (Path loc : searchPath) {
-      RelativePath p = searchFile(loc, relativePath, extension);
+      RelativePath p = searchFile(loc, relativePath, extension, driverResult);
       if (p != null)
         return p;
     }
@@ -206,14 +190,15 @@ public class ModuleSystemCommands {
     return null;
   }
 
-  @SuppressWarnings("resource")
-  private static RelativePath searchFile(Path base, String relativePath, String extension) {
+  private static RelativePath searchFile(Path base, String relativePath, String extension, Result driverResult) {
     if (relativePath.startsWith(base.getAbsolutePath())) {
       int sepOffset = relativePath.endsWith(Environment.sep) ? 0 : 1;
       relativePath = relativePath.substring(base.getAbsolutePath().length() + sepOffset);
     }
     
     RelativePath p = new RelativePath(base, relativePath + "." + extension);
+    if (driverResult != null)
+      driverResult.addFileDependency(p);
     if (p.getFile().exists())
       return p;
     
@@ -237,30 +222,17 @@ public class ModuleSystemCommands {
     return null;
   }
   
-  
-  /**
-   * Registers searched files in the driverResult. Existing as well as non-existent files are registers,
-   * so that the emergence of a file triggers recompilation.
-   * 
-   * @param relativePath
-   * @param extension
-   * @param driverResult
-   * @param environment
-   * @throws IOException
-   */
-  public static void registerSearchedFiles(String relativePath, String extension, Result driverResult, Environment environment) throws IOException {
-    RelativePath binFile = environment.createBinPath(relativePath + "." + extension);
-    driverResult.addFileDependency(binFile);
+  public static Result locateResult(String modulePath, Environment environment) {
+    Path dep = ModuleSystemCommands.searchFile(modulePath, "dep", environment, null);
+    Result res = null;
     
-    for (Path searchPath : environment.getIncludePath()) {
-      String relPath = relativePath;
-      if (relPath.startsWith(searchPath.getAbsolutePath())) {
-        int sepOffset = relativePath.endsWith(Environment.sep) ? 0 : 1;
-        relPath = relPath.substring(searchPath.getAbsolutePath().length() + sepOffset);
+    if (dep != null)
+      try {
+        res = Result.readDependencyFile(dep);
+      } catch (IOException e) {
+        log.logErr("could not read dependency file " + dep, Log.DETAIL);
       }
-      
-      RelativePath p = new RelativePath(searchPath, relPath + "." + extension);
-      driverResult.addFileDependency(p);
-    }
+    
+    return res;
   }
 }

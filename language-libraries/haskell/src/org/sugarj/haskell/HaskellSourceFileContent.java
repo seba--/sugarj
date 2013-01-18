@@ -1,25 +1,16 @@
 package org.sugarj.haskell;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
-import org.strategoxt.HybridInterpreter;
-import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.Path;
-import org.sugarj.common.path.RelativePath;
 import org.sugarj.languagelib.SourceFileContent;
 import org.sugarj.languagelib.SourceImport;
 
 public class HaskellSourceFileContent extends SourceFileContent {
-
-  private static final long serialVersionUID = -1793669825816782903L;
-
   private String moduleDecl;
   private List<SourceImport> imports = new LinkedList<SourceImport>();
   private List<SourceImport> checkedImports = new LinkedList<SourceImport>();
-  private boolean importsOptional = false;
   private List<String> bodyDecls = new LinkedList<String>();
  
   private boolean hasNonhaskellDecl;
@@ -48,18 +39,12 @@ public class HaskellSourceFileContent extends SourceFileContent {
     checkedImports.add(imp);
   }
 
-  public void setOptionalImport(boolean isOptional) {
-    this.importsOptional = isOptional;
-  }
-
   public void addBodyDecl(String bodyDecl) {
     bodyDecls.add(bodyDecl);
   }
 
-  public String getCode(Set<RelativePath> generatedFiles, HybridInterpreter interp, Path outFile) throws ClassNotFoundException, IOException {
-    List<String> modules = new LinkedList<String>();
-    for (RelativePath p : generatedFiles)
-      modules.add(FileCommands.dropExtension(p.getRelativePath()));
+  public SourceFileContent.Generated getCode(Path outFile) {
+    List<String> requiredPaths = new LinkedList<String>();
     
     StringBuilder code = new StringBuilder();
     code.append(moduleDecl);
@@ -68,16 +53,15 @@ public class HaskellSourceFileContent extends SourceFileContent {
     for (SourceImport imp : checkedImports)
       code.append(imp.getPrettyPrint()).append("\n");
 
-    for (SourceImport imp : imports)
-      if (modules.contains(imp.getPath()))
-        code.append(imp.getPrettyPrint()).append("\n");
-      else if (!importsOptional)
-        throw new ClassNotFoundException(imp.getPath());
+    for (SourceImport imp : imports) {
+      code.append(imp.getPrettyPrint()).append("\n");
+      requiredPaths.add(imp.getPath());
+    }
 
     for (String bodyDecl : bodyDecls)
       code.append(bodyDecl).append("\n");
 
-    return code.toString();
+    return new SourceFileContent.Generated(code.toString(), requiredPaths);
   }
 
   public int hashCode() {
@@ -92,7 +76,6 @@ public class HaskellSourceFileContent extends SourceFileContent {
     return other.moduleDecl.equals(moduleDecl) 
         && other.checkedImports.equals(checkedImports)
         && other.imports.equals(imports)
-        && other.importsOptional == importsOptional
         && other.bodyDecls.equals(bodyDecls);
   }
 

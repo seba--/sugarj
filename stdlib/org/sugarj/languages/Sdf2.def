@@ -4,67 +4,12 @@ module languages/sdf2/syntax/Aliases
 imports languages/sdf2/syntax/Kernel
 
 exports
-  sorts WATER WATERTOKEN WATERTOKENSTART WATERTOKENSEPARATOR WATERTOKENSTAR
-
-  lexical syntax
-    ~[A-Za-z0-9\_]                 -> WATERTOKENSTART     {recover, avoid}
-    WATERTOKENSTART [A-Za-z0-9\_]* -> WATERTOKEN          
-    ~[A-Za-z0-9\_\ \t\12\r\n\*]    -> WATERTOKENSEPARATOR {recover, avoid}
-    "*"                            -> WATERTOKENSTAR      {recover, avoid}
-    WATERTOKEN                     -> WATER               
-    WATERTOKENSEPARATOR            -> WATER               
-    WATERTOKENSTAR                 -> WATER               
-                                   -> WATEREOF            
-
-  lexical restrictions
-    WATERTOKEN -/- [A-Za-z0-9\_]
-    WATERTOKENSTAR -/- [\/]
-
-  context-free syntax
-    WATER -> LAYOUT {cons("WATER")}
-
-  (
-
-  sorts WATEREOF
-
-  lexical restrictions
-    WATEREOF -/- ~[]
-
-  lexical syntax
-    %% Lexical insertion recovery rules                            
-                                               -> "]]"             {recover, cons("INSERTION")}
-                                               -> "+"              {recover, cons("INSERTION")}
-                                               -> "*"              {recover, cons("INSERTION")}
-                                               -> "id"             {recover, cons("INSERTION")}
-    "%%"                                       -> INSERTSTART1     {recover}
-    INSERTSTART1 line:~[\n]* WATEREOF          -> LAYOUT           {cons("INSERTEND")}
-    "%"                                        -> INSERTOPENQUOTE0 {recover}
-    INSERTOPENQUOTE0 content:~[\%\n]+ "\n"     -> LAYOUT           {cons("INSERTEND")}
-    INSERTOPENQUOTE0 content:~[\%\n]+ WATEREOF -> LAYOUT           {cons("INSERTEND")}
-    "%"                                        -> INSERTSTART0     {recover}
-    INSERTSTART0 content:~[\%\n]+ WATEREOF     -> LAYOUT           {cons("INSERTEND")}
-                                               -> ")"              {recover, cons("INSERTION")}
-                                               -> "e"              {recover, cons("INSERTION")}
-                                               -> ">"              {recover, cons("INSERTION")}
-                                               -> "]"              {recover, cons("INSERTION")}
-                                               -> "}"              {recover, cons("INSERTION")}
-                                               -> ","              {recover, cons("INSERTION")}
-
-  syntax
-    %% Kernel syntax insertion recovery rules   
-
-  )
-
-  (
-
   sorts Alias Aliases
 
   context-free syntax
     "aliases" Aliases              -> Grammar {cons("aliases")}
     Symbol arrow:"->" alias:Symbol -> Alias   {cons("alias")}
     list:Alias*                    -> Aliases 
-
-  )
 
 module languages/sdf2/syntax/Restrictions
 imports languages/sdf2/syntax/CC
@@ -340,11 +285,13 @@ imports basic/Whitespace
 
 exports
   lexical syntax
-    "%%" line:~[\n]* "\n"    -> LAYOUT {cons("line"), category("Comment")}
-    "%" content:~[\%\n]+ "%" -> LAYOUT {cons("nested"), category("Comment")}
+    "%%" line:~[\n]* "\n"    -> Comment {cons("line"), category("Comment")}
+    "%" content:~[\%\n]+ "%" -> BlockComment {cons("nested"), category("Comment")}
+    Comment -> LAYOUT
+    BlockComment -> LAYOUT
 
   context-free restrictions
-    LAYOUT? -/- [\%]
+    BlockComment -/- [\%]
 
 module languages/sdf2/syntax/Symbols
 imports basic/Comments
@@ -405,8 +352,8 @@ exports
   lexical syntax
 %%    [\ \t\n\r] -> LAYOUT {cons("whitespace")}
 
-  context-free restrictions
-    LAYOUT? -/- [\ \t\n\r]
+%%  context-free restrictions
+%%    LAYOUT? -/- [\ \t\n\r]
 
 module languages/aterm/syntax/IntCon
 imports basic/Whitespace basic/NatCon
@@ -525,7 +472,6 @@ exports
     "syntax" "variables" "module" "imports" "exports" "hiddens" "left" "right"
     "assoc" "non-assoc" "bracket" "sorts" -/- [A-Za-z0-9]
     <NatCon-CF> -/- [0-9]
-    <LAYOUT?-CF> -/- [\ \t\n\%]
     <NumChar-CF> -/- [0-9]
     <ModuleName-CF> -/- [A-Za-z0-9\_\-]
 

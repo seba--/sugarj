@@ -1,0 +1,112 @@
+/**
+ * @author  Martin Bravenboer
+ * 
+ * copied from
+ *   https://svn.strategoxt.org/repos/StrategoXT/strategoxt/trunk/stratego-libraries/aterm/lib/stratego/aterm/Explode.str
+ * 
+ * use 
+ *   import libstratego-aterm
+ * instead as soon as this bug in STRJ is fixed: http://yellowgrass.org/issue/Spoofax/487
+ */
+module org/sugarj/transformations/ATerm
+imports
+  org/sugarj/languages/Sdf2
+  libstratego-lib
+
+strategies
+/*
+ * use 
+ *   import libstratego-aterm
+ * instead as soon as this bug in STRJ is fixed: http://yellowgrass.org/issue/Spoofax/487
+ */
+rules
+  desugar : ToModelTerm(t) -> <implode-aterm> t
+
+  explode-aterm =
+       aterm-explode-annotated
+    <+ aterm-explode-list
+    <+ aterm-explode-int
+    <+ aterm-explode-fun
+    <+ aterm-explode-appl
+
+  implode-aterm =
+       aterm-implode-annotated
+    <+ aterm-implode-list
+    <+ aterm-implode-int
+    <+ aterm-implode-fun
+    <+ aterm-implode-appl
+
+rules
+
+  /**
+   * list
+   */
+  aterm-explode-list :
+    [x*]{} -> list(<map(explode-aterm)> x*)
+
+  aterm-implode-list :
+    list(x*) -> <map(implode-aterm)> x*
+
+  /**
+   * integer
+   */
+  aterm-explode-int :
+    i{} -> int(natural(<int-to-string> i))
+    where
+      <is-int> i
+
+  aterm-implode-int :
+    int(natural(s)) -> <string-to-int> s
+
+  /**
+   * just fun
+   */
+  aterm-explode-fun :
+    s#([]){} -> fun(<aterm-explode-afun> s)
+
+  aterm-implode-fun :
+    fun(s1) -> s2#([])
+    where
+      <aterm-implode-afun> s1 => s2
+
+  /**
+   * appl
+   */
+  aterm-explode-appl :
+    s#([x*]){} -> appl(<aterm-explode-afun> s, <map(explode-aterm)> x*)
+
+  aterm-implode-appl :
+    appl(s1, x*) -> s2#(<map(implode-aterm)> x*)
+    where
+      <aterm-implode-afun> s1 => s2
+
+  /**
+   * afun
+   */
+  aterm-explode-afun :
+    s -> unquoted(s)
+    where
+      <not(is-double-quoted)> s
+
+  aterm-explode-afun :
+    s -> quoted(s)
+    where
+      <is-double-quoted> s
+
+  aterm-implode-afun :
+    unquoted(s) -> s
+
+  aterm-implode-afun :
+    quoted(s) -> s
+
+  /**
+   * Anotations
+   */
+  aterm-explode-annotated :
+    t{^as@[_ | _]} -> annotated(<explode-aterm> t{}, default(<map(explode-aterm)> as))
+
+  aterm-implode-annotated :
+    annotated(t, default(ts)) -> t'{^ts'}
+    where 
+      t'  := <implode-aterm> t
+    ; ts' := <map(implode-aterm)> ts

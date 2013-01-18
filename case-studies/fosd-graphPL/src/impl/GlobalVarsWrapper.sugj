@@ -1,0 +1,12 @@
+package impl;
+
+import variability.Java;
+import java.util.LinkedList;
+
+import impl.Vertex;
+
+
+#ifdef(Bfs)
+public variable class GlobalVarsWrapper {
+  public static LinkedList<Vertex> queue=new LinkedList<Vertex>();
+}

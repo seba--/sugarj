@@ -4,70 +4,6 @@ module RefactoringsService
 imports SemanticServices BuildersService
 
 exports
-  sorts WATER WATERTOKEN WATERTOKENSTART WATERTOKENSEPARATOR WATERTOKENSTAR
-
-  lexical syntax
-    ~[A-Za-z0-9\_]                 -> WATERTOKENSTART     {recover, avoid}
-    WATERTOKENSTART [A-Za-z0-9\_]* -> WATERTOKEN          
-    ~[A-Za-z0-9\_\ \t\12\r\n\*]    -> WATERTOKENSEPARATOR {recover, avoid}
-    "*"                            -> WATERTOKENSTAR      {recover, avoid}
-    WATERTOKEN                     -> WATER               
-    WATERTOKENSEPARATOR            -> WATER               
-    WATERTOKENSTAR                 -> WATER               
-                                   -> WATEREOF            
-
-  lexical restrictions
-    WATERTOKEN -/- [A-Za-z0-9\_]
-    WATERTOKENSTAR -/- [\/]
-
-  context-free syntax
-    WATER -> LAYOUT {cons("WATER")}
-
-  (
-
-  sorts WATEREOF
-
-  lexical restrictions
-    WATEREOF -/- ~[]
-
-  lexical syntax
-    %% Lexical insertion recovery rules                       
-                                          -> "pp-table"       {recover, cons("INSERTION")}
-                                          -> "pretty-print"   {recover, cons("INSERTION")}
-                                          -> "refactoring"    {recover, cons("INSERTION")}
-                                          -> "token"          {recover, cons("INSERTION")}
-                                          -> "italic"         {recover, cons("INSERTION")}
-                                          -> "bold"           {recover, cons("INSERTION")}
-                                          -> "all"            {recover, cons("INSERTION")}
-                                          -> "provider"       {recover, cons("INSERTION")}
-                                          -> "on"             {recover, cons("INSERTION")}
-                                          -> ","              {recover, cons("INSERTION")}
-                                          -> "name"           {recover, cons("INSERTION")}
-                                          -> "id"             {recover, cons("INSERTION")}
-                                          -> "extensions"     {recover, cons("INSERTION")}
-                                          -> "description"    {recover, cons("INSERTION")}
-                                          -> "table"          {recover, cons("INSERTION")}
-                                          -> "start"          {recover, cons("INSERTION")}
-                                          -> "url"            {recover, cons("INSERTION")}
-                                          -> "extends"        {recover, cons("INSERTION")}
-                                          -> "aliases"        {recover, cons("INSERTION")}
-                                          -> "*"              {recover, cons("INSERTION")}
-                                          -> "unmanaged"      {recover, cons("INSERTION")}
-    "\""                                  -> INSERTOPENQUOTE0 {recover}
-    INSERTOPENQUOTE0 StringChar* "\n"     -> STRING           {cons("INSERTEND")}
-    INSERTOPENQUOTE0 StringChar* WATEREOF -> STRING           {cons("INSERTEND")}
-    "/*"                                  -> INSERTSTART0     {recover}
-    INSERTSTART0 CommChar* WATEREOF       -> LongCom          {cons("INSERTEND")}
-                                          -> "module"         {recover, cons("INSERTION")}
-                                          -> "imports"        {recover, cons("INSERTION")}
-
-  syntax
-    %% Kernel syntax insertion recovery rules   
-
-  )
-
-  (
-
   syntax
     "refactorings" <SectionName-LEX> <LAYOUT?-CF> <RefactoringRule*-CF> -> <Section-CF>      {cons("Refactorings")}
     "refactorings"                                                   -> <ReservedName-CF> 
@@ -76,8 +12,6 @@ exports
     "pp-table" ":" StrategoCall                                            -> RefactoringRule {cons("PPTable")}
     "pretty-print" ":" StrategoCall                                        -> RefactoringRule {cons("PrettyPrint")}
     "refactoring" SemanticNode* ":" String "=" StrategoCall BuilderOption* -> RefactoringRule {cons("Refactoring")}
-
-  )
 
 module BuildersService
 imports SemanticServices
@@ -345,29 +279,12 @@ exports
     BACKSLASH                       -> StringChar  
     "\\"                            -> BACKSLASH   
     ~[\n\r]*                        -> SectionName 
-    [\t\ \n\r]                      -> Ws          
-    "//" ~[\n]* [\n] | Eof          -> ShortCom    
-    "/*" CommChar* "*/"             -> LongCom     
-    ~[\*]                           -> CommChar    
-    Asterisk                        -> CommChar    
-    "*"                             -> Asterisk    
-%%    Ws                              -> LAYOUT      
-    ShortCom                        -> LAYOUT      
-    LongCom                         -> LAYOUT      
-                                    -> Eof         
 
   lexical restrictions
     Int -/- [0-9]
     Id -/- [a-zA-Z0-9\'\-\_]
     SectionName -/- ~[\n\r]
-    Asterisk -/- [\/]
     BACKSLASH -/- [\"]
-    Eof -/- ~[]
-
-  context-free restrictions
-    LAYOUT? -/- [\ \t\n\r]
-    LAYOUT? -/- [\/] . [\*]
-    LAYOUT? -/- [\/] . [\/]
 
   context-free syntax
     Id                     -> Sort          {cons("Sort")}
@@ -454,12 +371,6 @@ imports EditorService
             Constructor      => EditorServiceConstructor
             String           => EditorServiceString
             Sort             => EditorServiceSort
-            Eof              => EditorServiceEof
-            Asterisk         => EditorServiceAsterisk
-            CommChar         => EditorServiceCommChar
-            LongCom          => EditorServiceLongCom
-            ShortCom         => EditorServiceShortCom
-            Ws               => EditorServiceWs
             SectionName      => EditorServiceSectionName
             BACKSLASH        => EditorServiceBACKSLASH
             StringChar       => EditorServiceStringChar

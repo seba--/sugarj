@@ -1,0 +1,29 @@
+package variability;
+
+import variability.FeatureExpressions;
+import variability.Model;
+import org.sugarj.languages.Java;
+
+public sugar Config { 
+
+ context-free syntax 
+  //config declaration
+  AnnoOrSugarMod* "config" JavaId "for" JavaId "{" ConfigDeclaration*  "}" -> ToplevelDeclaration {cons("ConfigDecl")}
+  "enable" {FeatureName ","}+ ";" -> ConfigDeclaration {cons("FeatureActivation")}
+  "disable" {FeatureName ","}+ ";" -> ConfigDeclaration {cons("FeatureDeactivation")}
+  "color" FeatureName EditorServiceInt EditorServiceInt EditorServiceInt ";" -> ConfigDeclaration {cons("FeatureColorDefinition")}
+
+ desugarings
+    featureconfig      
+
+ rules
+    featureconfig :
+    ConfigDecl(mods, name, model, configs)
+    ->
+    ModelDec(ModelDecHead(mods, name, "variability.Config"), ModelBody((model, configs)))
+
+    get-feature-config = ?configs;
+      <filter(?FeatureActivation(<collect-all(?FeatureName(Id(<id>)))>)); concat> configs => enabled;
+      <filter(?FeatureDeactivation(<collect-all(?FeatureName(Id(<id>)))>)); concat> configs => disabled;
+      !(enabled, disabled)
+}

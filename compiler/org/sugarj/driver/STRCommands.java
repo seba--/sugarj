@@ -32,10 +32,10 @@ import org.sugarj.common.FileCommands;
 import org.sugarj.common.FilteringIOAgent;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
-import org.sugarj.common.path.RelativePath;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.transformations.extraction.extract_str_0_0;
+import org.sugarj.driver.transformations.renaming.rename_rules_0_2;
 import org.sugarj.stdlib.StdLib;
 
 /**
@@ -46,10 +46,12 @@ import org.sugarj.stdlib.StdLib;
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
 public class STRCommands {
+  
 
   private static IOAgent strjIOAgent = new FilteringIOAgent(Log.CORE | Log.TRANSFORM, 
                                                             Pattern.quote("[ strj | info ]") + ".*", 
-                                                            Pattern.quote("[ strj | error ] Compilation failed") + ".*");
+                                                            Pattern.quote("[ strj | error ] Compilation failed") + ".*",
+                                                            Pattern.quote("[ strj | warning ] Nullary constructor") + ".*");
   
   private final static Pattern STR_FILE_PATTERN = Pattern.compile(".*\\.str");
   
@@ -62,10 +64,24 @@ public class STRCommands {
     }
   }
 
+  
+  private SGLR strParser;
+  private ModuleKeyCache<Path> strCache;
+  private Environment environment;
+  private LanguageLib langLib;
+  
+  public STRCommands(SGLR strParser, ModuleKeyCache<Path> strCache, Environment environment, LanguageLib langLib) {
+    this.strParser = strParser;
+    this.strCache = strCache;
+    this.environment = environment;
+    this.langLib = langLib;
+  }
+
+
   /**
    *  Compiles a {@code *.str} file to a single {@code *.java} file. 
    */
-  private static void strj(boolean normalize, Path str, Path out, String main, Context strjContext, Collection<Path> paths, LanguageLib langLib) throws IOException {
+  private static void strj(boolean normalize, Path str, Path out, String main, Collection<Path> paths, LanguageLib langLib) throws IOException {
     
     /*
      * We can include as many paths as we want here, checking the
@@ -98,13 +114,11 @@ public class STRCommands {
     
     final ByteArrayOutputStream log = new ByteArrayOutputStream();
 
+    // Strj requires a fresh context each time.
+    Context ctx = org.strategoxt.strj.strj.init();
     try {
-      // XXX strj does not create Java file with non-fresh context
-      Context c = org.strategoxt.strj.strj.init();
-      
-      c.setIOAgent(strjIOAgent);
-      
-      c.invokeStrategyCLI(main_strj_0_0.instance, "strj", cmd.toArray(new String[cmd.size()]));
+      ctx.setIOAgent(strjIOAgent);
+      ctx.invokeStrategyCLI(main_strj_0_0.instance, "strj", cmd.toArray(new String[cmd.size()]));
     }
     catch (StrategoExit e) {
       if (e.getValue() != 0)
@@ -112,16 +126,18 @@ public class STRCommands {
     } finally {
       if (log.size() > 0 && !log.toString().contains("Abstract syntax in"))
         throw new StrategoException(log.toString());
-
     }
   }
   
+  
+  public Path compile(Path str, String main, Collection<Path> dependentFiles) throws TokenExpectedException, BadTokenException, IOException, InvalidParseTableException, SGLRException {
+    return STRCommands.compile(str, main, dependentFiles, strParser, strCache, environment, langLib);
+  }
   
   public static Path compile(Path str,
                               String main,
                               Collection<Path> dependentFiles,
                               SGLR strParser,
-                              Context strjContext,
                               ModuleKeyCache<Path> strCache,
                               Environment environment,
                               LanguageLib langLib) throws IOException,
@@ -135,12 +151,12 @@ public class STRCommands {
     
     if (prog == null) {
       try {
-        prog = generateAssimilator(key, str, main, strjContext, environment.getIncludePath(), langLib);
+        prog = generateAssimilator(key, str, main, environment.getIncludePath(), langLib);
       } catch (StrategoException e) {
         prog = FAILED_COMPILATION_PATH;
         error = e;
       } finally {
-        if (prog != null)
+        if (prog != null && FileCommands.exists(prog) && !FileCommands.isEmptyFile(prog))
           cacheAssimilator(strCache, key, prog, environment);
       }
 
@@ -154,7 +170,6 @@ public class STRCommands {
   private static Path generateAssimilator(ModuleKey key,
                                           Path str,
                                           String main,
-                                          Context strjContext,
                                           Collection<Path> paths,
                                           LanguageLib langLib) throws IOException {
     boolean success = false;
@@ -162,7 +177,7 @@ public class STRCommands {
     try {
       Path prog = FileCommands.newTempFile("ctree");
       log.log("calling STRJ", Log.TRANSFORM);
-      strj(true, str, prog, main, strjContext, paths, langLib);
+      strj(true, str, prog, main, paths, langLib);
       success = FileCommands.exists(prog);
       return prog;
     } finally {
@@ -234,6 +249,10 @@ public class STRCommands {
     }
     
   }
+  
+  public IStrategoTerm assimilate(String strategy, Path ctree, IStrategoTerm in) throws IOException {
+    return STRCommands.assimilate(strategy, ctree, in, langLib.getInterpreter());
+  }
 
   public static IStrategoTerm assimilate(Path ctree, IStrategoTerm in, HybridInterpreter interp) throws IOException {
     return assimilate("internal-main", ctree, in, interp);
@@ -246,10 +265,10 @@ public class STRCommands {
       
       if (interp.invoke(strategy)) {
         IStrategoTerm term = interp.current();
-        
-        // XXX does this improve memory consumption?
-        interp.reset();
-        
+
+        //XXX performance improvement?
+//        interp.reset();
+                
 //        IToken left = ImploderAttachment.getLeftToken(in);
 //        IToken right = ImploderAttachment.getRightToken(in);
 //        String sort = ImploderAttachment.getSort(in);
@@ -266,7 +285,7 @@ public class STRCommands {
         throw new RuntimeException("hybrid interpreter failed");
     }
     catch (InterpreterException e) {
-      throw new StrategoException("desugaring failed: " + e.getCause().getMessage(), e);
+      throw new StrategoException("desugaring failed: " + (e.getCause() == null ? e : e.getCause()).getMessage(), e);
     }
     catch (Exception e) {
       throw new StrategoException("desugaring failed", e);
@@ -282,16 +301,36 @@ public class STRCommands {
    * @param str result file
    * @throws InvalidParseTableException 
    */
-  public static IStrategoTerm extractSTR(IStrategoTerm term, Context context) throws IOException, InvalidParseTableException {
+  public static IStrategoTerm extractSTR(IStrategoTerm term) throws IOException {
     IStrategoTerm result = null;
+    Context extractionContext = SugarJContexts.extractionContext();
     try {
-      result = extract_str_0_0.instance.invoke(context, term);
+      result = extract_str_0_0.instance.invoke(extractionContext, term);
     }
     catch (StrategoExit e) {
       if (e.getValue() != 0 || result == null)
         throw new RuntimeException("Stratego extraction failed", e);
+    } finally {
+      SugarJContexts.releaseContext(extractionContext);
     }
     return result;
   }
-  
+
+  public static IStrategoTerm renameRules(IStrategoTerm term, String oldName, String newName) throws IOException {
+    IStrategoTerm result = null;
+    Context renameRulesContext = SugarJContexts.renameRulesContext();
+    try {
+      IStrategoTerm toldName = renameRulesContext.getFactory().makeString(oldName);
+      IStrategoTerm tnewName = renameRulesContext.getFactory().makeString(newName);
+      result = rename_rules_0_2.instance.invoke(renameRulesContext, term, toldName, tnewName);
+    }
+    catch (StrategoExit e) {
+      if (e.getValue() != 0 || result == null)
+        throw new RuntimeException("Stratego extraction failed", e);
+    } finally {
+      SugarJContexts.releaseContext(renameRulesContext);
+    }
+    return result;
+  }
+
 }

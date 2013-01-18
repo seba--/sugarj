@@ -49,7 +49,7 @@ public class HaskellLib extends LanguageLib {
   private IStrategoTerm ppTable;
 
   @Override
-  public List<File> getGrammars() {
+  public List<File> getDefaultGrammars() {
     List<File> grammars = new LinkedList<File>(getDefaultGrammars());
     grammars.add(ensureFile("org/sugarj/languages/SugarHaskell.def"));
     grammars.add(ensureFile("org/sugarj/languages/Haskell.def"));
@@ -226,12 +226,12 @@ public class HaskellLib extends LanguageLib {
   }
 
   @Override
-  public String getImportedModulePath(IStrategoTerm toplevelDecl) throws IOException {
+  public String getImportedModulePath(IStrategoTerm toplevelDecl) {
     return prettyPrint(getApplicationSubterm(toplevelDecl, "Import", 2)).replace('.', '/');
   }
   
   @Override
-  public void addImportModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
+  public void addImportedModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
     SourceImport imp = new SourceImport(getImportedModulePath(toplevelDecl), prettyPrint(toplevelDecl));
     if (checked)
       sourceContent.addCheckedImport(imp);
@@ -249,8 +249,7 @@ public class HaskellLib extends LanguageLib {
     return getApplicationSubterm(decl, "SugarBody", 0);
   }
 
-  @Override
-  public String prettyPrint(IStrategoTerm term) throws IOException {
+  private String prettyPrint(IStrategoTerm term) {
     if (ppTable == null) 
       ppTable = ATermCommands.readPrettyPrintTable(ensureFile("org/sugarj/languages/Haskell.pp").getAbsolutePath());
     

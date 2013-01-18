@@ -17,7 +17,7 @@ import sugar.Accessors;
 public class SellerContactInfo implements java.io.Serializable {
     
     private String contactInfoID {set};
-    private String firstName,lastName,email {get; set; con}
+    private String firstName,lastName,email {get; set; con};
     
     public SellerContactInfo() { }
     

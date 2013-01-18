@@ -12,7 +12,7 @@ public class PrologLibFactory extends LanguageLibFactory {
 
   @Override
   public String getVersion() {
-    return "prolog-0.1";
+    return "prolog-0.1a";
   }
 
   @Override

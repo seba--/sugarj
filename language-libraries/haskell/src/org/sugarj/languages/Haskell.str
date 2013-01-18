@@ -1,295 +1,292 @@
-module org/sugarj/languages/Haskell
+module Haskell
 
 signature
   constructors
-                     : HaskellEmpty -> HaskellNoOffsideDeclList_HaskellEmpty0
-                     : HaskellNoOffsideDeclList -> HaskellNoOffsideDeclList_HaskellEmpty0
-                     : HaskellEmpty -> HaskellOffsideDeclList_HaskellEmpty0
-                     : HaskellOffsideDeclList -> HaskellOffsideDeclList_HaskellEmpty0
-    None             : OptHaskellExports0
+                     : Empty -> NoOffsideDeclListSem_Empty0
+                     : NoOffsideDeclListSem -> NoOffsideDeclListSem_Empty0
+                     : Empty -> OffsideDeclList_Empty0
+                     : OffsideDeclList -> OffsideDeclList_Empty0
+    None             : OptExports0
     Conc             : ListStarOfCharClass0 * ListPlusOfCharClass0 -> ListPlusOfCharClass0
     Conc             : ListPlusOfCharClass0 * ListStarOfCharClass0 -> ListPlusOfCharClass0
     Conc             : ListPlusOfCharClass0 * ListPlusOfCharClass0 -> ListPlusOfCharClass0
     Cons             : Int * ListStarOfCharClass0 -> ListPlusOfCharClass0
-    StmtSeq          : HaskellStmt * HaskellOffsideStmt -> HaskellOffsideStmt
-                     : HaskellStmt -> HaskellOffsideStmt
-    DeclSeq          : HaskellDecl * HaskellOffsideDecl -> HaskellOffsideDecl
-                     : HaskellDecl -> HaskellOffsideDecl
-    AltSeq           : HaskellAlt * HaskellOffsideAlt -> HaskellOffsideAlt
-                     : HaskellAlt -> HaskellOffsideAlt
-    TopdeclSeq       : HaskellTopdecl * HaskellOffsideTopdecl -> HaskellOffsideTopdecl
-                     : HaskellTopdecl -> HaskellOffsideTopdecl
-    ImportdeclSeq    : HaskellImportdecl * HaskellOffsideImportdecl -> HaskellOffsideImportdecl
-                     : HaskellImportdecl -> HaskellOffsideImportdecl
-    String           : List(HaskellStringChar) -> HaskellString-HASH
-    Char             : HaskellCharChar -> HaskellChar-HASH
-                     : String -> HaskellRATIONAL-HASH
-                     : String -> HaskellFLOAT-HASH
-                     : String -> HaskellINTEGER-HASH
-    FlexibleContext  : List(HaskellFlexibleClass) -> HaskellFlexibleContext
-    FlexibleContext  : HaskellFlexibleClass -> HaskellFlexibleContext
-    SimpleClass      : HaskellQtycls * HaskellTyvar -> HaskellFlexibleClass
-    Class            : HaskellQtycls * HaskellGtycon -> HaskellFlexibleClass
-    Class            : HaskellQtycls * HaskellType -> HaskellFlexibleClass
-                     : HaskellOffsideStmt -> HaskellOffsideStmtList
-                     : HaskellStmt -> HaskellNoOffsideStmt
-    StmtSeq          : HaskellNoOffsideStmt * HaskellNoOffsideStmtList -> HaskellNoOffsideStmtList
-                     : HaskellNoOffsideStmt -> HaskellNoOffsideStmtList
-                     : HaskellNoOffsideStmtList -> HaskellNoOffsideStmtBlock
-    StmtList         : HaskellOffsideStmtList -> HaskellStmtList
-    StmtList         : HaskellNoOffsideStmtBlock -> HaskellStmtList
-    FBind            : HaskellQvar * HaskellExp -> HaskellFbind
-    LetStmt          : HaskellDeclbinds -> HaskellStmt
-    ExpStmt          : HaskellExp -> HaskellStmt
-    BindStmt         : HaskellPat * HaskellExp -> HaskellStmt
-                     : HaskellExp -> HaskellList
-    PatBind          : HaskellQvar * HaskellPat -> HaskellFPat
-    Labeled          : List(HaskellFPat) -> HaskellLabeledPat
-    Irrefutable      : HaskellAPat -> HaskellAPat
-    List             : List(HaskellPat) -> HaskellAPat
-    Tuple            : HaskellPat * List(HaskellPat) -> HaskellAPat
-                     : HaskellPat -> HaskellAPat
-    Wildcard         : HaskellAPat
-                     : HaskellLiteral -> HaskellAPat
-    Labeled          : HaskellQcon * HaskellLabeledPat -> HaskellAPat
-    Constr           : HaskellGcon -> HaskellAPat
-    Named            : HaskellVar * HaskellAPat -> HaskellAPat
-                     : HaskellVar -> HaskellAPat
-    ConstrApp        : HaskellGcon * List(HaskellAPat) -> HaskellLPat
-    Negation         : HaskellLiteral -> HaskellLPat
-                     : HaskellAPat -> HaskellLPat
-                     : HaskellLPat -> HaskellXPat
-    BinOpApp         : HaskellPat * HaskellQconop * HaskellLPat -> HaskellXPat
-    BinOpApp         : HaskellXPat * HaskellConsOp * HaskellPat -> HaskellPat
-    BinOpApp         : HaskellPat * HaskellQconop * HaskellLPat -> HaskellPat
-                     : HaskellLPat -> HaskellPat
-                     : HaskellOffsideDecl -> HaskellOffsideDeclList
-                     : HaskellDecl -> HaskellNoOffsideDecl
-    DeclSeq          : HaskellNoOffsideDecl * HaskellNoOffsideDeclList -> HaskellNoOffsideDeclList
-                     : HaskellNoOffsideDecl -> HaskellNoOffsideDeclList
-                     : HaskellNoOffsideDeclList_HaskellEmpty0 -> HaskellNoOffsideDeclBlock
-    DeclList         : HaskellOffsideDeclList_HaskellEmpty0 -> HaskellDeclList
-    DeclList         : HaskellNoOffsideDeclBlock -> HaskellDeclList
-                     : HaskellDeclList -> HaskellDeclbinds
-                     : HaskellWhere -> HaskellMaybeWhere
-    Where            : HaskellDeclList -> HaskellWhere
-    NestedFunLHS     : HaskellFunLHS * List(HaskellAPat) -> HaskellFunLHS
-    OpFunLHS         : HaskellPat * HaskellVarop * HaskellPat -> HaskellFunLHS
-    VarFunLHS        : HaskellVar * List(HaskellAPat) -> HaskellFunLHS
-                     : HaskellPat -> HaskellFunLHS
-    Guarded          : HaskellExp * HaskellExp -> HaskellGdrh
-    GdValdef         : HaskellFunLHS * List(HaskellGdrh) * HaskellMaybeWhere -> HaskellValdef
-    Valdef           : HaskellFunLHS * HaskellExp * HaskellMaybeWhere -> HaskellValdef
-                     : HaskellOffsideAlt -> HaskellOffsideAltList
-                     : HaskellAlt -> HaskellNoOffsideAlt
-    AltSeq           : HaskellNoOffsideAlt * HaskellNoOffsideAltList -> HaskellNoOffsideAltList
-                     : HaskellNoOffsideAlt -> HaskellNoOffsideAltList
-                     : HaskellNoOffsideAltList -> HaskellNoOffsideAltBlock
-    AltList          : HaskellOffsideAltList -> HaskellAltList
-    AltList          : HaskellNoOffsideAltBlock -> HaskellAltList
-    GdPat            : HaskellExp * HaskellExp -> HaskellGdpat
-    GdAlt            : HaskellPat * List(HaskellGdpat) * HaskellMaybeWhere -> HaskellAlt
-    Alt              : HaskellPat * HaskellExp * HaskellMaybeWhere -> HaskellAlt
-    LabelBinds       : List(HaskellFbind) -> HaskellLabelBinds
-                     : HaskellQop -> HaskellQopNoNeg
-    FixDecl          : HaskellInfix * HaskellPrec * HaskellOps -> HaskellFixdecl
-                     : List(HaskellOp) -> HaskellOps
-                     : Option(HaskellINTEGER) -> HaskellPrec
-    InfixR           : HaskellInfix
-    InfixL           : HaskellInfix
-    Infix            : HaskellInfix
-                     : List(HaskellAPat) -> HaskellFargs
-    OpApp            : HaskellExp * HaskellQop * HaskellExp -> HaskellExp
-    Typed            : HaskellExp * HaskellType -> HaskellExp
-    AppBin           : HaskellExp * HaskellExp -> HaskellExp
-    Labeled          : HaskellExp * HaskellLabelBinds -> HaskellExp
-    Named            : HaskellQvar * HaskellExp -> HaskellExp
-    List             : HaskellList -> HaskellExp
-    Negation         : HaskellExp -> HaskellExp
-    Case             : HaskellAnyExp * HaskellAltList -> HaskellExp
-    Do               : HaskellStmtList -> HaskellExp
-    If               : HaskellAnyExp * HaskellAnyExp * HaskellExp -> HaskellExp
-    Let              : HaskellDeclbinds * HaskellExp -> HaskellExp
-    Abs              : HaskellFargs * HaskellExp -> HaskellExp
-    RSection         : HaskellQopNoNeg * HaskellExp -> HaskellExp
-    LSection         : HaskellExp * HaskellQop -> HaskellExp
-    Product          : HaskellExp * HaskellExps -> HaskellExp
-    Lit              : HaskellLiteral -> HaskellExp
-    Constr           : HaskellGcon -> HaskellExp
-    Var              : HaskellQvar -> HaskellExp
-                     : HaskellExp -> HaskellAnyExp
-    SignDecl         : HaskellVars * Option(HaskellContext) * HaskellType -> HaskellSigndecl
-                     : HaskellValdef -> HaskellDecl
-                     : HaskellFixdecl -> HaskellDecl
-                     : HaskellSigndecl -> HaskellDecl
-    Class            : HaskellQtycls * HaskellTyvar * List(HaskellAType) -> HaskellClass
-                     : HaskellSimpleClass -> HaskellClass
-    SimpleClass      : HaskellQtycls * HaskellTyvar -> HaskellSimpleClass
-                     : HaskellFlexibleContext -> HaskellSContext
-    SContext         : List(HaskellSimpleClass) -> HaskellSContext
-    SContext         : HaskellSimpleClass -> HaskellSContext
-                     : HaskellFlexibleContext -> HaskellContext
-    Context          : List(HaskellClass) -> HaskellContext
-    Context          : HaskellClass -> HaskellContext
-    InstArrow        : HaskellTyvar * HaskellTyvar -> HaskellInst
-    InstList         : HaskellTyvar -> HaskellInst
-    InstTuple        : HaskellTyvar * List(HaskellTyvar) -> HaskellInst
-    InstApp          : HaskellGtycon * List(HaskellTyvar) -> HaskellInst
-    InstCons         : HaskellGtycon -> HaskellInst
-                     : HaskellType -> HaskellSbtype
-                     : HaskellAType -> HaskellSatype
-    InfixConstr      : HaskellSbtype * HaskellConop * HaskellSbtype -> HaskellConstr
-    NoConstrDecls    : HaskellConstrs
-    ConstrDecls      : List(HaskellConstr) -> HaskellConstrs
-    ConstrDecl       : HaskellConid * List(HaskellSatype) -> HaskellConstr
-                     : List(HaskellConstr) -> HaskellConstrs
-    Derive           : List(HaskellQtycls) -> HaskellDeriving
-    NoDeriving       : HaskellDeriving
-    Derive           : HaskellQtycls -> HaskellDeriving
-    TFunBin          : HaskellType * HaskellType -> HaskellType
-    TAppBin          : HaskellType * HaskellType -> HaskellType
-                     : HaskellAType -> HaskellType
-    TProd            : HaskellType * HaskellTypes -> HaskellAType
-    TList            : HaskellType -> HaskellAType
-                     : HaskellType -> HaskellAType
-    TVar             : HaskellTyvar -> HaskellAType
-    TCon             : HaskellGtycon -> HaskellAType
-    TList            : HaskellGtycon
-    TUnit            : HaskellGtycon
-    TArrow           : HaskellGtycon
-                     : HaskellQtycon -> HaskellGtycon
-    Hiding           : HaskellExportlist -> HaskellImpspec
-    Impspec          : HaskellExportlist -> HaskellImpspec
-    As               : HaskellModid -> HaskellAs
-    Qualified        : HaskellQualified
-    SOURCE           : HaskellSrc
-    Import           : Option(HaskellSrc) * Option(HaskellQualified) * HaskellModid * Option(HaskellAs) * Option(HaskellImpspec) -> HaskellImportdecl
-    ExportAllSub     : HaskellGtycon -> HaskellExport
-    ExportNoSub      : HaskellGtycon -> HaskellExport
-    ExportSomeSub    : HaskellGtycon * List(Qcname) -> Qcname
-    ExportModule     : HaskellModid -> HaskellExport
-    Exportlist       : List(HaskellExport) -> HaskellExportlist
-                     : HaskellOffsideTopdecl -> HaskellOffsideTopdeclList
-                     : HaskellOffsideImportdecl -> HaskellOffsideImportdeclList
-                     : HaskellTopdecl -> HaskellNoOffsideTopdecl
-    TopdeclSeq       : HaskellNoOffsideTopdecl * HaskellNoOffsideTopdeclList -> HaskellNoOffsideTopdeclList
-                     : HaskellNoOffsideTopdecl -> HaskellNoOffsideTopdeclList
-                     : HaskellImportdecl -> HaskellNoOffsideImportdecl
-    ImportdeclSeq    : HaskellNoOffsideImportdecl * HaskellNoOffsideImportdeclList -> HaskellNoOffsideImportdeclList
-                     : HaskellNoOffsideImportdecl -> HaskellNoOffsideImportdeclList
-    Body             : HaskellOffsideImportdeclList * HaskellEmpty -> HaskellOffsideBody
-    Body             : HaskellEmpty * HaskellOffsideTopdeclList -> HaskellOffsideBody
-    Body             : HaskellEmpty * HaskellEmpty -> HaskellOffsideBody
-    Body             : HaskellNoOffsideImportdeclList * HaskellNoOffsideTopdeclList -> HaskellNoOffsideBody
-    Body             : HaskellNoOffsideImportdeclList * HaskellEmpty -> HaskellNoOffsideBody
-    Body             : HaskellEmpty * HaskellNoOffsideTopdeclList -> HaskellNoOffsideBody
-    Body             : HaskellEmpty * HaskellEmpty -> HaskellNoOffsideBody
-    Empty            : HaskellEmpty
-                     : HaskellOffsideBody -> HaskellBody
-                     : HaskellNoOffsideBody -> HaskellBody
-    FlexibleInstance : Option(HaskellSContext) * HaskellQtycls * List(HaskellAType) * HaskellMaybeWhere -> HaskellTopdecl
-    Default          : List(HaskellType) -> HaskellTopdecl
-    Instance         : Option(HaskellSContext) * HaskellQtycls * List(HaskellInst) * HaskellMaybeWhere -> HaskellTopdecl
-    Class            : Option(HaskellSContext) * HaskellTycls * HaskellTyvar * HaskellMaybeWhere -> HaskellTopdecl
-    Data             : Option(HaskellContext) * HaskellType * HaskellConstrs * HaskellDeriving -> HaskellTopdecl
-    TypeDecl         : HaskellTycon * List(HaskellTyvar) * HaskellType -> HaskellTopdecl
-                     : HaskellDecl -> HaskellTopdecl
-    Program          : HaskellBody -> HaskellModule
-    Module           : HaskellModid * OptHaskellExports0 * HaskellBody -> HaskellModule
-                     : HaskellString-HASH -> HaskellLiteral
-                     : HaskellChar-HASH -> HaskellLiteral
-    Float            : HaskellRATIONAL-HASH -> HaskellLiteral
-    Float            : HaskellFLOAT-HASH -> HaskellLiteral
-    Int              : HaskellINTEGER-HASH -> HaskellLiteral
-    CLitLit          : HaskellCLITLIT -> HaskellLiteral
-    PrimDouble       : HaskellPRIMDOUBLE -> HaskellLiteral
-    PrimFloat        : HaskellPRIMFLOAT -> HaskellLiteral
-    PrimString       : HaskellPRIMSTRING -> HaskellLiteral
-    PrimChar         : HaskellPRIMCHAR -> HaskellLiteral
-    PrimInt          : HaskellPRIMINTEGER -> HaskellLiteral
-                     : HaskellString -> HaskellLiteral
-    Float            : HaskellRATIONAL -> HaskellLiteral
-    Float            : HaskellFLOAT -> HaskellLiteral
-                     : HaskellChar -> HaskellLiteral
-    Int              : HaskellINTEGER -> HaskellLiteral
-    HexadecimalEsc   : String -> HaskellEscape
-    OctalEsc         : String -> HaskellEscape
-    DecimalEsc       : String -> HaskellEscape
-    ASCIIEsc         : String -> HaskellEscape
-    CharEsc          : String -> HaskellEscape
-    Gap              : ListPlusOfCharClass0 -> HaskellStringChar
-    Escape           : HaskellEscape -> HaskellStringChar
-                     : String -> HaskellStringChar
-    Escape           : HaskellEscape -> HaskellCharChar
-                     : String -> HaskellCharChar
-    String           : List(HaskellStringChar) -> HaskellString
-    Char             : HaskellCharChar -> HaskellChar
-                     : String -> HaskellCLITLIT
-                     : String -> HaskellPRIMDOUBLE
-                     : String -> HaskellPRIMFLOAT
-                     : String -> HaskellPRIMINTEGER
-                     : String -> HaskellPRIMSTRING
-                     : String -> HaskellPRIMCHAR
-                     : String -> HaskellRATIONAL
-                     : String -> HaskellFLOAT
-                     : String -> HaskellINTEGER
-    QModId           : String * HaskellQModid -> HaskellQModid
-    QModId           : String * String -> HaskellQModid
-    QConSym          : HaskellModid * String -> HaskellQCONSYM
-    QVarSym          : HaskellModid * String -> HaskellQVARSYM
-    QConId           : HaskellModid * String -> HaskellQCONID
-    QVarId           : HaskellModid * String -> HaskellQVARID
-                     : HaskellQModid -> HaskellModid
-                     : String -> HaskellModid
-                     : HaskellQCONID -> HaskellQconid
-                     : HaskellConid -> HaskellQconid
-                     : HaskellCONID -> HaskellConid
-                     : HaskellQtycon -> HaskellQtycls
-                     : HaskellTycon -> HaskellTycls
-                     : HaskellQCONID -> HaskellQtycon
-                     : HaskellTycon -> HaskellQtycon
-                     : HaskellCONID -> HaskellTycon
-                     : HaskellQVARSYM -> HaskellQvarsym1
-                     : HaskellVARSYM -> HaskellVarsym
-                     : HaskellQconid -> HaskellQcon
-    BinCon           : HaskellQconsym -> HaskellQcon
-                     : HaskellQconop -> HaskellQop
-                     : HaskellQvarop -> HaskellQop
-                     : HaskellConsOp -> HaskellQop
-    ConsOp           : HaskellCONSOP -> HaskellConsOp
-    PrefCon          : HaskellQconid -> HaskellQconop
-                     : HaskellGconsym -> HaskellQconop
-                     : HaskellQconsym -> HaskellGconsym
-    PrefCon          : HaskellConid -> HaskellConop
-                     : HaskellConsym -> HaskellConop
-                     : HaskellCONSYM -> HaskellConsym
-                     : HaskellQCONSYM -> HaskellQconsym
-                     : HaskellConsym -> HaskellQconsym
-                     : HaskellQvarsym1 -> HaskellQvarsym
-                     : HaskellVarsym -> HaskellQvarsym
-    PrefOp           : HaskellQvarid -> HaskellQvarop
-                     : HaskellQvarsym -> HaskellQvarop
-    PrefOp           : HaskellVarid -> HaskellVarop
-                     : HaskellVarsym -> HaskellVarop
-    ConOp            : HaskellConop -> HaskellOp
-    Op               : HaskellVarop -> HaskellOp
-    BinOp            : HaskellQvarsym -> HaskellQvar
-                     : HaskellQvarid -> HaskellQvar
-    BinOp            : HaskellVarsym -> HaskellVar
-    Var              : HaskellVarid -> HaskellVar
-                     : HaskellQVARID -> HaskellQvarid
-                     : HaskellVarid -> HaskellQvarid
-                     : HaskellQcon -> HaskellGcon
-    EmptyList        : HaskellGcon
-    Unit             : HaskellGcon
-    Ins              : HaskellQvar -> HaskellVars
-    Snoc             : HaskellVars * HaskellVar -> HaskellVars
-                     : String -> HaskellTyvar
-                     : String -> HaskellVarid
-                     : String -> HaskellCONSOP
-                     : String -> HaskellCONSYM
-                     : String -> HaskellVARSYM
-                     : String -> HaskellCONID
+    StmtSeq          : OffsideStmt * OffsideStmt -> OffsideStmt
+                     : Stmt -> OffsideStmt
+    DeclSeq          : OffsideDecl * Decl -> OffsideDecl
+                     : Decl -> OffsideDecl
+    AltSeq           : OffsideAlt * Alt -> OffsideAlt
+                     : Alt -> OffsideAlt
+    TopdeclSeq       : Topdecl * OffsideTopdecl -> OffsideTopdecl
+                     : Topdecl -> OffsideTopdecl
+    ImportdeclSeq    : Importdecl * OffsideImportdecl -> OffsideImportdecl
+                     : Importdecl -> OffsideImportdecl
+    FloatHash        : String -> Float-HASH
+    IntegerHash      : String -> Integer-HASH
+    StringHash       : List(StringChar) -> String-HASH
+    CharHash         : CharChar -> Char-HASH
+    FlexibleContext  : List(FlexibleClass) -> FlexibleContext
+    FlexibleContext  : FlexibleClass -> FlexibleContext
+    SimpleClass      : Qtycls * Tyvar -> FlexibleClass
+    Class            : Qtycls * Gtycon -> FlexibleClass
+    Class            : Qtycls * Type -> FlexibleClass
+                     : OffsideStmt -> OffsideStmtList
+                     : Stmt -> NoOffsideStmt
+                     : NoOffsideStmtList -> NoOffsideStmtListSem
+    StmtSeq          : NoOffsideStmt * NoOffsideStmtList -> NoOffsideStmtList
+                     : NoOffsideStmt -> NoOffsideStmtList
+                     : NoOffsideStmtListSem -> NoOffsideStmtBlock
+    StmtList         : OffsideStmtList -> StmtList
+    StmtList         : NoOffsideStmtBlock -> StmtList
+    FBind            : Qvar * Exp -> Fbind
+    LetStmt          : Declbinds -> Stmt
+    ExpStmt          : Exp -> Stmt
+    BindStmt         : Pat * Exp -> Stmt
+                     : Exp -> List
+    PatBind          : Qvar * Pat -> FPat
+    LabeledPats      : List(FPat) -> LabeledPat
+    Irrefutable      : APat -> APat
+    List             : List(Pat) -> APat
+    Tuple            : Pat * List(Pat) -> APat
+                     : Pat -> APat
+    Wildcard         : APat
+                     : Literal -> APat
+    Labeled          : Qcon * LabeledPat -> APat
+    Constr           : Gcon -> APat
+    Named            : Var * APat -> APat
+                     : Var -> APat
+    ConstrApp        : Gcon * List(APat) -> LPat
+    Negation         : Literal -> LPat
+                     : APat -> LPat
+    BinOpApp         : Pat * Qconop * LPat -> Pat
+                     : LPat -> Pat
+                     : OffsideDecl -> OffsideDeclList
+                     : Decl -> NoOffsideDecl
+                     : NoOffsideDeclList -> NoOffsideDeclListSem
+    DeclSeq          : NoOffsideDecl * NoOffsideDeclList -> NoOffsideDeclList
+                     : NoOffsideDecl -> NoOffsideDeclList
+                     : NoOffsideDeclListSem_Empty0 -> NoOffsideDeclBlock
+    DeclList         : OffsideDeclList_Empty0 -> DeclList
+    DeclList         : NoOffsideDeclBlock -> DeclList
+                     : DeclList -> Declbinds
+                     : Where -> MaybeWhere
+    Where            : DeclList -> Where
+    NestedFunLHS     : FunLHS * List(APat) -> FunLHS
+    OpFunLHS         : Pat * Varop * Pat -> FunLHS
+    VarFunLHS        : Var * List(APat) -> FunLHS
+                     : Pat -> FunLHS
+    Guarded          : Exp * Exp -> Gdrh
+    GdValdef         : FunLHS * List(Gdrh) * MaybeWhere -> Valdef
+    Valdef           : FunLHS * Exp * MaybeWhere -> Valdef
+                     : OffsideAlt -> OffsideAltList
+                     : Alt -> NoOffsideAlt
+    AltSeq           : NoOffsideAlt * NoOffsideAltList -> NoOffsideAltList
+                     : NoOffsideAlt -> NoOffsideAltList
+                     : NoOffsideAltList -> NoOffsideAltBlock
+    AltList          : OffsideAltList -> AltList
+    AltList          : NoOffsideAltBlock -> AltList
+    GdPat            : Exp * Exp -> Gdpat
+    GdAlt            : Pat * List(Gdpat) * MaybeWhere -> Alt
+    Alt              : Pat * Exp * MaybeWhere -> Alt
+    LabelBinds       : List(Fbind) -> LabelBinds
+                     : Qop -> QopNoNeg
+    FixDecl          : Infix * Prec * Ops -> Fixdecl
+                     : List(Op) -> Ops
+                     : Option(INTEGER) -> Prec
+    InfixR           : Infix
+    InfixL           : Infix
+    Infix            : Infix
+                     : List(APat) -> Fargs
+    ECons            : Exp * List(Exp) -> Exps2
+    Typed            : Exp * Option(Context) * Type -> Exp
+    OpApp            : Exp * Qop * Exp -> Exp
+    Negation         : Exp -> Exp
+    AppBin           : Exp * Exp -> Exp
+    Labeled          : Exp * LabelBinds -> Exp
+    Named            : Qvar * Exp -> Exp
+    List             : List -> Exp
+    Case             : AnyExp * AltList -> Exp
+    Do               : StmtList -> Exp
+    If               : AnyExp * AnyExp * Exp -> Exp
+    Let              : Declbinds * Exp -> Exp
+    Abs              : Fargs * Exp -> Exp
+    RSection         : QopNoNeg * Exp -> Exp
+    LSection         : Exp * Qop -> Exp
+    Product          : Exps2 -> Exp
+    Lit              : Literal -> Exp
+    Constr           : Gcon -> Exp
+    Var              : Qvar -> Exp
+                     : Exp -> AnyExp
+    SignDecl         : Vars * Option(Context) * Type -> Signdecl
+                     : Valdef -> Decl
+                     : Fixdecl -> Decl
+                     : Signdecl -> Decl
+    Class            : Qtycls * Tyvar * List(AType) -> Class
+                     : SimpleClass -> Class
+    SimpleClass      : Qtycls * Tyvar -> SimpleClass
+                     : FlexibleContext -> SContext
+    SContext         : List(SimpleClass) -> SContext
+    SContext         : SimpleClass -> SContext
+                     : FlexibleContext -> Context
+    Context          : List(Class) -> Context
+    Context          : Class -> Context
+    InstArrow        : Tyvar * Tyvar -> Inst
+    InstList         : Tyvar -> Inst
+    InstTuple        : Tyvar * List(Tyvar) -> Inst
+    InstApp          : Gtycon * List(Tyvar) -> Inst
+    InstCons         : Gtycon -> Inst
+                     : Type -> Sbtype
+                     : AType -> Satype
+    InfixConstr      : Sbtype * Conop * Sbtype -> Constr
+    ConstrDecl       : Conid * List(Satype) -> Constr
+    ConstrDecls      : List(Constr) -> Constrs
+    NoConstrDecls    : Constrs
+    Derive           : List(Qtycls) -> Deriving
+    NoDeriving       : Deriving
+    Derive           : Qtycls -> Deriving
+    TFunBin          : Type * Type -> Type
+    TAppBin          : Type * Type -> Type
+                     : AType -> Type
+    TProd            : Types2 -> AType
+    TList            : Type -> AType
+                     : Type -> AType
+    TVar             : Tyvar -> AType
+    TCon             : Gtycon -> AType
+    TCons            : Type * List(Type) -> Types2
+    TList            : Gtycon
+    TUnit            : Gtycon
+    TArrow           : Gtycon
+                     : Qtycon -> Gtycon
+    Hiding           : Exportlist -> Impspec
+    As               : Modid -> As
+    Qualified        : Qualified
+    SOURCE           : Src
+    Import           : Option(Src) * Option(Qualified) * Modid * Option(As) * Option(Impspec) -> Importdecl
+                     : Gtycon -> Export
+                     : Qvar -> Export
+    Exportlist       : List(Export) -> Exportlist
+                     : OffsideTopdecl -> OffsideTopdeclList
+                     : OffsideImportdecl -> OffsideImportdeclList
+                     : Topdecl -> NoOffsideTopdecl
+                     : NoOffsideTopdeclList -> NoOffsideTopdeclListSem
+    TopdeclSeq       : NoOffsideTopdecl * NoOffsideTopdeclList -> NoOffsideTopdeclList
+                     : NoOffsideTopdecl -> NoOffsideTopdeclList
+                     : Importdecl -> NoOffsideImportdecl
+                     : NoOffsideImportdeclList -> NoOffsideImportdeclListSem
+    ImportdeclSeq    : NoOffsideImportdecl * NoOffsideImportdeclList -> NoOffsideImportdeclList
+                     : NoOffsideImportdecl -> NoOffsideImportdeclList
+    Body             : OffsideImportdeclList * Empty -> OffsideBody
+    Body             : Empty * OffsideTopdeclList -> OffsideBody
+    Body             : Empty * Empty -> OffsideBody
+    Body             : NoOffsideImportdeclListSem * NoOffsideTopdeclList -> NoOffsideBody
+    Body             : NoOffsideImportdeclListSem * Empty -> NoOffsideBody
+    Body             : Empty * NoOffsideTopdeclListSem -> NoOffsideBody
+    Body             : Empty * Empty -> NoOffsideBody
+    Empty            : Empty
+                     : OffsideBody -> Body
+                     : NoOffsideBody -> Body
+    FlexibleInstance : Option(SContext) * Qtycls * List(AType) * MaybeWhere -> Topdecl
+    Default          : List(Type) -> Topdecl
+    Instance         : Option(SContext) * Qtycls * List(Inst) * MaybeWhere -> Topdecl
+    Class            : Option(SContext) * Tycls * Tyvar * MaybeWhere -> Topdecl
+    Data             : Option(Context) * Type * Constrs * Deriving -> Topdecl
+    TypeDecl         : Tycon * List(Tyvar) * Type -> Topdecl
+                     : Decl -> Topdecl
+    Program          : Body -> Module
+    Module           : Modid * OptExports0 * Body -> Module
+                     : Float-HASH -> Literal
+                     : Integer-HASH -> Literal
+                     : String-HASH -> Literal
+                     : Char-HASH -> Literal
+    CLitLit          : CLITLIT -> Literal
+    PrimDouble       : PRIMDOUBLE -> Literal
+    PrimFloat        : PRIMFLOAT -> Literal
+    PrimString       : PRIMSTRING -> Literal
+    PrimChar         : PRIMCHAR -> Literal
+    PrimInt          : PRIMINTEGER -> Literal
+                     : String -> Literal
+    Float            : RATIONAL -> Literal
+    Float            : FLOAT -> Literal
+                     : Char -> Literal
+    Int              : INTEGER -> Literal
+    HexadecimalEsc   : String -> Escape
+    OctalEsc         : String -> Escape
+    DecimalEsc       : String -> Escape
+    ASCIIEsc         : String -> Escape
+    CharEsc          : String -> Escape
+    Gap              : ListPlusOfCharClass0 -> StringChar
+    Escape           : Escape -> StringChar
+                     : String -> StringChar
+    Escape           : Escape -> CharChar
+                     : String -> CharChar
+    String           : List(StringChar) -> String
+    Char             : CharChar -> Char
+                     : String -> CLITLIT
+                     : String -> PRIMDOUBLE
+                     : String -> PRIMFLOAT
+                     : String -> PRIMINTEGER
+                     : String -> PRIMSTRING
+                     : String -> PRIMCHAR
+                     : String -> RATIONAL
+                     : String -> FLOAT
+                     : String -> INTEGER
+    QModId           : String * QModid -> QModid
+    QModId           : String * String -> QModid
+    QConSym          : Modid * String -> QCONSYM
+    QVarSym          : Modid * String -> QVARSYM
+    QConId           : Modid * String -> QCONID
+    QVarId           : Modid * String -> QVARID
+                     : QModid -> Modid
+                     : String -> Modid
+                     : QCONID -> Qconid
+                     : Conid -> Qconid
+                     : CONID -> Conid
+                     : Qtycon -> Qtycls
+                     : Tycon -> Tycls
+                     : QCONID -> Qtycon
+                     : Tycon -> Qtycon
+                     : CONID -> Tycon
+                     : QVARSYM -> Qvarsym1
+                     : VARSYM -> Varsym
+                     : Qconid -> Qcon
+    BinCon           : Qconsym -> Qcon
+                     : CONSYM -> Consym
+                     : QCONSYM -> Qconsym
+                     : Consym -> Qconsym
+    ConsOp           : CONSOP -> ConsOp
+                     : ConsOp -> Gconsym
+                     : Qconsym -> Gconsym
+                     : Qconop -> Qop
+                     : Qvarop -> Qop
+    PrefCon          : Qconid -> Qconop
+                     : Gconsym -> Qconop
+    PrefCon          : Conid -> Conop
+                     : Consym -> Conop
+    PrefOp           : Qvarid -> Qvarop
+                     : Qvarsym -> Qvarop
+    PrefOp           : Varid -> Varop
+                     : Varsym -> Varop
+                     : Qvarsym1 -> Qvarsym
+                     : Varsym -> Qvarsym
+    ConOp            : Conop -> Op
+    Op               : Varop -> Op
+    BinOp            : Qvarsym -> Qvar
+                     : Qvarid -> Qvar
+    BinOp            : Varsym -> Var
+    Var              : Varid -> Var
+                     : QVARID -> Qvarid
+                     : Varid -> Qvarid
+                     : Qcon -> Gcon
+    EmptyList        : Gcon
+    Unit             : Gcon
+    Ins              : Qvar -> Vars
+    Snoc             : Vars * Var -> Vars
+                     : String -> Tyvar
+                     : String -> Varid
+                     : String -> CONSOP
+                     : String -> CONSYM
+                     : String -> VARSYM
+                     : String -> CONID
 
 
 signature

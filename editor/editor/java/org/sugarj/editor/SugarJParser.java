@@ -14,6 +14,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoString;
@@ -56,6 +57,25 @@ public class SugarJParser extends JSGLRI {
   private static Map<String, Result> results = new HashMap<String, Result>();
   private static Set<String> pending = new HashSet<String>();
   
+  private final static int PARELLEL_PARSES = 3;
+  private final static List<ISchedulingRule> schedulingRules = new LinkedList<ISchedulingRule>();
+  private static int nextSchedulingRule = 0;
+  static {
+    for (int i = 0; i < PARELLEL_PARSES; i++) {
+      schedulingRules.add(new ISchedulingRule() {
+        @Override
+        public boolean isConflicting(ISchedulingRule rule) { return rule == this; }
+        @Override
+        public boolean contains(ISchedulingRule rule) { return rule == this; }
+      });
+    }
+  }
+  private synchronized static ISchedulingRule nextSchedulingRule() {
+    if (nextSchedulingRule >= schedulingRules.size())
+      nextSchedulingRule = 0;
+    return schedulingRules.get(nextSchedulingRule++);
+  }
+  
   private Result result;
 //  private JSGLRI parser;
 //  private Path parserTable;
@@ -68,6 +88,8 @@ public class SugarJParser extends JSGLRI {
   @Override
   protected IStrategoTerm doParse(String input, String filename) throws IOException {
     
+    if (environment == null && getController().getProject() != null)
+      environment = SugarJParseController.makeProjectEnvironment(getController().getProject().getRawProject());
     assert environment != null;
     
     if (!LanguageLibRegistry.getInstance().isRegistered(FileCommands.getExtension(filename)))
@@ -102,6 +124,8 @@ public class SugarJParser extends JSGLRI {
     }
     
     final RelativePath sourceFile = ModuleSystemCommands.locateSourceFile(filename, environment.getSourcePath());
+    assert sourceFile != null;
+    
     final LanguageLibFactory factory = LanguageLibRegistry.getInstance().getLanguageLib(FileCommands.getExtension(filename));
 
     SugarJParser.setPending(filename, true);
@@ -130,6 +154,8 @@ public class SugarJParser extends JSGLRI {
         return Status.OK_STATUS;
       }
     };
+    
+    parseJob.setRule(nextSchedulingRule());
     parseJob.schedule();
   }
   
@@ -143,7 +169,7 @@ public class SugarJParser extends JSGLRI {
     SugarJConsole.activateConsoleOnce();
     
     try {
-      return Driver.parse(input, sourceFile, environment, monitor, factory);
+      return Driver.run(input, sourceFile, environment, monitor, factory);
     } catch (InterruptedException e) {
       throw e;
     } catch (Exception e) {
@@ -224,7 +250,7 @@ public class SugarJParser extends JSGLRI {
 
     Tokenizer tokenizer = new Tokenizer(" ", " ", new KeywordRecognizer(pt) {});
     Token tok = tokenizer.makeToken(0, IToken.TK_UNKNOWN, true);
-    IStrategoTerm term = ATermCommands.makeList("SugarCompilationUnit", tok);
+    IStrategoTerm term = ATermCommands.makeList("CompilationUnit", tok);
     
     Result r = new Result(true) {
       public boolean isUpToDateShallow(int h, Environment env) { return false; }
@@ -236,7 +262,7 @@ public class SugarJParser extends JSGLRI {
   }
   
   private IStrategoTerm parseCompletionTree(String input, String filename, Result result) throws IOException {
-
+    //TODO fix: adapt to parsing with parseMax
     RetractableTreeBuilder treeBuilder = new RetractableTreeBuilder();
     ParseTable table;
     try {

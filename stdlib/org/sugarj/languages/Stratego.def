@@ -4,75 +4,11 @@ module Stratego-Sugar-Overlays
 imports Stratego-Core-Identifiers Stratego-Sugar-Terms
 
 exports
-  sorts WATER WATERTOKEN WATERTOKENSTART WATERTOKENSEPARATOR WATERTOKENSTAR
-
-  lexical syntax
-    ~[A-Za-z0-9\_]                 -> WATERTOKENSTART     {recover, avoid}
-    WATERTOKENSTART [A-Za-z0-9\_]* -> WATERTOKEN          
-    ~[A-Za-z0-9\_\ \t\12\r\n\*]    -> WATERTOKENSEPARATOR {recover, avoid}
-    "*"                            -> WATERTOKENSTAR      {recover, avoid}
-    WATERTOKEN                     -> WATER               
-    WATERTOKENSEPARATOR            -> WATER               
-    WATERTOKENSTAR                 -> WATER               
-                                   -> WATEREOF            
-
-  lexical restrictions
-    WATERTOKEN -/- [A-Za-z0-9\_]
-    WATERTOKENSTAR -/- [\/]
-
-  context-free syntax
-    WATER -> LAYOUT {cons("WATER")}
-
-  (
-
-  sorts WATEREOF
-
-  lexical restrictions
-    WATEREOF -/- ~[]
-
-  lexical syntax
-    %% Lexical insertion recovery rules                     
-                                        -> "|}"             {recover, cons("INSERTION")}
-                                        -> ">"              {recover, cons("INSERTION")}
-                                        -> "\\"             {recover, cons("INSERTION")}
-                                        -> "]"              {recover, cons("INSERTION")}
-                                        -> "sorts"          {recover, cons("INSERTION")}
-                                        -> "constructors"   {recover, cons("INSERTION")}
-                                        -> ":"              {recover, cons("INSERTION")}
-                                        -> "*"              {recover, cons("INSERTION")}
-                                        -> "end"            {recover, cons("INSERTION")}
-                                        -> "}"              {recover, cons("INSERTION")}
-                                        -> ","              {recover, cons("INSERTION")}
-                                        -> ")"              {recover, cons("INSERTION")}
-                                        -> "module"         {recover, cons("INSERTION")}
-                                        -> "specification"  {recover, cons("INSERTION")}
-                                        -> "imports"        {recover, cons("INSERTION")}
-                                        -> "strategies"     {recover, cons("INSERTION")}
-                                        -> "signature"      {recover, cons("INSERTION")}
-                                        -> "overlays"       {recover, cons("INSERTION")}
-    "\""                                -> INSERTOPENQUOTE1 {recover}
-    INSERTOPENQUOTE1 StrChar* "\n"      -> String           {cons("INSERTEND")}
-    INSERTOPENQUOTE1 StrChar* WATEREOF  -> String           {cons("INSERTEND")}
-    "'"                                 -> INSERTOPENQUOTE0 {recover}
-    INSERTOPENQUOTE0 CharChar "\n"      -> Char             {cons("INSERTEND")}
-    INSERTOPENQUOTE0 CharChar WATEREOF  -> Char             {cons("INSERTEND")}
-    "/*"                                -> INSERTSTART0     {recover}
-    INSERTSTART0 CommChar* WATEREOF     -> LongCom          {cons("INSERTEND")}
-
-  syntax
-    %% Kernel syntax insertion recovery rules   
-
-  )
-
-  (
-
   sorts Overlay
 
   context-free syntax
     Id "=" Term                   -> Overlay {cons("OverlayNoArgs")}
     Id "(" {Id ","}* ")" "=" Term -> Overlay {cons("Overlay")}
-
-  )
 
 module Stratego-Sugar-DynamicRules
 imports Stratego-Core-Identifiers Stratego-Sugar-Strategies Stratego-Sugar-Rules
@@ -571,30 +507,7 @@ exports
 
 module Stratego-Core-Layout
 exports
-  sorts Ws ShortCom LongCom CommChar Asterisk Eof
-
   lexical syntax
-    [\t\ \n\r]             -> Ws       
-    "//" ~[\n]* [\n] | Eof -> ShortCom 
-    "/*" CommChar* "*/"    -> LongCom  
-                           -> Eof      
-    ~[\*]                  -> CommChar 
-    "*"                    -> Asterisk 
-    Asterisk               -> CommChar 
-
-  lexical restrictions
-    Asterisk -/- [\/]
-    Eof -/- ~[]
-
-  lexical syntax
-    ShortCom -> LAYOUT 
-    LongCom  -> LAYOUT 
-%%    Ws       -> LAYOUT 
-
-  context-free restrictions
-    LAYOUT? -/- [\ \t\n\r]
-    LAYOUT? -/- [\/] . [\*]
-    LAYOUT? -/- [\/] . [\/]
 
 module Stratego-Sugar-Layout
 imports Stratego-Core-Layout
@@ -657,12 +570,6 @@ imports Stratego
             Id             => StrategoId
             ModNamePart    => StrategoModNamePart
             ModName        => StrategoModName
-            Asterisk       => StrategoAsterisk
-            CommChar       => StrategoCommChar
-            Eof            => StrategoEof
-            LongCom        => StrategoLongCom
-            ShortCom       => StrategoShortCom
-            Ws             => StrategoWs
             PreTerm        => StrategoPreTerm
             Term           => StrategoTerm
             StrategyMid    => StrategoStrategyMid

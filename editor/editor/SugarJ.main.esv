@@ -13,4 +13,4 @@ language General properties
                   
   extensions    : 
   table         : include/SugarJ.tbl
-  start symbols : SugarCompilationUnit
+  start symbols : CompilationUnit

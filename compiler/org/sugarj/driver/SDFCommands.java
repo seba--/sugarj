@@ -25,7 +25,6 @@ import org.spoofax.jsglr_layout.client.ITreeBuilder;
 import org.spoofax.jsglr_layout.client.InvalidParseTableException;
 import org.spoofax.jsglr_layout.client.ParseTable;
 import org.spoofax.jsglr_layout.client.SGLR;
-import org.spoofax.jsglr_layout.shared.BadTokenException;
 import org.spoofax.jsglr_layout.shared.SGLRException;
 import org.spoofax.jsglr_layout.shared.TokenExpectedException;
 import org.spoofax.terms.Term;
@@ -77,6 +76,7 @@ public class SDFCommands {
   
   private static IOAgent packSdfIOAgent = new FilteringIOAgent(Log.PARSE | Log.DETAIL, "  including .*");
   private static IOAgent sdf2tableIOAgent = new FilteringIOAgent(Log.PARSE | Log.DETAIL, "Invoking native tool .*");
+  private static IOAgent makePermissiveIOAgent = new FilteringIOAgent(Log.PARSE | Log.DETAIL, "[ make_permissive | info ].*");
   
   // cai 27.09.12
   // convert path-separator to that of the OS
@@ -85,7 +85,7 @@ public class SDFCommands {
       return path.replace('/', File.separatorChar);
   }
   
-  private static void packSdf(Path sdf, Path def, Context sdfContext, Collection<Path> paths, LanguageLib langLib) throws IOException {
+  private static void packSdf(Path sdf, Path def, Collection<Path> paths, LanguageLib langLib) throws IOException {
     /*
      * We can include as many paths as we want here, checking the
      * adequacy of the occurring imports is done elsewhere.
@@ -95,7 +95,7 @@ public class SDFCommands {
         "-o", nativePath(def.getAbsolutePath())
     }));
     
-    for (File grammarFile : langLib.getGrammars()) {
+    for (File grammarFile : langLib.getDefaultGrammars()) {
       cmd.add("-Idef");
       cmd.add(nativePath(grammarFile.getPath()));
     }
@@ -111,6 +111,8 @@ public class SDFCommands {
         cmd.add(nativePath(path.getAbsolutePath()));
       }
     
+    // Pack-sdf requires a fresh context each time, because it caches grammars, which leads to a heap overflow.
+    Context sdfContext = org.strategoxt.tools.tools.init(); 
     try {
       sdfContext.setIOAgent(packSdfIOAgent);
       sdfContext.invokeStrategyCLI(main_pack_sdf_0_0.instance, "pack-sdf", cmd.toArray(new String[cmd.size()]));
@@ -124,11 +126,11 @@ public class SDFCommands {
       throw new RuntimeException("execution of pack-sdf failed");
   }
   
-  private static void sdf2Table(Path def, Path tbl, String module, Context xtcContext) throws IOException {
-    sdf2Table(def, tbl, module, xtcContext, false);
+  private static void sdf2Table(Path def, Path tbl, String module) throws IOException {
+    sdf2Table(def, tbl, module, false);
   }
   
-  private static void sdf2Table(Path def, Path tbl, String module, Context xtcContext, boolean normalize) throws IOException {
+  private static void sdf2Table(Path def, Path tbl, String module, boolean normalize) throws IOException {
     String[] cmd; 
     
     if (!normalize)
@@ -149,24 +151,29 @@ public class SDFCommands {
     for (int i = 0; i < termArgs.length; i++)
       termArgs[i] = ATermCommands.makeString(cmd[i], null);
     
-    xtcContext.setIOAgent(sdf2tableIOAgent);
-    SDFBundleCommand.getInstance().init();
-    SDFBundleCommand.getInstance().invoke(xtcContext, "sdf2table", termArgs);
+    Context xtcContext = SugarJContexts.xtcContext();
+    try {
+      xtcContext.setIOAgent(sdf2tableIOAgent);
+      SDFBundleCommand.getInstance().init();
+      SDFBundleCommand.getInstance().invoke(xtcContext, "sdf2table", termArgs);
+    } finally {
+      SugarJContexts.releaseContext(xtcContext);
+    }
     
     if (!tbl.getFile().exists())
       throw new RuntimeException("execution of sdf2table failed");
   }
 
-  private static void normalizeTable(Path def, String module, Context xtcContext) throws IOException {
+  private static void normalizeTable(Path def, String module) throws IOException {
     Path tbl = FileCommands.newTempFile("tbl");
-    sdf2Table(def, tbl, module, xtcContext, true);
+    sdf2Table(def, tbl, module, true);
     FileCommands.deleteTempFiles(tbl);
   }
   
-  public static void check(Path sdf, String module, Context sdfContext, Context xtcContext, Collection<Path> paths, LanguageLib langLib) throws IOException {
+  public static void check(Path sdf, String module, Collection<Path> paths, LanguageLib langLib) throws IOException {
     Path def = FileCommands.newTempFile("def");
-    packSdf(sdf, def, sdfContext, paths, langLib);
-    normalizeTable(def, module, xtcContext);
+    packSdf(sdf, def, paths, langLib);
+    normalizeTable(def, module);
     FileCommands.deleteTempFiles(def);
   }
   
@@ -176,27 +183,22 @@ public class SDFCommands {
    * @throws IOException
    * @throws InvalidParseTableException
    * @throws SGLRException 
-   * @throws BadTokenException 
    * @throws TokenExpectedException 
    */
   public static Path compile(Path sdf,
                               String module, 
                               Collection<Path> dependentFiles, 
                               SGLR sdfParser, 
-                              Context sdfContext, 
-                              Context makePermissiveContext,
-                              Context xtcContext,
                               ModuleKeyCache<Path> sdfCache, 
                               Environment environment,
                               LanguageLib langLib) throws IOException,
                                                           InvalidParseTableException, 
                                                           TokenExpectedException, 
-                                                          BadTokenException, 
                                                           SGLRException {
     ModuleKey key = getModuleKeyForGrammar(sdf, module, dependentFiles, sdfParser);
     Path tbl = lookupGrammarInCache(sdfCache, key);
     if (tbl == null) {
-      tbl = generateParseTable(key, sdf, module, sdfContext, makePermissiveContext, xtcContext, environment.getIncludePath(), langLib);
+      tbl = generateParseTable(key, sdf, module, environment.getIncludePath(), langLib);
       cacheParseTable(sdfCache, key, tbl, environment);
     }
     
@@ -248,7 +250,7 @@ public class SDFCommands {
     }
   }
   
-  private static ModuleKey getModuleKeyForGrammar(Path sdf, String module, Collection<Path> dependentFiles, SGLR parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  private static ModuleKey getModuleKeyForGrammar(Path sdf, String module, Collection<Path> dependentFiles, SGLR parser) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
     log.beginTask("Generating", "Generate module key for current grammar", Log.CACHING);
     try {
       IStrategoTerm aterm = (IStrategoTerm) parser.parse(FileCommands.readFileAsString(sdf), sdf.getAbsolutePath(), "Sdf2Module");
@@ -273,9 +275,6 @@ public class SDFCommands {
   private static Path generateParseTable(ModuleKey key,
                                          Path sdf,
                                          String module,
-                                         Context sdfContext,
-                                         Context makePermissiveContext,
-                                         Context xtcContext,
                                          Collection<Path> paths,
                                          LanguageLib langLib)
       throws IOException, InvalidParseTableException {
@@ -286,8 +285,8 @@ public class SDFCommands {
       tblFile = FileCommands.newTempFile("tbl");
 
       Path def = FileCommands.newTempFile("def");
-      packSdf(sdf, def, sdfContext, paths, langLib);
-      sdf2Table(def, tblFile, module, xtcContext);
+      packSdf(sdf, def, paths, langLib);
+      sdf2Table(def, tblFile, module);
       FileCommands.deleteTempFiles(def);
       return tblFile;
     } finally {
@@ -295,12 +294,15 @@ public class SDFCommands {
     }
   }
   
-  public static String makePermissiveSdf(String source, Context context) throws IOException {
+  public static String makePermissiveSdf(String source) throws IOException {
+    if (true)
+      return source;
+    
     Path def = FileCommands.newTempFile("def");
     Path permissiveDef = FileCommands.newTempFile("def-permissive");
     
     FileCommands.writeToFile(def, sdfToDef(source));
-    makePermissive(def, permissiveDef, context);
+    makePermissive(def, permissiveDef);
     
     String s = defToSdf(FileCommands.readFileAsString(permissiveDef)); // drop "definition\n"
     FileCommands.deleteTempFiles(def);
@@ -308,10 +310,12 @@ public class SDFCommands {
     return s;
   }
   
-  private static void makePermissive(Path def, Path permissiveDef, Context context) throws IOException {
+  private static void makePermissive(Path def, Path permissiveDef) throws IOException {
     log.beginExecution("make permissive", Log.PARSE, "-i", def.getAbsolutePath(), "-o", permissiveDef.getAbsolutePath());
+    Context mpContext = SugarJContexts.makePermissiveContext();
+    mpContext.setIOAgent(makePermissiveIOAgent);
     try {
-      make_permissive.mainNoExit(context, "-i", def.getAbsolutePath(), "-o", permissiveDef.getAbsolutePath());
+      make_permissive.mainNoExit(mpContext, "-i", def.getAbsolutePath(), "-o", permissiveDef.getAbsolutePath());
     }
     catch (StrategoExit e) {
       if (e.getValue() != 0) {
@@ -320,6 +324,7 @@ public class SDFCommands {
       }
     }
     finally {
+      SugarJContexts.releaseContext(mpContext);
       log.endTask();
     }
   }
@@ -335,26 +340,31 @@ public class SDFCommands {
    * @throws IOException
    * @throws InvalidParseTableException
    * @throws SGLRException 
-   * @throws BadTokenException 
    * @throws TokenExpectedException 
    */
-  private static Pair<SGLR, IStrategoTerm> sglr(ParseTable table, final String source, final String start, boolean useRecovery, ITreeBuilder treeBuilder) throws SGLRException {
+  private static Pair<SGLR, Pair<IStrategoTerm, Integer>> sglr(ParseTable table, final String source, final String start, boolean useRecovery, final boolean parseMax, ITreeBuilder treeBuilder) throws SGLRException {
     if (treeBuilder instanceof RetractableTreeBuilder && ((RetractableTreeBuilder) treeBuilder).isInitialized())
       ((RetractableTokenizer) treeBuilder.getTokenizer()).setKeywordRecognizer(table.getKeywordRecognizer());
     
     final SGLR parser = new SGLR(treeBuilder, table);
     parser.setUseStructureRecovery(useRecovery);
 
-    Callable<IStrategoTerm> parseCallable = new Callable<IStrategoTerm>() {
+    Callable<Pair<IStrategoTerm, Integer>> parseCallable = new Callable<Pair<IStrategoTerm, Integer>>() {
       @Override
-      public IStrategoTerm call() throws Exception {
-        return (IStrategoTerm) parser.parse(source, "toplevel declaration", start);
+      public Pair<IStrategoTerm, Integer> call() throws Exception {
+        Object o = parser.parse(source, "toplevel declaration", start, parseMax);
+        if (o instanceof IStrategoTerm)
+          return Pair.create((IStrategoTerm) o, source.length());
+        else {
+          Object[] os = (Object[]) o;
+          return Pair.create((IStrategoTerm) os[0], (Integer) os[1]);
+        }
     }};
     
-    Future<IStrategoTerm> res = parseExecutorService.submit(parseCallable);
+    Future<Pair<IStrategoTerm, Integer>> res = parseExecutorService.submit(parseCallable);
     try {
-      IStrategoTerm term = res.get(PARSE_TIMEOUT, TimeUnit.MILLISECONDS);
-      return Pair.create(parser, term);
+      Pair<IStrategoTerm, Integer> result = res.get(PARSE_TIMEOUT, TimeUnit.MILLISECONDS);
+      return Pair.create(parser, result);
     } catch (ExecutionException e) {
       if (e.getCause() instanceof SGLRException)
         throw (SGLRException) e.getCause();
@@ -367,16 +377,16 @@ public class SDFCommands {
     }
   }
   
-  public static Pair<SGLR, IStrategoTerm> parseImplode(ParseTable table, String source, String start, boolean useRecovery, ITreeBuilder treeBuilder) throws IOException, SGLRException {
-    return parseImplode(table, null, source, start, useRecovery, treeBuilder);
+  public static Pair<SGLR, Pair<IStrategoTerm, Integer>> parseImplode(ParseTable table, String source, String start, boolean useRecovery, boolean parseMax, ITreeBuilder treeBuilder) throws IOException, SGLRException {
+    return parseImplode(table, null, source, start, useRecovery, parseMax, treeBuilder);
   }
   
-  private static Pair<SGLR, IStrategoTerm> parseImplode(ParseTable table, Path tbl, String source, String start, boolean useRecovery, ITreeBuilder treeBuilder) throws IOException, SGLRException {
+  private static Pair<SGLR, Pair<IStrategoTerm, Integer>> parseImplode(ParseTable table, Path tbl, String source, String start, boolean useRecovery, boolean parseMax, ITreeBuilder treeBuilder) throws IOException, SGLRException {
     log.beginExecution("parsing", Log.PARSE);
 
-    Pair<SGLR, IStrategoTerm> result = null;
+    Pair<SGLR, Pair<IStrategoTerm, Integer>> result = null;
     try {
-      result = sglr(table, source, start, useRecovery, treeBuilder);
+      result = sglr(table, source, start, useRecovery, parseMax, treeBuilder);
     }
     finally {
       if (result != null && result.b != null)
@@ -405,7 +415,7 @@ public class SDFCommands {
     if (string != null)
       return Term.asJavaString(string);
     
-    throw new RuntimeException("pretty printing SDF AST failed: " + ATermCommands.atermToFile(term));
+    throw new RuntimeException("pretty printing SDF AST failed");
   }
   
   /**
@@ -441,14 +451,17 @@ public class SDFCommands {
    * @param sdf result file
    * @throws InvalidParseTableException 
    */
-  public static IStrategoTerm extractSDF(IStrategoTerm term, Context context) throws IOException, InvalidParseTableException {
+  public static IStrategoTerm extractSDF(IStrategoTerm term) throws IOException, InvalidParseTableException {
     IStrategoTerm result = null;
+    Context extractContext = SugarJContexts.extractionContext();
     try {
-      result = extract_sdf_0_0.instance.invoke(context, term);
+      result = extract_sdf_0_0.instance.invoke(extractContext, term);
     }
     catch (StrategoExit e) {
       if (e.getValue() != 0 || result == null)
         throw new RuntimeException("Stratego extraction failed", e);
+    } finally {
+      SugarJContexts.releaseContext(extractContext);
     }
     return result;
   }

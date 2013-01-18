@@ -1,0 +1,31 @@
+package entity;
+
+/**
+ * partially copied from https://svn.strategoxt.org/repos/WebDSL/webdsls/trunk/src/org/webdsl/dsl/syntax/WebDSL-DataModel.sdf
+ **/
+public sugar Metamodel {
+  desugarings
+    entity-model
+
+  rules
+    entity-model :
+      entity@EntityDec(mods, name, super, body) -> 
+      ModelDec(ModelDecHead(mods, name, "entity.Metamodel"), ModelBody((super, body)))
+
+  context-free syntax
+    Entity -> ToplevelDeclaration
+    AnnoOrSugarMod* "entity" JavaId SuperEntity? "{" EntityBodyDeclaration* "}" -> Entity {cons("EntityDec")}
+    "extends" JavaId -> SuperEntity {cons("SuperDec")}
+    
+    Property -> EntityBodyDeclaration
+
+  context-free syntax
+    JavaId "::" Sort -> Property {cons("Property")}
+
+  context-free syntax %% Types
+    SimpleSort -> Sort
+    GenericSort -> Sort
+    
+    JavaId                     -> SimpleSort {cons("SimpleSort")}
+    JavaId "<" {Sort ","}+ ">" -> GenericSort {cons("GenericSort")}
+}

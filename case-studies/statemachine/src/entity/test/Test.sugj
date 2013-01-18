@@ -1,0 +1,40 @@
+package entity.test;
+
+import entity.ToJava(entity.test.Account);
+import entity.ToJava(entity.test.Customer);
+
+import java.util.HashSet;
+ 
+public class Test {
+  public static void main(String[] args) {
+    Customer alice = new Customer("Alice", "Marburg", new HashSet<Account>());
+    Customer bob = new Customer("Bob", "Marburg", new HashSet<Account>());
+
+    Account alicesPublicAccount = new Account(17, alice, 100, "0000");
+    alice.getAccounts().add(alicesPublicAccount);
+    Account alicesPrivateAccount = new Account(901, alice, 100000, "0000");
+    alice.getAccounts().add(alicesPrivateAccount);
+
+    Account bobsExpenses = new Account(35, bob, 300000, "0000");
+    bob.getAccounts().add(bobsExpenses);
+    Account bobsPrivateAccount = new Account(61, bob, 4000, "0000");
+    bob.getAccounts().add(bobsPrivateAccount);
+
+    // Bob corrects Alice's trust issues once and for all
+    transfer(bobsExpenses, alicesPublicAccount, 250000);
+
+    printAccountInfo(alice);
+    printAccountInfo(bob);
+  }
+
+  private static void transfer(Account from, Account to, int amount) {
+    from.setBalance(from.getBalance() - amount);
+    to.setBalance(to.getBalance() + amount);
+  }
+
+  private static void printAccountInfo(Customer c) {
+    System.out.println("Accounts of " + c.getName() + ": ");
+    for (Account a : c.getAccounts())
+      System.out.println(" *  uid=" + a.getUid() + ":\t balance=" + a.getBalance());
+  }
+}

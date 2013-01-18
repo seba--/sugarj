@@ -1,0 +1,9 @@
+package test;
+
+import metamodel.Java;
+
+import test.D1;
+
+public class-model D3 {
+  public D1 d1 = null;
+}

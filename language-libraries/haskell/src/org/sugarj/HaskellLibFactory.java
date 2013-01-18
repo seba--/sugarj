@@ -24,7 +24,7 @@ public class HaskellLibFactory extends LanguageLibFactory {
 
   @Override
   public String getVersion() {
-    return "haskell-0.1";
+    return "haskell-0.1a";
   }
   
   @Override

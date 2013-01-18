@@ -424,7 +424,7 @@ public class DriverCLI {
       environment.setCacheDir(pathArgument(line.getOptionValue("cache")));
   
     if (line.hasOption("gen-files"))
-      environment.setGenerateJavaFile(true);
+      environment.setGenerateFiles(true);
     
     if (line.hasOption("atomic-imports"))
       environment.setAtomicImportParsing(true);

@@ -194,6 +194,9 @@ rules // Analysis traversals
   
 rules // Parallel analysis
   
+  index-parallel-analyze-files(analyze) = index-analyze-files(index-parallel-analyze(analyze))
+  index-sequential-analyze-files(analyze) = index-analyze-files(index-sequential-analyze(analyze))
+  
   /**
    * Does a parallel analysis of given files using the specified analysis strategy. Automatically does parallel
    * analysis of dependent files that have changed during the analysis.
@@ -206,13 +209,13 @@ rules // Parallel analysis
    *                a (ast', errors, warnings, notes, filesToAnalyze) tuple as output.
    * @type List((file, subfile) or file) -> None()
    */
-  index-parallel-analyze-files(analyze):
+  index-analyze-files(internal-analyze):
     files -> None()
     with
       length; 
       set-total-work-units
     with
-      index-parallel-analyze(analyze);
+      internal-analyze;
       filter(not(?ParallelResults((), (), _, _, _, _) <+ ?ParallelResults((), [()], _, _, _, _)); index-set-markers)
       
 rules // Splitter
@@ -316,10 +319,10 @@ rules // Query primitives
   index-get-all:
     template -> <indexlib-get-all> template
       with
-       if set := <Index-ReadSet> then
-         uri := <index-uri>;
-         <iset-add(|Read(uri))> set
-       end
+        if set := <Index-ReadSet> then
+          uri := <index-uri>;
+          <iset-add(|Read(uri))> set
+        end
        
   /**
    * Get all values of index entries that match the given template.
@@ -465,7 +468,7 @@ rules // Index lookup rules (that take into account adjust-index-lookup)
    * @type "name"{uri} -> ?Def(uri')
    */
   index-lookup:
-    x{[namespace|path]} -> <index-lookup-internal(index-compare-name-equal(|name)|ns, path, name)> x
+    x{[namespace|path]} -> <index-lookup-internal(index-get-defs, index-compare-name-equal(|name)|ns, path, name)> x
     where
       ns := <index-namespace-unwrap> namespace;
       name := <strip-annos> x
@@ -477,7 +480,7 @@ rules // Index lookup rules (that take into account adjust-index-lookup)
    * @type "name"{uri} -> List(Def(uri'))
    */
   index-lookup-all:
-    x{[namespace|path]} -> <index-lookup-all-internal(index-compare-name-equal(|name)|ns, path, name)> x
+    x{[namespace|path]} -> <index-lookup-all-internal(index-get-defs, index-compare-name-equal(|name)|ns, path, name)> x
     where
       ns := <index-namespace-unwrap> namespace;
       name := <strip-annos> x
@@ -491,7 +494,7 @@ rules // Index lookup rules (that take into account adjust-index-lookup)
    * @type "name"{uri} -> List(Def(uri'))
    */
   index-lookup-all(|prefix):
-    x{[namespace|path]} -> <index-lookup-all-internal(index-compare-name-substring(|prefix)|ns, path, prefix)> x
+    x{[namespace|path]} -> <index-lookup-all-internal(index-get-defs-prefix, index-compare-name-substring(|prefix)|ns, path, prefix)> x
     where
       ns := <index-namespace-unwrap> namespace
       
@@ -502,7 +505,7 @@ rules // Index lookup rules (that take into account adjust-index-lookup)
    * @type "name"{uri} -> List(Def(uri'))
    */
   index-lookup-all-scoped:
-    x{[namespace|path]} -> <index-lookup-all-scoped-internal(index-compare-name-equal(|name)|ns, parent-path, name)> x
+    x{[namespace|path]} -> <index-lookup-all-scoped-internal(index-get-defs, index-compare-name-equal(|name)|ns, parent-path, name)> x
     where
       ns := <index-namespace-unwrap> namespace;
       name := <strip-annos> x;
@@ -515,7 +518,7 @@ rules // Index lookup rules (that take into account adjust-index-lookup)
    * @type "name"{uri} -> List(Def(uri'))
    */
   index-lookup-all-scoped-noimports:
-    x{[namespace|path]} -> <index-lookup-all-scoped-internal(fail, id, index-compare-name-equal(|name)|ns, parent-path, name)> x
+    x{[namespace|path]} -> <index-lookup-all-scoped-internal(fail, id, index-get-defs, index-compare-name-equal(|name)|ns, parent-path, name)> x
     where
       ns := <index-namespace-unwrap> namespace;
       name := <strip-annos> x;
@@ -530,7 +533,7 @@ rules // Index lookup rules (that take into account adjust-index-lookup)
    * @type "name"{uri} -> List(Def(uri'))
    */
   index-lookup-all-scoped(|prefix):
-    x{[namespace|path]} -> <index-lookup-all-scoped-internal(index-compare-name-substring(|prefix)|ns, parent-path, prefix)> x
+    x{[namespace|path]} -> <index-lookup-all-scoped-internal(index-get-defs-prefix, index-compare-name-substring(|prefix)|ns, parent-path, prefix)> x
     where
       ns := <index-namespace-unwrap> namespace;
       (<?[_|<id>]> path <+ !path) => parent-path
@@ -555,7 +558,7 @@ rules // Index lookup rules (that take into account adjust-index-lookup)
    * @type "name"{uri} -> List(Def(uri'))
    */    
   index-lookup-children(|namespace, prefix):
-    x{[_|path]} -> <index-lookup-all-scoped-internal(index-compare-name-substring(|prefix, namespace)|namespace, path, prefix)> x
+    x{[_|path]} -> <index-lookup-all-scoped-internal(index-get-defs-prefix, index-compare-name-substring(|prefix, namespace)|namespace, path, prefix)> x
       
 rules // Index utilities
   

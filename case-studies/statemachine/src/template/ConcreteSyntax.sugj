@@ -1,0 +1,15 @@
+package template;
+
+import org.sugarj.languages.Stratego;
+
+import template.Core;
+import template.util.MetaExplode;
+
+public sugar ConcreteSyntax { 
+  context-free syntax
+    ConcreteSyntaxTemplate -> TemplateBody
+    CompilationUnit -> ConcreteSyntaxTemplate {cons("ConcreteSyntaxTemplate")}
+
+  rules
+    compile-template-body : ConcreteSyntaxTemplate(code) -> Build(ToMetaExpr(code))
+}
