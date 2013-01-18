@@ -1,0 +1,14 @@
+package impl;
+
+import variability.Java;
+
+import impl.EdgeIfc;
+
+public variable class EdgeIter {
+  public boolean hasNext(){
+    return false;
+  }
+  public EdgeIfc next(){
+    return null;
+  }
+}

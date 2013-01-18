@@ -1,0 +1,29 @@
+package config;
+
+import variability.Config;
+import model.GraphFeatureModel;
+import variability.CheckConfig(model.GraphFeatureModel);
+
+public config MinimalGraphConfig for GraphFeatureModel {
+   enable Benchmark;
+   enable BaseImpl;
+   disable SearchAlg;
+   enable Undirected;
+   disable Weighted; 
+   
+   disable Number;
+   disable Connected;
+   disable Transpose;
+   disable Mstprim;
+   disable Mstkruskal;
+   disable Cycle;
+   disable StronglyConnected;
+   
+   disable SearchBase;
+   disable Dfs;
+   disable Bfs;
+
+   disable GenEdges;
+   disable GNOnlyNeighbours;
+   enable GNoEdges;
+}

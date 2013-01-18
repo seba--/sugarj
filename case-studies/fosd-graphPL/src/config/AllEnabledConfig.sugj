@@ -1,0 +1,31 @@
+package config;
+
+import variability.Config;
+import model.GraphFeatureModel;
+import variability.CheckConfig(model.GraphFeatureModel);
+
+/*
+ * This feature configuration violates a number of
+ * constraints from the feature model:
+ * Enabling all features simultaneously is illegal.
+ */
+public config AllEnabledConfig for GraphFeatureModel {
+  enable Cycle;
+  enable Undirected;
+  enable SearchBase;
+  enable Weighted;
+  enable StronglyConnected;
+  enable Bfs;
+  enable GenEdges;
+  enable GNOnlyNeighbours;
+  enable GNoEdges;
+  enable Benchmark;
+  enable BaseImpl;
+  enable Connected;
+  enable Mstkruskal;
+  enable Mstprim;
+  enable Number;
+  enable SearchAlg;
+  enable Transpose;
+  enable Dfs;
+}

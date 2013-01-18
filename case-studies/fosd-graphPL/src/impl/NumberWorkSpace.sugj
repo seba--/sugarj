@@ -1,0 +1,20 @@
+package impl;
+
+import variability.Java;
+
+import impl.WorkSpace;
+import impl.Vertex;
+
+
+#ifdef(Number)
+public variable class NumberWorkSpace extends WorkSpace {
+  int vertexCounter;
+  public NumberWorkSpace(){
+    vertexCounter=0;
+  }
+  public void preVisitAction(Vertex v){
+    if (v.visited != true) {
+      v.vertexNumber=vertexCounter++;
+    }
+  }
+}
