@@ -165,7 +165,7 @@ exports
       "\\" ID ":" Type "." Expr -> Expr {cons("Abs")}
       "\\" ID "::" Kind "." Expr -> Expr {cons("TAbs")}
       "if" Expr "then" Expr "else" Expr -> Expr {cons("Cond")}
-      "case" Expr "of" {Branch ";"}+ -> Expr {cons("Case")}
+      "case" Expr "of" Branches -> Expr {cons("Case")}
     }
 
 
