@@ -397,6 +397,12 @@ public class Result implements IErrorLogger {
     writeDependencyFile(persistentPath);
   }
   
+  private void cacheInMemory(Path dep) {
+    synchronized (results) {
+      results.put(dep, new WeakReference<Result>(this));
+    }
+  }
+  
   public void writeDependencyFile(Path dep) throws IOException {
     logGeneration(dep);
 
@@ -419,9 +425,7 @@ public class Result implements IErrorLogger {
       oos.writeObject(availableGeneratedFiles);
       oos.writeObject(deferredSourceFiles);
       
-      synchronized (results) {
-        results.put(dep, new WeakReference<Result>(this));
-      }
+      cacheInMemory(dep);
     } finally {
       if (oos != null)
         oos.close();
@@ -461,6 +465,8 @@ public class Result implements IErrorLogger {
 
       result.availableGeneratedFiles = (Map<Path, Set<RelativePath>>) ois.readObject();
       result.deferredSourceFiles = (Map<Path, Pair<Path, SourceFileContent.Generated>>) ois.readObject();
+      
+      result.cacheInMemory(dep);
     } catch (FileNotFoundException e) {
       return null;
     } catch (ClassNotFoundException e) {
