@@ -255,13 +255,15 @@ rules
   substDecl: (X,S,TyDecl(x,T)) -> TyDecl(x,<subst> (X,S,T))
 
   // Normalization
-  norm: (ctx,T) -> T'
+  norm = debug(!"NO IN ");norm1;debug(!"NO OUT ")
+
+  norm1: (ctx,T) -> T'
         where <parReduce> (ctx,T) => S
             ; <typeEq> (T,S) => msgs
             ; if (!msgs; ?[]) then
                 !T
               else
-                !(<norm> (ctx,S))
+                !(<norm1> (ctx,S))
               end => T'
 
   // Parallel reduction
@@ -270,7 +272,7 @@ rules
   parReduce: (ctx,TyNat()) -> TyNat()
   parReduce: (ctx,TyString()) -> TyString()
   parReduce: (ctx,TyBool()) -> TyBool()
-  parReduce: (ctx,Metavar(mvar)) -> Metavar(mvar)
+  //parReduce: (ctx,Metavar(mvar)) -> Metavar(mvar)
   parReduce: (CtxEmpty(),TyVar(X)) -> TyVar(X)
   parReduce: (CtxBindTVar(ctx,X,K),TyVar(X)) -> TyVar(X)
   parReduce: (CtxBindTVar(ctx,Y,K),TyVar(X)) -> <parReduce> (ctx,TyVar(X))
