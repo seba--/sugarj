@@ -5,7 +5,7 @@ import typing.Check
 
 // type App :: * => * = fun A::* . A
 
-val x = (1,2,2,3)
+val x = 5
 
 type T2 = Nat
 type T = \X :: * . T2
