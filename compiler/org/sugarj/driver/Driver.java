@@ -114,9 +114,12 @@ public class Driver{
   private SGLR strParser;
   private SGLR editorServicesParser;
   private SGLR parser;
-    
-  private static Map<String,ModuleKeyCache<Path>> sdfCaches;
-  private static Map<String,ModuleKeyCache<Path>> strCaches;
+  
+  /**
+   * cache location -> language library -> cache
+   */
+  private static Map<Path, Map<String,ModuleKeyCache<Path>>> sdfCaches;
+  private static Map<Path, Map<String,ModuleKeyCache<Path>>> strCaches;
   
   private ModuleKeyCache<Path> sdfCache;
   private ModuleKeyCache<Path> strCache;
@@ -147,21 +150,8 @@ public class Driver{
       FileCommands.createDir(environment.getBin());
       
       initializeCaches(environment, false);
-      sdfCache = sdfCaches.get(langLib.getLanguageName() + "#" + langLib.getVersion());
-      if (sdfCache == null) {
-        sdfCache = new ModuleKeyCache<Path>(sdfCaches);
-        synchronized (sdfCaches) {
-          sdfCaches.put(langLib.getLanguageName() + "#" + langLib.getVersion(), sdfCache);
-        }
-      }
-      
-      strCache = strCaches.get(langLib.getLanguageName() + "#" + langLib.getVersion());
-      if (strCache == null) {
-        strCache = new ModuleKeyCache<Path>(strCaches);
-        synchronized (strCaches) {
-          strCaches.put(langLib.getLanguageName() + "#" + langLib.getVersion(), strCache);
-        }
-      }
+      sdfCache = selectCache(sdfCaches, langLib, environment);
+      strCache = selectCache(strCaches, langLib, environment);
     } catch (IOException e) {
       throw new RuntimeException("error while initializing driver", e);
     }
@@ -1238,20 +1228,54 @@ public class Driver{
     Path sdfCachePath = environment.createCachePath("sdfCaches");
     Path strCachePath = environment.createCachePath("strCaches");
     
+    if (sdfCaches == null || force)
+      sdfCaches = new HashMap<Path, Map<String,ModuleKeyCache<Path>>>();
+    if (strCaches == null || force)
+      strCaches = new HashMap<Path, Map<String, ModuleKeyCache<Path>>>();
+    
+    ObjectInputStream sdfIn = null;
+    ObjectInputStream strIn = null;
     try{
-      if (sdfCaches == null || force)
-        sdfCaches = (Map<String, ModuleKeyCache<Path>>) new ObjectInputStream(new FileInputStream(sdfCachePath.getFile())).readObject();
-      if (strCaches == null || force)
-        strCaches = (Map<String, ModuleKeyCache<Path>>) new ObjectInputStream(new FileInputStream(strCachePath.getFile())).readObject();
+      sdfIn = new ObjectInputStream(new FileInputStream(sdfCachePath.getFile()));
+      if (!sdfCaches.containsKey(environment.getCacheDir())) {
+        Map<String, ModuleKeyCache<Path>> sdfLocalCaches = (Map<String, ModuleKeyCache<Path>>) sdfIn.readObject();
+        sdfCaches.put(environment.getCacheDir(), sdfLocalCaches);
+      }
+      strIn = new ObjectInputStream(new FileInputStream(strCachePath.getFile()));
+      if (!strCaches.containsKey(environment.getCacheDir())) {
+        Map<String, ModuleKeyCache<Path>> strLocalCaches = (Map<String, ModuleKeyCache<Path>>) strIn.readObject();
+        strCaches.put(environment.getCacheDir(), strLocalCaches);
+      }
     } catch (Exception e) {
-      sdfCaches = new HashMap<String, ModuleKeyCache<Path>>();
-      strCaches = new HashMap<String, ModuleKeyCache<Path>>();
+      sdfCaches.put(environment.getCacheDir(), new HashMap<String, ModuleKeyCache<Path>>());
+      strCaches.put(environment.getCacheDir(), new HashMap<String, ModuleKeyCache<Path>>());
       for (File f : environment.getCacheDir().getFile().listFiles())
-        if (f.getPath().endsWith(".tbl"))
-          f.delete();
+        f.delete();
+    } finally {
+      if (sdfIn != null)
+        sdfIn.close();
+      if (strIn != null)
+        strIn.close();
     }
   }
 
+  private static ModuleKeyCache<Path> selectCache(Map<Path, Map<String, ModuleKeyCache<Path>>> caches, LanguageLib langLib, Environment environment) throws IOException {
+    if (caches == null)
+      return null;
+    synchronized (caches) {
+      ModuleKeyCache<Path> cache = caches.get(environment.getCacheDir()).get(langLib.getLanguageName());
+      Path versionPath = environment.createCachePath(langLib.getLanguageName() + ".version");
+      if (cache != null &&
+          (!FileCommands.exists(versionPath) || !langLib.getVersion().equals(FileCommands.readFileAsString(versionPath))))
+        cache = null;
+      if (cache == null) {
+        cache = new ModuleKeyCache<Path>(caches);
+        FileCommands.writeToFile(versionPath, langLib.getVersion());
+        caches.get(environment.getCacheDir()).put(langLib.getLanguageName(), cache);
+      }
+      return cache;
+    }
+  }
   
 //TODO is this needed?
 //  private static ModuleKeyCache<Path> reallocate(ModuleKeyCache<Path> cache, Environment env) {
@@ -1288,7 +1312,7 @@ public class Driver{
     if (sdfCaches != null) {
       ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(sdfCachePath.getFile()));
       try {
-        oos.writeObject(sdfCaches);
+        oos.writeObject(sdfCaches.get(environment.getCacheDir()));
       } finally {
         oos.close();
       }
@@ -1297,7 +1321,7 @@ public class Driver{
     if (strCaches != null) {
       ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(strCachePath.getFile()));
       try {
-        oos.writeObject(strCaches);
+        oos.writeObject(strCaches.get(environment.getCacheDir()));
       } finally {
         oos.close();
       }
