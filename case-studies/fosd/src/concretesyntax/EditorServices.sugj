@@ -1,0 +1,27 @@
+package concretesyntax;
+ 
+import org.sugarj.languages.EditorServices;
+import org.sugarj.languages.Stratego;
+
+import concretesyntax.MetaExplode;
+
+public sugar EditorServices {
+  context-free syntax
+    "editor" "service" "|[" EditorServiceSection* "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                       "|[" EditorServiceSection* "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+  context-free syntax
+    "~" StrategoTerm -> EditorServiceNode {cons("FromMetaExpr")}
+    "node~" StrategoTerm -> EditorServiceNode {cons("FromMetaExpr")}
+    "~" StrategoTerm -> EditorServiceRefactoringRule {cons("FromMetaExpr")}
+    "~" StrategoTerm -> EditorServiceBuilderRule {cons("FromMetaExpr")}
+    "~" StrategoTerm -> EditorServiceCompletionRule {cons("FromMetaExpr")}
+    "~" StrategoTerm -> EditorServiceReferenceRule {cons("FromMetaExpr")}
+    "~" StrategoTerm -> EditorServicePropertyValue {cons("FromMetaExpr")} 
+    "~" StrategoTerm -> EditorServiceCompletionPart {cons("FromMetaExpr")} 
+    "~" StrategoTerm -> EditorServiceStrategoCall {cons("FromMetaExpr")}
+    "~" StrategoTerm -> EditorServiceSemanticNode {cons("FromMetaExpr")} 
+    "~" StrategoTerm -> EditorServiceCompletionPart {cons("FromMetaExpr")}
+    "~" StrategoTerm -> EditorServiceAttribute {cons("FromMetaExpr")} 
+    "string~" StrategoTerm -> EditorServiceString {cons("FromMetaExpr")}
+}  

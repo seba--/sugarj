@@ -1,0 +1,29 @@
+package concretesyntax; 
+
+import org.sugarj.languages.Stratego;
+
+import concretesyntax.MetaExplode;
+
+public sugar Stratego {
+  context-free syntax
+    "stratego-decl" "|[" StrategoDecl "]|" -> StrategoTerm {cons("ToMetaExpr")}
+	  "stratego"      "|[" StrategoDecl "]|" -> StrategoTerm {cons("ToMetaExpr")}
+	                  "|[" StrategoDecl "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+    "stratego-strategy" "|[" StrategoStrategy "]|" -> StrategoTerm {cons("ToMetaExpr")}
+    "stratego"          "|[" StrategoStrategy "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                        "|[" StrategoStrategy "]|" -> StrategoTerm {cons("ToMetaExpr")}
+	  
+	  "stratego-term" "|[" StrategoTerm "]|" -> StrategoTerm {cons("ToMetaExpr")}
+    "stratego"      "|[" StrategoTerm "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                    "|[" StrategoTerm "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+	context-free syntax
+	  "~"     StrategoTerm  -> StrategoTerm  {cons("FromMetaExpr")}
+    "term~" StrategoTerm  -> StrategoTerm  {cons("FromMetaExpr")}
+    "~"     StrategoTerm  -> StrategoId  {cons("FromMetaExpr")}
+	  "id~"   StrategoTerm  -> StrategoId  {cons("FromMetaExpr")}
+	  "~"     StrategoTerm  -> StrategoStrategy  {cons("FromMetaExpr")}
+    "strategy~" StrategoTerm  -> StrategoStrategy  {cons("FromMetaExpr")}
+    "string~" StrategoTerm  -> StrategoString  {cons("FromMetaExpr")}
+}

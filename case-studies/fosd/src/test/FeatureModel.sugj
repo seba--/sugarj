@@ -1,0 +1,11 @@
+package test;
+
+import variability.Model; 
+
+featuremodel FeatureModel {
+  features A, B, C, D, E, F, INTERFACE
+
+  constraint B -> A
+  constraint C -> D
+  constraint E xor F
+}

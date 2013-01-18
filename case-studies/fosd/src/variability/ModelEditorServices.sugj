@@ -1,0 +1,28 @@
+package variability;
+
+import concretesyntax.EditorServices;
+import variability.FeatureExpressions;
+
+import variability.Model;
+
+public transformation ModelEditorServices {
+
+  rules
+    main = oncetd(to-editor-service)
+
+    to-editor-service :
+      ModelDec(ModelDecHead(mods, Id(n), "variability.Model"), ModelBody((features, requirements)))
+      ->
+      EditorServicesDec(EditorServicesDecHead(mods, Id(n)), EditorServicesBody(services))
+    where <featuredecl2service> features => services
+
+    featuredecl2service =
+      get-decl-names;
+      map({name: ?name;
+        !|[ completions
+              completion template : FeatureName = string~name
+         ]|})
+    
+     get-decl-names = mapconcat(?FeatureDecl(<map(?FeatureName(Id(<id>)))>))
+
+}

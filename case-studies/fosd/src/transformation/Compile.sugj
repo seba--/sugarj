@@ -1,0 +1,13 @@
+package transformation;
+
+public transformation Compile {
+rules
+  compile-after(trans) = 
+    ?(model, model-path, trans-path);
+    !model;
+    trans;
+    sugarj-compile(|model-path, trans-path)
+
+  sugarj-compile(|model-path, trans-path) =
+    prim("SUGARJ_compile", model-path, trans-path)
+}
