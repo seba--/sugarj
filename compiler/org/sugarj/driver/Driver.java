@@ -848,8 +848,11 @@ public class Driver{
         log.log("CONTINUE PROCESSING'" + sourceFile + "'.", Log.CORE);
       }
       
-      if (res != null && !isCircularImport)
+      if (res != null && !isCircularImport) {
+        if (res.getPersistentPath() == null || res.hasPersistentVersionChanged())
+          setErrorMessage(toplevelDecl, "Result is inconsitent with persistent version.");
         driverResult.addDependency(res);
+      }
       
       if (!isCircularImport && importSourceFile != null)
         // if importSourceFile is delegated to something currently being processed
