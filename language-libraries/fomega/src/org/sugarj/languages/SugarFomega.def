@@ -7,11 +7,36 @@ imports org/sugarj/languages/Fomega
         org/sugarj/languages/Sugar
 
 exports
+  lexical syntax
+    [\ \t\r\n] -> LAYOUT
+
+  context-free restrictions
+    LAYOUT? -/- [\ \t\r\n]
+
+  lexical syntax
+    Comment                                                   -> LAYOUT            
+    "//" ~[\n\r]* ([\n\r] | EOF)                              -> Comment           
+    "/*" CommentPart* "*/"                                    -> Comment           
+    ~[\*]                                                     -> CommentPart 
+    Asterisk                                                  -> CommentPart       
+    "*"                                                       -> Asterisk
+                                                              -> EOF          
+  lexical restrictions
+    "/**" -/- [\/]
+    "/*" -/- [\*]
+    Asterisk -/- [\/]
+    EOF -/- ~[]
+
+  context-free restrictions
+    LAYOUT? -/- [\/] . [\/]
+    LAYOUT? -/- [\/] . [\*]
+
+
   context-free start-symbols
-  	SugarCompilationUnit
+  	CompilationUnit
 
   context-free syntax
-    FomegaModuleDec FomegaImports FomegaOrSugarDec -> SugarCompilationUnit {cons("CompilationUnit")}
+    FomegaModuleDec FomegaImports FomegaOrSugarDec -> CompilationUnit {cons("CompilationUnit")}
 
     FomegaDefinitions -> FomegaOrSugarDec
     SugarDefElements -> FomegaOrSugarDec
@@ -24,22 +49,3 @@ exports
     FomegaModuleDec -> ToplevelDeclaration
     FomegaImport -> ToplevelDeclaration
     FomegaOrSugarDec -> ToplevelDeclaration
-    
-  lexical syntax
-    Comment                                                   -> LAYOUT            
-    "//" ~[\n\r]* ([\n\r] | EOF)                              -> Comment           
-    "/*" CommentPart* "*/"                                    -> Comment           
-    ~[\*]                                                     -> CommentPart 
-    Asterisk                                                  -> CommentPart       
-    "*"                                                       -> Asterisk
-                                                              -> EOF          
-
-  lexical restrictions
-    "/**" -/- [\/]
-    "/*" -/- [\*]
-    Asterisk -/- [\/]
-    EOF -/- ~[]
-
-  context-free restrictions
-    LAYOUT? -/- [\/] . [\/]
-    LAYOUT? -/- [\/] . [\*]
