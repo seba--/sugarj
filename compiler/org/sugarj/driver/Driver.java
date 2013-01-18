@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.text.ParseException;
 import java.util.AbstractMap;
@@ -73,7 +74,7 @@ public class Driver{
   
   private final static int PENDING_TIMEOUT = 30000;
 
-  private static Map<Path, WeakReference<Result>> resultCache = new HashMap<Path, WeakReference<Result>>(); // new LRUMap(50);
+  private static Map<Path, SoftReference<Result>> resultCache = new HashMap<Path, SoftReference<Result>>(); // new LRUMap(50);
 
   private static Map<Path, Entry<ToplevelDeclarationProvider, Driver>> pendingRuns = new HashMap<Path, Map.Entry<ToplevelDeclarationProvider,Driver>>();
   private static List<Path> pendingInputFiles = new ArrayList<Path>();
@@ -167,9 +168,12 @@ public class Driver{
   }  
   
   private static synchronized Result getResult(Path file) {
-    WeakReference<Result> res = resultCache.get(file);
-    if (res != null)
+    SoftReference<Result> res = resultCache.get(file);
+    if (res != null) {
+      if (res.get() == null)
+        resultCache.remove(file);
       return res.get();
+    }
     return null;
   }
   
@@ -212,7 +216,7 @@ public class Driver{
   }
 
   private static synchronized void putResult(Path file, Result result) {
-    resultCache.put(file, new WeakReference<Result>(result));
+    resultCache.put(file, new SoftReference<Result>(result));
   }
 
   public static Result run(RelativePath sourceFile, Environment env, IProgressMonitor monitor, LanguageLibFactory langLibFactory) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
@@ -240,27 +244,28 @@ public class Driver{
   private static Result run(Driver driver, ToplevelDeclarationProvider declProvider, RelativePath sourceFile, IProgressMonitor monitor) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     Entry<ToplevelDeclarationProvider, Driver> pending = null;
     
-    synchronized (Driver.class) {
-      pending = getPendingRun(sourceFile);
-      if (pending != null && !pending.getKey().equals(declProvider) && pending.getValue().environment.doGenerateFiles() == driver.environment.doGenerateFiles()) {
-        log.log("interrupting " + sourceFile, Log.CORE);
-        pending.getValue().interrupt();
-      }
+    pending = getPendingRun(sourceFile);
+    if (pending != null && !pending.getKey().equals(declProvider) && pending.getValue().environment.doGenerateFiles() == driver.environment.doGenerateFiles()) {
+      log.log("interrupting " + sourceFile, Log.CORE);
+      pending.getValue().interrupt();
+    }
 
-      if (pending == null) {
-        Result result = getResult(sourceFile);
-        if (result != null && result.hasPersistentVersionChanged()) {
-          result = Result.readDependencyFile(result.getPersistentPath());
+    if (pending == null) {
+      Result result = getResult(sourceFile);
+      if (result == null || result != null && result.hasPersistentVersionChanged()) {
+        result = ModuleSystemCommands.locateResult(FileCommands.dropExtension(sourceFile.getRelativePath()), driver.environment);
+        if (result != null && result.getSugaredSyntaxTree() != null)
           putResult(sourceFile, result);
-        }
-        
-        if (result != null && result.isUpToDate(declProvider.getSourceHashCode(), driver.environment))
-          return result;
       }
       
-      if (pending == null)
-        putPendingRun(sourceFile, declProvider, driver);
+      if (result != null &&
+          (driver.environment.doGenerateFiles() || result.getSugaredSyntaxTree() != null) &&
+          result.isUpToDate(declProvider.getSourceHashCode(), driver.environment))
+        return result;
     }
+    
+    if (pending == null)
+      putPendingRun(sourceFile, declProvider, driver);
     
     if (pending != null) {
       waitForPending(sourceFile);
@@ -286,7 +291,7 @@ public class Driver{
       pendingRuns.remove(sourceFile);
 
     //if (env.doGenerateFiles())
-      putResult(sourceFile, driver.driverResult != null && driver.driverResult.getSugaredSyntaxTree() == null ? null : driver.driverResult);
+      putResult(sourceFile, driver.driverResult != null && driver.driverResult.getSugaredSyntaxTree() != null ? driver.driverResult : null);
     }
 
     return driver.driverResult;
