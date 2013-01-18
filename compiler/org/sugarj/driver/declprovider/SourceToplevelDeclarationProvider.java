@@ -100,8 +100,10 @@ public class SourceToplevelDeclarationProvider implements ToplevelDeclarationPro
       else
         log.logErr(msg, Log.DETAIL);
       
-      if (!treeBuilder.isInitialized())
+      if (!treeBuilder.isInitialized()) {
+        treeBuilder.initializeTable(driver.getParser().getParseTable(), 0, 0, 0);
         treeBuilder.initializeInput(input, null);
+      }
       else if (treeBuilder.getTokenizer().getStartOffset() > start) {
         IToken token = treeBuilder.getTokenizer().getTokenAtOffset(start);
         ((RetractableTokenizer) treeBuilder.getTokenizer()).retractTo(token.getIndex());
