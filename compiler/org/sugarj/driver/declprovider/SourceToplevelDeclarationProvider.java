@@ -11,6 +11,7 @@ import org.spoofax.jsglr_layout.client.FilterException;
 import org.spoofax.jsglr_layout.client.InvalidParseTableException;
 import org.spoofax.jsglr_layout.client.imploder.IToken;
 import org.spoofax.jsglr_layout.client.imploder.ImploderAttachment;
+import org.spoofax.jsglr_layout.client.imploder.TreeBuilder;
 import org.spoofax.jsglr_layout.shared.SGLRException;
 import org.spoofax.jsglr_layout.shared.TokenExpectedException;
 import org.strategoxt.lang.StrategoException;
@@ -100,7 +101,9 @@ public class SourceToplevelDeclarationProvider implements ToplevelDeclarationPro
       else
         log.logErr(msg, Log.DETAIL);
       
-      if (treeBuilder.getTokenizer().getStartOffset() > start) {
+      if (!treeBuilder.isInitialized())
+        treeBuilder.initializeInput(input, null);
+      else if (treeBuilder.getTokenizer().getStartOffset() > start) {
         IToken token = treeBuilder.getTokenizer().getTokenAtOffset(start);
         ((RetractableTokenizer) treeBuilder.getTokenizer()).retractTo(token.getIndex());
         treeBuilder.setOffset(start);
