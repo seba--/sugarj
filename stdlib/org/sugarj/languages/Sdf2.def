@@ -286,12 +286,10 @@ imports basic/Whitespace
 exports
   lexical syntax
     "%%" line:~[\n]* "\n"    -> Comment {cons("line"), category("Comment")}
-    "%" content:~[\%\n]+ "%" -> BlockComment {cons("nested"), category("Comment")}
     Comment -> LAYOUT
-    BlockComment -> LAYOUT
 
   context-free restrictions
-    BlockComment -/- [\%]
+  	LAYOUT? -/- [\%] . [\%]
 
 module languages/sdf2/syntax/Symbols
 imports basic/Comments
