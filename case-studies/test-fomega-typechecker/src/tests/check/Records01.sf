@@ -1,4 +1,4 @@
-module tests.cases.Records01
+module tests.check.Records01
 
 // Should give no errors.
 

@@ -1,4 +1,4 @@
-module tests.cases.Module01
+module tests.check.Module01
 
 import qualified typing.check.TypeChecker
 

@@ -1,8 +1,8 @@
-module tests.cases.Module07
+module tests.check.Module07
 
 import typing.check.TypeChecker
-import tests.cases.Module05
-import tests.cases.Module06
+import tests.check.Module05
+import tests.check.Module06
 
 val z = x
 val y = x
