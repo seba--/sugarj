@@ -1,0 +1,13 @@
+package entity.test;
+
+import entity.Metamodel;
+
+import java.util.Set;
+
+import entity.test.Account;
+
+public entity Customer {
+  name     :: String
+  address  :: String
+  accounts :: Set<Account>
+}

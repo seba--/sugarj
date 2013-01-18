@@ -1,0 +1,28 @@
+package test;
+
+import variability.Java;
+//#ifdef(A)
+import test.AnotherTest;
+import test.InterfaceTest;
+
+//import test.FeatureModel;
+ 
+#ifdef(C) 
+public variable class Test extends Object implements InterfaceTest {
+  
+  void foo(int x, #ifdef(B) int y) {
+  	
+    #ifdef(A)
+    System.out.println("Feature A enabled"); 
+    
+    bar("B", #ifdef(B){"enabled"}{"disabled"});
+    
+    if (2 + #ifdef(A) {3} {0} == 5) {
+       System.out.println("result was 5");
+    }
+  } 
+   
+  void bar(String fname, String state) {
+    System.out.println("Feature " + fname + " is " + state);
+  }
+}

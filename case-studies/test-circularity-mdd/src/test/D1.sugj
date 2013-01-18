@@ -1,0 +1,13 @@
+package test;
+
+import metamodel.Java;
+
+import test.D2;
+
+public class-model D1 {
+  public D2 d2 = new D2();
+
+  public D1() {
+    d2.d3.d1 = this;
+  }
+}

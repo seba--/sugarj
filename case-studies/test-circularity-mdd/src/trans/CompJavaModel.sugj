@@ -1,0 +1,17 @@
+package trans;
+
+import org.sugarj.languages.Model;
+import org.sugarj.languages.Java;
+
+import transformation.Recursive;
+
+public transformation CompJavaModel {
+  rules
+    main = recursively-transform(conforms-to-metamodel(|"metamodel.Java"),
+                                 oncetd(model-to-java))
+
+  rules
+    model-to-java : 
+         ModelDec(ModelDecHead(mods, name, _), ModelBody(body))
+      -> ClassDec(ClassDecHead(mods, name, None, None, None), body)
+}

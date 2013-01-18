@@ -1,0 +1,13 @@
+package template;
+
+import template.Core;
+import template.ConcreteSyntax;
+import template.Unquote;
+import template.UnquoteSplicing;
+import template.Shorthands;
+import template.LocalStrategies;
+import template.IdentifierComposition;
+import template.Foreach;
+
+public sugar Language {
+}

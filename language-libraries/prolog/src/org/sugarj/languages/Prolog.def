@@ -249,7 +249,7 @@ exports
 
 
   lexical syntax
-
+    LayoutText -> LAYOUT
     LayoutTextItem+ 		-> LayoutText
     LayoutChar 			-> LayoutTextItem
     Comment 			-> LayoutTextItem
@@ -262,10 +262,9 @@ exports
     [\*]			-> Asterisk
   lexical restrictions
     Asterisk -/- [\/]
-
-  lexical restrictions
     LayoutText -/- [\0-\32\127\%] | [\/].[\*]
-
+  context-free restrictions
+    LAYOUT? -/- [\0-\32\127]
 
 module org/sugarj/languages/Prolog
 imports org/sugarj/languages/PrologMain

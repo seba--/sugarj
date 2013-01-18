@@ -25,7 +25,6 @@ import org.spoofax.jsglr_layout.client.ITreeBuilder;
 import org.spoofax.jsglr_layout.client.InvalidParseTableException;
 import org.spoofax.jsglr_layout.client.ParseTable;
 import org.spoofax.jsglr_layout.client.SGLR;
-import org.spoofax.jsglr_layout.shared.BadTokenException;
 import org.spoofax.jsglr_layout.shared.SGLRException;
 import org.spoofax.jsglr_layout.shared.TokenExpectedException;
 import org.spoofax.terms.Term;
@@ -97,7 +96,7 @@ public class SDFCommands {
         "-o", nativePath(def.getAbsolutePath())
     }));
     
-    for (File grammarFile : langLib.getGrammars()) {
+    for (File grammarFile : langLib.getDefaultGrammars()) {
       cmd.add("-Idef");
       cmd.add(nativePath(grammarFile.getPath()));
     }
@@ -185,7 +184,6 @@ public class SDFCommands {
    * @throws IOException
    * @throws InvalidParseTableException
    * @throws SGLRException 
-   * @throws BadTokenException 
    * @throws TokenExpectedException 
    */
   public static Path compile(Path sdf,
@@ -197,7 +195,6 @@ public class SDFCommands {
                               LanguageLib langLib) throws IOException,
                                                           InvalidParseTableException, 
                                                           TokenExpectedException, 
-                                                          BadTokenException, 
                                                           SGLRException {
     ModuleKey key = getModuleKeyForGrammar(sdf, module, dependentFiles, sdfParser);
     Path tbl = lookupGrammarInCache(sdfCache, key);
@@ -254,7 +251,7 @@ public class SDFCommands {
     }
   }
   
-  private static ModuleKey getModuleKeyForGrammar(Path sdf, String module, Collection<Path> dependentFiles, SGLR parser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  private static ModuleKey getModuleKeyForGrammar(Path sdf, String module, Collection<Path> dependentFiles, SGLR parser) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
     log.beginTask("Generating", "Generate module key for current grammar", Log.CACHING);
     try {
       IStrategoTerm aterm = (IStrategoTerm) parser.parse(FileCommands.readFileAsString(sdf), sdf.getAbsolutePath(), "Sdf2Module");
@@ -344,7 +341,6 @@ public class SDFCommands {
    * @throws IOException
    * @throws InvalidParseTableException
    * @throws SGLRException 
-   * @throws BadTokenException 
    * @throws TokenExpectedException 
    */
   private static Pair<SGLR, Pair<IStrategoTerm, Integer>> sglr(ParseTable table, final String source, final String start, boolean useRecovery, final boolean parseMax, ITreeBuilder treeBuilder) throws SGLRException {

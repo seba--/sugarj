@@ -1,0 +1,56 @@
+package variability;
+
+import org.sugarj.languages.Stratego;
+import org.sugarj.languages.SugarJ;
+
+import concretesyntax.Java;
+
+import transformation.Recursive;
+
+import variability.Config;
+import variability.ConfigTransAux;
+import variability.FeatureExpressions;
+
+public transformation ConfigTrans {
+  rules
+    main =
+      rules ( Input := <id> );
+      recursively-transform(
+        conforms-to-metamodel(|"variability.Config") + conforms-to-metamodel(|"variability.Model"),
+        conforms-to-metamodel(|"variability.Config")
+          < CompilationUnit(?pkg,ensure-aux-import,map(featureconfig-to-trans(|pkg)))
+          + ignore-featuremodel)
+
+    featureconfig-to-trans(|pkg) :
+      ModelDec(ModelDecHead(mods, name, "variability.Config"), ModelBody((model, configs)))
+      ->
+      TransDec(TransDecHead(mods, name), TransBody([body]))
+    where
+      <get-feature-config> configs => (enabled, disabled);
+      <(map(feature-enabled2rule), map(feature-disabled2rule)); conc> (enabled, disabled) => rulez;
+      main-rule1 := SDefNoArgs("main", CallNoArgs(SVar("eliminate-variability")));
+      conforms-call := CallT(SVar("conforms-to-metamodel"), [], [NoAnnoList(Str("\"VariableStructure\""))]);
+      main-rule2 := SDefNoArgs("main", Call(SVar("recursively-transform"), [conforms-call, CallNoArgs(SVar("main"))]));
+
+      Input => (_,model-path, trans-path);
+      !Rules([main-rule1, main-rule2 | rulez]) => body
+
+    feature-enabled2rule = !SDefNoArgs("feature-enabled", Match(NoAnnoList(Str(<id>))))
+    feature-disabled2rule = !SDefNoArgs("feature-disabled", Match(NoAnnoList(Str(<id>))))
+
+    ensure-aux-import : imps -> <union> (imps, [auximp1, auximp2])
+      where auximp1 := |[ import variability.ConfigTransAux; ]|;
+            auximp2 := |[ import transformation.Recursive; ]| 
+
+    ignore-featuremodel =
+      CompilationUnit(id, ![], map(
+        \  ModelDec(ModelDecHead(mods, name, "variability.Model"), _)
+        -> ClassDec(ClassDecHead(mods, name, None, None, None), ClassBody([])) \))
+
+    pkg-name : [] -> []
+    pkg-name : [Id(x)] -> [x]
+    pkg-name : [Id(x) | ys] -> [x | <pkg-name>ys]
+    pkg-name = ?Some(<pkg-name>)
+    pkg-name = ?PackageDec(_,<pkg-name>)
+    pkg-name = ?PackageName(<pkg-name; concat-strings>)
+}

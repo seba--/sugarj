@@ -1,0 +1,48 @@
+package statemachine.test;
+
+import statemachine.data.ToJava(entity.test.Account);
+import statemachine.data.ToJava(entity.test.Customer);
+import statemachine.data.ToJava(statemachine.test.DataATM);
+
+import java.util.HashSet;
+
+public class DataATMTest {    
+  public static void main(String[] args) {
+    Customer alice = new Customer("Alice", "Marburg", new HashSet<Account>());
+    Account alicesPublicAccount = new Account(17, alice, 3000, "xxxx");
+    alice.getAccounts().add(alicesPublicAccount);
+
+    printAccountInfo(alice); 
+    
+    DataATM atm = new DataATM();
+    report(atm.currentState());
+    report(atm.step(atm.event_InsertCard(alicesPublicAccount)));
+    report(atm.step(atm.event_Pin("xxxx")));
+    report(atm.step(atm.event_Amount(2500)));
+    report(atm.step(atm.event_MoneyTaken()));
+    report(atm.step(atm.event_CardTaken()));
+    assert atm.currentState() == atm.state_Init();
+    assert alicesPublicAccount.getBalance() == 500;
+
+    printAccountInfo(alice);
+    
+    report(atm.currentState());
+    report(atm.step(atm.event_InsertCard(alicesPublicAccount)));
+    report(atm.step(atm.event_Pin("yyyy")));
+    report(atm.step(atm.event_Pin("yyyy")));
+    report(atm.step(atm.event_Pin("yyyy")));
+    report(atm.step(atm.event_CardRevoked()));
+    assert atm.currentState() == atm.state_Init();
+  }
+
+  private static void printAccountInfo(Customer c) {
+    System.out.println("Accounts of " + c.getName() + ": ");
+    for (Account a : c.getAccounts())
+      System.out.println(" *  uid=" + a.getUid() + ":\t balance=" + a.getBalance());
+  }
+
+  private static void report(DataATM.State state) {
+    System.out.println("Current state: " + state);
+  }
+}
+

@@ -1,0 +1,41 @@
+package variability;
+
+import variability.Config;
+
+public transformation CheckConfigAux {
+  rules
+    featuremodel-names = fail
+    model-requirements = fail
+
+    constraint-error =
+      ?ConfigDecl(_,_,Id(fm),<id>);
+      where(<featuremodel-names> fm => names);
+      where(collect-all(constraint-feature-configuration(|names)) => undeclared);
+      where(conflicting-features => conflicts);
+      where(check-model-requirements(|fm) => requirements);
+      <conc> (undeclared, conflicts, requirements)
+      
+
+    constraint-feature-configuration(|names) :
+      fname@FeatureName(Id(n)) -> (fname, <conc-strings> ("Undeclared feature name ", n, "."))
+    where <not(elem)> (n,names)
+
+    conflicting-features =
+      get-feature-config;
+      isect;
+      map(!(<id>, <conc-strings> ("Configuration conflict for feature ",<id>, ".")))
+
+    check-model-requirements(|fm) =
+      get-feature-config => config;
+      <model-requirements> fm;
+      filter(is-condition-disabled(|config));
+      map(!(fm, ["Model requirement vilolated: ",<id>,"."]))
+
+
+/*
+    constraint-note =
+      ?decl@ConfigDecl(_,_,Id(fm),<id>);
+      compute-feature-config;
+      !(decl, ["Enabled features: ", <Fst; intersperse(|",")>, ". Disabled features: ", <Snd; intersperse(|",")>, "."])
+*/
+}

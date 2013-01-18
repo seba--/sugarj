@@ -1,0 +1,23 @@
+definition
+module org/sugarj/languages/Model
+imports org/sugarj/languages/Sdf2
+
+exports
+  context-free syntax
+    ATerm -> ModelTerm {cons("ToModelTerm")}
+ 
+  context-free syntax
+    ModelTransformation*  -> TransformationDef  {ast("TransformationDef([],<1>)")}
+    DirectTransformation ModelTransformation*  -> TransformationDef {cons("TransformationDef")} 
+
+    StrategoDef+ -> DirectTransformation
+    "strategies" StrategoDef*   -> ModelTransformation {cons("Strategies")}
+    "signature" StrategoSdecl*  -> ModelTransformation {cons("Signature")}
+    "rules" StrategoDef*        -> ModelTransformation {cons("Rules")}
+    "overlays" StrategoOverlay* -> ModelTransformation {cons("Overlays")}
+
+  context-free syntax
+    ModuleName -> TransformationExpr
+    "(" TransformationExpr ")" -> TransformationExpr {bracket}
+    TransformationAppExpr -> TransformationExpr
+    TransformationExpr "(" TransformationExpr ")" -> TransformationAppExpr {cons("TransApp")}

@@ -1,0 +1,119 @@
+package variability;
+
+public sugar FeatureExpressions {
+
+  context-free syntax
+   JavaId -> FeatureName {cons("FeatureName")}
+   FeatureName -> FeatureExpr
+   FeatureExpr "&&" FeatureExpr -> FeatureExpr {left, cons("FeatureExprAnd")}
+   FeatureExpr "||" FeatureExpr -> FeatureExpr {left, cons("FeatureExprOr")}
+   FeatureExpr "xor" FeatureExpr -> FeatureExpr {left, cons("FeatureExprXor")}
+   FeatureExpr "->" FeatureExpr -> FeatureExpr {cons("FeatureExprImplies")}
+   FeatureExpr "<->" FeatureExpr -> FeatureExpr {cons("FeatureExprBiImplies")}
+   "(" FeatureExpr ")" -> FeatureExpr {bracket}
+   "!" FeatureExpr -> FeatureExpr {cons("FeatureExprNot")} 
+
+ context-free priorities
+   "!" FeatureExpr -> FeatureExpr > 
+   FeatureExpr "&&" FeatureExpr -> FeatureExpr >
+   { FeatureExpr "||" FeatureExpr -> FeatureExpr 
+     FeatureExpr "xor" FeatureExpr -> FeatureExpr } >
+   { FeatureExpr "->" FeatureExpr -> FeatureExpr
+     FeatureExpr "<->" FeatureExpr -> FeatureExpr }
+
+  desugarings
+    \ FeatureExprXor(a,b) -> FeatureExprOr(FeatureExprAnd(a,FeatureExprNot(b)),FeatureExprAnd(FeatureExprNot(a),b)) \
+    \ FeatureExprImplies(a,b) -> FeatureExprOr(FeatureExprNot(a), b) \
+    \ FeatureExprBiImplies(a,b) -> FeatureExprAnd(FeatureExprImplies(a,b), FeatureExprImplies(b,a)) \
+
+
+
+  signature
+    constructors 
+       VariabilityHole : VariabilityHole
+       OptionalNode : FeatureExpr * Expr -> Expr
+       VariableNode : FeatureExpr * Expr * Expr -> Expr       
+
+  rules
+    configure-node : 
+     OptionalNode(e, s) -> s
+      where <is-condition-enabled> e
+     
+    configure-node :
+     OptionalNode(e, s) -> VariabilityHole
+      where <is-condition-disabled> e    
+      
+    configure-node :
+     VariableNode(e, s1, s2) -> s1
+      where <is-condition-enabled> e
+      
+    configure-node :
+     VariableNode(e, s1, s2) -> s2
+      where <is-condition-disabled> e
+
+  rules
+    is-condition-enabled = is-condition-enabled(|([],[]))
+
+    is-condition-enabled(|c) :
+      e@FeatureName(Id(n)) -> e
+      where !c => (en,dis);
+            <elem> (n, en);
+            <not(elem)> (n, dis)
+
+    is-condition-enabled(|c) :
+      e@FeatureName(Id(n)) -> e 
+      where <feature-enabled> n;
+            <not(feature-disabled)> n
+
+    is-condition-enabled(|c) :
+      n@FeatureExprNot(e) -> n 
+      where <is-condition-disabled(|c)> e
+
+    is-condition-enabled(|c) :
+      a@FeatureExprAnd(e1, e2) -> a 
+      where <is-condition-enabled(|c)> e1;
+            <is-condition-enabled(|c)> e2
+
+    is-condition-enabled(|c) :
+      o@FeatureExprOr(e1, e2) -> o 
+      where <is-condition-enabled(|c)> e1
+
+    is-condition-enabled(|c) :
+      o@FeatureExprOr(e1, e2) -> o 
+      where <is-condition-enabled(|c)> e2
+      
+  rules
+    is-condition-disabled = is-condition-disabled(|([],[]))
+
+    is-condition-disabled(|c) :
+      e@FeatureName(Id(n)) -> e
+      where !c => (en,dis);
+            <elem> (n, dis);
+            <not(elem)> (n, en)
+
+    is-condition-disabled(|c) :
+      e@FeatureName(Id(n)) -> e 
+      where <feature-disabled> n;
+            <not(feature-enabled)> n      
+
+    is-condition-disabled(|c) :
+      o@FeatureExprOr(e1, e2) -> o
+      where <is-condition-disabled(|c)> e1;
+            <is-condition-disabled(|c)> e2 
+
+    is-condition-disabled(|c) :
+      o@FeatureExprAnd(e1, e2) -> o
+      where <is-condition-disabled(|c)> e1
+
+    is-condition-disabled(|c) :
+      o@FeatureExprAnd(e1, e2) -> o
+      where <is-condition-disabled(|c)> e2
+
+    is-condition-disabled(|c) :
+      n@FeatureExprNot(e) -> n 
+      where <is-condition-enabled(|c)> e
+
+    feature-enabled = fail
+    
+    feature-disabled = fail     
+}

@@ -1,0 +1,111 @@
+package transformation;
+
+import transformation.Renaming;
+
+public transformation Recursive {
+rules
+  main =
+    ?(model, model-path, trans-path);
+    where(!SDefNoArgs("main", Call(SVar("recursively-transform"), [Id(), Call(SVar("try"), [CallNoArgs(SVar("main"))])])) => new-main);
+    !model;
+    CompilationUnit(
+      id,
+      ensure-import(|TypeImportDec(TypeName(PackageOrTypeName(Id("transformation")), Id("Recursive")))),
+      oncetd(\TransformationDef(ts,ts2) -> TransformationDef([new-main|ts], ts2) \));
+    prim("SUGARJ_compile", model-path, trans-path)
+
+  recursively-transform(model-predicate, trans) = ?(model, model-path, trans-path); 
+    {| Renamings, Stack: 
+         rules ( Renamings := [] 
+                 Stack := [model-path]
+                 Deferred := []);
+         !model;
+         (where(model-predicate) < trans + id) => generated;
+         recursively-transform(model-predicate, trans | trans-path);
+         compile-renamed(model-predicate | model-path, trans-path)
+    |}
+
+  recursively-transform(model-predicate, trans | trans-path) =
+    topdown(try(where(
+      {pkgs, name, local-name, model-path, model, generated, new-name, new-renaming, old-renamings, new-renamings:
+        get-imported-model(model-predicate) => (pkgs, name, local-name, model-path, model);
+        where(!model-path;debug(!"check import: "));
+        where(<conc-strings> (name, <name-suffix> trans-path) => new-name;
+              (<?None()> local-name
+                 < !(pkgs, name, new-name) => new-renaming
+                 + !([], <?Some(<id>)> local-name, new-name) => new-renaming));
+
+        where(old-renamings := <Renamings>;
+              new-renamings := [ new-renaming | old-renamings ]);
+
+        (not(is-circular-import(|<debug(!"test circularity: ")> model-path));
+         not(is-circular-import(|<compose-path; debug(!"test circularity: ")> (pkgs, new-name)))
+         <+ !model-path;debug(!"found circularity: "); rules( Renamings := new-renamings ); fail);
+
+        rules( Stack := <debug(!"Stack push: ")> [ model-path | <Stack> ] );
+        finally-do(
+          where(!model-path;debug(!"apply trans: "));
+          <trans> model => generated;
+          where(!model-path;debug(!"trans ok: "));
+          rules( Renamings := new-renamings );
+          {| Renamings:
+            rules ( Renamings := [new-renaming] );
+            recursively-transform(model-predicate, trans | trans-path);
+            compile-renamed(model-predicate | model-path, trans-path)
+          |},
+          rules( Stack := <debug(!"Stack pop:  ")><Stack; Tl> ))
+      })))
+
+  compile-renamed(model-predicate | model-path, trans-path) =
+    where(apply-renamings(|<Renamings; debug(!"rename: ")>) => renamed);
+    if has-circular-import(model-predicate) => circular-import
+      then <?(_, _, _, import-path, _)> circular-import;
+           where(!(model-path, trans-path);debug(!"write renamed: "));
+           where(!(import-path, trans-path);debug(!"circular import: "));
+           rules( Deferred := <Deferred; add-defer(|model-path, import-path);debug(!"add defer: ")> );
+           !renamed;
+           prim("SUGARJ_write", model-path, trans-path)
+      else where(!(model-path, trans-path);debug(!"compile renamed: "));
+           rules( Deferred := <Deferred;remove-values(|model-path); debug(!"remove defer: ")> );
+           !renamed;
+           prim("SUGARJ_compile", model-path, trans-path)
+    end
+
+  has-circular-import(model-predicate) =
+    collect-one(is-circular-import(model-predicate))
+
+  is-circular-import(model-predicate) =
+    get-imported-model(model-predicate) => (pkgs, name, local-name, model-path, model);
+    is-circular-import(|model-path)
+  
+  is-circular-import(|model-path) =
+    where(<elem> (model-path,<Stack>) +
+          <lookup> (model-path, <Deferred>) => def;
+          not(equal(|<Stack; Hd>));
+          <elem> (def, <Stack>))
+
+  get-imported-model(predicate) =
+    (?TypeImportDec(<id>) + ?TypeImportAsDec(_, <id>));
+    import-model-path => (pkgs, name);
+    <build-path> (pkgs, name) => path;
+    prim("SUGARJ_resolve_model") => model;
+    where(predicate);
+    (?TypeImportAsDec(<id>, _); !Some(<id>) + !None()) => local-name;
+    !(pkgs, name, local-name, path, model)
+
+  ensure-import(|imp) = !(<id>, [imp]); union
+
+  conforms-to-metamodel(|meta-model) =
+    where(collect-one(?ModelDecHead(_, _, meta-model)))
+
+  finally-do(s, final) = s < final + (final; fail)
+
+  add-defer(|model-path, import-path) =
+    ?defer;
+    (<lookup> (import-path, defer) => def
+      < ![(model-path, def) | <map(\(x, model-path) -> (x,def)\)> defer]
+      + ![(model-path, import-path) | <map(\(x, model-path) -> (x,import-path)\)> defer])
+
+  remove-values(|val) = filter(\ (x,y) -> (x,y) where <not(equal(|val))> y \)
+}
+

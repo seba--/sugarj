@@ -1,0 +1,33 @@
+package statemachine;
+
+public sugar Metamodel {
+  desugarings
+    statemachine-model
+
+  rules
+    statemachine-model :
+      model@Statemachine(mods, name, body) -> 
+      ModelDec(ModelDecHead(mods, name, "statemachine.Metamodel"), ModelBody(body))
+
+  context-free syntax
+    Statemachine -> ToplevelDeclaration
+    AnnoOrSugarMod* "statemachine" JavaId "{" StatemachineBody "}" -> Statemachine {cons("Statemachine")}
+
+    InitialState EventsDec* StateDec* -> StatemachineBody {cons("StatemachineBody")}
+
+    JavaId -> StateName
+    JavaId -> EventName
+
+    "initial" "state" StateName -> InitialState {cons("InitialState")}
+
+    "events" {EventDec ","}+ -> EventsDec {cons("Events")}
+    EventName -> EventDec {cons("EventName")}
+    "state" StateName "{" Transition* "}" -> StateDec {cons("State")}
+
+    TransitionFrom "=>" TransitionTo -> Transition {cons("Transition")}
+    
+    Event -> TransitionFrom
+    StateName -> TransitionTo
+
+    EventName -> Event {cons("NamedEvent")}
+}

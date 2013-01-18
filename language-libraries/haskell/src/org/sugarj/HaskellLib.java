@@ -48,18 +48,9 @@ public class HaskellLib extends LanguageLib {
 
   private IStrategoTerm ppTable;
 
-  public String getVersion() {
-    return "haskell-0.1b";
-  }
-  
   @Override
-  public String getLanguageName() {
-    return "Haskell";
-  }
-
-  @Override
-  public List<File> getGrammars() {
-    List<File> grammars = new LinkedList<File>(super.getGrammars());
+  public List<File> getDefaultGrammars() {
+    List<File> grammars = new LinkedList<File>(super.getDefaultGrammars());
     grammars.add(ensureFile("org/sugarj/languages/SugarHaskell.def"));
     grammars.add(ensureFile("org/sugarj/languages/Haskell.def"));
     return Collections.unmodifiableList(grammars);
@@ -115,21 +106,6 @@ public class HaskellLib extends LanguageLib {
     }
     
     return libDir;
-  }
-
-  @Override
-  public String getGeneratedFileExtension() {
-    return "o";
-  }
-
-  @Override
-  public String getSugarFileExtension() {
-    return "shs";
-  }
-  
-  @Override
-  public String getOriginalFileExtension() {
-    return "hs";
   }
 
   @Override
@@ -207,7 +183,7 @@ public class HaskellLib extends LanguageLib {
   
   @Override
   public void setupSourceFile(RelativePath sourceFile, Environment environment) {
-    outFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + getOriginalFileExtension());
+    outFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + HaskellLibFactory.getInstance().getOriginalFileExtension());
     sourceContent = new HaskellSourceFileContent();
   }
 
@@ -220,7 +196,7 @@ public class HaskellLib extends LanguageLib {
     String declaredRelNamespaceName = FileCommands.dropFilename(qualifiedModulePath);
     relNamespaceName = FileCommands.dropFilename(sourceFile.getRelativePath());
     
-    RelativePath objectFile = environment.createBinPath(getRelativeNamespaceSep() + moduleName + "." + getGeneratedFileExtension());
+    RelativePath objectFile = environment.createBinPath(getRelativeNamespaceSep() + moduleName + "." + HaskellLibFactory.getInstance().getGeneratedFileExtension());
     generatedModules.add(objectFile);
     
     sourceContent.setNamespaceDecl(prettyPrint(toplevelDecl));
@@ -250,12 +226,12 @@ public class HaskellLib extends LanguageLib {
   }
 
   @Override
-  public String getImportedModulePath(IStrategoTerm toplevelDecl) throws IOException {
+  public String getImportedModulePath(IStrategoTerm toplevelDecl) {
     return prettyPrint(getApplicationSubterm(toplevelDecl, "Import", 2)).replace('.', '/');
   }
   
   @Override
-  public void addImportModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
+  public void addImportedModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
     SourceImport imp = new SourceImport(getImportedModulePath(toplevelDecl), prettyPrint(toplevelDecl));
     if (checked)
       sourceContent.addCheckedImport(imp);
@@ -273,8 +249,7 @@ public class HaskellLib extends LanguageLib {
     return getApplicationSubterm(decl, "SugarBody", 0);
   }
 
-  @Override
-  public String prettyPrint(IStrategoTerm term) throws IOException {
+  private String prettyPrint(IStrategoTerm term) {
     if (ppTable == null) 
       ppTable = ATermCommands.readPrettyPrintTable(ensureFile("org/sugarj/languages/Haskell.pp").getAbsolutePath());
     
@@ -282,7 +257,7 @@ public class HaskellLib extends LanguageLib {
   }
   
   @Override
-  protected void compile(List<Path> outFiles, Path bin, List<Path> includePaths, boolean generateFiles) throws IOException {
+  public void compile(List<Path> outFiles, Path bin, List<Path> includePaths, boolean generateFiles) throws IOException {
     if (generateFiles) {
       List<String> cmds = new LinkedList<String>();
       cmds.add(GHC_COMMAND);

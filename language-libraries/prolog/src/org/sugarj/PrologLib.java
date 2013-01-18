@@ -46,10 +46,6 @@ public class PrologLib extends LanguageLib implements Serializable {
 	private IStrategoTerm pptable = null;
 	private File prettyPrint = null;
 
-  public String getVersion() {
-    return "prolog-0.1";
-  }
-
 	private File getPrettyPrint() {
 		if (prettyPrint == null)
 			prettyPrint = ensureFile("org/sugarj/languages/Prolog.pp");
@@ -58,8 +54,8 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 		
 	@Override
-	public List<File> getGrammars() {
-		List<File> grammars = new LinkedList<File>(super.getGrammars());
+	public List<File> getDefaultGrammars() {
+		List<File> grammars = new LinkedList<File>(super.getDefaultGrammars());
 		grammars.add(ensureFile("org/sugarj/languages/SugarProlog.def"));
 		grammars.add(ensureFile("org/sugarj/languages/Prolog.def"));
 		return Collections.unmodifiableList(grammars);
@@ -122,7 +118,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 	  public static void main(String args[]) throws URISyntaxException {
 		PrologLib pl = new PrologLib();
 		
-		for (File file : pl.getGrammars()) 
+		for (File file : pl.getDefaultGrammars()) 
 			exists(file);
 
 
@@ -176,16 +172,6 @@ public class PrologLib extends LanguageLib implements Serializable {
 	  }
 
 	@Override
-	public String getGeneratedFileExtension() {
-		return "pro";
-	}
-
-	@Override
-	public String getSugarFileExtension() {
-		return "sugp";
-	}
-
-	@Override
 	public SourceFileContent getSource() {
 		return prologSource;
 	}
@@ -223,18 +209,15 @@ public class PrologLib extends LanguageLib implements Serializable {
 		return pptable;
 	}
 	
-	@Override
-	public String prettyPrint(IStrategoTerm term) throws IOException {
+	public String prettyPrint(IStrategoTerm term) {
 		IStrategoTerm ppTable = initializePrettyPrinter(interp.getCompiledContext());
 		return ATermCommands.prettyPrint(ppTable, term, interp);
 	}
 
 	@Override
 	public void setupSourceFile(RelativePath sourceFile, Environment environment) {
-		prologOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + getGeneratedFileExtension());
+		prologOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + PrologLibFactory.getInstance().getGeneratedFileExtension());
 		prologSource = new PrologSourceFileContent(this);
-		prologSource.setOptionalImport(false);
-		
 	}
 
 
@@ -269,7 +252,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 		log.log("The SDF / Stratego package name is '" + relNamespaceName + "'.", Log.DETAIL);
 		
 		if (prologOutFile == null) 
-			prologOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + getGeneratedFileExtension());
+			prologOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + PrologLibFactory.getInstance().getGeneratedFileExtension());
 	}
 	
 
@@ -279,21 +262,17 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 
 	@Override
-	protected void compile(List<Path> sourceFiles, Path bin, List<Path> path,
-			boolean generateFiles)
-			throws IOException {
-
+	public void compile(List<Path> sourceFiles, Path bin, List<Path> path, boolean generateFiles) throws IOException {
 		if (generateFiles) {
 			for (Path file : sourceFiles) {
 				// XXX: do nothing here?
 				System.err.println("prolog;     no compilation neccessary, file: " + file);
 			}
 		}
-
 	}
 	
 	@Override
-	public String getImportedModulePath(IStrategoTerm toplevelDecl) throws IOException {
+	public String getImportedModulePath(IStrategoTerm toplevelDecl) {
 		String modulePath = prettyPrint(toplevelDecl.getSubterm(0).getSubterm(0));
 		
 		return modulePath;		
@@ -304,7 +283,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 	
 	@Override
-	public void addImportModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
+	public void addImportedModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
 		
 		String importedModuleName = prettyPrint(toplevelDecl.getSubterm(0).getSubterm(0));
 		PrologModuleImport imp = prologSource.getImport(importedModuleName, toplevelDecl);
@@ -330,11 +309,6 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 	
 	@Override
-	public String getLanguageName() {
-		return "Prolog";
-	}
-
-	@Override
 	public boolean isModuleResolvable(String relModulePath) {
 		// TODO: look for pre-installed SWI libraries?
 		return false;
@@ -349,8 +323,4 @@ public class PrologLib extends LanguageLib implements Serializable {
 	public IStrategoTerm getEditorServices(IStrategoTerm decl) {
 		throw new UnsupportedOperationException("SugarProlog does currently not support editor libraries.");
 	}
-
-
-	
-	
 }

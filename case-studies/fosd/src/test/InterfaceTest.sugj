@@ -1,0 +1,13 @@
+package test; 
+
+import variability.Java; 
+
+#ifdef(INTERFACE)
+public variable interface InterfaceTest {
+
+  #ifdef(A)
+  public void doSomething();
+	
+  #ifdef(B)
+  public void doSomethingElse();
+} 

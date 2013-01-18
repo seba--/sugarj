@@ -1,0 +1,14 @@
+package statemachine.test;
+
+import statemachine.ToJava(statemachine.test.ATM);
+
+public class ATMTest { 
+  public static void main(String[] args) {
+    ATM machine = new ATM(); 
+    machine.step(machine.event_DoWithdraw());
+    machine.step(machine.event_PinOK());
+    machine.step(machine.event_MoneyTaken());
+    machine.step(machine.event_CardTaken());
+    assert machine.currentState() == machine.state_Init();
+  }
+}
