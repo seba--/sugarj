@@ -1,4 +1,5 @@
 module org/sugarj/languages/Sugar
+imports org/sugarj/languages/Model
 
 signature constructors
     transformation-elem        : Transformation -> SugarDefElem

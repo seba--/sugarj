@@ -1,0 +1,288 @@
+package impl;
+
+import variability.Java;
+import java.util.Iterator;
+import java.util.LinkedList;
+
+import impl.WorkSpace;
+import impl.EdgeIter;
+import impl.VertexIter;
+import impl.EdgeIfc;
+import impl.NeighborIfc;
+import impl.Neighbor;
+import impl.GlobalVarsWrapper; 
+
+
+variable class Vertex implements 
+#ifdef(GNoEdges) EdgeIfc,
+#ifdef(GNoEdges) NeighborIfc {
+  
+  public String name=null;
+
+  public Vertex assignName(  String name){
+    this.name=name;
+    return (Vertex)this;
+  }
+
+  public String getName(){
+    return this.name;
+  }
+
+  #ifdef(GNoEdges)
+    public LinkedList<Vertex> adjacentVertices=new LinkedList<Vertex>();
+
+  #ifdef(GNOnlyNeighbours)
+    public LinkedList<Neighbor> adjacentNeighbors=new LinkedList<Neighbor>();
+
+  #ifdef(GNoEdges)
+  public void addAdjacent(  Vertex n){
+    adjacentVertices.add(n);
+  }
+
+  #ifdef(GNoEdges)
+  public void adjustAdorns(  Vertex the_vertex,  int index){
+    #ifdef(Weighted)
+      int the_weight=the_vertex.weightsList.get(index).intValue();
+    #ifdef(Weighted)
+      weightsList.add(new Integer(the_weight));
+  }
+
+  #ifdef(GNoEdges)
+  public VertexIter getNeighbors() {
+    return new VertexIter(){
+      private Iterator<Vertex> iter=adjacentVertices.iterator();
+      public Vertex next(){
+        return iter.next();
+      }
+      public boolean hasNext(){
+        return iter.hasNext();
+      }
+    };
+  }
+
+  #ifdef(GNOnlyNeighbours)
+  public VertexIter getNeighbors() {
+    return new VertexIter(){
+      private Iterator<Neighbor> iter=adjacentNeighbors.iterator();
+      public Vertex next(){
+        return (iter.next()).neighbor;
+      }
+      public boolean hasNext(){
+        return iter.hasNext();
+      }
+    };
+  }
+
+  #ifdef(GenEdges)
+  public VertexIter getNeighbors() {
+    return new VertexIter(){
+      private Iterator<Neighbor> iter=neighbors.iterator();
+      public Vertex next(){
+        return (iter.next()).end;
+      }
+      public boolean hasNext(){
+        return iter.hasNext();
+      }
+    };
+  }
+  
+  #ifdef(GNoEdges)
+  public Vertex getStart(){
+    #ifdef(Undirected) return this;
+    #ifdef(!Undirected) return null;
+  }
+
+  #ifdef(GNoEdges)
+  public Vertex getEnd(){
+    return null;
+  }
+
+  #ifdef(GNoEdges)
+  public int getWeight(){
+    return 0;
+  }
+
+  #ifdef(GNoEdges)
+  public Vertex getOtherVertex(  Vertex vertex){
+    return this;
+  }
+
+  #ifdef(GNoEdges)
+  public void adjustAdorns(  EdgeIfc the_edge){
+  }
+
+  #ifdef(GNOnlyNeighbours)
+  public void addEdge(  Neighbor n){
+    adjacentNeighbors.add(n);
+  }
+
+  #ifdef(GNOnlyNeighbours)
+  public void adjustAdorns(Neighbor sourceNeighbor){
+    #ifdef(Weighted)
+      adjacentNeighbors.getLast().weight=sourceNeighbor.weight;
+  }
+
+  #ifdef(GenEdges)
+    public LinkedList<Neighbor> neighbors=new LinkedList<Neighbor>();
+
+  #ifdef(GenEdges)
+  public void addNeighbor(  Neighbor n){
+    neighbors.add(n);
+  }
+
+  #ifdef(SearchBase && GNoEdges)
+  public EdgeIter getEdges() {
+    return new EdgeIter(){
+      private Iterator<Vertex> iter=adjacentVertices.iterator();
+      public EdgeIfc next(){
+        return iter.next();
+      }
+      public boolean hasNext(){
+        return iter.hasNext();
+      }
+    };
+  }
+
+
+  #ifdef(SearchBase && GNOnlyNeighbours)
+  public EdgeIter getEdges() {
+    return new EdgeIter(){
+      private Iterator<Neighbor> iter=adjacentNeighbors.iterator();
+      public EdgeIfc next(){
+        return iter.next();
+      }
+      public boolean hasNext(){
+        return iter.hasNext();
+      }
+    };
+  }
+
+  #ifdef(SearchBase && GenEdges)
+  public EdgeIter getEdges() {
+    return new EdgeIter(){
+      private Iterator<Neighbor> iter=neighbors.iterator();
+      public EdgeIfc next(){
+        return iter.next().edge;
+      }
+      public boolean hasNext(){
+        return iter.hasNext();
+      }
+    };
+  }
+
+  public LinkedList getNeighborsObj(){
+    #ifdef(GNOnlyNeighbours) return adjacentNeighbors;
+    #ifdef(GenEdges) return neighbors;
+    #ifdef(GNoEdges) return adjacentVertices;
+  }
+
+  #ifdef(Weighted && GNoEdges)
+    public LinkedList<Integer> weightsList=new LinkedList<Integer>();
+
+  #ifdef(Weighted)
+  public void addWeight(  int weight){
+    #ifdef(GNoEdges)
+      weightsList.add(new Integer(weight));
+    #ifdef(GNOnlyNeighbours)
+      adjacentNeighbors.getLast().weight=weight;
+  }
+
+  #ifdef(Weighted && GNoEdges)
+  public void setWeight(  int weight){
+    addWeight(weight);
+    adjacentVertices.getLast().addWeight(weight);
+  }
+
+  #ifdef(SearchAlg)  public boolean visited=false;
+
+  #ifdef(SearchAlg)
+  public void init_vertex(  WorkSpace w){
+    visited=false;
+    w.init_vertex((Vertex)this);
+  }
+
+  #ifdef(SearchAlg)
+  public void nodeSearch(  WorkSpace w){
+    #ifdef(Bfs) int s, c;
+    #ifdef(Bfs) Vertex header;
+    Vertex v;
+
+    w.preVisitAction((Vertex)this);
+    if (visited) {
+      return;
+    }
+    visited=true;
+    #ifdef(Dfs)
+	    for (VertexIter vxiter=getNeighbors(); vxiter.hasNext(); ) {
+	      v=vxiter.next();
+	      w.checkNeighborAction((Vertex)this,v);
+	      v.nodeSearch(w);
+	    }
+    w.postVisitAction((Vertex)this);
+    #ifdef(Bfs)
+	    for (VertexIter vxiter=getNeighbors(); vxiter.hasNext(); ) {
+	      v=vxiter.next();
+	      if (!v.visited) {
+	        GlobalVarsWrapper.queue.add(v);
+	      }
+	    }
+    #ifdef(Bfs)
+	    while (GlobalVarsWrapper.queue.size() != 0) {
+	      header=(Vertex)GlobalVarsWrapper.queue.get(0);
+	      GlobalVarsWrapper.queue.remove(0);
+	      header.nodeSearch(w);
+	    }
+  }
+
+  #ifdef(Number)  public int vertexNumber;
+  #ifdef(Connected)  public int componentNumber;
+  #ifdef(StronglyConnected)  public int finishTime;
+  #ifdef(StronglyConnected)  public int strongComponentNumber;
+  #ifdef(Cycle) public int VertexCycle;
+  #ifdef(Cycle) public int VertexColor;
+  #ifdef(Mstkruskal)  public Vertex representative;
+  #ifdef(Mstkruskal)  public LinkedList members;
+  #ifdef(Mstprim)  public String pred;
+  #ifdef(Mstprim)  public int key;
+
+  public void display(){
+    #ifdef(Weighted && GNoEdges)
+      System.out.print(" Weights : ");
+
+    #ifdef(Weighted && GNoEdges)
+	    for (int i=0; i < weightsList.size(); i++) {
+	      System.out.print(weightsList.get(i).intValue() + ", ");
+	    }
+
+    System.out.print("Vertex " + name + " Connected to: ");
+    for (VertexIter vxiter=getNeighbors(); vxiter.hasNext(); ) {
+      Vertex v=vxiter.next();
+      System.out.print(v.getName() + ", ");
+    }
+    #ifdef(SearchAlg)
+      if (visited) System.out.print("  visited");
+      else System.out.println(" !visited");
+
+    #ifdef(Number)
+      System.out.print(" # " + vertexNumber + " ");
+
+    #ifdef(Connected)
+      System.out.print(" comp# " + componentNumber + " ");
+
+    #ifdef(StronglyConnected)
+      System.out.print(" FinishTime -> " + finishTime + " SCCNo -> "+ strongComponentNumber);
+
+    #ifdef(Cycle)
+      System.out.print(" VertexCycle# " + VertexCycle + " ");
+
+    #ifdef(Mstkruskal)
+	    if (representative == null) 
+	      System.out.print("Rep null ");
+	    else 
+	      System.out.print(" Rep " + representative.getName() + " ");
+
+    #ifdef(Mstprim)
+      System.out.print(" Pred " + pred + " Key "+ key+ " ");
+    System.out.println();
+  }
+}

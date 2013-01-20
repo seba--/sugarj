@@ -1,0 +1,10 @@
+package statemachine.test;
+
+import statemachine.test.ATM;
+
+public class ATMRef {
+  public static void print() {
+    ATM atm = new ATM();
+    System.out.println(atm);
+  }
+}

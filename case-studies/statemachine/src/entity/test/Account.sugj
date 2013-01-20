@@ -1,0 +1,12 @@
+package entity.test;
+
+import entity.Metamodel;
+
+import entity.test.Customer;
+
+public entity Account {
+  uid     :: Integer
+  owner   :: Customer
+  balance :: Integer
+  pin     :: String
+}

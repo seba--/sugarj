@@ -1,0 +1,10 @@
+package statemachine.test;
+
+import transformation.Recursive(statemachine.ToJava)(statemachine.test.ATMRef);
+
+public class ATMRefTestRecursive {
+  public static void main(String[] args) {
+    ATMRef.print();
+  }
+}
+

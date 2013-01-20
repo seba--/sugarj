@@ -1,0 +1,13 @@
+package test;
+
+import variability.ConfigTrans(config.MinimalGraphConfig)(impl.Main);
+import Other = variability.ConfigTrans(config.FullGraphConfig)(impl.Main);
+
+
+public class GraphTest {
+   public static void main(String[] args) {
+      String[] l_args = {"Graph.txt"};
+      Main.main(l_args);
+      Other.main(l_args);
+   }
+}

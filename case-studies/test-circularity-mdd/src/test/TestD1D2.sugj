@@ -1,0 +1,13 @@
+package test;
+
+import trans.CompJavaModel(test.D1);
+
+public class TestD1D2 {
+  public static void main(String[] args) {
+    D1 d1 = new D1();
+    System.out.println(d1);
+    System.out.println(d1.d2);
+    System.out.println(d1.d2.d3);
+    System.out.println(d1.d2.d3.d1);
+  }
+}

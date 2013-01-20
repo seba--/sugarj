@@ -1,0 +1,159 @@
+package statemachine.data;
+
+import statemachine.data.Metamodel;
+
+import entity.ToJava;
+import statemachine.ToJava;
+
+import statemachine.data.InternalData;
+import statemachine.data.ParametricEvent;
+import statemachine.data.TransitionCondition;
+import statemachine.data.TransitionEffect;
+
+import transformation.Recursive;
+
+import template.Language;
+
+public transformation ToJava {
+  rules
+    main =
+      recursively-transform(
+        id,
+        conforms-to-metamodel(|"statemachine.data.Metamodel")
+          < {orig:
+              ?orig;
+              main-statemachine_ToJava;
+              copy-imports(|orig);
+              add-internal-data-decls(|orig)}
+          + conforms-to-metamodel(|"entity.Metamodel"); main-entity_ToJava)
+
+  rules
+    copy-imports(|orig) =
+      where(<?CompilationUnit(_,imps,_)> orig);
+      CompilationUnit(id, !(<id>,imps);conc, id)
+
+    add-internal-data-decls(|orig) =
+      where(<collect-all(?PropertyData(_,_))> orig => decls;
+            <map(prop-data-java)> decls => jdecls);
+      oncetd(\ClassBody(xs) -> ClassBody(<conc> (xs, jdecls))\)
+  
+    prop-data-java :
+      PropertyData(Property(name, sort), None) ->
+      > private ${<sort-to-type> sort} $name; <
+
+    prop-data-java :
+      PropertyData(Property(name, sort), Some(exp)) ->
+      > private ${<sort-to-type> sort} $name = ${<ee-java(|[])> exp}; <
+
+  rules
+    event-as-class :
+      ParametricEvent(eventname, ss) ->
+      > public class $eventname implements Event {
+          $names = <event-data-names> ss
+          // sort-to-type reused from entity.ToJava
+          $types = <map(sort-to-type)> ss
+          $names_types = <zip> (names, types)
+
+          $for((name, type) in !names_types) {
+            public $type $name;
+          }
+        }
+        public Event ${<Id(!("event_",<id>);conc-strings)> eventname}($for((name, type) in !names_types) {
+                                       $type $name
+                                     }) {
+            id $eventname e = new id $eventname();
+            $for((name, _) in !names_types) {
+              e.$name = $name;
+            }
+            return e;
+          }
+      <
+
+    event-data-names = not(?(_,_)); !(<id>,0); event-data-names
+    event-data-names : ([],_) -> []
+    event-data-names : ([_|ss],i) -> [name | <event-data-names> (ss, <inc> i)]
+      where name := Id(<conc-strings> ("a", <int-to-string> i))
+
+  rules
+    transition-premise :
+      Transition(ParametricEvent(name, params),to) ->
+      <transition-premise> Transition(NamedEvent(name),to)
+
+    transition-premise :
+      Transition(WithCondition(event, exp),to) ->
+      LazyAnd(<transition-premise> Transition(event,to), jexp)
+    where <event-bindings> event => env;
+          <ee-java(|env)> exp => jexp
+
+  rules
+    transition-consequence :
+      Transition(from, WithEffect(state, effects)) ->
+      <conc> (jeffects, <transition-consequence> Transition(from, state))
+
+    where
+      <event-bindings> from => env;
+      <map(assignment-java(|env))> effects => jeffects
+
+    assignment-java(|env) :
+      Assignment(e1,e2) ->
+      ExprStm(ass)
+    where
+      <ee-java(|env)> e2 => e2';
+      <ee-java-assign(|env,e2')> e1 => ass
+
+  rules
+    event-bindings : NamedEvent(_) -> []
+    event-bindings : ParametricEvent(name, params) -> <zip> (params, <event-data-names; map(!(name,<id>))> params)
+    event-bindings : WithCondition(event,_) -> <event-bindings> event
+
+  rules
+    ee-java(|env) : Var(n) -> Field(CastRef(ClassOrInterfaceType(TypeName(event), None), ExprName(Id("e"))), field)
+      where <lookup> (n, env) => (event,field)
+    ee-java(|env) : Var(n) -> ExprName(n)
+
+    ee-java(|env) : FieldAccess(e, n) -> Invoke(Method(j, None, getter-name), [])
+      where <ee-java(|env)> e => j;
+            <?Id(<id>); first-upper> n => upperName;
+            !Id(<concat-strings> ["get", upperName]) => getter-name
+    ee-java(|env) : Call(e, n, args) -> Invoke(Method(MethodName(j, n)), <map(ee-java(|env))> args) 
+      where <ee-java(|env); is-name> e => j
+    ee-java(|env) : Call(e, n, args) -> Invoke(Method(j, None, n), <map(ee-java(|env))> args) 
+      where <ee-java(|env); is-name> e => j
+    
+    ee-java(|env) = Eq(ee-java(|env), ee-java(|env))
+    ee-java(|env) = NotEq(ee-java(|env), ee-java(|env))
+    ee-java(|env) : LargerThan(e1, e2) -> Gt(<ee-java(|env)> e1, <ee-java(|env)> e2)
+    ee-java(|env) : LargerThanOrEqual(e1, e2) -> GtEq(<ee-java(|env)> e1, <ee-java(|env)> e2)
+    ee-java(|env) : SmallerThan(e1, e2) -> Lt(<ee-java(|env)> e1, <ee-java(|env)> e2)
+    ee-java(|env) : SmallerThanOrEqual(e1, e2) -> LtEq(<ee-java(|env)> e1, <ee-java(|env)> e2)
+
+    ee-java(|env) : True -> Lit(Bool(True)) 
+    ee-java(|env) : False -> Lit(Bool(False)) 
+    ee-java(|env) : Null -> Lit(Null) 
+    ee-java(|env) : This -> This 
+
+    ee-java(|env) : And(e1,e2) -> LazyAnd(<ee-java(|env)> e1, <ee-java(|env)> e2)
+    ee-java(|env) : Or(e1,e2) -> LazyOr(<ee-java(|env)> e1, <ee-java(|env)> e2)
+    ee-java(|env) = Not(ee-java(|env))
+
+    ee-java(|env) = Mul(ee-java(|env),ee-java(|env))
+    ee-java(|env) = Div(ee-java(|env),ee-java(|env))
+    ee-java(|env) : Add(e1,e2) -> Plus(<ee-java(|env)> e1, <ee-java(|env)> e2)
+    ee-java(|env) : Sub(e1,e2) -> Minus(<ee-java(|env)> e1, <ee-java(|env)> e2)
+    ee-java(|env) : Mod(e1,e2) -> Remain(<ee-java(|env)> e1, <ee-java(|env)> e2)
+
+    ee-java(|env) : Int(i) -> Lit(Deci(i)) 
+    ee-java(|env) : Long(l) -> Lit(Deci(l)) 
+    ee-java(|env) : Float(f) -> Lit(Float(f)) 
+    ee-java(|env) : String(s) -> Lit(s) 
+
+    is-name = ?ExprName(_) + ?ExprName(_,_) + ?AmbName(_) + ?AmbName(_,_) + ?MethodName(_) + ?MethodName(_,_)
+
+  rules
+    ee-java-assign(|env,v) : Var(n) -> Assign(<ee-java(|env)> Var(n), v)
+    ee-java-assign(|env,v) : FieldAccess(e, n) -> Invoke(Method(j, None, setter-name), [v])
+      where <ee-java(|env)> e => j;
+            <?Id(<id>); first-upper> n => upperName;
+            !Id(<concat-strings> ["set", upperName]) => setter-name
+
+} 

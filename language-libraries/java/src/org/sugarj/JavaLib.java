@@ -47,13 +47,9 @@ public class JavaLib extends LanguageLib implements Serializable {
 
   private Path sourcePath;
 
-  public String getVersion() {
-    return "java-0.1a";
-  }
-
   @Override
-  public List<File> getGrammars() {
-    List<File> grammars = new LinkedList<File>(super.getGrammars());
+  public List<File> getDefaultGrammars() {
+    List<File> grammars = new LinkedList<File>(super.getDefaultGrammars());
     grammars.add(ensureFile("org/sugarj/languages/SugarJ.def"));
     grammars.add(ensureFile("org/sugarj/languages/Java-15.def"));
     return Collections.unmodifiableList(grammars);
@@ -114,7 +110,7 @@ public class JavaLib extends LanguageLib implements Serializable {
   public static void main(String args[]) throws URISyntaxException {
     JavaLib jl = new JavaLib();
 
-    for (File file : jl.getGrammars())
+    for (File file : jl.getDefaultGrammars())
       exists(file);
 
     exists(jl.getInitGrammar());
@@ -130,22 +126,6 @@ public class JavaLib extends LanguageLib implements Serializable {
       System.err.println(file.getPath() + " does not exist.");
   }
 
-  @Override
-  public String getGeneratedFileExtension() {
-    return "class";
-  }
-
-  @Override
-  public String getSugarFileExtension() {
-    return "sugj";
-  }
-  
-  @Override
-  public String getOriginalFileExtension() {
-    return "java";
-  }
-
-
   private void checkPackageName(IStrategoTerm toplevelDecl, RelativePath sourceFile, IErrorLogger errorLog) {
     if (sourceFile != null) {
       String packageName = relPackageName == null ? "" : relPackageName.replace('/', '.');
@@ -159,12 +139,16 @@ public class JavaLib extends LanguageLib implements Serializable {
     }
   }
 
-  public String extractImportedModuleName(IStrategoTerm toplevelDecl) throws IOException {
+  public String extractImportedModuleName(IStrategoTerm toplevelDecl) {
     String name = null;
     if (isApplication(toplevelDecl, "TypeImportDec"))
       name = prettyPrint(toplevelDecl.getSubterm(0));
     else if (isApplication(toplevelDecl, "TypeImportOnDemandDec"))
       name = prettyPrint(toplevelDecl.getSubterm(0)) + ".*";
+    else if (isApplication(toplevelDecl, "TypeImportAsDec"))
+      name = prettyPrint(toplevelDecl.getSubterm(1));
+    else if (isApplication(toplevelDecl, "TransImportDec"))
+      name = getTransformedModulePath(toplevelDecl.getSubterm(1));
     return name;
   }
 
@@ -205,7 +189,10 @@ public class JavaLib extends LanguageLib implements Serializable {
 
   @Override
   public boolean isImportDec(IStrategoTerm decl) {
-    return isApplication(decl, "TypeImportDec") || isApplication(decl, "TypeImportOnDemandDec");
+    return 
+        isApplication(decl, "TypeImportDec") || 
+        isApplication(decl, "TypeImportOnDemandDec") ||
+        isApplication(decl, "TypeImportAsDec");
   }
 
     @Override
@@ -227,17 +214,23 @@ public class JavaLib extends LanguageLib implements Serializable {
   public boolean isNamespaceDec(IStrategoTerm decl) {
     return isApplication(decl, "PackageDec");
   }
+  
+  @Override
+  public boolean isModelDec(IStrategoTerm decl) {
+    return isApplication(decl, "ModelDec");
+  }
+
+  @Override
+  public boolean isTransformationDec(IStrategoTerm decl) {
+    return isApplication(decl, "TransDec");
+  }
 
   /**
-   * Pretty prints the content of a Java AST in some file.
+   * Pretty prints the content of a Java AST.
    * 
    * @param aterm
-   *          the name of a file which contains an aterm which encodes a Java
-   *          AST
-   * @throws IOException
    */
-  @Override
-  public String prettyPrint(IStrategoTerm term) throws IOException {
+  private String prettyPrint(IStrategoTerm term) {
     Context ctx = interp.getCompiledContext();
     IStrategoTerm string = pp_java_string_0_0.instance.invoke(ctx, term);
     if (string != null)
@@ -269,7 +262,7 @@ public class JavaLib extends LanguageLib implements Serializable {
     checkPackageName(toplevelDecl, sourceFile, errorLog);
 
     if (javaOutFile == null)
-      javaOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + getOriginalFileExtension()); // XXX:
+      javaOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + JavaLibFactory.getInstance().getOriginalFileExtension()); // XXX:
                                               
     // moved here before depOutFile==null check
     javaSource.setNamespaceDecl(prettyPrint(toplevelDecl));
@@ -282,9 +275,8 @@ public class JavaLib extends LanguageLib implements Serializable {
 
   @Override
   public void setupSourceFile(RelativePath sourceFile, Environment environment) {
-    javaOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + getOriginalFileExtension());
+    javaOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + JavaLibFactory.getInstance().getOriginalFileExtension());
     javaSource = new JavaSourceFileContent();
-    javaSource.setOptionalImport(false);
     
     for (Path dir : environment.getSourcePath())
       if (sourceFile.getBasePath().equals(dir))
@@ -297,25 +289,75 @@ public class JavaLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  protected void compile(List<Path> javaOutFiles, Path bin, List<Path> path, boolean generateFiles) throws IOException {
+  public void compile(List<Path> javaOutFiles, Path bin, List<Path> path, boolean generateFiles) throws IOException {
     if (generateFiles)
       JavaCommands.javac(javaOutFiles, sourcePath, bin, path);
   }
 
   @Override
-  public String getImportedModulePath(IStrategoTerm toplevelDecl) throws IOException {
+  public String getImportedModulePath(IStrategoTerm toplevelDecl) {
     String importModule = extractImportedModuleName(toplevelDecl);
     String modulePath = getRelativeModulePath(importModule);
 
     return modulePath;
   }
+  
+  @Override
+  public boolean isTransformationApplication(IStrategoTerm decl) {
+    return isApplication(decl, "TransImportDec");
+  }
+  
+  @Override
+  public IStrategoTerm getTransformationApplication(IStrategoTerm decl) {
+    return getApplicationSubterm(decl, "TransImportDec", 1);
+  }
+  
+  @Override
+  public String getImportLocalName(IStrategoTerm decl) {
+    IStrategoTerm opt = null;
+    if (isApplication(decl, "TransImportDec")) 
+      opt = getApplicationSubterm(decl, "TransImportDec", 0);
+    else if (isApplication(decl, "TypeImportAsDec"))
+      opt = getApplicationSubterm(decl, "TypeImportAsDec", 0);
+    
+    if (opt != null && isApplication(opt, "Some"))
+      return getModulePath(getApplicationSubterm(getApplicationSubterm(opt, "Some", 0), "ImportAs", 0));
+    
+    return null;
+  }
+  
+  @Override
+  public IStrategoTerm reconstructImport(String modulePath, IStrategoTerm decl) {
+    IStrategoTerm localName = null;
+    if (isApplication(decl, "TransImportDec")) 
+      localName = getApplicationSubterm(decl, "TransImportDec", 0);
+    else if (isApplication(decl, "TypeImportAsDec"))
+      localName = getApplicationSubterm(decl, "TypeImportAsDec", 0);
+    
+    if (localName == null || isApplication(localName, "None"))
+      return
+        ATermCommands.makeAppl("TypeImportDec", "TypeImportDec", 1, 
+          ATermCommands.makeAppl("Id", "Id", 1, ATermCommands.makeString(modulePath)));
+
+    return 
+      ATermCommands.makeAppl("TypeImportAsDec", "TypeImportAsDec", 2,
+        localName,
+        ATermCommands.makeAppl("Id", "Id", 1, ATermCommands.makeString(modulePath)));
+  }
+  
+  @Override
+  public String getModulePath(IStrategoTerm decl) {
+    return getRelativeModulePath(prettyPrint(decl));
+  }
 
   private String getRelativeModulePath(String module) {
+    if (module == null)
+      return null;
     return module.replace(".", Environment.sep);
   }
 
   @Override
-  public void addImportModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
+  public void addImportedModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
     String imp = extractImportedModuleName(toplevelDecl).replace('/', '.');
     if (checked)
       javaSource.addCheckedImport(imp);
@@ -327,7 +369,6 @@ public class JavaLib extends LanguageLib implements Serializable {
   public String getSugarName(IStrategoTerm decl) throws IOException {
     IStrategoTerm head = getApplicationSubterm(decl, "SugarDec", 0);
     String extName = prettyPrint(getApplicationSubterm(head, "SugarDecHead", 1));
-
     return extName;
   }
 
@@ -335,17 +376,34 @@ public class JavaLib extends LanguageLib implements Serializable {
   public IStrategoTerm getSugarBody(IStrategoTerm decl) {
     IStrategoTerm body = getApplicationSubterm(decl, "SugarDec", 1);
     IStrategoTerm sugarBody = getApplicationSubterm(body, "SugarBody", 0);
+    return sugarBody;
+  }
+  
+  @Override
+  public String getModelName(IStrategoTerm decl) throws IOException {
+    IStrategoTerm head = getApplicationSubterm(decl, "ModelDec", 0);
+    String extName = prettyPrint(getApplicationSubterm(head, "ModelDecHead", 1));
+    return extName;
+  }
 
+  @Override
+  public String getTransformationName(IStrategoTerm decl) throws IOException {
+    IStrategoTerm head = getApplicationSubterm(decl, "TransDec", 0);
+    String extName = prettyPrint(getApplicationSubterm(head, "TransDecHead", 1));
+    return extName;
+  }
+
+  @Override
+  public IStrategoTerm getTransformationBody(IStrategoTerm decl) {
+    IStrategoTerm body = getApplicationSubterm(decl, "TransDec", 1);
+    IStrategoTerm sugarBody = getApplicationSubterm(body, "TransBody", 0);
     return sugarBody;
   }
 
   @Override
-  public String getLanguageName() {
-    return "Java";
-  }
-
-  @Override
   public boolean isModuleResolvable(String relModulePath) {
+    if (relModulePath.endsWith("*"))
+      return true;
     try {
       return getClass().getClassLoader().loadClass(relModulePath.replace('/', '.')) != null;
     } catch (ClassNotFoundException e) {
@@ -364,5 +422,4 @@ public class JavaLib extends LanguageLib implements Serializable {
     IStrategoTerm body = getApplicationSubterm(decl, "EditorServicesDec", 1);
     return ATermCommands.getApplicationSubterm(body, "EditorServicesBody", 0);
   }
-
 }

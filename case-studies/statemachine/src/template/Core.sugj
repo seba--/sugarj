@@ -1,0 +1,28 @@
+package template;
+
+import org.sugarj.languages.Model;
+import org.sugarj.languages.Stratego;
+
+import transformation.Recursive;
+
+public sugar Core {
+  desugarings
+    template-to-sugar
+
+  rules
+    template-to-sugar :
+      TemplateDec(mods, name, body) ->
+      TransDec(TransDecHead(mods, name), TransBody(TransformationDef([],[Rules([main-strategy, main-strategy2])])))
+    where
+      <compile-template-body> body => compiled-body;
+      main-strategy  := SDefNoArgs("main", Call(SVar("recursively-transform"), [Id(), CallNoArgs(SVar("main"))]));
+      main-strategy2 := SDefNoArgs("main", compiled-body)
+    
+    compile-template-body = fail
+
+  context-free syntax
+    TemplateDec -> ToplevelDeclaration
+    AnnoOrSugarMod* "template" JavaId "{" TemplateBody "}" -> TemplateDec {cons("TemplateDec")}
+}
+
+

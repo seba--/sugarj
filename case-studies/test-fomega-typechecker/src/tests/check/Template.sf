@@ -1,4 +1,4 @@
-module tests.cases.Template
+module tests.check.Template
 
 import typing.check.TypeChecker
 

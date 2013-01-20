@@ -1,4 +1,4 @@
-module tests.cases.RecursiveTypes01
+module tests.check.RecursiveTypes01
 
 import typing.check.TypeChecker
 

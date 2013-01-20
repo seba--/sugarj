@@ -1,0 +1,24 @@
+package javaclosure;
+
+import javaclosure.Syntax;
+
+import org.sugarj.languages.Java;
+
+public analysis Analysis {
+  rules
+    /*
+     * this is approximate: we ignore that methods in anonymous class expressions bind variables
+     */
+    free-local-vars-expr : ExprName(Id(name)) -> [name]
+    free-local-vars-expr : AmbName(Id(name)) -> [name]
+    
+    free-local-vars-expr : Closure(_, Id(v), e) ->
+      <diff> (<free-local-vars-expr> e, [v])
+    
+    free-local-vars-expr : c#(xs) -> <mapconcat(free-local-vars-expr)> xs
+    
+  warnings
+    Closure(_, Id(v), e) =
+    [(v, <concat-strings> ["unused variable: ", v])]
+    where <not(elem)> (v, <free-local-vars-expr> e)
+}

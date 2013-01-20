@@ -1,0 +1,40 @@
+package transformation;
+
+public transformation Renaming {
+rules
+  import-model-path : TypeName(Id(name)) -> ([], name)
+  import-model-path : TypeName(pkg, Id(name)) -> (<import-model-pkg> pkg, name)
+
+  import-model-pkg : PackageOrTypeName(Id(name)) -> [name]
+  import-model-pkg : PackageOrTypeName(pkg, Id(name)) -> <conc> (<import-model-pkg> pkg, [name])
+
+  build-path : ([], name) -> name
+  build-path : ([pkg|pkgs], name) -> <conc-strings> (pkg, "/", <build-path> (pkgs, name))
+
+  name-suffix = !("__", <id>); conc-strings; string-replace(|"/","_")
+
+  apply-renamings(|renamings) =
+    where(!renamings; is-list; make-renamings-hashtable => renamings-table);
+    apply-renamings(|renamings-table)
+  
+  make-renamings-hashtable : [] -> <new-hashtable>
+  make-renamings-hashtable : [(quals,from,to) | rest] -> table
+    where <make-renamings-hashtable> rest => table;
+          <hashtable-put(|from, to)> table;
+          <hashtable-put(|(quals, from), to)> table;
+          <hashtable-get(|from)> table
+
+  as-java-path = string-as-chars(map(try(?'-';!'_')))
+
+  split-packages-decname =
+    where(!(<id>, "/"); not(split-before));
+    !([], <id>)
+
+  split-packages-decname =
+    !(<id>, "/"); split-before => (pkg, rest);
+    <string-as-chars(Tl); split-packages-decname> rest => (pkgs, name);
+    !([pkg|pkgs], name)
+
+  compose-path : ([], name) -> <as-java-path> name
+  compose-path : ([pkg|pkgs], name) -> <conc-strings> (pkg, "/", <compose-path> (pkgs, name))
+}

@@ -35,6 +35,7 @@ import org.sugarj.common.path.Path;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.transformations.extraction.extract_str_0_0;
+import org.sugarj.driver.transformations.renaming.rename_rules_0_2;
 import org.sugarj.stdlib.StdLib;
 
 /**
@@ -45,6 +46,7 @@ import org.sugarj.stdlib.StdLib;
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
 public class STRCommands {
+  
 
   private static IOAgent strjIOAgent = new FilteringIOAgent(Log.CORE | Log.TRANSFORM, 
                                                             Pattern.quote("[ strj | info ]") + ".*", 
@@ -62,6 +64,18 @@ public class STRCommands {
     }
   }
   
+  private SGLR strParser;
+  private ModuleKeyCache<Path> strCache;
+  private Environment environment;
+  private LanguageLib langLib;
+  
+  public STRCommands(SGLR strParser, ModuleKeyCache<Path> strCache, Environment environment, LanguageLib langLib) {
+    this.strParser = strParser;
+    this.strCache = strCache;
+    this.environment = environment;
+    this.langLib = langLib;
+  }
+
   /**
    *  Compiles a {@code *.str} file to a single {@code *.java} file. 
    */
@@ -113,6 +127,10 @@ public class STRCommands {
     }
   }
   
+  
+  public Path compile(Path str, String main, Collection<Path> dependentFiles) throws TokenExpectedException, BadTokenException, IOException, InvalidParseTableException, SGLRException {
+    return STRCommands.compile(str, main, dependentFiles, strParser, strCache, environment, langLib);
+  }
   
   public static Path compile(Path str,
                               String main,
@@ -229,6 +247,10 @@ public class STRCommands {
     }
     
   }
+  
+  public IStrategoTerm assimilate(String strategy, Path ctree, IStrategoTerm in) throws IOException {
+    return STRCommands.assimilate(strategy, ctree, in, langLib.getInterpreter());
+  }
 
   public static IStrategoTerm assimilate(Path ctree, IStrategoTerm in, HybridInterpreter interp) throws IOException {
     return assimilate("internal-main", ctree, in, interp);
@@ -261,7 +283,7 @@ public class STRCommands {
         throw new RuntimeException("hybrid interpreter failed");
     }
     catch (InterpreterException e) {
-      throw new StrategoException("desugaring failed: " + e.getCause().getMessage(), e);
+      throw new StrategoException("desugaring failed: " + (e.getCause() == null ? e : e.getCause()).getMessage(), e);
     }
     catch (Exception e) {
       throw new StrategoException("desugaring failed", e);
@@ -277,7 +299,7 @@ public class STRCommands {
    * @param str result file
    * @throws InvalidParseTableException 
    */
-  public static IStrategoTerm extractSTR(IStrategoTerm term) throws IOException, InvalidParseTableException {
+  public static IStrategoTerm extractSTR(IStrategoTerm term) throws IOException {
     IStrategoTerm result = null;
     Context extractionContext = SugarJContexts.extractionContext();
     try {
@@ -291,5 +313,22 @@ public class STRCommands {
     }
     return result;
   }
-  
+
+  public static IStrategoTerm renameRules(IStrategoTerm term, String oldName, String newName) throws IOException {
+    IStrategoTerm result = null;
+    Context renameRulesContext = SugarJContexts.renameRulesContext();
+    try {
+      IStrategoTerm toldName = renameRulesContext.getFactory().makeString(oldName);
+      IStrategoTerm tnewName = renameRulesContext.getFactory().makeString(newName);
+      result = rename_rules_0_2.instance.invoke(renameRulesContext, term, toldName, tnewName);
+    }
+    catch (StrategoExit e) {
+      if (e.getValue() != 0 || result == null)
+        throw new RuntimeException("Stratego extraction failed", e);
+    } finally {
+      SugarJContexts.releaseContext(renameRulesContext);
+    }
+    return result;
+  }
+
 }

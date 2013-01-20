@@ -21,8 +21,30 @@ public class FomegaLibFactory extends LanguageLibFactory {
 	 */
 	@Override
 	public LanguageLib createLanguageLibrary() {
+	  // TODO leave log level unchanged
 	  Log.log.setLoggingLevel(Log.ALWAYS);
 		return new FomegaLib();
 	}
+
+  @Override
+  public String getLanguageName() {
+    return "Fomega";
+  }
+
+  @Override
+  public String getVersion() {
+    return "fomega-0.1f";
+  }
+  
+  @Override
+  public String getGeneratedFileExtension() {
+    return "pts";
+  }
+
+  @Override
+  public String getSugarFileExtension() {
+    return "sf";
+  }
+
 
 }

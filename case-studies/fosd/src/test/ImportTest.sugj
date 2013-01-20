@@ -1,0 +1,16 @@
+package test;
+
+import variability.ConfigTrans(test.FeatureConfig)(test.Test);
+import variability.ConfigTrans(test.FeatureConfig)(test.InterfaceTest);
+
+public class ImportTest implements InterfaceTest {	
+
+	public static void main(String[] args) {  
+		Test t =  new Test(); 
+		t.foo(12);   
+	} 
+	
+	public void doSomething() {
+		System.out.println("something.");
+	}
+}

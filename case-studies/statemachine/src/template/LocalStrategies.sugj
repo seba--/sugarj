@@ -1,0 +1,41 @@
+package template;
+
+import template.Core;
+import template.Requote;
+
+import template.util.MetaExplode;
+
+import org.sugarj.languages.Stratego;
+
+public sugar LocalStrategies {
+  context-free syntax
+    "$$" StrategoStrategyDef TemplateBody -> TemplateBody {cons("LocalStrategy")}
+    "$$" StrategoRuleDef TemplateBody -> TemplateBody {cons("LocalStrategy")}
+
+    ">" Requoted "<" -> StrategoTerm {cons("ToMetaExpr")}
+
+
+  rules
+    compile-template-body = LocalStrategy(id, compile-template-body)
+
+  desugarings
+    desugar-local-strategies
+
+  rules
+    desugar-local-strategies = Rules(mapconcat(promote-local-strategies <+ ![<id>]))
+
+    promote-local-strategies :
+      SDefNoArgs("main", body) -> 
+      [SDefNoArgs("main", body') | loc-strats]
+    where <oncetd(?LocalStrategy(_,_))> body;
+          <extract-local-strategies> body => (body', loc-strats)
+ 
+    extract-local-strategies :
+      LocalStrategy(strat, body) -> (body', [strat | strats'])
+    where <extract-local-strategies> body => (body', strats')
+    extract-local-strategies :
+      c#(xs) -> (c#(xs'), strats)
+    where <map(extract-local-strategies)> xs => subs;
+          <map(?(<id>,_))> subs => xs';
+          <mapconcat(?(_,<id>))> subs => strats
+}

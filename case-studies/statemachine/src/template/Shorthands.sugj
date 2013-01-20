@@ -1,0 +1,65 @@
+package template;
+
+import org.sugarj.languages.Stratego;
+
+import template.Core;
+import template.util.MetaExplode;
+
+public sugar Shorthands { 
+  context-free syntax
+    ShorthandDef TemplateBody -> TemplateBody {cons("ShorthandCons")}
+    "$" StrategoId "=" StrategoStrategy -> ShorthandDef {cons("ShorthandDef")}
+
+    UnquoteShorthand -> JavaPackageDec
+    UnquoteShorthand -> JavaPackageName
+    UnquoteShorthand -> JavaImportDec
+    UnquoteShorthand -> JavaType
+
+    "id" UnquoteShorthand -> JavaId
+    UnquoteShorthand -> JavaId {avoid}
+
+    UnquotedShorthand -> UnquoteShorthand {cons("FromMetaExpr")}
+    "$" StrategoId -> UnquotedShorthand {cons("UnquotedShorthand")}
+
+  context-free priorities
+    JavaId -> JavaTypeName
+  > UnquoteShorthand -> JavaId
+
+  lexical syntax
+    "$" [A-Za-z0-9\_\$]* -> JavaID {reject}
+
+  rules
+    compile-template-body :
+      ShorthandCons(ShorthandDef(varname, strat), rest) -> 
+      Seq(Where(AM(strat, Var(varname))), <compile-template-body> rest)
+
+  desugarings
+    unquote-shorthands
+
+  rules
+    unquote-shorthands = ?UnquotedShorthand(<id>); !Var(<id>)
+
+
+
+
+  context-free syntax
+    ShorthandDef -> JavaImportDec {cons("InlineShorthand")}
+    ShorthandDef -> JavaClassBodyDec {cons("InlineShorthand")}
+    ShorthandDef -> JavaBlockStm {cons("InlineShorthand")}
+    ShorthandDef -> FormalParam {cons("InlineShorthand")}
+
+  desugarings
+    inline-shorthand-desugar
+
+  rules
+    inline-shorthand-desugar :
+      [InlineShorthand(ShorthandDef(varname, strat)) | xs] ->
+      FromMetaExpr(RootApp(
+        Seq(
+          Where(AM(strat, Var(varname))),
+          Build(ToMetaExpr(xs)))))
+
+    inline-shorthand-desugar :
+      [InlineShorthand(strat)] -> []
+
+} 

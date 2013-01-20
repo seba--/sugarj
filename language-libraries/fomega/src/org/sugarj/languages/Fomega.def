@@ -5,12 +5,6 @@ exports
   sorts ID MID QID NAT STRING Keyword PrimitiveType
 
   lexical syntax
-    [\ \t\r\n] -> LAYOUT
-
-  context-free restrictions
-%%    LAYOUT? -/- [\ \t\r\n]
-
-  lexical syntax
     [a-zA-Z][A-Za-z0-9]* -> ID
     [0-9]+ -> NAT
     "\""~[\"\\\n\r]*"\"" -> STRING
@@ -171,7 +165,7 @@ exports
       "\\" ID ":" Type "." Expr -> Expr {cons("Abs")}
       "\\" ID "::" Kind "." Expr -> Expr {cons("TAbs")}
       "if" Expr "then" Expr "else" Expr -> Expr {cons("Cond")}
-      "case" Expr "of" {Branch ";"}+ -> Expr {cons("Case")}
+      "case" Expr "of" Branches -> Expr {cons("Case")}
     }
 
 

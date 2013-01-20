@@ -285,11 +285,11 @@ imports basic/Whitespace
 
 exports
   lexical syntax
-    "%%" line:~[\n]* "\n"    -> LAYOUT {cons("line"), category("Comment")}
-    "%" content:~[\%\n]+ "%" -> LAYOUT {cons("nested"), category("Comment")}
+    "%%" line:~[\n]* "\n"    -> Comment {cons("line"), category("Comment")}
+    Comment -> LAYOUT
 
   context-free restrictions
-    LAYOUT? -/- [\%]
+  	LAYOUT? -/- [\%] . [\%]
 
 module languages/sdf2/syntax/Symbols
 imports basic/Comments
@@ -350,8 +350,8 @@ exports
   lexical syntax
 %%    [\ \t\n\r] -> LAYOUT {cons("whitespace")}
 
-  context-free restrictions
-    LAYOUT? -/- [\ \t\n\r]
+%%  context-free restrictions
+%%    LAYOUT? -/- [\ \t\n\r]
 
 module languages/aterm/syntax/IntCon
 imports basic/Whitespace basic/NatCon
@@ -470,7 +470,6 @@ exports
     "syntax" "variables" "module" "imports" "exports" "hiddens" "left" "right"
     "assoc" "non-assoc" "bracket" "sorts" -/- [A-Za-z0-9]
     <NatCon-CF> -/- [0-9]
-    <LAYOUT?-CF> -/- [\ \t\n\%]
     <NumChar-CF> -/- [0-9]
     <ModuleName-CF> -/- [A-Za-z0-9\_\-]
 

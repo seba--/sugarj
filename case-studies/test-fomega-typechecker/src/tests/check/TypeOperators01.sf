@@ -1,4 +1,4 @@
-module tests.cases.TypeOperators01
+module tests.check.TypeOperators01
 
 import typing.check.TypeChecker
 

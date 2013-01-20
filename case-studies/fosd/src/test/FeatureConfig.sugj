@@ -1,0 +1,14 @@
+package test;
+
+import variability.Config;
+
+import variability.CheckConfig(test.FeatureModel);
+
+public config FeatureConfig for FeatureModel {  
+  enable A;
+  disable B;
+  enable C;
+  enable E;
+  disable F;
+  disable INTERFACE;
+}

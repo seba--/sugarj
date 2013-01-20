@@ -36,23 +36,20 @@ public class LanguageLibRegistry {
   }
 
   public synchronized void registerLanguageLib(LanguageLibFactory libFactory) {
-    LanguageLib lib = libFactory.createLanguageLibrary();
-    languageLibs.put(lib.getSugarFileExtension(), libFactory);
-    if (lib.getOriginalFileExtension() != null)
-      languageLibs.put(lib.getOriginalFileExtension(), libFactory);
+    languageLibs.put(libFactory.getSugarFileExtension(), libFactory);
+    if (libFactory.getOriginalFileExtension() != null)
+      languageLibs.put(libFactory.getOriginalFileExtension(), libFactory);
   }
 
   public synchronized void unregisterLanguageLib(LanguageLibFactory libFactory) {
-    LanguageLib lib = libFactory.createLanguageLibrary();
-    
-    LanguageLibFactory reg = languageLibs.get(lib.getSugarFileExtension());
+    LanguageLibFactory reg = languageLibs.get(libFactory.getSugarFileExtension());
     if (reg != null && reg.equals(libFactory))
-      languageLibs.remove(lib.getSugarFileExtension());
+      languageLibs.remove(libFactory.getSugarFileExtension());
     
-    if (lib.getOriginalFileExtension() != null) {
-      reg = languageLibs.get(lib.getOriginalFileExtension());
+    if (libFactory.getOriginalFileExtension() != null) {
+      reg = languageLibs.get(libFactory.getOriginalFileExtension());
       if (reg != null && reg.equals(libFactory))
-        languageLibs.remove(lib.getOriginalFileExtension());
+        languageLibs.remove(libFactory.getOriginalFileExtension());
     }
   }
   
@@ -103,8 +100,8 @@ public class LanguageLibRegistry {
       loadExtensions();
 
     List<String> list = new LinkedList<String>();
-    for (LanguageLibFactory fact : languageLibs.values())
-      list.add(fact.createLanguageLibrary().getSugarFileExtension());
+    for (LanguageLibFactory libFactory : languageLibs.values())
+      list.add(libFactory.getSugarFileExtension());
     return list;
   }
 }

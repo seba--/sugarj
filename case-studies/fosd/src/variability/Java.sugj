@@ -1,0 +1,103 @@
+package variability; 
+  
+import variability.FeatureExpressions;
+import concretesyntax.MetaExplode;
+
+public editor services Java {
+  folding
+    VariableClass._
+}
+
+public sugar Java {
+
+  context-free syntax
+    JavaVariableType -> ToplevelDeclaration
+
+    VariableClass -> JavaVariableType
+    VariableClassDecHead JavaClassBody -> VariableClass {cons("VariableClassDec")}
+    AnnoOrSugarMod* "variable" "class" JavaId JavaTypeParams? JavaSuper? JavaInterfaces? -> VariableClassDecHead {cons("VariableClassDecHead")}
+    
+    VariableInterface -> JavaVariableType
+    VariableInterfaceDecHead "{" JavaInterfaceMemberDec* "}" -> VariableInterface {cons("VariableInterfaceDec")}
+    AnnoOrSugarMod* "variable" "interface" JavaId JavaTypeParams? JavaExtendsInterfaces? -> VariableInterfaceDecHead  {cons("VariableInterfaceDecHead")}
+
+  //conditional elements   
+   //"#" "ifdef" "(" FeatureExpr ")" JavaImportDec -> JavaImportDec {cons("OptionalNode")}
+   "#" "ifdef" "(" FeatureExpr ")" JavaClassBodyDec -> JavaClassBodyDec {cons("OptionalNode")}
+   "#" "ifdef" "(" FeatureExpr ")" JavaFormalParam -> JavaFormalParam {cons("OptionalNode")}
+   "#" "ifdef" "(" FeatureExpr ")" JavaInterfaceType -> JavaInterfaceType {cons("OptionalNode")}
+   "#" "ifdef" "(" FeatureExpr ")" JavaStm -> JavaStm {cons("OptionalNode")}
+   "#" "ifdef" "(" FeatureExpr ")" JavaLocalVarDecStm -> JavaLocalVarDecStm {cons("OptionalNode")}
+   "#" "ifdef" "(" FeatureExpr ")" JavaInterfaceMemberDec -> JavaInterfaceMemberDec {cons("OptionalNode")}
+   "#" "ifdef" "(" FeatureExpr ")" JavaVariableType -> JavaVariableType {cons("OptionalNode")}
+   "#" "ifdef" "(" FeatureExpr ")" JavaExpr -> JavaExpr {cons("OptionalNode")}
+   "#" "ifdef" "(" FeatureExpr ")" "{" JavaExpr "}" "{" JavaExpr "}" -> JavaExpr {cons("VariableNode")}
+
+  context-free priorities
+    JavaExpr ";" -> JavaStm >
+    "#" "ifdef" "(" FeatureExpr ")" JavaExpr -> JavaExpr {cons("OptionalNode")}
+    
+  context-free priorities
+    // The remaining priorities follow by transitivity.
+      {right:
+      JavaLHS "="    JavaExpr -> JavaExpr
+      JavaLHS "*="   JavaExpr -> JavaExpr
+      JavaLHS "/="   JavaExpr -> JavaExpr
+      JavaLHS "%="   JavaExpr -> JavaExpr
+      JavaLHS "+="   JavaExpr -> JavaExpr
+      JavaLHS "-="   JavaExpr -> JavaExpr
+      JavaLHS "<<="  JavaExpr -> JavaExpr
+      JavaLHS ">>="  JavaExpr -> JavaExpr
+      JavaLHS ">>>=" JavaExpr -> JavaExpr
+      JavaLHS "&="   JavaExpr -> JavaExpr
+      JavaLHS "^="   JavaExpr -> JavaExpr
+      JavaLHS "|="   JavaExpr -> JavaExpr
+    } >
+    "#" "ifdef" "(" FeatureExpr ")" JavaExpr -> JavaExpr {cons("OptionalNode")}
+    
+
+  desugarings
+    desugar-variable-type
+    variable-type-declaration
+
+  rules         
+    desugar-variable-type :
+      VariableClassDec(VariableClassDecHead(mods, name, params, super, interfaces), body) -> 
+      ModelDec(ModelDecHead(mods, name, "VariableStructure"), ModelBody(ClassDec(ClassDecHead(mods, name, params, super, interfaces), body)))
+      
+    desugar-variable-type :
+      VariableInterfaceDec(VariableInterfaceDecHead(mods,name,params,extendsifc),body) ->
+      ModelDec(ModelDecHead(mods, name, "VariableStructure"), ModelBody(InterfaceDec(InterfaceDecHead(mods,name,params,extendsifc),body)))
+
+    variable-type-declaration : 
+      OptionalNode(exp, ModelDec(head@ModelDecHead(mods, name, "VariableStructure"), ModelBody(vartypedec))) ->
+      ModelDec(head, ModelBody(OptionalNode(exp, vartypedec)))
+     
+}
+
+public editor services Java {
+  //TODO coloring
+  //TODO configuration-aware folding
+  //TODO configuration-specific preview builder or with input dialog
+  //TODO outlining
+  //TODO reference resolving
+  //TODO code completion limited through candidate sorts
+
+  completions
+    completion trigger : "#"
+    completion template : JavaTypeDec = "#feature(" <e> ")" 
+    completion template : JavaMethodDec = "#feature(" <e> ")" 
+    completion template : JavaStm = "#feature(" <e> ")" 
+    completion template : JavaBlockStm = "#feature(" <e> ")" 
+
+  folding
+    _.ConditionalStatement
+    _.ConditionalMethod
+    _.ConditionalType
+
+//   colorer ConditionalMethodColoring
+//     environment _.ConditionalStatement : _ 192 255 255
+//     _.ConditionalStatement : _ 192 255 255
+//
+//     _.ConditionalMethod : _ 192 192 192
+}

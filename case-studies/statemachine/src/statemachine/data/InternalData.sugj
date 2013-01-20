@@ -1,0 +1,14 @@
+package statemachine.data;
+
+import statemachine.Metamodel;
+import entity.Metamodel;
+
+import statemachine.data.EntityExp;
+
+public sugar InternalData {
+  context-free syntax
+    InitialState DataDec+ EventsDec StateDec* -> StatemachineBody {cons("StatemachineBody")}
+
+    "data" Property Initializer? -> DataDec {cons("PropertyData")}
+    "=" EntityExp -> Initializer {cons("DataInit")}
+}

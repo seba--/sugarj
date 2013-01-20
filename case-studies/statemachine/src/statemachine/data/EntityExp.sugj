@@ -1,0 +1,71 @@
+package statemachine.data;
+
+public sugar EntityExp {
+  /**
+   * copied from https://svn.strategoxt.org/repos/WebDSL/webdsls/trunk/src/org/webdsl/dsl/syntax/WebDSL-Action.sdf
+   **/
+  context-free syntax
+    EntityExp "." JavaId             -> EntityExp {cons("FieldAccess"),prefer}
+    EntityExp "." JavaId "(" {EntityExp ","}* ")"  -> EntityExp {cons("Call")}
+
+    EntityExp "==" EntityExp           -> EntityExp {cons("Eq")}
+    EntityExp "!=" EntityExp           -> EntityExp {cons("NotEq")}
+    EntityExp ">" EntityExp           -> EntityExp {cons("LargerThan")}
+    EntityExp ">=" EntityExp           -> EntityExp {cons("LargerThanOrEqual")}
+    EntityExp "<" EntityExp           -> EntityExp {cons("SmallerThan")}
+    EntityExp "<=" EntityExp           -> EntityExp {cons("SmallerThanOrEqual")}
+
+    "true"                 -> EntityExp {prefer,cons("True")}
+    "false"                -> EntityExp {prefer,cons("False")}
+
+    "null"                 -> EntityExp {prefer,cons("Null")}
+
+    EntityExp "&&" EntityExp          -> EntityExp {cons("And"), assoc}
+    EntityExp "||" EntityExp           -> EntityExp {cons("Or"), assoc}
+    "!" EntityExp              -> EntityExp {cons("Not")}
+
+    "(" EntityExp ")"            -> EntityExp {bracket}
+
+
+    EntityExp "*" EntityExp  -> EntityExp {cons("Mul"),assoc}
+    EntityExp "/" EntityExp  -> EntityExp {cons("Div"),assoc}
+    EntityExp "%" EntityExp  -> EntityExp {cons("Mod"),assoc}
+    EntityExp "+" EntityExp  -> EntityExp {cons("Add"),assoc}
+    EntityExp "-" EntityExp  -> EntityExp {cons("Sub"),assoc}
+
+  context-free priorities
+    {left:
+      EntityExp "." JavaId "(" {EntityExp ","}* ")"  -> EntityExp
+      EntityExp "." JavaId  -> EntityExp }
+    > "!" EntityExp -> EntityExp
+    > {left:
+         EntityExp "*" EntityExp -> EntityExp
+         EntityExp "%" EntityExp -> EntityExp
+         EntityExp "/" EntityExp -> EntityExp }
+    > {left:
+         EntityExp "+" EntityExp -> EntityExp
+         EntityExp "-" EntityExp -> EntityExp }
+    > EntityExp "in" EntityExp -> EntityExp
+    > {left:
+         EntityExp "==" EntityExp -> EntityExp
+         EntityExp "!=" EntityExp -> EntityExp
+         EntityExp ">" EntityExp -> EntityExp
+         EntityExp ">=" EntityExp -> EntityExp
+         EntityExp "<" EntityExp -> EntityExp
+         EntityExp "<=" EntityExp -> EntityExp }
+    > {left:
+         EntityExp "&&" EntityExp -> EntityExp }
+    > {left:
+         EntityExp "||" EntityExp -> EntityExp }
+
+  /* not copied */
+  context-free syntax
+    JavaId -> EntityExp {cons("Var")}
+    "this" -> EntityExp {cons("This")}
+    "null" -> EntityExp {cons("Null")}
+
+    JavaDeciNumeral        -> EntityExp {cons("Int")}
+    JavaDeciNumeral [lL]   -> EntityExp {cons("Long")}
+    JavaDeciFloatLiteral   -> EntityExp {cons("Float")}
+    JavaStringLiteral      -> EntityExp {cons("String")}
+}

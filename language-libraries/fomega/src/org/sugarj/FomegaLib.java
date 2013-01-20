@@ -41,19 +41,10 @@ public class FomegaLib extends LanguageLib {
   private String moduleName;
 
   private IStrategoTerm ppTable;
-
-  public String getVersion() {
-    return "fomega-0.1e";
-  }
   
   @Override
-  public String getLanguageName() {
-    return "Fomega";
-  }
-
-  @Override
-  public List<File> getGrammars() {
-    List<File> grammars = new LinkedList<File>(super.getGrammars());
+  public List<File> getDefaultGrammars() {
+    List<File> grammars = new LinkedList<File>(super.getDefaultGrammars());
     grammars.add(ensureFile("org/sugarj/languages/SugarFomega.def"));
     grammars.add(ensureFile("org/sugarj/languages/Fomega.def"));
     return Collections.unmodifiableList(grammars);
@@ -109,16 +100,6 @@ public class FomegaLib extends LanguageLib {
     }
     
     return libDir;
-  }
-
-  @Override
-  public String getGeneratedFileExtension() {
-    return "pts";
-  }
-
-  @Override
-  public String getSugarFileExtension() {
-    return "sf";
   }
 
   @Override
@@ -209,7 +190,7 @@ public class FomegaLib extends LanguageLib {
     String declaredRelNamespaceName = FileCommands.dropFilename(qualifiedModulePath);
     relNamespaceName = FileCommands.dropFilename(sourceFile.getRelativePath());
     
-    RelativePath objectFile = environment.createBinPath(getRelativeNamespaceSep() + moduleName + "." + getGeneratedFileExtension());
+    RelativePath objectFile = environment.createBinPath(getRelativeNamespaceSep() + moduleName + "." + getFactoryForLanguage().getGeneratedFileExtension());
     generatedModules.add(objectFile);
     
     sourceContent.setNamespaceDecl(prettyPrint(toplevelDecl));
@@ -239,12 +220,12 @@ public class FomegaLib extends LanguageLib {
   }
 
   @Override
-  public String getImportedModulePath(IStrategoTerm toplevelDecl) throws IOException {
+  public String getImportedModulePath(IStrategoTerm toplevelDecl) {
     return prettyPrint(getApplicationSubterm(toplevelDecl, "Import", 1)).replace('.', '/');
   }
   
   @Override
-  public void addImportModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
+  public void addImportedModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
     SourceImport imp = new SourceImport(getImportedModulePath(toplevelDecl), prettyPrint(toplevelDecl));
     if (checked)
       sourceContent.addCheckedImport(imp);
@@ -262,8 +243,7 @@ public class FomegaLib extends LanguageLib {
     return getApplicationSubterm(decl, "SugarBody", 0);
   }
 
-  @Override
-  public String prettyPrint(IStrategoTerm term) throws IOException {
+  public String prettyPrint(IStrategoTerm term) {
     if (ppTable == null) 
       ppTable = ATermCommands.readPrettyPrintTable(ensureFile("org/sugarj/languages/Fomega.pp").getAbsolutePath());
     
@@ -271,7 +251,7 @@ public class FomegaLib extends LanguageLib {
   }
   
   @Override
-  protected void compile(List<Path> outFiles, Path bin, List<Path> includePaths, boolean generateFiles) throws IOException {
+  public void compile(List<Path> outFiles, Path bin, List<Path> includePaths, boolean generateFiles) throws IOException {
     if (generateFiles) {
       for (Path out : outFiles) {
         RelativePath relOut = (RelativePath) out;

@@ -1,0 +1,34 @@
+package variability;
+
+import org.sugarj.languages.Java;
+import org.sugarj.languages.Model;
+
+import variability.FeatureExpressions;
+
+public transformation ConfigTransAux {
+  rules 
+    eliminate-variability = downup(empty-variable-type <+ configure-node <+ id,
+                                   try(filter(not(?VariabilityHole))));
+                            CompilationUnit(id,id,map(try(no-variability)));
+                            topdown(try(empty-interface-list))
+
+    no-variability :
+      ModelDec(ModelDecHead(mods, name, "VariableStructure"), ModelBody(structure))
+      -> structure
+      where <not(oncetd(?OptionalNode(_,_) + ?VariableNode(_,_,_)))> structure
+                           
+  rules
+    empty-interface-list :
+      Some(ImplementsDec([])) -> None
+
+  rules 
+    empty-variable-type : 
+     ModelDec(mhead, ModelBody( OptionalNode(e,ClassDec(ClassDecHead(mods, name, _, _, _), ClassBody(elems)))))
+     -> ModelDec(mhead, ModelBody(ClassDec(ClassDecHead(mods, name, None, None, None), ClassBody([]))))
+      where <is-condition-disabled> e 
+
+    empty-variable-type : 
+     ModelDec(mhead, ModelBody(OptionalNode(e,InterfaceDec(head, ibody))))
+     -> ModelDec(mhead, ModelBody(InterfaceDec(head, [])))
+      where <is-condition-disabled> e
+}

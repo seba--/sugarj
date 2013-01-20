@@ -1,0 +1,533 @@
+package impl; 
+
+import variability.Java;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+
+import impl.EdgeIter;
+import impl.VertexIter;
+import impl.NeighborIfc;
+import impl.Vertex;
+import impl.Edge;
+import impl.EdgeIfc;
+import impl.Neighbor;
+import impl.WorkSpace;
+import impl.NumberWorkSpace;
+import impl.RegionWorkSpace;
+import impl.FinishTimeWorkSpace; 
+import impl.CycleWorkSpace;
+import impl.WorkSpaceTranspose; 
+
+
+public variable class Graph { 
+  LinkedList<Vertex> vertices;
+  #ifdef(SearchBase) private LinkedList<EdgeIfc> edges;
+  
+  public Graph(){ 
+    vertices=new LinkedList<Vertex>();
+    #ifdef(GenEdges)
+      edges=new LinkedList<EdgeIfc>();
+
+  }
+  public VertexIter getVertices(){
+    return new VertexIter(this);
+  }
+  #ifdef(SearchBase)
+  public EdgeIter getEdges(){
+    if (#ifdef(GenEdges) {false && edgesNotBuilt} {edgesNotBuilt}) {
+      edgesNotBuilt=false;
+      edges=new LinkedList<EdgeIfc>();
+      int k1=0, k2=0, sizeAV=0;
+      #ifdef(GNOnlyNeighbours) Neighbor tempNeighbor;
+      
+      for (VertexIter vxiter=getVertices(); vxiter.hasNext(); ) {
+        Vertex v=vxiter.next(); 
+        #ifdef(GNoEdges) sizeAV=v.adjacentVertices.size();
+        #ifdef(GNOnlyNeighbours) sizeAV=v.adjacentNeighbors.size();
+
+        for (k2=0; k2 < sizeAV; k2++) {
+          #ifdef(GNoEdges)
+            edges.add(
+              new Edge(v,v.adjacentVertices.get(k2), #ifdef(Weighted) v.weightsList.get(k2).intValue())
+            ); 
+          #ifdef(GNOnlyNeighbours)
+            tempNeighbor=v.adjacentNeighbors.get(k2);
+          #ifdef(GNOnlyNeighbours)
+            edges.add(
+              new Edge(v,tempNeighbor.neighbor, #ifdef(Weighted) tempNeighbor.weight)
+            );
+        } 
+      }
+    }
+    return new EdgeIter(){
+      private Iterator<EdgeIfc> iter=edges.iterator();
+      public EdgeIfc next(){
+        return iter.next();
+      }
+      public boolean hasNext(){
+        return iter.hasNext();
+      }
+    };
+  }
+
+  #ifdef(SearchBase)  boolean edgesNotBuilt=true; 
+
+  public void sortVertices(  Comparator<Vertex> c){
+    Collections.sort(vertices,c);
+  }
+
+  #ifdef(SearchBase)
+  public void sortEdges(  Comparator<EdgeIfc> c){
+    Collections.sort(edges,c);
+  }
+
+  #ifdef(GNoEdges)
+  EdgeIfc addEdge(Vertex start, Vertex end, #ifdef(Weighted) int weight) {
+    start.addAdjacent(end);
+    #ifdef(Undirected)
+      end.addAdjacent(start);
+    #ifdef(Weighted)
+      start.setWeight(weight);
+    #ifdef(Undirected && Weighted)
+      end.addWeight(weight);
+    return (EdgeIfc)start;
+  }
+
+
+  #ifdef(GNOnlyNeighbours)
+  EdgeIfc addEdge(Vertex start, Vertex end, #ifdef(Weighted) int weight) {
+    Neighbor e=new Neighbor(end, #ifdef(Weighted) weight);
+    addEdge(start,e);
+    return e;
+  }
+
+  #ifdef(GenEdges)
+  EdgeIfc addEdge(Vertex start, Vertex end, #ifdef(Weighted) int weight) {
+    Edge theEdge=new Edge(start, end, #ifdef(Weighted) weight);
+    edges.add(theEdge);
+	  start.addNeighbor(new Neighbor(end,theEdge));
+	  end.addNeighbor(new Neighbor(start,theEdge));
+	  return theEdge;
+  }
+
+
+  #ifdef(GNOnlyNeighbours)
+  public void addEdge(  Vertex start,  Neighbor theNeighbor){
+    start.addEdge(theNeighbor);
+    #ifdef(Undirected)
+      Vertex end=theNeighbor.neighbor;
+    #ifdef(Undirected)
+      end.addEdge(
+        new Neighbor(start, #ifdef(Weighted) theNeighbor.weight)
+      );
+  }
+
+  Vertex findsVertex(String name){
+    Vertex theVertex;
+    if (name == null) return null;
+    for (VertexIter vxiter=getVertices(); vxiter.hasNext(); ) {
+      theVertex=vxiter.next();
+      if (name.equals(theVertex.getName())) {
+        return theVertex;
+      }
+    }
+    return null;
+  }
+
+  void display(){
+    System.out.println("******************************************");
+    System.out.println("Vertices ");
+    for (int i=0; i < vertices.size(); i++)     vertices.get(i).display();
+    System.out.println("******************************************");
+    #ifdef(GenEdges)
+      System.out.println("Edges ");
+
+    #ifdef(GenEdges)
+      for (EdgeIter edgeiter=getEdges(); edgeiter.hasNext(); ) 
+        edgeiter.next().display();
+
+    #ifdef(GenEdges)
+      System.out.println("******************************************");
+  }
+
+  void addVertex(  Vertex v){
+    vertices.add(v);
+  }
+
+  #ifdef(Benchmark) public Reader inFile;
+  #ifdef(Benchmark) public static int ch;
+  #ifdef(Benchmark) static long last=0, current=0, accum=0;
+
+  #ifdef(Benchmark)
+  public void runBenchmark(String FileName) throws IOException {
+    try {
+      inFile=new FileReader(FileName);
+    }
+    catch (IOException e) {
+      System.out.println("Your file " + FileName + " cannot be read");
+    }
+  }
+
+  #ifdef(Benchmark)
+  public void stopBenchmark() throws IOException {
+    inFile.close();
+  }
+
+  #ifdef(Benchmark)
+  public int readNumber() throws IOException {
+    int index=0;
+    char[] word=new char[80];
+    int ch=0;
+    ch=inFile.read();
+    while (ch == 32) {
+      ch=inFile.read();
+    }
+    while (ch != -1 && ch != 32 && ch != 10) {
+      word[index++]=(char)ch;
+      ch=inFile.read();
+    }
+    word[index]=0;
+    String theString=new String(word);
+    theString=new String(theString.substring(0,index)).trim();
+    return Integer.parseInt(theString,10);
+  }
+
+  #ifdef(Benchmark)
+  public static void startProfile(){
+    accum=0;
+    current=System.currentTimeMillis();
+    last=current;
+  }
+
+  #ifdef(Benchmark)
+  public static void stopProfile(){
+    current=System.currentTimeMillis();
+    accum=accum + (current - last);
+  }
+
+  #ifdef(Benchmark)
+  public static void resumeProfile(){
+    current=System.currentTimeMillis();
+    last=current;
+  }
+  
+  #ifdef(Benchmark)
+  public static void endProfile(){
+    current=System.currentTimeMillis();
+    accum=accum + (current - last);
+    System.out.println("Time elapsed: " + accum + " milliseconds");
+  }
+
+  #ifdef(BaseImpl)
+  public void run(Vertex v){
+    #ifdef(Connected)
+      ConnectedComponents();
+
+	  #ifdef(Cycle)
+	    System.out.println(" Cycle? " + cycleCheck());
+	
+	  #ifdef(Mstkruskal)
+	    Graph gaux=kruskal();
+	
+	  #ifdef(Mstkruskal)
+	    Graph.stopProfile();
+	
+	  #ifdef(Mstkruskal)
+	    gaux.display();
+	
+	  #ifdef(Mstkruskal)
+	    Graph.resumeProfile();
+	
+	  #ifdef(Mstprim)
+	    Graph gaux1=prim(v);
+	
+	  #ifdef(Mstprim)
+	    Graph.stopProfile();
+	
+	  #ifdef(Mstprim)
+	    gaux1.display();
+	
+	  #ifdef(Mstprim)
+	    Graph.resumeProfile();
+	
+	  #ifdef(Number)
+	    numberVertices();
+	
+	  #ifdef(StronglyConnected)
+	    Graph gaux2=strongComponents();
+	
+	  #ifdef(StronglyConnected)
+	    Graph.stopProfile();
+	
+	  #ifdef(StronglyConnected)
+	    gaux2.display();
+	
+	  #ifdef(StronglyConnected)
+	    Graph.resumeProfile();
+  }
+
+  #ifdef(SearchBase)
+  public EdgeIfc findsEdge(  Vertex theSource,  Vertex theTarget){
+    Vertex v1=theSource;
+    for (EdgeIter edgeiter=v1.getEdges(); edgeiter.hasNext(); ) {
+      EdgeIfc theEdge=edgeiter.next();
+      Vertex v2=theEdge.getOtherVertex(v1);
+      if ((v1.getName().equals(theSource.getName()) && v2.getName().equals(theTarget.getName())) ||
+          (v1.getName().equals(theTarget.getName()) && v2.getName().equals(theSource.getName())))
+       return theEdge;
+    }
+    return null;
+  }
+
+  #ifdef(SearchAlg)
+  public void graphSearch(  WorkSpace w){
+    VertexIter vxiter=getVertices();
+    if (vxiter.hasNext() == false) {
+      return;
+    }
+    while (vxiter.hasNext()) {
+      Vertex v=vxiter.next();
+      v.init_vertex(w);
+    }
+    for (vxiter=getVertices(); vxiter.hasNext(); ) {
+      Vertex v=vxiter.next();
+      if (!v.visited) {
+        w.nextRegionAction(v);
+        v.nodeSearch(w);
+      }
+    }
+  }
+
+  #ifdef(Number)
+  public void numberVertices(){
+    graphSearch(new NumberWorkSpace());
+  }
+
+  #ifdef(Connected)
+  public void ConnectedComponents(){
+    graphSearch(new RegionWorkSpace());
+  }
+
+  #ifdef(StronglyConnected)
+  public Graph strongComponents(){
+    FinishTimeWorkSpace FTWS=new FinishTimeWorkSpace();
+    graphSearch(FTWS);
+    sortVertices(new Comparator<Vertex>(){
+      public int compare(Vertex v1, Vertex v2){
+        if (v1.finishTime > v2.finishTime) return -1;
+        if (v1.finishTime == v2.finishTime) return 0;
+        return 1;
+      }
+    });
+    Graph gaux=computeTranspose((Graph)this);
+    WorkSpaceTranspose WST=new WorkSpaceTranspose();
+    gaux.graphSearch(WST);
+    return gaux;
+  }
+
+  #ifdef(Transpose)
+  public Graph computeTranspose(  Graph the_graph){
+    int i;
+    String theName;
+    Map newVertices=new HashMap();
+    Graph newGraph=new Graph();
+    for (VertexIter vxiter=getVertices(); vxiter.hasNext(); ) {
+      theName=vxiter.next().getName();
+      Vertex v=new Vertex().assignName(theName);
+      newGraph.addVertex(v);
+      newVertices.put(theName,v);
+    }
+    Vertex theVertex, newVertex;
+    Vertex theNeighbor;
+    Vertex newAdjacent;
+    EdgeIfc newEdge;
+    VertexIter newvxiter=newGraph.getVertices();
+    for (VertexIter vxiter=getVertices(); vxiter.hasNext(); ) {
+      theVertex=vxiter.next();
+      newAdjacent=newvxiter.next();
+      for (VertexIter neighbors=theVertex.getNeighbors(); neighbors.hasNext(); ) {
+        theNeighbor=neighbors.next();
+        newVertex=(Vertex)newVertices.get(theNeighbor.getName());
+        newEdge=
+          newGraph.addEdge(newVertex, newAdjacent, #ifdef(Weighted) 0);
+      }
+    }
+    return newGraph;
+  }
+
+  #ifdef(Cycle)
+  public boolean cycleCheck(){
+    CycleWorkSpace c=new CycleWorkSpace();
+    graphSearch(c);
+    return c.AnyCycles;
+  }
+
+  #ifdef(Mstkruskal)
+  public Graph kruskal(){
+    LinkedList A=new LinkedList();
+    for (VertexIter vxiter=getVertices(); vxiter.hasNext(); ) {
+      Vertex v=vxiter.next();
+      v.representative=v;
+      v.members=new LinkedList();
+    }
+    LinkedList Vneighbors=new LinkedList();
+    EdgeIter dummyIter=getEdges();
+    sortEdges(new Comparator<EdgeIfc>(){
+      public int compare( EdgeIfc e1, EdgeIfc e2){
+        if (e1.getWeight() < e2.getWeight()) return -1;
+        if (e1.getWeight() == e2.getWeight()) return 0;
+        return 1;
+      }
+    });
+    Vertex vaux, urep, vrep;
+    for (EdgeIter edgeiter=getEdges(); edgeiter.hasNext(); ) {
+      EdgeIfc e1=edgeiter.next();
+      Vertex u=e1.getStart();
+      Vertex v=e1.getEnd();
+      if (!(v.representative.getName()).equals(u.representative.getName())) {
+        A.add(e1);
+        urep=u.representative;
+        vrep=v.representative;
+        if ((urep.members).size() > (vrep.members).size()) {
+          for (int j=0; j < (vrep.members).size(); j++) {
+            vaux=(Vertex)(vrep.members).get(j);
+            vaux.representative=urep;
+            (urep.members).add(vaux);
+          }
+          v.representative=urep;
+          vrep.representative=urep;
+          (urep.members).add(v);
+          if (!v.equals(vrep))           (urep.members).add(vrep);
+          (vrep.members).clear();
+        } else {
+          for (int j=0; j < (urep.members).size(); j++) {
+            vaux=(Vertex)(urep.members).get(j);
+            vaux.representative=vrep;
+            (vrep.members).add(vaux);
+          }
+          u.representative=vrep;
+          urep.representative=vrep;
+          (vrep.members).add(u);
+          if (!u.equals(urep))           (vrep.members).add(urep);
+          (urep.members).clear();
+        }
+      }
+    }
+    String theName;
+    Graph newGraph=new Graph();
+    for (VertexIter vxiter=getVertices(); vxiter.hasNext(); ) {
+      theName=vxiter.next().getName();
+      newGraph.addVertex(new Vertex().assignName(theName));
+    }
+    Vertex theStart = null, theEnd = null;
+    Vertex theNewStart = null, theNewEnd = null;
+    EdgeIfc theEdge = null;
+    for (int i=0; i < A.size(); i++) {
+      theEdge=(EdgeIfc)A.get(i);
+      theEnd=theEdge.getEnd();
+      theNewStart=newGraph.findsVertex(theStart.getName());
+      theNewEnd=newGraph.findsVertex(theEnd.getName());
+      EdgeIfc theNewEdge=newGraph.addEdge(theNewStart,theNewEnd,theEdge.getWeight());
+      theNewEdge.adjustAdorns(theEdge);
+    }
+    return newGraph;
+  }
+
+  #ifdef(Mstprim)
+  public Graph prim(  Vertex r){
+    Vertex root;
+    root=r;
+    Vertex x;
+    for (VertexIter vxiter=getVertices(); vxiter.hasNext(); ) {
+      x=vxiter.next();
+      x.pred=null;
+      x.key=Integer.MAX_VALUE;
+    }
+    root.key=0;
+    root.pred=null;
+    LinkedList<Vertex> queue=new LinkedList<Vertex>();
+    Set<String> indx=new HashSet<String>();
+    queue.add(root);
+    indx.add(root.getName());
+    for (VertexIter vxiter=getVertices(); vxiter.hasNext(); ) {
+      x=vxiter.next();
+      if (x.key != 0) {
+        queue.add(x);
+        indx.add(x.getName());
+      }
+    }
+    int k;
+    LinkedList<NeighborIfc> uneighbors;
+    Vertex u, v;
+    EdgeIfc en;
+    NeighborIfc vn;
+    int wuv;
+    boolean isNeighborInQueue=false;
+    while (queue.size() != 0) {
+      u=(Vertex)queue.removeFirst();
+      indx.remove(u.getName());
+      uneighbors=u.getNeighborsObj();
+      k=0;
+      for (EdgeIter edgeiter=u.getEdges(); edgeiter.hasNext(); k++) {
+        vn=(NeighborIfc)uneighbors.get(k);
+        en=edgeiter.next();
+        v=en.getOtherVertex(u);
+        isNeighborInQueue=false;
+        if (indx.contains(v.getName()))         isNeighborInQueue=true;
+        wuv=en.getWeight();
+        if (isNeighborInQueue && (wuv < v.key)) {
+          v.key=wuv;
+          v.pred=u.getName();
+          uneighbors.set(k,vn);
+          Object residue=(Object)v;
+          queue.remove(residue);
+          indx.remove(v.getName());
+          int position=Collections.binarySearch(queue,v,new Comparator<Vertex>(){
+            public int compare(Vertex v1, Vertex v2){
+              if (v1.key < v2.key) return -1;
+              if (v1.key == v2.key) return 0;
+              return 1;
+            }
+          });
+          if (position < 0) {
+            queue.add(-(position + 1),v);
+          } else {
+            queue.add(position,v);
+          }
+          indx.add(v.getName());
+        }
+      }
+    }
+    String theName;
+    Graph newGraph=new Graph();
+    for (VertexIter vxiter=getVertices(); vxiter.hasNext(); ) {
+      Vertex vtx=vxiter.next();
+      theName=vtx.name;
+      newGraph.addVertex(new Vertex().assignName(theName));
+    }
+    Vertex theVertex, thePred;
+    Vertex theNewVertex, theNewPred;
+    EdgeIfc e;
+    for (VertexIter vxiter=getVertices(); vxiter.hasNext(); ) {
+      theVertex=vxiter.next();
+      thePred=findsVertex(theVertex.pred);
+      if (thePred == null) continue;
+      theNewVertex=newGraph.findsVertex(theVertex.name);
+      theNewPred=newGraph.findsVertex(thePred.name);
+      EdgeIfc theNewEdge=newGraph.addEdge(theNewPred,theNewVertex,0);
+      e=findsEdge(thePred,theVertex);
+      theNewEdge.adjustAdorns(e);
+    }
+    return newGraph;
+  }
+
+}

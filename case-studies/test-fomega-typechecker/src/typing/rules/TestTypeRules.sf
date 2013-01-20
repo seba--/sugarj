@@ -3,9 +3,10 @@ module typing.rules.TestTypeRules
 import typing.rules.Syntax
 import typing.rules.Desugaring
 
-~C |- ~T ~> ~U
+~C |- ~e : ~S
+~C |- ~T :: *
 ~C |- ~S ~> ~U
-~C |- ~V ~> ~U
+~C |- ~T ~> ~U
 =================== T-As
 ~C |- ~e as ~T : ~T
 
@@ -18,8 +19,8 @@ import typing.rules.Desugaring
 
 ~C |- ~e1 : ~T1
 ~C |- ~T1 ~> forall ~%X::~K11. ~T12
-~C |- ~U ~> forall ~%X::~K11. ~T12
+~C |- ~T2 :: ~K11
 =================================== T-TApp
-~C |- ~e1 [~T2] : ~T12
+~C |- ~e1 [~T2] : [~%X |-> ~T2]~T12
 //~C |- ~T2 :: ~K11
 //~C |- ~e1 [~T2] : [~%X |-> ~T2]~T12
