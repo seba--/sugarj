@@ -254,8 +254,10 @@ rules
 
   substDecl: (X,S,TyDecl(x,T)) -> TyDecl(x,<subst> (X,S,T))
 
+
   // Normalization
-  norm = debug(!"NO IN ");norm1;debug(!"NO OUT ")
+
+  norm = norm1
 
   norm1: (ctx,T) -> T'
         where <parReduce> (ctx,T) => S
@@ -266,13 +268,21 @@ rules
                 !(<norm1> (ctx,S))
               end => T'
 
+
   // Parallel reduction
+
+  parReduce = parReduce1 <+ parReduceMetavar
+    // Identity on meta-variables only as a fallback
+    // since dynamic axioms might establish more specific
+    // reductions.
+
+  parReduceMetavar :
+    (C, Metavar(mvar)) -> Metavar(mvar)
   
   parReduce1: (ctx,TyUnknown()) -> TyUnknown()
   parReduce1: (ctx,TyNat()) -> TyNat()
   parReduce1: (ctx,TyString()) -> TyString()
   parReduce1: (ctx,TyBool()) -> TyBool()
-  //parReduce: (ctx,Metavar(mvar)) -> Metavar(mvar)
   parReduce1: (CtxEmpty(),TyVar(X)) -> TyVar(X)
   parReduce1: (CtxBindTVar(ctx,X,K),TyVar(X)) -> TyVar(X)
   parReduce1: (CtxBindTVar(ctx,Y,K),TyVar(X)) -> <parReduce> (ctx,TyVar(X))
@@ -294,9 +304,3 @@ rules
   parReduce1: (ctx,TyRecord(decls)) -> TyRecord(<map(\ decl -> <parReduceDecl> (ctx,decl) \)> decls)
 
   parReduceDecl: (ctx,TyDecl(x,T)) -> TyDecl(x,<parReduce> (ctx,T))
-
-
-  parReduce = parReduce1 <+ parReduceMetavar
-
-  parReduceMetavar :
-    (C, Metavar(mvar)) -> Metavar(mvar)

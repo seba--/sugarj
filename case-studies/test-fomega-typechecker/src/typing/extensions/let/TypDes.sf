@@ -9,15 +9,6 @@ import typing.rules.Verification
 
 import typing.extensions.let.Syntax
 
-// import typing.extensions.let.Desugaring
-// With this import the conclusion term in T-Let is desugared before
-// the typeOfUnknown clause is written, i. e. the clause is wrong.
-// If we do not import the desugaring here,
-// the call to desugar in Verification does not do anything,
-// because the desugar-let is not known here.
-// How do we prevent the desugaring of the conclusion term
-// of a typing rule?
-
 
 ~C |- ~e1 : ~T1
 ~C |- ~S :: *
@@ -34,4 +25,4 @@ desugarings
 rules
   desugar-let :
     Let(x, T, e1, e2) -> App(Abs(x, T, e1), e2)
-    // (wrong:) Wrong translation on purpose: error must be found by Verification
+    // Wrong translation on purpose: error must be found by Verification

@@ -20,11 +20,11 @@ rules
         ; <premises-to-list> premises => premises-list
         ; {| Dynamic-Axioms:
                <activate-dynamic-axioms> premises-list
-             ; <debug(!"TC of "); typeOf> (C, des-e) => (U, errs)
+             ; <typeOf> (C, des-e) => (U, errs)
           |}
         ; <debug(!"Expected type: ")> T
-        ; <debug(!"Actual type: ")> U
-        ; <debug(!"Type errors: ")> errs
+        ; <debug(!"Actual type:   ")> U
+        ; <debug(!"Type errors:   ")> errs
 
   activate-dynamic-axioms :
     [] -> []
@@ -46,8 +46,8 @@ rules
 
   activate-dynamic-axiom =
     ?NormalizationJudgment(C, T, T');
-    rules(Dynamic-ParReduce : (C, T) -> T');
-    <debug(!"Activated PRJ ")> (C, T, T')
+    rules(Dynamic-ParReduce1 : (C, T) -> T');
+    <debug(!"Activated PJ ")> (C, T, T')
 
   activate-dynamic-axiom =
     ?VarInContextJudgment(x, T, C);
@@ -59,11 +59,11 @@ rules // Rules to hook in dynamic axioms into the judgment implementations
 
   typeOfKnown :
     (C, e) -> (T, errs)
-    where <debug(!"DTO IN "); Dynamic-TypeOf; debug(!"DTO OUT ")> (C, e) => (T, errs)
+    where <Dynamic-TypeOf> (C, e) => (T, errs)
 
-  parReduce :
+  parReduce1 :
     (C, T) -> T'
-    where <debug(!"DP IN "); Dynamic-ParReduce; debug(!"DP OUT ")> (C, T) => T'
+    where <Dynamic-ParReduce1> (C, T) => T'
 
   kindOf :
     (C, T) -> (K, errs)

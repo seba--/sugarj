@@ -8,7 +8,7 @@ signature
     IDUnknown: FomegaID
 
 rules
-  typeOf = debug(!"TO IN ");typeOf1;debug(!"TO OUT ")
+  typeOf = typeOf1
 
   typeOf1 = typeOfKnown <+ typeOfUnknown
 
