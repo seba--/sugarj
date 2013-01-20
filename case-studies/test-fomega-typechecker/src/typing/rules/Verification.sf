@@ -46,8 +46,8 @@ rules
 
   activate-dynamic-axiom =
     ?NormalizationJudgment(C, T, T');
-    rules(Dynamic-Norm : (C, T) -> T');
-    <debug(!"Activated NJ ")> (C, T, T')
+    rules(Dynamic-ParReduce : (C, T) -> T');
+    <debug(!"Activated PRJ ")> (C, T, T')
 
   activate-dynamic-axiom =
     ?VarInContextJudgment(x, T, C);
@@ -61,9 +61,9 @@ rules // Rules to hook in dynamic axioms into the judgment implementations
     (C, e) -> (T, errs)
     where <debug(!"DTO IN "); Dynamic-TypeOf; debug(!"DTO OUT ")> (C, e) => (T, errs)
 
-  norm :
+  parReduce :
     (C, T) -> T'
-    where <debug(!"DN IN "); Dynamic-Norm; debug(!"DN OUT ")> (C, T) => T'
+    where <debug(!"DP IN "); Dynamic-ParReduce; debug(!"DP OUT ")> (C, T) => T'
 
   kindOf :
     (C, T) -> (K, errs)

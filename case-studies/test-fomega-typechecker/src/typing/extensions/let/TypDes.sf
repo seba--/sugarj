@@ -33,5 +33,5 @@ desugarings
 
 rules
   desugar-let :
-    Let(x, T, e1, e2) -> App(Abs(x, T, e2), e1)
+    Let(x, T, e1, e2) -> App(Abs(x, T, e1), e2)
     // (wrong:) Wrong translation on purpose: error must be found by Verification
