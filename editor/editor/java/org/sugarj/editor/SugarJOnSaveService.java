@@ -10,12 +10,12 @@ import org.strategoxt.imp.runtime.dynamicloading.IOnSaveService;
  */
 public class SugarJOnSaveService implements IOnSaveService {
 
-  private final SugarJDescriptor descriptor;
+//  private final SugarJDescriptor descriptor;
 
   private final IOnSaveService baseService;
   
   public SugarJOnSaveService(SugarJDescriptor descriptor, IOnSaveService baseService) {
-    this.descriptor = descriptor;
+//    this.descriptor = descriptor;
     this.baseService = baseService;
   }
 
