@@ -24,6 +24,9 @@ rules
                                ," but found "
                                ,<write-to-string> T]]
 
+  typeEqProper: (Metavar(mvar),Metavar(mvar)) -> []
+  typeEqProper: (Metavar(mvar1),Metavar(mvar2)) -> <typeMismatch> (Metavar(mvar1),Metavar(mvar2))
+    where <not(equal)> (mvar1,mvar2)
   typeEqProper: (TyString(),T) -> msgs
     where if !T; ?TyString() then ![] else !(<typeMismatch> (TyString(),T)) end => msgs
   typeEqProper: (TyBool(),T) -> msgs
@@ -251,40 +254,53 @@ rules
 
   substDecl: (X,S,TyDecl(x,T)) -> TyDecl(x,<subst> (X,S,T))
 
+
   // Normalization
-  norm: (ctx,T) -> T'
+
+  norm = norm1
+
+  norm1: (ctx,T) -> T'
         where <parReduce> (ctx,T) => S
             ; <typeEq> (T,S) => msgs
             ; if (!msgs; ?[]) then
                 !T
               else
-                !(<norm> (ctx,S))
+                !(<norm1> (ctx,S))
               end => T'
 
+
   // Parallel reduction
-  parReduce: (ctx,TyUnknown()) -> TyUnknown()
-  parReduce: (ctx,TyNat()) -> TyNat()
-  parReduce: (ctx,TyString()) -> TyString()
-  parReduce: (ctx,TyBool()) -> TyBool()
 
-  parReduce: (CtxEmpty(),TyVar(X)) -> TyVar(X)
-  parReduce: (CtxBindTVar(ctx,X,K),TyVar(X)) -> TyVar(X)
-  parReduce: (CtxBindTVar(ctx,Y,K),TyVar(X)) -> <parReduce> (ctx,TyVar(X))
-             where <not(equal)> (X,Y)
-  parReduce: (CtxBindTVarDef(ctx,X,K,T),TyVar(X)) -> T
-  parReduce: (CtxBindTVarDef(ctx,Y,K,T),TyVar(X)) -> <parReduce> (ctx,TyVar(X))
-             where <not(equal)> (X,Y)
-  parReduce: (CtxBindVar(ctx,x,T),TyVar(X)) -> <parReduce> (ctx,TyVar(X))
+  parReduce = parReduce1 <+ parReduceMetavar
+    // Identity on meta-variables only as a fallback
+    // since dynamic axioms might establish more specific
+    // reductions.
 
-  parReduce: (ctx,TyQVar(qX)) -> TyQVar(qX)
-  parReduce: (ctx,TyMu(X,T)) -> TyMu(X,<parReduce> (CtxBindTVar(ctx,X,KiStar()),T))
-  parReduce: (ctx,TyAbs(X,K,T)) -> TyAbs(X,K,<parReduce> (CtxBindTVar(ctx,X,K),T))
-  parReduce: (ctx,TyForall(X,K,T)) -> TyForall(X,K,<parReduce> (CtxBindTVar(ctx,X,K),T))
-  parReduce: (ctx,TyArrow(T1,T2)) -> TyArrow(<parReduce> (ctx,T1),<parReduce> (ctx,T2))
-  parReduce: (ctx,TyApp(T1,T2)) -> TyApp(<parReduce> (ctx,T1),<parReduce> (ctx,T2))
+  parReduceMetavar :
+    (C, Metavar(mvar)) -> Metavar(mvar)
+  
+  parReduce1: (ctx,TyUnknown()) -> TyUnknown()
+  parReduce1: (ctx,TyNat()) -> TyNat()
+  parReduce1: (ctx,TyString()) -> TyString()
+  parReduce1: (ctx,TyBool()) -> TyBool()
+  parReduce1: (CtxEmpty(),TyVar(X)) -> TyVar(X)
+  parReduce1: (CtxBindTVar(ctx,X,K),TyVar(X)) -> TyVar(X)
+  parReduce1: (CtxBindTVar(ctx,Y,K),TyVar(X)) -> <parReduce> (ctx,TyVar(X))
+             where <not(equal)> (X,Y)
+  parReduce1: (CtxBindTVarDef(ctx,X,K,T),TyVar(X)) -> T
+  parReduce1: (CtxBindTVarDef(ctx,Y,K,T),TyVar(X)) -> <parReduce> (ctx,TyVar(X))
+             where <not(equal)> (X,Y)
+  parReduce1: (CtxBindVar(ctx,x,T),TyVar(X)) -> <parReduce> (ctx,TyVar(X))
+
+  parReduce1: (ctx,TyQVar(qX)) -> TyQVar(qX)
+  parReduce1: (ctx,TyMu(X,T)) -> TyMu(X,<parReduce> (CtxBindTVar(ctx,X,KiStar()),T))
+  parReduce1: (ctx,TyAbs(X,K,T)) -> TyAbs(X,K,<parReduce> (CtxBindTVar(ctx,X,K),T))
+  parReduce1: (ctx,TyForall(X,K,T)) -> TyForall(X,K,<parReduce> (CtxBindTVar(ctx,X,K),T))
+  parReduce1: (ctx,TyArrow(T1,T2)) -> TyArrow(<parReduce> (ctx,T1),<parReduce> (ctx,T2))
+  parReduce1: (ctx,TyApp(T1,T2)) -> TyApp(<parReduce> (ctx,T1),<parReduce> (ctx,T2))
              where if (!T1; ?(TyAbs(_,_,_))) then fail else id end
-  parReduce: (ctx,TyApp(TyAbs(X,K11,T12),T2)) -> <subst> (X,<parReduce> (ctx,T2),<parReduce> (CtxBindTVar(ctx,X,K11),T12))
-  parReduce: (ctx,TyVariant(decls)) -> TyVariant(<map(\ decl -> <parReduceDecl> (ctx,decl) \)> decls)
-  parReduce: (ctx,TyRecord(decls)) -> TyRecord(<map(\ decl -> <parReduceDecl> (ctx,decl) \)> decls)
+  parReduce1: (ctx,TyApp(TyAbs(X,K11,T12),T2)) -> <subst> (X,<parReduce> (ctx,T2),<parReduce> (CtxBindTVar(ctx,X,K11),T12))
+  parReduce1: (ctx,TyVariant(decls)) -> TyVariant(<map(\ decl -> <parReduceDecl> (ctx,decl) \)> decls)
+  parReduce1: (ctx,TyRecord(decls)) -> TyRecord(<map(\ decl -> <parReduceDecl> (ctx,decl) \)> decls)
 
   parReduceDecl: (ctx,TyDecl(x,T)) -> TyDecl(x,<parReduce> (ctx,T))

@@ -6,3 +6,13 @@ signature
   constructors
     TyUnknown: FomegaType
     IDUnknown: FomegaID
+
+rules
+  typeOf = typeOf1
+
+  typeOf1 = typeOfKnown <+ typeOfUnknown
+
+  typeOfKnown = fail
+
+  typeOfUnknown :
+    (ctx, e) -> (TyUnknown(), [(e, "Missing typing rule")])

@@ -1,0 +1,74 @@
+module typing.rules.Verification
+
+import typing.rules.Syntax
+import typing.rules.Desugaring // for premises-to-list
+
+// import typing.rules.ExprTypeRules
+
+rules
+
+  constraint-error = verify-type-rule
+
+
+rules
+
+  verify-type-rule :
+    tr@TypeRule(premises, RuleName(sep, Some(Var(name))), TypingJudgment(C, e, T)) ->
+      [(tr, <concat-strings> [name, ": ", text-des-e])]
+    where <desugar <+ id> e => des-e
+        ; <write-to-string> des-e => text-des-e
+        ; <premises-to-list> premises => premises-list
+        ; {| Dynamic-Axioms:
+               <activate-dynamic-axioms> premises-list
+             ; <typeOf> (C, des-e) => (U, errs)
+          |}
+        ; <debug(!"Expected type: ")> T
+        ; <debug(!"Actual type:   ")> U
+        ; <debug(!"Type errors:   ")> errs
+
+  activate-dynamic-axioms :
+    [] -> []
+
+  activate-dynamic-axioms :
+    [judgment|judgments] ->
+      <activate-dynamic-axiom> judgment
+      where <activate-dynamic-axioms> judgments
+
+  activate-dynamic-axiom =
+    ?TypingJudgment(C, e, T);
+    rules(Dynamic-TypeOf : (C, e) -> (T, []));
+    <debug(!"Activated TJ ")> (C, e, T)
+
+  activate-dynamic-axiom =
+    ?KindingJudgment(C, T, K);
+    rules(Dynamic-KindOf : (C, T) -> (K, []));
+    <debug(!"Activated KJ ")> (C, T, K)
+
+  activate-dynamic-axiom =
+    ?NormalizationJudgment(C, T, T');
+    rules(Dynamic-ParReduce1 : (C, T) -> T');
+    <debug(!"Activated PJ ")> (C, T, T')
+
+  activate-dynamic-axiom =
+    ?VarInContextJudgment(x, T, C);
+    rules(Dynamic-Lookup-Expr-Var : (x, C) -> (T, []));
+    <debug(!"Activated VJ ")> (x, T, C)
+
+
+rules // Rules to hook in dynamic axioms into the judgment implementations
+
+  typeOfKnown :
+    (C, e) -> (T, errs)
+    where <Dynamic-TypeOf> (C, e) => (T, errs)
+
+  parReduce1 :
+    (C, T) -> T'
+    where <Dynamic-ParReduce1> (C, T) => T'
+
+  kindOf :
+    (C, T) -> (K, errs)
+    where <Dynamic-KindOf> (C, T) => (K, errs)
+
+  lookup-expr-var :
+    (x, C) -> (T, errs)
+    where <Dynamic-Lookup-Expr-Var> (x, C) => (T, errs)
