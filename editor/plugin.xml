@@ -5,9 +5,8 @@
        <extension point="org.eclipse.imp.runtime.languageDescription">
           <language
                 derivedFrom="DynamicRoot"
-                description="SugarJ"
-                extensions="sugj,shs,sugp,sf"
-                language="SugarJ"
+                description="SugarJ-dummy"
+                language="SugarJ-dummy"
                 validator="org.sugarj.editor.SugarJValidator"
                 validatorClass="org.sugarj.editor.SugarJValidator"></language>
        </extension>
