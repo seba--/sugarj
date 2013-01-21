@@ -89,7 +89,7 @@ public class DriverCLI {
       log.log("syntax error: line " + e.getLineNumber() + " column " + e.getColumnNumber() + ": " + e.getMessage(), Log.ALWAYS);
     
     if (res.getSugaredSyntaxTree() == null)
-      return false;
+      return success;
     
     IToken tok = ImploderAttachment.getRightToken(res.getSugaredSyntaxTree());
     
