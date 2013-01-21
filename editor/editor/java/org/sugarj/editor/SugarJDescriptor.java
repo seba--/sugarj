@@ -26,7 +26,6 @@ import org.strategoxt.imp.runtime.dynamicloading.IDynamicLanguageService;
 import org.strategoxt.imp.runtime.dynamicloading.IOnSaveService;
 import org.strategoxt.imp.runtime.parser.SGLRParseController;
 import org.strategoxt.imp.runtime.services.StrategoObserver;
-import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.AbsolutePath;
 
 /**

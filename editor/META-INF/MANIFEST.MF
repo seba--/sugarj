@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: org.sugarj.editor
 Bundle-SymbolicName: org.sugarj.editor;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: org.sugarj.editor.Activator
+Bundle-Activator: org.sugarj.editor.SugarJActivator
 Export-Package: org.sugarj.builder,
  org.sugarj.editor;
   uses:="org.eclipse.imp.preferences,

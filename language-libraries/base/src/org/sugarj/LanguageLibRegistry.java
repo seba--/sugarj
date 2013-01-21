@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
@@ -100,8 +101,9 @@ public class LanguageLibRegistry {
       loadExtensions();
 
     List<String> list = new LinkedList<String>();
-    for (LanguageLibFactory libFactory : languageLibs.values())
-      list.add(libFactory.getSugarFileExtension());
+    for (Entry<String, LanguageLibFactory> entry : languageLibs.entrySet())
+      if (entry.getKey().equals(entry.getValue().getSugarFileExtension()))
+        list.add(entry.getValue().getSugarFileExtension());
     return list;
   }
 }
