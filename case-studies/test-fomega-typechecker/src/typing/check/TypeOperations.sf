@@ -24,9 +24,8 @@ rules
                                ," but found "
                                ,<write-to-string> T]]
 
-  typeEqProper: (Metavar(mvar),Metavar(mvar)) -> []
-  typeEqProper: (Metavar(mvar1),Metavar(mvar2)) -> <typeMismatch> (Metavar(mvar1),Metavar(mvar2))
-    where <not(equal)> (mvar1,mvar2)
+  typeEqProper: (Metavar(mvar),T) -> msgs
+    where if !T; ?Metavar(mvar) then ![] else <typeMismatch> (Metavar(mvar),T) end => msgs
   typeEqProper: (TyString(),T) -> msgs
     where if !T; ?TyString() then ![] else !(<typeMismatch> (TyString(),T)) end => msgs
   typeEqProper: (TyBool(),T) -> msgs
@@ -257,7 +256,9 @@ rules
 
   // Normalization
 
-  norm = norm1
+  norm = // debug(!"NORM IN: ");
+         norm1
+         // ;debug(!"NORM OUT: ")
 
   norm1: (ctx,T) -> T'
         where <parReduce> (ctx,T) => S
@@ -265,13 +266,15 @@ rules
             ; if (!msgs; ?[]) then
                 !T
               else
-                !(<norm1> (ctx,S))
+                !(<norm> (ctx,S))
               end => T'
 
 
   // Parallel reduction
 
-  parReduce = parReduce1 <+ parReduceMetavar
+  parReduce = // debug(!"PR IN:  ");
+              (parReduce1 <+ parReduceMetavar)
+              // ; debug(!"PR OUT: ")
     // Identity on meta-variables only as a fallback
     // since dynamic axioms might establish more specific
     // reductions.
