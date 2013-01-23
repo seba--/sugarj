@@ -17,7 +17,7 @@ rules
       result
     where <desugar <+ id> e => des-e
         ; <write-to-string> des-e => text-des-e
-       	; <debug(!"Desugared conclusion term: ")> text-des-e 
+       	// ; <debug(!"Desugared conclusion term: ")> text-des-e 
         ; <premises-to-list> premises => premises-list
         ; {| Dynamic-Axioms:
                <activate-dynamic-axioms> premises-list
@@ -26,11 +26,13 @@ rules
         ; <debug(!"Expected type: ")> T
         ; <debug(!"Actual type:   ")> U
         ; <debug(!"Type errors:   ")> errs
-        ; if !errs; ?[] then fail
-          else ![(tr
-          		 , <concat-strings> [ "Could not verify typing rule ", name, "\n"
-          		                    , "The type checker returned the following errors:\n"
-                                    , <write-to-string> errs])]
+        ; if !errs; ?[] then
+            debug(!(<concat-strings> ["Successfully verified typing rule ", name])); fail
+          else
+            ![( tr
+          	  , <concat-strings> [ "Could not verify typing rule ", name, "\n"
+          		                 , "The type checker returned the following errors:\n"
+                                 , <write-to-string> errs])]
           end => result
 
   activate-dynamic-axioms :
@@ -43,28 +45,28 @@ rules
 
   activate-dynamic-axiom =
     ?TypingJudgment(C, e, T);
-    rules(Dynamic-TypeOf : (C, e) -> (T, []));
-    <debug(!"Activated TJ ")> (C, e, T)
+    rules(Dynamic-TypeOf : (C, e) -> (T, []))
+    // ; <debug(!"Activated TJ ")> (C, e, T)
 
   activate-dynamic-axiom =
     ?KindingJudgment(C, T, K);
-    rules(Dynamic-KindOf : (C, T) -> (K, []));
-    <debug(!"Activated KJ ")> (C, T, K)
+    rules(Dynamic-KindOf : (C, T) -> (K, []))
+    // ; <debug(!"Activated KJ ")> (C, T, K)
 
   activate-dynamic-axiom =
     ?NormalizationJudgment(C, T, T');
-    rules(Dynamic-ParReduce1 : (C, T) -> T');
-    <debug(!"Activated PJ ")> (C, T, T')
+    rules(Dynamic-ParReduce1 : (C, T) -> T')
+    // ; <debug(!"Activated PJ ")> (C, T, T')
 
   activate-dynamic-axiom =
     ?VarInContextJudgment(x, T, C);
-    rules(Dynamic-Lookup-Expr-Var : (x, C) -> (T, []));
-    <debug(!"Activated VJ ")> (x, T, C)
+    rules(Dynamic-Lookup-Expr-Var : (x, C) -> (T, []))
+    // ; <debug(!"Activated VJ ")> (x, T, C)
     
   activate-dynamic-axiom =
     ?QVarInContextJudgment(qx, T, C);
-    rules(Dynamic-Lookup-Expr-Var : (qx, C) -> (T, []));
-    <debug(!"Activated VQJ ")> (qx, T, C)
+    rules(Dynamic-Lookup-Expr-Var : (qx, C) -> (T, []))
+    // ; <debug(!"Activated VQJ ")> (qx, T, C)
 
 rules // Rules to hook in dynamic axioms into the judgment implementations
 
