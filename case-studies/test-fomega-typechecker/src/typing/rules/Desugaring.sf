@@ -97,7 +97,7 @@ rules // Translate a judgment
 
   translate-judgment :
     (ts, VarInContextJudgment(x, T, C)) ->
-      (ts3, |[   <lookup-expr-var> (term~tx, term~tC) => (term~result-var, term~errs-var)
+      (ts4, |[   <lookup-expr-var> (term~tx, term~tC) => (term~result-var, term~errs-var)
                ; strategy~inspect-result
             ]|)
     where <trm-explode> C => tC

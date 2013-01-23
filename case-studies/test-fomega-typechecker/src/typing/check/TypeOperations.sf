@@ -133,14 +133,14 @@ rules
   typeEqNat: TyUnknown() -> []
   typeEqNat: TyNat() -> []
   typeEqNat:
-    T -> [<concat-strings> ["type mismatch, expected Nat but found"
+    T -> [<concat-strings> ["type mismatch, expected Nat but found "
                            ,<write-to-string> T]]
     where if (!T; ?TyNat()) then fail else if (!T; ?TyUnknown()) then fail else id end end
 
   typeEqString: TyUnknown() -> []
   typeEqString: TyString() -> []
   typeEqString:
-    T -> [<concat-strings> ["type mismatch, expected String but found"
+    T -> [<concat-strings> ["type mismatch, expected String but found "
                            ,<write-to-string> T]]
     where if (!T; ?TyString()) then fail else if (!T; ?TyUnknown()) then fail else id end end
 
@@ -148,7 +148,7 @@ rules
   typeEqMu: TyMu(X,T) -> (X,T,[])
   typeEqMu:
     T -> (IDUnknown(),TyUnknown()
-         ,[<concat-strings> ["type mismatch, expected recursive type but found"
+         ,[<concat-strings> ["type mismatch, expected recursive type but found "
                             ,<write-to-string> T]])
     where if (!T; ?TyMu(_,_)) then fail else if (!T; ?TyUnknown()) then fail else id end end
 
@@ -156,7 +156,7 @@ rules
   typeEqForall: TyForall(X,K,T) -> (X,K,T,[])
   typeEqForall:
     T -> (IDUnknown(),TyUnknown()
-         ,[<concat-strings> ["type mismatch, expected for all type but found"
+         ,[<concat-strings> ["type mismatch, expected for all type but found "
                             ,<write-to-string> T]])
     where if (!T; ?TyForall(_,_,_)) then fail else if (!T; ?TyUnknown()) then fail else id end end
 
@@ -164,14 +164,14 @@ rules
   typeEqArrow: TyArrow(S,T) -> (S,T,[])
   typeEqArrow:
     T -> (TyUnknown(),TyUnknown()
-         ,[<concat-strings> ["type mismatch, expected arrow type but found"
+         ,[<concat-strings> ["type mismatch, expected arrow type but found "
                             ,<write-to-string> T]])
     where if (!T; ?TyArrow(_,_)) then fail else if (!T; ?TyUnknown()) then fail else id end end
 
   typeEqRecord: TyUnknown() -> ([],[])
   typeEqRecord: TyRecord(decls) -> (decls,[])
   typeEqRecord:
-    T -> ([] ,[<concat-strings> ["type mismatch, expected record type but found"
+    T -> ([] ,[<concat-strings> ["type mismatch, expected record type but found "
                                 ,<write-to-string> T]])
     where if (!T; ?TyRecord(_)) then fail else if (!T; ?TyUnknown()) then fail else id end end
 
