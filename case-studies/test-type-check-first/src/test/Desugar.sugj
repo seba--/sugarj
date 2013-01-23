@@ -1,0 +1,11 @@
+package test;
+
+import test.Check;
+
+public sugar Desugar {
+  desugarings
+    int-lit-to-string
+  
+  rules 
+    int-lit-to-string = has-type(|"Int"); ?Lit(_); !Lit(String([Chars("This was an int")]))
+}

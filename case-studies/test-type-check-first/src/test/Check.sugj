@@ -1,0 +1,13 @@
+package test;
+
+public sugar Check {
+  rules
+    analyze = ?Lit(Deci(_)); put-type(|"Int")
+    analyze = ?Plus(x,y); put-type(|"Int");
+      where (<has-type(|"Int")> x;
+             <has-type(|"Int")> y)
+
+    has-type(|type) = where(retrieve-type; equal(|type)) 
+    retrieve-type = get-anno(|"type")
+    put-type(|type) = put-anno(|"type", type)
+}

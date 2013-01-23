@@ -1,0 +1,13 @@
+package test;
+
+import test.Check;
+import test.Desugar;
+
+public class Subject {
+  // desugars to:
+  //   private String s = "This was an int" + "This was an int";
+  private String s = 5 + 1;
+  
+}
+
+
