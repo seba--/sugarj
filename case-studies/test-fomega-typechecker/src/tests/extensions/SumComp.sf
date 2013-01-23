@@ -6,4 +6,8 @@ import typing.extensions.sumcomprehension.Syntax
 import typing.extensions.sumcomprehension.Semantics
 import qualified typing.extensions.sumcomprehension.Support
 
-val test01 = for n = 1 to 10 add (\m:Nat. m) n
+
+val test01 =
+  dosum
+  { n1 <- 5
+  ; (\x:Nat. \y:Nat. y) n1 1 }

@@ -2,17 +2,24 @@ module typing.extensions.sumcomprehension.Syntax
 
 import org.sugarj.languages.Fomega
 
-context-free syntax
-  "for" FomegaID "=" FomegaExpr "to" FomegaExpr "add" FomegaExpr -> FomegaExpr {cons("SumComp")}
 
-context-free priorities
-  FomegaExpr FomegaExpr -> FomegaExpr >
-  "for" FomegaID "=" FomegaExpr "to" FomegaExpr "add" FomegaExpr -> FomegaExpr
+context-free syntax
+  "dosum" "{" FomegaExpr "}"                   -> FomegaExpr {cons("DoSumAtomic")}
+  "dosum" "{" DoSumBindings ";" FomegaExpr "}" -> FomegaExpr {cons("DoSumSeq")}
+  
+  FomegaID "<-" FomegaExpr      -> DoSumBinding {cons("DoSumGen")}
+  "let" FomegaID "=" FomegaExpr -> DoSumBinding {cons("DoSumLet")}
+
+  DoSumBinding                   -> DoSumBindings {cons("BindingsEnd")}
+  DoSumBinding ";" DoSumBindings -> DoSumBindings {cons("BindingsCons")}
+   
+
+context-free syntax
+  "~" StrategoVar -> DoSumBindings {cons("Metavar")}
 
 lexical syntax
-  "for" -> Keyword
-  "to"  -> Keyword
-  "add" -> Keyword
+  "dosum" -> FomegaKeyword 
+  "let"   -> FomegaKeyword
 
 lexical restrictions
-  "for" "to" "add" -/- [A-Za-z0-9]
+  "dosum" "let" -/- [A-Za-z0-9]
