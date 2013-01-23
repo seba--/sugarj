@@ -1,0 +1,9 @@
+module tests.extensions.SumComp
+
+import typing.rules.TypeChecker
+
+import typing.extensions.sumcomprehension.Syntax
+import typing.extensions.sumcomprehension.Semantics
+import qualified typing.extensions.sumcomprehension.Support
+
+val test01 = for n = 1 to 10 add (\m:Nat. m) n

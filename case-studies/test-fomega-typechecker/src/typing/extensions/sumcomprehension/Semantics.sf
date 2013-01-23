@@ -1,0 +1,31 @@
+module typing.extensions.sumcomprehension.Semantics
+
+import org.sugarj.languages.Fomega
+import concretesyntax.Fomega
+
+import typing.rules.Syntax
+import typing.rules.Desugaring
+import typing.rules.ExprTypeRules
+import typing.rules.Verification
+
+import typing.extensions.sumcomprehension.Syntax
+
+
+~C |- ~e1 : ~T1
+~C |- ~e2 : ~T2
+(~C;~%x:Nat) |- ~e3 : ~T3
+~C |- ~T1 ~> Nat
+~C |- ~T2 ~> Nat
+~C |- ~T3 ~> Nat
+typing.extensions.sumcomprehension.Support.sum:(Nat -> Nat -> (Nat -> Nat) -> Nat) in ~C
+========================================================================================  T-SumComp
+~C |- for ~%x = ~e1 to ~e2 add ~e3 : Nat
+
+
+desugarings
+  sumcomp-desugar
+
+rules
+  sumcomp-desugar :
+    |[ for ~%x = ~e1 to ~e2 add ~e3 ]| ->
+    |[ typing.extensions.sumcomprehension.Support.sum ~e1 ~e2 (\~%x:Nat. ~e3) ]|
