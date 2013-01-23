@@ -14,9 +14,10 @@ rules
 
   verify-type-rule :
     tr@TypeRule(premises, RuleName(sep, Some(Var(name))), TypingJudgment(C, e, T)) ->
-      [(tr, <concat-strings> [name, ": ", text-des-e])]
+      result
     where <desugar <+ id> e => des-e
         ; <write-to-string> des-e => text-des-e
+       	; <debug(!"Desugared conclusion term: ")> text-des-e 
         ; <premises-to-list> premises => premises-list
         ; {| Dynamic-Axioms:
                <activate-dynamic-axioms> premises-list
@@ -25,6 +26,12 @@ rules
         ; <debug(!"Expected type: ")> T
         ; <debug(!"Actual type:   ")> U
         ; <debug(!"Type errors:   ")> errs
+        ; if !errs; ?[] then fail
+          else ![(tr
+          		 , <concat-strings> [ "Could not verify typing rule ", name, "\n"
+          		                    , "The type checker returned the following errors:\n"
+                                    , <write-to-string> errs])]
+          end => result
 
   activate-dynamic-axioms :
     [] -> []
