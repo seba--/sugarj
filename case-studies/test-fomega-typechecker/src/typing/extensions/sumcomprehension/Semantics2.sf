@@ -1,0 +1,27 @@
+module typing.extensions.sumcomprehension.Semantics2
+
+import org.sugarj.languages.Fomega
+import concretesyntax.Fomega
+
+import typing.rules.Syntax
+//import typing.rules.Desugaring
+//import typing.rules.ExprTypeRules
+//import typing.rules.Verification
+
+import typing.extensions.sumcomprehension.Syntax2
+
+
+desugarings
+  dosum-desugar
+
+rules
+  dosum-desugar :
+    DoSumAtomic(e) -> e
+  dosum-desugar :
+    DoSumSeq([DoSumGen(x, e1)], e2) -> |[ sum1 ~e1 (\~%x:Nat. ~e2) ]|
+  dosum-desugar :
+    DoSumSeq([DoSumLet(x, e1)], e2) -> |[ (\~%x:Nat. ~e2) ~e1 ]|
+  dosum-desugar :
+    DoSumSeq([DoSumGen(x, e1) | bs], e2) -> |[ sum1 ~e1 (\~%x:Nat. dosum { ~bs; ~e2 }) ]|
+  dosum-desugar :
+    DoSumSeq([DoSumLet(x, e1) | bs], e2)  -> |[ (\~%x:Nat. dosum { ~bs; ~e2 }) ~e1 ]|
