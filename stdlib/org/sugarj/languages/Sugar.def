@@ -39,6 +39,7 @@ exports
 
   lexical syntax
     "desugarings" -> StrategoKeyword
+    "analyses" -> StrategoKeyword
 
   context-free syntax
     "desugarings" Desugaring* -> Transformation {cons("Desugarings")}
