@@ -8,3 +8,6 @@
   premises.
 
 * Variants, records (require additional judgments)
+
+* Use Locked to disable desugaring of conclusion when generating the
+  type checker from a typing rule.
