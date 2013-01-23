@@ -3,8 +3,7 @@ module tests.extensions.LetErrors
 import typing.rules.TypeChecker
 
 import typing.extensions.let.Syntax
-import typing.extensions.let.Typing
-import typing.extensions.let.Desugaring
+import typing.extensions.let.Semantics
 
 
 val val1 =
