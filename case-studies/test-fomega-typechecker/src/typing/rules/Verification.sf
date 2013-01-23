@@ -60,7 +60,11 @@ rules
     ?VarInContextJudgment(x, T, C);
     rules(Dynamic-Lookup-Expr-Var : (x, C) -> (T, []));
     <debug(!"Activated VJ ")> (x, T, C)
-
+    
+  activate-dynamic-axiom =
+    ?QVarInContextJudgment(qx, T, C);
+    rules(Dynamic-Lookup-Expr-Var : (qx, C) -> (T, []));
+    <debug(!"Activated VQJ ")> (qx, T, C)
 
 rules // Rules to hook in dynamic axioms into the judgment implementations
 
