@@ -10,7 +10,8 @@ context-free syntax
    "let" FomegaID "=" FomegaExpr -> DoSumBinding {cons("DoSumLet")}
 
 context-free syntax
-  "~" StrategoVar -> { DoSumBinding ";" }+ {cons("Metavar")}
+  "~" StrategoVar -> DoSumBinding {cons("Metavar")}
+  // TODO: how to handle lists correctly?
 
 lexical syntax
   "dosum" -> Keyword

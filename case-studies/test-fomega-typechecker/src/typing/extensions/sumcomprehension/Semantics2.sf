@@ -4,24 +4,88 @@ import org.sugarj.languages.Fomega
 import concretesyntax.Fomega
 
 import typing.rules.Syntax
-//import typing.rules.Desugaring
-//import typing.rules.ExprTypeRules
-//import typing.rules.Verification
+import typing.rules.Desugaring
+import typing.rules.ExprTypeRules
+import typing.rules.Verification
 
 import typing.extensions.sumcomprehension.Syntax2
+
+
+// TODO: causes ambiguity
+// ~C |- ~e : ~T
+// ~C |- ~T ~> Nat
+// typing.extensions.sumcomprehensions.Support.sum1:Nat -> (Nat -> Nat) -> Nat in ~C
+// ================================================================================= T-DoSumAtomic
+// ~C |- dosum { ~e } : Nat
+
+~C |- ~e1 : ~T1
+~C |- ~T1 ~> Nat
+(~C;~%x:Nat) |- ~e2 : ~T2
+~C |- ~T2 ~> Nat
+typing.extensions.sumcomprehensions.Support.sum1:Nat -> (Nat -> Nat) -> Nat in ~C
+================================================================================= T-DoSumGen1
+~C |- dosum { ~%x <- ~e1 ; ~e2 } : Nat
+
+~C |- ~e1 : ~T1
+~C |- ~T1 ~> Nat
+(~C;~%x:Nat) |- ~e2 : ~T2
+~C |- ~T2 ~> Nat
+typing.extensions.sumcomprehensions.Support.sum1:Nat -> (Nat -> Nat) -> Nat in ~C
+================================================================================= T-DoSumLet1
+~C |- dosum { let ~%x = ~e1 ; ~e2 } : Nat
+
+// TODO: bs not handled correctly
+// ~C |- ~e1 : ~T1
+// ~C |- ~T1 ~> Nat
+// (~C;~%x:Nat) |- dosum { ~bs; ~e2 } : Nat
+// typing.extensions.sumcomprehensions.Support.sum1:Nat -> (Nat -> Nat) -> Nat in ~C
+// ================================================================================= T-DoSumGen2
+// ~C |- dosum { ~%x <- ~e1; ~bs; ~e2 } : Nat
+
+// TODO: bs not handled correctly
+// ~C |- ~e1 : ~T1
+// ~C |- ~T1 ~> Nat
+// (~C;~%x:Nat) |- dosum { ~bs; ~e2 } : Nat
+// typing.extensions.sumcomprehensions.Support.sum1:Nat -> (Nat -> Nat) -> Nat in ~C
+// ================================================================================= T-DoSumGen2
+// ~C |- dosum { let ~%x = ~e1; ~bs; ~e2 } : Nat
 
 
 desugarings
   dosum-desugar
 
 rules
+
+  // TODO: ambiguity
   dosum-desugar :
-    DoSumAtomic(e) -> e
+    DoSumAtomic(e)
+    // |[ dosum { ~e } ]|
+    ->
+    e
+    // |[ ~e ]|
+    
   dosum-desugar :
-    DoSumSeq([DoSumGen(x, e1)], e2) -> |[ sum1 ~e1 (\~%x:Nat. ~e2) ]|
+    |[ dosum { ~%x <- ~e1; ~e2 } ]|
+    ->
+    |[ typing.extensions.sumcomprehensions.Support.sum1 ~e1 (\~%x:Nat. ~e2) ]|
+    
   dosum-desugar :
-    DoSumSeq([DoSumLet(x, e1)], e2) -> |[ (\~%x:Nat. ~e2) ~e1 ]|
+    |[ dosum { let ~%x = ~e1; ~e2 } ]|
+    ->
+    |[ (\~%x:Nat. ~e2) ~e1 ]|
+  
+  // TODO: handle bs
   dosum-desugar :
-    DoSumSeq([DoSumGen(x, e1) | bs], e2) -> |[ sum1 ~e1 (\~%x:Nat. dosum { ~bs; ~e2 }) ]|
-  dosum-desugar :
-    DoSumSeq([DoSumLet(x, e1) | bs], e2)  -> |[ (\~%x:Nat. dosum { ~bs; ~e2 }) ~e1 ]|
+    DoSumSeq([DoSumGen(x, e1) | bs], e2)
+    // |[ dosum { ~%x <- ~e1; ~bs ; ~e2 } ]|
+    ->
+    App(App(Var("typing.extensions.sumcomprehensions.Support.sum1"), e1), Abs(x, TyNat, DoSumSeq(bs, e2) )) 
+    // |[ typing.extensions.sumcomprehensions.Support.sum1 ~e1 (\~%x:Nat. dosum { ~bs; ~e2 }) ]|
+  
+  // TODO: handle bs  
+  dosum-desugar :   
+    DoSumSeq([DoSumLet(x, e1) | bs], e2)
+    // |[ dosum { let ~%x = ~e1; ~bs; ~e2 } ]|
+    ->
+    App(Abs(x, TyNat, DoSumSeq(bs, e2)), e1)
+    // |[ (\~%x:Nat. dosum { ~bs; ~e2 }) ~e1 ]|

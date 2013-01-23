@@ -1,11 +1,13 @@
 module tests.extensions.DoSum
 
+import typing.rules.TypeChecker
+
 import typing.extensions.sumcomprehension.Syntax2
 import typing.extensions.sumcomprehension.Semantics2
+import qualified typing.extensions.sumcomprehensions.Support
 
 
 val test01 =
   dosum
   { n1 <- 5
-  ; n2 <- 23
-  ; (\x:Nat. \y:Nat. y) n1 n2 }
+  ; (\x:Nat. \y:Nat. y) n1 1 }
