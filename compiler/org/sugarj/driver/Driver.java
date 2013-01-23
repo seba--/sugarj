@@ -355,8 +355,12 @@ public class Driver{
         
         stepped();
         
+        IStrategoTerm analyzed = currentAnalyze(lastSugaredToplevelDecl);
+        
+        stepped();
+        
         // DESUGAR the parsed top-level declaration
-        IStrategoTerm desugared = currentDesugar(lastSugaredToplevelDecl);
+        IStrategoTerm desugared = currentDesugar(analyzed);
         
         stepped();
         
@@ -555,7 +559,7 @@ public class Driver{
         buf.append(service).append('\n');
       
       for (IStrategoTerm service : editorServices) {
-        driverResult.addEditorService(service);
+//        driverResult.addEditorService(service);
         buf.append(service).append('\n');
       }
       
@@ -638,14 +642,34 @@ public class Driver{
     return parseResult.b;
   }
 
+  private IStrategoTerm currentAnalyze(IStrategoTerm term) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
+  // assimilate toplevelDec using current transformation
+  
+    log.beginTask("analyze", "ANALYZE toplevel declaration.", Log.CORE);
+    try {
+      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(), strParser, strCache, environment, langLib);
+    
+      return STRCommands.assimilate("analyze-main", currentTransProg, term, langLib.getInterpreter());
+    } catch (StrategoException e) {
+      String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
+      
+      log.logErr(msg, Log.DETAIL);
+      setErrorMessage(term, msg);
+      return term;
+    } finally {
+      log.endTask();
+    }
+  }
+
   private IStrategoTerm currentDesugar(IStrategoTerm term) throws IOException,
       InvalidParseTableException, TokenExpectedException, SGLRException {
     // assimilate toplevelDec using current transformation
 
     log.beginTask("desugaring", "DESUGAR toplevel declaration.", Log.CORE);
     try {
-      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(), strParser, strCache, environment, langLib);
-
+      if (currentTransProg == null)
+        return term;
+      
       return STRCommands.assimilate(currentTransProg, term, langLib.getInterpreter());
     } catch (StrategoException e) {
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();

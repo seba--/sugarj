@@ -1,6 +1,7 @@
 module org/sugarj/stdlib/StdTrans
 imports libstrategolib
 
+imports org/sugarj/transformations/Analyze
 imports org/sugarj/transformations/ATerm
 imports org/sugarj/transformations/GenerateSignatures
 imports org/sugarj/transformations/LayoutSugar
@@ -24,24 +25,6 @@ strategies
   internal-main = traverse(desugar); unlock
   main = io-wrap(internal-main)
 
-  sugarj-analyze:
-    (ast, path, project-path) -> (ast, errors, warnings, notes)
-    with
-      editor-init;
-      try(analyze);
-      errors   := <collect-all(constraint-error, conc)> ast;
-      warnings := <collect-all(constraint-warning, conc)> ast;
-      notes    := <collect-all(constraint-note, conc)> ast
-
-    editor-init =
-      // Ensure all dynamic rules are properly scoped
-      try(dr-scope-all-end);
-      dr-scope-all-start
-
-    analyze = fail
-    constraint-error = fail
-    constraint-warning = fail
-    constraint-note = fail
 
 signature
   constructors

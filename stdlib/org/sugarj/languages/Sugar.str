@@ -8,3 +8,5 @@ signature constructors
     Desugarings                : List(Desugaring) -> DesugaringDecl
     InjectDesugaring           : StrategoId * Sdf2Symbol * Sdf2Symbol * Sdf2Attributes -> Desugaring
     PureDesugaring             : StrategoId -> Desugaring
+    
+    Analyses                   : List(Strategy) -> Analyses
