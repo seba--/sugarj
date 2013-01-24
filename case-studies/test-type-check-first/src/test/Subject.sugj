@@ -2,6 +2,7 @@ package test;
 
 import test.Check;
 import test.Desugar;
+import test.Editor;
 
 public class Subject {
   // desugars to:

@@ -26,7 +26,7 @@ rules
     constraint-note = fail
 
 
-  change-annotations-only(s) = ?t; s => t2; !(t,t2); not(equal); structurally-equal; !t2 
+  change-annotations-only(s) = ?t; s => t2; where(!(t,t2); not(equal); structurally-equal) 
   structurally-equal = ?(c#(xs),d#(ys)); <equal> (c,d); <zip(structurally-equal)> (xs, ys)
   
 rules
