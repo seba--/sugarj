@@ -26,6 +26,7 @@ import org.spoofax.jsglr_layout.client.imploder.Tokenizer;
 import org.spoofax.jsglr_layout.io.ParseTableManager;
 import org.spoofax.terms.StrategoListIterator;
 import org.spoofax.terms.TermFactory;
+import org.spoofax.terms.TermVisitor;
 import org.spoofax.terms.attachments.ParentAttachment;
 import org.spoofax.terms.attachments.ParentTermFactory;
 import org.spoofax.terms.io.InlinePrinter;
@@ -458,5 +459,42 @@ public class ATermCommands {
     IStrategoTerm textTerm = box2text_string_0_1.instance.invoke(ctx, aboxTerm, factory.makeInt(80));
     return ATermCommands.getString(textTerm);
 
+  }
+
+  /**
+   * Copies the imploder attachments from one term to the other. The two input terms must be structurally equivalent.
+   * 
+   * @return the term 'to' with the imploder attachments of 'from'.
+   */
+  public static IStrategoTerm copyTokens(IStrategoTerm from, IStrategoTerm to) {
+    if (from == to)
+      return to;
+    
+    IStrategoTerm result = to;
+    LinkedList<IStrategoTerm> fromStack = new LinkedList<IStrategoTerm>();
+    LinkedList<IStrategoTerm> toStack = new LinkedList<IStrategoTerm>();
+    fromStack.push(from);
+    toStack.push(to);
+    
+    while (!fromStack.isEmpty()) {
+      from = fromStack.pop();
+      to = toStack.pop();
+      
+      ImploderAttachment attach = ImploderAttachment.get(from);
+      if (attach != null)
+        ImploderAttachment.putImploderAttachment(
+            to,
+            attach.isSequenceAttachment(), 
+            attach.isSequenceAttachment() ? attach.getElementSort() : attach.getSort(), 
+            attach.getLeftToken(), 
+            attach.getRightToken());
+      
+      for (int i = 0; i < from.getSubtermCount(); i++) {
+        fromStack.push(from.getSubterm(i));
+        toStack.push(to.getSubterm(i));
+      }
+    }
+    
+    return result;
   }
 }

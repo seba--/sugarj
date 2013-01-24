@@ -343,7 +343,7 @@ public class SDFCommands {
    * @throws SGLRException 
    * @throws TokenExpectedException 
    */
-  private static Pair<SGLR, Pair<IStrategoTerm, Integer>> sglr(ParseTable table, final String source, final String start, boolean useRecovery, final boolean parseMax, ITreeBuilder treeBuilder) throws SGLRException {
+  private static Pair<SGLR, Pair<IStrategoTerm, Integer>> sglr(ParseTable table, final String source, final Path sourceFile, final String start, boolean useRecovery, final boolean parseMax, ITreeBuilder treeBuilder) throws SGLRException {
     if (treeBuilder instanceof RetractableTreeBuilder && ((RetractableTreeBuilder) treeBuilder).isInitialized())
       ((RetractableTokenizer) treeBuilder.getTokenizer()).setKeywordRecognizer(table.getKeywordRecognizer());
     
@@ -353,7 +353,7 @@ public class SDFCommands {
     Callable<Pair<IStrategoTerm, Integer>> parseCallable = new Callable<Pair<IStrategoTerm, Integer>>() {
       @Override
       public Pair<IStrategoTerm, Integer> call() throws Exception {
-        Object o = parser.parse(source, "toplevel declaration", start, parseMax);
+        Object o = parser.parse(source, sourceFile.getAbsolutePath(), start, parseMax);
         if (o instanceof IStrategoTerm)
           return Pair.create((IStrategoTerm) o, source.length());
         else {
@@ -378,25 +378,25 @@ public class SDFCommands {
     }
   }
   
-  public static Pair<SGLR, Pair<IStrategoTerm, Integer>> parseImplode(ParseTable table, String source, String start, boolean useRecovery, boolean parseMax, ITreeBuilder treeBuilder) throws IOException, SGLRException {
-    return parseImplode(table, null, source, start, useRecovery, parseMax, treeBuilder);
+  public static Pair<SGLR, Pair<IStrategoTerm, Integer>> parseImplode(ParseTable table, String source, Path sourceFile, String start, boolean useRecovery, boolean parseMax, ITreeBuilder treeBuilder) throws IOException, SGLRException {
+    return parseImplode(table, null, source, sourceFile, start, useRecovery, parseMax, treeBuilder);
   }
   
-  private static Pair<SGLR, Pair<IStrategoTerm, Integer>> parseImplode(ParseTable table, Path tbl, String source, String start, boolean useRecovery, boolean parseMax, ITreeBuilder treeBuilder) throws IOException, SGLRException {
+  private static Pair<SGLR, Pair<IStrategoTerm, Integer>> parseImplode(ParseTable table, Path tbl, String source, Path sourceFile, String start, boolean useRecovery, boolean parseMax, ITreeBuilder treeBuilder) throws IOException, SGLRException {
     log.beginExecution("parsing", Log.PARSE);
 
     Pair<SGLR, Pair<IStrategoTerm, Integer>> result = null;
     try {
-      result = sglr(table, source, start, useRecovery, parseMax, treeBuilder);
+      result = sglr(table, source, sourceFile, start, useRecovery, parseMax, treeBuilder);
     }
     finally {
       if (result != null && result.b != null)
         log.endTask();
       else {
-        Path sourceFile = FileCommands.newTempFile("");
-        FileCommands.writeToFile(sourceFile, source.toString());
+        Path tmpSourceFile = FileCommands.newTempFile("");
+        FileCommands.writeToFile(tmpSourceFile, source.toString());
         log.endTask("failed: " + 
-            log.commandLineAsString(new String[] {"jsglri", "-p", tbl == null ? "unknown" : tbl.getAbsolutePath(), "-i " + sourceFile + "-s", start}));
+            log.commandLineAsString(new String[] {"jsglri", "-p", tbl == null ? "unknown" : tbl.getAbsolutePath(), "-i " + tmpSourceFile + "-s", start}));
       }
     }
     

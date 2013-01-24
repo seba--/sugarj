@@ -1,9 +1,8 @@
 module org/sugarj/transformations/Analyze
 imports
   org/sugarj/languages/Sugar
-  org/sugarj/stdlib/StdTrans
 rules
-  analyze-main = repeat(changed-tree(analyze))
+  analyze-main = repeat(change-annotations-only(analyze))
   analyze = fail
   get-anno(|key) = get-annotations; !(key,<id>); lookup
   put-anno(|key,val) = where((get-annotations <+ ![]) => annos); !(<id>,[(key,val)|annos]); set-annotations
@@ -26,6 +25,9 @@ rules
     constraint-warning = fail
     constraint-note = fail
 
+
+  change-annotations-only(s) = ?t; s => t2; !(t,t2); equal-except-annotations; !t2 
+  equal-except-annotations = ?(c#(xs),d#(ys)); <equal> (c,d); <zip(equal-except-annotations)> (xs, ys)
   
 rules
   // desugar =
