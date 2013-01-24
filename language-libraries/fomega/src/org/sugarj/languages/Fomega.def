@@ -16,20 +16,20 @@ exports
     "mu" -> Keyword
     "if" -> Keyword
     "then" -> Keyword
-	"else" -> Keyword
-	"case" -> Keyword
-	"of" -> Keyword
-	"fold" -> Keyword
-	"unfold" -> Keyword
+    "else" -> Keyword
+    "case" -> Keyword
+    "of" -> Keyword
+    "fold" -> Keyword
+    "unfold" -> Keyword
     "as" -> Keyword
-	"module" -> Keyword
-	"import" -> Keyword
-	"qualified" -> Keyword
-	"public" -> Keyword
+    "module" -> Keyword
+    "import" -> Keyword
+    "qualified" -> Keyword
+    "public" -> Keyword
     "val" -> Keyword
-	"type" -> Keyword
-	"true" -> Keyword
-	"false" -> Keyword
+    "type" -> Keyword
+    "true" -> Keyword
+    "false" -> Keyword
 
     "Nat" -> PrimitiveType
     "Bool" -> PrimitiveType
@@ -57,38 +57,39 @@ module Fomega-Type
 imports Fomega-Lexical
 
 exports
-  sorts Type TypeDecl TypeDecls Kind
+  sorts Type TyDecl TyDecls Kind
 
   context-free syntax
     ID -> Type {cons("TyVar")}
     "Nat" -> Type {cons("TyNat")}
     "Bool" -> Type {cons("TyBool")}
     "String" -> Type {cons("TyString")}
-    "{" TypeDecls "}" -> Type {cons("TyRecord")}
-    "<" TypeDecls ">" -> Type {cons("TyVariant")}
+    "{" TyDecls "}" -> Type {cons("TyRecord")}
+    "<" TyDecls ">" -> Type {cons("TyVariant")}
     "(" Type ")" -> Type {bracket}
 
-    ID ":" Type -> TypeDecl {cons("TyDecl")}
-    {TypeDecl ","}* -> TypeDecls
+    ID ":" Type        -> TyDecl  {cons("TyDecl")}
+                       -> TyDecls {cons("TyDeclsNil")}
+    TyDecl "," TyDecls -> TyDecls {cons("TyDeclsCons")}
 
     "*" -> Kind {cons("KiStar")}
-    Kind "=>" Kind -> Kind {cons("KiArrow")}        
+    Kind "=>" Kind -> Kind {cons("KiArrow")}
 
     QID -> Type {cons("TyQVar")}
 
     Type Type -> Type {cons("TyApp"), left}
-	Type "->" Type -> Type {cons("TyArrow"), right}
-	"forall" ID "::" Kind "." Type -> Type {cons("TyForall")}
-	"\\" ID "::" Kind "." Type -> Type {cons("TyAbs")}
-	"mu" ID "." Type -> Type {cons("TyMu")}
+    Type "->" Type -> Type {cons("TyArrow"), right}
+    "forall" ID "::" Kind "." Type -> Type {cons("TyForall")}
+    "\\" ID "::" Kind "." Type -> Type {cons("TyAbs")}
+    "mu" ID "." Type -> Type {cons("TyMu")}
 
   context-free priorities
       Type Type -> Type {cons("TyApp"), left}
-	> Type "->" Type -> Type {cons("TyArrow"), right}
-	> {
+    > Type "->" Type -> Type {cons("TyArrow"), right}
+    > {
       "forall" ID "::" Kind "." Type -> Type {cons("TyForall")}
-	  "\\" ID "::" Kind "." Type -> Type {cons("TyAbs")}
-	  "mu" ID "." Type -> Type {cons("TyMu")}
+      "\\" ID "::" Kind "." Type -> Type {cons("TyAbs")}
+      "mu" ID "." Type -> Type {cons("TyMu")}
     }
 
 module Fomega-Module
@@ -123,7 +124,7 @@ exports
 
   context-free syntax
     ID -> Expr {cons("Var")}
-	QID -> Expr {cons("QVar")}
+    QID -> Expr {cons("QVar")}
     "(" Expr ")" -> Expr {bracket}
     "{" Fields "}" -> Expr {cons("Record")}
     "<" Field ">" "as" Type -> Expr {cons("Variant")}
@@ -132,11 +133,13 @@ exports
     NAT -> Expr {cons("Nat")}
     STRING -> Expr {cons("String")}
 
-    ID "=" Expr -> Field {cons("Field")}
-    {Field ","}* -> Fields
+    ID "=" Expr      -> Field  {cons("Field")}
+                     -> Fields {cons("FieldsNil")}
+    Field "," Fields -> Fields {cons("FieldsCons")}
 
-    "<" ID "=" ID ">" "=>" Expr -> Branch {cons("Branch")}
-    {Branch ";"}+ -> Branches
+    "<" ID "=" ID ">" "=>" Expr -> Branch   {cons("Branch")}
+                                -> Branches {cons("BranchesNil")}
+    Branch ";" Branches         -> Branches {cons("BranchesCons")}
 
     Expr "!" ID -> Expr {cons("SelectRcd")}
     Expr Expr -> Expr {cons("App"), left}
@@ -178,14 +181,15 @@ imports Fomega-Module [
     NAT => FomegaNAT
     STRING => FomegaSTRING
     Keyword => FomegaKeyword
-    PrimitiveType => FomegaPrimitiveType    
+    PrimitiveType => FomegaPrimitiveType
     Type => FomegaType
-    TypeDecl => FomegaTypeDecl
-    TypeDecls => FomegaTypeDecls
+    TyDecl => FomegaTyDecl
+    TyDecls => FomegaTyDecls
     Kind => FomegaKind
     Module => FomegaModule
     Def => FomegaDef
     Import => FomegaImport
+    Imports => FomegaImports
     Expr => FomegaExpr
     Field => FomegaField
     Fields => FomegaFields

@@ -14,13 +14,13 @@ exports
     LAYOUT? -/- [\ \t\r\n]
 
   lexical syntax
-    Comment                                                   -> LAYOUT            
-    "//" ~[\n\r]* ([\n\r] | EOF)                              -> Comment           
-    "/*" CommentPart* "*/"                                    -> Comment           
-    ~[\*]                                                     -> CommentPart 
-    Asterisk                                                  -> CommentPart       
+    Comment                                                   -> LAYOUT
+    "//" ~[\n\r]* ([\n\r] | EOF)                              -> Comment
+    "/*" CommentPart* "*/"                                    -> Comment
+    ~[\*]                                                     -> CommentPart
+    Asterisk                                                  -> CommentPart
     "*"                                                       -> Asterisk
-                                                              -> EOF          
+                                                              -> EOF
   lexical restrictions
     "/**" -/- [\/]
     "/*" -/- [\*]
