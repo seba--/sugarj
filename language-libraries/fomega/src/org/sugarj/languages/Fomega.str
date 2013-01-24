@@ -12,7 +12,7 @@ signature
     Module        : FomegaModuleDec * FomegaImports * FomegaDefinitions -> FomegaModule
     ModuleDec     : FomegaMID -> FomegaModuleDec
     BranchesCons  : FomegaBranch * FomegaBranches -> FomegaBranches
-    BranchesNil   : FomegaBranches
+    BranchesEnd   : FomegaBranch -> FomegaBranches
     Branch        : FomegaID * FomegaID * FomegaExpr -> FomegaBranch
     FieldsCons    : FomegaField * FomegaFields -> FomegaFields
     FieldsNil     : FomegaFields

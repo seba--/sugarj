@@ -57,7 +57,7 @@ module Fomega-Type
 imports Fomega-Lexical
 
 exports
-  sorts Type TyDecl TyDecls Kind
+  sorts Type TyDecl TyDecls TyDecls1 Kind
 
   context-free syntax
     ID -> Type {cons("TyVar")}
@@ -68,9 +68,11 @@ exports
     "<" TyDecls ">" -> Type {cons("TyVariant")}
     "(" Type ")" -> Type {bracket}
 
-    ID ":" Type        -> TyDecl  {cons("TyDecl")}
-                       -> TyDecls {cons("TyDeclsNil")}
-    TyDecl "," TyDecls -> TyDecls {cons("TyDeclsCons")}
+    ID ":" Type     -> TyDecl   {cons("TyDecl")}
+                    -> TyDecls  {cons("TyDeclsNil")}
+    TyDecl TyDecls1 -> TyDecls  {cons("TyDeclsCons")}
+                    -> TyDecls1 {cons("TyDeclsNil")}
+    "," TyDecls     -> TyDecls1 {bracket}
 
     "*" -> Kind {cons("KiStar")}
     Kind "=>" Kind -> Kind {cons("KiArrow")}
@@ -120,7 +122,7 @@ imports Fomega-Lexical
 imports Fomega-Type
 
 exports
-  sorts Expr Field Fields Branch Branches
+  sorts Expr Field Fields Fields1 Branch Branches
 
   context-free syntax
     ID -> Expr {cons("Var")}
@@ -133,12 +135,14 @@ exports
     NAT -> Expr {cons("Nat")}
     STRING -> Expr {cons("String")}
 
-    ID "=" Expr      -> Field  {cons("Field")}
-                     -> Fields {cons("FieldsNil")}
-    Field "," Fields -> Fields {cons("FieldsCons")}
+    ID "=" Expr   -> Field   {cons("Field")}
+                  -> Fields  {cons("FieldsNil")}
+    Field Fields1 -> Fields  {cons("FieldsCons")}
+                  -> Fields1 {cons("FieldsNil")}
+    "," Fields    -> Fields1 {bracket}
 
     "<" ID "=" ID ">" "=>" Expr -> Branch   {cons("Branch")}
-                                -> Branches {cons("BranchesNil")}
+    Branch                      -> Branches {cons("BranchesEnd")}
     Branch ";" Branches         -> Branches {cons("BranchesCons")}
 
     Expr "!" ID -> Expr {cons("SelectRcd")}
