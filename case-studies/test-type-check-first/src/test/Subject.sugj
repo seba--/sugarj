@@ -6,13 +6,9 @@ import test.Desugar;
 public class Subject {
   // desugars to:
   //   private String s = "This was an int" + "This was an int";
-  private String s = 5.4 + 1;
+  private String s = 5 + 1;
   
+  // type error is marked on '3.14': expected type Int
+  private Object o = 3.14 + 1;
 }
-
-
-
-
-
-
 
