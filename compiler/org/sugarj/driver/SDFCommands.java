@@ -66,7 +66,7 @@ public class SDFCommands {
   /*
    * timeout for parsing files (in milliseconds)
    */
-  public static long PARSE_TIMEOUT = 20000;
+  public static long PARSE_TIMEOUT = 10000;
   static {
     try {
       PARSE_TIMEOUT = Long.parseLong(System.getProperty("org.sugarj.parse_timeout"));
