@@ -189,6 +189,7 @@ imports Fomega-Module [
     Type => FomegaType
     TyDecl => FomegaTyDecl
     TyDecls => FomegaTyDecls
+    TyDecls1 => FomegaTyDecls1
     Kind => FomegaKind
     Module => FomegaModule
     Def => FomegaDef
@@ -197,6 +198,7 @@ imports Fomega-Module [
     Expr => FomegaExpr
     Field => FomegaField
     Fields => FomegaFields
+    Fields1 => FomegaFields1
     ModuleDec => FomegaModuleDec
     Branch => FomegaBranch
     Branches => FomegaBranches
