@@ -12,11 +12,20 @@ import typing.check.TypeOperations
 import concretesyntax.Stratego
 
 
+desugarings
+  desugar-type-rule
+  desugar-branch-type-rule
+
+
 rules
 
   desugar-type-rule :
     TypeRule(premises, RuleName(sep, optional-name), conclusion) ->
       transformation-elem(<translate-type-rule> (optional-name, premises, conclusion))
+
+  desugar-branch-type-rule :
+    BranchTypeRule(premises, RuleName(sep, optional-name), conclusion) ->
+      transformation-elem(<translate-branch-type-rule> (optional-name, premises, conclusion))
 
 
 rules // Translate a type rule
@@ -37,6 +46,30 @@ rules // Translate a type rule
         ; <ts-get-errs> ts1 => errs
         ; <foldr( ! stratego-term |[ [] ]|
                 , \ (hd,tl) -> |[ [term~hd | term~tl] ]| \ )> errs => errors
+
+
+rules // Translate a branch type rule
+
+  translate-branch-type-rule :
+    (Some(Var(name)), premises, BranchTypingJudgment(C, decls, brs, T)) ->
+    stratego-decl
+    |[ rules
+         typeOfBrsKnown :
+           (term~tC, term~tdecls, term~tbrs) -> (term~tT, <concat> term~errors)
+           where strategy~premises-implementation
+    ]|
+    where <trm-explode> C => tC
+        ; <trm-explode> decls => tdecls
+        ; <trm-explode> brs => tbrs
+        ; <translate-subst> T => tT
+        ; <premises-to-list> premises => premises-list
+        ; <translate-premises> (<ts-initial> (), premises-list) => (ts1, premises-implementation)
+        ; <ts-get-errs> ts1 => errs
+        ; <foldr( ! stratego-term |[ [] ]|
+                , \ (hd,tl) -> |[ [term~hd | term~tl] ]| \ )> errs => errors
+
+
+rules // Code for all kind of rules
 
   premises-to-list :
     NoPremises -> []
@@ -110,7 +143,7 @@ rules // Translate a judgment
    translate-judgment :
      (ts, QVarInContextJudgment(qx, T, C)) -> <translate-judgment> (ts, VarInContextJudgment(qx, T, C))
 
-   translate-judgment :
+  translate-judgment :
     (ts, BranchTypingJudgment(C, decls, brs, T)) ->
       (ts4, |[   <typeOfBrs> (term~tC, term~tdecls, term~tbrs) => (term~result-var, term~errs-var)
                ; strategy~inspect-result
@@ -123,39 +156,60 @@ rules // Translate a judgment
          ; <ts-append-errs-var> (ts2, errs-var) => ts3
          ; <translate-type-expectation> (ts3, result-var, [], T, []) => (ts4, inspect-result)
 
-    translate-judgment :
-      (ts, NotinTagJudgment(x, brs)) ->
-        (ts2, |[ errorUnless(<not(elem)> (term~tx, <tag> term~tbrs)
-                             | (term~tx, <concat-strings> ["duplicate tag ", term~tx])) => term~errs-var
-              ]|)
-      where <trm-explode> brs => tbrs
-      	  ; <trm-explode> x => tx        
-          ; <fresh-errs-var> ts => (ts1, errs-var)
-          ; <ts-append-errs-var> (ts1, errs-var) => ts2 
+  translate-judgment :
+    (ts, NotinTagJudgment(x, brs)) ->
+      (ts2, |[ errorUnless(<not(elem)> (term~tx, <tag> term~tbrs)
+                           | (term~tx, <concat-strings> ["duplicate tag ", term~tx])) => term~errs-var
+            ]|)
+    where <trm-explode> brs => tbrs
+        ; <trm-explode> x => tx        
+        ; <fresh-errs-var> ts => (ts1, errs-var)
+        ; <ts-append-errs-var> (ts1, errs-var) => ts2 
 
-    translate-judgment :
-      (ts, NotinSelJudgment(x, decls)) ->
-        (ts2, |[ errorUnless(<not(elem)> (term~tx, <lab> term~tdecls)
-                             | (term~tx, <concat-strings> ["duplicate label ", term~tx])) => term~errs-var
-              ]|)
-      where <trm-explode> decls => tdecls
-      	  ; <trm-explode> x => tx        
-          ; <fresh-errs-var> ts => (ts1, errs-var)
-          ; <ts-append-errs-var> (ts1, errs-var) => ts2 
+  translate-judgment :
+    (ts, NotinSelJudgment(x, decls)) ->
+      (ts2, |[ errorUnless(<not(elem)> (term~tx, <lab> term~tdecls)
+                           | (term~tx, <concat-strings> ["duplicate label ", term~tx])) => term~errs-var
+            ]|)
+    where <trm-explode> decls => tdecls
+        ; <trm-explode> x => tx
+        ; <fresh-errs-var> ts => (ts1, errs-var)
+        ; <ts-append-errs-var> (ts1, errs-var) => ts2 
 
-     translate-judgment :
-       (ts, InDeclJudgment(x, T, decls)) ->
-         (ts5, |[   <labType> (term~tx, term~tdecls) => (term~result-var, term~msgs-var)
-                  ; <msgsToErrsDummy> term~msgs-var => term~errs-var
-                  ; strategy~inspect-result 
-               ]|)
-        where <trm-explode> x => tx
-            ; <trm-explode> decls => tdecls
-            ; <fresh-errs-var> ts => (ts1, errs-var)
-            ; <fresh-msgs-var> ts1 => (ts2, msgs-var)
-            ; <fresh-result-var> ts2 => (ts3, result-var)
-            ; <ts-append-errs-var> (ts3, errs-var) => ts4
-            ; <translate-type-expectation> (ts4, result-var, [], T, []) => (ts5, inspect-result)
+  translate-judgment :
+    (ts, InDeclJudgment(x, T, decls)) ->
+      (ts5, |[   <labType> (term~tx, term~tdecls) => (term~result-var, term~msgs-var)
+               ; <msgsToErrsDummy> term~msgs-var => term~errs-var
+               ; strategy~inspect-result 
+            ]|)
+     where <trm-explode> x => tx
+         ; <trm-explode> decls => tdecls
+         ; <fresh-errs-var> ts => (ts1, errs-var)
+         ; <fresh-msgs-var> ts1 => (ts2, msgs-var)
+         ; <fresh-result-var> ts2 => (ts3, result-var)
+         ; <ts-append-errs-var> (ts3, errs-var) => ts4
+         ; <translate-type-expectation> (ts4, result-var, [], T, []) => (ts5, inspect-result)
+
+  translate-judgment :
+    (ts, LabelTagJudgment(decls, brs)) ->
+    (ts2, |[ errorUnless( <set-eq> ( <make-set> (<lab> term~tdecls)
+                                   , <make-set> (<tag> term~tbrs))
+                        | (term~brs, <concat-strings>
+                                     [ "missing branch(es) for "
+                                     , <write-to-string> (<diff> (<lab> term~tdecls, <tag> term~tbrs))
+                                     ])) => term~errs-var
+          ]|)
+    where <trm-explode> decls => tdecls
+        ; <trm-explode> brs => tbrs
+        ; <fresh-errs-var> ts => (ts1, errs-var)
+        ; <ts-append-errs-var> (ts1, errs-var) => ts2
+
+
+rules // TODO: find a more appropriate place for this definition 
+
+  tag : BranchesEnd(Branch(x, t, e)) -> [x]
+  tag : BranchesCons(Branch(x, y, e), brs) -> [x | <tag> brs]
+
 
 rules // Translate a substitution operator in a type
 
@@ -279,6 +333,13 @@ rules // Translate a type expectation
                                        ) => (ts8, inspect-result3)
         ; <ts-append-eq> (ts8, X) => ts9
 
+  // TODO: type expectation for variants and records (and decls!)
+  // translate-type-expectation :
+  //   (ts, result-var, fv1, TyVariant(decls), fv2) ->
+  //     (tsX, |[
+  //           ]|)
+  //   where <trm-explode> decls -> tdecls
+
 
 rules
 
@@ -371,7 +432,7 @@ rules // Debug definitions to find rewrite failures
 
   translate-kind-expectation :
     (ts, y, x) -> (ts, |[ !"fail in translate-kind-expectation" ]|)
-    where !(ts, y, x); debug(!"BAR")
+    where !(ts, y, x); debug(!"QUXX")
 
 
 rules // Fresh variables
@@ -429,9 +490,6 @@ rules // Translation state handling
 rules // TODO: proper error origin tracking:
   msgsToErrsDummy : msgs -> <map(\ msg -> (TyUnknown(), msg) \)> msgs
 
-
-desugarings
-  desugar-type-rule
 
 rules
   TrmFromTerm = 

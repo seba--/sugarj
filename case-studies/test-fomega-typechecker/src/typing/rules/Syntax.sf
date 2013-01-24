@@ -85,9 +85,6 @@ context-free syntax // *** Syntax for judgments ***
   FomegaID ":" FomegaType "in" Context               -> VarInContextJudgment  {cons("VarInContextJudgment")}
   FomegaQID ":" FomegaType "in" Context              -> QVarInContextJudgment {cons("QVarInContextJudgment")}
 
-  FomegaQID "/=" FomegaQID -> UnequalQIDJudgment {cons("UnequalQIDJudgment")}
-  FomegaID "/=" FomegaID   -> UnequalIDJudgment  {cons("UnequalIDJudgment")}
-
   // Judgments allowed as premises in typing rules
   KindingJudgment       -> TypeRuleJudgment
   TypingJudgment        -> TypeRuleJudgment
@@ -98,8 +95,6 @@ context-free syntax // *** Syntax for judgments ***
   InDeclJudgment        -> TypeRuleJudgment
   VarInContextJudgment  -> TypeRuleJudgment
   QVarInContextJudgment -> TypeRuleJudgment
-  UnequalQIDJudgment    -> TypeRuleJudgment
-  UnequalIDJudgment     -> TypeRuleJudgment
   LabelTagJudgment      -> TypeRuleJudgment
   
   // Judgments allowed as premises in branch typing rules
