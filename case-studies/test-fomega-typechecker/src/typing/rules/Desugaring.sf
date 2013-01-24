@@ -110,6 +110,52 @@ rules // Translate a judgment
    translate-judgment :
      (ts, QVarInContextJudgment(qx, T, C)) -> <translate-judgment> (ts, VarInContextJudgment(qx, T, C))
 
+   translate-judgment :
+    (ts, BranchTypingJudgment(C, decls, brs, T)) ->
+      (ts4, |[   <typeOfBrs> (term~tC, term~tdecls, term~tbrs) => (term~result-var, term~errs-var)
+               ; strategy~inspect-result
+            ]|)
+     where <trm-explode> C => tC
+         ; <trm-explode> decls => tdecls
+         ; <trm-explode> brs => tbrs
+         ; <fresh-result-var> ts => (ts1, result-var)
+         ; <fresh-errs-var> ts1 => (ts2, errs-var)
+         ; <ts-append-errs-var> (ts2, errs-var) => ts3
+         ; <translate-type-expectation> (ts3, result-var, [], T, []) => (ts4, inspect-result)
+
+    translate-judgment :
+      (ts, NotinTagJudgment(x, brs)) ->
+        (ts2, |[ errorUnless(<not(elem)> (term~tx, <tag> term~tbrs)
+                             | (term~tx, <concat-strings> ["duplicate tag ", term~tx])) => term~errs-var
+              ]|)
+      where <trm-explode> brs => tbrs
+      	  ; <trm-explode> x => tx        
+          ; <fresh-errs-var> ts => (ts1, errs-var)
+          ; <ts-append-errs-var> (ts1, errs-var) => ts2 
+
+    translate-judgment :
+      (ts, NotinSelJudgment(x, decls)) ->
+        (ts2, |[ errorUnless(<not(elem)> (term~tx, <lab> term~tdecls)
+                             | (term~tx, <concat-strings> ["duplicate label ", term~tx])) => term~errs-var
+              ]|)
+      where <trm-explode> decls => tdecls
+      	  ; <trm-explode> x => tx        
+          ; <fresh-errs-var> ts => (ts1, errs-var)
+          ; <ts-append-errs-var> (ts1, errs-var) => ts2 
+
+     translate-judgment :
+       (ts, InDeclJudgment(x, T, decls)) ->
+         (ts5, |[   <labType> (term~tx, term~tdecls) => (term~result-var, term~msgs-var)
+                  ; <msgsToErrsDummy> term~msgs-var => term~errs-var
+                  ; strategy~inspect-result 
+               ]|)
+        where <trm-explode> x => tx
+            ; <trm-explode> decls => tdecls
+            ; <fresh-errs-var> ts => (ts1, errs-var)
+            ; <fresh-msgs-var> ts1 => (ts2, msgs-var)
+            ; <fresh-result-var> ts2 => (ts3, result-var)
+            ; <ts-append-errs-var> (ts3, errs-var) => ts4
+            ; <translate-type-expectation> (ts4, result-var, [], T, []) => (ts5, inspect-result)
 
 rules // Translate a substitution operator in a type
 

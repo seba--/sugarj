@@ -5,25 +5,6 @@ import org.sugarj.languages.Fomega
 
 import concretesyntax.Stratego
 
-// *** Syntax for typing rules ***
-
-context-free syntax
-  TypeRule -> SugarDefElem
-
-  RulePremises RuleSepName RuleConsequence
-    -> TypeRule {cons("TypeRule"),
-                 layout(1.first.col == 2.first.col &&
-                        2.first.col == 3.first.col)}
-
-  PremiseList -> RulePremises {cons("PremiseList")}
-              -> RulePremises {cons("NoPremises")}
-
-  OffTypeRuleJudgment -> RuleConsequence
-
-  OffTypeRuleJudgment -> PremiseList
-  OffTypeRuleJudgment PremiseList -> PremiseList {cons("PremiseCons"), layout(1.first.col == 2.first.col)}
-
-  TypeRuleJudgment -> OffTypeRuleJudgment {layout(1.first.col < 1.left.col)}
 
 lexical syntax
   "===" "="* -> RuleSep
@@ -35,44 +16,102 @@ context-free syntax
   RuleSep StrategoVar? -> RuleSepName {cons("RuleName"), layout(1.first.line == 2.last.line)}
 
 
-// *** Syntax for contexts ***
+context-free syntax // *** Syntax for typing rules ***
 
-context-free syntax
+  TypeRule -> SugarDefElem
+
+  RulePremises RuleSepName RuleConsequence
+    -> TypeRule {cons("TypeRule"),
+                 layout(1.first.col == 2.first.col &&
+                        2.first.col == 3.first.col)}
+
+  PremiseList -> RulePremises {cons("PremiseList")}
+              -> RulePremises {cons("NoPremises")}
+
+  OffTypingJudgment -> RuleConsequence
+  
+  TypingJudgment -> OffTypingJudgment {layout(1.first.col < 1.left.col)}
+
+  OffTypeRuleJudgment -> PremiseList
+  OffTypeRuleJudgment PremiseList -> PremiseList {cons("PremiseCons"), layout(1.first.col == 2.first.col)}
+
+  TypeRuleJudgment -> OffTypeRuleJudgment {layout(1.first.col < 1.left.col)}
+
+
+context-free syntax // *** Syntax for branch typing rules ***
+
+  BranchTypeRule -> SugarDefElem
+  
+  BranchTypeRulePremises RuleSepName BranchTypeRuleConsequence
+    -> BranchTypeRule {cons("BranchTypeRule"),
+                       layout(1.first.col == 2.first.col &&
+                              2.first.col == 3.first.col)}
+
+  BranchTypeRulePremiseList -> BranchTypeRulePremises {cons("PremiseList")}
+                            -> BranchTypeRulePremises {cons("NoPremises")}
+
+  OffBranchTypingJudgment -> BranchTypeRuleConsequence
+  
+  BranchTypingJudgment -> OffBranchTypingJudgment {layout(1.first.col < 1.left.col)}
+
+  OffBranchTypeRuleJudgment                           -> BranchTypeRulePremiseList
+  OffBranchTypeRuleJudgment BranchTypeRulePremiseList -> BranchTypeRulePremiseList {cons("PremiseCons"),
+                                                                                    layout(1.first.col == 2.first.col)}
+
+  BranchTypeRuleJudgment -> OffBranchTypeRuleJudgment {layout(1.first.col < 1.left.col)}
+
+
+context-free syntax // *** Syntax for contexts ***
+
   "()"                                                        -> Context {cons("CtxEmpty")}
   "(" Context ";" FomegaID ":" FomegaType ")"                 -> Context {cons("CtxBindVar")}
   "(" Context ";" FomegaID "::" FomegaKind ")"                -> Context {cons("CtxBindTVar")}
   "(" Context ";" FomegaID "::" FomegaKind "=" FomegaType ")" -> Context {cons("CtxBindTVarDef")}
 
 
-// *** Syntax for judgments ***
+context-free syntax // *** Syntax for judgments ***
 
-context-free syntax
-  Context "|-" FomegaType "::" FomegaKind -> TypeRuleJudgment {cons("KindingJudgment")}
-  Context "|-" FomegaExpr ":" FomegaType  -> TypeRuleJudgment {cons("TypingJudgment")}
-  Context "|-" FomegaType "~>" FomegaType -> TypeRuleJudgment {cons("NormalizationJudgment")}
+  Context "|-" FomegaType "::" FomegaKind                      -> KindingJudgment       {cons("KindingJudgment")} 
+  Context "|-" FomegaExpr ":" FomegaType                       -> TypingJudgment        {cons("TypingJudgment")}
+  Context "|-" FomegaType "~>" FomegaType                      -> NormalizationJudgment {cons("NormalizationJudgment")}
+  Context "|" FomegaTyDecls "|-" FomegaBranches ":" FomegaType -> BranchTypingJudgment  {cons("BranchTypingJudgment")}
 
-  "lab" "(" FomegaTypeDecls ")" "~=" "tag" "(" FomegaBranches ")" ->
-    TypeRuleJudgment {cons("LabelTagJudgment")}
+  "lab" "(" FomegaTyDecls ")" "~=" "tag" "(" FomegaBranches ")" ->
+    LabelTagJudgment {cons("LabelTagJudgment")}
 
-  FomegaID "notin" "tag" "(" FomegaBranches ")" -> TypeRuleJudgment {cons("NotinTagJudgment")}
+  FomegaID "notin" "tag" "(" FomegaBranches ")"      -> NotinTagJudgment      {cons("NotinTagJudgment")}
+  FomegaID "notin" "sel" "(" FomegaFields ")"        -> NotinSelJudgment      {cons("NotinSelJudgment")}
+  FomegaID ":" FomegaType "in" "decls" FomegaTyDecls -> InDeclJudgment        {cons("InDeclJudgment")}
+  FomegaID ":" FomegaType "in" Context               -> VarInContextJudgment  {cons("VarInContextJudgment")}
+  FomegaQID ":" FomegaType "in" Context              -> QVarInContextJudgment {cons("QVarInContextJudgment")}
 
-  FomegaID "notin" "sel" "(" FomegaFields ")" -> TypeRuleJudgment {cons("NotinSelJudgment")}
+  FomegaQID "/=" FomegaQID -> UnequalQIDJudgment {cons("UnequalQIDJudgment")}
+  FomegaID "/=" FomegaID   -> UnequalIDJudgment  {cons("UnequalIDJudgment")}
 
-  // FomegaID ":" FomegaType "in" FomegaTypeDecls -> TypeRuleJudgment {cons("InDeclJudgment")}
+  // Judgments allowed as premises in typing rules
+  KindingJudgment       -> TypeRuleJudgment
+  TypingJudgment        -> TypeRuleJudgment
+  NormalizationJudgment -> TypeRuleJudgment
+  BranchTypingJudgment  -> TypeRuleJudgment
+  NotinTagJudgment      -> TypeRuleJudgment
+  NotinSelJudgment      -> TypeRuleJudgment
+  InDeclJudgment        -> TypeRuleJudgment
+  VarInContextJudgment  -> TypeRuleJudgment
+  QVarInContextJudgment -> TypeRuleJudgment
+  UnequalQIDJudgment    -> TypeRuleJudgment
+  UnequalIDJudgment     -> TypeRuleJudgment
+  LabelTagJudgment      -> TypeRuleJudgment
+  
+  // Judgments allowed as premises in branch typing rules
+  TypingJudgment        -> BranchTypeRuleJudgment
+  InDeclJudgment        -> BranchTypeRuleJudgment
+  NotinTagJudgment      -> BranchTypeRuleJudgment
+  NormalizationJudgment -> BranchTypeRuleJudgment
+  BranchTypingJudgment  -> BranchTypeRuleJudgment
 
-  FomegaID ":" FomegaType "in" Context -> TypeRuleJudgment {cons("VarInContextJudgment")}
 
-  FomegaQID ":" FomegaType "in" Context -> TypeRuleJudgment {cons("QVarInContextJudgment")}
+context-free syntax // *** Substitution on level of types
 
-  FomegaQID "/=" FomegaQID -> TypeRuleJudgment {cons("UnequalQIDJudgment")}
-  FomegaID "/=" FomegaID   -> TypeRuleJudgment {cons("UnequalIDJudgment")}
-
-  Context "|" FomegaTypeDecls "|-" FomegaBranches ":" FomegaType ->
-  TypeRuleJudgment {cons("BranchTypingJudgment")}
-
-// *** Substitution on level of types
-
-context-free syntax
   "[" FomegaID "|->" FomegaType "]" FomegaType -> FomegaType {cons("Subst")}
 
 signature
@@ -82,13 +121,13 @@ signature
 // *** Meta variables ***
 
 context-free syntax
-  "~" StrategoVar -> Context         {cons("Metavar")}
-  "~" StrategoVar -> FomegaTypeDecls {cons("Metavar")}
-  "~" StrategoVar -> FomegaBranches  {cons("Metavar")}
-  "~" StrategoVar -> FomegaFields    {cons("Metavar")}
-  "~" StrategoVar -> FomegaExpr      {cons("Metavar")}
-  "~" StrategoVar -> FomegaType      {cons("Metavar")}
-  "~" StrategoVar -> FomegaKind      {cons("Metavar")}
+  "~" StrategoVar  -> Context        {cons("Metavar")}
+  "~" StrategoVar  -> FomegaTyDecls  {cons("Metavar")}
+  "~" StrategoVar  -> FomegaBranches {cons("Metavar")}
+  "~" StrategoVar  -> FomegaFields   {cons("Metavar")}
+  "~" StrategoVar  -> FomegaExpr     {cons("Metavar")}
+  "~" StrategoVar  -> FomegaType     {cons("Metavar")}
+  "~" StrategoVar  -> FomegaKind     {cons("Metavar")}
 
   "~%" StrategoVar -> FomegaID       {cons("Metavar")}
   "~&" StrategoVar -> FomegaQID      {cons("Metavar")}
