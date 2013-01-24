@@ -356,6 +356,8 @@ public class Driver{
         stepped();
         
         IStrategoTerm analyzed = currentAnalyze(lastSugaredToplevelDecl);
+        analyzed = ATermCommands.copyTokens(lastSugaredToplevelDecl, analyzed);
+        lastSugaredToplevelDecl = analyzed;
         
         stepped();
         
@@ -623,6 +625,7 @@ public class Driver{
       parseResult = SDFCommands.parseImplode(
           table,
           remainingInput,
+          sourceFile,
           "ToplevelDeclaration",
           recovery,
           true,
