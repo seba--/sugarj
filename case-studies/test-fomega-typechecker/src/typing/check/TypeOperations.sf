@@ -11,12 +11,15 @@ import concretesyntax.Stratego
 
 
 rules
-  labType: (x,T) -> (TyUnknown(), ["not a variant or record type"])
-           where if (!T; ?Cons(_,_)) then fail else if (!T; ?Nil()) then fail else id end end
-  labType: (x,[]) -> (TyUnknown(), [<concat-strings> ["undefined label ",x]])
-  labType: (x,[TyDecl(x,T)|decls]) -> (T,[])
-  labType: (x,[TyDecl(y,T)|decls]) -> <labType> (x,decls)
-           where <not(equal)> (x,y)
+  // labType: FomegaID * TyDecls -> Type * List(String)
+  labType = labType1 <+ !(TyUnknown(), ["not a variant or record type"])
+  labType1 :
+    (x, TyDeclsNil()) -> (TyUnknown(), [<concat-strings> ["undefined label ", x]])
+  labType1 :
+    (x, TyDeclsCons(TyDecl(x, T), decls)) -> (T, [])
+  labType1 :
+    (x, TyDeclsCons(TyDecl(y, T), decls)) -> <labType> (x, decls)
+    where <not(equal)> (x, y)
 
   typeMismatch:
     (S,T) -> [<concat-strings> ["type mismatch, expected "
@@ -101,11 +104,13 @@ rules
     where if (!T; ?TyVar(X)) then ![] else !(<typeMismatch> (TyVar(X),T)) end => msgs
 
   // Assumes that both lists of declarations have the same labels
-  declsEq: ([],decls1) -> []
-  declsEq: ([TyDecl(x,T)|decls],decls1) -> <conc> (msgs2,msgs3)
-    where <labType> (x,decls1) => (S,msgs1)
-        ; <typeEq> (T,S) => msgs2
-        ; <declsEq> (decls,decls1) => msgs3
+  declsEq :
+    (TyDeclsNil(), decls1) -> []
+  declsEq:
+    (TyDeclsCons(TyDecl(x, T), decls), decls1) -> <conc> (msgs2, msgs3)
+    where <labType> (x, decls1) => (S, msgs1)
+        ; <typeEq> (T, S) => msgs2
+        ; <declsEq> (decls, decls1) => msgs3
 
   // TyUnknown is equal to any type. Other types are compared structurally.
   // Bound variable are renamed as necessary and the order of declarations
@@ -307,3 +312,9 @@ rules
   parReduce1: (ctx,TyRecord(decls)) -> TyRecord(<map(\ decl -> <parReduceDecl> (ctx,decl) \)> decls)
 
   parReduceDecl: (ctx,TyDecl(x,T)) -> TyDecl(x,<parReduce> (ctx,T))
+
+
+  // Map over type declarations
+  map = mapDecls
+  mapDecls(s) : TyDeclsNil -> TyDeclsNil
+  mapDecls(s) : TyDeclsCons(decl, decls) -> TyDeclsCons(<s> decl, <map(s)> decls)

@@ -10,8 +10,8 @@ signature
     KiUnknown: FomegaKind
 
 rules
-  lab: [] -> []
-  lab: [TyDecl(x,T) | decls] -> [x|<lab> decls]
+  lab : TyDeclsNil -> []
+  lab : TyDeclsCons(TyDecl(x, T), decls) -> [x | <lab> decls]
 
   kindMismatch:
     (K,J) -> [<concat-strings> ["kind mismatch, expected ",<write-to-string> K," but found ",<write-to-string> J]]
@@ -91,9 +91,9 @@ rules
     where <not(equal)> (qY,qX)
 
   kindOf:
-    (ctx,TyVariant([])) -> (KiStar(),[])
+    (ctx,TyVariant(TyDeclsNil())) -> (KiStar(),[])
   kindOf:
-    (ctx,TyVariant([TyDecl(x,T) | decls])) ->
+    (ctx,TyVariant(TyDeclsCons(TyDecl(x,T), decls))) ->
     (KiStar(),<conc> (errs1,errs2,errs3,errs4,errs5))
     where errorUnless(<not(elem)> (x,<lab> decls)
                      | [(decls, <concat-strings> ["duplicate label ",x])]) => errs1
@@ -105,9 +105,9 @@ rules
         ; <msgsToErrs> (msgs5,decls) => errs5
 
   kindOf:
-    (ctx,TyRecord([])) -> (KiStar(),[])
+    (ctx,TyRecord(TyDeclsNil())) -> (KiStar(),[])
   kindOf:
-    (ctx,TyRecord([TyDecl(x,T) | decls])) ->
+    (ctx,TyRecord(TyDeclsCons(TyDecl(x,T), decls))) ->
     (KiStar(),<conc> (errs1,errs2,errs3,errs4,errs5))
     where errorUnless(<not(elem)> (x,<lab> decls)
                      | [(x,<concat-strings> ["duplicate label ",x])]) => errs1

@@ -8,8 +8,8 @@ import typing.check.ErrorHandling
 import org.sugarj.languages.Fomega
 
 rules
-  tag: [] -> []
-  tag: [Branch(x,y,e)|brs] -> [x|<tag> brs]
+  tag : BranchesEnd(Branch(x, t, e)) -> [x]
+  tag : BranchesCons(Branch(x, y, e), brs) -> [x | <tag> brs]
 
   // *** Case expression ***
   //
@@ -35,7 +35,7 @@ rules
   // -----------------------------
   // Γ | <decls> ⊢ <x=y> => e : T
   typeOfBrs:
-    (ctx,R,[Branch(x,y,e)]) -> (T,<conc> (errs1,errs2))
+    (ctx,R,BranchesEnd(Branch(x,y,e))) -> (T,<conc> (errs1,errs2))
     where <labType> (x,R) => (S,msgs1)
         ; <msgsToErrs> (msgs1,x) => errs1
         ; <typeOf> (CtxBindVar(ctx,y,S),e) => (T,errs2)
@@ -45,7 +45,7 @@ rules
   // ----------------------------------------------
   // Γ | <decls> ⊢ <x=y> => e; brs : U
   typeOfBrs:
-    (ctx,R,[Branch(x,y,e)|brs]) ->
+    (ctx,R,BranchesCons(Branch(x,y,e),brs)) ->
     (T1',<conc> (errs1,errs2,errs3,errs4,errs5))
     where errorUnless(<not(elem)> (x, <tag> brs)
                       | (x,<concat-strings> ["duplicate tag ",x])) => errs1
@@ -56,7 +56,7 @@ rules
         ; <typeOfBrs> (ctx,R,brs) => (T2,errs4)
         ; <norm> (ctx,T2) => T2'
         ; <typeEq> (T1',T2') => msgs5
-        ; <msgsToErrs> (msgs5,[Branch(x,y,e)|brs]) => errs5
+        ; <msgsToErrs> (msgs5,BranchesCons(Branch(x,y,e),brs)) => errs5
 
   // *** Conditional ***
   //
@@ -234,13 +234,13 @@ rules
   // -----------
   // Γ ⊢ {} : {}
   typeOf:
-    (ctx,Record([])) -> (TyRecord([]),[])
+    (ctx,Record(FieldsNil())) -> (TyRecord(TyDeclsNil()),[])
   // Γ ⊢ e : T   Γ ⊢ {flds} : S   Γ ⊢ S ⇓ {decls}   x ∉ lab(decls)
   // --------------------------------------------------------------
   // Γ ⊢ {x=e,flds} : {x:T,decls}
   typeOf:
-    (ctx,Record([Field(x,e)|flds])) ->
-    (TyRecord([TyDecl(x,T)|decls]),<conc> (errs1,errs2,errs3,errs4))
+    (ctx,Record(FieldsCons(Field(x,e),flds))) ->
+    (TyRecord(TyDeclsCons(TyDecl(x,T),decls)),<conc> (errs1,errs2,errs3,errs4)) 
     where <typeOf> (ctx,e) => (T,errs1)
         ; <typeOf> (ctx,Record(flds)) => (S,errs2)
         ; <norm> (ctx,S) => S'
@@ -273,7 +273,7 @@ rules
     (CtxBindVar(ctx,qx,T),QVar(qx)) -> (T,[])
   typeOf:
     (CtxBindVar(ctx,qy,T),QVar(qx)) -> <typeOf> (ctx,QVar(qx))
-    where <not(equal)> (qy,qx)
+    where <not(equal)> (qy,qx) 
 
 // *** Notes ***
 //

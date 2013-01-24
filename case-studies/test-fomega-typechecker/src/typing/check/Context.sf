@@ -25,4 +25,4 @@ rules
   lookup-expr-var: (x, CtxBindTVar(ctx, Y, K)) -> <lookup-expr-var> (x, ctx)
   lookup-expr-var: (x, CtxBindTVarDef(ctx, Y, K, T)) -> <lookup-expr-var> (x, ctx)
   lookup-expr-var: (x, CtxBindVar(ctx, x, T)) -> (T, [])
-  lookup-expr-var: (x, CtxBindVar(ctx, y, T)) -> <lookup-expr-var> (x, ctx) where <not(equal)> (y,x)
+  lookup-expr-var: (x, CtxBindVar(ctx, y, T)) -> <lookup-expr-var> (x, ctx) where <not(equal)> (y,x) 
