@@ -26,8 +26,8 @@ rules
     constraint-note = fail
 
 
-  change-annotations-only(s) = ?t; s => t2; !(t,t2); equal-except-annotations; !t2 
-  equal-except-annotations = ?(c#(xs),d#(ys)); <equal> (c,d); <zip(equal-except-annotations)> (xs, ys)
+  change-annotations-only(s) = ?t; s => t2; !(t,t2); not(equal); structurally-equal; !t2 
+  structurally-equal = ?(c#(xs),d#(ys)); <equal> (c,d); <zip(structurally-equal)> (xs, ys)
   
 rules
   // desugar =
