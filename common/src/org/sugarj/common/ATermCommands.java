@@ -26,7 +26,6 @@ import org.spoofax.jsglr_layout.client.imploder.Tokenizer;
 import org.spoofax.jsglr_layout.io.ParseTableManager;
 import org.spoofax.terms.StrategoListIterator;
 import org.spoofax.terms.TermFactory;
-import org.spoofax.terms.TermVisitor;
 import org.spoofax.terms.attachments.ParentAttachment;
 import org.spoofax.terms.attachments.ParentTermFactory;
 import org.spoofax.terms.io.InlinePrinter;
@@ -96,7 +95,8 @@ public class ATermCommands {
     }
   }
   
-  public static ITermFactory factory = new ImploderOriginTermFactory(new ParentTermFactory(new TermFactory().getFactoryWithStorageType(IStrategoTerm.MUTABLE)));
+  // TODO use origin factory
+  public static ITermFactory factory = new ParentTermFactory(new TermFactory().getFactoryWithStorageType(IStrategoTerm.MUTABLE));
   public static ParseTableManager parseTableManager = new ParseTableManager(factory, false);
 
   public static IStrategoTerm atermFromFile(String filename) throws IOException {
@@ -436,6 +436,7 @@ public class ATermCommands {
       org.spoofax.jsglr.client.imploder.Token oLeft = map.get(left);
       org.spoofax.jsglr.client.imploder.Token oRight = map.get(right);
       
+      current.removeAttachment(ImploderAttachment.TYPE);
       org.spoofax.jsglr.client.imploder.ImploderAttachment.putImploderAttachment(current, isSequence, sort, oLeft, oRight);
       
       for (int i = current.getSubtermCount() - 1; i >= 0; i--)
@@ -491,7 +492,10 @@ public class ATermCommands {
       
       for (int i = 0; i < from.getSubtermCount(); i++) {
         fromStack.push(from.getSubterm(i));
-        toStack.push(to.getSubterm(i));
+        
+        IStrategoTerm subterm = to.getSubterm(i);
+        ParentAttachment.putParent(subterm, to, null);
+        toStack.push(subterm);
       }
     }
     
