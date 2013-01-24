@@ -1,8 +1,9 @@
 module org/sugarj/transformations/Analyze
 imports
   org/sugarj/languages/Sugar
+  org/sugarj/stdlib/StdTrans
 rules
-  analyze-main = bottomup(try(analyze))
+  analyze-main = repeat(changed-tree(analyze))
   analyze = fail
   get-anno(|key) = get-annotations; !(key,<id>); lookup
   put-anno(|key,val) = where((get-annotations <+ ![]) => annos); !(<id>,[(key,val)|annos]); set-annotations
