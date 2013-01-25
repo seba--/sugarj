@@ -427,16 +427,18 @@ public class ATermCommands {
       IStrategoTerm current = terms.pop();
       
       ImploderAttachment attach = ImploderAttachment.get(current);
-      boolean isSequence = attach.isSequenceAttachment();
-      String sort = isSequence ? attach.getElementSort() : attach.getSort();
-      IToken left = attach.getLeftToken();
-      IToken right = attach.getRightToken();
-      
-      org.spoofax.jsglr.client.imploder.Token oLeft = map.get(left);
-      org.spoofax.jsglr.client.imploder.Token oRight = map.get(right);
-      
-      current.removeAttachment(ImploderAttachment.TYPE);
-      org.spoofax.jsglr.client.imploder.ImploderAttachment.putImploderAttachment(current, isSequence, sort, oLeft, oRight);
+      if (attach != null) {
+        boolean isSequence = attach.isSequenceAttachment();
+        String sort = isSequence ? attach.getElementSort() : attach.getSort();
+        IToken left = attach.getLeftToken();
+        IToken right = attach.getRightToken();
+        
+        org.spoofax.jsglr.client.imploder.Token oLeft = map.get(left);
+        org.spoofax.jsglr.client.imploder.Token oRight = map.get(right);
+        
+        current.removeAttachment(ImploderAttachment.TYPE);
+        org.spoofax.jsglr.client.imploder.ImploderAttachment.putImploderAttachment(current, isSequence, sort, oLeft, oRight);
+      }
       
       for (int i = current.getSubtermCount() - 1; i >= 0; i--)
         terms.push(current.getAllSubterms()[i]);
