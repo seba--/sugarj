@@ -1,6 +1,7 @@
 package test;
 
 import quest.syntax.Questionnaire;
+import quest.trans.NormalizeQuestionText;
 
 public questionnaire HouseOwning
 
@@ -8,3 +9,4 @@ public questionnaire HouseOwning
     Did you sell a house in 2010?
   boolean question hasBoughtHouse =
     Did you by a house in 2010?
+
