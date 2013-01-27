@@ -1,0 +1,22 @@
+package quest.syntax;
+
+public sugar Questionnaire {
+  context-free syntax
+    Quest -> ToplevelDeclaration
+    AnnoOrSugarMod* "questionnaire" JavaId QuestBody
+      -> Quest {cons("Questionnaire"), layout(1.first.col < 4.first.col)}
+
+    -> QuestBody {cons("QNil")}
+    QuestElem QuestBody -> QuestBody {cons("QCons"),
+                                      layout(1.first.col == 2.first.col
+                                          && 1.first.col < 1.left.col)}
+  
+  context-free syntax
+    Question -> QuestElem
+    JavaType "question" JavaId "=" QuestionText
+      -> Question {cons("Question"), layout(1.first.col < 5.first.col
+                                         && 5.first.col <= 5.left.col)}
+  
+  lexical syntax
+    (~[\ \t\n\r]+ LAYOUT+)* ~[\ \t\n\r]+ -> QuestionText
+}

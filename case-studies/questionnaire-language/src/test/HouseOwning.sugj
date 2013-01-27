@@ -1,0 +1,10 @@
+package test;
+
+import quest.syntax.Questionnaire;
+
+public questionnaire HouseOwning
+
+  boolean question hasSoldHouse =
+    Did you sell a house in 2010?
+  boolean question hasBoughtHouse =
+    Did you by a house in 2010?
