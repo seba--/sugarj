@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -43,6 +44,7 @@ import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.FilteringIOAgent;
 import org.sugarj.common.Log;
+import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
@@ -59,6 +61,8 @@ import org.sugarj.util.Pair;
  */
 public class SDFCommands {
   
+  public final static boolean USE_PERMISSIVE_GRAMMARS = true;
+  
   private final static Pattern SDF_FILE_PATTERN = Pattern.compile(".*\\.sdf");
   
   private static ExecutorService parseExecutorService = Executors.newSingleThreadExecutor();
@@ -66,7 +70,7 @@ public class SDFCommands {
   /*
    * timeout for parsing files (in milliseconds)
    */
-  public static long PARSE_TIMEOUT = 60000;
+  public static long PARSE_TIMEOUT = 10000;
   static {
     try {
       PARSE_TIMEOUT = Long.parseLong(System.getProperty("org.sugarj.parse_timeout"));
@@ -79,37 +83,44 @@ public class SDFCommands {
   private static IOAgent sdf2tableIOAgent = new FilteringIOAgent(Log.PARSE | Log.DETAIL, "Invoking native tool .*");
   private static IOAgent makePermissiveIOAgent = new FilteringIOAgent(Log.PARSE | Log.DETAIL, "[ make_permissive | info ].*");
   
-  // cai 27.09.12
-  // convert path-separator to that of the OS
-  // so that strategoXT doesn't prepend ./ to C:/foo/bar/baz.
-  private static String nativePath(String path){
-      return path.replace('/', File.separatorChar);
-  }
-  
-  private static void packSdf(Path sdf, Path def, Collection<Path> paths, LanguageLib langLib) throws IOException {
+  private static void packSdf(
+      Path sdf, 
+      Path def, 
+      Collection<Path> paths, 
+      ModuleKeyCache<Path> sdfCache, 
+      Environment environment, 
+      LanguageLib langLib) throws IOException {
     /*
      * We can include as many paths as we want here, checking the
      * adequacy of the occurring imports is done elsewhere.
      */
     List<String> cmd = new ArrayList<String>(Arrays.asList(new String[]{
-        "-i", nativePath(sdf.getAbsolutePath()),
-        "-o", nativePath(def.getAbsolutePath())
+        "-i", FileCommands.nativePath(sdf.getAbsolutePath()),
+        "-o", FileCommands.nativePath(def.getAbsolutePath())
     }));
     
     for (File grammarFile : langLib.getDefaultGrammars()) {
+      ModuleKey key = new ModuleKey(Collections.<Path, Integer>emptyMap(), grammarFile.getAbsolutePath()); 
+      Path permissiveGrammar = lookupGrammarInCache(sdfCache, key);
+      if (permissiveGrammar == null) {
+        permissiveGrammar = FileCommands.newTempFile("def");
+        makePermissive(new AbsolutePath(grammarFile.getAbsolutePath()), permissiveGrammar);
+        permissiveGrammar = cacheParseTable(sdfCache, key, permissiveGrammar, environment);
+      }
+      
       cmd.add("-Idef");
-      cmd.add(nativePath(grammarFile.getPath()));
+      cmd.add(FileCommands.nativePath(permissiveGrammar.getAbsolutePath()));
     }
     
     cmd.add("-I");
-    cmd.add(nativePath(langLib.getLibraryDirectory().getPath()));
+    cmd.add(FileCommands.nativePath(langLib.getLibraryDirectory().getPath()));
     cmd.add("-I");
-    cmd.add(nativePath(StdLib.stdLibDir.getPath()));
+    cmd.add(FileCommands.nativePath(StdLib.stdLibDir.getPath()));
     
     for (Path path : paths) 
       if (path.getFile().isDirectory()) {
         cmd.add("-I");
-        cmd.add(nativePath(path.getAbsolutePath()));
+        cmd.add(FileCommands.nativePath(path.getAbsolutePath()));
       }
     
     // Pack-sdf requires a fresh context each time, because it caches grammars, which leads to a heap overflow.
@@ -171,9 +182,9 @@ public class SDFCommands {
     FileCommands.deleteTempFiles(tbl);
   }
   
-  public static void check(Path sdf, String module, Collection<Path> paths, LanguageLib langLib) throws IOException {
+  public static void check(Path sdf, String module, Collection<Path> paths, ModuleKeyCache<Path> sdfCache, Environment environment, LanguageLib langLib) throws IOException {
     Path def = FileCommands.newTempFile("def");
-    packSdf(sdf, def, paths, langLib);
+    packSdf(sdf, def, paths, sdfCache, environment, langLib);
     normalizeTable(def, module);
     FileCommands.deleteTempFiles(def);
   }
@@ -199,8 +210,8 @@ public class SDFCommands {
     ModuleKey key = getModuleKeyForGrammar(sdf, module, dependentFiles, sdfParser);
     Path tbl = lookupGrammarInCache(sdfCache, key);
     if (tbl == null) {
-      tbl = generateParseTable(key, sdf, module, environment.getIncludePath(), langLib);
-      cacheParseTable(sdfCache, key, tbl, environment);
+      tbl = generateParseTable(key, sdf, module, environment.getIncludePath(), sdfCache, environment, langLib);
+      tbl = cacheParseTable(sdfCache, key, tbl, environment);
     }
     
     if (tbl != null)
@@ -210,9 +221,9 @@ public class SDFCommands {
   }
   
   
-  private static void cacheParseTable(ModuleKeyCache<Path> sdfCache, ModuleKey key, Path tbl, Environment environment) throws IOException {
+  private static Path cacheParseTable(ModuleKeyCache<Path> sdfCache, ModuleKey key, Path tbl, Environment environment) throws IOException {
     if (sdfCache == null)
-      return;
+      return tbl;
     
     log.beginTask("Caching", "Cache parse table", Log.CACHING);
     try {
@@ -223,6 +234,7 @@ public class SDFCommands {
       FileCommands.delete(oldTbl);
 
       log.log("Cache Location: " + cacheTbl, Log.CACHING);
+      return cacheTbl;
     } finally {
       log.endTask();
     }
@@ -277,6 +289,8 @@ public class SDFCommands {
                                          Path sdf,
                                          String module,
                                          Collection<Path> paths,
+                                         ModuleKeyCache<Path> sdfCache,
+                                         Environment environment,
                                          LanguageLib langLib)
       throws IOException, InvalidParseTableException {
     log.beginTask("Generating", "Generate the parse table", Log.PARSE);
@@ -286,7 +300,7 @@ public class SDFCommands {
       tblFile = FileCommands.newTempFile("tbl");
 
       Path def = FileCommands.newTempFile("def");
-      packSdf(sdf, def, paths, langLib);
+      packSdf(sdf, def, paths, sdfCache, environment, langLib);
       sdf2Table(def, tblFile, module);
       FileCommands.deleteTempFiles(def);
       return tblFile;
@@ -296,9 +310,6 @@ public class SDFCommands {
   }
   
   public static String makePermissiveSdf(String source) throws IOException {
-    if (true)
-      return source;
-    
     Path def = FileCommands.newTempFile("def");
     Path permissiveDef = FileCommands.newTempFile("def-permissive");
     
@@ -312,6 +323,11 @@ public class SDFCommands {
   }
   
   private static void makePermissive(Path def, Path permissiveDef) throws IOException {
+    if (!USE_PERMISSIVE_GRAMMARS) {
+      FileCommands.copyFile(def, permissiveDef);
+      return;
+    } 
+      
     log.beginExecution("make permissive", Log.PARSE, "-i", def.getAbsolutePath(), "-o", permissiveDef.getAbsolutePath());
     Context mpContext = SugarJContexts.makePermissiveContext();
     mpContext.setIOAgent(makePermissiveIOAgent);

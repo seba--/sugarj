@@ -389,4 +389,11 @@ public class FileCommands {
         in.close();
     }
   }
+
+  // cai 27.09.12
+  // convert path-separator to that of the OS
+  // so that strategoXT doesn't prepend ./ to C:/foo/bar/baz.
+  public static String nativePath(String path){
+      return path.replace('/', File.separatorChar);
+  }
 }
