@@ -181,7 +181,8 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
   public          IStrategoTerm getTransformationBody(IStrategoTerm decl) { return null; }
   
 	protected void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IErrorLogger errorLog) {
-	  errorLog.logError(msg);
+	  if (errorLog != null)
+	    errorLog.logError(msg);
 	  ATermCommands.setErrorMessage(toplevelDecl, msg);
   }
 
