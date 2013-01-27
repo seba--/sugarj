@@ -61,7 +61,7 @@ import org.sugarj.util.Pair;
  */
 public class SDFCommands {
   
-  public final static boolean USE_PERMISSIVE_GRAMMARS = true;
+  public final static boolean USE_PERMISSIVE_GRAMMARS = false;
   
   private final static Pattern SDF_FILE_PATTERN = Pattern.compile(".*\\.sdf");
   
