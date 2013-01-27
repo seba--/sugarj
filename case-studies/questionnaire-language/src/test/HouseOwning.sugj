@@ -2,6 +2,7 @@ package test;
 
 import quest.syntax.Questionnaire;
 import quest.trans.NormalizeQuestionText;
+import quest.editor.Questionnaire;
 
 public questionnaire HouseOwning
 
@@ -10,3 +11,9 @@ public questionnaire HouseOwning
   boolean question hasBoughtHouse =
     Did you by a house in 2010?
 
+  question group Payment
+    int question howMuchPaid =
+      How much did you pay?
+    String question howPaid =
+      Which method of payment did you use?
+    

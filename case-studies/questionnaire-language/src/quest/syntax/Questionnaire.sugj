@@ -19,13 +19,21 @@ public sugar Questionnaire {
       Questionnaire(mods, name, body) -> 
       ModelDec(ModelDecHead(mods, name, "quest.syntax.Questionnaire"), ModelBody(body))
 
+  // question
   context-free syntax
     Question -> QuestElem
-    JavaType "question" JavaId "=" QuestionText
+    JavaType "question" JavaId "=" QuestText
       -> Question {cons("Question"), layout(1.first.col < 5.first.col
                                          && 5.first.col <= 5.left.col)}
-    QuestionString -> QuestionText {cons("QuestionText")}
+    QuestionString -> QuestText {cons("QuestionText")}
   
   lexical syntax
     (~[\ \t\n\r]+ LAYOUT+)* ~[\ \t\n\r]+ -> QuestionString
+    
+  
+  // question group
+  context-free syntax
+    QuestGroup -> QuestElem
+    "question" "group" JavaId QuestBody -> QuestGroup {cons("QuestGroup"),
+                                                       layout(1.first.col < 4.first.col)}
 }
