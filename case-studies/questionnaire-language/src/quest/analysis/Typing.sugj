@@ -14,8 +14,14 @@ public sugar Typing {
     
     analyze-types = ?Question(QuestType(type), _, _); put-type(|<strip-annos> type) 
     analyze-types =
-      DerivedValue(QuestType(?type), id, analyze-expr-type);
-      put-type(|<strip-annos> type)
+      DerivedValue(
+        QuestType(strip-annos => type), 
+        id, 
+        QuestExpr(analyze-expr-type; where(retrieve-type => etype)));
+      if <equal> (type, etype)
+        then put-type(|type)
+        else DerivedValue(id, id, QuestExpr(unexpected-type-error(|type)))
+      end
     analyze-types = QuestGroup(id, analyze-types)
     analyze-types = ConditionalQuest(analyze-expr-type, analyze-types)
     analyze-types = ConditionalQuest(analyze-expr-type, analyze-types, analyze-types)
@@ -25,7 +31,7 @@ public sugar Typing {
       where(get-ref-type => type);
       put-type(|type)
 
-    get-ref-type = retrieve-reference; (retrieve-type <+ analysis-data-as-list;debug)
+    get-ref-type = retrieve-reference; (retrieve-type <+ analysis-data-as-list)
 
   rules
     analyze-expr-type = 
@@ -90,8 +96,8 @@ public sugar Typing {
     
     unexpected-type-error(|expected) =
       if retrieve-type => was
-        then put-type-error(|<conc-strings> ("Expected type: ", expected, ", found: ", was, "."))
-        else put-type-error(|<conc-strings> ("Expected type: ", expected, ", no type found."))
+        then put-type-error(|<conc-strings> ("Expected type: ", expected, ", found: ", was))
+        else put-type-error(|<conc-strings> ("Expected type: ", expected, ", but no type found"))
       end
     has-type-error = get-anno(|"type-error")
     retrieve-type-error = get-anno(|"type-error")
