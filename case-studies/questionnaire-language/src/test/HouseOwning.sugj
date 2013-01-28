@@ -16,4 +16,8 @@ public questionnaire HouseOwning
       How much did you pay?
     String question howPaid =
       Which method of payment did you use?
-    
+  
+  if 1 + 2 == 3
+    boolean question x = That so?
+    define boolean question really = Really?
+    really

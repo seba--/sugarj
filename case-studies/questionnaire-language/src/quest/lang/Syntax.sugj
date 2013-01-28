@@ -20,8 +20,11 @@ public sugar Syntax {
   // question
   context-free syntax
     Question -> QuestElem {layout(1.first.col < 1.left.col)}
-    JavaType "question" JavaId "=" QuestText -> Question {cons("Question")}
+    QuestType "question" QuestId "=" QuestText -> Question {cons("Question")}
     QuestionString -> QuestText {cons("QuestionText"), layout(1.first.col <= 1.left.col)}
+    
+    JavaID -> QuestId {cons("QuestId")}
+    JavaType -> QuestType {cons("QuestType")}
   
   lexical syntax
     (~[\ \t\n\r]+ LAYOUT+)* ~[\ \t\n\r]+ -> QuestionString
@@ -30,16 +33,24 @@ public sugar Syntax {
   // question group
   context-free syntax
     QuestGroup -> QuestElem {layout(1.first.col < 1.left.col)}
-    "question" "group" JavaId QuestList -> QuestGroup {cons("QuestGroup")}
+    "question" "group" QuestId QuestList -> QuestGroup {cons("QuestGroup")}
                                                        
   // conditional question
   context-free syntax
     ConditionalQuest -> QuestElem
-    "if" JavaExpr QuestList -> ConditionalQuest {cons("ConditionalQuest"),
+    "if" QuestExpr QuestList -> ConditionalQuest {cons("ConditionalQuest"),
                                                  layout(1.first.col < 2.first.col && 1.first.col < 3.first.col)}
-    "if" JavaExpr QuestList
+    "if" QuestExpr QuestList
     "else" QuestList -> ConditionalQuest {cons("ConditionalQuest"),
                                           layout(1.first.col < 2.first.col && 1.first.col < 3.first.col
                                               && 4.first.col == 1.first.col
                                               && 4.first.col < 5.left.col)}
+    
+    JavaExpr -> QuestExpr {cons("QuestExpr")}
+
+  // local question
+  context-free syntax
+    LocalQuest -> QuestElem {layout(1.first.col < 1.left.col)}
+    "define" Question -> LocalQuest {cons("LocalQuest")}
+    QuestId -> Question {cons("QuestRef")}
 }

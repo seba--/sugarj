@@ -10,4 +10,5 @@ public editor services Editor {
     
   colorer
     QuestText : blue
+    QuestId : red
 }
