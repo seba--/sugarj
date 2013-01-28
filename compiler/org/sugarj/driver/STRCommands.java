@@ -155,7 +155,7 @@ public class STRCommands {
         error = e;
       } finally {
         if (prog != null && FileCommands.exists(prog) && !FileCommands.isEmptyFile(prog))
-          cacheAssimilator(strCache, key, prog, environment);
+          prog = cacheAssimilator(strCache, key, prog, environment);
       }
 
       if (error != null)
@@ -183,9 +183,9 @@ public class STRCommands {
     }
   }
     
-  private static void cacheAssimilator(ModuleKeyCache<Path> strCache, ModuleKey key, Path prog, Environment environment) throws IOException {
+  private static Path cacheAssimilator(ModuleKeyCache<Path> strCache, ModuleKey key, Path prog, Environment environment) throws IOException {
     if (strCache == null)
-      return;
+      return prog;
     
 
     log.beginTask("Caching", "Cache assimilator", Log.CACHING);
@@ -200,6 +200,7 @@ public class STRCommands {
       FileCommands.delete(oldProg);
 
       log.log("Cache Location: " + cacheProg, Log.CACHING);
+      return cacheProg;
     } finally {
       log.endTask();
     }

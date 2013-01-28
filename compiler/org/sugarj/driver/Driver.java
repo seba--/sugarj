@@ -533,6 +533,7 @@ public class Driver{
       
       String extName = langLib.getEditorName(toplevelDecl);
       String fullExtName = getFullRenamedDeclarationName(extName);
+      checkModuleName(extName);
 
       log.log("The name of the editor services is '" + extName + "'.", Log.DETAIL);
       log.log("The full name of the editor services is '" + fullExtName + "'.", Log.DETAIL);
@@ -580,7 +581,8 @@ public class Driver{
       IStrategoTerm head = getApplicationSubterm(toplevelDecl, "PlainDec", 0);
       IStrategoTerm body= getApplicationSubterm(toplevelDecl, "PlainDec", 1);
       
-      String extName = ATermCommands.getString(getApplicationSubterm(head, "PlainDecHead", 1));    
+      String extName = ATermCommands.getString(getApplicationSubterm(head, "PlainDecHead", 1));
+      checkModuleName(extName);
 
       String extension = null;
       if (head.getSubtermCount() >= 3 && isApplication(getApplicationSubterm(head, "PlainDecHead", 2), "Some"))
@@ -1008,6 +1010,7 @@ public class Driver{
 
       String extName = langLib.getSugarName(toplevelDecl);
       String fullExtName = getFullRenamedDeclarationName(extName);
+      checkModuleName(extName);
 
       log.log("The name of the sugar is '" + extName + "'.", Log.DETAIL);
       log.log("The full name of the sugar is '" + fullExtName + "'.", Log.DETAIL);
@@ -1091,6 +1094,8 @@ public class Driver{
 
       String extName = langLib.getTransformationName(toplevelDecl);
       String fullExtName = getFullRenamedDeclarationName(extName);
+      checkModuleName(extName);
+      
       Path strExtension = environment.createBinPath(langLib.getRelativeNamespaceSep() + extName + ".str");
       IStrategoTerm transBody = langLib.getTransformationBody(toplevelDecl);
       if (isApplication(transBody, "TransformationDef")) 
@@ -1154,6 +1159,7 @@ public class Driver{
   
       String modelName = langLib.getModelName(toplevelDecl);
       String fullModelName = getFullRenamedDeclarationName(modelName);
+      checkModuleName(modelName);
   
       log.log("The name of the model is '" + modelName + "'.", Log.DETAIL);
 //      checkToplevelDeclarationName(modelName.replace("-", "$"), "model", toplevelDecl);
@@ -1230,14 +1236,26 @@ public class Driver{
     }
   }
     
+  private void checkModuleName(String decName) {
+    String expectedDecName = FileCommands.fileName(langLib.getOutFile());
+    if (expectedDecName != null && !expectedDecName.equals(decName))
+      setErrorMessage(sugaredNamespaceDecl, "Declaration name " + decName + " does not match file name " + expectedDecName);
+  }
+
   private void initEditorServices() throws IOException, TokenExpectedException, SGLRException, InterruptedException {
+    IStrategoTerm stdEditor = (IStrategoTerm) editorServicesParser.parse(FileCommands.readFileAsString(StdLib.stdEditor), StdLib.stdEditor.getPath(), "Module");
     IStrategoTerm initEditor = (IStrategoTerm) editorServicesParser.parse(FileCommands.readFileAsString(langLib.getInitEditor()), langLib.getInitEditor().getPath(), "Module");
 
+    IStrategoTerm stdServices = ATermCommands.getApplicationSubterm(stdEditor, "Module", 2);
     IStrategoTerm services = ATermCommands.getApplicationSubterm(initEditor, "Module", 2);
     
+    if (!ATermCommands.isList(stdServices))
+      throw new IllegalStateException("standard editor ill-formed");
     if (!ATermCommands.isList(services))
       throw new IllegalStateException("initial editor ill-formed");
     
+    for (IStrategoTerm service : ATermCommands.getList(stdServices))
+      driverResult.addEditorService(service);
     for (IStrategoTerm service : ATermCommands.getList(services))
       driverResult.addEditorService(service);
   }
@@ -1452,8 +1470,7 @@ public class Driver{
   }
 
   public void setErrorMessage(String msg) {
-    driverResult.logError(msg);
-    ATermCommands.setErrorMessage(lastSugaredToplevelDecl, msg);
+    setErrorMessage(lastSugaredToplevelDecl, msg);
   }
 
   private void sortForImports(List<IStrategoTerm> list) {

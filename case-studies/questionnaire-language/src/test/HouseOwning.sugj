@@ -1,0 +1,27 @@
+package test;
+
+import quest.lang.Syntax;
+import quest.lang.NormalizeQuestionText;
+import quest.lang.Editor;
+
+import quest.analysis.Naming;
+import quest.analysis.Typing;
+
+public questionnaire HouseOwning
+
+  Boolean question hasSoldHouse =
+    Did you sell a house in 2010?
+  Boolean question hasBoughtHouse =
+    Did you by a house in 2010?
+  Boolean value active = hasSoldHouse || hasBoughtHouse
+  
+  Integer question howMuchPaid =
+	    How much did you pay?
+  String question howPaid =
+	    Which method of payment did you use?
+
+  if active && howMuchPaid >= 5000000
+    Boolean question x = That so?
+    define Boolean question really = Really?
+    really
+

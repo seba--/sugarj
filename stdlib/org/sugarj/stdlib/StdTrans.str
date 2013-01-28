@@ -25,7 +25,20 @@ strategies
   internal-main = traverse(desugar); unlock
   main = io-wrap(internal-main)
 
-
+strategies
+  generate-desugared :
+    (selected, position, ast, path, project-path) -> (filename, result)
+    where
+      filename := <guarantee-extension(|"desug")> path;
+      result   := <desugar-main; nice-analysis-data-term> selected // we just return the input term
+  
+  // Prints the abstract syntax ATerm of a selection.
+  generate-aterm:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"aterm")> path;
+      result   := <nice-analysis-data-term> selected
+  
 signature
   constructors
     Locked : a -> a

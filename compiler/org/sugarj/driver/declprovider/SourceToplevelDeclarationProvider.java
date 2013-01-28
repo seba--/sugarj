@@ -90,8 +90,8 @@ public class SourceToplevelDeclarationProvider implements ToplevelDeclarationPro
 
       return new IncrementalParseResult(toplevelDecl, rest);
     } catch (Exception e) {
-      if (!recovery)
-        throw new SGLRException(driver.getParser(), "parsing failed", e);
+//      if (!recovery)
+//        throw new SGLRException(driver.getParser(), "parsing failed", e);
       
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
       

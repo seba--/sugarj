@@ -4,10 +4,10 @@ import test.Check;
 
 public sugar Editor {
   rules
-    type-infor-hover = ?(<retrieve-type>,_,_,_,_)
+    type-info-hover = ?(<retrieve-type>,_,_,_,_)
 }
 
 public editor services Editor {
   references
-    hover _ : type-infor-hover
+    hover _ : type-info-hover
 }

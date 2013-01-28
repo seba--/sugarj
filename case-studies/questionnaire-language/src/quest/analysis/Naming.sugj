@@ -1,0 +1,68 @@
+package quest.analysis;
+
+import quest.lang.Syntax;
+
+public sugar Naming {
+  rules
+    analyze =
+    {| LocalQuest, ActiveQuest:
+       Questionnaire(id, id, analyze-names)
+    |}
+    
+  rules
+    analyze-names = QNil
+    analyze-names = QCons(analyze-names, analyze-names)
+    
+    analyze-names = ?Question(_, QuestId(name), _); new-active-name(|name) 
+    analyze-names =
+      ?val; DerivedValue(id, QuestId(?name), analyze-expr-names);
+      where(<new-active-name(|name)> val)
+    analyze-names = QuestGroup(id, analyze-names)
+    analyze-names = ConditionalQuest(analyze-expr-names, analyze-names-local-scope)
+    analyze-names = ConditionalQuest(analyze-expr-names, analyze-names-local-scope, analyze-names-local-scope)
+    analyze-names = ?LocalQuest(Question(_, QuestId(name), _)); new-local-name(|name)
+    analyze-names =
+      ?QuestRef(QuestId(name)); 
+      if <LocalQuest> name => ref
+        then put-reference(|ref)
+        else put-name-error(|"Could not resolve reference.")
+      end
+
+    analyze-names-local-scope = {| LocalQuest: analyze-names |}
+    
+  rules
+    analyze-expr-names = topdown(try(analyze-expr-name))
+    analyze-expr-name =
+      ?ExprName(Id(name)); 
+      if <ActiveQuest> name => ref
+        then put-reference(|ref)
+        else put-name-error(|"Could not resolve reference.")
+      end
+      
+  rules
+    new-local-name(|name) = ?t; rules ( LocalQuest : name{t*} -> t) 
+    new-active-name(|name) = ?t; rules ( ActiveQuest : name{t*} -> t) 
+
+
+  rules
+    is-reference = where(get-anno(|"reference"))
+    is-reference-to(|t) = where(retrieve-reference; equal(|t)) 
+    retrieve-reference = get-anno(|"reference")
+    put-reference(|t) = put-anno(|"reference", t)
+    
+    has-name-error = where(get-anno(|"name-error"))
+    retrieve-name-error = get-anno(|"name-error")
+    put-name-error(|t) = put-anno(|"name-error", t)
+    
+  rules
+    constraint-error =
+      where(retrieve-name-error => err);
+      !(<id>,<conc-strings>("Naming error: ", err))
+      
+    resolve-reference = ?(<retrieve-reference;id>,_,_,_,_)
+}
+
+public editor services Naming {
+  references
+    reference _ : resolve-reference
+}

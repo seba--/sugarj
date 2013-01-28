@@ -7,8 +7,6 @@ import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.library.AbstractPrimitive;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.jsglr.client.imploder.IToken;
-import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.driver.Driver;
 
@@ -24,10 +22,10 @@ public class CurrentImports extends AbstractPrimitive {
   public boolean call(IContext context, Strategy[] svars, IStrategoTerm[] tvars) throws InterpreterException {
     List<IStrategoTerm> sugaredImportDecls = driver.getSugaredImportDecls();
 
-    if (name == null)
+    if (sugaredImportDecls == null)
       return false;
     
-    IStrategoTerm imports = ATermCommands.makeList("JavaImportDec*", driver.getSugaredImportDecls());
+    IStrategoTerm imports = ATermCommands.makeList("JavaImportDec*", sugaredImportDecls);
     context.setCurrent(imports);
     return true;
   }

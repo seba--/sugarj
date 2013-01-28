@@ -1,0 +1,59 @@
+package quest.lang;
+
+public sugar Syntax {
+  context-free syntax
+    Quest -> ToplevelDeclaration
+    AnnoOrSugarMod* "questionnaire" JavaId QuestList
+      -> Quest {cons("Questionnaire"), layout(1.first.col < 4.first.col)}
+
+    -> QuestList {cons("QNil")}
+    QuestElem QuestList -> QuestList {cons("QCons"), layout(1.first.col == 2.first.col)}
+  
+  desugarings
+    questionnaire-model
+
+  rules
+    questionnaire-model :
+      Questionnaire(mods, name, body) -> 
+      ModelDec(ModelDecHead(mods, name, "quest.syntax.Questionnaire"), ModelBody(body))
+
+  // question
+  context-free syntax
+    Question -> QuestElem {layout(1.first.col < 1.left.col)}
+    QuestType "question" QuestId "=" QuestText -> Question {cons("Question")}
+    QuestionString -> QuestText {cons("QuestionText"), layout(1.first.col <= 1.left.col)}
+    
+    JavaID -> QuestId {cons("QuestId")}
+    JavaID -> QuestType {cons("QuestType")}
+  
+  lexical syntax
+    (~[\ \t\n\r]+ LAYOUT+)* ~[\ \t\n\r]+ -> QuestionString
+  
+  // derived values
+  context-free syntax
+    DerivedValue -> QuestElem {layout(1.first.col < 1.left.col)}
+    QuestType "value" QuestId "=" QuestExpr -> DerivedValue {cons("DerivedValue")}
+    JavaExpr -> QuestExpr {cons("QuestExpr")}
+  
+  // question group
+  context-free syntax
+    QuestGroup -> QuestElem {layout(1.first.col < 1.left.col)}
+    "question" "group" QuestId QuestList -> QuestGroup {cons("QuestGroup")}
+                                                       
+  // conditional question
+  context-free syntax
+    ConditionalQuest -> QuestElem
+    "if" QuestExpr QuestList -> ConditionalQuest {cons("ConditionalQuest"),
+                                                 layout(1.first.col < 2.first.col && 1.first.col < 3.first.col)}
+    "if" QuestExpr QuestList
+    "else" QuestList -> ConditionalQuest {cons("ConditionalQuest"),
+                                          layout(1.first.col < 2.first.col && 1.first.col < 3.first.col
+                                              && 4.first.col == 1.first.col
+                                              && 4.first.col < 5.left.col)}
+  
+  // local question
+  context-free syntax
+    LocalQuest -> QuestElem {layout(1.first.col < 1.left.col)}
+    "define" Question -> LocalQuest {cons("LocalQuest")}
+    QuestId -> Question {cons("QuestRef")}
+}

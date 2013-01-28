@@ -19,25 +19,19 @@ exports
   context-free syntax
     "layout" "(" LayoutConstraint ")" -> Sdf2ATermAttribute {avoid, cons("LayoutConstraint")}
     Sdf2IntCon                        -> LayoutConstraint   {cons("LayoutInt")}
+    "(" LayoutConstraint ")" -> LayoutConstraint {bracket}
 
   context-free priorities
     LayoutConstraint "." Sdf2AFun -> LayoutConstraint {cons("LayoutSelect")} >
-    {right:
-      LayoutConstraint ">" LayoutConstraint -> LayoutConstraint
-      {cons("LayoutGT")}
-      LayoutConstraint ">=" LayoutConstraint -> LayoutConstraint
-      {cons("LayoutGE")}
-      LayoutConstraint "==" LayoutConstraint -> LayoutConstraint
-      {cons("LayoutEQ")}
-      LayoutConstraint "<=" LayoutConstraint -> LayoutConstraint
-      {cons("LayoutLE")}
-      LayoutConstraint "<" LayoutConstraint -> LayoutConstraint
-      {cons("LayoutLT")}
+    "!" LayoutConstraint -> LayoutConstraint {cons("LayoutNot")} >
+    {
+      LayoutConstraint ">" LayoutConstraint -> LayoutConstraint {cons("LayoutGT"), right}
+      LayoutConstraint ">=" LayoutConstraint -> LayoutConstraint {cons("LayoutGE"), right}
+      LayoutConstraint "==" LayoutConstraint -> LayoutConstraint {cons("LayoutEQ"), right}
+      LayoutConstraint "<=" LayoutConstraint -> LayoutConstraint {cons("LayoutLE"), right}
+      LayoutConstraint "<" LayoutConstraint -> LayoutConstraint {cons("LayoutLT"), right}
     } >
-    {right:
-      LayoutConstraint "&&" LayoutConstraint -> LayoutConstraint
-      {cons("LayoutAnd")}
-      LayoutConstraint "||" LayoutConstraint -> LayoutConstraint
-      {cons("LayoutOr")}
-      "!" LayoutConstraint -> LayoutConstraint {cons("LayoutNot")}
+    {
+      LayoutConstraint "&&" LayoutConstraint -> LayoutConstraint {cons("LayoutAnd"), right}
+      LayoutConstraint "||" LayoutConstraint -> LayoutConstraint {cons("LayoutOr"), right}
     }
