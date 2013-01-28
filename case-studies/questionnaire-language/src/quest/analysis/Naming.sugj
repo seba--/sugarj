@@ -5,10 +5,8 @@ import quest.lang.Syntax;
 public sugar Naming {
   rules
     analyze =
-    {| LocalQuestContext, ActivatedQuestContext:
-      rules( LocalQuestContext := <new-hashtable>
-             ActivatedQuestContext := <new-hashtable> ); 
-      Questionnaire(id, id, analyze-names)
+    {| LocalQuest, ActivatedQuest:
+       Questionnaire(id, id, analyze-names)
     |}
     
   rules
@@ -16,37 +14,32 @@ public sugar Naming {
     analyze-names = QCons(analyze-names, analyze-names)
     
     analyze-names = 
-      ?Question(_, QuestId(name), _); 
-      register-activated-quest(|name)
+      ?q@Question(_, QuestId(name), _); 
+      rules ( ActivatedQuest : name -> q )
     analyze-names = QuestGroup(id, analyze-names)
-    analyze-names = ConditionalQuest(analyze-expr-names, analyze-names)
-    analyze-names = ConditionalQuest(analyze-expr-names, analyze-names, analyze-names)
+    analyze-names = ConditionalQuest(analyze-expr-names, analyze-names-local-scope)
+    analyze-names = ConditionalQuest(analyze-expr-names, analyze-names-local-scope, analyze-names-local-scope)
     analyze-names = 
-      ?LocalQuest(Question(_, QuestId(name), _)); 
-      register-local-quest(|name)
+      ?q@LocalQuest(Question(_, QuestId(name), _));
+      rules ( LocalQuest : name -> q) 
     analyze-names =
       ?QuestRef(QuestId(name)); 
-      if lookup-local-quest(|name) => ref
+      if <LocalQuest> name => ref
         then put-reference(|ref)
         else put-name-error(|"Could not resolve reference.")
       end
+
+    analyze-names-local-scope = {| LocalQuest: analyze-names |}
       
   rules
     analyze-expr-names = topdown(try(analyze-expr-name))
     analyze-expr-name =
       ?ExprName(Id(name)); 
-      if lookup-activated-quest(|name) => ref
+      if <ActivatedQuest> name => ref
         then put-reference(|ref)
         else put-name-error(|"Could not resolve reference.")
       end
-    
-  rules
-    register-local-quest(|name) = where(?val; LocalQuestContext; hashtable-put(|name, val))
-    lookup-local-quest(|name) = LocalQuestContext; hashtable-get(|name)
-    
-    register-activated-quest(|name) = where(?val; ActivatedQuestContext; hashtable-put(|name, val))
-    lookup-activated-quest(|name) = ActivatedQuestContext; hashtable-get(|name)
-  
+
   rules
     is-reference = where(get-anno(|"reference"))
     is-reference-to(|t) = where(retrieve-reference; equal(|t)) 
@@ -60,7 +53,7 @@ public sugar Naming {
   rules
     constraint-error =
       where(retrieve-name-error => err);
-      !(<id>,<conc-strings>("type error: ", err))
+      !(<id>,<conc-strings>("naming error: ", err))
       
     resolve-reference = ?(<retrieve-reference>,_,_,_,_)
 }
