@@ -15,11 +15,14 @@ public questionnaire HouseOwning
     Did you by a house in 2010?
   Boolean value active = hasSoldHouse || hasBoughtHouse
   
-  Integer question howMuchPaid =
+  question group Payment
+    Integer question howMuchPaid =
 	    How much did you pay?
-  String question howPaid =
+    String question howPaid =
 	    Which method of payment did you use?
-
+	    Please do not write down any details;
+	    keet it brief. 
+  
   if active && howMuchPaid >= 5000000
     Boolean question x = That so?
     define Boolean question really = Really?
