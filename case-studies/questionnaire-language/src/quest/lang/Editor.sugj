@@ -1,0 +1,13 @@
+package quest.lang;
+
+import quest.lang.Syntax;
+
+public editor services Editor {
+  folding
+    Quest
+    Question
+    QuestGroup
+    
+  colorer
+    QuestText : blue
+}

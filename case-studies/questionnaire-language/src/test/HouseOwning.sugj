@@ -1,8 +1,8 @@
 package test;
 
-import quest.syntax.Questionnaire;
-import quest.trans.NormalizeQuestionText;
-import quest.editor.Questionnaire;
+import quest.lang.Syntax;
+import quest.lang.NormalizeQuestionText;
+import quest.lang.Editor;
 
 public questionnaire HouseOwning
 

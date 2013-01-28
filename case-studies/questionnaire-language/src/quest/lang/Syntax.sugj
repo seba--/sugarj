@@ -1,0 +1,45 @@
+package quest.lang;
+
+public sugar Syntax {
+  context-free syntax
+    Quest -> ToplevelDeclaration
+    AnnoOrSugarMod* "questionnaire" JavaId QuestList
+      -> Quest {cons("Questionnaire"), layout(1.first.col < 4.first.col)}
+
+    -> QuestList {cons("QNil")}
+    QuestElem QuestList -> QuestList {cons("QCons"), layout(1.first.col == 2.first.col)}
+  
+  desugarings
+    questionnaire-model
+
+  rules
+    questionnaire-model :
+      Questionnaire(mods, name, body) -> 
+      ModelDec(ModelDecHead(mods, name, "quest.syntax.Questionnaire"), ModelBody(body))
+
+  // question
+  context-free syntax
+    Question -> QuestElem {layout(1.first.col < 1.left.col)}
+    JavaType "question" JavaId "=" QuestText -> Question {cons("Question")}
+    QuestionString -> QuestText {cons("QuestionText"), layout(1.first.col <= 1.left.col)}
+  
+  lexical syntax
+    (~[\ \t\n\r]+ LAYOUT+)* ~[\ \t\n\r]+ -> QuestionString
+    
+  
+  // question group
+  context-free syntax
+    QuestGroup -> QuestElem {layout(1.first.col < 1.left.col)}
+    "question" "group" JavaId QuestList -> QuestGroup {cons("QuestGroup")}
+                                                       
+  // conditional question
+  context-free syntax
+    ConditionalQuest -> QuestElem
+    "if" JavaExpr QuestList -> ConditionalQuest {cons("ConditionalQuest"),
+                                                 layout(1.first.col < 2.first.col && 1.first.col < 3.first.col)}
+    "if" JavaExpr QuestList
+    "else" QuestList -> ConditionalQuest {cons("ConditionalQuest"),
+                                          layout(1.first.col < 2.first.col && 1.first.col < 3.first.col
+                                              && 4.first.col == 1.first.col
+                                              && 4.first.col < 5.left.col)}
+}

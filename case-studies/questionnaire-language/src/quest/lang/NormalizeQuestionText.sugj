@@ -1,6 +1,6 @@
-package quest.trans;
+package quest.lang;
 
-import quest.syntax.Questionnaire;
+import quest.lang.Syntax;
 
 public sugar NormalizeQuestionText {
   desugarings
