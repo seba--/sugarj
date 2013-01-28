@@ -24,7 +24,7 @@ public sugar Syntax {
     QuestionString -> QuestText {cons("QuestionText"), layout(1.first.col <= 1.left.col)}
     
     JavaID -> QuestId {cons("QuestId")}
-    JavaType -> QuestType {cons("QuestType")}
+    JavaID -> QuestType {cons("QuestType")}
   
   lexical syntax
     (~[\ \t\n\r]+ LAYOUT+)* ~[\ \t\n\r]+ -> QuestionString

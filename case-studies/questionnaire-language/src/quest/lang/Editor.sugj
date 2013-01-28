@@ -7,8 +7,14 @@ public editor services Editor {
     Quest
     Question
     QuestGroup
+    ConditionalQuest
     
   colorer
+    darkgrey = 100 100 100
+    darkorange = 200 100 0
+    keyword = 127 0 85 bold
+    
     QuestText : blue
-    QuestId : red
+    QuestId : darkgrey
+    QuestType : keyword
 }
