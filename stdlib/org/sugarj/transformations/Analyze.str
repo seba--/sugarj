@@ -3,7 +3,7 @@ imports
   org/sugarj/languages/Sugar
 rules
   analyze-main = init-for-analysis; repeat(change-annotations-only(analyze))
-  analyze-debug = analyze-main; analysis-data-as-list
+  analyze-debug = analyze-main; nice-analysis-data-term
   analyze = fail
   
   init-for-analysis = bottomup(init-analysis-data-annotation)
@@ -11,7 +11,11 @@ rules
   get-analysis-data-annotation = get-annotations; <lookup> ("analysis-data",<id>)
   init-analysis-data-annotation = put-analysis-data-annotation(|<new-hashtable>)
   put-analysis-data-annotation(|tbl) =
-  	where(![("analysis-data", tbl) | <(get-annotations <+ ![])>] => annos); !(<id>, annos); set-annotations
+  	where(![("analysis-data", tbl) | <(get-annotations;filter(not(?("analysis-data",_))) <+ ![])>] => annos);
+  	!(<id>, annos); set-annotations
+	rm-analysis-data-annotation =
+    where(get-annotations; filter(not(?("analysis-data",_))) => annos);
+    !(<id>, annos); set-annotations
     
   get-anno(|key) = get-analysis-data-annotation; hashtable-get(|key)
   put-anno(|key,val) = where(get-analysis-data-annotation; hashtable-put(|key, val))
@@ -56,6 +60,16 @@ rules
     zip(restore-analysis-data)
     
   structurally-equal = ?(c#(xs),d#(ys)); <equal> (c,d); <zip(structurally-equal)> (xs, ys)
+  
+  nice-analysis-data-term =
+    bottomup({list:
+      (where(get-analysis-data-annotation; hashtable-getlist => list);
+       if <?[]> list
+         then rm-analysis-data-annotation
+         else put-analysis-data-annotation(|<bottomup(strip-annos)> list)
+       end
+    <+ id)
+    })
   
 rules
   // desugar =

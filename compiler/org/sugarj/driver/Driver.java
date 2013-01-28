@@ -1243,13 +1243,19 @@ public class Driver{
   }
 
   private void initEditorServices() throws IOException, TokenExpectedException, SGLRException, InterruptedException {
+    IStrategoTerm stdEditor = (IStrategoTerm) editorServicesParser.parse(FileCommands.readFileAsString(StdLib.stdEditor), StdLib.stdEditor.getPath(), "Module");
     IStrategoTerm initEditor = (IStrategoTerm) editorServicesParser.parse(FileCommands.readFileAsString(langLib.getInitEditor()), langLib.getInitEditor().getPath(), "Module");
 
+    IStrategoTerm stdServices = ATermCommands.getApplicationSubterm(stdEditor, "Module", 2);
     IStrategoTerm services = ATermCommands.getApplicationSubterm(initEditor, "Module", 2);
     
+    if (!ATermCommands.isList(stdServices))
+      throw new IllegalStateException("standard editor ill-formed");
     if (!ATermCommands.isList(services))
       throw new IllegalStateException("initial editor ill-formed");
     
+    for (IStrategoTerm service : ATermCommands.getList(stdServices))
+      driverResult.addEditorService(service);
     for (IStrategoTerm service : ATermCommands.getList(services))
       driverResult.addEditorService(service);
   }
