@@ -5,7 +5,13 @@ rules
   analyze-main = repeat(change-annotations-only(analyze))
   analyze = fail
   get-anno(|key) = get-annotations; !(key,<id>); lookup
-  put-anno(|key,val) = where((get-annotations <+ ![]) => annos); !(<id>,[(key,val)|annos]); set-annotations
+  put-anno(|key,val) =
+    where((get-annotations <+ ![]) => annos);
+    if <equal> (<lookup> (key, annos), val)
+      then id
+      else !(<id>,[(key,val)| <filter(not(?(key,_)))> annos]); set-annotations
+    end
+    
 
   sugarj-analyze:
     (ast, path, project-path) -> (ast, errors, warnings, notes)
