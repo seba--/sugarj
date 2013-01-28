@@ -1,0 +1,74 @@
+package quest.analysis;
+
+import quest.lang.Syntax;
+import quest.analysis.Naming;
+import quest.analysis.Satisfiability;
+
+public sugar Determinism {
+  rules
+    analyze = references-are-resolved;
+    {| ActiveQuestCond, ConditionalContext:
+       rules ( ConditionalContext := Lit(Bool(True)) );
+       Questionnaire(id, id, analyze-determinism)
+    |}
+    references-are-resolved = oncetd(?QuestRef(QuestId(name)); (is-reference + has-name-error)) 
+                           <+ topdown(not(?QuestRef(_)))
+    
+  rules
+    analyze-determinism = QNil
+    analyze-determinism = QCons(analyze-determinism, analyze-determinism)
+    
+    analyze-determinism = ?Question(_, QuestId(name), _); new-active-name-cond(|name) 
+    analyze-determinism = ?DerivedValue(_, QuestId(name), _); new-active-name-cond(|name)
+    analyze-determinism = QuestGroup(id, analyze-determinism)
+    analyze-determinism =
+      ConditionalQuest(?QuestExpr(cond), analyze-determinism-limited-context(|cond))
+    analyze-determinism =
+      ConditionalQuest(?QuestExpr(cond),
+                       analyze-determinism-limited-context(|cond), 
+                       analyze-determinism-limited-context(|Not(cond)))
+    analyze-determinism = ?LocalQuest(_)
+    analyze-determinism =
+      ?QuestRef(QuestId(name)); 
+      if <retrieve-reference> name => ref
+        then <analyze-determinism> ref
+      end
+
+    analyze-determinism-limited-context(|cond) =
+      {| ConditionalContext:
+         where(<inline-derived-values> cond => inlined-cond);
+         rules( ConditionalContext := LazyAnd(<ConditionalContext>, <strip-annos> inlined-cond)); 
+         analyze-determinism
+      |}
+    
+    inline-derived-values =
+      repeat(changed-tree(
+        topdown(try(
+          ?ExprName(_); 
+          retrieve-reference; 
+          ?DerivedValue(_, _, QuestExpr(<id>))))))
+
+  rules
+    new-active-name-cond(|name) = 
+      where(
+        <ActiveQuestCond <+ !Lit(Bool(False))> name => other-cond;
+        ConditionalContext => this-cond;
+        !LazyAnd(other-cond, this-cond) => check-cond;
+        if <is-satisfiable> check-cond
+          then <conc-strings> ("Overlapping definition of ", name,
+                               " in ", other-cond, " and ", this-cond, ".") => msg;
+               <put-determinism-error(|msg)> name
+          else rules ( ActiveQuestCond : name{t*} -> LazyOr(other-cond, this-cond))
+        end
+      ) 
+      
+  rules
+    has-determinism-error = where(get-anno(|"determinism-error"))
+    retrieve-determinism-error = get-anno(|"determinism-error")
+    put-determinism-error(|t) = put-anno(|"determinism-error", t)
+    
+  rules
+    constraint-error =
+      where(retrieve-determinism-error => err);
+      !(<id>,<conc-strings>("Determinsm error: ", err))
+}

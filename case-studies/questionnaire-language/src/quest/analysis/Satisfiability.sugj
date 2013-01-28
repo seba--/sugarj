@@ -1,0 +1,6 @@
+package quest.analysis;
+
+public sugar Satisfiability {
+  rules
+    is-satisfiable = debug(!"Is satisfiable? "); fail
+}

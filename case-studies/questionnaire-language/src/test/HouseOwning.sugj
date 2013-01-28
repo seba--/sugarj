@@ -6,6 +6,7 @@ import quest.lang.Editor;
 
 import quest.analysis.Naming;
 import quest.analysis.Typing;
+import quest.analysis.Determinism;
 
 public questionnaire HouseOwning
 
@@ -31,4 +32,3 @@ public questionnaire HouseOwning
     Boolean question x =
       Can you deal with another question named 'x'?
   
-

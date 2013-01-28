@@ -6,7 +6,8 @@ import quest.analysis.Naming;
 public sugar Typing {
   rules
     analyze = references-are-resolved; Questionnaire(id, id, analyze-types)
-    references-are-resolved = oncetd(?QuestRef(QuestId(name)); (is-reference + has-name-error))
+    references-are-resolved = oncetd(?QuestRef(QuestId(name)); (is-reference + has-name-error)) 
+                           <+ topdown(not(?QuestRef(_)))
     
   rules
     analyze-types = QNil
