@@ -2,22 +2,27 @@ module org/sugarj/transformations/Analyze
 imports
   org/sugarj/languages/Sugar
 rules
-  analyze-main = repeat(change-annotations-only(analyze))
+  analyze-main = init-for-analysis; repeat(change-annotations-only(analyze))
+  analyze-debug = analyze-main; analysis-data-as-list
   analyze = fail
-  get-anno(|key) = get-annotations; !(key,<id>); lookup
-  put-anno(|key,val) =
-    where((get-annotations <+ ![]) => annos);
-    if <equal> (<lookup> (key, annos), val)
-      then id
-      else !(<id>,[(key,val)| <filter(not(?(key,_)))> annos]); set-annotations
-    end
+  
+  init-for-analysis = bottomup(init-analysis-data-annotation)
+  
+  get-analysis-data-annotation = get-annotations; <lookup> ("analysis-data",<id>)
+  init-analysis-data-annotation = put-analysis-data-annotation(|<new-hashtable>)
+  put-analysis-data-annotation(|tbl) =
+  	where(![("analysis-data", tbl) | <(get-annotations <+ ![])>] => annos); !(<id>, annos); set-annotations
     
+  get-anno(|key) = get-analysis-data-annotation; hashtable-get(|key)
+  put-anno(|key,val) = where(get-analysis-data-annotation; hashtable-put(|key, val))
+  rm-anno(|key) = where(get-analysis-data-annotation; hashtable-remove(|key))
+  
 
   sugarj-analyze:
     (ast, path, project-path) -> (ast, errors, warnings, notes)
     with
       editor-init;
-      try(analyze);
+      // try(analyze);
       errors   := <collect-all(constraint-error, conc)> ast;
       warnings := <collect-all(constraint-warning, conc)> ast;
       notes    := <collect-all(constraint-note, conc)> ast
@@ -32,7 +37,24 @@ rules
     constraint-note = fail
 
 
-  change-annotations-only(s) = ?t; s => t2; where(!(t,t2); not(equal); structurally-equal) 
+  change-annotations-only(s) = 
+  	where(analysis-data-as-list => t1);
+  	s => t2;
+  	where(!(t1,t2); structurally-equal);
+  	where(!(t1, <analysis-data-as-list> t2); not(equal))
+  
+  analysis-data-as-list = 
+  	where(get-analysis-data-annotation; hashtable-getlist => list);
+  	\ c#(xs) -> <put-analysis-data-annotation(|list)> c#(<map(analysis-data-as-list)> xs) \
+  
+  restore-analysis-data = 
+    ?(t1,t2); 
+    where(!t2; get-analysis-data-annotation => list);
+    where(!t1; get-analysis-data-annotation; hashtable-clear; hashtable-putlist(|list));
+    ?(_#(xs),_#(ys));
+    !(xs,ys);
+    zip(restore-analysis-data)
+    
   structurally-equal = ?(c#(xs),d#(ys)); <equal> (c,d); <zip(structurally-equal)> (xs, ys)
   
 rules

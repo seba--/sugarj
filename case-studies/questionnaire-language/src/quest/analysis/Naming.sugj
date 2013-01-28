@@ -40,8 +40,8 @@ public sugar Naming {
       end
       
   rules
-    new-local-name(|name) = ?t; rules ( LocalQuest : name -> t)
-    new-active-name(|name) = ?t; rules ( ActiveQuest : name -> t) 
+    new-local-name(|name) = ?t; rules ( LocalQuest : name{t*} -> t) 
+    new-active-name(|name) = ?t; rules ( ActiveQuest : name{t*} -> t) 
 
 
   rules
@@ -50,16 +50,16 @@ public sugar Naming {
     retrieve-reference = get-anno(|"reference")
     put-reference(|t) = put-anno(|"reference", t)
     
-    has-name-error = get-anno(|"name-error")
+    has-name-error = where(get-anno(|"name-error"))
     retrieve-name-error = get-anno(|"name-error")
     put-name-error(|t) = put-anno(|"name-error", t)
     
   rules
     constraint-error =
       where(retrieve-name-error => err);
-      !(<id>,<conc-strings>("naming error: ", err))
+      !(<id>,<conc-strings>("Naming error: ", err))
       
-    resolve-reference = ?(<retrieve-reference>,_,_,_,_)
+    resolve-reference = ?(<retrieve-reference;id>,_,_,_,_)
 }
 
 public editor services Naming {

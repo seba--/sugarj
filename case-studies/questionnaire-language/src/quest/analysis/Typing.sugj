@@ -5,27 +5,34 @@ import quest.analysis.Naming;
 
 public sugar Typing {
   rules
-    analyze2 = Questionnaire(id, id, analyze-types)
+    analyze = references-are-resolved; Questionnaire(id, id, analyze-types)
+    references-are-resolved = oncetd(?QuestRef(QuestId(name)); (is-reference + has-name-error))
     
   rules
     analyze-types = QNil
     analyze-types = QCons(analyze-types, analyze-types)
     
-    analyze-types = ?Question(QuestType(type), _, _); put-type(|type) 
+    analyze-types = ?Question(QuestType(type), _, _); put-type(|<strip-annos> type) 
     analyze-types =
       DerivedValue(QuestType(?type), id, analyze-expr-type);
-      put-type(|type)
+      put-type(|<strip-annos> type)
     analyze-types = QuestGroup(id, analyze-types)
     analyze-types = ConditionalQuest(analyze-expr-type, analyze-types)
     analyze-types = ConditionalQuest(analyze-expr-type, analyze-types, analyze-types)
-    analyze-types = ?LocalQuest(Question(QuestType(type), _, _)); put-type(|type)
+    analyze-types = ?LocalQuest(Question(QuestType(type), _, _)); put-type(|<strip-annos> type)
     analyze-types =
-      ?QuestRef(QuestId(name)); try(where(get-ref-type(|name) => type); put-type(|type))
+      ?QuestRef(_);
+      where(get-ref-type => type);
+      put-type(|type)
+
+    get-ref-type = retrieve-reference; (retrieve-type <+ analysis-data-as-list;debug)
 
   rules
-    analyze-expr-type = bottomup(try(where(type-of-expr => type); put-type(|type)))
+    analyze-expr-type = 
+      bottomup(try({type: where(type-of-expr => type); put-type(|type)} 
+                <+ mark-type-error))
     
-    type-of-expr = ?ExprName(Id(name)); get-ref-type(|name)
+    type-of-expr = ?ExprName(_); get-ref-type
     
     type-of-expr = (?Lit(Deci(_)) + ?Lit(Hexa(_)) + ?Lit(Octa(_))); !"Integer"
     type-of-expr = ?Lit(Float(_)); !"Float"
@@ -34,10 +41,10 @@ public sugar Typing {
     type-of-expr = ?Lit(String(_)); !"String"
     
     type-of-expr = is-unary-arith-op#([get-num-type => t1]); !t1
-    type-of-expr = is-unary-bool-op#([has-type(|"Boolean")]); !"Boolean"
+    type-of-expr = is-unary-bool-op#([get-bool-type]); !"Boolean"
     type-of-expr = is-bin-arith-op#([get-num-type => t1, get-num-type => t2]); <join-num-types> (t1, t2)
     type-of-expr = is-bin-arith-comp#([get-num-type, get-num-type]); !"Boolean"
-    type-of-expr = is-bin-bool-comp#([has-type(|"Boolean"), has-type(|"Boolean")]); !"Boolean"
+    type-of-expr = is-bin-bool-comp#([get-bool-type, get-bool-type]); !"Boolean"
 
     join-num-types = (?("Double",_) + ?(_,"Double")); !"Double"
     join-num-types = (?("Float",_) + ?(_,"Float")); !"Float"
@@ -45,6 +52,18 @@ public sugar Typing {
     join-num-types = !"Integer"
     
     get-num-type = retrieve-type; (?"Byte" + ?"Short" + ?"Integer" + ?"Long" + ?"Float" + ?"Double" + ?"Char")
+    get-bool-type = retrieve-type; ?"Boolean"
+
+  rules
+    mark-type-error = is-unary-arith-op#(?x;[not(get-num-type)]); <unexpected-type-error(|"any number")> x
+    mark-type-error = is-unary-bool-op#([?x;not(has-type(|"Boolean"))]); <unexpected-type-error(|"Boolean")> x
+    mark-type-error = is-bin-arith-op#([?x; not(get-num-type), id]); <unexpected-type-error(|"any number")> x
+    mark-type-error = is-bin-arith-op#([id, ?x; not(get-num-type)]); <unexpected-type-error(|"any number")> x
+    mark-type-error = is-bin-arith-comp#([?x; not(get-num-type), id]); <unexpected-type-error(|"any number")> x
+    mark-type-error = is-bin-arith-comp#([id, ?x; not(get-num-type)]); <unexpected-type-error(|"any number")> x
+    mark-type-error = is-bin-bool-comp#([?x; not(has-type(|"Boolean")), id]); <unexpected-type-error(|"Boolean")> x
+    mark-type-error = is-bin-bool-comp#([id, ?x; not(has-type(|"Boolean"))]); <unexpected-type-error(|"Boolean")> x
+
 
   rules
     // Num -> Num
@@ -64,21 +83,24 @@ public sugar Typing {
     is-bin-bool-comp = <elem> (<id>, <bin-bool-comps>)
 
   rules
-    get-ref-type(|name) = <LocalQuest> name => ref; retrieve-type
-  
     hast-type = where(get-anno(|"type"))
-    has-type(|t) = where(retrieve-reference; equal(|t)) 
+    has-type(|t) = where(retrieve-type; equal(|t)) 
     retrieve-type = get-anno(|"type")
     put-type(|t) = put-anno(|"type", t)
     
+    unexpected-type-error(|expected) =
+      if retrieve-type => was
+        then put-type-error(|<conc-strings> ("Expected type: ", expected, ", found: ", was, "."))
+        else put-type-error(|<conc-strings> ("Expected type: ", expected, ", no type found."))
+      end
     has-type-error = get-anno(|"type-error")
     retrieve-type-error = get-anno(|"type-error")
-    put-type-error(|t) = put-anno(|"type-error", t)
+    put-type-error(|t) = has-name-error <+ put-anno(|"type-error", t)
     
  rules
     constraint-error =
       where(retrieve-type-error => err);
-      !(<id>,<conc-strings>("type error: ", err))
+      !(<id>,<conc-strings>("Type error: ", err))
       
     hover-type-info = ?(<conc-strings> ("Type: ", <retrieve-type>),_,_,_,_)
 }
