@@ -5,7 +5,7 @@ import quest.lang.Syntax;
 public sugar Naming {
   rules
     analyze =
-    {| LocalQuest, ActivatedQuest:
+    {| LocalQuest, ActiveQuest:
        Questionnaire(id, id, analyze-names)
     |}
     
@@ -13,15 +13,14 @@ public sugar Naming {
     analyze-names = QNil
     analyze-names = QCons(analyze-names, analyze-names)
     
-    analyze-names = 
-      ?q@Question(_, QuestId(name), _); 
-      rules ( ActivatedQuest : name -> q )
+    analyze-names = where(?Question(_, QuestId(name), _)); new-active-name(|name) 
+    analyze-names =
+      ?val; DerivedValue(id, QuestId(?name), analyze-expr-names);
+      where(<new-active-name(|name)> val)
     analyze-names = QuestGroup(id, analyze-names)
     analyze-names = ConditionalQuest(analyze-expr-names, analyze-names-local-scope)
     analyze-names = ConditionalQuest(analyze-expr-names, analyze-names-local-scope, analyze-names-local-scope)
-    analyze-names = 
-      ?q@LocalQuest(Question(_, QuestId(name), _));
-      rules ( LocalQuest : name -> q) 
+    analyze-names = where(?LocalQuest(Question(_, QuestId(name), _))); new-local-name(|name)
     analyze-names =
       ?QuestRef(QuestId(name)); 
       if <LocalQuest> name => ref
@@ -30,15 +29,20 @@ public sugar Naming {
       end
 
     analyze-names-local-scope = {| LocalQuest: analyze-names |}
-      
+    
   rules
     analyze-expr-names = topdown(try(analyze-expr-name))
     analyze-expr-name =
       ?ExprName(Id(name)); 
-      if <ActivatedQuest> name => ref
+      if <ActiveQuest> name => ref
         then put-reference(|ref)
         else put-name-error(|"Could not resolve reference.")
       end
+      
+  rules
+    new-local-name(|name) = ?t; rules ( LocalQuest : name -> t)
+    new-active-name(|name) = ?t; rules ( ActiveQuest : name -> t) 
+
 
   rules
     is-reference = where(get-anno(|"reference"))

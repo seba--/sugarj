@@ -28,7 +28,12 @@ public sugar Syntax {
   
   lexical syntax
     (~[\ \t\n\r]+ LAYOUT+)* ~[\ \t\n\r]+ -> QuestionString
-    
+  
+  // derived values
+  context-free syntax
+    DerivedValue -> QuestElem {layout(1.first.col < 1.left.col)}
+    QuestType "value" QuestId "=" QuestExpr -> DerivedValue {cons("DerivedValue")}
+    JavaExpr -> QuestExpr {cons("QuestExpr")}
   
   // question group
   context-free syntax
@@ -45,9 +50,7 @@ public sugar Syntax {
                                           layout(1.first.col < 2.first.col && 1.first.col < 3.first.col
                                               && 4.first.col == 1.first.col
                                               && 4.first.col < 5.left.col)}
-    
-    JavaExpr -> QuestExpr {cons("QuestExpr")}
-
+  
   // local question
   context-free syntax
     LocalQuest -> QuestElem {layout(1.first.col < 1.left.col)}
