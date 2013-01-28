@@ -5,6 +5,7 @@ import quest.lang.NormalizeQuestionText;
 import quest.lang.Editor;
 
 import quest.analysis.Naming;
+import quest.analysis.Typing;
 
 public questionnaire HouseOwning
 
@@ -24,6 +25,3 @@ public questionnaire HouseOwning
     Boolean question x = That so?
     define Boolean question really = Really?
     really
-    
-    
-

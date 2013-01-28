@@ -1,0 +1,89 @@
+package quest.analysis;
+
+import quest.lang.Syntax;
+import quest.analysis.Naming;
+
+public sugar Typing {
+  rules
+    analyze2 = Questionnaire(id, id, analyze-types)
+    
+  rules
+    analyze-types = QNil
+    analyze-types = QCons(analyze-types, analyze-types)
+    
+    analyze-types = ?Question(QuestType(type), _, _); put-type(|type) 
+    analyze-types =
+      DerivedValue(QuestType(?type), id, analyze-expr-type);
+      put-type(|type)
+    analyze-types = QuestGroup(id, analyze-types)
+    analyze-types = ConditionalQuest(analyze-expr-type, analyze-types)
+    analyze-types = ConditionalQuest(analyze-expr-type, analyze-types, analyze-types)
+    analyze-types = ?LocalQuest(Question(QuestType(type), _, _)); put-type(|type)
+    analyze-types =
+      ?QuestRef(QuestId(name)); try(where(get-ref-type(|name) => type); put-type(|type))
+
+  rules
+    analyze-expr-type = bottomup(try(where(type-of-expr => type); put-type(|type)))
+    
+    type-of-expr = ?ExprName(Id(name)); get-ref-type(|name)
+    
+    type-of-expr = (?Lit(Deci(_)) + ?Lit(Hexa(_)) + ?Lit(Octa(_))); !"Integer"
+    type-of-expr = ?Lit(Float(_)); !"Float"
+    type-of-expr = ?Lit(Bool(_)); !"Boolean"
+    type-of-expr = ?Lit(Char(_)); !"Char"
+    type-of-expr = ?Lit(String(_)); !"String"
+    
+    type-of-expr = is-unary-arith-op#([get-num-type => t1]); !t1
+    type-of-expr = is-unary-bool-op#([has-type(|"Boolean")]); !"Boolean"
+    type-of-expr = is-bin-arith-op#([get-num-type => t1, get-num-type => t2]); <join-num-types> (t1, t2)
+    type-of-expr = is-bin-arith-comp#([get-num-type, get-num-type]); !"Boolean"
+    type-of-expr = is-bin-bool-comp#([has-type(|"Boolean"), has-type(|"Boolean")]); !"Boolean"
+
+    join-num-types = (?("Double",_) + ?(_,"Double")); !"Double"
+    join-num-types = (?("Float",_) + ?(_,"Float")); !"Float"
+    join-num-types = (?("Long",_) + ?(_,"Long")); !"Long"
+    join-num-types = !"Integer"
+    
+    get-num-type = retrieve-type; (?"Byte" + ?"Short" + ?"Integer" + ?"Long" + ?"Float" + ?"Double" + ?"Char")
+
+  rules
+    // Num -> Num
+    unary-arith-ops = !["Plus", "Minus", "PreIncr", "PreDecr", "Complement"]
+    is-unary-arith-op = <elem> (<id>, <unary-arith-ops>)
+    // Bool -> Bool
+    unary-bool-ops = !["Not"]
+    is-unary-bool-op = <elem> (<id>, <unary-bool-ops>)
+    // Num * Num -> Num
+    bin-arith-ops = !["Mul", "Div", "Remain", "Plus", "Minus", "LeftShift", "RightShift", "URightShift", "And", "Or", "ExcOr"]
+    is-bin-arith-op = <elem> (<id>, <bin-arith-ops>)
+    // Num * Num -> Bool
+    bin-arith-comps = !["Lt", "Gt", "LtEq", "GtEq", "Eq", "NotEq"]
+    is-bin-arith-comp = <elem> (<id>, <bin-arith-comps>)
+    // Bool * Bool -> Bool
+    bin-bool-comps = !["LazyAnd", "LazyOr", "Eq", "NotEq"]
+    is-bin-bool-comp = <elem> (<id>, <bin-bool-comps>)
+
+  rules
+    get-ref-type(|name) = <LocalQuest> name => ref; retrieve-type
+  
+    hast-type = where(get-anno(|"type"))
+    has-type(|t) = where(retrieve-reference; equal(|t)) 
+    retrieve-type = get-anno(|"type")
+    put-type(|t) = put-anno(|"type", t)
+    
+    has-type-error = get-anno(|"type-error")
+    retrieve-type-error = get-anno(|"type-error")
+    put-type-error(|t) = put-anno(|"type-error", t)
+    
+ rules
+    constraint-error =
+      where(retrieve-type-error => err);
+      !(<id>,<conc-strings>("type error: ", err))
+      
+    hover-type-info = ?(<conc-strings> ("Type: ", <retrieve-type>),_,_,_,_)
+}
+
+public editor services Typing {
+  references
+    hover _ : hover-type-info
+}
