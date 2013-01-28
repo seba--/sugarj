@@ -2,7 +2,7 @@ package test;
 
 public sugar Check {
   rules
-    analyze = not(oncetd(has-type + has-type-error)); bottomup(try(type-check))
+    analyze = bottomup(try(type-check))
   
   rules
     type-check = ?Lit(Deci(_)); put-type(|"Int")
