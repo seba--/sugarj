@@ -1,0 +1,15 @@
+ConditionalQuest(
+  QuestExpr(
+    Eq(
+      Plus(Lit(Deci("1")), Lit(Deci("2")))
+    , ExprName(Id("howMuchPaid"))
+    )
+  )
+, QCons(
+    Question(QuestType("Boolean"), QuestId("x"), QuestionText("That so?"))
+  , QCons(
+      LocalQuest(Question(QuestType("Boolean"), QuestId("really"), QuestionText("Really?")))
+    , QCons(QuestRef(QuestId("really")), QNil())
+    )
+  )
+)

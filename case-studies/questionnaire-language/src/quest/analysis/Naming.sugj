@@ -32,8 +32,9 @@ public sugar Naming {
       end
       
   rules
-    analyze-expr-names = 
-      topdown(?ExprName(Id(name))); 
+    analyze-expr-names = topdown(try(analyze-expr-name))
+    analyze-expr-name =
+      ?ExprName(Id(name)); 
       if lookup-activated-quest(|name) => ref
         then put-reference(|ref)
         else put-name-error(|"Could not resolve reference.")
@@ -54,5 +55,17 @@ public sugar Naming {
     
     has-name-error = get-anno(|"name-error")
     retrieve-name-error = get-anno(|"name-error")
-    put-name-error(|type) = put-anno(|"name-error", type)
+    put-name-error(|t) = put-anno(|"name-error", t)
+    
+  rules
+    constraint-error =
+      where(retrieve-name-error => err);
+      !(<id>,<conc-strings>("type error: ", err))
+      
+    resolve-reference = ?(<retrieve-reference>,_,_,_,_)
+}
+
+public editor services Naming {
+  references
+    reference _ : resolve-reference
 }
