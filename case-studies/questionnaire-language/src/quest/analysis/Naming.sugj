@@ -59,7 +59,8 @@ public sugar Naming {
       where(retrieve-name-error => err);
       !(<id>,<conc-strings>("Naming error: ", err))
       
-    resolve-reference = ?(<retrieve-reference;id>,_,_,_,_)
+    resolve-reference = ?(<find-annotation(retrieve-reference)>,_,_,_,_)
+    find-annotation(s) = s <+ ?c#([<find-annotation(s)>])
 }
 
 public editor services Naming {

@@ -102,8 +102,9 @@ public sugar Typing {
       where(retrieve-type-error => err);
       !(<id>,<conc-strings>("Type error: ", err))
       
-    hover-type-info = ?(<conc-strings> ("Type: ", <retrieve-type>),_,_,_,_)
+    hover-type-info = ?(<conc-strings> ("Type: ", <find-annotation(retrieve-type)>),_,_,_,_)
 }
+
 
 public editor services Typing {
   references

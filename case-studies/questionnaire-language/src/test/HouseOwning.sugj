@@ -27,4 +27,8 @@ public questionnaire HouseOwning
     Boolean question x = That so?
     define Boolean question really = Really?
     really
+  if active
+    Boolean question x =
+      Can you deal with another question named 'x'?
+  
 
