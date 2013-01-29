@@ -9,7 +9,7 @@ public sugar Satisfiability {
           innermost(reduce);
           repeat(remove-variable);
           innermost(reduce));
-      ?Lit(Bool(True))
+      (?Lit(Bool(True)) <+ debug(!"unsatisfiable: "); fail)
 
     remove-equation =
       ?t; oncetd({c: where(?c#([_,_]); <elem> (c, ["Lt", "Gt", "LtEq", "GtEq", "Eq", "NotEq"])); ?op});
