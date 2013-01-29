@@ -5,15 +5,13 @@ import quest.analysis.Naming;
 import quest.analysis.Satisfiability;
 
 public sugar Determinism {
-  rules
-    analyze = references-are-resolved;
+  analyses
+    references-are-resolved;
     {| ActiveQuestCond, ConditionalContext:
        rules ( ConditionalContext := Lit(Bool(True)) );
        Questionnaire(id, id, analyze-determinism)
     |}
-    references-are-resolved = oncetd(?QuestRef(QuestId(name)); (is-reference + has-name-error)) 
-                           <+ topdown(not(?QuestRef(_)))
-    
+  
   rules
     analyze-determinism = QNil
     analyze-determinism = QCons(analyze-determinism, analyze-determinism)
@@ -31,7 +29,7 @@ public sugar Determinism {
     analyze-determinism =
       ?QuestRef(QuestId(name)); 
       if <retrieve-reference> name => ref
-        then <analyze-determinism> ref
+        then where(<analyze-determinism> ref)
       end
 
     analyze-determinism-limited-context(|cond) =
@@ -57,11 +55,11 @@ public sugar Determinism {
         !LazyAnd(other-cond, this-inlined-cond) => check-cond);
       if <strip-annos; is-satisfiable> check-cond
         then where(<conc-strings> 
-                     ("Overlapping definition of ", name,
-                      " in ", <strip-annos; repeat(reduce); aterm-to-string> other-cond,
+                     ("Overlapping definition of '", name,
+                      "' in ", <strip-annos; repeat(reduce); aterm-to-string> other-cond,
                       " and ", <strip-annos; repeat(reduce); aterm-to-string> this-cond, ".") => msg);
              put-determinism-error(|msg)
-        else rules ( ActiveQuestCond : name{t*} -> LazyOr(other-cond, this-inlined-cond))
+        else rules ( ActiveQuestCond : name{t*} -> LazyOr(other-cond, this-cond))
       end
     
   rules

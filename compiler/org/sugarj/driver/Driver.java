@@ -452,7 +452,7 @@ public class Driver{
             driverResult.getGeneratedFileHashes(), 
             driverResult.isGenerateFiles());
       } catch (ClassNotFoundException e) {
-        setErrorMessage(lastSugaredToplevelDecl, "Could not resolve imported class " + e.getMessage());
+        setErrorMessage("Could not resolve imported class " + e.getMessage());
         // throw new RuntimeException(e);
       }
       good = true;
@@ -519,7 +519,7 @@ public class Driver{
         if (!(e instanceof StrategoException))
           e.printStackTrace();
 
-        setErrorMessage(toplevelDecl, msg);
+        setErrorMessage(msg);
         if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
           sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
 
@@ -663,7 +663,7 @@ public class Driver{
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
       
       log.logErr(msg, Log.DETAIL);
-      setErrorMessage(term, msg);
+      setErrorMessage(msg);
       return term;
     } finally {
       log.endTask();
@@ -684,7 +684,7 @@ public class Driver{
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
       
       log.logErr(msg, Log.DETAIL);
-      setErrorMessage(term, msg);
+      setErrorMessage(msg);
       return term;
     } finally {
       log.endTask();
@@ -705,7 +705,7 @@ public class Driver{
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
 
       log.logErr(msg, Log.DETAIL);
-      setErrorMessage(term, msg);
+      setErrorMessage(msg);
       return term;
     }
   }
@@ -784,7 +784,7 @@ public class Driver{
         IStrategoTerm transformation = getApplicationSubterm(appl, "TransApp", 0);
         
         ImportCommands imp = new ImportCommands(langLib, environment, this, driverResult, new STRCommands(strParser, strCache, environment, langLib));
-        Pair<String, Boolean> transformationResult = imp.transformModel(model, transformation, toplevelDecl);
+        Pair<String, Boolean> transformationResult = imp.transformModel(model, transformation, lastSugaredToplevelDecl);
         if (transformationResult == null)
           return ;
         
@@ -813,7 +813,7 @@ public class Driver{
       boolean success = codeImportSuccess || modelImportSuccess;
       
       if (!success)
-        setErrorMessage(toplevelDecl, "module not found: " + modulePath);
+        setErrorMessage("module not found: " + modulePath);
       
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -856,7 +856,7 @@ public class Driver{
       if (sourceFileAvailable && requiresUpdate && !environment.doGenerateFiles()) {
         // This is a parser run. Required module needs to be compiled before.
         log.log("Module outdated, compile first: " + modulePath + ".", Log.IMPORT);
-        setErrorMessage(toplevelDecl, "module outdated, compile first: " + modulePath);
+        setErrorMessage("module outdated, compile first: " + modulePath);
       }
       else if (sourceFileAvailable && requiresUpdate && getCircularImportResult(importSourceFile) != null) {
         // Circular import. Assume source file does not provide syntactic sugar.
@@ -871,7 +871,7 @@ public class Driver{
         
         res = subcompile(toplevelDecl, importSourceFile);
         if (res.hasFailed())
-          setErrorMessage(toplevelDecl, "Problems while compiling " + modulePath);
+          setErrorMessage("Problems while compiling " + modulePath);
           
         log.log("CONTINUE PROCESSING'" + sourceFile + "'.", Log.CORE);
       }
@@ -882,7 +882,7 @@ public class Driver{
       
       if (!isCircularImport && res != null) {
         if (res.getPersistentPath() == null || res.hasPersistentVersionChanged())
-          setErrorMessage(toplevelDecl, "Result is inconsitent with persistent version.");
+          setErrorMessage("Result is inconsitent with persistent version.");
         driverResult.addDependency(res);
       }
       
@@ -933,15 +933,15 @@ public class Driver{
       else
         return run(importSourceFile, environment, monitor, langLib.getFactoryForLanguage(), currentlyProcessing);
     } catch (IOException e) {
-      setErrorMessage(toplevelDecl, "Problems while compiling " + importSourceFile);
+      setErrorMessage("Problems while compiling " + importSourceFile);
     } catch (TokenExpectedException e) {
-      setErrorMessage(toplevelDecl, "Problems while compiling " + importSourceFile);
+      setErrorMessage("Problems while compiling " + importSourceFile);
     } catch (ParseException e) {
-      setErrorMessage(toplevelDecl, "Problems while compiling " + importSourceFile);
+      setErrorMessage("Problems while compiling " + importSourceFile);
     } catch (InvalidParseTableException e) {
-      setErrorMessage(toplevelDecl, "Problems while compiling " + importSourceFile);
+      setErrorMessage("Problems while compiling " + importSourceFile);
     } catch (SGLRException e) {
-      setErrorMessage(toplevelDecl, "Problems while compiling " + importSourceFile);
+      setErrorMessage("Problems while compiling " + importSourceFile);
     }
     return null;
   }
@@ -1084,7 +1084,7 @@ public class Driver{
         buildCompoundStrModule();
 
     } catch (PrettyPrintError e) {
-      setErrorMessage(toplevelDecl, e.getMsg());
+      setErrorMessage(e.getMsg());
     } finally {
       log.endTask();
     }
@@ -1234,7 +1234,7 @@ public class Driver{
     } catch (StrategoException e) {
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
       log.logErr(msg, Log.DETAIL);
-      setErrorMessage(lastSugaredToplevelDecl, msg);
+      setErrorMessage(msg);
     } finally {
       log.endTask();
     }
@@ -1243,7 +1243,7 @@ public class Driver{
   private void checkModuleName(String decName) {
     String expectedDecName = FileCommands.fileName(langLib.getOutFile());
     if (expectedDecName != null && !expectedDecName.equals(decName))
-      setErrorMessage(sugaredNamespaceDecl, "Declaration name " + decName + " does not match file name " + expectedDecName);
+      setErrorMessage("Declaration name " + decName + " does not match file name " + expectedDecName);
   }
 
   private void initEditorServices() throws IOException, TokenExpectedException, SGLRException, InterruptedException {

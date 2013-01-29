@@ -3,12 +3,9 @@ package quest.analysis;
 import quest.lang.Syntax;
 
 public sugar Naming {
-  rules
-    analyze =
-    {| LocalQuest, ActiveQuest:
-       Questionnaire(id, id, analyze-names)
-    |}
-    
+  analyses
+    {| LocalQuest, ActiveQuest: Questionnaire(id, id, analyze-names) |}
+  
   rules
     analyze-names = QNil
     analyze-names = QCons(analyze-names, analyze-names)
@@ -61,6 +58,9 @@ public sugar Naming {
       
     resolve-reference = ?(<find-annotation(retrieve-reference)>,_,_,_,_)
     find-annotation(s) = s <+ ?c#([<find-annotation(s)>])
+    
+    references-are-resolved = oncetd(?QuestRef(QuestId(name)); (is-reference + has-name-error)) 
+                           <+ topdown(not(?QuestRef(_)))
 }
 
 public editor services Naming {

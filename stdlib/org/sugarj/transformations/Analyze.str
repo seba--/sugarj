@@ -1,10 +1,16 @@
 module org/sugarj/transformations/Analyze
 imports
+  org/sugarj/languages/Stratego
   org/sugarj/languages/Sugar
+  org/sugarj/stdlib/StdTrans
 rules
-  analyze-main = init-for-analysis; repeat(change-annotations-only(analyze))
+  desugar = changed-tree(desugar-analyze)
+  desugar-analyze : Analyses(strats) -> Rules(<map(strat-to-analysis)> strats)
+  strat-to-analysis = !SDefNoArgs("start-analysis" , Call(SVar("change-annotations-only"), [<id>]))
+  
+  analyze-main = init-for-analysis; repeat(start-analysis); rm-empty-analysis-data-annotations
   analyze-debug = analyze-main; nice-analysis-data-term
-  analyze = fail
+  start-analysis = fail
   
   init-for-analysis = bottomup(init-analysis-data-annotation)
   
@@ -16,6 +22,7 @@ rules
 	rm-analysis-data-annotation =
     where(get-annotations; filter(not(?("analysis-data",_))) => annos);
     !(<id>, annos); set-annotations
+  rm-empty-analysis-data-annotations = id // TODO
     
   get-anno(|key) = get-analysis-data-annotation; hashtable-get(|key)
   put-anno(|key,val) = where(get-analysis-data-annotation; hashtable-put(|key, val))
