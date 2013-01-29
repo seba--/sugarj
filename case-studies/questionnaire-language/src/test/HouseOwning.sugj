@@ -31,4 +31,3 @@ public questionnaire HouseOwning
   if active
     Boolean question x =
       Can you deal with another question named 'x'?
-  
