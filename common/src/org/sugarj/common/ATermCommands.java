@@ -20,7 +20,6 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.jsglr_layout.client.InvalidParseTableException;
 import org.spoofax.jsglr_layout.client.imploder.IToken;
 import org.spoofax.jsglr_layout.client.imploder.ImploderAttachment;
-import org.spoofax.jsglr_layout.client.imploder.ImploderOriginTermFactory;
 import org.spoofax.jsglr_layout.client.imploder.Token;
 import org.spoofax.jsglr_layout.client.imploder.Tokenizer;
 import org.spoofax.jsglr_layout.io.ParseTableManager;
