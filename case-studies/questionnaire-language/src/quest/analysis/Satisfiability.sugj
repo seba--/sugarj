@@ -1,5 +1,12 @@
 package quest.analysis;
 
+/*
+ * TODO: use proper SAT solver or the like
+ * Hints from Christian Kaestner:
+ *   pseudo-boolsche SAT solver -> SAT4J, Packet: pseudo
+ *   CSP solver -> Choco
+ *   SMT -> Microsoft Z3
+ */
 public sugar Satisfiability {
   rules
     is-satisfiable =
