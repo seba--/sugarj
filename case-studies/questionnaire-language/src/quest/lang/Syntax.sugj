@@ -15,7 +15,7 @@ public sugar Syntax {
   rules
     questionnaire-model :
       Questionnaire(mods, name, body) -> 
-      ModelDec(ModelDecHead(mods, name, "quest.syntax.Questionnaire"), ModelBody(body))
+      ModelDec(ModelDecHead(mods, name, "quest.lang.Syntax"), ModelBody(body))
 
   // question
   context-free syntax
