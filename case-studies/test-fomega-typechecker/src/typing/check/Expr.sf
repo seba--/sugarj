@@ -16,7 +16,7 @@ rules
   // Γ ⊢ e : S   Γ ⊢ S ⇓ <decls>   lab(decls) ≐ tag(brs)   Γ | <decls> ⊢ brs : T
   // ----------------------------------------------------------------------------
   // Γ ⊢ case e of brs : T
-  typeOf:
+  typeOfKnown:
     (ctx,Case(e,brs)) -> (T,<conc> (errs1,errs2,errs3,errs4))
     where <typeOf> (ctx,e) => (S,errs1)
         ; <norm> (ctx,S) => S'
@@ -34,7 +34,7 @@ rules
   // x:S ∈ <decls>   Γ,y:S ⊢ e : T
   // -----------------------------
   // Γ | <decls> ⊢ <x=y> => e : T
-  typeOfBrs:
+  typeOfBrsKnown:
     (ctx,R,BranchesEnd(Branch(x,y,e))) -> (T,<conc> (errs1,errs2))
     where <labType> (x,R) => (S,msgs1)
         ; <msgsToErrs> (msgs1,x) => errs1
@@ -44,7 +44,7 @@ rules
   // Γ ⊢ T1 ⇓ U    Γ | R ⊢ brs : T2     Γ ⊢ T2 ⇓ U
   // ----------------------------------------------
   // Γ | <decls> ⊢ <x=y> => e; brs : U
-  typeOfBrs:
+  typeOfBrsKnown:
     (ctx,R,BranchesCons(Branch(x,y,e),brs)) ->
     (T1',<conc> (errs1,errs2,errs3,errs4,errs5))
     where errorUnless(<not(elem)> (x, <tag> brs)
@@ -64,7 +64,7 @@ rules
   // Γ ⊢ T1 ⇓ Bool Γ ⊢ T2 ⇓ U Γ ⊢ T3 ⇓ U
   // ----------------------------------------
   // Γ ⊢ if e1 then e2 else e3 : U
-  typeOf:
+  typeOfKnown:
     (ctx,Cond(e1,e2,e3)) ->
     (T2',<conc> (errs1,errs2,errs3,errs4,errs5))
     where <typeOf> (ctx,e1) => (T1,errs1)
@@ -83,7 +83,7 @@ rules
   // Γ,X::K1 ⊢ e2 : T2
   // ----------------------------
   // Γ ⊢ \X::K1. e2 : ∀ X::K1. T2
-  typeOf:
+  typeOfKnown:
     (ctx,TAbs(X,K1,e2)) -> (TyForall(X,K1,T2),errs1)
     where <typeOf> (CtxBindTVar(ctx,X,K1),e2) => (T2,errs1)
 
@@ -92,7 +92,7 @@ rules
   // Γ,x:T1 ⊢ e2 : T2 Γ ⊢ T1 :: *
   // ------------------------------
   // Γ ⊢ \x::T1. e2 : T1 → T2
-  typeOf:
+  typeOfKnown:
     (ctx,Abs(x,T1,e2)) -> (TyArrow(T1,T2),<conc> (errs1,errs2,errs3))
     where <typeOf> (CtxBindVar(ctx,x,T1),e2) => (T2,errs1)
         ; <kindOf> (ctx,T1) => (K1,errs2)
@@ -104,7 +104,7 @@ rules
   // Γ ⊢ e : S Γ ⊢ T :: * Γ ⊢ S ⇓ U Γ ⊢ T ⇓ U
   // -----------------------------------------------
   // Γ ⊢ e as T : T
-  typeOf:
+  typeOfKnown:
     (ctx,Ascription(e,T)) -> (T,<conc> (errs1,errs2,errs3,errs4))
     where <typeOf> (ctx,e) => (S,errs1)
         ; <kindOf> (ctx,T) => (K,errs2)
@@ -120,7 +120,7 @@ rules
   // Γ ⊢ T :: *  Γ ⊢ e : S  Γ ⊢ T ⇓ μX.T1  Γ ⊢ S ⇓ μX.T1
   // ----------------------------------------------------
   // Γ ⊢ unfold [T] e : [X↦μX.T1]T1
-  typeOf:
+  typeOfKnown:
     (ctx,Unfold(T,e)) ->
     (<subst> (X,T',T1),<conc> (errs1,errs2,errs3,errs4,errs5,errs6))
     where <kindOf> (ctx,T) => (K,errs1)
@@ -132,7 +132,7 @@ rules
         ; <typeEqMu> T' => (X,T1,msgs4)
         ; <msgsToErrs> (msgs4,T) => errs4
         ; <typeEqMu> S' => (Y,S1,msgs5)
-	; <msgsToErrs> (msgs5,e) => errs5
+        ; <msgsToErrs> (msgs5,e) => errs5
         ; <fresh> (X,[T',S']) => Z
         ; <subst> (X,TyVar(Z),T1) => T1'
         ; <subst> (Y,TyVar(Z),S1) => S1'
@@ -144,7 +144,7 @@ rules
   // Γ ⊢ T :: *   Γ ⊢ T ⇓ μX.U   Γ ⊢ e : [X↦μX.U]U
   // -----------------------------------------------
   // Γ ⊢ fold [T] e : T
-  typeOf:
+  typeOfKnown:
     (ctx,Fold(T,e)) ->
     (T,<conc> (errs1,errs2,errs3,errs4,errs5))
     where <kindOf> (ctx,T) => (K,errs1)
@@ -163,7 +163,7 @@ rules
   // Γ ⊢ e1 : T1 Γ ⊢ T1 ⇓ ∀X::K11.T12 Γ ⊢ T2 :: K11
   // ---------------------------------------------------
   // Γ ⊢ e1 [T2] : [X↦T2]T12
-  typeOf:
+  typeOfKnown:
     (ctx,TApp(e1,T2)) -> (<subst> (X,T2,T12),<conc> (errs1,errs2,errs3,errs4))
     where <typeOf> (ctx,e1) => (T1,errs1)
         ; <norm> (ctx,T1) => T1'
@@ -178,7 +178,7 @@ rules
   // Γ ⊢ e1 : T1 Γ ⊢ e2: T2 Γ ⊢ T1 ⇓ T11 → T12 Γ ⊢ T2 ⇓ T11
   // -------------------------------------------------------------
   // Γ ⊢ e1 e2 : T12
-  typeOf:
+  typeOfKnown:
     (ctx,App(e1,e2)) -> (T12,<conc> (errs1,errs2,errs3,errs4))
     where <typeOf> (ctx,e1) => (T1,errs1)
         ; <typeOf> (ctx,e2) => (T2,errs2)
@@ -194,7 +194,7 @@ rules
   // Γ ⊢ e : T Γ ⊢ T ⇓ {decls} x:S ∈ decls
   // ------------------------------------------
   // Γ ⊢ e!x : S
-  typeOf:
+  typeOfKnown:
     (ctx,SelectRcd(e,x)) -> (S,<conc> (errs1,errs2,errs3))
     where <typeOf> (ctx,e) => (T,errs1)
         ; <norm> (ctx,T) => T'
@@ -204,17 +204,17 @@ rules
         ; <msgsToErrs> (msgs3,x) => errs3
 
   // *** Primitive types ***
-  typeOf: (ctx,String(str)) -> (TyString(),[])
-  typeOf: (ctx,Nat(n)) -> (TyNat(),[])
-  typeOf: (ctx,False()) -> (TyBool(),[])
-  typeOf: (ctx,True()) -> (TyBool(),[])
+  typeOfKnown: (ctx,String(str)) -> (TyString(),[])
+  typeOfKnown: (ctx,Nat(n)) -> (TyNat(),[])
+  typeOfKnown: (ctx,False()) -> (TyBool(),[])
+  typeOfKnown: (ctx,True()) -> (TyBool(),[])
 
   // *** Variant ***
   //
   // Γ ⊢ T :: *   Γ ⊢ e : S   Γ ⊢ S ⇓ U   Γ ⊢ T ⇓ <decls>   x:U ∈ decls
   // -------------------------------------------------------------------
   // Γ ⊢ <x=e> as T : T
-  typeOf:
+  typeOfKnown:
     (ctx,Variant(Field(x,e),T)) -> (T,<conc> (errs1,errs2,errs3,errs4,errs5,errs6))
     where <kindOf> (ctx,T) => (K,errs1)
         ; <kindEqStar> K => msgs2
@@ -233,7 +233,7 @@ rules
   //
   // -----------
   // Γ ⊢ {} : {}
-  typeOf:
+  typeOfKnown:
     (ctx,Record(FieldsNil())) -> (TyRecord(TyDeclsNil()),[])
   // Γ ⊢ e : T   Γ ⊢ {flds} : S   Γ ⊢ S ⇓ {decls}   x ∉ lab(decls)
   // --------------------------------------------------------------
@@ -250,28 +250,28 @@ rules
                      | (x,<concat-strings> ["duplicate label ",x])) => errs4
 
   // *** Var ***
-  typeOf:
+  typeOfKnown:
     (CtxEmpty(),Var(x)) -> (TyUnknown(),[(x,<concat-strings> ["undefined identifier ",x])])
-  typeOf:
+  typeOfKnown:
     (CtxBindTVar(ctx,Y,K),Var(x)) -> <typeOf> (ctx,Var(x))
-  typeOf:
+  typeOfKnown:
     (CtxBindTVarDef(ctx,Y,K,T),Var(x)) -> <typeOf> (ctx,Var(x))
-  typeOf:
+  typeOfKnown:
     (CtxBindVar(ctx,x,T),Var(x)) -> (T,[])
-  typeOf:
+  typeOfKnown:
     (CtxBindVar(ctx,y,T),Var(x)) -> <typeOf> (ctx,Var(x))
     where <not(equal)> (y,x)
 
   // *** QVar ***
-  typeOf:
+  typeOfKnown:
     (CtxEmpty(),QVar(qx)) -> (TyUnknown(),[(qx,<concat-strings> ["undefined identifier ",qx])])
-  typeOf:
+  typeOfKnown:
     (CtxBindTVar(ctx,Y,K),QVar(qx)) -> <typeOf> (ctx,QVar(qx))
-  typeOf:
+  typeOfKnown:
     (CtxBindTVarDef(ctx,Y,K,T),QVar(qx)) -> <typeOf> (ctx,QVar(qx))
-  typeOf:
+  typeOfKnown:
     (CtxBindVar(ctx,qx,T),QVar(qx)) -> (T,[])
-  typeOf:
+  typeOfKnown:
     (CtxBindVar(ctx,qy,T),QVar(qx)) -> <typeOf> (ctx,QVar(qx))
     where <not(equal)> (qy,qx) 
 
