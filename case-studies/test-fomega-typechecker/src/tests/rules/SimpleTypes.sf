@@ -15,3 +15,13 @@ val val5 = val4 [Nat]
 val val6 = if val4 [(\Z::*. Z) (forall A::*. A -> A)] (\B::*.\x:B. x) then val1 else val3
 
 val val7 = 6
+
+val val8 = {x=9,y=true}
+
+val val9 = val8!y
+
+val val10 = <left="foo"> as <left:String,right:Nat>
+
+val val11 = case val10 of
+    <left=l> => 1
+  ; <right=r> => 2
