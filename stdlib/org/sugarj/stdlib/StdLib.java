@@ -15,7 +15,7 @@ import org.eclipse.core.runtime.FileLocator;
  */
 public class StdLib {
 
-  public static final String VERSION = "stdlib-0.1b";
+  public static final String VERSION = "stdlib-0.2";
   
   public static File stdLibDir;
   private static String stdLibTmpDir;
@@ -84,6 +84,7 @@ public class StdLib {
   public static File sugarDef = ensureFile("org/sugarj/languages/Sugar.def");
   public static File modelDef = ensureFile("org/sugarj/languages/Model.def");
   public static File failureTrans = ensureFile("failure-trans.jar");
+  public static File stdEditor = ensureFile("org/sugarj/stdlib/StdEditor.serv");
 
   public static List<File> stdGrammars() {
     return Arrays.asList(new File[]{sdfDef, strategoDef, editorServicesDef, plainDef, commonDef, sugarDef, modelDef});

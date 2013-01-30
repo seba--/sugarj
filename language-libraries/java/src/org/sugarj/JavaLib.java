@@ -244,6 +244,9 @@ public class JavaLib extends LanguageLib implements Serializable {
     IStrategoTerm dec = isApplication(toplevelDecl, "JavaTypeDec") ? getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0) : toplevelDecl;
 
     String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
+    String expectedDecName = FileCommands.fileName(javaOutFile);
+    if (expectedDecName != null && !expectedDecName.equals(decName))
+      setErrorMessage(toplevelDecl, "Declaration name '" + decName + "'" + " does not match the file name '" + expectedDecName + "'.", null);
 
     RelativePath clazz = environment.createBinPath(getRelativeNamespaceSep() + decName + ".class");
 

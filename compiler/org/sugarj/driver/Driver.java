@@ -44,6 +44,8 @@ import org.spoofax.jsglr_layout.shared.TokenExpectedException;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.lang.StrategoException;
+import org.strategoxt.stratego_aterm.stratego_aterm;
+import org.strategoxt.stratego_gpp.stratego_gpp;
 import org.sugarj.LanguageLib;
 import org.sugarj.LanguageLibFactory;
 import org.sugarj.common.ATermCommands;
@@ -141,6 +143,8 @@ public class Driver{
     this.driverResult = new Result(environment.doGenerateFiles());
     
     langLib.setInterpreter(new HybridInterpreter());
+//    stratego_aterm.registerInterop(langLib.getInterpreter().getContext(), langLib.getInterpreter().getCompiledContext());
+//    stratego_gpp.registerInterop(langLib.getInterpreter().getContext(), langLib.getInterpreter().getCompiledContext());
     langLib.getInterpreter().addOperatorRegistry(new SugarJPrimitivesLibrary(this, environment, driverResult, monitor));
 
     try {      
@@ -355,8 +359,14 @@ public class Driver{
         
         stepped();
         
+        IStrategoTerm analyzed = currentAnalyze(lastSugaredToplevelDecl);
+        analyzed = ATermCommands.copyTokens(lastSugaredToplevelDecl, analyzed);
+        lastSugaredToplevelDecl = analyzed;
+        
+        stepped();
+        
         // DESUGAR the parsed top-level declaration
-        IStrategoTerm desugared = currentDesugar(lastSugaredToplevelDecl);
+        IStrategoTerm desugared = currentDesugar(analyzed);
         
         stepped();
         
@@ -442,7 +452,7 @@ public class Driver{
             driverResult.getGeneratedFileHashes(), 
             driverResult.isGenerateFiles());
       } catch (ClassNotFoundException e) {
-        setErrorMessage(lastSugaredToplevelDecl, "Could not resolve imported class " + e.getMessage());
+        setErrorMessage("Could not resolve imported class " + e.getMessage());
         // throw new RuntimeException(e);
       }
       good = true;
@@ -509,7 +519,7 @@ public class Driver{
         if (!(e instanceof StrategoException))
           e.printStackTrace();
 
-        setErrorMessage(toplevelDecl, msg);
+        setErrorMessage(msg);
         if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
           sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
 
@@ -527,6 +537,7 @@ public class Driver{
       
       String extName = langLib.getEditorName(toplevelDecl);
       String fullExtName = getFullRenamedDeclarationName(extName);
+      checkModuleName(extName);
 
       log.log("The name of the editor services is '" + extName + "'.", Log.DETAIL);
       log.log("The full name of the editor services is '" + fullExtName + "'.", Log.DETAIL);
@@ -555,7 +566,7 @@ public class Driver{
         buf.append(service).append('\n');
       
       for (IStrategoTerm service : editorServices) {
-        driverResult.addEditorService(service);
+//        driverResult.addEditorService(service);
         buf.append(service).append('\n');
       }
       
@@ -574,7 +585,8 @@ public class Driver{
       IStrategoTerm head = getApplicationSubterm(toplevelDecl, "PlainDec", 0);
       IStrategoTerm body= getApplicationSubterm(toplevelDecl, "PlainDec", 1);
       
-      String extName = ATermCommands.getString(getApplicationSubterm(head, "PlainDecHead", 1));    
+      String extName = ATermCommands.getString(getApplicationSubterm(head, "PlainDecHead", 1));
+      checkModuleName(extName);
 
       String extension = null;
       if (head.getSubtermCount() >= 3 && isApplication(getApplicationSubterm(head, "PlainDecHead", 2), "Some"))
@@ -617,6 +629,7 @@ public class Driver{
       parseResult = SDFCommands.parseImplode(
           table,
           remainingInput,
+          sourceFile,
           "ToplevelDeclaration",
           recovery,
           true,
@@ -638,20 +651,40 @@ public class Driver{
     return parseResult.b;
   }
 
+  private IStrategoTerm currentAnalyze(IStrategoTerm term) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
+  // assimilate toplevelDec using current transformation
+  
+    log.beginTask("analyze", "ANALYZE toplevel declaration.", Log.CORE);
+    try {
+      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(), strParser, strCache, environment, langLib);
+    
+      return STRCommands.assimilate("analyze-main", currentTransProg, term, langLib.getInterpreter());
+    } catch (StrategoException e) {
+      String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
+      
+      log.logErr(msg, Log.DETAIL);
+      setErrorMessage(msg);
+      return term;
+    } finally {
+      log.endTask();
+    }
+  }
+
   private IStrategoTerm currentDesugar(IStrategoTerm term) throws IOException,
       InvalidParseTableException, TokenExpectedException, SGLRException {
     // assimilate toplevelDec using current transformation
 
     log.beginTask("desugaring", "DESUGAR toplevel declaration.", Log.CORE);
     try {
-      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(), strParser, strCache, environment, langLib);
-
+      if (currentTransProg == null)
+        return term;
+      
       return STRCommands.assimilate(currentTransProg, term, langLib.getInterpreter());
     } catch (StrategoException e) {
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
       
       log.logErr(msg, Log.DETAIL);
-      setErrorMessage(term, msg);
+      setErrorMessage(msg);
       return term;
     } finally {
       log.endTask();
@@ -672,7 +705,7 @@ public class Driver{
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
 
       log.logErr(msg, Log.DETAIL);
-      setErrorMessage(term, msg);
+      setErrorMessage(msg);
       return term;
     }
   }
@@ -751,7 +784,7 @@ public class Driver{
         IStrategoTerm transformation = getApplicationSubterm(appl, "TransApp", 0);
         
         ImportCommands imp = new ImportCommands(langLib, environment, this, driverResult, new STRCommands(strParser, strCache, environment, langLib));
-        Pair<String, Boolean> transformationResult = imp.transformModel(model, transformation, toplevelDecl);
+        Pair<String, Boolean> transformationResult = imp.transformModel(model, transformation, lastSugaredToplevelDecl);
         if (transformationResult == null)
           return ;
         
@@ -780,7 +813,7 @@ public class Driver{
       boolean success = codeImportSuccess || modelImportSuccess;
       
       if (!success)
-        setErrorMessage(toplevelDecl, "module not found: " + modulePath);
+        setErrorMessage("module not found: " + modulePath);
       
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -823,7 +856,7 @@ public class Driver{
       if (sourceFileAvailable && requiresUpdate && !environment.doGenerateFiles()) {
         // This is a parser run. Required module needs to be compiled before.
         log.log("Module outdated, compile first: " + modulePath + ".", Log.IMPORT);
-        setErrorMessage(toplevelDecl, "module outdated, compile first: " + modulePath);
+        setErrorMessage("module outdated, compile first: " + modulePath);
       }
       else if (sourceFileAvailable && requiresUpdate && getCircularImportResult(importSourceFile) != null) {
         // Circular import. Assume source file does not provide syntactic sugar.
@@ -838,7 +871,7 @@ public class Driver{
         
         res = subcompile(toplevelDecl, importSourceFile);
         if (res.hasFailed())
-          setErrorMessage(toplevelDecl, "Problems while compiling " + modulePath);
+          setErrorMessage("Problems while compiling " + modulePath);
           
         log.log("CONTINUE PROCESSING'" + sourceFile + "'.", Log.CORE);
       }
@@ -849,7 +882,7 @@ public class Driver{
       
       if (!isCircularImport && res != null) {
         if (res.getPersistentPath() == null || res.hasPersistentVersionChanged())
-          setErrorMessage(toplevelDecl, "Result is inconsitent with persistent version.");
+          setErrorMessage("Result is inconsitent with persistent version.");
         driverResult.addDependency(res);
       }
       
@@ -900,15 +933,15 @@ public class Driver{
       else
         return run(importSourceFile, environment, monitor, langLib.getFactoryForLanguage(), currentlyProcessing);
     } catch (IOException e) {
-      setErrorMessage(toplevelDecl, "Problems while compiling " + importSourceFile);
+      setErrorMessage("Problems while compiling " + importSourceFile);
     } catch (TokenExpectedException e) {
-      setErrorMessage(toplevelDecl, "Problems while compiling " + importSourceFile);
+      setErrorMessage("Problems while compiling " + importSourceFile);
     } catch (ParseException e) {
-      setErrorMessage(toplevelDecl, "Problems while compiling " + importSourceFile);
+      setErrorMessage("Problems while compiling " + importSourceFile);
     } catch (InvalidParseTableException e) {
-      setErrorMessage(toplevelDecl, "Problems while compiling " + importSourceFile);
+      setErrorMessage("Problems while compiling " + importSourceFile);
     } catch (SGLRException e) {
-      setErrorMessage(toplevelDecl, "Problems while compiling " + importSourceFile);
+      setErrorMessage("Problems while compiling " + importSourceFile);
     }
     return null;
   }
@@ -981,6 +1014,7 @@ public class Driver{
 
       String extName = langLib.getSugarName(toplevelDecl);
       String fullExtName = getFullRenamedDeclarationName(extName);
+      checkModuleName(extName);
 
       log.log("The name of the sugar is '" + extName + "'.", Log.DETAIL);
       log.log("The full name of the sugar is '" + fullExtName + "'.", Log.DETAIL);
@@ -1050,7 +1084,7 @@ public class Driver{
         buildCompoundStrModule();
 
     } catch (PrettyPrintError e) {
-      setErrorMessage(toplevelDecl, e.getMsg());
+      setErrorMessage(e.getMsg());
     } finally {
       log.endTask();
     }
@@ -1064,6 +1098,8 @@ public class Driver{
 
       String extName = langLib.getTransformationName(toplevelDecl);
       String fullExtName = getFullRenamedDeclarationName(extName);
+      checkModuleName(extName);
+      
       Path strExtension = environment.createBinPath(langLib.getRelativeNamespaceSep() + extName + ".str");
       IStrategoTerm transBody = langLib.getTransformationBody(toplevelDecl);
       if (isApplication(transBody, "TransformationDef")) 
@@ -1127,6 +1163,7 @@ public class Driver{
   
       String modelName = langLib.getModelName(toplevelDecl);
       String fullModelName = getFullRenamedDeclarationName(modelName);
+      checkModuleName(modelName);
   
       log.log("The name of the model is '" + modelName + "'.", Log.DETAIL);
 //      checkToplevelDeclarationName(modelName.replace("-", "$"), "model", toplevelDecl);
@@ -1197,20 +1234,32 @@ public class Driver{
     } catch (StrategoException e) {
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
       log.logErr(msg, Log.DETAIL);
-      setErrorMessage(lastSugaredToplevelDecl, msg);
+      setErrorMessage(msg);
     } finally {
       log.endTask();
     }
   }
     
+  private void checkModuleName(String decName) {
+    String expectedDecName = FileCommands.fileName(langLib.getOutFile());
+    if (expectedDecName != null && !expectedDecName.equals(decName))
+      setErrorMessage("Declaration name " + decName + " does not match file name " + expectedDecName);
+  }
+
   private void initEditorServices() throws IOException, TokenExpectedException, SGLRException, InterruptedException {
+    IStrategoTerm stdEditor = (IStrategoTerm) editorServicesParser.parse(FileCommands.readFileAsString(StdLib.stdEditor), StdLib.stdEditor.getPath(), "Module");
     IStrategoTerm initEditor = (IStrategoTerm) editorServicesParser.parse(FileCommands.readFileAsString(langLib.getInitEditor()), langLib.getInitEditor().getPath(), "Module");
 
+    IStrategoTerm stdServices = ATermCommands.getApplicationSubterm(stdEditor, "Module", 2);
     IStrategoTerm services = ATermCommands.getApplicationSubterm(initEditor, "Module", 2);
     
+    if (!ATermCommands.isList(stdServices))
+      throw new IllegalStateException("standard editor ill-formed");
     if (!ATermCommands.isList(services))
       throw new IllegalStateException("initial editor ill-formed");
     
+    for (IStrategoTerm service : ATermCommands.getList(stdServices))
+      driverResult.addEditorService(service);
     for (IStrategoTerm service : ATermCommands.getList(services))
       driverResult.addEditorService(service);
   }
@@ -1425,8 +1474,7 @@ public class Driver{
   }
 
   public void setErrorMessage(String msg) {
-    driverResult.logError(msg);
-    ATermCommands.setErrorMessage(lastSugaredToplevelDecl, msg);
+    setErrorMessage(lastSugaredToplevelDecl, msg);
   }
 
   private void sortForImports(List<IStrategoTerm> list) {

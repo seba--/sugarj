@@ -1,0 +1,20 @@
+package quest.lang;
+
+import quest.lang.Syntax;
+
+public editor services Editor {
+  folding
+    Quest
+    Question
+    QuestGroup
+    ConditionalQuest
+    
+  colorer
+    darkgrey = 100 100 100
+    darkorange = 200 100 0
+    keyword = 127 0 85 bold
+    
+    QuestText : blue
+    QuestId : darkgrey
+    QuestType : keyword
+}

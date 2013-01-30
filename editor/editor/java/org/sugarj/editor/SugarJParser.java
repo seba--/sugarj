@@ -212,8 +212,6 @@ public class SugarJParser extends JSGLRI {
   }
   
   public static void putResult(String file, Result result) {
-    if (result != null)
-      result.setSugaredSyntaxTree(result.getSugaredSyntaxTree());
     synchronized (results) {
       results.put(file, result);
     }

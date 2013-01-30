@@ -1,0 +1,34 @@
+package test;
+
+import quest.lang.Syntax;
+import quest.lang.NormalizeQuestionText;
+import quest.lang.Editor;
+
+import quest.analysis.Naming;
+import quest.analysis.Typing;
+import quest.analysis.Determinism;
+
+public questionnaire HouseOwning
+
+  Boolean question hasSoldHouse =
+    Did you sell a house in 2010?
+  Boolean question hasBoughtHouse =
+    Did you by a house in 2010?
+  Boolean value active = hasSoldHouse || hasBoughtHouse
+  
+  question group Payment
+    Integer question howMuchPaid =
+	    How much did you pay?
+    String question howPaid =
+	    Which method of payment did you use?
+	    Please do not write down any details;
+	    keep it short. 
+  
+  if active && howMuchPaid >= 5000000
+    Boolean question conflict = That so?
+    define Boolean question really = Really?
+    really
+  if !hasBoughtHouse
+    Boolean question conflict =
+      Can you deal with another question named 'x'?
+
