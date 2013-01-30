@@ -57,22 +57,22 @@ rules
     fomega |[ dosum { ~e } ]|
     ->
     fomega |[ ~e ]|
-    
+
   dosum-desugar :
     |[ dosum { ~%x <- ~e1; ~e2 } ]|
     ->
     |[ typing.extensions.sumcomprehension.Support.sum1 ~e1 (\~%x:Nat. ~e2) ]|
-    
+
   dosum-desugar :
     |[ dosum { let ~%x = ~e1; ~e2 } ]|
     ->
     |[ (\~%x:Nat. ~e2) ~e1 ]|
-  
+
   dosum-desugar :
     |[ dosum { ~%x <- ~e1; ~bs; ~e2 } ]|
     ->
     |[ typing.extensions.sumcomprehension.Support.sum1 ~e1 (\~%x:Nat. dosum { ~bs; ~e2 }) ]|
-  
+
   dosum-desugar :
     |[ dosum { let ~%x = ~e1; ~bs; ~e2 } ]|
     ->

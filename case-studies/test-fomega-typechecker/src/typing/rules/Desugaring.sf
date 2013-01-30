@@ -21,7 +21,7 @@ rules
 
   desugar-type-rule :
     TypeRule(premises, RuleName(sep, optional-name), conclusion) ->
-      transformation-elem(<debug(!("IN:  "));translate-type-rule; debug(!"OUT: ")> (optional-name, premises, conclusion))
+      transformation-elem(<translate-type-rule> (optional-name, premises, conclusion))
 
   desugar-branch-type-rule :
     BranchTypeRule(premises, RuleName(sep, optional-name), conclusion) ->
@@ -38,9 +38,9 @@ rules // Translate a type rule
            (term~tC, term~te) -> (term~tT, <concat> term~errors)
            where strategy~premises-implementation
     ]|
-    where <trm-explode;debug(!"CCC")> C => tC
-        ; <trm-explode;debug(!"BBB")> e => te
-        ; <translate-subst;debug(!"AAA")> T => tT
+    where <trm-explode> C => tC
+        ; <trm-explode> e => te
+        ; <translate-subst> T => tT
         ; <premises-to-list> premises => premises-list
         ; <translate-premises> (<ts-initial> (), premises-list) => (ts1, premises-implementation)
         ; <ts-get-errs> ts1 => errs
