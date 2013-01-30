@@ -188,8 +188,8 @@ rules
   freeVars: TyArrow(T1,T2) -> <union> (<freeVars> T1,<freeVars> T2)
   freeVars: TyApp(T1,T2) -> <union> (<freeVars> T1,<freeVars> T2)
   freeVars: TyQVar(qX) -> []
-  freeVars: TyVariant(decls) -> <unions> (<map(freeVarsDecl)> decls)
-  freeVars: TyRecord(decls) -> <unions> (<map(freeVarsDecl)> decls)
+  freeVars: TyVariant(decls) -> <unions> (<mapDeclsToList(freeVarsDecl)> decls)
+  freeVars: TyRecord(decls) -> <unions> (<mapDeclsToList(freeVarsDecl)> decls)
   freeVars: TyString() -> []
   freeVars: TyNat() -> []
   freeVars: TyBool() -> []
@@ -245,8 +245,8 @@ rules
   subst: (X,S,TyArrow(T1,T2)) -> TyArrow(<subst> (X,S,T1),<subst> (X,S,T2))
   subst: (X,S,TyApp(T1,T2)) -> TyApp(<subst> (X,S,T1),<subst> (X,S,T2))
   subst: (X,S,TyQVar(qX)) -> TyQVar(qX)
-  subst: (X,S,TyVariant(decls)) -> TyVariant(<map(\decl -> <substDecl> (X,S,decl)\)> decls)
-  subst: (X,S,TyRecord(decls)) -> TyRecord(<map(\decl -> <substDecl> (X,S,decl)\)> decls)
+  subst: (X,S,TyVariant(decls)) -> TyVariant(<mapDecls(\decl -> <substDecl> (X,S,decl)\)> decls)
+  subst: (X,S,TyRecord(decls)) -> TyRecord(<mapDecls(\decl -> <substDecl> (X,S,decl)\)> decls)
   subst: (X,S,TyString()) -> TyString()
   subst: (X,S,TyNat()) -> TyNat()
   subst: (X,S,TyBool()) -> TyBool()
@@ -263,11 +263,14 @@ rules
 
   norm = // debug(!"NORM IN: ");
          norm1
-         // ;debug(!"NORM OUT: ")
+         // ; debug(!"NORM OUT: ")
 
   norm1: (ctx,T) -> T'
         where <parReduce> (ctx,T) => S
-            ; <typeEq> (T,S) => msgs
+            ; <// debug(!"EQ IN  ");
+               typeEq
+               // ; debug(!"EQ OUT ")
+              > (T,S) => msgs
             ; if (!msgs; ?[]) then
                 !T
               else
@@ -315,5 +318,7 @@ rules
 
 
   // Map over type declarations
-  mapDecls(s) : TyDeclsNil -> TyDeclsNil()
+  mapDecls(s) : TyDeclsNil() -> TyDeclsNil()
   mapDecls(s) : TyDeclsCons(decl, decls) -> TyDeclsCons(<s> decl, <mapDecls(s)> decls)
+  mapDeclsToList(s) : TyDeclsNil() -> []
+  mapDeclsToList(s) : TyDeclsCons(decl, decls) -> [<s> decl | <mapDeclsToList(s)> decls]
