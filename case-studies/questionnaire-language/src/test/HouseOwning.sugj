@@ -3,7 +3,7 @@ package test;
 import quest.lang.Syntax;
 import quest.lang.NormalizeQuestionText;
 import quest.lang.Editor;
-import quest.lang.Transform;
+import quest.lang.Transform2;
 
 import quest.analysis.Naming;
 import quest.analysis.Typing;
@@ -28,8 +28,6 @@ public questionnaire HouseOwning
   
   if active && howMuchPaid >= 5000000
     Boolean question conflict = That so?
-    define Boolean question really = Really?
-    really
   if !hasBoughtHouse
     Boolean question conflict =
       Can you deal with another question named 'x'?

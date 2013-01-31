@@ -148,6 +148,7 @@ public class STRCommands {
     StrategoException error = null;
     
     if (prog == null) {
+      System.err.println("no chaching");
       try {
         prog = generateAssimilator(key, str, main, environment.getIncludePath(), langLib);
       } catch (StrategoException e) {

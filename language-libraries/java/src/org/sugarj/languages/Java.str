@@ -215,6 +215,7 @@ signature
     AssignDiv               : JavaLHS * JavaExpr -> JavaExpr
     AssignMul               : JavaLHS * JavaExpr -> JavaExpr
     Assign                  : JavaLHS * JavaExpr -> JavaExpr
+    Cond                    : JavaExpr * JavaExpr * JavaExpr -> JavaExpr
     Or                      : JavaExpr * JavaExpr -> JavaExpr
     ExcOr                   : JavaExpr * JavaExpr -> JavaExpr
     And                     : JavaExpr * JavaExpr -> JavaExpr
