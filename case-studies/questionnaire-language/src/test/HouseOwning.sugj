@@ -26,11 +26,13 @@ public questionnaire HouseOwning
       Please do not write down any details;
       keep it short.
 
+  
+  define Boolean question conflict =
+    Can you deal with multiple questions named 'conflic'?
+  
   if active && howMuchPaid >= 50000
-    Boolean question conflict = That so?
-    define Boolean question really = Really?
-    really
+    conflict
+    Boolean question really = That so?
   if !hasBoughtHouse
-    Boolean question conflict =
-      Can you deal with another question named 'x'?
-
+    conflict
+    Boolean question really = Indeed?

@@ -59,8 +59,9 @@ public sugar Naming {
     resolve-reference = ?(<find-annotation(retrieve-reference)>,_,_,_,_)
     find-annotation(s) = s <+ ?c#([<find-annotation(s)>])
     
-    references-are-resolved = oncetd(?QuestRef(QuestId(name)); (is-reference + has-name-error)) 
-                           <+ topdown(not(?QuestRef(_)))
+    references-are-resolved = oncetd((?QuestRef(_) + ?ExprName(_));
+                                     (is-reference + has-name-error)) 
+                           <+ topdown(not(?QuestRef(_) + ?ExprName(_)))
 }
 
 public editor services Naming {

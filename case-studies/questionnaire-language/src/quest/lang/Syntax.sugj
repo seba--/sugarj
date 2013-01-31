@@ -17,7 +17,9 @@ public sugar Syntax {
     
     JavaID -> QuestId {cons("QuestId")}
     JavaID -> QuestType {cons("QuestType")}
-  
+    "false" -> JavaID {reject}
+    "true" -> JavaID {reject}
+    
   lexical syntax
     (~[\ \t\n\r]+ LAYOUT+)* ~[\ \t\n\r]+ -> QuestionString
   

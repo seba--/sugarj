@@ -26,11 +26,7 @@ public sugar Determinism {
                        analyze-determinism-limited-context(|cond), 
                        analyze-determinism-limited-context(|Not(cond)))
     analyze-determinism = ?LocalQuest(_)
-    analyze-determinism =
-      ?QuestRef(QuestId(name)); 
-      if <retrieve-reference> name => ref
-        then where(<analyze-determinism> ref)
-      end
+    analyze-determinism = QuestRef(QuestId(new-active-name-cond))
 
     analyze-determinism-limited-context(|cond) =
       {| ConditionalContext:
