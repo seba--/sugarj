@@ -8,7 +8,7 @@ public sugar NormalizeQuestionText {
     
   rules
     normalize-question-text :
-      QuestionText(text) -> QuestionText(ntext)
+      QuestText(text) -> QuestText(ntext)
     where <normalize-layout> text => ntext
     
     normalize-layout = string-as-chars(normalize-layout-chars)

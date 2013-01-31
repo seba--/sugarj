@@ -12,7 +12,7 @@ public sugar Satisfiability {
     is-satisfiable =
       innermost(reduce);
       repeat(remove-equation);
-      innermost(reduce);debug;
+      innermost(reduce);
       repeat(remove-variable);
       innermost(reduce);
       ?Lit(Bool(True))

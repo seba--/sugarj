@@ -1,0 +1,20 @@
+package quest.style;
+
+public sugar Syntax {
+  context-free syntax
+    Style -> ToplevelDeclaration
+    AnnoOrSugarMod* "style" JavaId StyleList
+      -> Style {cons("Style"), layout(1.first.col < 4.first.col)}
+
+    -> StyleList {cons("SNil")}
+    StyleElem StyleList -> StyleList {cons("SCons"), layout(1.first.col == 2.first.col)}
+  
+  desugarings
+    style-model
+
+  rules
+    style-model :
+      Style(mods, name, body) -> 
+      ModelDec(ModelDecHead(mods, name, "quest.style.Syntax"), ModelBody(body))
+
+}

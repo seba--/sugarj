@@ -1,0 +1,143 @@
+package quest.lang;
+
+import concretesyntax.Java;
+
+import quest.lang.Syntax;
+import quest.analysis.Typing;
+
+public sugar Transform {
+  desugarings
+    desugar-questionnaire
+    desugar-question
+    desugar-derived-value
+
+  rules
+    desugar-questionnaire :
+      Questionnaire(mods, Id(java_x), body) ->
+      <put-mods(|mods)> java_tdec |[
+        class java_x extends javax.swing.JFrame {
+          
+          public java_x(String s) { super(s); }
+
+          public static void main(String[] args) {
+            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+              public void run() {
+                java_x frame = new java_x("Questionnaire: " + ~Lit(String([Chars(java_x)])));
+                frame.init();
+                frame.setPreferredSize(new java.awt.Dimension(800,600));
+                frame.pack();
+                frame.setVisible(true);
+              }
+            });
+          }
+          
+          public void init() {
+            // Add components to the container.
+            // Constructs (e.g., conditional quest blocks) may change the current container.
+            javax.swing.JComponent container = new javax.swing.JPanel(new java.awt.GridLayout(0, 1));
+            getContentPane().add(container);
+            
+            ~block:Block(flat-body)
+          }
+        }
+      ]|
+    where <flatten-questlist> body => flat-body
+    
+    flatten-questlist : QNil -> []
+    flatten-questlist : QCons(xs, xss) -> <conc> (xs, <flatten-questlist> xss)
+      
+  rules    
+    desugar-question :
+      Question(QuestType(type), QuestId(java_x), QuestText(text)) ->
+      java_bstm* |[
+        javax.swing.JPanel java_x_panel = new javax.swing.JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+        java_x_panel.add(new javax.swing.JLabel(~Lit(String([Chars(text)]))));
+        final java_tclass_component java_x = new java_tclass_component();
+        java_x_panel.add(java_x);
+        container.add(java_x_panel);
+      ]|
+    where
+      <component-type> type => java_tclass_component;
+      <newname> "panel" => java_x_panel
+  
+  rules
+    desugar-derived-value :
+      DerivedValue(QuestType(type), QuestId(java_x), QuestExpr(expr)) ->
+      java_bstm* |[
+        javax.swing.JPanel java_x_panel = new javax.swing.JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+        java_x_panel.add(new javax.swing.JLabel(~Lit(String([Chars(java_x)]))));
+        final javax.swing.JTextField java_x = new javax.swing.JTextField();
+        java_x.setPreferredSize(new java.awt.Dimension(200, 30));
+        java_x.setEditable(false);
+        java_x_panel.add(java_x);
+        container.add(java_x_panel);
+        
+        java_stm_computationClass
+        final java_x_className java_x_obj = new java_x_className();
+        ~block:(Block(listeners)); 
+        java_x_obj.update();
+      ]|
+    where
+      <newname> "panel" => java_x_panel;
+      <newname> java_x => java_x_className;
+      <newname> java_x => java_x_obj;
+      <collect-all(?ExprName(Id(_)))> expr => free-vars;
+      <make-computation-class; !ClassDecStm(<id>)> (java_x_className, free-vars, java_x, expr) => java_stm_computationClass;
+      <mapconcat(make-value-listener(|java_x_obj))> free-vars => listeners
+
+    make-computation-class =
+      ?(class-name, free-vars, java_x, java_e);
+      <map(make-computation-class-fielddec)> free-vars => fields;
+      !MethodDec(MethodDecHead([Public], None, Void, Id("update"), [], None),
+                 Block([|[ java_x.setText(String.valueOf(java_e)); ]|])) => method;
+      !ClassDecHead([], Id(class-name), None, None, None) => head;
+      !ClassBody(<conc> (fields, [method])) => body;
+      !ClassDec(head, body)
+      
+    make-computation-class-fielddec = 
+      where(retrieve-type => java_x);
+      ?ExprName(name);
+      !FieldDec([Public], java_type |[ java_x ]|, [VarDec(name)])
+  
+  rules
+    component-type : "Boolean" -> java_type |[ javax.swing.JCheckBox ]|
+    component-type : "String" -> java_type |[ javax.swing.JTextField ]|
+    component-type : "Integer" -> java_type |[ javax.swing.JTextField ]|
+    
+    make-value-listener(|computation-object) = 
+      where(retrieve-type => type);
+      where(retrieve-reference => ref;
+            <?DerivedValue(_,_,_) < !"true" + !"false"> ref => is-derived);
+      ?ExprName(Id(name));
+      <make-value-listener(|computation-object, name)> (type,is-derived)
+    
+    make-value-listener(|java_x_obj, java_x_var) : 
+      ("Boolean","false") ->
+      java_bstm* |[ 
+        java_x_obj.java_x_var = java_x_var.isSelected();
+        java_x_var.addChangeListener(new javax.swing.event.ChangeListener() {
+          public void stateChanged(javax.swing.event.ChangeEvent e) {
+            java_x_obj.java_x_var = java_x_var.isSelected();
+            java_x_obj.update();
+          }
+        });
+      ]|
+      
+    make-value-listener(|java_x_obj, java_x_var) : 
+      (java_x_type,_) ->
+      java_bstm* |[ 
+        java_x_obj.java_x_var = java_x_type.valueOf(java_x_var.getText());
+        java_x_var.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+          public void anyUpdate() {
+            java_x_obj.java_x_var = java_x_type.valueOf(java_x_var.getText());
+            java_x_obj.update();
+          }
+          public void insertUpdate(javax.swing.event.DocumentEvent e) { anyUpdate(); }
+          public void removeUpdate(javax.swing.event.DocumentEvent e) { anyUpdate(); }
+          public void changedUpdate(javax.swing.event.DocumentEvent e) { anyUpdate(); }
+        });
+      ]|
+    
+  rules
+    put-mods(|mods) = ClassDec(ClassDecHead(!mods,id,id,id,id),id)
+}

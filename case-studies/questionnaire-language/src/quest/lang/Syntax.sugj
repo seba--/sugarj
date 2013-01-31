@@ -9,19 +9,19 @@ public sugar Syntax {
     -> QuestList {cons("QNil")}
     QuestElem QuestList -> QuestList {cons("QCons"), layout(1.first.col == 2.first.col)}
   
-  desugarings
-    questionnaire-model
-
-  rules
-    questionnaire-model :
-      Questionnaire(mods, name, body) -> 
-      ModelDec(ModelDecHead(mods, name, "quest.lang.Syntax"), ModelBody(body))
+//   desugarings
+//     questionnaire-model
+// 
+//   rules
+//     questionnaire-model :
+//       Questionnaire(mods, name, body) -> 
+//       ModelDec(ModelDecHead(mods, name, "quest.lang.Syntax"), ModelBody(body))
 
   // question
   context-free syntax
     Question -> QuestElem {layout(1.first.col < 1.left.col)}
     QuestType "question" QuestId "=" QuestText -> Question {cons("Question")}
-    QuestionString -> QuestText {cons("QuestionText"), layout(1.first.col <= 1.left.col)}
+    QuestionString -> QuestText {cons("QuestText"), layout(1.first.col <= 1.left.col)}
     
     JavaID -> QuestId {cons("QuestId")}
     JavaID -> QuestType {cons("QuestType")}
