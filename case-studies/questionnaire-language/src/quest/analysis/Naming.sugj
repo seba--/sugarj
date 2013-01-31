@@ -23,7 +23,8 @@ public sugar Naming {
       if <LocalQuest> name => ref
         then put-reference(|ref)
         else put-name-error(|"Could not resolve reference.")
-      end
+      end;
+      new-active-name(|name)
 
     analyze-names-local-scope = {| LocalQuest: analyze-names |}
     

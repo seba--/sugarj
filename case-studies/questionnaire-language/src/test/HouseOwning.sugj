@@ -26,13 +26,14 @@ public questionnaire HouseOwning
       Please do not write down any details;
       keep it short.
 
+  define Boolean question hasMoney =
+    So you have some money?
   
-  define Boolean question conflict =
-    Can you deal with multiple questions named 'conflic'?
-  
-  if active && howMuchPaid >= 50000
-    conflict
-    Boolean question really = That so?
-  if !hasBoughtHouse
-    conflict
-    Boolean question really = Indeed?
+  if hasBoughtHouse && howMuchPaid < 50000
+    hasMoney
+    if hasMoney
+      Boolean question spareADime = Can you spare some?
+  if hasSoldHouse
+    hasMoney
+    if hasMoney
+      Boolean question spareADime = For a good cause?
