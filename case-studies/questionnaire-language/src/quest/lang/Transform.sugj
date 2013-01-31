@@ -10,8 +10,8 @@ public sugar Transform {
     desugar-questionnaire
     desugar-question
     desugar-derived-value
-    desugar-question-group
-    desugar-conditional-group
+    // desugar-question-group
+    // desugar-conditional-group
 
   rules
     desugar-questionnaire :
@@ -46,8 +46,11 @@ public sugar Transform {
       ]|
     where
       <flatten-questlist> body => flat-body;
-      (QuestNames; map(strip-annos); nub) => names;
-      <map(!FieldDec([Public], java_type |[ java.util.List<javax.swing.JComponent> ]|, [VarDec(Id(<id>)), |[ java.util.LinkedList<javax.swing.JComponent>() ]|]))> names => fields
+      (QuestVars; map(strip-annos); nub) => vars;
+      <map(\ (name, java_x_type)
+           -> FieldDec([Public], 
+                       java_type |[ quest.lang.var.Variable<java_x_type> ]|,
+                       [VarDec(Id(name), |[ new quest.lang.var.Variable<java_x_type>(~<default-value> java_x_type) ]|)])\)> vars => fields
     
     flatten-questlist : QNil -> []
     flatten-questlist : QCons(xs, xss) -> <conc> (xs, <flatten-questlist> xss)
@@ -58,29 +61,26 @@ public sugar Transform {
       java_bstm* |[
         javax.swing.JPanel java_x_panel = new javax.swing.JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
         java_x_panel.add(new javax.swing.JLabel(~Lit(String([Chars(text)]))));
-        if (java_x == null) {
-          java_x = new java_tclass_component();
-          java_x.setPreferredSize(new java.awt.Dimension(200, 30));
-          java_x_panel.add(java_x);
-        }
+        java_tclass_component java_x_component = new java_tclass_component(java_x);
+        java_x_component.setPreferredSize(new java.awt.Dimension(200, 30));
+        java_x_panel.add(java_x_component);
         container.add(java_x_panel);
       ]|
     where
       <component-type> type => java_tclass_component;
+      <newname> java_x => java_x_component;
       <newname> "panel" => java_x_panel;
-      rules ( QuestNames := [java_x | <QuestNames <+ ![]>] )
-  
+      rules ( QuestVars := [(java_x,type) | <QuestVars <+ ![]>] )
+
   rules
     desugar-derived-value :
       DerivedValue(QuestType(type), QuestId(java_x), QuestExpr(expr)) ->
       java_bstm* |[
         javax.swing.JPanel java_x_panel = new javax.swing.JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
         java_x_panel.add(new javax.swing.JLabel(~Lit(String([Chars(java_x)]))));
-        if (java_x == null) {
-          java_x = new javax.swing.JTextField();
-          java_x.setPreferredSize(new java.awt.Dimension(200, 30));
-          ((javax.swing.JTextField) java_x).setEditable(false);
-        }
+        java_tclass_component java_x_component = new java_tclass_component(java_x);
+        java_x_component.setPreferredSize(new java.awt.Dimension(200, 30));
+        java_x_component.setEditable(false);
         java_x_panel.add(java_x);
         container.add(java_x_panel);
         
@@ -91,27 +91,30 @@ public sugar Transform {
       ]|
     where
       <newname> "panel" => java_x_panel;
+      <newname> java_x => java_x_component;
       <newname> java_x => java_x_className;
       <newname> java_x => java_x_obj;
+      <derived-component-type; debug> type => java_tclass_component;
       <collect-all(?ExprName(Id(_)))> expr => free-vars;
       <make-computation-class; !ClassDecStm(<id>)> (java_x_className, free-vars, java_x, expr) => java_stm_computationClass;
-      <mapconcat(make-value-listener(|java_x_obj))> free-vars => listeners;
-      rules ( QuestNames := [java_x | <QuestNames <+ ![]>] )
+      <mapconcat(make-variable-listener(|java_x_obj);debug)> free-vars => listeners;
+      rules ( QuestVars := [(java_x,type) | <QuestVars <+ ![]>] )
 
     make-computation-class =
       ?(class-name, free-vars, java_x, java_e);
-      <map(make-computation-class-fielddec)> free-vars => fields;
+      <map(debug;make-computation-class-vardec;debug)> free-vars => vars;
       !MethodDec(MethodDecHead([Public], None, Void, Id("update"), [], None),
-                 Block([|[ ((javax.swing.JTextField) java_x).setText(String.valueOf(java_e)); ]|])) => method;
+                 Block(<concat> [vars, [|[ java_x.set(String.valueOf(java_e)); ]|]])) => method;
       !ClassDecHead([], Id(class-name), None, None, None) => head;
-      !ClassBody(<conc> (fields, [method])) => body;
+      !ClassBody([method]) => body;
       !ClassDec(head, body)
       
-    make-computation-class-fielddec = 
-      where(retrieve-type => java_x);
-      ?ExprName(name);
-      !FieldDec([Public], java_type |[ java_x ]|, [VarDec(name)])
-  
+    make-computation-class-vardec = 
+      where(retrieve-type => java_x_type);
+      ?ExprName(Id(java_x));
+      !LocalVarDecStm(LocalVarDec([], java_type |[ java_x_type ]|, [VarDec(Id(java_x)), |[ this.java_x.get() ]|]))
+
+    /*
   rules
     desugar-question-group :
       QuestGroup(QuestId(java_x), qs) ->
@@ -195,50 +198,27 @@ public sugar Transform {
       where(retrieve-type => java_x);
       ?ExprName(name);
       !FieldDec([Public], java_type |[ java_x ]|, [VarDec(name)])
-
+*/
   rules
-    component-type : "Boolean" -> java_type |[ javax.swing.JCheckBox ]|
-    component-type : "String" -> java_type |[ javax.swing.JTextField ]|
-    component-type : "Integer" -> java_type |[ javax.swing.JTextField ]|
+    component-type : "Boolean" -> java_type |[ quest.lang.var.VariableCheckBox ]|
+    component-type : "String" -> java_type |[ quest.lang.var.VariableStringTextField ]|
+    component-type : "Integer" -> java_type |[ quest.lang.var.VariableIntegerTextField ]|
     
-    make-value-listener(|computation-object) = 
-      where(retrieve-type => type);
-      where(retrieve-reference => ref;
-            <?DerivedValue(_,_,_) < !"true" + !"false"> ref => is-derived);
-      ?ExprName(Id(name));
-      <make-value-listener(|computation-object, name)> (type,is-derived)
+    derived-component-type : "Boolean" -> java_type |[ quest.lang.var.VariableBooleanTextField ]|
+    derived-component-type : "String" -> java_type |[ quest.lang.var.VariableStringTextField ]|
+    derived-component-type : "Integer" -> java_type |[ quest.lang.var.VariableIntegerTextField ]|
     
-    make-value-listener(|java_x_obj, java_x_var) : 
-      ("Boolean","false") ->
-      java_bstm* |[ 
-        final javax.swing.JCheckBox java_y = (javax.swing.JCheckBox) java_x_var;
-        java_x_obj.java_x_var = java_y.isSelected();
-        java_y.addChangeListener(new javax.swing.event.ChangeListener() {
-          public void stateChanged(javax.swing.event.ChangeEvent e) {
-            java_x_obj.java_x_var = java_y.isSelected();
+    make-variable-listener(|java_x_obj) = 
+      where(retrieve-type => java_x_type);
+      ?ExprName(Id(java_x_var));
+      !|[ 
+        java_x_var.addChangeListener(new quest.lang.var.Variable.ChangeListener<java_x_type>() {
+          public void changed(java_x_type old, java_x_type now) {
             java_x_obj.update();
           }
         });
       ]|
-    where <newname> java_x_var => java_y
       
-    make-value-listener(|java_x_obj, java_x_var) : 
-      (java_x_type,_) ->
-      java_bstm* |[
-        final javax.swing.JTextField java_y = (javax.swing.JTextField) java_x_var;
-        java_x_obj.java_x_var = java_y.getText().isEmpty() ? ~(<default-value> java_x_type) : java_x_type.valueOf(java_y.getText());
-        java_y.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-          public void anyUpdate() {
-            java_x_obj.java_x_var = java_y.getText().isEmpty() ? ~(<default-value> java_x_type) : java_x_type.valueOf(java_y.getText());
-            java_x_obj.update();
-          }
-          public void insertUpdate(javax.swing.event.DocumentEvent e) { anyUpdate(); }
-          public void removeUpdate(javax.swing.event.DocumentEvent e) { anyUpdate(); }
-          public void changedUpdate(javax.swing.event.DocumentEvent e) { anyUpdate(); }
-        });
-      ]|
-    where <newname> java_x_var => java_y
-    
     default-value : "Boolean" -> |[ false ]|
     default-value : "Integer" -> |[ 0 ]|
     default-value : "String" -> |[ "" ]|

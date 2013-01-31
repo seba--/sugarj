@@ -1,0 +1,30 @@
+package quest.lang.var;
+
+import javax.swing.JCheckBox;
+import javax.swing.event.ChangeEvent;
+
+import quest.lang.var.Variable;
+
+/**
+ * @author seba
+ *
+ */
+public class VariableCheckBox extends JCheckBox implements Variable.ChangeListener<Boolean> {
+  private static final long serialVersionUID = 1L;
+
+  final private Variable<Boolean> var;
+  
+  public VariableCheckBox(final Variable<Boolean> var) {
+    this.var = var;
+    var.addChangeListener(this);
+    addChangeListener(new javax.swing.event.ChangeListener() {
+      public void stateChanged(ChangeEvent e) {
+        var.set(isSelected());
+      }
+    });
+  }
+
+  public void changed(Boolean old, Boolean now) {
+    this.setSelected(now);
+  }
+}

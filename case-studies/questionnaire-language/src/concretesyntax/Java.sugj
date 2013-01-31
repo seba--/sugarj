@@ -335,6 +335,8 @@ context-free syntax
     "java"             "|[" JavaMethodDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
                        "|[" JavaMethodDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
    
+  context-free syntax
+    "~field:"  StrategoTerm  -> JavaFieldDec  {cons("FromMetaExpr")}
   
   strategies
     java-char-expr = java-char-expr-meta <+ java-char-expr-plain
