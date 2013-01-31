@@ -4,7 +4,7 @@ import org.sugarj.languages.Fomega
 import concretesyntax.Fomega
 
 import typing.rules.Syntax
-import typing.rules.Desugaring
+// import typing.rules.Desugaring
 import typing.rules.ExprTypeRules
 // import typing.rules.Verification
 // Verification not yet possible, see remarks in desugarings section.
