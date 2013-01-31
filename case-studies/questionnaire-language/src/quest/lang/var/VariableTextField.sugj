@@ -10,21 +10,16 @@ import quest.lang.var.Variable;
  * @author seba
  *
  */
-public class VariableIntegerTextField extends JTextField implements Variable.ChangeListener<Integer> {
+public abstract class VariableTextField<T> extends JTextField implements Variable.ChangeListener<T> {
   private static final long serialVersionUID = 1L;
-
-  final private Variable<Integer> var;
   
-  public VariableIntegerTextField(final Variable<Integer> var) {
-    this.var = var;
+  private boolean inChange = false;
+
+  public VariableTextField(final Variable<T> var) {
     var.addChangeListener(this);
     getDocument().addDocumentListener(new DocumentListener() {
       private void anyUpdate() {
-        try {
-          var.set(Integer.valueOf(getText()));
-        } catch (NumberFormatException e) {
-          var.set(0);
-        }
+        var.set(getValue(getText()));
       }
       public void removeUpdate(DocumentEvent arg0) { anyUpdate(); }
       public void insertUpdate(DocumentEvent arg0) { anyUpdate(); }
@@ -32,7 +27,16 @@ public class VariableIntegerTextField extends JTextField implements Variable.Cha
     });
   }
 
-  public void changed(Integer old, Integer now) {
-    this.setText(String.valueOf(now));
+  public void changed(T old, T now) {
+    if (inChange)
+      return;
+    inChange = true;
+    String text = getText(now);
+    if (!getText().equals(text))
+      this.setText(text);
+    inChange = false;
   }
+  
+  public abstract T getValue(String s);
+  public abstract String getText(T t);
 }

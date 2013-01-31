@@ -10,7 +10,7 @@ public sugar Transform {
     desugar-questionnaire
     desugar-question
     desugar-derived-value
-    // desugar-question-group
+    desugar-question-group
     // desugar-conditional-group
 
   rules
@@ -81,7 +81,7 @@ public sugar Transform {
         java_tclass_component java_x_component = new java_tclass_component(java_x);
         java_x_component.setPreferredSize(new java.awt.Dimension(200, 30));
         java_x_component.setEditable(false);
-        java_x_panel.add(java_x);
+        java_x_panel.add(java_x_component);
         container.add(java_x_panel);
         
         java_stm_computationClass
@@ -94,27 +94,27 @@ public sugar Transform {
       <newname> java_x => java_x_component;
       <newname> java_x => java_x_className;
       <newname> java_x => java_x_obj;
-      <derived-component-type; debug> type => java_tclass_component;
+      <derived-component-type> type => java_tclass_component;
+      <make-computation-class; !ClassDecStm(<id>)> (java_x_className, java_x, expr) => java_stm_computationClass;
       <collect-all(?ExprName(Id(_)))> expr => free-vars;
-      <make-computation-class; !ClassDecStm(<id>)> (java_x_className, free-vars, java_x, expr) => java_stm_computationClass;
-      <mapconcat(make-variable-listener(|java_x_obj);debug)> free-vars => listeners;
+      <map(make-variable-listener(|java_x_obj))> free-vars => listeners;
       rules ( QuestVars := [(java_x,type) | <QuestVars <+ ![]>] )
 
     make-computation-class =
-      ?(class-name, free-vars, java_x, java_e);
-      <map(debug;make-computation-class-vardec;debug)> free-vars => vars;
-      !MethodDec(MethodDecHead([Public], None, Void, Id("update"), [], None),
-                 Block(<concat> [vars, [|[ java_x.set(String.valueOf(java_e)); ]|]])) => method;
-      !ClassDecHead([], Id(class-name), None, None, None) => head;
-      !ClassBody([method]) => body;
-      !ClassDec(head, body)
+      ?(java_x_class, java_x, java_e);
+      <bottomup(try(variable-get))> java_e => java_e_get;
+      !|[
+        class java_x_class {
+          public void update() {
+            java_x.set(java_e_get);
+          }
+        } 
+      ]|
       
-    make-computation-class-vardec = 
-      where(retrieve-type => java_x_type);
-      ?ExprName(Id(java_x));
-      !LocalVarDecStm(LocalVarDec([], java_type |[ java_x_type ]|, [VarDec(Id(java_x)), |[ this.java_x.get() ]|]))
+    variable-get = 
+      ?ExprName(Id(_)) => java_e;
+      !|[ java_e.get() ]|
 
-    /*
   rules
     desugar-question-group :
       QuestGroup(QuestId(java_x), qs) ->
@@ -133,8 +133,9 @@ public sugar Transform {
     where
       <newname> "container" => java_x_old; 
       <newname> "cond" => java_x_cond;
-      <flatten-questlist> qs => flat-qs
+      <debug;flatten-questlist> qs => flat-qs
   
+    /*
   rules
     desugar-conditional-group :
       ConditionalQuest(cond, qs) -> ConditionalQuest(cond, qs, QNil)

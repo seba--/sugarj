@@ -18,3 +18,10 @@ public questionnaire HouseOwning
   Boolean value active = hasSoldHouse || hasBoughtHouse
   Boolean value inactive = !active
  
+  question group Payment
+    Integer question howMuchPaid =
+      How much did you pay?
+    String question howPaid =
+      Which method of payment did you use?
+      Please do not write down any details;
+      keep it short.

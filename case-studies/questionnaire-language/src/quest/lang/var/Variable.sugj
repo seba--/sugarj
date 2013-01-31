@@ -1,6 +1,7 @@
 package quest.lang.var;
 
 import java.util.List;
+import java.util.LinkedList;
 
 /**
  * @author seba
@@ -11,7 +12,7 @@ public class Variable<T> {
   }
   
   private T t;
-  private List<ChangeListener<T>> listeners;
+  private List<ChangeListener<T>> listeners = new LinkedList<ChangeListener<T>>();
   
   public Variable(T t) {
     this.set(t);
