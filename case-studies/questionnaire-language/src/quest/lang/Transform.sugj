@@ -11,7 +11,9 @@ public sugar Transform {
     desugar-question
     desugar-derived-value
     desugar-question-group
-    // desugar-conditional-group
+    desugar-conditional-group
+    desugar-local-quest
+    desugar-quest-ref
 
   rules
     desugar-questionnaire :
@@ -133,9 +135,8 @@ public sugar Transform {
     where
       <newname> "container" => java_x_old; 
       <newname> "cond" => java_x_cond;
-      <debug;flatten-questlist> qs => flat-qs
+      <flatten-questlist> qs => flat-qs
   
-    /*
   rules
     desugar-conditional-group :
       ConditionalQuest(cond, qs) -> ConditionalQuest(cond, qs, QNil)
@@ -144,15 +145,24 @@ public sugar Transform {
       ConditionalQuest(QuestExpr(cond), qs1, qs2) ->
       <conc> 
       (java_bstm* |[
+        final quest.lang.var.Variable java_x = new quest.lang.var.Variable<Boolean>(true);
+        final quest.lang.var.Variable java_x_not = new quest.lang.var.Variable<Boolean>(false);
+        java_x.addChangeListener(new quest.lang.var.Variable.ChangeListener<Boolean>() {
+          public void changed(Boolean old, Boolean now) {
+            java_x_not.set(!now);
+          }
+        });
+        
         javax.swing.JComponent java_x_old = container;
-        final javax.swing.JComponent java_x_then = new javax.swing.JPanel();
+        final quest.lang.var.VariablePanel java_x_then = new quest.lang.var.VariablePanel(java_x);
+        final quest.lang.var.VariablePanel java_x_else = new quest.lang.var.VariablePanel(java_x_not);
+
         container = java_x_then;
         container.setLayout(new javax.swing.BoxLayout(container, javax.swing.BoxLayout.Y_AXIS));
         container.setVisible(false);
        ]|
       , flat-qs1
       ,java_bstm* |[
-        final javax.swing.JComponent java_x_else = new javax.swing.JPanel();
         container = java_x_else;
         container.setLayout(new javax.swing.BoxLayout(container, javax.swing.BoxLayout.Y_AXIS));
         container.setVisible(false);
@@ -176,30 +186,21 @@ public sugar Transform {
       <flatten-questlist> qs1 => flat-qs1;
       <flatten-questlist> qs2 => flat-qs2;
 
+      <newname> "cond" => java_x;
+      <newname> "cond" => java_x_not;
       <newname> "cond" => java_x_className;
       <newname> "cond" => java_x_obj;
       <collect-all(?ExprName(Id(_)))> cond => free-vars;
-      <make-cond-computation-class; !ClassDecStm(<id>)> (java_x_className, free-vars, java_x_then, java_x_else, cond) => java_stm_computationClass;
-      <mapconcat(make-value-listener(|java_x_obj))> free-vars => listeners
+      <make-computation-class; !ClassDecStm(<id>)> (java_x_className, java_x, cond) => java_stm_computationClass;
+      <map(make-variable-listener(|java_x_obj))> free-vars => listeners
     
-    make-cond-computation-class =
-      ?(class-name, free-vars, java_x, java_y, java_e);
-      <map(make-cond-computation-class-fielddec)> free-vars => fields;
-      !MethodDec(MethodDecHead([Public], None, Void, Id("update"), [], None),
-                 Block(java_bstm*|[ 
-                         boolean b = java_e;
-                         java_x.setVisible(b);
-                         java_y.setVisible(!b);
-                       ]|)) => method;
-      !ClassDecHead([], Id(class-name), None, None, None) => head;
-      !ClassBody(<conc> (fields, [method])) => body;
-      !ClassDec(head, body)
-      
-    make-cond-computation-class-fielddec = 
-      where(retrieve-type => java_x);
-      ?ExprName(name);
-      !FieldDec([Public], java_type |[ java_x ]|, [VarDec(name)])
-*/
+    
+  rules
+    desugar-local-quest :
+      QCons(LocalQuest(_), rest) -> rest
+    desugar-quest-ref :
+      q@QuestRef(_) -> <retrieve-reference; ?LocalQuest(<id>)> q
+
   rules
     component-type : "Boolean" -> java_type |[ quest.lang.var.VariableCheckBox ]|
     component-type : "String" -> java_type |[ quest.lang.var.VariableStringTextField ]|

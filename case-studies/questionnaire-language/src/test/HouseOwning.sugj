@@ -25,3 +25,12 @@ public questionnaire HouseOwning
       Which method of payment did you use?
       Please do not write down any details;
       keep it short.
+
+  if active && howMuchPaid >= 50000
+    Boolean question conflict = That so?
+    define Boolean question really = Really?
+    really
+  if !hasBoughtHouse
+    Boolean question conflict =
+      Can you deal with another question named 'x'?
+

@@ -12,10 +12,7 @@ import quest.lang.var.Variable;
 public class VariableCheckBox extends JCheckBox implements Variable.ChangeListener<Boolean> {
   private static final long serialVersionUID = 1L;
 
-  final private Variable<Boolean> var;
-  
   public VariableCheckBox(final Variable<Boolean> var) {
-    this.var = var;
     var.addChangeListener(this);
     addChangeListener(new javax.swing.event.ChangeListener() {
       public void stateChanged(ChangeEvent e) {

@@ -1,0 +1,17 @@
+package quest.lang.var;
+
+import javax.swing.JPanel;
+
+/**
+ * @author seba
+ *
+ */
+public class VariablePanel extends JPanel implements Variable.ChangeListener<Boolean> {
+  public VariablePanel(Variable<Boolean> var) {
+    var.addChangeListener(this);
+  }
+  
+  public void changed(Boolean old, Boolean now) {
+    this.setVisible(now);
+  }
+}

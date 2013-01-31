@@ -19,7 +19,9 @@ public abstract class VariableTextField<T> extends JTextField implements Variabl
     var.addChangeListener(this);
     getDocument().addDocumentListener(new DocumentListener() {
       private void anyUpdate() {
+        inChange = true;
         var.set(getValue(getText()));
+        inChange = false;
       }
       public void removeUpdate(DocumentEvent arg0) { anyUpdate(); }
       public void insertUpdate(DocumentEvent arg0) { anyUpdate(); }
@@ -30,11 +32,9 @@ public abstract class VariableTextField<T> extends JTextField implements Variabl
   public void changed(T old, T now) {
     if (inChange)
       return;
-    inChange = true;
-    String text = getText(now);
+    final String text = getText(now);
     if (!getText().equals(text))
-      this.setText(text);
-    inChange = false;
+      setText(text);
   }
   
   public abstract T getValue(String s);
