@@ -19,7 +19,7 @@ rules // Type of expressions
   typeOfKnown = fail
 
   typeOfUnknown :
-    (ctx, e) -> (TyUnknown(), [(e, "Missing typing rule")])
+    (ctx, e) -> (TyUnknown(), [(e, <concat-strings> ["Missing typing rule for ", <write-to-string> (<strip-annos> e)])])
 
 
 rules // Type of branches

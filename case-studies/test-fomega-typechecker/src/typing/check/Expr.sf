@@ -257,10 +257,11 @@ rules
   typeOfKnown:
     (CtxBindTVarDef(ctx,Y,K,T),Var(x)) -> <typeOf> (ctx,Var(x))
   typeOfKnown:
-    (CtxBindVar(ctx,x,T),Var(x)) -> (T,[])
+    (CtxBindVar(ctx,y,T),Var(x)) -> (T,[])
+    where <structurally-equal> (y, x)
   typeOfKnown:
     (CtxBindVar(ctx,y,T),Var(x)) -> <typeOf> (ctx,Var(x))
-    where <not(equal)> (y,x)
+    where <not(structurally-equal)> (y, x)
 
   // *** QVar ***
   typeOfKnown:
@@ -270,10 +271,11 @@ rules
   typeOfKnown:
     (CtxBindTVarDef(ctx,Y,K,T),QVar(qx)) -> <typeOf> (ctx,QVar(qx))
   typeOfKnown:
-    (CtxBindVar(ctx,qx,T),QVar(qx)) -> (T,[])
+    (CtxBindVar(ctx,qy,T),QVar(qx)) -> (T,[])
+    where <structurally-equal> (qy, qx)
   typeOfKnown:
     (CtxBindVar(ctx,qy,T),QVar(qx)) -> <typeOf> (ctx,QVar(qx))
-    where <not(equal)> (qy,qx) 
+    where <not(structurally-equal)> (qy, qx) 
 
 // *** Notes ***
 //

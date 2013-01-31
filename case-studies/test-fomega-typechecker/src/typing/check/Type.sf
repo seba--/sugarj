@@ -19,8 +19,8 @@ rules
   kindEq: (KiUnknown(),K) -> []
   kindEq: (K,KiUnknown()) -> []
   kindEq: (K,J) -> <kindEqProper> (K,J)
-          where <not(equal)> (K,KiUnknown())
-              ; <not(equal)> (J,KiUnknown())
+          where <not(structurally-equal)> (K, KiUnknown())
+              ; <not(structurally-equal)> (J, KiUnknown())
 
   kindEqProper: (KiStar(),K) -> msgs
                 where if !K; ?KiStar() then ![] else !(<kindMismatch> (KiStar(),K)) end => msgs
@@ -85,10 +85,11 @@ rules
   kindOf:
     (CtxBindVar(ctx,y,T),TyQVar(qX)) -> <kindOf> (ctx,TyQVar(qX))
   kindOf:
-    (CtxBindTVarDef(ctx,qX,K,T),TyQVar(qX)) -> (K,[])
+    (CtxBindTVarDef(ctx,qY,K,T),TyQVar(qX)) -> (K,[])
+    where <structurally-equal> (qY, qX)
   kindOf:
     (CtxBindTVarDef(ctx,qY,K,T),TyQVar(qX)) -> <kindOf> (ctx,TyQVar(qX))
-    where <not(equal)> (qY,qX)
+    where <not(structurally-equal)> (qY, qX)
 
   kindOf:
     (ctx,TyVariant(TyDeclsNil())) -> (KiStar(),[])
@@ -132,15 +133,17 @@ rules
   kindOf:
     (CtxBindVar(ctx,y,T),TyVar(X)) -> <kindOf> (ctx,TyVar(X))
   kindOf:
-    (CtxBindTVar(ctx,X,K),TyVar(X)) -> (K,[])
+    (CtxBindTVar(ctx,Y,K),TyVar(X)) -> (K,[])
+    where <structurally-equal> (Y, X)
   kindOf:
-    (CtxBindTVarDef(ctx,X,K,T),TyVar(X)) -> (K,[])
+    (CtxBindTVarDef(ctx,Y,K,T),TyVar(X)) -> (K,[])
+    where <structurally-equal> (Y, X)
   kindOf:
     (CtxBindTVar(ctx,Y,K),TyVar(X)) -> <kindOf> (ctx,TyVar(X))
-    where <not(equal)> (Y,X)
+    where <not(structurally-equal)> (Y, X)
   kindOf:
     (CtxBindTVarDef(ctx,Y,K,T),TyVar(X)) -> <kindOf> (ctx,TyVar(X))
-    where <not(equal)> (Y,X)
+    where <not(structurally-equal)> (Y, X)
 
 // *** Notes ***
 //

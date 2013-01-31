@@ -559,7 +559,7 @@ rules // Translation state handling
     where <ts-get-eqs> ts => eqs-old
         ; <ts-set-eqs> (ts, <concat> [eqs-old, [var]]) => ts1
 
-  ts-in-eqs = ?(ts, var); where(<ts-get-eqs> ts => eqs); <elem> (var, eqs)
+  ts-in-eqs = ?(ts, var); where(<ts-get-eqs> ts => eqs); <elem(structurally-equal)> (var, eqs)
 
 
 rules // TODO: proper error origin tracking:

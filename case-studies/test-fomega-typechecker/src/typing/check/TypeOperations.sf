@@ -16,10 +16,11 @@ rules
   labType1 :
     (x, TyDeclsNil()) -> (TyUnknown(), [<concat-strings> ["undefined label ", x]])
   labType1 :
-    (x, TyDeclsCons(TyDecl(x, T), decls)) -> (T, [])
+    (x, TyDeclsCons(TyDecl(y, T), decls)) -> (T, [])
+    where <structurally-equal> (x, y)
   labType1 :
     (x, TyDeclsCons(TyDecl(y, T), decls)) -> <labType> (x, decls)
-    where <not(equal)> (x, y)
+    where <not(structurally-equal)> (x, y)
 
   typeMismatch:
     (S,T) -> [<concat-strings> ["type mismatch, expected "
@@ -28,7 +29,15 @@ rules
                                ,<write-to-string> T]]
 
   typeEqProper: (Metavar(mvar),T) -> msgs
-    where if !T; ?Metavar(mvar) then ![] else <typeMismatch> (Metavar(mvar),T) end => msgs
+    where if !T; ?Metavar(mvar1) then
+            if <structurally-equal> (mvar, mvar1) then
+              ![]
+            else
+              <typeMismatch> (Metavar(mvar),T)
+            end
+          else
+            <typeMismatch> (Metavar(mvar),T)
+          end => msgs
   typeEqProper: (TyString(),T) -> msgs
     where if !T; ?TyString() then ![] else !(<typeMismatch> (TyString(),T)) end => msgs
   typeEqProper: (TyBool(),T) -> msgs
@@ -49,7 +58,7 @@ rules
     where if (!T; ?TyRecord(decls1)) then
             <lab> decls => labs;
             <lab> decls1 => labs1;
-            if <set-eq> (labs,labs1) then
+            if <set-eq(structurally-equal)> (labs,labs1) then
               <declsEq> (decls,decls1)
             else
               !(<typeMismatch> (TyRecord(decls),T))
@@ -61,7 +70,7 @@ rules
     where if (!T; ?TyVariant(decls1)) then
             <lab> decls => labs;
             <lab> decls1 => labs1;
-            if <set-eq> (labs,labs1) then
+            if <set-eq(structurally-equal)> (labs,labs1) then
               <declsEq> (decls,decls1)
             else
               !(<typeMismatch> (TyVariant(decls),T))
@@ -101,7 +110,15 @@ rules
             !(<typeMismatch> (TyAbs(X,K,S),T))
           end => msgs
   typeEqProper: (TyVar(X),T) -> msgs
-    where if (!T; ?TyVar(X)) then ![] else !(<typeMismatch> (TyVar(X),T)) end => msgs
+    where if (!T; ?TyVar(Y)) then
+            if <structurally-equal> (X,Y) then
+              ![]
+            else
+              !(<typeMismatch> (TyVar(X),T))
+            end
+          else
+            !(<typeMismatch> (TyVar(X),T))
+          end => msgs
 
   // Assumes that both lists of declarations have the same labels
   declsEq :
@@ -118,8 +135,8 @@ rules
   typeEq: (TyUnknown(),T) -> []
   typeEq: (S,TyUnknown()) -> []
   typeEq: (S,T) -> <typeEqProper> (S,T)
-          where <not(equal)> (S,TyUnknown())
-              ; <not(equal)> (T,TyUnknown())
+          where <not(structurally-equal)> (S, TyUnknown())
+              ; <not(structurally-equal)> (T, TyUnknown())
 
   typeEqVariant: TyUnknown() -> ([],[])
   typeEqVariant: TyVariant(decls) -> (decls,[])
@@ -182,14 +199,14 @@ rules
 
 
   // *** Free variables ***
-  freeVars: TyMu(X,T) -> <diff> (<freeVars> T,[X])
-  freeVars: TyAbs(X,K,T) -> <diff> (<freeVars> T,[X])
-  freeVars: TyForall(X,K,T) -> <diff> (<freeVars> T,[X])
-  freeVars: TyArrow(T1,T2) -> <union> (<freeVars> T1,<freeVars> T2)
-  freeVars: TyApp(T1,T2) -> <union> (<freeVars> T1,<freeVars> T2)
+  freeVars: TyMu(X,T) -> <diff(structurally-equal)> (<freeVars> T,[X])
+  freeVars: TyAbs(X,K,T) -> <diff(structurally-equal)> (<freeVars> T,[X])
+  freeVars: TyForall(X,K,T) -> <diff(structurally-equal)> (<freeVars> T,[X])
+  freeVars: TyArrow(T1,T2) -> <union(structurally-equal)> (<freeVars> T1,<freeVars> T2)
+  freeVars: TyApp(T1,T2) -> <union(structurally-equal)> (<freeVars> T1,<freeVars> T2)
   freeVars: TyQVar(qX) -> []
-  freeVars: TyVariant(decls) -> <unions> (<mapDeclsToList(freeVarsDecl)> decls)
-  freeVars: TyRecord(decls) -> <unions> (<mapDeclsToList(freeVarsDecl)> decls)
+  freeVars: TyVariant(decls) -> <unions(structurally-equal)> (<mapDeclsToList(freeVarsDecl)> decls)
+  freeVars: TyRecord(decls) -> <unions(structurally-equal)> (<mapDeclsToList(freeVarsDecl)> decls)
   freeVars: TyString() -> []
   freeVars: TyNat() -> []
   freeVars: TyBool() -> []
@@ -199,11 +216,11 @@ rules
 
   // *** Generate fresh variable ***
   fresh: (X,Ts) -> Z
-         where <unions> (<map(freeVars)> Ts) => fvs
+         where <unions(structurally-equal)> (<map(freeVars)> Ts) => fvs
              ; <genID> (X,0,fvs) => Z
   genID: (X,n,fvs) -> Y
          where <concat-strings> [X,"_",<write-to-string> n] => Z
-             ; (if <elem> (Z,fvs) then
+             ; (if <elem(structurally-equal)> (Z,fvs) then
                   <genID> (X,<add> (n,1),fvs)
                else
                   !Z
@@ -212,33 +229,36 @@ rules
   // *** Capture-avoiding substitution ***
   // ��-type
   subst: (X,S,Metavar(mvar)) -> Metavar(mvar)
-  subst: (X,S,TyMu(X,T)) -> TyMu(X,T)
+  subst: (X,S,TyMu(Y,T)) -> TyMu(X,T)
+         where <structurally-equal> (Y, X)
   subst: (X,S,TyMu(Y,T)) -> TyMu(Y,<subst> (X,S,T))
-         where <not(equal)> (X,Y)
-             ; <not(elem)> (Y,<freeVars> S)
+         where <not(structurally-equal)> (X, Y)
+             ; <not(elem(structurally-equal))> (Y, <freeVars> S)
   subst: (X,S,TyMu(Y,T)) -> TyMu(Z,<subst> (X,S,<subst> (Y,TyVar(Z),T)))
-         where <not(equal)> (X,Y)
-             ; <elem> (Y,<freeVars> S)
+         where <not(structurally-equal)> (X, Y)
+             ; <elem(structurally-equal)> (Y, <freeVars> S)
              ; <fresh> (Y,[T,S]) => Z
 
   // Type abstraction
-  subst: (X,S,TyAbs(X,K,T)) -> TyAbs(X,K,T)
+  subst: (X,S,TyAbs(Y,K,T)) -> TyAbs(X,K,T)
+         where <structurally-equal> (X, Y)
   subst: (X,S,TyAbs(Y,K,T)) -> TyAbs(Y,K,<subst> (X,S,T))
-         where <not(equal)> (X,Y)
-             ; <not(elem)> (Y,<freeVars> S)
+         where <not(structurally-equal)> (X, Y)
+             ; <not(elem(structurally-equal))> (Y, <freeVars> S)
   subst: (X,S,TyAbs(Y,K,T)) -> TyAbs(Z,K,<subst> (X,S,<subst> (Y,TyVar(Z),T)))
-         where <not(equal)> (X,Y)
-             ; <elem> (Y,<freeVars> S)
+         where <not(structurally-equal)> (X, Y)
+             ; <elem(structurally-equal)> (Y, <freeVars> S)
              ; <fresh> (Y,[T,S]) => Z
 
   // ���-type
-  subst: (X,S,TyForall(X,K,T)) -> TyForall(X,K,T)
+  subst: (X,S,TyForall(Y,K,T)) -> TyForall(X,K,T)
+         where <structurally-equal> (X, Y)
   subst: (X,S,TyForall(Y,K,T)) -> TyForall(Y,K,<subst> (X,S,T))
-         where <not(equal)> (X,Y)
-             ; <not(elem)> (Y,<freeVars> S)
+         where <not(structurally-equal)> (X, Y)
+             ; <not(elem(structurally-equal))> (Y, <freeVars> S)
   subst: (X,S,TyForall(Y,K,T)) -> TyForall(Z,K,<subst> (X,S,<subst> (Y,TyVar(Z),T)))
-         where <not(equal)> (X,Y)
-             ; <elem> (Y,<freeVars> S)
+         where <not(structurally-equal)> (X, Y)
+             ; <elem(structurally-equal)> (Y, <freeVars> S)
              ; <fresh> (Y,[T,S]) => Z
 
   // Simple cases
@@ -252,9 +272,10 @@ rules
   subst: (X,S,TyBool()) -> TyBool()
 
   // Type variables
-  subst: (X,S,TyVar(X)) -> S
+  subst: (X,S,TyVar(Y)) -> S
+         where <structurally-equal> (X, Y)
   subst: (X,S,TyVar(Y)) -> TyVar(Y)
-         where <not(equal)> (X,Y)
+         where <not(structurally-equal)> (<rm-annotations>X, Y)
 
   substDecl: (X,S,TyDecl(x,T)) -> TyDecl(x,<subst> (X,S,T))
 
@@ -289,18 +310,20 @@ rules
 
   parReduceMetavar :
     (C, Metavar(mvar)) -> Metavar(mvar)
-  
+
   parReduce1: (ctx,TyUnknown()) -> TyUnknown()
   parReduce1: (ctx,TyNat()) -> TyNat()
   parReduce1: (ctx,TyString()) -> TyString()
   parReduce1: (ctx,TyBool()) -> TyBool()
   parReduce1: (CtxEmpty(),TyVar(X)) -> TyVar(X)
-  parReduce1: (CtxBindTVar(ctx,X,K),TyVar(X)) -> TyVar(X)
+  parReduce1: (CtxBindTVar(ctx,Y,K),TyVar(X)) -> TyVar(X)
+             where <structurally-equal> (X, Y)
   parReduce1: (CtxBindTVar(ctx,Y,K),TyVar(X)) -> <parReduce> (ctx,TyVar(X))
-             where <not(equal)> (X,Y)
-  parReduce1: (CtxBindTVarDef(ctx,X,K,T),TyVar(X)) -> T
+             where <not(structurally-equal)> (X,Y)
+  parReduce1: (CtxBindTVarDef(ctx,Y,K,T),TyVar(X)) -> T
+             where <structurally-equal> (X, Y)
   parReduce1: (CtxBindTVarDef(ctx,Y,K,T),TyVar(X)) -> <parReduce> (ctx,TyVar(X))
-             where <not(equal)> (X,Y)
+             where <not(structurally-equal)> (X, Y)
   parReduce1: (CtxBindVar(ctx,x,T),TyVar(X)) -> <parReduce> (ctx,TyVar(X))
 
   parReduce1: (ctx,TyQVar(qX)) -> TyQVar(qX)

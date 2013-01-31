@@ -17,7 +17,11 @@ rules
         ; <filter(?FomegaBody(_));
            map(\FomegaBody(defs) -> defs\);
            concat> toplevel-defs => defs
-        ; <signatureOf> (ctx1, defs) => (sig2, errs2)
+        ; <
+           // debug(!"INPUT TO SIGNATUREOF  ");
+           signatureOf
+           // ; debug(!"OUTPUT OF SIGNATUREOF ")
+          > (ctx1, defs) => (sig2, errs2)
         ; <conc> (errs1, errs2) => errs
         ; if !errs; ?[] then fail else !errs end => result
 
@@ -106,7 +110,11 @@ rules
     where prim("SUGARJ_current_package"); ?current-package
         ; <string-replace(|"/", ".")> current-package => module-qualifier
         ; prim("SUGARJ_current_module"); ?current-module
-        ; <concat-strings> [module-qualifier, ".", current-module] => mid
+        ; if !module-qualifier; ?"" then
+            !current-module
+          else
+            <concat-strings> [module-qualifier, ".", current-module]
+          end => mid
 
   make-fomega-sugar = 
     !SugarBody([transformation-elem(Rules(<generate-module-signature-rule> <id>))])
