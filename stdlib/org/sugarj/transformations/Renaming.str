@@ -9,7 +9,10 @@ rules
   rename-decl(|renamings) = fail 
 
 rules
-  rename-rules(|oname, nname) = topdown(try(rename-rule(|oname, nname))); topdown(try(SVar(?oname;!nname)))
+  rename-rules(|oname, nname) = 
+    topdown(strip-annos);
+    topdown(try(rename-rule(|oname, nname)));
+    topdown(try(SVar(?oname;!nname)))
   
   rename-rule(|oname, nname) :
     RDefNoArgs(oname, rule) -> RDefNoArgs(nname, rule)

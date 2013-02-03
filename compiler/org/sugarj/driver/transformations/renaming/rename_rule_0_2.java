@@ -12,10 +12,10 @@ import java.lang.ref.WeakReference;
 { 
   public static rename_rule_0_2 instance = new rename_rule_0_2();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, IStrategoTerm e_49, IStrategoTerm f_49)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, IStrategoTerm x_18, IStrategoTerm y_18)
   { 
     ITermFactory termFactory = context.getFactory();
-    Fail1:
+    Fail4:
     { 
       IStrategoTerm term0 = term;
       IStrategoConstructor cons0 = term.getTermType() == IStrategoTerm.APPL ? ((IStrategoAppl)term).getConstructor() : null;
@@ -23,13 +23,13 @@ import java.lang.ref.WeakReference;
       { 
         if(cons0 == out._consRDefNoArgs_2)
         { 
-          Fail2:
+          Fail5:
           { 
-            IStrategoTerm q_23 = null;
-            if(term.getSubterm(0) != e_49 && !e_49.match(term.getSubterm(0)))
-              break Fail2;
-            q_23 = term.getSubterm(1);
-            term = termFactory.makeAppl(out._consRDefNoArgs_2, new IStrategoTerm[]{f_49, q_23});
+            IStrategoTerm y_9 = null;
+            if(term.getSubterm(0) != x_18 && !x_18.match(term.getSubterm(0)))
+              break Fail5;
+            y_9 = term.getSubterm(1);
+            term = termFactory.makeAppl(out._consRDefNoArgs_2, new IStrategoTerm[]{y_18, y_9});
             if(true)
               break Success0;
           }
@@ -39,15 +39,15 @@ import java.lang.ref.WeakReference;
         { 
           if(cons0 == out._consRDef_3)
           { 
-            Fail3:
+            Fail6:
             { 
-              IStrategoTerm m_23 = null;
-              IStrategoTerm n_23 = null;
-              if(term.getSubterm(0) != e_49 && !e_49.match(term.getSubterm(0)))
-                break Fail3;
-              m_23 = term.getSubterm(1);
-              n_23 = term.getSubterm(2);
-              term = termFactory.makeAppl(out._consRDef_3, new IStrategoTerm[]{f_49, m_23, n_23});
+              IStrategoTerm u_9 = null;
+              IStrategoTerm v_9 = null;
+              if(term.getSubterm(0) != x_18 && !x_18.match(term.getSubterm(0)))
+                break Fail6;
+              u_9 = term.getSubterm(1);
+              v_9 = term.getSubterm(2);
+              term = termFactory.makeAppl(out._consRDef_3, new IStrategoTerm[]{y_18, u_9, v_9});
               if(true)
                 break Success1;
             }
@@ -57,17 +57,17 @@ import java.lang.ref.WeakReference;
           { 
             if(cons0 == out._consRDefT_4)
             { 
-              Fail4:
+              Fail7:
               { 
-                IStrategoTerm h_23 = null;
-                IStrategoTerm i_23 = null;
-                IStrategoTerm j_23 = null;
-                if(term.getSubterm(0) != e_49 && !e_49.match(term.getSubterm(0)))
-                  break Fail4;
-                h_23 = term.getSubterm(1);
-                i_23 = term.getSubterm(2);
-                j_23 = term.getSubterm(3);
-                term = termFactory.makeAppl(out._consRDefT_4, new IStrategoTerm[]{f_49, h_23, i_23, j_23});
+                IStrategoTerm p_9 = null;
+                IStrategoTerm q_9 = null;
+                IStrategoTerm r_9 = null;
+                if(term.getSubterm(0) != x_18 && !x_18.match(term.getSubterm(0)))
+                  break Fail7;
+                p_9 = term.getSubterm(1);
+                q_9 = term.getSubterm(2);
+                r_9 = term.getSubterm(3);
+                term = termFactory.makeAppl(out._consRDefT_4, new IStrategoTerm[]{y_18, p_9, q_9, r_9});
                 if(true)
                   break Success2;
               }
@@ -77,13 +77,13 @@ import java.lang.ref.WeakReference;
             { 
               if(cons0 == out._consSDefNoArgs_2)
               { 
-                Fail5:
+                Fail8:
                 { 
-                  IStrategoTerm e_23 = null;
-                  if(term.getSubterm(0) != e_49 && !e_49.match(term.getSubterm(0)))
-                    break Fail5;
-                  e_23 = term.getSubterm(1);
-                  term = termFactory.makeAppl(out._consSDefNoArgs_2, new IStrategoTerm[]{f_49, e_23});
+                  IStrategoTerm m_9 = null;
+                  if(term.getSubterm(0) != x_18 && !x_18.match(term.getSubterm(0)))
+                    break Fail8;
+                  m_9 = term.getSubterm(1);
+                  term = termFactory.makeAppl(out._consSDefNoArgs_2, new IStrategoTerm[]{y_18, m_9});
                   if(true)
                     break Success3;
                 }
@@ -91,17 +91,17 @@ import java.lang.ref.WeakReference;
               }
               if(cons0 == out._consSDef_3)
               { 
-                IStrategoTerm a_23 = null;
-                IStrategoTerm b_23 = null;
-                if(term.getSubterm(0) != e_49 && !e_49.match(term.getSubterm(0)))
-                  break Fail1;
-                a_23 = term.getSubterm(1);
-                b_23 = term.getSubterm(2);
-                term = termFactory.makeAppl(out._consSDef_3, new IStrategoTerm[]{f_49, a_23, b_23});
+                IStrategoTerm i_9 = null;
+                IStrategoTerm j_9 = null;
+                if(term.getSubterm(0) != x_18 && !x_18.match(term.getSubterm(0)))
+                  break Fail4;
+                i_9 = term.getSubterm(1);
+                j_9 = term.getSubterm(2);
+                term = termFactory.makeAppl(out._consSDef_3, new IStrategoTerm[]{y_18, i_9, j_9});
               }
               else
               { 
-                break Fail1;
+                break Fail4;
               }
             }
           }

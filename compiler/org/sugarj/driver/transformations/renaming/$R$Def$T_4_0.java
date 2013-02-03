@@ -12,44 +12,44 @@ import java.lang.ref.WeakReference;
 { 
   public static $R$Def$T_4_0 instance = new $R$Def$T_4_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy a_42, Strategy b_42, Strategy c_42, Strategy d_42)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy n_11, Strategy o_11, Strategy p_11, Strategy q_11)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("RDefT_4_0");
-    Fail269:
+    Fail31:
     { 
-      IStrategoTerm c_179 = null;
-      IStrategoTerm y_178 = null;
-      IStrategoTerm z_178 = null;
-      IStrategoTerm a_179 = null;
-      IStrategoTerm b_179 = null;
-      IStrategoTerm d_179 = null;
-      IStrategoTerm e_179 = null;
-      IStrategoTerm f_179 = null;
+      IStrategoTerm k_94 = null;
+      IStrategoTerm g_94 = null;
+      IStrategoTerm h_94 = null;
+      IStrategoTerm i_94 = null;
+      IStrategoTerm j_94 = null;
+      IStrategoTerm l_94 = null;
+      IStrategoTerm m_94 = null;
+      IStrategoTerm n_94 = null;
       if(term.getTermType() != IStrategoTerm.APPL || out._consRDefT_4 != ((IStrategoAppl)term).getConstructor())
-        break Fail269;
-      y_178 = term.getSubterm(0);
-      z_178 = term.getSubterm(1);
-      a_179 = term.getSubterm(2);
-      b_179 = term.getSubterm(3);
-      IStrategoList annos216 = term.getAnnotations();
-      c_179 = annos216;
-      term = a_42.invoke(context, y_178);
+        break Fail31;
+      g_94 = term.getSubterm(0);
+      h_94 = term.getSubterm(1);
+      i_94 = term.getSubterm(2);
+      j_94 = term.getSubterm(3);
+      IStrategoList annos22 = term.getAnnotations();
+      k_94 = annos22;
+      term = n_11.invoke(context, g_94);
       if(term == null)
-        break Fail269;
-      d_179 = term;
-      term = b_42.invoke(context, z_178);
+        break Fail31;
+      l_94 = term;
+      term = o_11.invoke(context, h_94);
       if(term == null)
-        break Fail269;
-      e_179 = term;
-      term = c_42.invoke(context, a_179);
+        break Fail31;
+      m_94 = term;
+      term = p_11.invoke(context, i_94);
       if(term == null)
-        break Fail269;
-      f_179 = term;
-      term = d_42.invoke(context, b_179);
+        break Fail31;
+      n_94 = term;
+      term = q_11.invoke(context, j_94);
       if(term == null)
-        break Fail269;
-      term = termFactory.annotateTerm(termFactory.makeAppl(out._consRDefT_4, new IStrategoTerm[]{d_179, e_179, f_179, term}), checkListAnnos(termFactory, c_179));
+        break Fail31;
+      term = termFactory.annotateTerm(termFactory.makeAppl(out._consRDefT_4, new IStrategoTerm[]{l_94, m_94, n_94, term}), checkListAnnos(termFactory, k_94));
       context.popOnSuccess();
       if(true)
         return term;

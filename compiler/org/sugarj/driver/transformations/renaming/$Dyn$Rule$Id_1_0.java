@@ -12,23 +12,23 @@ import java.lang.ref.WeakReference;
 { 
   public static $Dyn$Rule$Id_1_0 instance = new $Dyn$Rule$Id_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy w_40)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy j_10)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("DynRuleId_1_0");
-    Fail253:
+    Fail15:
     { 
-      IStrategoTerm n_175 = null;
-      IStrategoTerm m_175 = null;
+      IStrategoTerm l_90 = null;
+      IStrategoTerm j_90 = null;
       if(term.getTermType() != IStrategoTerm.APPL || out._consDynRuleId_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail253;
-      m_175 = term.getSubterm(0);
-      IStrategoList annos200 = term.getAnnotations();
-      n_175 = annos200;
-      term = w_40.invoke(context, m_175);
+        break Fail15;
+      j_90 = term.getSubterm(0);
+      IStrategoList annos6 = term.getAnnotations();
+      l_90 = annos6;
+      term = j_10.invoke(context, j_90);
       if(term == null)
-        break Fail253;
-      term = termFactory.annotateTerm(termFactory.makeAppl(out._consDynRuleId_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, n_175));
+        break Fail15;
+      term = termFactory.annotateTerm(termFactory.makeAppl(out._consDynRuleId_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, l_90));
       context.popOnSuccess();
       if(true)
         return term;

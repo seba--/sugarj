@@ -8,18 +8,18 @@ import org.spoofax.interpreter.library.AbstractPrimitive;
 import java.util.ArrayList;
 import java.lang.ref.WeakReference;
 
-@SuppressWarnings("all") public class rename_java_0_3 extends Strategy 
+@SuppressWarnings("all") public class apply_renamings_0_1 extends Strategy 
 { 
-  public static rename_java_0_3 instance = new rename_java_0_3();
+  public static apply_renamings_0_1 instance = new apply_renamings_0_1();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, IStrategoTerm u_23, IStrategoTerm v_23, IStrategoTerm w_23)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, IStrategoTerm c_9)
   { 
-    context.push("rename_java_0_3");
-    Fail7:
+    context.push("apply_renamings_0_1");
+    Fail1:
     { 
-      term = do_rename_java_0_3.instance.invoke(context, term, u_23, v_23, w_23);
+      term = rename_decl_0_1.instance.invoke(context, term, c_9);
       if(term == null)
-        break Fail7;
+        break Fail1;
       context.popOnSuccess();
       if(true)
         return term;
