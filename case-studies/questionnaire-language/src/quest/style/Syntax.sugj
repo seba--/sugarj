@@ -1,5 +1,7 @@
 package quest.style;
 
+import quest.lang.Syntax;
+
 public sugar Syntax {
   context-free syntax
     Style -> ToplevelDeclaration
@@ -17,4 +19,13 @@ public sugar Syntax {
       Style(mods, name, body) -> 
       ModelDec(ModelDecHead(mods, name, "quest.style.Syntax"), ModelBody(body))
 
+
+  // type style
+  context-free syntax
+    TypeStyle -> StyleElem {layout(1.first.col < 1.left.col)}
+    "display" QuestType "question" "with" ComponentType -> TypeStyle {cons("QuestionTypeStyle")}
+    "display" QuestType "value"    "with" ComponentType -> TypeStyle {cons("DerivedValueTypeStyle")}
+    JavaType -> ComponentType {cons("ComponentType")}
+  
+    
 }
