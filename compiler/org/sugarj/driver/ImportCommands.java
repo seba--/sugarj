@@ -160,15 +160,14 @@ public class ImportCommands {
             ATermCommands.makeString(FileCommands.dropExtension(model.getRelativePath()), null),
             ATermCommands.makeString(FileCommands.dropExtension(transformationPath.getRelativePath()), null));
 
-    IStrategoTerm transformedTerm = str.assimilate(strat, trans, transformationInput);
-    
-    if (transformedTerm == null) {
-      String msg = "Failed to apply transformation " + transformationPath.getRelativePath() + " to model " + model.getRelativePath() + ".";
+    try {
+      IStrategoTerm transformedTerm = str.assimilate(strat, trans, transformationInput);
+      return transformedTerm;
+    } catch (StrategoException e) {
+      String msg = "Failed to apply transformation " + transformationPath.getRelativePath() + " to model " + model.getRelativePath() + ": " + e.getMessage();
       driver.setErrorMessage(toplevelDecl, msg);
       throw new StrategoException(msg);
     }
-    
-    return transformedTerm;
   }
   
   /**

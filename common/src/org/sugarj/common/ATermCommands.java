@@ -325,8 +325,10 @@ public class ATermCommands {
 //      e.printStackTrace();
 //    }
     
-    if (left == null || right == null)
-      throw new IllegalStateException(msg);
+    if (left == null || right == null) {
+      new IllegalStateException(msg).printStackTrace();
+      return;
+    }
     
     for (int i = left.getIndex(), max = right.getIndex(); i <= max; i++) {
       Token tok = ((Token) left.getTokenizer().getTokenAt(i));
