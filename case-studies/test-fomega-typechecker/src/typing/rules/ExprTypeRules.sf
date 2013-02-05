@@ -3,7 +3,7 @@ module typing.rules.ExprTypeRules
 import typing.rules.Syntax
 import typing.rules.Desugaring
 
-// TODO: fold/unfold, case/variant, record/selection
+// TODO: fold/unfold
 
 ~C |- ~e1 : ~T1
 ~C |- ~e2 : ~T2
