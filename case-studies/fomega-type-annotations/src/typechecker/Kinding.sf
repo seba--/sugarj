@@ -1,0 +1,8 @@
+module typechecker.Kinding
+
+import typechecker.Context
+
+import org.sugarj.languages.Fomega
+
+
+rules
