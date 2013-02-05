@@ -25,8 +25,8 @@ rules
                // strip-annos is necessary since dynamic rules without annotations
                // do not match annotated terms.
              ; if !errs; ?[] then
-                   <norm> (C, T) => T'
-                 ; <norm> (C, U) => U'
+                   <norm> (<strip-annos> C, <strip-annos> T) => T'
+                 ; <norm> (<strip-annos> C, <strip-annos> U) => U'
                else
                  !T; ?T'; !U; ?U'
                end
