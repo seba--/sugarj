@@ -1,0 +1,34 @@
+module typing.extensions.let.Let
+
+import concretesyntax.Fomega
+
+import typing.extensions.Declaration
+
+import typing.rules.Syntax
+import typing.rules.Desugaring
+import typing.rules.ExprTypeRules
+import typing.rules.Verification
+
+syntax {
+	context-free syntax
+	  "let" FomegaID ":" FomegaType "=" FomegaExpr "in" FomegaExpr -> FomegaExpr {cons("Let")}
+	
+	context-free priorities
+	  FomegaExpr FomegaExpr -> FomegaExpr >
+	  "let" FomegaID ":" FomegaType "=" FomegaExpr "in" FomegaExpr -> FomegaExpr
+	
+	lexical syntax
+	  "let" -> Keyword
+	  "in"  -> Keyword
+	
+	lexical restrictions
+	  "let" "in" -/- [A-Za-z0-9]
+}
+
+desugaring desugar-let {
+	rules
+	  desugar-let :
+	    |[ let ~%x : ~T = ~e1 in ~e2 ]| -> |[ (\~%x:~T. ~e2) ~e1 ]|
+}
+
+

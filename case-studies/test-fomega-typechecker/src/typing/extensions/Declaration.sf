@@ -1,0 +1,38 @@
+module typing.extensions.Declaration
+
+context-free syntax
+  "syntax" "{" Grammar+ "}" -> ToplevelDeclaration {cons("SyntaxExtension")}
+  "desugaring" StrategoId "{" Transformation+ "}" -> ToplevelDeclaration {cons("DesugaringExtension")}
+  "typing" "{" Transformation+ "}" -> ToplevelDeclaration {cons("TypingExtension")}
+
+rules
+  desugar-extension :
+    SyntaxExtension(grammars) ->
+    SugarBody(<conc> (body, trafos, checks))
+  where
+      (Extension-Trafos <+ ![]) => trafos 
+    ; (Extension-Checks <+ ![]) => checks
+    ; <map(!grammar-elem(<id>))> grammars => body 
+    ; rules( Extension-Syntax := body )
+  
+  desugar-extension :
+    DesugaringExtension(desugar-strat, trafos) ->
+    SugarBody(<conc> (grammars, body, checks))
+  where
+      (Extension-Syntax <+ ![]) => grammars 
+    ; (Extension-Checks <+ ![]) => checks
+    ; !transformation-elem(Desugarings([PureDesugaring(CallNoArgs(SVar(desugar-strat)))])) => desugaring
+    ; ![desugaring | <map(!transformation-elem(<id>))> trafos] => body
+    ; rules( Extension-Trafos := body )
+  
+  desugar-extension :
+    TypingExtension(checks) ->
+    SugarBody(<conc> (grammars, trafos, body))
+  where
+      (Extension-Syntax <+ ![]) => grammars 
+    ; (Extension-Trafos <+ ![]) => trafos
+    ; <map(!transformation-elem(<id>))> checks => body
+    ; rules( Extension-Checks := body )
+  
+desugarings
+  desugar-extension
