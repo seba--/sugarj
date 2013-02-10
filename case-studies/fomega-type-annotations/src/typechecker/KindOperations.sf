@@ -2,6 +2,7 @@ module typechecker.KindOperations
 
 import org.sugarj.languages.Fomega
 
+import typechecker.Unknown
 
 rules
 
