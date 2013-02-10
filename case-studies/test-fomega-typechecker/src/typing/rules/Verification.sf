@@ -13,13 +13,12 @@ rules
 rules
 
   verify-type-rule :
-    tr@TypeRule(premises, RuleName(sep, Some(Var(name))), TypingJudgment(C, e, T)) ->
+    TypeRule(premises, RuleName(sep, Some(Var(name))), TypingJudgment(C, e, T)) ->
       result
     where <desugar <+ id> e => des-e
-        ; <write-to-string> des-e => text-des-e
-        ; <debug(!"Desugared conclusion term: ")> text-des-e 
+        ; <nice-analysis-data-term; debug(!"Desugared conclusion term: ")> des-e 
         ; <premises-to-list> premises => premises-list
-        ; {| Dynamic-Axioms:
+        ; {| Dynamic-TypeOf, Dynamic-KindOf, Dynamic-ParReduce1, Dynamic-Lookup-Expr-Var:
                <activate-dynamic-axioms> premises-list
              ; <typeOf> (<strip-annos> C, <strip-annos> des-e) => (U, errs)
                // strip-annos is necessary since dynamic rules without annotations
@@ -37,16 +36,16 @@ rules
         ; if !errs; ?[] then
               <typeEq> (T', U') => msgs
             ; if !msgs; ?[] then
-                debug(!(<concat-strings> ["Successfully verified typing rule ", name])); fail
+                debug(!(<concat-strings> ["Successfully verified typing rule ", name, "."])); fail
               else
-                ![( tr
-                 , <concat-strings> [ "Could not verify typing rule ", name, "\n"
-                                    , "Expected type: ", <write-to-string> T', "\n"
-                                    , "But got type:  ", <write-to-string> U'])]
+                ![( name
+                 , <concat-strings> [ "Could not verify typing rule ", name, ".\n"
+                                    , "Expected type: ", <write-to-string> T', ".\n"
+                                    , "But got type:  ", <write-to-string> U', "."])]
               end
           else
-            ![( tr
-              , <concat-strings> [ "Could not verify typing rule ", name, "\n"
+            ![( name
+              , <concat-strings> [ "Could not verify typing rule ", name, ".\n"
                                  , "The type checker returned the following errors:\n"
                                  , <write-to-string> errs])]
           end => result
