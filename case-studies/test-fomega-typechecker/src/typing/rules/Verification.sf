@@ -5,6 +5,8 @@ import typing.rules.Desugaring // for premises-to-list
 
 // import typing.rules.ExprTypeRules
 
+import typing.extensions.Declaration
+
 rules
 
   constraint-error = verify-type-rule
@@ -15,7 +17,9 @@ rules
   verify-type-rule :
     TypeRule(premises, RuleName(sep, Some(Var(name))), TypingJudgment(C, e, T)) ->
       result
-    where <desugar <+ id> e => des-e
+    where // TODO: only allow desugar-extension-internal; extension declaration 
+          //       requires this rule to be successfully applicable to subject
+          <desugar-extension-internal <+ desugar <+ id> e => des-e 
         ; <nice-analysis-data-term; debug(!"Desugared conclusion term: ")> des-e 
         ; <premises-to-list> premises => premises-list
         ; {| Dynamic-TypeOf, Dynamic-KindOf, Dynamic-ParReduce1, Dynamic-Lookup-Expr-Var:
