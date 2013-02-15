@@ -28,6 +28,8 @@
    ValDef.1:opt              -- _1,
    TypeDef                   -- _1 KW["type"] _2 KW["="] _3,
    TypeDef.1:opt             -- _1,
+   DefsEnd                   -- _1,
+   DefsCons                  -- _1 _2,
    Public                    -- KW["public"],
    Qualified                 -- KW["qualified"],
    Var                       -- _1,
