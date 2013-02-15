@@ -2,38 +2,45 @@ module contextanalysis.Unknowns
 
 import org.sugarj.languages.Fomega
 
+import contextanalysis.Annotations
+
+
 signature
   constructors
     TyUnknown: FomegaType
     KiUnknown: FomegaKind
     IDUnknown: FomegID
 
+
 rules // Type of expressions
 
-  typeOf = // debug(!"TYPEOF IN:  "); 
-           typeOf1
-           // ; debug(!"TYPEOF OUT: ")
+  annotate-type =
+    // debug(!"ANNO TYPE IN:  "); 
+    annotate-type-defined <+ annotate-type-missing
+    // ; debug(!"ANNO TYPE OUT: ") 
 
-  typeOf1 = typeOfKnown <+ typeOfUnknown
+  annotate-type-defined = fail
 
-  typeOfKnown = fail
-
-  typeOfUnknown :
-    (ctx, e) -> (TyUnknown(), [(e, <concat-strings> [ "Missing typing rule for "
-                                                    , <write-to-string> (<strip-annos> e)
-                                                    , " in context "
-                                                    , <write-to-string> (<strip-annos> ctx)])])
+  annotate-type-missing =
+      ?(C, e)
+    ; <put-type> (TyUnknown(), e)
+    ; <add-context-errors> ( <concat-strings> [ "Missing typing rule for "
+                                              , <write-to-string> (<strip-annos> e)
+                                              , " in context "
+                                              , <write-to-string> (<strip-annos> C)]
+                           , e)
 
 
 rules // Type of branches
 
-  typeOfBrs = // debug(!"TYPEOFBRS IN:  "); 
-              typeOfBrs1
-              // ; debug(!"TYPEOFBRS OUT: ")
+  annotate-type-branches =
+    // debug(!"ANNO TYPE BRS IN:  "); 
+    annotate-type-branches-defined <+ annotate-type-branches-missing
+    // ; debug(!"ANNO TYPE BRS OUT: ")
 
-  typeOfBrs1 = typeOfBrsKnown <+ typeOfBrsUnknown
+  annotate-type-branches-defined = fail
 
-  typeOfBrsKnown = fail
-
-  typeOfBrsUnknown :
-    (ctx, decls, brs) -> (TyUnknown(), [(brs, "Missing branch typing rule")])
+  annotate-type-branches-missing =
+      ?(C, decls, brs)
+    ; <put-type> (TyUnknown(), brs)
+    ; <add-context-errors> (["Missing branch typing rule"], brs)

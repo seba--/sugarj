@@ -29,7 +29,7 @@ context-free syntax // *** Syntax for typing rules ***
               -> RulePremises {cons("NoPremises")}
 
   OffTypingJudgment -> RuleConsequence
-  
+
   TypingJudgment -> OffTypingJudgment {layout(1.first.col < 1.left.col)}
 
   OffTypeRuleJudgment -> PremiseList
@@ -41,7 +41,7 @@ context-free syntax // *** Syntax for typing rules ***
 context-free syntax // *** Syntax for branch typing rules ***
 
   BranchTypeRule -> SugarDefElem
-  
+
   BranchTypeRulePremises RuleSepName BranchTypeRuleConsequence
     -> BranchTypeRule {cons("BranchTypeRule"),
                        layout(1.first.col == 2.first.col &&
@@ -96,7 +96,7 @@ context-free syntax // *** Syntax for judgments ***
   VarInContextJudgment  -> TypeRuleJudgment
   QVarInContextJudgment -> TypeRuleJudgment
   LabelTagJudgment      -> TypeRuleJudgment
-  
+
   // Judgments allowed as premises in branch typing rules
   TypingJudgment        -> BranchTypeRuleJudgment
   InDeclJudgment        -> BranchTypeRuleJudgment
@@ -113,23 +113,3 @@ signature
   constructors
     Subst: FomegaID * FomegaType * FomegaType -> FomegaType
 
-// *** Meta variables ***
-
-context-free syntax
-  "~" StrategoVar  -> Context        {cons("Metavar")}
-  "~" StrategoVar  -> FomegaTyDecls  {cons("Metavar")}
-  "~" StrategoVar  -> FomegaBranches {cons("Metavar")}
-  "~" StrategoVar  -> FomegaFields   {cons("Metavar")}
-  "~" StrategoVar  -> FomegaExpr     {cons("Metavar")}
-  "~" StrategoVar  -> FomegaType     {cons("Metavar")}
-  "~" StrategoVar  -> FomegaKind     {cons("Metavar")}
-
-  "~%" StrategoVar -> FomegaID       {cons("Metavar")}
-  "~&" StrategoVar -> FomegaQID      {cons("Metavar")}
-
-  "~#" StrategoVar -> FomegaNAT      {cons("Metavar")}
-  "~$" StrategoVar -> FomegaSTRING   {cons("Metavar")}
-
-signature
-  constructors
-    Metavar: String -> Term
