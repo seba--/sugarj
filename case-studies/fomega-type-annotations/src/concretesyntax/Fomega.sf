@@ -5,6 +5,7 @@ import org.sugarj.languages.Stratego
 
 import concretesyntax.MetaExplode
 
+
 context-free syntax
   "fomega-expr" "|[" FomegaExpr "]|" -> StrategoTerm {cons("ToMetaExpr")}
   "fomega"      "|[" FomegaExpr "]|" -> StrategoTerm {cons("ToMetaExpr")}
@@ -12,5 +13,4 @@ context-free syntax
 
 context-free syntax
   "~" StrategoTerm  -> StrategoId {cons("FromMetaExpr")}
-  "~%" StrategoTerm -> StrategoId {cons("FromMEtaExpr")}
-                 
+  "~%" StrategoTerm -> StrategoId {cons("FromMetaExpr")}

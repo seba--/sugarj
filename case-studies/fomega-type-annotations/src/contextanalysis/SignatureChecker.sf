@@ -1,0 +1,43 @@
+module contextanalysis.SignatureChecker
+
+import org.sugarj.languages.Fomega
+
+import contextanalysis.Annotations
+import contextanalysis.KindChecker
+import contextanalysis.Signatures
+
+
+rules
+
+  annotate-signature =
+      ?(C, node@DefsEnd(TypeDef(None(), X, T)))
+    // TODO: add error if X is defined in C
+    ; <annotate-kind> (C, T)
+    ; <get-kind> T => K
+    ; <put-signature> (SigEmpty(), node)
+
+  annotate-signature =
+      ?(C, node@DefsEnd(TypeDef(Some(Public()), X, T)))
+    // TODO: add error if X is defined in C
+    ; <annotate-kind> (C, T)
+    ; <get-kind> T => K
+    ; <put-signature> (SigBindTVarDef(X, K, T, SigEmpty()), node)
+
+  annotate-signature =
+     ?(C, node@DefsCons(TypeDef(None(), X, T), defs))
+    // TODO: add error if X is defined in C
+    ; <annotate-kind> (C, T)
+    ; <get-kind> T => K
+    ; <annotate-signature> (CtxBindTVarDef(C, X, K, T), defs)
+    ; <get-signature> defs => sig
+    ; <put-signature> (sig, node)
+
+  annotate-signature =
+     ?(C, node@DefsCons(TypeDef(Some(Public()), X, T), defs))
+    // TODO: add error if X is defined in C
+    ; <annotate-kind> (C, T)
+    ; <get-kind> T => K
+    ; <annotate-signature> (CtxBindTVarDef(C, X, K, T), defs)
+    ; <get-signature> defs => sig
+    ; <put-signature> (sig, node)
+    ; <put-signature> (SigBindTVarDef(X, K, T, sig), node)

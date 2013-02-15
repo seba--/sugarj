@@ -1,4 +1,4 @@
-module typechecker.RuleSyntax
+module contextanalysis.RuleSyntax
 
 import org.sugarj.languages.Stratego
 import org.sugarj.languages.Fomega

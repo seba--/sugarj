@@ -1,4 +1,4 @@
-module typechecker.Unknown
+module contextanalysis.Unknowns
 
 import org.sugarj.languages.Fomega
 
@@ -6,6 +6,7 @@ signature
   constructors
     TyUnknown: FomegaType
     KiUnknown: FomegaKind
+    IDUnknown: FomegID
 
 rules // Type of expressions
 

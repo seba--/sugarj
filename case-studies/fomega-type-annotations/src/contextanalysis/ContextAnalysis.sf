@@ -1,0 +1,27 @@
+module contextanalysis.ContextAnalysis
+
+import org.sugarj.languages.Fomega
+
+import contextanalysis.SignatureChecker
+
+
+analyses
+  annotate-types
+
+
+rules
+
+  // TODO: Establish context from imports instead of empty context
+  annotate-types :
+    FomegaBody(defs) -> <debug(!"ANN TY ")> (<nice-analysis-data-term> (<annotate-signature> (CtxEmpty(), defs)))
+
+
+rules
+
+  constraint-error :
+    FomegaBody(defs) -> <collect-all(context-errors)> defs
+
+  context-errors =
+      ?node
+    ; <get-context-errors> node => errs
+    ; if !errs; ?[] then fail else ![(node, errs)] end

@@ -1,0 +1,14 @@
+module test.AnnoTest
+
+import contextanalysis.ContextAnalysis
+
+
+public type Foo = Nat
+
+public type Foo1 = Foo
+
+type Bar = (\X::*. X) Foo
+
+type V = {x:Nat, y:Nat, a:Bool, b:Nat}
+
+type Foo1 = forall X::*. V
