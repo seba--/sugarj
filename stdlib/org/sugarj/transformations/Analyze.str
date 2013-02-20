@@ -69,13 +69,16 @@ rules
   
   nice-analysis-data-term =
     bottomup({list:
-      (where(get-analysis-data-annotation; hashtable-getlist => list);
-       if <?[]> list
-         then rm-analysis-data-annotation
-         else put-analysis-data-annotation(|<bottomup(strip-annos)> list)
-       end
-    <+ id)
+      try(
+        where(get-analysis-data-annotation; hashtable-getlist => list);
+	      if <?[]> list
+	        then rm-analysis-data-annotation
+	        else put-analysis-data-annotation(|<bottomup(strip-annos)> list)
+	      end)
     })
+  
+  debug-analysis = debug-analysis(id)
+  debug-analysis(s) = where(nice-analysis-data-term; debug(s))
   
 rules
   // desugar =
