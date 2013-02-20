@@ -12,3 +12,4 @@ type Bar = (\X::*. X) Foo
 type V = {x:Nat, y:Nat, a:Bool, b:Nat}
 
 type Foo1 = forall X::*. V
+
