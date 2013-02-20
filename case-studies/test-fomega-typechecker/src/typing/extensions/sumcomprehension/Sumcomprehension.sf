@@ -63,7 +63,6 @@ desugaring dosum-desugar {
 typing {
 	~C |- ~e : ~T
 	~C |- ~T ~> Nat
-	typing.extensions.sumcomprehension.Support.sum1:Nat -> (Nat -> Nat) -> Nat in ~C
 	================================================================================ T-DoSumAtomic
 	~C |- dosum { ~e } : Nat
 	
@@ -77,14 +76,6 @@ typing {
 	
 	~C |- ~e1 : ~T1
 	~C |- ~T1 ~> Nat
-	(~C;~%x:Nat) |- ~e2 : ~T2
-	~C |- ~T2 ~> Nat
-	typing.extensions.sumcomprehension.Support.sum1:Nat -> (Nat -> Nat) -> Nat in ~C
-	================================================================================ T-DoSumLet1
-	~C |- dosum { let ~%x = ~e1; ~e2 } : Nat
-	
-	~C |- ~e1 : ~T1
-	~C |- ~T1 ~> Nat
 	(~C;~%x:Nat) |- dosum { ~bs; ~e2 } : Nat
 	typing.extensions.sumcomprehension.Support.sum1:Nat -> (Nat -> Nat) -> Nat in ~C
 	================================================================================ T-DoSumGen2
@@ -92,8 +83,14 @@ typing {
 	
 	~C |- ~e1 : ~T1
 	~C |- ~T1 ~> Nat
+	(~C;~%x:Nat) |- ~e2 : ~T2
+	~C |- ~T2 ~> Nat
+	======================================== T-DoSumLet1
+	~C |- dosum { let ~%x = ~e1; ~e2 } : Nat
+
+	~C |- ~e1 : ~T1
+	~C |- ~T1 ~> Nat
 	(~C;~%x:Nat) |- dosum { ~bs; ~e2 } : Nat
-	typing.extensions.sumcomprehension.Support.sum1:Nat -> (Nat -> Nat) -> Nat in ~C
-	================================================================================ T-DoSumGen2
+	============================================= T-DoSumLet2
 	~C |- dosum { let ~%x = ~e1; ~bs; ~e2 } : Nat
 }
