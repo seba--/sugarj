@@ -3,7 +3,7 @@ module contextanalysis.RuleDesugaring
 import org.sugarj.languages.Fomega
 import org.sugarj.languages.Stratego
 
-import concretesyntax.Metavar
+import concretesyntax.Metavars
 import concretesyntax.Stratego
 
 import contextanalysis.RuleSyntax
@@ -134,7 +134,7 @@ rules // Translate a type expectation
         ; <translate-fv-subst> (ts2, mvar, [result-var, mvar], fv2) => (ts3, subst-fvs2, result-var2)
 
   translate-type-expectation :
-    (ts, blame result-var, fv1, Metavar(mvar), fv2) ->
+    (ts, blame, result-var, fv1, Metavar(mvar), fv2) ->
       (<ts-append-eq> (ts, mvar), |[ !term~result-var; ?term~mvar ]|)
     where <not(ts-in-eqs)> (ts, mvar)
 
