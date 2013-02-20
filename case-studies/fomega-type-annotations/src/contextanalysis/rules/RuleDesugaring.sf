@@ -1,4 +1,4 @@
-module contextanalysis.RuleDesugaring
+module contextanalysis.rules.RuleDesugaring
 
 import org.sugarj.languages.Fomega
 import org.sugarj.languages.Stratego
@@ -6,7 +6,7 @@ import org.sugarj.languages.Stratego
 import concretesyntax.Metavars
 import concretesyntax.Stratego
 
-import contextanalysis.RuleSyntax
+import contextanalysis.rules.RuleSyntax
 
 
 desugarings
