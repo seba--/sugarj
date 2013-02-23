@@ -3,3 +3,12 @@ module contextanalysis.TypeChecker
 import contextanalysis.RuleSyntax
 import contextanalysis.RuleDesugaring
 
+
+~C |- ~e1 : ~T1
+~C |- ~e2 : ~T2
+~C |- ~e3 : ~T3
+~C |- ~T1 ~> Bool
+~C |- ~T2 ~> ~U
+~C |- ~T3 ~> ~U
+=================================== T-If
+~C |- if ~e1 then ~e2 else ~e3 : ~U

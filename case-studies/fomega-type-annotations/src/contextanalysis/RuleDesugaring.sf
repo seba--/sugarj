@@ -3,10 +3,12 @@ module contextanalysis.RuleDesugaring
 import org.sugarj.languages.Fomega
 import org.sugarj.languages.Stratego
 
-import concretesyntax.Metavar
+import concretesyntax.Metavars
 import concretesyntax.Stratego
 
+import contextanalysis.KindOperations
 import contextanalysis.RuleSyntax
+import contextanalysis.TypeOperations
 
 
 desugarings
@@ -17,7 +19,7 @@ rules
 
   desugar-type-rule :
     TypeRule(premises, RuleName(sep, optional-name), conclusion) ->
-      transformation-elem(<translate-type-rule> (optional-name, premises, conclusion))
+      transformation-elem(<debug(!"IN  ");translate-type-rule; debug(!"OUT ")> (optional-name, premises, conclusion))
 
 
 rules // Translate a type rule
@@ -94,7 +96,7 @@ rules // Translate a judgment
     where <trm-explode> C => tC
         ; <trm-explode> T => tT
         ; <fresh-result-var> ts => (ts1, result-var)
-        ; <ts-get-blame> (ts1, T) => blame
+        ; <ts-lookup-blame> (ts1, T) => blame
         ; <ts-add-blame> (ts1, T', blame) => ts2
         ; <translate-type-expectation> (ts2, blame, result-var, [], T', []) => (ts3, inspect-result)
 
@@ -124,7 +126,7 @@ rules // Translate a type expectation
       ( ts3
       , |[   strategy~subst-fvs1
            ; strategy~subst-fvs2
-           ; <typeEq> (term~result-var2, term~result-var1) => term~msgs-var
+           ; <type-eq> (term~result-var2, term~result-var1) => term~msgs-var
            ; <add-context-errors> (term~msgs-var, term~tblame)
         ]|)
     where <ts-in-eqs> (ts, mvar)
@@ -134,18 +136,175 @@ rules // Translate a type expectation
         ; <translate-fv-subst> (ts2, mvar, [result-var, mvar], fv2) => (ts3, subst-fvs2, result-var2)
 
   translate-type-expectation :
-    (ts, blame result-var, fv1, Metavar(mvar), fv2) ->
+    (ts, blame, result-var, fv1, Metavar(mvar), fv2) ->
       (<ts-append-eq> (ts, mvar), |[ !term~result-var; ?term~mvar ]|)
     where <not(ts-in-eqs)> (ts, mvar)
 
   translate-type-expectation :
-    (ts, result-var, fv1, TyBool(), fv2) ->
-      (ts3, |[   <typeEqBool> term~result-var => term~msgs-var
-               ; <msgsToErrsDummy> term~msgs-var => term~errs-var
+    (ts, blame, result-var, fv1, TyBool(), fv2) ->
+      (ts1, |[   <type-eq-bool> term~result-var => term~msgs-var
+               ; <add-context-errors> (term~msgs-var, term~tblame)
             ]|)
     where <fresh-msgs-var> ts => (ts1, msgs-var)
-        ; <fresh-errs-var> ts1 => (ts2, errs-var)
-        ; <ts-append-errs-var> (ts2, errs-var) => ts3
+        ; <trm-explode> blame => tblame
+
+  translate-type-expectation :
+    (ts, blame, result-var, fv1, TyNat(), fv2) ->
+      (ts1, |[   <type-eq-nat> term~result-var => term~msgs-var
+               ; <add-context-errors> (term~msgs-var, term~tblame)
+            ]|)
+    where <fresh-msgs-var> ts => (ts1, msgs-var)
+        ; <trm-explode> blame => tblame
+
+  translate-type-expectation :
+    (ts, blame, result-var, fv1, TyString(), fv2) ->
+      (ts1, |[   <type-eq-string> term~result-var => term~msgs-var
+               ; <add-context-errors> (term~msgs-var, term~tblame)
+            ]|)
+    where <fresh-msgs-var> ts => (ts1, msgs-var)
+        ; <trm-explode> blame => tblame
+
+  translate-type-expectation :
+    (ts, blame, result-var, fv1, TyArrow(T1, T2), fv2) ->
+      (ts5, |[   <type-eq-arrow> term~result-var => (term~result-var1, term~result-var2, term~msgs-var)
+               ; <add-context-errors> (term~msgs-var, term~tblame)
+               ; strategy~inspect-result1
+               ; strategy~inspect-result2
+            ]|)
+    where <fresh-result-var> ts => (ts1, result-var1)
+        ; <fresh-result-var> ts1 => (ts2, result-var2)
+        ; <fresh-msgs-var> ts2 => (ts3, msgs-var)
+        ; <trm-explode> blame => tblame
+        ; <translate-type-expectation> (ts3, blame, result-var1, fv1, T1, fv2) => (ts4, inspect-result1)
+        ; <translate-type-expectation> (ts4, blame, result-var2, fv1, T2, fv2) => (ts5, inspect-result2)
+
+  translate-type-expectation :
+    (ts, blame, result-var, fv1, TyForall(X, K, T), fv2) ->
+      (ts7, |[   <type-eq-forall> term~result-var =>
+                   (term~result-var1, term~result-var2, term~result-var3, term~msgs-var)
+               ; <add-context-errors> (term~msgs-var, term~tblame)
+               ; strategy~inspect-result1
+               ; strategy~inspect-result2
+               ; strategy~inspect-result3
+            ]|)
+    where <trm-explode> X => tX
+        ; <trm-explode> T => tT
+        ; <trm-explode> blame => tblame
+        ; <fresh-result-var> ts => (ts1, result-var1)
+        ; <fresh-result-var> ts1 => (ts2, result-var2)
+        ; <fresh-result-var> ts2 => (ts3, result-var3)
+        ; <fresh-msgs-var> ts3 => (ts4, msgs-var)
+        ; <translate-bound-variable> (ts4, result-var1, X) => inspect-result1
+        ; <translate-kind-expectation> (ts4, blame, result-var2, K) => (ts5, inspect-result2)
+        ; <translate-type-expectation> ( ts5
+                                       , blame
+                                       , result-var3
+                                       , <concat> [fv1, [result-var1]]
+                                       , T
+                                       , <concat> [fv2, [tX]]
+                                       ) => (ts6, inspect-result3)
+        ; <ts-append-eq> (ts6, X) => ts7
+
+  translate-type-expectation :
+    (ts, blame, result-var, fv1, TyVariant(decls), fv2) ->
+      (ts3, |[   <type-eq-variant> term~result-var => (term~result-var1, term~msgs-var)
+               ; <add-context-errors> (term~msgs-var, term~tblame)
+               ; strategy~inspect-result
+            ]|)
+    where <trm-explode> decls => tdecls
+        ; <trm-explode> blame => tblame
+        ; <fresh-result-var> ts => (ts1, result-var1)
+        ; <fresh-msgs-var> ts1 => (ts2, msgs-var)
+        ; <translate-decls-expectation> (ts2, blame, result-var1, fv1, decls, fv2) => (ts3, inspect-result)
+
+  translate-type-expectation :
+    (ts, blame, result-var, fv1, TyRecord(decls), fv2) ->
+      (ts3, |[   <type-eq-record> term~result-var => (term~result-var1, term~msgs-var)
+               ; <add-context-errors> (term~msgs-var, term~tblame)
+               ; strategy~inspect-result 
+            ]|)
+    where <trm-explode> decls => tdecls
+        ; <trm-explode> blame => tblame
+        ; <fresh-result-var> ts => (ts1, result-var1)
+        ; <fresh-msgs-var> ts1 => (ts2, msgs-var)
+        ; <translate-decls-expectation> (ts2, blame, result-var1, fv1, decls, fv2) => (ts3, inspect-result)
+
+
+rules // Generate code to expect a type declaration
+
+  translate-decls-expectation :
+    (ts, blame, result-var, fv1, Metavar(mvar), fv2) ->
+      (<ts-append-eq> (ts, mvar), |[ !term~result-var; ?term~mvar ]|)
+    where <not(ts-in-eqs)> (ts, mvar)
+
+  translate-decls-expectation :
+    (ts, blame, result-var, fv1, Metavar(mvar), fv2) ->
+      ( ts1
+      , |[   <decls-eq> (term~mvar, term~result-var) => term~msgs-var
+           ; <add-context-errors> (term~msgs-var, term~tblame)
+        ]|)
+    where <ts-in-eqs> (ts, mvar)
+        ; <trm-explode> blame => tblame
+        ; <fresh-msgs-var> ts => (ts1, msgs-var)
+
+  translate-decls-expectation :
+    (ts, blame, result-var, fv1, TyDeclsNil(), fv2) -> (ts, |[ id ]|)
+
+  translate-decls-expectation :
+    (ts, blame, result-var, fv1, TyDeclsCons(TyDecl(x, T), decls), fv2) ->
+    (ts4, |[   <lab-type> (term~tx, term~result-var) => (term~result-var1, term~msgs-var)
+             ; <add-context-errors> (term~msgs-var, term~tblame)
+             ; strategy~inspect-result1
+             ; strategy~inspect-result2
+          ]|)
+    where <trm-explode> x => tx
+        ; <trm-explode> T => tT
+        ; <trm-explode> blame => tblame
+        ; <fresh-msgs-var> ts => (ts1, msgs-var)
+        ; <fresh-result-var> ts1 => (ts2, result-var1)
+        ; <translate-type-expectation> (ts2, blame, result-var1, fv1, T, fv2) => (ts3, inspect-result1)
+        ; <translate-decls-expectation> (ts3, blame, result-var, fv1, decls, fv2) => (ts4, inspect-result2)
+
+
+rules // Translate a kind expectation
+
+  translate-kind-expectation :
+    (ts, blame, result-var, Metavar(mvar)) ->
+      (<ts-append-eq> (ts, mvar), |[ !term~result-var; ?term~mvar ]|)
+    where <not(ts-in-eqs)> (ts, mvar)
+
+  translate-kind-expectation :
+    (ts, blame, result-var, Metavar(mvar)) ->
+      ( ts1
+      , |[   <kind-eq> (term~mvar, term~result-var) => term~msgs-var
+           ; <add-context-errors> (term~msgs-var, term~tblame)
+        ]|)
+    where <ts-in-eqs> (ts, mvar)
+        ; <trm-explode> blame => tblame
+        ; <fresh-msgs-var> ts => (ts1, msgs-var)
+
+  translate-kind-expectation :
+    (ts, blame, result-var, KiStar()) ->
+      (ts1, |[   <kind-eq-star> term~result-var => term~msgs-var
+               ; <add-context-errors> (term~msgs-var, term~tblame)
+            ]|)
+    where <fresh-msgs-var> ts => (ts1, msgs-var)
+        ; <trm-explode> blame => tblame
+
+  translate-kind-expectation :
+    (ts, blame, result-var, KiArrow(K1, K2)) ->
+      (ts5, |[   <kind-eq-arrow> term~result-var => (term~result-var1, term~result-var2, term~msgs-var)
+               ; <add-context-errors> (term~msgs-var, term~tblame)
+               ; strategy~inspect-result1
+               ; strategy~inspect-result2
+            ]|)
+    where <fresh-result-var> ts => (ts1, result-var1)
+        ; <fresh-result-var> ts1 => (ts2, result-var2)
+        ; <fresh-msgs-var> ts2 => (ts3, msgs-var)
+        ; <trm-explode> blame => tblame
+        ; <translate-kind-expectation> (ts3, blame, result-var1, K1) => (ts4, inspect-result1)
+        ; <translate-kind-expectation> (ts4, blame, result-var2, K2) => (ts5, inspect-result2)
+
 
 rules // Translate a substitution operator in a type
 
@@ -291,4 +450,25 @@ rules // Translation state handling
     where <ts-get-blame> ts => blame-old
 
   ts-lookup-blame :
-    (ts, prop) -> <lookup> (prop, <ts-get-blame> ts)
+    (ts, prop) -> blame
+    where <ts-get-blame> ts => blame-map
+        ; <lookup(\ (x, (y, z)) -> <structurally-equal> (x, y) \)> (prop, blame-map) => (_, blame)
+
+
+rules // Debug definitions to find rewrite failures
+
+  translate-judgment :
+    (ts, x) -> (ts, |[ !("fail in translate-judgment") ]|)
+    where !(ts, x); debug(!"FAILURE IN JUDGMENT")
+
+  translate-type-expectation :
+    (ts, y, fv1, x, fv2) -> (ts, |[ !"fail in translate-type-expectation" ]|)
+    where !(ts, y, x); debug(!"FAILURE IN TYPE")
+
+  translate-kind-expectation :
+    (ts, y, x) -> (ts, |[ !"fail in translate-kind-expectation" ]|)
+    where !(ts, y, x); debug(!"FAILURE IN KIND")
+
+  translate-decls-expectation :
+    (ts, y, fv1, x, fv2) -> (ts, |[ !"fail in translate-decls-expectation" ]|)
+    where !(ts, y, x); debug(!"FAILURE IN DECLS")
