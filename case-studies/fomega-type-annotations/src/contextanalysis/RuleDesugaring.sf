@@ -6,6 +6,7 @@ import org.sugarj.languages.Stratego
 import concretesyntax.Metavars
 import concretesyntax.Stratego
 
+import contextanalysis.KindChecker
 import contextanalysis.KindOperations
 import contextanalysis.RuleSyntax
 import contextanalysis.TypeOperations
@@ -80,7 +81,7 @@ rules // Translate a judgment
   translate-judgment :
     (ts, KindingJudgment(C, T, K)) ->
       (ts3, |[   <annotate-kind> (term~tC, term~tT)
-               ; <get-type> term~tT => term~result-var
+               ; <get-kind> term~tT => term~result-var
                ; strategy~inspect-result
             ]|)
     where <trm-explode> C => tC
@@ -103,7 +104,7 @@ rules // Translate a judgment
 
   translate-judgment :
     (ts, VarInContextJudgment(x, T, C)) ->
-      (ts4, |[   <debug(!"LU IN  ");lookup-expr-var;debug(!"LU OUT ")> (term~tx, term~tC) => (term~result-var, term~errs-var)
+      (ts4, |[   <lookup-expr-var> (term~tx, term~tC) => (term~result-var, term~errs-var)
                ; <add-context-errors> (term~errs-var, term~tx)
                ; strategy~inspect-result
             ]|)

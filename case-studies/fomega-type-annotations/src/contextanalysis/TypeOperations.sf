@@ -379,7 +379,7 @@ rules
         ; if (!msgs; ?[]) then
             !T
           else
-            !(<norm> (C,S))
+            !(<norm> (C, S))
           end => T'
 
   par-reduce = // debug(!"PR IN:  ");
@@ -406,7 +406,7 @@ rules
 
   par-reduce-type :
     (C, TyVar(X)) -> S
-    where <lookup-type-var> (X, C) => (T, msgs)
+    where <lookup-type-var-def> (X, C) => (T, msgs)
         ; if !msgs; ?[] then
             !T
           else
@@ -415,7 +415,7 @@ rules
 
   par-reduce-type :
     (C, TyQVar(qX)) -> S
-    where <lookup-type-var> (qX, C) => (T, msgs)
+    where <lookup-type-var-def> (qX, C) => (T, msgs)
         ; if !msgs; ?[] then
             !T
           else
