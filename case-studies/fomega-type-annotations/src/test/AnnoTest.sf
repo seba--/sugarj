@@ -27,3 +27,4 @@ val x6 = \A::*.\x:A. x
 
 val x7 = x6 [Bool] true
 
+val x8 = 1 as (\X::*.X) Nat
