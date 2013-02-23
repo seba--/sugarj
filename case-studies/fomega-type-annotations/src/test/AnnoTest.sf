@@ -12,3 +12,17 @@ type Bar = (\X::*. X) Foo
 type V = {x:Nat, y:Nat, a:Bool, b:Nat}
 
 type Foo1 = forall X::*. V
+
+val x1 = if true then 1 else 1
+
+//val x2 = if x1 then 1 else 2
+
+//val x3 = if x2 then 1 else 2
+
+val x4 = \x:Nat. x
+
+val x5 = x4 x1
+
+val x6 = \A::*.\x:A. x
+
+val x7 = x6 [Bool] true
