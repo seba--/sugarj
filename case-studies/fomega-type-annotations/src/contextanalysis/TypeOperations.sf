@@ -52,7 +52,7 @@ rules
 
 rules
 
-  pp-type = strip-annos; write-to-string
+  pp-type = bottomup(strip-annos); write-to-string
 
 
 rules

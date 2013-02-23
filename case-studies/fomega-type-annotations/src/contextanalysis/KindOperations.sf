@@ -16,7 +16,7 @@ rules
 
 rules
 
-  pp-kind = strip-annos; write-to-string
+  pp-kind = bottomup(strip-annos); write-to-string
 
 
 rules
