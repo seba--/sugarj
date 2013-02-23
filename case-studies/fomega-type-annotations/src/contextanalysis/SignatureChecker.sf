@@ -15,6 +15,7 @@ rules
     // TODO: add error if X is defined in C
     ; <annotate-kind> (C, T)
     ; <get-kind> T => K
+    ; <put-kind> (K, X)
     ; <put-signature> (SigEmpty(), node)
 
   annotate-signature =
@@ -22,6 +23,7 @@ rules
     // TODO: add error if X is defined in C
     ; <annotate-kind> (C, T)
     ; <get-kind> T => K
+    ; <put-kind> (K, X)
     ; <put-signature> (SigBindTVarDef(X, K, T, SigEmpty()), node)
 
   annotate-signature =
@@ -29,6 +31,7 @@ rules
     // TODO: add error if X is defined in C
     ; <annotate-kind> (C, T)
     ; <get-kind> T => K
+    ; <put-kind> (K, X)
     ; <annotate-signature> (CtxBindTVarDef(C, X, K, T), defs)
     ; <get-signature> defs => sig
     ; <put-signature> (sig, node)
@@ -38,6 +41,7 @@ rules
     // TODO: add error if X is defined in C
     ; <annotate-kind> (C, T)
     ; <get-kind> T => K
+    ; <put-kind> (K, X)
     ; <annotate-signature> (CtxBindTVarDef(C, X, K, T), defs)
     ; <get-signature> defs => sig
     ; <put-signature> (sig, node)
@@ -47,6 +51,8 @@ rules
       ?(C, node@DefsEnd(ValDef(None(), x, e)))
     // TODO: add error if x is defined in C
     ; <annotate-type> (C, e)
+    ; <get-type> e => T
+    ; <put-type> (T, x)
     ; <put-signature> (SigEmpty(), node)
 
   annotate-signature =
@@ -54,6 +60,7 @@ rules
     // TODO: add error if x is defined in C
     ; <annotate-type> (C, e)
     ; <get-type> e => T
+    ; <put-type> (T, x)
     ; <put-signature> (SigBindVar(x, T, SigEmpty()), node)
 
   annotate-signature =
@@ -61,6 +68,7 @@ rules
     // TODO: add error if x is defined in C
     ; <annotate-type> (C, e)
     ; <get-type> e => T
+    ; <put-type> (T, x)
     ; <annotate-signature> (CtxBindVar(C, x, T), defs)
     ; <get-signature> defs => sig
     ; <put-signature> (sig, node)
@@ -70,9 +78,8 @@ rules
     // TODO: add error if x is defined in C
     ; <annotate-kind> (C, e)
     ; <get-kind> e => T
+    ; <put-type> (T, x)
     ; <annotate-signature> (CtxBindVar(C, x, T), defs)
     ; <get-signature> defs => sig
     ; <put-signature> (sig, node)
     ; <put-signature> (SigBindVar(x, T, sig), node)
-
-annotate-signature = debug(!"FAIL AS ")
