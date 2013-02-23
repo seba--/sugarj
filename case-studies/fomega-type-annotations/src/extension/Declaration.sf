@@ -1,6 +1,6 @@
 module extension.Declaration
 
-import contextanalysis.rules.RuleSyntax
+import contextanalysis.rules.Syntax
 
 context-free syntax
   "syntax" "{" Grammar* "}" -> ToplevelDeclaration {cons("SyntaxExtension")}
