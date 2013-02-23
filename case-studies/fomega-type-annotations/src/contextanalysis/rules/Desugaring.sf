@@ -461,7 +461,7 @@ rules // Translation state handling
 rules // Debug definitions to find rewrite failures
 
   translate-judgment :
-    (ts, x) -> (ts, |[ !("fail in translate-judgment") ]|)
+    (ts, x) -> (ts, |[ !(<concat-strings> ("fail in translate-judgment ", <strip-annos;write-to-string> x)) ]|)
     where !(ts, x); debug(!"FAILURE IN JUDGMENT")
 
   translate-type-expectation :
