@@ -1,4 +1,4 @@
-module contextanalysis.rules.RuleDesugaring
+module contextanalysis.rules.Desugaring
 
 import org.sugarj.languages.Fomega
 import org.sugarj.languages.Stratego
@@ -10,7 +10,7 @@ import contextanalysis.KindChecker
 import contextanalysis.KindOperations
 import contextanalysis.TypeOperations
 
-import contextanalysis.rules.RuleSyntax
+import contextanalysis.rules.Syntax
 
 
 desugarings
@@ -455,14 +455,16 @@ rules // Translation state handling
   ts-lookup-blame :
     (ts, prop) -> blame
     where <ts-get-blame> ts => blame-map
-        ; <lookup(\ (x, (y, z)) -> <structurally-equal> (x, y) \)> (prop, blame-map) => (_, blame)
+        ; (<lookup(\ (x, (y, z)) -> <structurally-equal> (x, y) \)> (prop, blame-map) <+ !(prop, prop)) => (_, blame)
+          // If lookup fails, prop has not been registered. We assume prop itself
+          // comes from the input and is to blame in case of a context error.
 
 
 rules // Debug definitions to find rewrite failures
 
-  translate-judgment :
-    (ts, x) -> (ts, |[ !(<concat-strings> ("fail in translate-judgment ", <strip-annos;write-to-string> x)) ]|)
-    where !(ts, x); debug(!"FAILURE IN JUDGMENT")
+ translate-judgment :
+   (ts, x) -> (ts, |[ !"fail in translate-judgment " ]|)
+   where !(<write-to-string> (<strip-annos> x)); debug(!"FAILURE IN JUDGMENT ")
 
   translate-type-expectation :
     (ts, y, fv1, x, fv2) -> (ts, |[ !"fail in translate-type-expectation" ]|)
