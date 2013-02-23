@@ -19,7 +19,7 @@ rules
 
   desugar-type-rule :
     TypeRule(premises, RuleName(sep, optional-name), conclusion) ->
-      transformation-elem(<debug(!"IN  ");translate-type-rule; debug(!"OUT ")> (optional-name, premises, conclusion))
+      transformation-elem(<translate-type-rule> (optional-name, premises, conclusion))
 
 
 rules // Translate a type rule
@@ -29,8 +29,9 @@ rules // Translate a type rule
     stratego-decl
     |[ rules
          annotate-type-defined =
-             ?(term~tC, term~te)
+             ?(term~tC, node@term~te)
            ; strategy~premises-implementation
+           ; <put-type> (term~tT, node)
     ]|
     where <trm-explode> C => tC
         ; <trm-explode> e => te

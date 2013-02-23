@@ -4,6 +4,22 @@ import contextanalysis.RuleSyntax
 import contextanalysis.RuleDesugaring
 
 
+================= T-True
+~C |- true : Bool
+
+
+================== T-False
+~C |- false : Bool
+
+
+=============== T-Nat
+~C |- ~#n : Nat
+
+
+================== T-String
+~C |- ~$s : String
+
+
 ~C |- ~e1 : ~T1
 ~C |- ~e2 : ~T2
 ~C |- ~e3 : ~T3

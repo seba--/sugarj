@@ -5,6 +5,7 @@ import org.sugarj.languages.Fomega
 import contextanalysis.Annotations
 import contextanalysis.KindChecker
 import contextanalysis.Signatures
+import contextanalysis.TypeChecker
 
 
 rules
@@ -41,3 +42,37 @@ rules
     ; <get-signature> defs => sig
     ; <put-signature> (sig, node)
     ; <put-signature> (SigBindTVarDef(X, K, T, sig), node)
+
+  annotate-signature =
+      ?(C, node@DefsEnd(ValDef(None(), x, e)))
+    // TODO: add error if x is defined in C
+    ; <annotate-type> (C, e)
+    ; <put-signature> (SigEmpty(), node)
+
+  annotate-signature =
+      ?(C, node@DefsEnd(ValDef(Some(Public()), x, e)))
+    // TODO: add error if x is defined in C
+    ; <annotate-type> (C, e)
+    ; <get-type> e => T
+    ; <put-signature> (SigBindVar(x, T, SigEmpty()), node)
+
+  annotate-signature =
+     ?(C, node@DefsCons(ValDef(None(), x, e), defs))
+    // TODO: add error if x is defined in C
+    ; <annotate-type> (C, e)
+    ; <get-type> e => T
+    ; <annotate-signature> (CtxBindVar(C, x, T), defs)
+    ; <get-signature> defs => sig
+    ; <put-signature> (sig, node)
+
+  annotate-signature =
+     ?(C, node@DefsCons(ValDef(Some(Public()), x, e), defs))
+    // TODO: add error if x is defined in C
+    ; <annotate-kind> (C, e)
+    ; <get-kind> e => T
+    ; <annotate-signature> (CtxBindVar(C, x, T), defs)
+    ; <get-signature> defs => sig
+    ; <put-signature> (sig, node)
+    ; <put-signature> (SigBindVar(x, T, sig), node)
+
+annotate-signature = debug(!"FAIL AS ")
