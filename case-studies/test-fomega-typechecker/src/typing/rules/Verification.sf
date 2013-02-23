@@ -19,7 +19,7 @@ rules
       result
     where // TODO: only allow desugar-extension-internal; extension declaration 
           //       requires this rule to be successfully applicable to subject
-          <desugar-extension-internal <+ desugar <+ id> e => des-e 
+          <bottomup(strip-annos); (desugar-extension-internal <+ desugar <+ id)> e => des-e 
         ; <nice-analysis-data-term; debug(!"Desugared conclusion term: ")> des-e 
         ; <premises-to-list> premises => premises-list
         ; {| Dynamic-TypeOf, Dynamic-KindOf, Dynamic-ParReduce1, Dynamic-Lookup-Expr-Var:

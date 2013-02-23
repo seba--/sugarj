@@ -26,3 +26,4 @@ val x5 = x4 x1
 val x6 = \A::*.\x:A. x
 
 val x7 = x6 [Bool] true
+

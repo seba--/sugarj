@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.spoofax.interpreter.library.AbstractStrategoOperatorRegistry;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.HybridInterpreter;
 import org.sugarj.common.ATermCommands;
@@ -23,6 +24,8 @@ import org.sugarj.common.StringCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.languagelib.SourceFileContent;
+import org.sugarj.languagelib.primitive.IPrettyPrint;
+import org.sugarj.languagelib.primitive.PrettyPrint;
 import org.sugarj.stdlib.StdLib;
 import org.sugarj.util.Pair;
 
@@ -34,6 +37,19 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
 
   public void setInterpreter(HybridInterpreter interp) {
     this.interp = interp;
+    interp.addOperatorRegistry(new AbstractStrategoOperatorRegistry() {
+      {
+        if (LanguageLib.this instanceof IPrettyPrint)
+          add(new PrettyPrint((IPrettyPrint) LanguageLib.this));
+        else
+          add(new PrettyPrint(null));
+      }
+      
+      @Override
+      public String getOperatorRegistryName() {
+        return "SUGARJ_PrettyPrint";
+      }
+    });
   }
   
   public HybridInterpreter getInterpreter() {

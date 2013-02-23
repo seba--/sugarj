@@ -3,18 +3,18 @@ module contextanalysis.ContextAnalysis
 import org.sugarj.languages.Fomega
 
 import contextanalysis.SignatureChecker
-
+import contextanalysis.Editor
 
 analyses
   annotate-types
 
-
 rules
 
   // TODO: Establish context from imports instead of empty context
-  annotate-types :
-    FomegaBody(defs) -> <debug(!"ANN TY ")> (<nice-analysis-data-term> (<annotate-signature> (CtxEmpty(), defs)))
-
+  annotate-types =
+      ?FomegaBody(defs)
+    ; <debug-analysis(!"Before checking: "); where(annotate-signature)> (CtxEmpty(), defs)
+    ; debug-analysis(!"After checking: ")
 
 rules
 
@@ -25,3 +25,7 @@ rules
       ?node
     ; <get-context-errors> node => errs
     ; if !errs; ?[] then fail else ![(node, errs)] end
+
+
+colorer
+// dummy declaration to ensure export of editor service
