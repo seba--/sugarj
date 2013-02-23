@@ -156,7 +156,7 @@ rules
     TyBool() -> []
 
   type-eq-bool-unexpected :
-    T -> [<concat-strings> ["type mismatch, expected bool type but found ", <pp-type> T]]
+    T -> [<concat-strings> ["type mismatch, expected Bool type but found ", <pp-type> T]]
 
 
   type-eq-nat = type-eq-nat-proper <+ type-eq-nat-unexpected
@@ -168,7 +168,7 @@ rules
     TyBool() -> []
 
   type-eq-nat-unexpected :
-    T -> [<concat-strings> ["type mismatch, expected nat type but found ", <pp-type> T]]
+    T -> [<concat-strings> ["type mismatch, expected Nat type but found ", <pp-type> T]]
 
 
   type-eq-string = type-eq-string-proper <+ type-eq-string-unexpected
@@ -180,7 +180,7 @@ rules
     TyBool() -> []
 
   type-eq-string-unexpected :
-    T -> [<concat-strings> ["type mismatch, expected string type but found ", <pp-type> T]]
+    T -> [<concat-strings> ["type mismatch, expected String type but found ", <pp-type> T]]
 
 
   type-eq-variant = type-eq-variant-proper <+ type-eq-variant-unexpected

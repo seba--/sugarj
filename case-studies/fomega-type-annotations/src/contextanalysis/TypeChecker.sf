@@ -20,6 +20,16 @@ import contextanalysis.RuleDesugaring
 ~C |- ~$s : String
 
 
+~%x:~T in ~C
+============== T-Var
+~C |- ~%x : ~T
+
+
+~&qx:~T in ~C
+=============== T-QVar
+~C |- ~&qx : ~T
+
+
 ~C |- ~e1 : ~T1
 ~C |- ~e2 : ~T2
 ~C |- ~e3 : ~T3
