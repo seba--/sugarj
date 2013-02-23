@@ -1,7 +1,7 @@
 module contextanalysis.TypeChecker
 
-import contextanalysis.rules.RuleSyntax
-import contextanalysis.rules.RuleDesugaring
+import contextanalysis.rules.Syntax
+import contextanalysis.rules.Desugaring
 
 
 ================= T-True
