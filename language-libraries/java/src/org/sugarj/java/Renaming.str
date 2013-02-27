@@ -14,72 +14,47 @@ rules
     rename-languagedec(|renamings) <+
     id
     
-  rename-sugardec(|renamings) = oncetd( \ SugarDecHead(mods, Id(from)) -> SugarDecHead(mods, Id(to))  
-                                          where <hashtable-get(|from)> renamings => to \)
-  rename-transdec(|renamings) = oncetd( \ TransDecHead(mods, Id(from)) -> TransDecHead(mods, Id(to))  
-                                          where <hashtable-get(|from)> renamings => to \)
-  rename-modeldec(|renamings) = oncetd( \ ModelDecHead(mods, Id(from), meta) -> ModelDecHead(mods, Id(to), meta)  
-                                          where <hashtable-get(|from)> renamings => to \)
-  rename-editordec(|renamings) = oncetd( \ EditorServicesDecHead(mods, Id(from)) -> EditorServicesDecHead(mods, Id(to))  
-                                           where <hashtable-get(|from)> renamings => to \)
+  rename-sugardec(|renamings) = oncetd(SugarDecHead(id, Id(do-rename(|renamings))))  
+  rename-transdec(|renamings) = oncetd(TransDecHead(id, Id(do-rename(|renamings))))
+  rename-modeldec(|renamings) = oncetd(ModelDecHead(id, Id(do-rename(|renamings)), id))
+  rename-editordec(|renamings) = oncetd(EditorServicesDecHead(id, Id(do-rename(|renamings))))
 
   rename-languagedec(|renamings) = topdown(try(rename-java(|renamings)))
   
+  do-rename(|renamings) :
+    from -> to
+    where <hashtable-get(|<strip-annos> from)> renamings => to
+  
 rules
-  rename-java(|renamings) :
-       t@ClassDecHead(mods, Id(from), typeParams, super, interface)
-    -> ClassDecHead(mods, Id(to), typeParams, super, interface)
-  where <hashtable-get(|from)> renamings => to
+  rename-java(|renamings) = ClassDecHead(id, Id(do-rename(|renamings)), id, id, id)
     
-  rename-java(|renamings) :
-       InterfaceDecHead(mods, Id(from), typeParams, interface)
-    -> InterfaceDecHead(mods, Id(to), typeParams, interface) 
-  where <hashtable-get(|from)> renamings => to 
+  rename-java(|renamings) = InterfaceDecHead(id, Id(do-rename(|renamings)), id, id)
 
-  rename-java(|renamings) :
-       EnumDecHead(mods, Id(from), interface)
-    -> EnumDecHead(mods, Id(to), interface) 
-  where <hashtable-get(|from)> renamings => to 
+  rename-java(|renamings) = EnumDecHead(id, Id(do-rename(|renamings)), id) 
     
-  rename-java(|renamings) :
-       AnnoDecHead(mods, Id(from))
-    -> AnnoDecHead(mods, Id(to)) 
-  where <hashtable-get(|from)> renamings => to 
+  rename-java(|renamings) = AnnoDecHead(id, Id(do-rename(|renamings)))
     
-  rename-java(|renamings) :
-       ConstrDecHead(mods, typeParams, Id(from), params, throws)
-    -> ConstrDecHead(mods, typeParams, Id(to), params, throws)
-  where <hashtable-get(|from)> renamings => to 
+  rename-java(|renamings) = ConstrDecHead(id, id, Id(do-rename(|renamings)), id, id)
 
-  rename-java(|renamings) :
-       TypeName(Id(from))
-    -> TypeName(Id(to))
-  where <hashtable-get(|from)> renamings => to 
+  rename-java(|renamings) = TypeName(Id(do-rename(|renamings))) 
 
   rename-java(|renamings) :
        TypeName(qual, Id(from))
     -> TypeName(qual, Id(to))
   where
     <pkg-list> qual => pkgs; 
-    <hashtable-get(|(pkgs, from))> renamings => to 
+    <hashtable-get(|<bottomup(strip-annos)> (pkgs, from))> renamings => to 
 
-  rename-java(|renamings) :
-       PackageOrTypeName(Id(from))
-    -> PackageOrTypeName(Id(to))
-  where <hashtable-get(|from)> renamings => to 
-
+  rename-java(|renamings) = PackageOrTypeName(Id(do-rename(|renamings)))
+  
   rename-java(|renamings) :
        PackageOrTypeName(qual, Id(from))
     -> PackageOrTypeName(qual, Id(to))
   where
     <pkg-list> qual => pkgs; 
-    <hashtable-get(|(pkgs, from))> renamings => to 
+    <hashtable-get(|<bottomup(strip-annos)> (pkgs, from))> renamings => to 
 
-  rename-java(|renamings) :
-       AmbName(Id(from))
-    -> AmbName(Id(to))
-  where <hashtable-get(|from)> renamings => to 
-
+  rename-java(|renamings) = AmbName(Id(do-rename(|renamings)))
 
 rules
   pkg-list : PackageOrTypeName(Id(pkg)) -> [pkg]
