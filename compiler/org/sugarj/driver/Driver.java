@@ -1082,7 +1082,7 @@ public class Driver{
         buildCompoundStrModule();
 
     } catch (PrettyPrintError e) {
-      setErrorMessage(e.getMsg());
+      setErrorMessage(e.getMessage());
     } finally {
       log.endTask();
     }
