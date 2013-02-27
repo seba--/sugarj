@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Tuple$Cong_2_0 instance = new $Tuple$Cong_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy m_45, Strategy n_45)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy x_14, Strategy y_14)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("TupleCong_2_0");
-    Fail314:
+    Fail79:
     { 
-      IStrategoTerm j_188 = null;
-      IStrategoTerm h_188 = null;
-      IStrategoTerm i_188 = null;
-      IStrategoTerm k_188 = null;
+      IStrategoTerm b_104 = null;
+      IStrategoTerm x_103 = null;
+      IStrategoTerm z_103 = null;
+      IStrategoTerm c_104 = null;
       if(term.getTermType() != IStrategoTerm.APPL || out._consTupleCong_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail314;
-      h_188 = term.getSubterm(0);
-      i_188 = term.getSubterm(1);
-      IStrategoList annos261 = term.getAnnotations();
-      j_188 = annos261;
-      term = m_45.invoke(context, h_188);
+        break Fail79;
+      x_103 = term.getSubterm(0);
+      z_103 = term.getSubterm(1);
+      IStrategoList annos69 = term.getAnnotations();
+      b_104 = annos69;
+      term = x_14.invoke(context, x_103);
       if(term == null)
-        break Fail314;
-      k_188 = term;
-      term = n_45.invoke(context, i_188);
+        break Fail79;
+      c_104 = term;
+      term = y_14.invoke(context, z_103);
       if(term == null)
-        break Fail314;
-      term = termFactory.annotateTerm(termFactory.makeAppl(out._consTupleCong_2, new IStrategoTerm[]{k_188, term}), checkListAnnos(termFactory, j_188));
+        break Fail79;
+      term = termFactory.annotateTerm(termFactory.makeAppl(out._consTupleCong_2, new IStrategoTerm[]{c_104, term}), checkListAnnos(termFactory, b_104));
       context.popOnSuccess();
       if(true)
         return term;

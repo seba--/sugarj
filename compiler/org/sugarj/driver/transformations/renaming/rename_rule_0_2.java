@@ -12,105 +12,87 @@ import java.lang.ref.WeakReference;
 { 
   public static rename_rule_0_2 instance = new rename_rule_0_2();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, IStrategoTerm e_49, IStrategoTerm f_49)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, IStrategoTerm ref_r_18, IStrategoTerm ref_s_18)
   { 
-    ITermFactory termFactory = context.getFactory();
-    Fail1:
+    TermReference r_18 = new TermReference(ref_r_18);
+    TermReference s_18 = new TermReference(ref_s_18);
+    context.push("rename_rule_0_2");
+    Fail4:
     { 
       IStrategoTerm term0 = term;
-      IStrategoConstructor cons0 = term.getTermType() == IStrategoTerm.APPL ? ((IStrategoAppl)term).getConstructor() : null;
       Success0:
       { 
-        if(cons0 == out._consRDefNoArgs_2)
+        Fail5:
         { 
-          Fail2:
-          { 
-            IStrategoTerm q_23 = null;
-            if(term.getSubterm(0) != e_49 && !e_49.match(term.getSubterm(0)))
-              break Fail2;
-            q_23 = term.getSubterm(1);
-            term = termFactory.makeAppl(out._consRDefNoArgs_2, new IStrategoTerm[]{f_49, q_23});
-            if(true)
-              break Success0;
-          }
-          term = term0;
+          lifted6 lifted60 = new lifted6();
+          lifted60.r_18 = r_18;
+          lifted60.s_18 = s_18;
+          term = $R$Def$No$Args_2_0.instance.invoke(context, term, lifted60, _Id.instance);
+          if(term == null)
+            break Fail5;
+          if(true)
+            break Success0;
         }
+        term = term0;
+        IStrategoTerm term1 = term;
         Success1:
         { 
-          if(cons0 == out._consRDef_3)
+          Fail6:
           { 
-            Fail3:
-            { 
-              IStrategoTerm m_23 = null;
-              IStrategoTerm n_23 = null;
-              if(term.getSubterm(0) != e_49 && !e_49.match(term.getSubterm(0)))
-                break Fail3;
-              m_23 = term.getSubterm(1);
-              n_23 = term.getSubterm(2);
-              term = termFactory.makeAppl(out._consRDef_3, new IStrategoTerm[]{f_49, m_23, n_23});
-              if(true)
-                break Success1;
-            }
-            term = term0;
+            lifted8 lifted80 = new lifted8();
+            lifted80.r_18 = r_18;
+            lifted80.s_18 = s_18;
+            term = $R$Def_3_0.instance.invoke(context, term, lifted80, _Id.instance, _Id.instance);
+            if(term == null)
+              break Fail6;
+            if(true)
+              break Success1;
           }
+          term = term1;
+          IStrategoTerm term2 = term;
           Success2:
           { 
-            if(cons0 == out._consRDefT_4)
+            Fail7:
             { 
-              Fail4:
-              { 
-                IStrategoTerm h_23 = null;
-                IStrategoTerm i_23 = null;
-                IStrategoTerm j_23 = null;
-                if(term.getSubterm(0) != e_49 && !e_49.match(term.getSubterm(0)))
-                  break Fail4;
-                h_23 = term.getSubterm(1);
-                i_23 = term.getSubterm(2);
-                j_23 = term.getSubterm(3);
-                term = termFactory.makeAppl(out._consRDefT_4, new IStrategoTerm[]{f_49, h_23, i_23, j_23});
-                if(true)
-                  break Success2;
-              }
-              term = term0;
+              lifted11 lifted111 = new lifted11();
+              lifted111.r_18 = r_18;
+              lifted111.s_18 = s_18;
+              term = $R$Def$T_4_0.instance.invoke(context, term, lifted111, _Id.instance, _Id.instance, _Id.instance);
+              if(term == null)
+                break Fail7;
+              if(true)
+                break Success2;
             }
+            term = term2;
+            IStrategoTerm term3 = term;
             Success3:
             { 
-              if(cons0 == out._consSDefNoArgs_2)
+              Fail8:
               { 
-                Fail5:
-                { 
-                  IStrategoTerm e_23 = null;
-                  if(term.getSubterm(0) != e_49 && !e_49.match(term.getSubterm(0)))
-                    break Fail5;
-                  e_23 = term.getSubterm(1);
-                  term = termFactory.makeAppl(out._consSDefNoArgs_2, new IStrategoTerm[]{f_49, e_23});
-                  if(true)
-                    break Success3;
-                }
-                term = term0;
+                lifted15 lifted150 = new lifted15();
+                lifted150.r_18 = r_18;
+                lifted150.s_18 = s_18;
+                term = $S$Def$No$Args_2_0.instance.invoke(context, term, lifted150, _Id.instance);
+                if(term == null)
+                  break Fail8;
+                if(true)
+                  break Success3;
               }
-              if(cons0 == out._consSDef_3)
-              { 
-                IStrategoTerm a_23 = null;
-                IStrategoTerm b_23 = null;
-                if(term.getSubterm(0) != e_49 && !e_49.match(term.getSubterm(0)))
-                  break Fail1;
-                a_23 = term.getSubterm(1);
-                b_23 = term.getSubterm(2);
-                term = termFactory.makeAppl(out._consSDef_3, new IStrategoTerm[]{f_49, a_23, b_23});
-              }
-              else
-              { 
-                break Fail1;
-              }
+              term = term3;
+              lifted17 lifted170 = new lifted17();
+              lifted170.r_18 = r_18;
+              lifted170.s_18 = s_18;
+              term = $S$Def_3_0.instance.invoke(context, term, lifted170, _Id.instance, _Id.instance);
+              if(term == null)
+                break Fail4;
             }
           }
         }
       }
+      context.popOnSuccess();
       if(true)
         return term;
     }
-    context.push("rename_rule_0_2");
     context.popOnFailure();
     return null;
   }

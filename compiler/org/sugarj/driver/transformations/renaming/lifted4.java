@@ -10,22 +10,20 @@ import java.lang.ref.WeakReference;
 
 @SuppressWarnings("all") final class lifted4 extends Strategy 
 { 
-  TermReference w_22;
+  TermReference e_9;
 
-  TermReference x_22;
+  TermReference f_9;
 
   @Override public IStrategoTerm invoke(Context context, IStrategoTerm term)
   { 
-    Fail390:
+    Fail157:
     { 
-      if(w_22.value == null)
-        w_22.value = term;
-      else
-        if(w_22.value != term && !w_22.value.match(term))
-          break Fail390;
-      if(x_22.value == null)
-        break Fail390;
-      term = x_22.value;
+      lifted5 lifted50 = new lifted5();
+      lifted50.e_9 = e_9;
+      lifted50.f_9 = f_9;
+      term = $S$Var_1_0.instance.invoke(context, term, lifted50);
+      if(term == null)
+        break Fail157;
       if(true)
         return term;
     }

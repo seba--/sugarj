@@ -12,23 +12,23 @@ import java.lang.ref.WeakReference;
 { 
   public static $Gen$Dyn$Rules_1_0 instance = new $Gen$Dyn$Rules_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy l_44)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy u_13)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("GenDynRules_1_0");
-    Fail299:
+    Fail63:
     { 
-      IStrategoTerm n_185 = null;
-      IStrategoTerm m_185 = null;
+      IStrategoTerm a_101 = null;
+      IStrategoTerm z_100 = null;
       if(term.getTermType() != IStrategoTerm.APPL || out._consGenDynRules_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail299;
-      m_185 = term.getSubterm(0);
-      IStrategoList annos246 = term.getAnnotations();
-      n_185 = annos246;
-      term = l_44.invoke(context, m_185);
+        break Fail63;
+      z_100 = term.getSubterm(0);
+      IStrategoList annos53 = term.getAnnotations();
+      a_101 = annos53;
+      term = u_13.invoke(context, z_100);
       if(term == null)
-        break Fail299;
-      term = termFactory.annotateTerm(termFactory.makeAppl(out._consGenDynRules_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, n_185));
+        break Fail63;
+      term = termFactory.annotateTerm(termFactory.makeAppl(out._consGenDynRules_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, a_101));
       context.popOnSuccess();
       if(true)
         return term;

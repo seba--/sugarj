@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Dyn$Rule$Intersect$Fix_2_0 instance = new $Dyn$Rule$Intersect$Fix_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy j_44, Strategy k_44)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy s_13, Strategy t_13)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("DynRuleIntersectFix_2_0");
-    Fail298:
+    Fail62:
     { 
-      IStrategoTerm h_185 = null;
-      IStrategoTerm f_185 = null;
-      IStrategoTerm g_185 = null;
-      IStrategoTerm k_185 = null;
+      IStrategoTerm w_100 = null;
+      IStrategoTerm u_100 = null;
+      IStrategoTerm v_100 = null;
+      IStrategoTerm x_100 = null;
       if(term.getTermType() != IStrategoTerm.APPL || out._consDynRuleIntersectFix_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail298;
-      f_185 = term.getSubterm(0);
-      g_185 = term.getSubterm(1);
-      IStrategoList annos245 = term.getAnnotations();
-      h_185 = annos245;
-      term = j_44.invoke(context, f_185);
+        break Fail62;
+      u_100 = term.getSubterm(0);
+      v_100 = term.getSubterm(1);
+      IStrategoList annos52 = term.getAnnotations();
+      w_100 = annos52;
+      term = s_13.invoke(context, u_100);
       if(term == null)
-        break Fail298;
-      k_185 = term;
-      term = k_44.invoke(context, g_185);
+        break Fail62;
+      x_100 = term;
+      term = t_13.invoke(context, v_100);
       if(term == null)
-        break Fail298;
-      term = termFactory.annotateTerm(termFactory.makeAppl(out._consDynRuleIntersectFix_2, new IStrategoTerm[]{k_185, term}), checkListAnnos(termFactory, h_185));
+        break Fail62;
+      term = termFactory.annotateTerm(termFactory.makeAppl(out._consDynRuleIntersectFix_2, new IStrategoTerm[]{x_100, term}), checkListAnnos(termFactory, w_100));
       context.popOnSuccess();
       if(true)
         return term;
