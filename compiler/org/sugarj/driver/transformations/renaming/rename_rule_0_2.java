@@ -12,10 +12,10 @@ import java.lang.ref.WeakReference;
 { 
   public static rename_rule_0_2 instance = new rename_rule_0_2();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, IStrategoTerm ref_r_18, IStrategoTerm ref_s_18)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, IStrategoTerm ref_u_18, IStrategoTerm ref_v_18)
   { 
-    TermReference r_18 = new TermReference(ref_r_18);
-    TermReference s_18 = new TermReference(ref_s_18);
+    TermReference u_18 = new TermReference(ref_u_18);
+    TermReference v_18 = new TermReference(ref_v_18);
     context.push("rename_rule_0_2");
     Fail4:
     { 
@@ -25,8 +25,8 @@ import java.lang.ref.WeakReference;
         Fail5:
         { 
           lifted6 lifted60 = new lifted6();
-          lifted60.r_18 = r_18;
-          lifted60.s_18 = s_18;
+          lifted60.u_18 = u_18;
+          lifted60.v_18 = v_18;
           term = $R$Def$No$Args_2_0.instance.invoke(context, term, lifted60, _Id.instance);
           if(term == null)
             break Fail5;
@@ -40,8 +40,8 @@ import java.lang.ref.WeakReference;
           Fail6:
           { 
             lifted8 lifted80 = new lifted8();
-            lifted80.r_18 = r_18;
-            lifted80.s_18 = s_18;
+            lifted80.u_18 = u_18;
+            lifted80.v_18 = v_18;
             term = $R$Def_3_0.instance.invoke(context, term, lifted80, _Id.instance, _Id.instance);
             if(term == null)
               break Fail6;
@@ -55,8 +55,8 @@ import java.lang.ref.WeakReference;
             Fail7:
             { 
               lifted11 lifted111 = new lifted11();
-              lifted111.r_18 = r_18;
-              lifted111.s_18 = s_18;
+              lifted111.u_18 = u_18;
+              lifted111.v_18 = v_18;
               term = $R$Def$T_4_0.instance.invoke(context, term, lifted111, _Id.instance, _Id.instance, _Id.instance);
               if(term == null)
                 break Fail7;
@@ -70,8 +70,8 @@ import java.lang.ref.WeakReference;
               Fail8:
               { 
                 lifted15 lifted150 = new lifted15();
-                lifted150.r_18 = r_18;
-                lifted150.s_18 = s_18;
+                lifted150.u_18 = u_18;
+                lifted150.v_18 = v_18;
                 term = $S$Def$No$Args_2_0.instance.invoke(context, term, lifted150, _Id.instance);
                 if(term == null)
                   break Fail8;
@@ -80,8 +80,8 @@ import java.lang.ref.WeakReference;
               }
               term = term3;
               lifted17 lifted170 = new lifted17();
-              lifted170.r_18 = r_18;
-              lifted170.s_18 = s_18;
+              lifted170.u_18 = u_18;
+              lifted170.v_18 = v_18;
               term = $S$Def_3_0.instance.invoke(context, term, lifted170, _Id.instance, _Id.instance);
               if(term == null)
                 break Fail4;

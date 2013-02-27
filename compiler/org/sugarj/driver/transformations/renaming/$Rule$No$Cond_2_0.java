@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Rule$No$Cond_2_0 instance = new $Rule$No$Cond_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy f_11, Strategy g_11)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy i_11, Strategy j_11)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("RuleNoCond_2_0");
     Fail31:
     { 
-      IStrategoTerm x_93 = null;
-      IStrategoTerm u_93 = null;
-      IStrategoTerm w_93 = null;
+      IStrategoTerm a_94 = null;
       IStrategoTerm y_93 = null;
+      IStrategoTerm z_93 = null;
+      IStrategoTerm b_94 = null;
       if(term.getTermType() != IStrategoTerm.APPL || out._consRuleNoCond_2 != ((IStrategoAppl)term).getConstructor())
         break Fail31;
-      u_93 = term.getSubterm(0);
-      w_93 = term.getSubterm(1);
+      y_93 = term.getSubterm(0);
+      z_93 = term.getSubterm(1);
       IStrategoList annos21 = term.getAnnotations();
-      x_93 = annos21;
-      term = f_11.invoke(context, u_93);
+      a_94 = annos21;
+      term = i_11.invoke(context, y_93);
       if(term == null)
         break Fail31;
-      y_93 = term;
-      term = g_11.invoke(context, w_93);
+      b_94 = term;
+      term = j_11.invoke(context, z_93);
       if(term == null)
         break Fail31;
-      term = termFactory.annotateTerm(termFactory.makeAppl(out._consRuleNoCond_2, new IStrategoTerm[]{y_93, term}), checkListAnnos(termFactory, x_93));
+      term = termFactory.annotateTerm(termFactory.makeAppl(out._consRuleNoCond_2, new IStrategoTerm[]{b_94, term}), checkListAnnos(termFactory, a_94));
       context.popOnSuccess();
       if(true)
         return term;

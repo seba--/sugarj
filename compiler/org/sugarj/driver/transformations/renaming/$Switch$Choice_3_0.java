@@ -12,37 +12,37 @@ import java.lang.ref.WeakReference;
 { 
   public static $Switch$Choice_3_0 instance = new $Switch$Choice_3_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy b_14, Strategy c_14, Strategy d_14)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy e_14, Strategy f_14, Strategy g_14)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("SwitchChoice_3_0");
     Fail67:
     { 
+      IStrategoTerm z_101 = null;
       IStrategoTerm w_101 = null;
-      IStrategoTerm t_101 = null;
-      IStrategoTerm u_101 = null;
-      IStrategoTerm v_101 = null;
       IStrategoTerm x_101 = null;
       IStrategoTerm y_101 = null;
+      IStrategoTerm a_102 = null;
+      IStrategoTerm b_102 = null;
       if(term.getTermType() != IStrategoTerm.APPL || out._consSwitchChoice_3 != ((IStrategoAppl)term).getConstructor())
         break Fail67;
-      t_101 = term.getSubterm(0);
-      u_101 = term.getSubterm(1);
-      v_101 = term.getSubterm(2);
+      w_101 = term.getSubterm(0);
+      x_101 = term.getSubterm(1);
+      y_101 = term.getSubterm(2);
       IStrategoList annos57 = term.getAnnotations();
-      w_101 = annos57;
-      term = b_14.invoke(context, t_101);
+      z_101 = annos57;
+      term = e_14.invoke(context, w_101);
       if(term == null)
         break Fail67;
-      x_101 = term;
-      term = c_14.invoke(context, u_101);
+      a_102 = term;
+      term = f_14.invoke(context, x_101);
       if(term == null)
         break Fail67;
-      y_101 = term;
-      term = d_14.invoke(context, v_101);
+      b_102 = term;
+      term = g_14.invoke(context, y_101);
       if(term == null)
         break Fail67;
-      term = termFactory.annotateTerm(termFactory.makeAppl(out._consSwitchChoice_3, new IStrategoTerm[]{x_101, y_101, term}), checkListAnnos(termFactory, w_101));
+      term = termFactory.annotateTerm(termFactory.makeAppl(out._consSwitchChoice_3, new IStrategoTerm[]{a_102, b_102, term}), checkListAnnos(termFactory, z_101));
       context.popOnSuccess();
       if(true)
         return term;

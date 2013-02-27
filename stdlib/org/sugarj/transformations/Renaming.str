@@ -26,5 +26,6 @@ rules
     SDef(replace-name(|oname, nname), id, id)
 
 rules
-  replace-name(|oname, nname) =
-    preserve-annos(\ oname -> nname \)
+  replace-name(|oname, nname) :
+    name -> nname
+  where equal(|<strip-annos> name, oname)

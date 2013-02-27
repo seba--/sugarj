@@ -12,37 +12,37 @@ import java.lang.ref.WeakReference;
 { 
   public static $Prim$T_3_0 instance = new $Prim$T_3_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy a_16, Strategy b_16, Strategy c_16)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy d_16, Strategy e_16, Strategy f_16)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("PrimT_3_0");
     Fail101:
     { 
+      IStrategoTerm p_107 = null;
       IStrategoTerm j_107 = null;
-      IStrategoTerm e_107 = null;
-      IStrategoTerm g_107 = null;
-      IStrategoTerm h_107 = null;
       IStrategoTerm k_107 = null;
       IStrategoTerm o_107 = null;
+      IStrategoTerm q_107 = null;
+      IStrategoTerm r_107 = null;
       if(term.getTermType() != IStrategoTerm.APPL || out._consPrimT_3 != ((IStrategoAppl)term).getConstructor())
         break Fail101;
-      e_107 = term.getSubterm(0);
-      g_107 = term.getSubterm(1);
-      h_107 = term.getSubterm(2);
+      j_107 = term.getSubterm(0);
+      k_107 = term.getSubterm(1);
+      o_107 = term.getSubterm(2);
       IStrategoList annos90 = term.getAnnotations();
-      j_107 = annos90;
-      term = a_16.invoke(context, e_107);
+      p_107 = annos90;
+      term = d_16.invoke(context, j_107);
       if(term == null)
         break Fail101;
-      k_107 = term;
-      term = b_16.invoke(context, g_107);
+      q_107 = term;
+      term = e_16.invoke(context, k_107);
       if(term == null)
         break Fail101;
-      o_107 = term;
-      term = c_16.invoke(context, h_107);
+      r_107 = term;
+      term = f_16.invoke(context, o_107);
       if(term == null)
         break Fail101;
-      term = termFactory.annotateTerm(termFactory.makeAppl(out._consPrimT_3, new IStrategoTerm[]{k_107, o_107, term}), checkListAnnos(termFactory, j_107));
+      term = termFactory.annotateTerm(termFactory.makeAppl(out._consPrimT_3, new IStrategoTerm[]{q_107, r_107, term}), checkListAnnos(termFactory, p_107));
       context.popOnSuccess();
       if(true)
         return term;

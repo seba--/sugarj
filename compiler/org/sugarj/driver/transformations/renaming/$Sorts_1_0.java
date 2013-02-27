@@ -12,23 +12,23 @@ import java.lang.ref.WeakReference;
 { 
   public static $Sorts_1_0 instance = new $Sorts_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy r_17)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy u_17)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("Sorts_1_0");
     Fail128:
     { 
-      IStrategoTerm c_112 = null;
-      IStrategoTerm b_112 = null;
+      IStrategoTerm g_112 = null;
+      IStrategoTerm f_112 = null;
       if(term.getTermType() != IStrategoTerm.APPL || out._consSorts_1 != ((IStrategoAppl)term).getConstructor())
         break Fail128;
-      b_112 = term.getSubterm(0);
+      f_112 = term.getSubterm(0);
       IStrategoList annos115 = term.getAnnotations();
-      c_112 = annos115;
-      term = r_17.invoke(context, b_112);
+      g_112 = annos115;
+      term = u_17.invoke(context, f_112);
       if(term == null)
         break Fail128;
-      term = termFactory.annotateTerm(termFactory.makeAppl(out._consSorts_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, c_112));
+      term = termFactory.annotateTerm(termFactory.makeAppl(out._consSorts_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, g_112));
       context.popOnSuccess();
       if(true)
         return term;

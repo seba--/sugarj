@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Add$Scope$Label_2_0 instance = new $Add$Scope$Label_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy x_10, Strategy y_10)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy a_11, Strategy b_11)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("AddScopeLabel_2_0");
     Fail26:
     { 
-      IStrategoTerm x_92 = null;
-      IStrategoTerm u_92 = null;
-      IStrategoTerm v_92 = null;
+      IStrategoTerm c_93 = null;
       IStrategoTerm y_92 = null;
+      IStrategoTerm b_93 = null;
+      IStrategoTerm d_93 = null;
       if(term.getTermType() != IStrategoTerm.APPL || out._consAddScopeLabel_2 != ((IStrategoAppl)term).getConstructor())
         break Fail26;
-      u_92 = term.getSubterm(0);
-      v_92 = term.getSubterm(1);
+      y_92 = term.getSubterm(0);
+      b_93 = term.getSubterm(1);
       IStrategoList annos16 = term.getAnnotations();
-      x_92 = annos16;
-      term = x_10.invoke(context, u_92);
+      c_93 = annos16;
+      term = a_11.invoke(context, y_92);
       if(term == null)
         break Fail26;
-      y_92 = term;
-      term = y_10.invoke(context, v_92);
+      d_93 = term;
+      term = b_11.invoke(context, b_93);
       if(term == null)
         break Fail26;
-      term = termFactory.annotateTerm(termFactory.makeAppl(out._consAddScopeLabel_2, new IStrategoTerm[]{y_92, term}), checkListAnnos(termFactory, x_92));
+      term = termFactory.annotateTerm(termFactory.makeAppl(out._consAddScopeLabel_2, new IStrategoTerm[]{d_93, term}), checkListAnnos(termFactory, c_93));
       context.popOnSuccess();
       if(true)
         return term;

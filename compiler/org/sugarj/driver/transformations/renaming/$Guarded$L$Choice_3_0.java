@@ -12,37 +12,37 @@ import java.lang.ref.WeakReference;
 { 
   public static $Guarded$L$Choice_3_0 instance = new $Guarded$L$Choice_3_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy d_16, Strategy e_16, Strategy f_16)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy g_16, Strategy h_16, Strategy i_16)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("GuardedLChoice_3_0");
     Fail102:
     { 
+      IStrategoTerm w_107 = null;
       IStrategoTerm t_107 = null;
-      IStrategoTerm q_107 = null;
-      IStrategoTerm r_107 = null;
-      IStrategoTerm s_107 = null;
       IStrategoTerm u_107 = null;
       IStrategoTerm v_107 = null;
+      IStrategoTerm x_107 = null;
+      IStrategoTerm y_107 = null;
       if(term.getTermType() != IStrategoTerm.APPL || out._consGuardedLChoice_3 != ((IStrategoAppl)term).getConstructor())
         break Fail102;
-      q_107 = term.getSubterm(0);
-      r_107 = term.getSubterm(1);
-      s_107 = term.getSubterm(2);
+      t_107 = term.getSubterm(0);
+      u_107 = term.getSubterm(1);
+      v_107 = term.getSubterm(2);
       IStrategoList annos91 = term.getAnnotations();
-      t_107 = annos91;
-      term = d_16.invoke(context, q_107);
+      w_107 = annos91;
+      term = g_16.invoke(context, t_107);
       if(term == null)
         break Fail102;
-      u_107 = term;
-      term = e_16.invoke(context, r_107);
+      x_107 = term;
+      term = h_16.invoke(context, u_107);
       if(term == null)
         break Fail102;
-      v_107 = term;
-      term = f_16.invoke(context, s_107);
+      y_107 = term;
+      term = i_16.invoke(context, v_107);
       if(term == null)
         break Fail102;
-      term = termFactory.annotateTerm(termFactory.makeAppl(out._consGuardedLChoice_3, new IStrategoTerm[]{u_107, v_107, term}), checkListAnnos(termFactory, t_107));
+      term = termFactory.annotateTerm(termFactory.makeAppl(out._consGuardedLChoice_3, new IStrategoTerm[]{x_107, y_107, term}), checkListAnnos(termFactory, w_107));
       context.popOnSuccess();
       if(true)
         return term;

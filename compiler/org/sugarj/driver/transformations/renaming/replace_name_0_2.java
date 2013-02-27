@@ -12,17 +12,22 @@ import java.lang.ref.WeakReference;
 { 
   public static replace_name_0_2 instance = new replace_name_0_2();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, IStrategoTerm q_9, IStrategoTerm ref_r_9)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, IStrategoTerm q_9, IStrategoTerm r_9)
   { 
-    TermReference r_9 = new TermReference(ref_r_9);
     context.push("replace_name_0_2");
     Fail9:
     { 
-      lifted20 lifted200 = new lifted20();
-      lifted200.r_9 = r_9;
-      term = preserve_annos_1_0.instance.invoke(context, term, lifted200);
+      IStrategoTerm s_9 = null;
+      IStrategoTerm v_9 = null;
+      s_9 = term;
+      v_9 = term;
+      term = strip_annos_0_0.instance.invoke(context, s_9);
       if(term == null)
         break Fail9;
+      term = equal_0_2.instance.invoke(context, v_9, term, q_9);
+      if(term == null)
+        break Fail9;
+      term = r_9;
       context.popOnSuccess();
       if(true)
         return term;
