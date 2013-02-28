@@ -33,14 +33,14 @@ rules
       result
     where // TODO: only allow desugar-extension-internal; extension declaration 
           //       requires this rule to be successfully applicable to subject
-          <(desugar-extension-internal <+ desugar <+ id); reinit-for-analysis> e => des-e 
-        ; <nice-analysis-data-term; debug(!"Desugared conclusion term: ")> des-e
+          <(desugar-extension-internal <+ desugar <+ id); reinit-for-analysis> e => e-desugared 
+        ; <strip-annos; debug(!"Desugared conclusion term: ")> e-desugared
         ; <premises-to-list> premises => premises-list
         ; {| Dynamic-Annotate-Type, Dynamic-Annotate-Kind, Dynamic-Par-Reduce-Type, Dynamic-Lookup-Expr-Var:
                <activate-dynamic-axioms> premises-list
-             ; <annotate-type> (C, des-e)
-             ; <get-context-errors> des-e => errs
-             ; <get-type> des-e => U
+             ; <annotate-type> (C, e-desugared)
+             ; <collect-all-context-errors> e-desugared => errs
+             ; <get-type> e-desugared => U
              ; if !errs; ?[] then
                    <norm> (C, T) => T'
                  ; <norm> (C, U) => U'
@@ -48,8 +48,8 @@ rules
                  !T; ?T'; !U; ?U'
                end
           |}
-        ; <nice-analysis-data-term; debug(!"Expected type: ")> T'
-        ; <nice-analysis-data-term; debug(!"Actual type:   ")> U'
+        ; <strip-annos; debug(!"Expected type: ")> T'
+        ; <strip-annos; debug(!"Actual type:   ")> U'
         ; <debug(!"Type errors:   ")> errs
         ; if !errs; ?[] then
               <type-eq> (T', U') => msgs
