@@ -7,6 +7,7 @@ rules
   desugar = changed-tree(desugar-analyze)
   desugar-analyze : Analyses(strats) -> Rules(<map(strat-to-analysis)> strats)
   strat-to-analysis = !SDefNoArgs("start-analysis" , Call(SVar("change-annotations-only"), [<id>]))
+  remove-all-annos = bottomup(strip-annos)
   
   analyze-main = init-for-analysis; repeat(start-analysis); rm-empty-analysis-data-annotations
   analyze-debug = analyze-main; nice-analysis-data-term
@@ -73,7 +74,7 @@ rules
         where(get-analysis-data-annotation; hashtable-getlist => list);
 	      if <?[]> list
 	        then rm-analysis-data-annotation
-	        else put-analysis-data-annotation(|<bottomup(strip-annos)> list)
+	        else put-analysis-data-annotation(|<remove-all-annos> list)
 	      end)
     })
   

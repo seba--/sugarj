@@ -10,17 +10,17 @@ import java.lang.ref.WeakReference;
 
 @SuppressWarnings("all") final class lifted8 extends Strategy 
 { 
-  TermReference s_23;
+  TermReference u_18;
 
-  TermReference t_23;
+  TermReference v_18;
 
   @Override public IStrategoTerm invoke(Context context, IStrategoTerm term)
   { 
-    Fail382:
+    Fail151:
     { 
-      term = rename_modeldec_0_2.instance.invoke(context, term, s_23.value, t_23.value);
+      term = replace_name_0_2.instance.invoke(context, term, u_18.value, v_18.value);
       if(term == null)
-        break Fail382;
+        break Fail151;
       if(true)
         return term;
     }
