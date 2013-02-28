@@ -82,7 +82,7 @@ rules
 
   type-eq-proper :
     (TyArrow(T1, T2), TyArrow(S1, S2)) -> <conc> (msgs1, msgs2)
-    where <type-eq> (T1, T2) => msgs1
+    where <type-eq> (T1, S1) => msgs1
         ; <type-eq> (T2, S2) => msgs2
 
   type-eq-proper :
