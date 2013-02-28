@@ -119,7 +119,19 @@ rules // Translate a judgment
    translate-judgment :
      (ts, QVarInContextJudgment(qx, T, C)) -> <translate-judgment> (ts, VarInContextJudgment(qx, T, C))
 
-  // TODO: missing NotinTagJudgment, NotinSelJudgment etc.
+  translate-judgment :
+    (ts, NotinSelJudgment(x, decls)) ->
+      (ts, |[ if <not(elem(structurally-equal))> (term~tx, <lab> term~tdecls) then
+                id
+              else
+                <add-context-errors> ([<concat-strings> ["duplicate label ", term~tx]], term~tx)
+              end
+           ]|)
+    where <trm-explode> decls => tdecls
+        ; <trm-explode> x => tx
+
+
+  // TODO: missing NotinTagJudgment, etc.
 
 
 rules // Translate a type expectation
