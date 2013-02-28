@@ -11,7 +11,7 @@ signature
     KiUnknown: FomegaKind
     IDUnknown: FomegID
 
-
+// TODO: the following definitions should go to contextanalysis.rules. ...
 rules // Type of expressions
 
   annotate-type =
