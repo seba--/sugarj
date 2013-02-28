@@ -10,6 +10,17 @@ rules
 
   get-context-errors = get-anno(|"context-errors") <+ ![]
 
+  collect-all-context-errors = collect-all(get-context-errors); concat
+
+  context-errors-as-alist =
+    let as-alist =
+      { node, errs:
+          ?node
+        ; <get-context-errors> node => errs
+        ; if !errs; ?[] then fail else ![(node, errs)] end
+      }
+    in collect-all(as-alist) end
+
   get-kind = get-anno(|"kind")
 
   put-kind = ?(K, node); <put-anno(|"kind", K)> node

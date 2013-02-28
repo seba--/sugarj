@@ -5,26 +5,23 @@ import org.sugarj.languages.Fomega
 import contextanalysis.SignatureChecker
 import contextanalysis.Editor
 
+
 analyses
-  annotate-types
+  context-analysis
 
 rules
 
   // TODO: Establish context from imports instead of empty context
-  annotate-types =
+  context-analysis =
       ?FomegaBody(defs)
     ; <debug-analysis(!"Before checking: "); where(annotate-signature)> (CtxEmpty(), defs)
     ; debug-analysis(!"After checking: ")
 
+
 rules
 
   constraint-error :
-    FomegaBody(defs) -> <collect-all(context-errors)> defs
-
-  context-errors =
-      ?node
-    ; <get-context-errors> node => errs
-    ; if !errs; ?[] then fail else ![(node, errs)] end
+    FomegaBody(defs) -> <context-errors-as-alist> defs
 
 
 colorer
