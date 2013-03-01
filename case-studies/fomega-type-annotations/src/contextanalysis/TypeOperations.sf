@@ -189,7 +189,7 @@ rules
     TyUnknown() -> (TyDeclsNil(), [])
 
   type-eq-variant-proper :
-    TyRecord(decls) -> (decls, [])
+    TyVariant(decls) -> (decls, [])
 
   type-eq-variant-unexpected :
     T -> (TyDeclsNil(), [<concat-strings> ["type mismatch, expected variant type but found ", <pp-type> T]])
@@ -201,7 +201,7 @@ rules
     TyUnknown() -> (TyDeclsNil(), [])
 
   type-eq-record-proper :
-    TyVariant(decls) -> (decls, [])
+    TyRecord(decls) -> (decls, [])
 
   type-eq-record-unexpected :
     T -> (TyDeclsNil(), [<concat-strings> ["type mismatch, expected record type but found ", <pp-type> T]])
