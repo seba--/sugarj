@@ -74,6 +74,10 @@ import contextanalysis.rules.Desugaring
 ~C |- ~e1 ~e2 : ~T12
 
 
+============= T-RecordNil
+~C |- {} : {}
+
+
 ~C |- ~e : ~T
 ~C |- {~flds} : ~S
 ~C |- ~S ~> {~decls}

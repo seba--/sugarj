@@ -13,7 +13,7 @@ type V = {x:Nat, y:Nat, a:Bool, b:Nat}
 
 type Foo1 = forall X::*. V
 
-val x1 = if true then 1 else 1
+val x1 = if true then 1 else 3
 
 //val x2 = if x1 then 1 else 2
 
@@ -28,3 +28,7 @@ val x6 = \A::*.\x:A. x
 val x7 = x6 [Bool] true
 
 val x8 = 1 as (\X::*.X) Nat
+
+val x9 = {x=true,y=13,z="abc"}
+
+val x10 = {}
