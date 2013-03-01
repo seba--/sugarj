@@ -51,7 +51,7 @@ class WriteTransformed extends AbstractPrimitive {
 //      generatedModel = driver.currentRename(generatedModel);
       
       if (generateFiles)
-        driver.generateModel(source, generatedModel);
+        driver.getCurrentResult().generateFile(source, ATermCommands.atermToString(generatedModel));
     } catch (IOException e) {
       driver.setErrorMessage(e.getLocalizedMessage());
     }

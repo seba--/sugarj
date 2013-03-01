@@ -9,23 +9,19 @@ rules
   rename-decl(|renamings) = fail 
 
 rules
-  rename-rules(|oname, nname) = topdown(try(rename-rule(|oname, nname))); topdown(try(SVar(replace-name(|oname, nname))))
+  rename-rules(|oname, nname) = topdown(try(rename-rule(|oname, nname))); topdown(try(SVar(?oname;!nname)))
   
-  rename-rule(|oname, nname) = RDefNoArgs(replace-name(|oname, nname), id)
+  rename-rule(|oname, nname) :
+    RDefNoArgs(oname, rule) -> RDefNoArgs(nname, rule)
     
-  rename-rule(|oname, nname) =
-    RDef(replace-name(|oname, nname), id, id)
+  rename-rule(|oname, nname) :
+    RDef(oname, typeids, rule) -> RDef(nname, typeids, rule)
     
-  rename-rule(|oname, nname) =
-    RDefT(replace-name(|oname, nname), id, id, id)
+  rename-rule(|oname, nname) :
+    RDefT(oname, typeids1,typeids2, rule ) -> RDefT(nname, typeids1, typeids2, rule)
     
-  rename-rule(|oname, nname) =
-    SDefNoArgs(replace-name(|oname, nname), id)
+  rename-rule(|oname, nname) :
+    SDefNoArgs(oname, strategy) -> SDefNoArgs(nname, strategy)
     
-  rename-rule(|oname, nname) =
-    SDef(replace-name(|oname, nname), id, id)
-
-rules
-  replace-name(|oname, nname) :
-    name -> nname
-  where equal(|<strip-annos> name, oname)
+  rename-rule(|oname, nname) :
+    SDef(oname, typeids, strategy) -> SDef(nname, typeids, strategy)

@@ -2,7 +2,8 @@ module tests.extensions.LetErrors
 
 import typing.rules.TypeChecker
 
-import typing.extensions.let.Let
+import typing.extensions.let.Syntax
+import typing.extensions.let.Semantics
 
 
 val val1 =

@@ -128,7 +128,8 @@ public class ImportCommands {
       else {
         // transform the model, prepare the import of the resulting code.
         IStrategoTerm transformedModel = executeTransformation(modelPath, transformationPath, toplevelDecl, environment, str, driver);
-        driver.generateModel(transformedModelSourceFile, transformedModel);
+        String transformedModelText = ATermCommands.atermToString(transformedModel);
+        driverResult.generateFile(transformedModelSourceFile, transformedModelText);
         
         boolean isCircularImport = driver.prepareImport(toplevelDecl, transformedModelPath);
         return Pair.create(transformedModelPath, isCircularImport);

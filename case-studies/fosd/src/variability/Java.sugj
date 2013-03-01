@@ -5,11 +5,7 @@ import concretesyntax.MetaExplode;
 
 public editor services Java {
   folding
-    VariableClassDec._
-    VariableInterfaceDec._
-  outliner
-    VariableClassDec._
-    VariableInterfaceDec._
+    VariableClass._
 }
 
 public sugar Java {
