@@ -68,11 +68,12 @@ exports
     "<" TyDecls ">" -> Type {cons("TyVariant")}
     "(" Type ")" -> Type {bracket}
 
-    ID ":" Type     -> TyDecl   {cons("TyDecl")}
-                    -> TyDecls  {cons("TyDeclsNil")}
-    TyDecl TyDecls1 -> TyDecls  {cons("TyDeclsCons")}
-                    -> TyDecls1 {cons("TyDeclsNil")}
-    "," TyDecls     -> TyDecls1 {bracket}
+    ID ":" Type -> TyDecl {cons("TyDecl")}
+
+                        -> TyDecls  {cons("TyDeclsNil")}
+    TyDecl TyDecls1     -> TyDecls  {cons("TyDeclsCons")}
+                        -> TyDecls1 {cons("TyDeclsNil")}
+    "," TyDecl TyDecls1 -> TyDecls1 {cons("TyDeclsCons")}
 
     "*" -> Kind {cons("KiStar")}
     Kind "=>" Kind -> Kind {cons("KiArrow")}
@@ -141,11 +142,12 @@ exports
     NAT -> Expr {cons("Nat")}
     STRING -> Expr {cons("String")}
 
-    ID "=" Expr   -> Field   {cons("Field")}
-                  -> Fields  {cons("FieldsNil")}
-    Field Fields1 -> Fields  {cons("FieldsCons")}
-                  -> Fields1 {cons("FieldsNil")}
-    "," Fields    -> Fields1 {bracket}
+    ID "=" Expr -> Field {cons("Field")}
+
+                      -> Fields  {cons("FieldsNil")}
+    Field Fields1     -> Fields  {cons("FieldsCons")}
+                      -> Fields1 {cons("FieldsNil")}
+    "," Field Fields1 -> Fields1 {cons("FieldsCons")}
 
     "<" ID "=" ID ">" "=>" Expr -> Branch   {cons("Branch")}
     Branch                      -> Branches {cons("BranchesEnd")}
