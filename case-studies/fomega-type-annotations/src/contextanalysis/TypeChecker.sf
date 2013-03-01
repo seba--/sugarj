@@ -83,4 +83,4 @@ import contextanalysis.rules.Desugaring
 ~C |- ~S ~> {~decls}
 ~%x notin sel(~decls)
 ======================================== T-RecordCons
-~C |- {~%x=~e, ~flds} : {~%x:~T, ~decls}
+~C |- {~%x=~e ~=flds} : {~%x:~T ~:decls}
