@@ -13,11 +13,11 @@ rules
 
   desugar-data :
     DefsCons(def@DataDef(public, X, params, dcons), defs)
-      -> DefsCons(<make-type-synonym> def, <make-con-defs> DefsCons(def, defs))
+      -> DefsCons(<make-type-synonym> def, defs) // <make-con-defs> DefsCons(def, defs))
 
   desugar-data :
     DefsEnd(def@DataDef(public, X, params, dcons))
-      -> DefsCons(<make-type-synonym> def, <make-con-defs> DataEnd(def))
+      -> DefsEnd(<make-type-synonym> def) //, <make-con-defs> DataEnd(def))
 
 
 rules
@@ -41,18 +41,18 @@ rules
 rules
 
   make-type-op :
-    (DataParamsNil(), e) -> e
+    (DataParamsNil(), T) -> T
 
   // make-type-op :
-  //   (DataParamsCons(KiDecl(X, K), params), e) -> TyAbs(X, K, (params, e))
+  //   (DataParamsCons(KiDecl(X, K), params), T) -> TyAbs(X, K, (params, T))
   make-type-op :
-    (DataParamsCons(KiDecl(X, K), params), e) -> TyAbs(X, K, <make-type-op> (params, e))
+    (DataParamsCons(KiDecl(X, K), params), T) -> TyAbs(X, K, <make-type-op> (params, T))
 
 
 rules
 
   make-type-mu :
-    (X, params, dcons) -> TyMu(<make-type-pair-kind;debug(!"D3 ")> params, <make-type-mu-op;debug(!"D4 ")> (X, params, dcons), <make-type-pair-args> params)
+    (X, params, dcons) -> TyMu(<make-type-pair-kind> params, <make-type-mu-op;debug(!"D4 ")> (X, params, dcons), <make-type-pair-args> params)
 
 
 rules
@@ -80,10 +80,10 @@ rules
 rules
 
   make-type-uncurry :
-    (X, params, e) ->
+    (X, params, T) ->
       TyApp( TyAbs( X
                   , <make-type-curry-kind; debug(!"D8 ")> params
-                  , <debug(!"D9 ");make-type-curry-args; debug(!"D7 ")> (params, TyVar("args"), <make-type-op> (params, e)))
+                  , <debug(!"D9 ");make-type-curry-args; debug(!"D7 ")> (params, TyVar("args"), <make-type-op> (params, T)))
            , <make-type-op> (params, TyApp(TyVar(X), <make-type-pair-args> params)))
 
 
@@ -139,24 +139,27 @@ rules
   // |[ data ~public ~X ~params = ~X-con ~X-discr ~dcon-params
   //                            | ~dcons
   //    ~defs ]| ->
-  // |[ val ~X-con = ...
-  //    data ~public ~X ~params = ~dcons
+  // |[ ~public val ~X-con = ...
+  //    ~public data ~public ~X ~params = ~dcons
   //    ~defs ]|
-  make-con-defs :
-    DefsCons(DataDef(public, X, params, DataConsCons(DataCon(X-con, X-discr, dcon-params), dcons)), defs) ->
-      defs
+  //make-con-defs :
+  //  DefsCons(DataDef(public, X, params, DataConsCons(DataCon(X-con, X-discr, dcon-params), dcons)), defs) ->
+  //    DefsCons( ValDef(public, X-con, <make-con-rhs> (X, params, dcon-params))
+  //            , DefsCons(DataDef(public, X, params, dcons))
+  //            , defs)
 
   // |[ data ~public ~X ~params = ~dcon ~defs ]| -> ...
-  make-con-defs :
-    DefsCons(DataDef(public, X, params, DataConsEnd(DataCon(X-con, X-discr, dcon-params))), defs) ->
-      defs
+  //make-con-defs :
+  //  DefsCons(DataDef(public, X, params, DataConsEnd(DataCon(X-con, X-discr, dcon-params))), defs) ->
+  //    defs
 
   // |[ data ~public ~X ~params = ~dcon | ~dcons ]| -> ...
-  make-con-defs :
-    DefsEnd(DataDef(public, X, params, DataConsCons(DataCon(X-con, X-discr, dcon-params)))) ->
-      ValDef(None(), "nyi", String("nyi"))
+  //make-con-defs :
+  //  DefsEnd(DataDef(public, X, params, DataConsCons(DataCon(X-con, X-discr, dcon-params)))) ->
+  //    ValDef(None(), "nyi", String("nyi"))
 
   // |[ data ~public ~X ~params = ~dcon ]| -> ...
-  make-con-defs :
-    DefsEnd(DataDef(public, X, params, DataConsEnd(DataCon(X-con, X-discr, dcon-params)))) ->
-      ValDef(None(), "nyi", String("nyi"))
+  //make-con-defs :
+  //  DefsEnd(DataDef(public, X, params, DataConsEnd(DataCon(X-con, X-discr, dcon-params)))) ->
+  //    ValDef(None(), "nyi", String("nyi"))
+
