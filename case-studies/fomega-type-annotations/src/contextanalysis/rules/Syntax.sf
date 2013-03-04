@@ -28,9 +28,9 @@ context-free syntax // *** Syntax for typing rules ***
   TypingRulePremiseList -> TypingRulePremises {cons("PremiseList")}
                         -> TypingRulePremises {cons("NoPremises")}
 
-  OffTypingRuleJudgment -> TypingRuleConsequence
+  OffTypingJudgment -> TypingRuleConsequence
 
-  TypingRuleJudgment -> OffTypingRuleJudgment {layout(1.first.col < 1.left.col)}
+  TypingJudgment -> OffTypingJudgment {layout(1.first.col < 1.left.col)}
 
   OffTypingRuleJudgment -> TypingRulePremiseList
   OffTypingRuleJudgment TypingRulePremiseList -> TypingRulePremiseList {cons("PremiseCons"),
@@ -38,6 +38,28 @@ context-free syntax // *** Syntax for typing rules ***
 
   TypingRuleJudgment -> OffTypingRuleJudgment {layout(1.first.col < 1.left.col)}
 
+
+context-free syntax // *** Syntax for kinding rules ***
+
+  KindingRule -> SugarDefElem
+
+  KindingRulePremises RuleSepName KindingRuleConsequence
+    -> KindingRule {cons("KindingRule"),
+                    layout(1.first.col == 2.first.col &&
+                           2.first.col == 3.first.col)}
+
+  KindingRulePremiseList -> KindingRulePremises {cons("PremiseList")}
+                         -> KindingRulePremises {cons("NoPremises")}
+
+  OffKindingJudgment -> KindingRuleConsequence
+
+  KindingJudgment -> OffKindingJudgment {layout(1.first.col < 1.left.col)}
+
+  OffKindingRuleJudgment -> KindingRulePremiseList
+  OffKindingRuleJudgment KindingRulePremiseList -> KindingRulePremiseList {cons("PremiseCons"),
+                                                                           layout(1.first.col == 2.first.col)}
+
+  KindingRuleJudgment -> OffKindingRuleJudgment {layout(1.first.col < 1.left.col)}
 
 
 context-free syntax // *** Syntax for contexts ***
@@ -54,10 +76,12 @@ context-free syntax // *** Syntax for judgments ***
   Context "|-" FomegaExpr ":" FomegaType  -> TypingJudgment        {cons("TypingJudgment")}
   Context "|-" FomegaType "~>" FomegaType -> NormalizationJudgment {cons("NormalizationJudgment")}
 
-  FomegaID "notin" "sel" "(" FomegaFields ")"        -> NotinSelJudgment      {cons("NotinSelJudgment")}
-  FomegaID ":" FomegaType "in" "decls" FomegaTyDecls -> InDeclJudgment        {cons("InDeclJudgment")}
-  FomegaID ":" FomegaType "in" Context               -> VarInContextJudgment  {cons("VarInContextJudgment")}
-  FomegaQID ":" FomegaType "in" Context              -> QVarInContextJudgment {cons("QVarInContextJudgment")}
+  FomegaID "notin" "sel" "(" FomegaFields ")"        -> NotinSelJudgment       {cons("NotinSelJudgment")}
+  FomegaID ":" FomegaType "in" "decls" FomegaTyDecls -> InDeclJudgment         {cons("InDeclJudgment")}
+  FomegaID ":" FomegaType "in" Context               -> VarInContextJudgment   {cons("VarInContextJudgment")}
+  FomegaQID ":" FomegaType "in" Context              -> QVarInContextJudgment  {cons("QVarInContextJudgment")}
+  FomegaID "::" FomegaKind "in" Context              -> TVarInContextJudgment  {cons("TVarInContextJudgment")}
+  FomegaQID "::" FomegaKind "in" Context             -> QTVarInContextJudgment {cons("QTVarInContextJudgment")}
 
   // Judgments allowed as premises in typing rules
   KindingJudgment       -> TypingRuleJudgment
@@ -67,6 +91,11 @@ context-free syntax // *** Syntax for judgments ***
   InDeclJudgment        -> TypingRuleJudgment
   VarInContextJudgment  -> TypingRuleJudgment
   QVarInContextJudgment -> TypingRuleJudgment
+
+  // Judgments allowed as premises in kinding rules
+  KindingJudgment       -> KindingRuleJudgment
+  VarInContextJudgment  -> KindingRuleJudgment
+  QVarInContextJudgment -> KindingRuleJudgment
 
 
 context-free syntax // *** Substitution on level of types

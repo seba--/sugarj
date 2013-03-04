@@ -11,6 +11,7 @@ signature
     KiUnknown: FomegaKind
     IDUnknown: FomegID
 
+
 // TODO: the following definitions should go to contextanalysis.rules. ...
 rules // Type of expressions
 
@@ -30,6 +31,24 @@ rules // Type of expressions
                                                 , <write-to-string> (<strip-annos> C)] ]
                            , e)
 
+
+rules // Kind of types
+
+  annotate-kind =
+    // debug(!"ANNO KIND IN:  "); 
+    (annotate-kind-defined <+ annotate-kind-missing)
+    // ; debug(!"ANNO KIND OUT: ") 
+
+  annotate-kind-defined = fail
+
+  annotate-kind-missing =
+      ?(C, T)
+    ; <put-kind> (KiUnknown(), T)
+    ; <add-context-errors> ( [ <concat-strings> [ "Missing kinding rule for "
+                                                , <write-to-string> (<strip-annos> T)
+                                                , " in context "
+                                                , <write-to-string> (<strip-annos> C)] ]
+                           , T)
 
 rules // Type of branches
 

@@ -134,6 +134,22 @@ rules // Translate a judgment
     (ts, QVarInContextJudgment(qx, T, C)) -> <translate-judgment> (ts, VarInContextJudgment(qx, T, C))
 
   translate-judgment :
+    (ts, TVarInContextJudgment(X, K, C)) ->
+      (ts4, |[   <lookup-type-var> (term~tX, term~tC) => (term~result-var, term~errs-var)
+               ; <add-context-errors> (term~errs-var, term~tX)
+               ; strategy~inspect-result
+            ]|)
+    where <trm-explode> C => tC
+        ; <trm-explode> X => tX
+        ; <fresh-result-var> ts => (ts1, result-var)
+        ; <fresh-errs-var> ts1 => (ts2, errs-var)
+        ; <ts-add-blame> (ts2, K, tX) => ts3
+        ; <translate-kind-expectation> (ts3, tX, result-var, [], K, []) => (ts4, inspect-result)
+
+  translate-judgment :
+    (ts, QTVarInContextJudgment(qX, K, C)) -> <translate-judgment> (ts, TVarInContextJudgment(qX, K, C))
+
+  translate-judgment :
     (ts, NotinSelJudgment(x, decls)) ->
       (ts, |[ if <not(elem(structurally-equal))> (term~tx, <lab> term~tdecls) then
                 id

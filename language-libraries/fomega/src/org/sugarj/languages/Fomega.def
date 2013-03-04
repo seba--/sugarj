@@ -81,9 +81,11 @@ exports
     "," TyDecl TyDecls1 -> TyDecls1 {cons("TyDeclsCons")}
 
     "*"                   -> Kind {cons("KiStar")}
-    Kind "=>" Kind        -> Kind {cons("KiArrow")}
+    Kind "=>" Kind        -> Kind {cons("KiArrow"), right}
     "[]"                  -> Kind {cons("KiEmpty")}
     "{" Kind "," Kind "}" -> Kind {cons("KiPair")}
+
+    "(" Kind ")" -> Kind {bracket}
 
     QID -> Type {cons("TyQVar")}
 
