@@ -130,8 +130,8 @@ rules // Translate a judgment
         ; <ts-add-blame> (ts2, T, tx) => ts3
         ; <translate-type-expectation> (ts3, tx, result-var, [], T, []) => (ts4, inspect-result)
 
-   translate-judgment :
-     (ts, QVarInContextJudgment(qx, T, C)) -> <translate-judgment> (ts, VarInContextJudgment(qx, T, C))
+  translate-judgment :
+    (ts, QVarInContextJudgment(qx, T, C)) -> <translate-judgment> (ts, VarInContextJudgment(qx, T, C))
 
   translate-judgment :
     (ts, NotinSelJudgment(x, decls)) ->
@@ -144,6 +144,17 @@ rules // Translate a judgment
     where <trm-explode> decls => tdecls
         ; <trm-explode> x => tx
 
+  translate-judgment :
+    (ts, InDeclJudgment(x, T, decls)) ->
+      (ts3, |[   <lab-type> (term~tx, term~tdecls) => (term~result-var, term~msgs-var)
+               ; <add-context-errors> (term~msgs-var, term~tx)
+               ; strategy~inspect-result
+            ]|)
+    where <trm-explode> x => tx
+        ; <trm-explode> decls => tdecls
+        ; <fresh-msgs-var> ts => (ts1, msgs-var)
+        ; <fresh-result-var> ts1 => (ts2, result-var)
+        ; <translate-type-expectation> (ts2, tx, result-var, [], T, []) => (ts3, inspect-result)
 
   // TODO: missing NotinTagJudgment, etc.
 
