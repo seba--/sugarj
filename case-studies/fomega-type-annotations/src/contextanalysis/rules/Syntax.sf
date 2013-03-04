@@ -18,24 +18,26 @@ context-free syntax
 
 context-free syntax // *** Syntax for typing rules ***
 
-  TypeRule -> SugarDefElem
+  TypingRule -> SugarDefElem
 
-  RulePremises RuleSepName RuleConsequence
-    -> TypeRule {cons("TypeRule"),
-                 layout(1.first.col == 2.first.col &&
-                        2.first.col == 3.first.col)}
+  TypingRulePremises RuleSepName TypingRuleConsequence
+    -> TypingRule {cons("TypingRule"),
+                   layout(1.first.col == 2.first.col &&
+                          2.first.col == 3.first.col)}
 
-  PremiseList -> RulePremises {cons("PremiseList")}
-              -> RulePremises {cons("NoPremises")}
+  TypingRulePremiseList -> TypingRulePremises {cons("PremiseList")}
+                        -> TypingRulePremises {cons("NoPremises")}
 
-  OffTypingJudgment -> RuleConsequence
+  OffTypingRuleJudgment -> TypingRuleConsequence
 
-  TypingJudgment -> OffTypingJudgment {layout(1.first.col < 1.left.col)}
+  TypingRuleJudgment -> OffTypingRuleJudgment {layout(1.first.col < 1.left.col)}
 
-  OffTypeRuleJudgment -> PremiseList
-  OffTypeRuleJudgment PremiseList -> PremiseList {cons("PremiseCons"), layout(1.first.col == 2.first.col)}
+  OffTypingRuleJudgment -> TypingRulePremiseList
+  OffTypingRuleJudgment TypingRulePremiseList -> TypingRulePremiseList {cons("PremiseCons"),
+                                                                        layout(1.first.col == 2.first.col)}
 
-  TypeRuleJudgment -> OffTypeRuleJudgment {layout(1.first.col < 1.left.col)}
+  TypingRuleJudgment -> OffTypingRuleJudgment {layout(1.first.col < 1.left.col)}
+
 
 
 context-free syntax // *** Syntax for contexts ***
@@ -58,13 +60,13 @@ context-free syntax // *** Syntax for judgments ***
   FomegaQID ":" FomegaType "in" Context              -> QVarInContextJudgment {cons("QVarInContextJudgment")}
 
   // Judgments allowed as premises in typing rules
-  KindingJudgment       -> TypeRuleJudgment
-  TypingJudgment        -> TypeRuleJudgment
-  NormalizationJudgment -> TypeRuleJudgment
-  NotinSelJudgment      -> TypeRuleJudgment
-  InDeclJudgment        -> TypeRuleJudgment
-  VarInContextJudgment  -> TypeRuleJudgment
-  QVarInContextJudgment -> TypeRuleJudgment
+  KindingJudgment       -> TypingRuleJudgment
+  TypingJudgment        -> TypingRuleJudgment
+  NormalizationJudgment -> TypingRuleJudgment
+  NotinSelJudgment      -> TypingRuleJudgment
+  InDeclJudgment        -> TypingRuleJudgment
+  VarInContextJudgment  -> TypingRuleJudgment
+  QVarInContextJudgment -> TypingRuleJudgment
 
 
 context-free syntax // *** Substitution on level of types

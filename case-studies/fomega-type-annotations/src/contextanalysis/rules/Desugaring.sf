@@ -29,7 +29,7 @@ rules
     <set-annotations> (node, <conc> (annos, new-ana-annos))
 
   desugar-type-rule :
-    TypeRule(premises, RuleName(sep, optional-name), conclusion) ->
+    TypingRule(premises, RuleName(sep, optional-name), conclusion) ->
       transformation-elem(<translate-type-rule> (optional-name, premises, conclusion))
 
 
