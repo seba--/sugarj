@@ -29,6 +29,18 @@ val x7 = x6 [Bool] true
 
 val x8 = 1 as (\X::*.X) Nat
 
-val x9 = {x=true,y=13,z="abc"}
+val x9 = {x=true, y=13, z="abc"}
 
 val x10 = {}
+
+val x11 = x9 ! z
+
+val x12 = <x=true> as <x:Bool, y:Nat, z: {a:Nat,b:String}>
+
+val x13 = case x12 of
+  <x=x> => 17;
+  <y=y> => y;
+  <z=z> => z!a
+ 
+ val xLast = "dummy"
+ 
