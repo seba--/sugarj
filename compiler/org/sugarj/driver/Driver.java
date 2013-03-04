@@ -854,8 +854,6 @@ public class Driver{
       if (sourceFileAvailable && requiresUpdate && !environment.doGenerateFiles()) {
         // This is a parser run. Required module needs to be compiled before.
         log.log("Module outdated, compile first: " + modulePath + ".", Log.IMPORT);
-        if (res != null)
-          res.isUpToDate(res.getSourceFile(), environment);
         setErrorMessage("module outdated, compile first: " + modulePath);
       }
       else if (sourceFileAvailable && requiresUpdate && getCircularImportResult(importSourceFile) != null) {
@@ -1084,7 +1082,7 @@ public class Driver{
         buildCompoundStrModule();
 
     } catch (PrettyPrintError e) {
-      setErrorMessage(e.getMessage());
+      setErrorMessage(e.getMsg());
     } finally {
       log.endTask();
     }
@@ -1178,21 +1176,16 @@ public class Driver{
     log.beginTask("Generate model.", Log.DETAIL);
     try {
       RelativePath modelOutFile = environment.createBinPath(fullModelName + ".model");
+      
       IStrategoTerm modelTerm = makeDesugaredSyntaxTree(body);
-      generateModel(modelOutFile, modelTerm);
+      String string = ATermCommands.atermToString(modelTerm);
+      driverResult.generateFile(modelOutFile, string);
+      
+      if (modelOutFile.equals(sourceFile))
+        driverResult.setSourceFile(sourceFile, string.hashCode());
     } finally {
       log.endTask();
     }
-  }
-  
-  public void generateModel(Path p, IStrategoTerm modelTerm) throws IOException {
-    if (currentTransProg == null)
-      throw new IllegalStateException("Requires pre-compiled desugaring.");
-    
-    modelTerm = STRCommands.assimilate("remove-all-annos", currentTransProg, modelTerm, langLib.getInterpreter());
-    
-    String string = ATermCommands.atermToString(modelTerm);
-    driverResult.generateFile(p, string);
   }
   
   private void buildCompoundSdfModule() throws IOException {

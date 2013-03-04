@@ -8,7 +8,6 @@ public transformation CheckConfigAux {
     model-requirements = fail
 
     constraint-error =
-      bottomup(strip-annos);
       ?ConfigDecl(_,_,Id(fm),<id>);
       where(<featuremodel-names> fm => names);
       where(collect-all(constraint-feature-configuration(|names)) => undeclared);

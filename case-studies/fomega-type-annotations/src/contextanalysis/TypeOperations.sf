@@ -52,7 +52,7 @@ rules
 
 rules
 
-  pp-type = strip-annos; write-to-string
+  pp-type = bottomup(strip-annos); write-to-string
 
 
 rules
@@ -82,7 +82,7 @@ rules
 
   type-eq-proper :
     (TyArrow(T1, T2), TyArrow(S1, S2)) -> <conc> (msgs1, msgs2)
-    where <type-eq> (T1, T2) => msgs1
+    where <type-eq> (T1, S1) => msgs1
         ; <type-eq> (T2, S2) => msgs2
 
   type-eq-proper :
@@ -111,9 +111,10 @@ rules
         ; <type-eq> (T2, S2) => msgs2
 
   type-eq-proper :
-    (TyMu(X, T), TyMu(Y, S)) -> msgs
-    where <fresh> (X, [S, T]) => Z
-        ; <type-eq> (<subst> (X, TyVar(Z), T), <subst> (Y, TyVar(Z), S)) => msgs
+    (TyMu(K, T1, T2), TyMu(J, S1, S2)) -> <conc> (msgs1, msgs2, msgs3)
+    where <kind-eq> (K, J) => msgs1
+        ; <type-eq> (T1, S1) => msgs2
+        ; <type-eq> (T2, S2) => msgs3
 
   type-eq-proper :
     (TyForall(X, K, T), TyForall(Y, J, S)) -> <conc> (msgs1, msgs2)
@@ -156,7 +157,7 @@ rules
     TyBool() -> []
 
   type-eq-bool-unexpected :
-    T -> [<concat-strings> ["type mismatch, expected bool type but found ", <pp-type> T]]
+    T -> [<concat-strings> ["type mismatch, expected Bool type but found ", <pp-type> T]]
 
 
   type-eq-nat = type-eq-nat-proper <+ type-eq-nat-unexpected
@@ -168,7 +169,7 @@ rules
     TyBool() -> []
 
   type-eq-nat-unexpected :
-    T -> [<concat-strings> ["type mismatch, expected nat type but found ", <pp-type> T]]
+    T -> [<concat-strings> ["type mismatch, expected Nat type but found ", <pp-type> T]]
 
 
   type-eq-string = type-eq-string-proper <+ type-eq-string-unexpected
@@ -180,7 +181,7 @@ rules
     TyBool() -> []
 
   type-eq-string-unexpected :
-    T -> [<concat-strings> ["type mismatch, expected string type but found ", <pp-type> T]]
+    T -> [<concat-strings> ["type mismatch, expected String type but found ", <pp-type> T]]
 
 
   type-eq-variant = type-eq-variant-proper <+ type-eq-variant-unexpected
@@ -189,7 +190,7 @@ rules
     TyUnknown() -> (TyDeclsNil(), [])
 
   type-eq-variant-proper :
-    TyRecord(decls) -> (decls, [])
+    TyVariant(decls) -> (decls, [])
 
   type-eq-variant-unexpected :
     T -> (TyDeclsNil(), [<concat-strings> ["type mismatch, expected variant type but found ", <pp-type> T]])
@@ -201,7 +202,7 @@ rules
     TyUnknown() -> (TyDeclsNil(), [])
 
   type-eq-record-proper :
-    TyVariant(decls) -> (decls, [])
+    TyRecord(decls) -> (decls, [])
 
   type-eq-record-unexpected :
     T -> (TyDeclsNil(), [<concat-strings> ["type mismatch, expected record type but found ", <pp-type> T]])
@@ -213,10 +214,10 @@ rules
     TyUnknown() -> (IDUnknown(), TyUnknown(), [])
 
   type-eq-mu-proper :
-    TyMu(X, T) -> (X, T, [])
+    TyMu(K, T1, T2) -> (K, T1, T2, [])
 
   type-eq-mu-unexpected :
-    T -> (IDUnknown(), TyUnknown(), [<concat-strings> ["type mismatch, expected recursive type but found ", <pp-type> T]])
+    T -> (KiUnknown(), TyUnknown(), TyUnknown(), [<concat-strings> ["type mismatch, expected recursive type but found ", <pp-type> T]])
 
 
   type-eq-forall = type-eq-forall-proper <+ type-eq-forall-unexpected
@@ -245,7 +246,7 @@ rules
 
 rules
 
-  free-vars : TyMu(X, T) -> <diff(structurally-equal)> (<free-vars> T, [X])
+  free-vars : TyMu(K, T1, T2) -> <union(structurally-equal)> (<free-vars> T1, <free-vars> T2)
   free-vars : TyAbs(X, K, T) -> <diff(structurally-equal)> (<free-vars> T, [X])
   free-vars : TyForall(X, K, T) -> <diff(structurally-equal)> (<free-vars> T, [X])
   free-vars : TyArrow(T1, T2) -> <union(structurally-equal)> (<free-vars> T1, <free-vars> T2)
@@ -284,19 +285,7 @@ rules
     (X, S, Metavar(mvar)) -> Metavar(mvar)
 
   subst :
-    (X, S, TyMu(Y, T)) -> TyMu(X, T)
-    where <structurally-equal> (Y, X)
-
-  subst :
-    (X, S, TyMu(Y, T)) -> TyMu(Y, <subst> (X, S, T))
-    where <not(structurally-equal)> (X, Y)
-        ; <not(elem(structurally-equal))> (Y, <free-vars> S)
-
-  subst :
-    (X, S, TyMu(Y, T)) -> TyMu(Z, <subst> (X, S, <subst> (Y, TyVar(Z), T)))
-    where <not(structurally-equal)> (X, Y)
-        ; <elem(structurally-equal)> (Y, <free-vars> S)
-        ; <fresh> (Y, [T, S]) => Z
+    (X, S, TyMu(K, T1, T2)) -> TyMu(K, <subst> (X, S, T1), <subst> (X, S, T2))
 
   subst :
     (X, S, TyAbs(Y, K, T)) -> TyAbs(X, K, T)
@@ -379,7 +368,7 @@ rules
         ; if (!msgs; ?[]) then
             !T
           else
-            !(<norm> (C,S))
+            !(<norm> (C, S))
           end => T'
 
   par-reduce = // debug(!"PR IN:  ");
@@ -406,7 +395,7 @@ rules
 
   par-reduce-type :
     (C, TyVar(X)) -> S
-    where <lookup-type-var> (X, C) => (T, msgs)
+    where <lookup-type-var-def> (X, C) => (T, msgs)
         ; if !msgs; ?[] then
             !T
           else
@@ -415,7 +404,7 @@ rules
 
   par-reduce-type :
     (C, TyQVar(qX)) -> S
-    where <lookup-type-var> (qX, C) => (T, msgs)
+    where <lookup-type-var-def> (qX, C) => (T, msgs)
         ; if !msgs; ?[] then
             !T
           else
@@ -423,7 +412,7 @@ rules
           end => S
 
   par-reduce-type :
-    (C, TyMu(X, T)) -> TyMu(X, <par-reduce> (CtxBindTVar(C, X, KiStar()), T))
+    (C, TyMu(K, T1, T2)) -> TyMu(K, <par-reduce> T1, <par-reduce> T2)
 
   par-reduce-type :
     (C, TyAbs(X, K, T)) -> TyAbs(X, K, <par-reduce> (CtxBindTVar(C, X, K), T))

@@ -11,12 +11,12 @@ signature
     KiUnknown: FomegaKind
     IDUnknown: FomegID
 
-
+// TODO: the following definitions should go to contextanalysis.rules. ...
 rules // Type of expressions
 
   annotate-type =
     // debug(!"ANNO TYPE IN:  "); 
-    annotate-type-defined <+ annotate-type-missing
+    (annotate-type-defined <+ annotate-type-missing)
     // ; debug(!"ANNO TYPE OUT: ") 
 
   annotate-type-defined = fail
@@ -24,10 +24,10 @@ rules // Type of expressions
   annotate-type-missing =
       ?(C, e)
     ; <put-type> (TyUnknown(), e)
-    ; <add-context-errors> ( <concat-strings> [ "Missing typing rule for "
-                                              , <write-to-string> (<strip-annos> e)
-                                              , " in context "
-                                              , <write-to-string> (<strip-annos> C)]
+    ; <add-context-errors> ( [ <concat-strings> [ "Missing typing rule for "
+                                                , <write-to-string> (<strip-annos> e)
+                                                , " in context "
+                                                , <write-to-string> (<strip-annos> C)] ]
                            , e)
 
 

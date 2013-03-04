@@ -60,38 +60,46 @@ exports
   sorts Type TyDecl TyDecls TyDecls1 Kind
 
   context-free syntax
-    ID -> Type {cons("TyVar")}
-    "Nat" -> Type {cons("TyNat")}
-    "Bool" -> Type {cons("TyBool")}
-    "String" -> Type {cons("TyString")}
-    "{" TyDecls "}" -> Type {cons("TyRecord")}
-    "<" TyDecls ">" -> Type {cons("TyVariant")}
+    ID                    -> Type {cons("TyVar")}
+    "Nat"                 -> Type {cons("TyNat")}
+    "Bool"                -> Type {cons("TyBool")}
+    "String"              -> Type {cons("TyString")}
+    "{" TyDecls "}"       -> Type {cons("TyRecord")}
+    "<" TyDecls ">"       -> Type {cons("TyVariant")}
+    "[]"                  -> Type {cons("TyEmpty")}
+    "{" Type "," Type "}" -> Type {cons("TyPair")}
+    Type "." "1"          -> Type {cons("TyFst")}
+    Type "." "2"          -> Type {cons("TySnd")}
+
     "(" Type ")" -> Type {bracket}
 
-    ID ":" Type     -> TyDecl   {cons("TyDecl")}
-                    -> TyDecls  {cons("TyDeclsNil")}
-    TyDecl TyDecls1 -> TyDecls  {cons("TyDeclsCons")}
-                    -> TyDecls1 {cons("TyDeclsNil")}
-    "," TyDecls     -> TyDecls1 {bracket}
+    ID ":" Type -> TyDecl {cons("TyDecl")}
 
-    "*" -> Kind {cons("KiStar")}
-    Kind "=>" Kind -> Kind {cons("KiArrow")}
+                        -> TyDecls  {cons("TyDeclsNil")}
+    TyDecl TyDecls1     -> TyDecls  {cons("TyDeclsCons")}
+                        -> TyDecls1 {cons("TyDeclsNil")}
+    "," TyDecl TyDecls1 -> TyDecls1 {cons("TyDeclsCons")}
+
+    "*"                   -> Kind {cons("KiStar")}
+    Kind "=>" Kind        -> Kind {cons("KiArrow")}
+    "[]"                  -> Kind {cons("KiEmpty")}
+    "{" Kind "," Kind "}" -> Kind {cons("KiPair")}
 
     QID -> Type {cons("TyQVar")}
 
-    Type Type -> Type {cons("TyApp"), left}
-    Type "->" Type -> Type {cons("TyArrow"), right}
-    "forall" ID "::" Kind "." Type -> Type {cons("TyForall")}
-    "\\" ID "::" Kind "." Type -> Type {cons("TyAbs")}
-    "mu" ID "." Type -> Type {cons("TyMu")}
+    Type Type                           -> Type {cons("TyApp"), left}
+    Type "->" Type                      -> Type {cons("TyArrow"), right}
+    "forall" ID "::" Kind "." Type      -> Type {cons("TyForall")}
+    "\\" ID "::" Kind "." Type          -> Type {cons("TyAbs")}
+    "mu" Kind "." "(" Type "," Type ")" -> Type {cons("TyMu")}
 
   context-free priorities
-      Type Type -> Type {cons("TyApp"), left}
-    > Type "->" Type -> Type {cons("TyArrow"), right}
+      Type Type      -> Type
+    > Type "->" Type -> Type
     > {
-      "forall" ID "::" Kind "." Type -> Type {cons("TyForall")}
-      "\\" ID "::" Kind "." Type -> Type {cons("TyAbs")}
-      "mu" ID "." Type -> Type {cons("TyMu")}
+      "forall" ID "::" Kind "." Type      -> Type
+      "\\" ID "::" Kind "." Type          -> Type
+      "mu" Kind "." "(" Type "," Type ")" -> Type
     }
 
 module Fomega-Module
@@ -141,11 +149,12 @@ exports
     NAT -> Expr {cons("Nat")}
     STRING -> Expr {cons("String")}
 
-    ID "=" Expr   -> Field   {cons("Field")}
-                  -> Fields  {cons("FieldsNil")}
-    Field Fields1 -> Fields  {cons("FieldsCons")}
-                  -> Fields1 {cons("FieldsNil")}
-    "," Fields    -> Fields1 {bracket}
+    ID "=" Expr -> Field {cons("Field")}
+
+                      -> Fields  {cons("FieldsNil")}
+    Field Fields1     -> Fields  {cons("FieldsCons")}
+                      -> Fields1 {cons("FieldsNil")}
+    "," Field Fields1 -> Fields1 {cons("FieldsCons")}
 
     "<" ID "=" ID ">" "=>" Expr -> Branch   {cons("Branch")}
     Branch                      -> Branches {cons("BranchesEnd")}

@@ -12,25 +12,25 @@ import java.lang.ref.WeakReference;
 { 
   public static rename_rules_0_2 instance = new rename_rules_0_2();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, IStrategoTerm ref_e_9, IStrategoTerm ref_f_9)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, IStrategoTerm ref_w_22, IStrategoTerm ref_x_22)
   { 
-    TermReference e_9 = new TermReference(ref_e_9);
-    TermReference f_9 = new TermReference(ref_f_9);
+    TermReference w_22 = new TermReference(ref_w_22);
+    TermReference x_22 = new TermReference(ref_x_22);
     context.push("rename_rules_0_2");
-    Fail3:
+    Fail0:
     { 
-      lifted1 lifted110 = new lifted1();
-      lifted110.e_9 = e_9;
-      lifted110.f_9 = f_9;
-      term = topdown_1_0.instance.invoke(context, term, lifted110);
+      lifted0 lifted00 = new lifted0();
+      lifted00.w_22 = w_22;
+      lifted00.x_22 = x_22;
+      term = topdown_1_0.instance.invoke(context, term, lifted00);
       if(term == null)
-        break Fail3;
-      lifted3 lifted30 = new lifted3();
-      lifted30.e_9 = e_9;
-      lifted30.f_9 = f_9;
-      term = topdown_1_0.instance.invoke(context, term, lifted30);
+        break Fail0;
+      lifted2 lifted20 = new lifted2();
+      lifted20.w_22 = w_22;
+      lifted20.x_22 = x_22;
+      term = topdown_1_0.instance.invoke(context, term, lifted20);
       if(term == null)
-        break Fail3;
+        break Fail0;
       context.popOnSuccess();
       if(true)
         return term;

@@ -12,37 +12,37 @@ import java.lang.ref.WeakReference;
 { 
   public static $Dyn$Rule$Union_3_0 instance = new $Dyn$Rule$Union_3_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy k_13, Strategy l_13, Strategy m_13)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy y_43, Strategy z_43, Strategy a_44)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("DynRuleUnion_3_0");
-    Fail58:
+    Fail294:
     { 
-      IStrategoTerm a_100 = null;
-      IStrategoTerm x_99 = null;
-      IStrategoTerm y_99 = null;
-      IStrategoTerm z_99 = null;
-      IStrategoTerm b_100 = null;
-      IStrategoTerm c_100 = null;
+      IStrategoTerm i_184 = null;
+      IStrategoTerm f_184 = null;
+      IStrategoTerm g_184 = null;
+      IStrategoTerm h_184 = null;
+      IStrategoTerm j_184 = null;
+      IStrategoTerm k_184 = null;
       if(term.getTermType() != IStrategoTerm.APPL || out._consDynRuleUnion_3 != ((IStrategoAppl)term).getConstructor())
-        break Fail58;
-      x_99 = term.getSubterm(0);
-      y_99 = term.getSubterm(1);
-      z_99 = term.getSubterm(2);
-      IStrategoList annos48 = term.getAnnotations();
-      a_100 = annos48;
-      term = k_13.invoke(context, x_99);
+        break Fail294;
+      f_184 = term.getSubterm(0);
+      g_184 = term.getSubterm(1);
+      h_184 = term.getSubterm(2);
+      IStrategoList annos241 = term.getAnnotations();
+      i_184 = annos241;
+      term = y_43.invoke(context, f_184);
       if(term == null)
-        break Fail58;
-      b_100 = term;
-      term = l_13.invoke(context, y_99);
+        break Fail294;
+      j_184 = term;
+      term = z_43.invoke(context, g_184);
       if(term == null)
-        break Fail58;
-      c_100 = term;
-      term = m_13.invoke(context, z_99);
+        break Fail294;
+      k_184 = term;
+      term = a_44.invoke(context, h_184);
       if(term == null)
-        break Fail58;
-      term = termFactory.annotateTerm(termFactory.makeAppl(out._consDynRuleUnion_3, new IStrategoTerm[]{b_100, c_100, term}), checkListAnnos(termFactory, a_100));
+        break Fail294;
+      term = termFactory.annotateTerm(termFactory.makeAppl(out._consDynRuleUnion_3, new IStrategoTerm[]{j_184, k_184, term}), checkListAnnos(termFactory, i_184));
       context.popOnSuccess();
       if(true)
         return term;

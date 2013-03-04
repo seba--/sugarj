@@ -89,7 +89,7 @@ public class ATermCommands {
     public IStrategoTerm getTerm() {
       return term;
     }
-    public String getMessage() {
+    public String getMsg() {
       return msg;
     }
   }
