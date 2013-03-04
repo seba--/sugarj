@@ -9,7 +9,7 @@ signature
   constructors
     TyUnknown: FomegaType
     KiUnknown: FomegaKind
-    IDUnknown: FomegID
+    IDUnknown: FomegaID
 
 
 // TODO: the following definitions should go to contextanalysis.rules. ...

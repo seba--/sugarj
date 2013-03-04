@@ -93,9 +93,9 @@ context-free syntax // *** Syntax for judgments ***
   QVarInContextJudgment -> TypingRuleJudgment
 
   // Judgments allowed as premises in kinding rules
-  KindingJudgment       -> KindingRuleJudgment
-  VarInContextJudgment  -> KindingRuleJudgment
-  QVarInContextJudgment -> KindingRuleJudgment
+  KindingJudgment        -> KindingRuleJudgment
+  TVarInContextJudgment  -> KindingRuleJudgment
+  QTVarInContextJudgment -> KindingRuleJudgment
 
 
 context-free syntax // *** Substitution on level of types
