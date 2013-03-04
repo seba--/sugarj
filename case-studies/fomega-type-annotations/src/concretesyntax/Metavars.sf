@@ -13,10 +13,10 @@ signature
 context-free syntax
 
   "~"  StrategoVar  -> Context        {cons("Metavar")}
-  "~:" StrategoVar  -> FomegaTyDecls1  {cons("Metavar")}
+  "~:" StrategoVar  -> FomegaTyDecls1 {cons("Metavar")}
   "~"  StrategoVar  -> FomegaTyDecls  {cons("Metavar")}
   "~"  StrategoVar  -> FomegaBranches {cons("Metavar")}
-  "~=" StrategoVar  -> FomegaFields1   {cons("Metavar")}
+  "~=" StrategoVar  -> FomegaFields1  {cons("Metavar")}
   "~"  StrategoVar  -> FomegaFields   {cons("Metavar")}
   "~"  StrategoVar  -> FomegaExpr     {cons("Metavar")}
   "~"  StrategoVar  -> FomegaType     {cons("Metavar")}
