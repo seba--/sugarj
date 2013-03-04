@@ -3,6 +3,8 @@ module contextanalysis.TypeChecker
 import contextanalysis.rules.Syntax
 import contextanalysis.rules.Desugaring
 
+import concretesyntax.Fomega
+
 
 ================= T-True
 ~C |- true : Bool
@@ -84,3 +86,46 @@ import contextanalysis.rules.Desugaring
 ~%x notin sel(~decls)
 ======================================== T-RecordCons
 ~C |- {~%x=~e ~=flds} : {~%x:~T ~:decls}
+
+
+~C |- ~e : ~T
+~C |- ~T ~> {~decls}
+~%x:~S in decls ~decls
+====================== T-Select
+~C |- ~e!~%x : ~S
+
+
+~C |- ~T :: *
+~C |- ~e : ~S
+~C |- ~S ~> ~U
+~C |- ~T ~> <~decls>
+~%x:~U in decls ~decls
+========================= T-Variant
+~C |- <~%x=~e> as ~T : ~T
+
+
+signature
+  constructors
+    BRANCH-TYPING : FomegaTyDecls * FomegaBranches -> FomegaExpr
+
+
+~C |- ~e : ~S
+~C |- ~S ~> <~decls>
+~C |- M~BRANCH-TYPING(decls, brs) : ~T
+========================================= T-Case
+~C |- case ~e of ~brs : ~T
+
+
+~%x:~S in decls ~decls
+(~C;~%y:~S) |- ~e : ~T
+=========================================================== TB-End
+~C |- M~BRANCH-TYPING(decls, |[ <~%x=~%y> => ~e ]|) : ~T
+
+
+~%x:~S in decls ~decls
+(~C;~%y:~S) |- ~e : ~T1
+~C |- ~T1 ~> ~U
+~C |- M~BRANCH-TYPING(decls, brs) : ~T2
+~C |- ~T2 ~> ~U
+================================================================= TB-Cons
+~C |- M~BRANCH-TYPING(decls, |[ <~%x=~%y> => ~e; ~brs ]|) : ~U
