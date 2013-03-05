@@ -1,4 +1,4 @@
-module contextanalysis.KindChecker
+module contextanalysis.KindingRelation
 
 import contextanalysis.rules.Syntax
 import contextanalysis.rules.Desugaring

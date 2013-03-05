@@ -1,9 +1,12 @@
-module contextanalysis.SignatureChecker
+module contextanalysis.SignatureRelation
 
 //import org.sugarj.languages.Fomega
 
 import contextanalysis.rules.Syntax
 import contextanalysis.rules.Desugaring
+
+import contextanalysis.KindingRelation
+import contextanalysis.TypingRelation
 
 //import contextanalysis.Annotations
 //import contextanalysis.KindChecker

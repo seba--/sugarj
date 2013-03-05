@@ -7,7 +7,7 @@ import contextanalysis.rules.Syntax
 import contextanalysis.rules.Desugaring
 import contextanalysis.rules.Verification
 
-import contextanalysis.TypeChecker  
+import contextanalysis.TypingRelation
 
 import extension.let.Syntax
 

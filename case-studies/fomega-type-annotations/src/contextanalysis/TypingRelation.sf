@@ -1,4 +1,4 @@
-module contextanalysis.TypeChecker
+module contextanalysis.TypingRelation
 
 import contextanalysis.rules.Syntax
 import contextanalysis.rules.Desugaring

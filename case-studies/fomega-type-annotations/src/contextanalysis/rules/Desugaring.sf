@@ -6,7 +6,10 @@ import org.sugarj.languages.Stratego
 import concretesyntax.Metavars
 import concretesyntax.Stratego
 
+import contextanalysis.Annotations
+import contextanalysis.Contexts
 import contextanalysis.KindOperations
+import contextanalysis.Signatures
 import contextanalysis.TypeOperations
 
 import contextanalysis.rules.Syntax
