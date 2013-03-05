@@ -11,7 +11,7 @@ type Bar = (\X::*. X) Foo
 
 type V = {x:Nat, y:Nat, a:Bool, b:Nat}
 
-type Foo1 = forall X::*. V
+type Foo2 = forall X::*. V
 
 val x1 = if true then 1 else 3
 

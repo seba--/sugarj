@@ -3,6 +3,8 @@ module contextanalysis.TypingRelation
 import contextanalysis.rules.Syntax
 import contextanalysis.rules.Desugaring
 
+import contextanalysis.KindingRelation
+
 import concretesyntax.Fomega
 
 
