@@ -93,7 +93,7 @@ exports
     Type "->" Type                      -> Type {cons("TyArrow"), right}
     "forall" ID "::" Kind "." Type      -> Type {cons("TyForall")}
     "\\" ID "::" Kind "." Type          -> Type {cons("TyAbs")}
-    "mu" Kind "." "(" Type "," Type ")" -> Type {cons("TyMu")}
+    "mu" "(" Type "," Type ")"          -> Type {cons("TyMu")}
 
   context-free priorities
       Type Type      -> Type
