@@ -49,17 +49,3 @@ rules // Kind of types
                                                 , " in context "
                                                 , <write-to-string> (<strip-annos> C)] ]
                            , T)
-
-rules // Type of branches
-
-  annotate-type-branches =
-    // debug(!"ANNO TYPE BRS IN:  "); 
-    annotate-type-branches-defined <+ annotate-type-branches-missing
-    // ; debug(!"ANNO TYPE BRS OUT: ")
-
-  annotate-type-branches-defined = fail
-
-  annotate-type-branches-missing =
-      ?(C, decls, brs)
-    ; <put-type> (TyUnknown(), brs)
-    ; <add-context-errors> (["Missing branch typing rule"], brs)
