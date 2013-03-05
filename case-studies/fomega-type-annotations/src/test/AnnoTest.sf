@@ -44,4 +44,4 @@ val x13 = case x12 of
  
 type x14 = {b:Nat,a:Bool}
 
-val xLast = "dummy"
+val x15 = 1 as Nat

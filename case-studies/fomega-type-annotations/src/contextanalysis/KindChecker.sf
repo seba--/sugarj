@@ -24,7 +24,7 @@ import contextanalysis.rules.Desugaring
 ~C |- ~T1 :: (~K => *) => ~K => *
 ~C |- ~T2 :: ~K
 ================================= K-Mu
-~C |- mu ~K. (~T1, ~T2) :: *
+~C |- mu (~T1, ~T2) :: *
 
 
 ~C |- ~T1 :: *

@@ -96,6 +96,25 @@ import concretesyntax.Fomega
 
 
 ~C |- ~T :: *
+~C |- ~T ~> mu (~T1, ~T2)
+~C |- ~e : ~S
+~C |- ~S ~> ~U
+~C |- ~T2 :: ~K
+~C |- ~T1 (\arg::~K. mu (~T1, arg)) ~T2 ~> ~U
+============================================= T-Fold
+~C |- fold [~T] ~e : mu (~T1, ~T2) 
+
+
+~C |- ~T :: *
+~C |- ~T ~> mu (~T1, ~T2)
+~C |- ~e : ~S
+~C |- ~S ~> mu (~T1, ~T2) 
+~C |- ~T2 :: ~K
+======================================================== T-Unfold
+~C |- unfold [~T] ~e : ~T1 (\arg::~K. mu (~T1, arg)) ~T2
+
+
+~C |- ~T :: *
 ~C |- ~e : ~S
 ~C |- ~S ~> ~U
 ~C |- ~T ~> <~decls>

@@ -121,14 +121,13 @@ rules
 
   type-eq-proper :
     (TyApp(T1, T2), TyApp(S1, S2)) -> <conc> (msgs1, msgs2)
-    where <type-eq> (T1, T2) => msgs1
+    where <type-eq> (T1, S1) => msgs1
         ; <type-eq> (T2, S2) => msgs2
 
   type-eq-proper :
-    (TyMu(K, T1, T2), TyMu(J, S1, S2)) -> <conc> (msgs1, msgs2, msgs3)
-    where <kind-eq> (K, J) => msgs1
-        ; <type-eq> (T1, S1) => msgs2
-        ; <type-eq> (T2, S2) => msgs3
+    (TyMu(T1, T2), TyMu(S1, S2)) -> <conc> (msgs1, msgs2)
+    where <type-eq> (T1, S1) => msgs1
+        ; <type-eq> (T2, S2) => msgs2
 
   type-eq-proper :
     (TyForall(X, K, T), TyForall(Y, J, S)) -> <conc> (msgs1, msgs2)
@@ -249,13 +248,13 @@ rules
   type-eq-mu = type-eq-mu-proper <+ type-eq-mu-unexpected
 
   type-eq-mu-proper :
-    TyUnknown() -> (IDUnknown(), TyUnknown(), [])
+    TyUnknown() -> (TyUnknown(), TyUnknown(), [])
 
   type-eq-mu-proper :
-    TyMu(K, T1, T2) -> (K, T1, T2, [])
+    TyMu(T1, T2) -> (T1, T2, [])
 
   type-eq-mu-unexpected :
-    T -> (KiUnknown(), TyUnknown(), TyUnknown(), [<concat-strings> ["type mismatch, expected recursive type but found ", <pp-type> T]])
+    T -> (TyUnknown(), TyUnknown(), [<concat-strings> ["type mismatch, expected recursive type but found ", <pp-type> T]])
 
 
 rules
@@ -302,7 +301,7 @@ rules
 
 rules
 
-  free-vars : TyMu(K, T1, T2) -> <union(structurally-equal)> (<free-vars> T1, <free-vars> T2)
+  free-vars : TyMu(T1, T2) -> <union(structurally-equal)> (<free-vars> T1, <free-vars> T2)
   free-vars : TyAbs(X, K, T) -> <diff(structurally-equal)> (<free-vars> T, [X])
   free-vars : TyForall(X, K, T) -> <diff(structurally-equal)> (<free-vars> T, [X])
   free-vars : TyArrow(T1, T2) -> <union(structurally-equal)> (<free-vars> T1, <free-vars> T2)
@@ -317,6 +316,7 @@ rules
   free-vars : TyNat() -> []
   free-vars : TyBool() -> []
   free-vars : TyEmpty() -> []
+  free-vars : TyUnknown() -> []
   free-vars : TyVar(X) -> [X]
 
   free-vars-decl : TyDecl(x, T) -> <free-vars> T
@@ -345,7 +345,7 @@ rules
     (X, S, Metavar(mvar)) -> Metavar(mvar)
 
   subst :
-    (X, S, TyMu(K, T1, T2)) -> TyMu(K, <subst> (X, S, T1), <subst> (X, S, T2))
+    (X, S, TyMu(T1, T2)) -> TyMu(<subst> (X, S, T1), <subst> (X, S, T2))
 
   subst :
     (X, S, TyAbs(Y, K, T)) -> TyAbs(X, K, T)
@@ -414,6 +414,9 @@ rules
     (X, S, TyEmpty()) -> TyEmpty()
 
   subst :
+    (X, S, TyUnknown()) -> TyUnknown()
+
+  subst :
     (X, S, TyVar(Y)) -> S
     where <structurally-equal> (X, Y)
 
@@ -426,26 +429,26 @@ rules
 
 
 rules
-  norm = // debug(!"NORM IN: ");
+  norm = // debug-analysis(!"NORM IN: ");
          iterate-par-reduce
-         // ; debug(!"NORM OUT: ")
+         // ; debug-analysis(!"NORM OUT: ")
 
   iterate-par-reduce :
     (C, T) -> T'
     where <par-reduce> (C, T) => S
-        ; <// debug(!"EQ IN  ");
+        ; <// debug-analysis(!"EQ IN  ");
            type-eq
-           // ; debug(!"EQ OUT ")
+           // ; debug-analysis(!"EQ OUT ")
           > (T, S) => msgs
-        ; if (!msgs; ?[]) then
+        ; if !msgs; ?[] then
             !T
           else
             !(<norm> (C, S))
           end => T'
 
-  par-reduce = // debug(!"PR IN:  ");
+  par-reduce = // debug-analysis(!"PR IN:  ");
               (par-reduce-type <+ par-reduce-metavar)
-              // ; debug(!"PR OUT: ")
+              // ; debug-analysis(!"PR OUT: ")
     // Identity on meta-variables only as a fallback
     // since dynamic axioms might establish more specific
     // reductions.
@@ -487,7 +490,7 @@ rules
           end => S
 
   par-reduce-type :
-    (C, TyMu(K, T1, T2)) -> TyMu(K, <par-reduce> T1, <par-reduce> T2)
+    (C, TyMu(T1, T2)) -> TyMu(<par-reduce> (C, T1), <par-reduce> (C, T2))
 
   par-reduce-type :
     (C, TyAbs(X, K, T)) -> TyAbs(X, K, <par-reduce> (CtxBindTVar(C, X, K), T))
