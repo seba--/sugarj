@@ -30,10 +30,10 @@ public questionnaire HouseOwning
     So you have some money?
   
   if hasBoughtHouse && howMuchPaid < 50000
-    hasMoney
+    ask hasMoney
     if hasMoney
       Boolean question spareADime = Can you spare some?
   if hasSoldHouse
-    hasMoney
+    ask hasMoney
     if hasMoney
       Boolean question spareADime = For a good cause?

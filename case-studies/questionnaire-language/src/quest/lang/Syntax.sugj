@@ -37,17 +37,14 @@ public sugar Syntax {
   // conditional question
   context-free syntax
     ConditionalQuest -> QuestElem
-    "if" QuestExpr QuestList -> ConditionalQuest {cons("ConditionalQuest"),
-                                                 layout(1.first.col < 2.first.col && 1.first.col < 3.first.col)}
-    "if" QuestExpr QuestList
-    "else" QuestList -> ConditionalQuest {cons("ConditionalQuest"),
-                                          layout(1.first.col < 2.first.col && 1.first.col < 3.first.col
-                                              && 4.first.col == 1.first.col
-                                              && 4.first.col < 5.left.col)}
+    "if" QuestExpr QuestList ConditionalElse? -> ConditionalQuest {cons("ConditionalQuest"),
+       layout(1.first.col < 2.first.col && 1.first.col < 3.first.col && 1.first.col == 4.first.col)}
+    
+    "else" QuestList -> ConditionalElse {layout(1.first.col < 2.left.col)}
   
   // local question
   context-free syntax
     LocalQuest -> QuestElem {layout(1.first.col < 1.left.col)}
     "define" Question -> LocalQuest {cons("LocalQuest")}
-    QuestId -> Question {cons("QuestRef")}
+    "ask" QuestId -> Question {cons("QuestRef")}
 }
