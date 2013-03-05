@@ -17,6 +17,16 @@ import contextanalysis.rules.Syntax
 
 desugarings
   desugar-context-rule
+  desugar-EVAL
+
+
+signature
+  constructors
+    EVAL: StrategoTerm -> StrategoTerm
+
+rules
+  desugar-EVAL :
+    Op("EVAL", x) -> BA(CallNoArgs(SVar("desugar")), x)
 
 
 rules

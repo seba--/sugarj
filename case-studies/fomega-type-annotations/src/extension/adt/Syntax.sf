@@ -9,16 +9,26 @@ context-free syntax
 
   FomegaID "::" FomegaKind -> KiDecl {cons("KiDecl")}
 
-  FomegaID FomegaID DataConParams -> DataCon {cons("DataCon")}
+  FomegaID FomegaID "{" FomegaTyDecls "}" -> DataCon {cons("DataCon")}
 
   DataCon              -> DataCons {cons("DataConsEnd")}
   DataCon "|" DataCons -> DataCons {cons("DataConsCons")}
-
-                                     -> DataConParams {cons("DataConParamsNil")} 
-  "(" FomegaTyDecl ")" DataConParams -> DataConParams {cons("DataConParamsCons")}
 
 lexical syntax
   "data" -> FomegaKeyword
 
 lexical restrictions
   "data" -/- [a-zA-Z0-9]
+
+context-free syntax
+  "~" StrategoVar -> DataParams    {cons("Metavar")}
+  "~" StrategoVar -> DataCons      {cons("Metavar")}
+  "~" StrategoVar -> DataConParams {cons("Metavar")}
+
+  "fomega-params" "|[" DataParams "]|" -> StrategoTerm {cons("ToMetaExpr")}
+  "fomega"        "|[" DataParams "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                  "|[" DataParams "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+  "fomega-datacons" "|[" DataCons "]|" -> StrategoTerm {cons("ToMetaExpr")}
+  "fomega"          "|[" DataCons "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                    "|[" DataCons "]|" -> StrategoTerm {cons("ToMetaExpr")}

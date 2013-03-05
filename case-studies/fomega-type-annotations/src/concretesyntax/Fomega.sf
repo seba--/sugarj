@@ -19,6 +19,10 @@ context-free syntax
   "fomega"          "|[" FomegaBranches "]|" -> StrategoTerm {cons("ToMetaExpr")}
                     "|[" FomegaBranches "]|" -> StrategoTerm {cons("ToMetaExpr")}
 
+  "fomega-defs" "|[" FomegaDefs "]|" -> StrategoTerm {cons("ToMetaExpr")}
+  "fomega"      "|[" FomegaDefs "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                "|[" FomegaDefs "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
 context-free syntax
   "~" StrategoTerm  -> StrategoId {cons("FromMetaExpr")}
   "~%" StrategoTerm -> StrategoId {cons("FromMetaExpr")}

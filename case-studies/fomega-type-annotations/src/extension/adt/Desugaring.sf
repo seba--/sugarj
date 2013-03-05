@@ -2,13 +2,40 @@ module extension.adt.Desugaring
 
 import org.sugarj.languages.Fomega
 
+import concretesyntax.Fomega
+import concretesyntax.Metavars
+
+import contextanalysis.rules.Syntax
+import contextanalysis.rules.Desugaring
+// import contextanalysis.rules.Verification
+
 import extension.adt.Syntax
 
 
-// desugarings
-//   desugar-data
-// 
-// 
+desugarings
+  desugar-data
+
+
+signature
+  constructors
+    ADT-TYPE: FomegaID * DataParams * DataCons -> StrategoTerm
+
+rules
+
+  desugar-data :
+    |[ data ~%X ~params = ~dcons ~=defs ]| -> |[ type ~%X = M~ADT-TYPE(X, params, dcons) ~=defs]|
+
+~%X notin dom(~C)
+~C |- M~ADT-TYPE(X, params, dcons) :: ~K
+(~C;~%X::~K=M~EVAL(ADT-TYPE(X, params, dcons))) |- ~=defs ==> ~sig
+================================================================== S-DataCons
+~C |- data ~%X ~params = ~dcons ~=defs ==> ~sig
+
+
+
+
+
+
 // rules
 // 
 //   desugar-data :
