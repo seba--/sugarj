@@ -3,6 +3,7 @@ module contextanalysis.Unknowns
 import org.sugarj.languages.Fomega
 
 import contextanalysis.Annotations
+import contextanalysis.Signatures
 
 
 signature
@@ -16,9 +17,9 @@ signature
 rules // Type of expressions
 
   annotate-type =
-    // debug(!"ANNO TYPE IN:  "); 
+    // debug-analysis(!"ANNO TYPE IN:  "); 
     (annotate-type-defined <+ annotate-type-missing)
-    // ; debug(!"ANNO TYPE OUT: ") 
+    // ; debug-analysis(!"ANNO TYPE OUT: ") 
 
   annotate-type-defined = fail
 
@@ -35,9 +36,9 @@ rules // Type of expressions
 rules // Kind of types
 
   annotate-kind =
-    // debug(!"ANNO KIND IN:  "); 
+    // debug-analysis(!"ANNO KIND IN:  "); 
     (annotate-kind-defined <+ annotate-kind-missing)
-    // ; debug(!"ANNO KIND OUT: ") 
+    // ; debug-analysis(!"ANNO KIND OUT: ") 
 
   annotate-kind-defined = fail
 
@@ -49,3 +50,22 @@ rules // Kind of types
                                                 , " in context "
                                                 , <write-to-string> (<strip-annos> C)] ]
                            , T)
+
+
+rules // Signature of definitions
+
+  annotate-signature =
+    // debug-analysis(!"ANNO SIGNATURE IN:  "); 
+    (annotate-signature-defined <+ annotate-signature-missing)
+    // ; debug-analysis(!"ANNO SIGNATURE OUT: ") 
+
+  annotate-signature-defined = fail
+
+  annotate-signature-missing =
+      ?(C, defs)
+    ; <put-kind> (SigEmpty(), defs)
+    ; <add-context-errors> ( [ <concat-strings> [ "Missing signature rule for "
+                                                , <write-to-string> (<strip-annos> defs)
+                                                , " in context "
+                                                , <write-to-string> (<strip-annos> C)] ]
+                           , defs)

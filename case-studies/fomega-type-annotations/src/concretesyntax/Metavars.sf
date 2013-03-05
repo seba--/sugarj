@@ -22,6 +22,9 @@ context-free syntax
   "~"  StrategoVar  -> FomegaType     {cons("Metavar")}
   "~"  StrategoVar  -> FomegaKind     {cons("Metavar")}
 
+  "~=" StrategoVar -> FomegaDefs {cons("Metavar")}
+  "~" StrategoVar  -> Signature  {cons("Metavar")}
+
   "~%" StrategoVar -> FomegaID       {cons("Metavar")}
   "~&" StrategoVar -> FomegaQID      {cons("Metavar")}
 

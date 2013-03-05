@@ -35,6 +35,10 @@ rules
     KindingRule(premises, RuleName(sep, optional-name), conclusion) ->
       transformation-elem(<translate-kinding-rule> (optional-name, premises, conclusion))
 
+  desugar-context-rule :
+    SignatureRule(premises, RuleName(sep, optional-name), conclusion) ->
+      transformation-elem(<translate-signature-rule> (optional-name, premises, conclusion))
+
 
 rules // Translate a typing rule
 
@@ -69,6 +73,24 @@ rules // Translate a kinding rule
     where <trm-explode> C => tC
         ; <trm-explode> T => tT
         ; <trm-explode> K => tK
+        ; <premises-to-list> premises => premises-list
+        ; <translate-premises> (<ts-initial> (), premises-list) => (ts1, premises-implementation)
+
+
+rules // Translate a signature rule
+
+  translate-signature-rule :
+    (Some(Var(name)), premises, SignatureJudgment(C, defs, sig)) ->
+    stratego-decl
+    |[ rules
+         annotate-signature-defined =
+             ?(term~tC, node@term~tdefs)
+           ; strategy~premises-implementation
+           ; <put-signature> (term~tsig, node)
+    ]|
+    where <trm-explode> C => tC
+        ; <trm-explode> defs => tdefs
+        ; <trm-explode> sig => tsig
         ; <premises-to-list> premises => premises-list
         ; <translate-premises> (<ts-initial> (), premises-list) => (ts1, premises-implementation)
 
@@ -146,6 +168,17 @@ rules // Translate a judgment
         ; <translate-type-expectation> (ts2, tblame, result-var, [], T', []) => (ts3 , inspect-result)
 
   translate-judgment :
+    (ts, SignatureJudgment(C, defs, sig)) ->
+      (ts1, |[   <reinit-for-analysis> term~tdefs => term~result-var1
+               ; <annotate-signature> (term~tC, term~tdefs)
+               ; <get-signature> term~result-var1 => term~tsig
+            ]|)
+    where <trm-explode> C => tC
+        ; <trm-explode> defs => tdefs
+        ; <trm-explode> sig => tsig
+        ; <fresh-result-var> ts => (ts1, result-var1)
+
+  translate-judgment :
     (ts, VarInContextJudgment(x, T, C)) ->
       (ts3, |[   <lookup-expr-var> (term~tx, term~tC) => (term~result-var, term~errs-var)
                ; <add-context-errors> (term~errs-var, term~tx)
@@ -199,6 +232,17 @@ rules // Translate a judgment
         ; <fresh-msgs-var> ts => (ts1, msgs-var)
         ; <fresh-result-var> ts1 => (ts2, result-var)
         ; <translate-type-expectation> (ts2, tx, result-var, [], T, []) => (ts3, inspect-result)
+
+  translate-judgment :
+    (ts, NotinDomJudgment(x, C)) ->
+      (ts, |[ if <not(elem(structurally-equal))> (term~tx, <dom> term~tC) then
+                id
+              else
+                <add-context-errors> ([<concat-strings> ["duplicate definition for ", term~tx]], term~tx)
+              end
+           ]|)
+    where <trm-explode> x => tx
+        ; <trm-explode> C => tC
 
 
 rules // Translate a type expectation

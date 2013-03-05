@@ -2,6 +2,8 @@ module contextanalysis.ContextAnalysis
 
 import org.sugarj.languages.Fomega
 
+import contextanalysis.KindChecker
+import contextanalysis.TypeChecker
 import contextanalysis.SignatureChecker
 import contextanalysis.Editor
 

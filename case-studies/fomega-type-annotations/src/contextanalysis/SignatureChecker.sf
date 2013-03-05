@@ -1,85 +1,141 @@
 module contextanalysis.SignatureChecker
 
-import org.sugarj.languages.Fomega
+//import org.sugarj.languages.Fomega
 
-import contextanalysis.Annotations
-import contextanalysis.KindChecker
-import contextanalysis.Signatures
-import contextanalysis.TypeChecker
+import contextanalysis.rules.Syntax
+import contextanalysis.rules.Desugaring
+
+//import contextanalysis.Annotations
+//import contextanalysis.KindChecker
+//import contextanalysis.Signatures
+//import contextanalysis.TypeChecker
 
 
-rules
+~%X notin dom(~C)
+~C |- ~T :: ~K
+========================== S-TypeEnd
+~C |- type ~%X = ~T ==> ()
 
-  annotate-signature =
-      ?(C, node@DefsEnd(TypeDef(None(), X, T)))
-    // TODO: add error if X is defined in C
-    ; <annotate-kind> (C, T)
-    ; <get-kind> T => K
-    ; <put-kind> (K, X)
-    ; <put-signature> (SigEmpty(), node)
 
-  annotate-signature =
-      ?(C, node@DefsEnd(TypeDef(Some(Public()), X, T)))
-    // TODO: add error if X is defined in C
-    ; <annotate-kind> (C, T)
-    ; <get-kind> T => K
-    ; <put-kind> (K, X)
-    ; <put-signature> (SigBindTVarDef(X, K, T, SigEmpty()), node)
+~%X notin dom(~C)
+~C |- ~T :: ~K
+============================================== S-PubTypeEnd
+~C |- public type ~%X = ~T ==> (~%X::~K=~T;())
 
-  annotate-signature =
-     ?(C, node@DefsCons(TypeDef(None(), X, T), defs))
-    // TODO: add error if X is defined in C
-    ; <annotate-kind> (C, T)
-    ; <get-kind> T => K
-    ; <put-kind> (K, X)
-    ; <annotate-signature> (CtxBindTVarDef(C, X, K, T), defs)
-    ; <get-signature> defs => sig
-    ; <put-signature> (sig, node)
 
-  annotate-signature =
-     ?(C, node@DefsCons(TypeDef(Some(Public()), X, T), defs))
-    // TODO: add error if X is defined in C
-    ; <annotate-kind> (C, T)
-    ; <get-kind> T => K
-    ; <put-kind> (K, X)
-    ; <annotate-signature> (CtxBindTVarDef(C, X, K, T), defs)
-    ; <get-signature> defs => sig
-    ; <put-signature> (sig, node)
-    ; <put-signature> (SigBindTVarDef(X, K, T, sig), node)
+~%x notin dom(~C)
+~C |- ~e : ~T
+========================= S-ValEnd
+~C |- val ~%x = ~e ==> ()
 
-  annotate-signature =
-      ?(C, node@DefsEnd(ValDef(None(), x, e)))
-    // TODO: add error if x is defined in C
-    ; <annotate-type> (C, e)
-    ; <get-type> e => T
-    ; <put-type> (T, x)
-    ; <put-signature> (SigEmpty(), node)
 
-  annotate-signature =
-      ?(C, node@DefsEnd(ValDef(Some(Public()), x, e)))
-    // TODO: add error if x is defined in C
-    ; <annotate-type> (C, e)
-    ; <get-type> e => T
-    ; <put-type> (T, x)
-    ; <put-signature> (SigBindVar(x, T, SigEmpty()), node)
+~%x notin dom(~C)
+~C |- ~e : ~T
+========================================= S-PubValEnd
+~C |- public val ~%x = ~e ==> (~%x:~T;())
 
-  annotate-signature =
-     ?(C, node@DefsCons(ValDef(None(), x, e), defs))
-    // TODO: add error if x is defined in C
-    ; <annotate-type> (C, e)
-    ; <get-type> e => T
-    ; <put-type> (T, x)
-    ; <annotate-signature> (CtxBindVar(C, x, T), defs)
-    ; <get-signature> defs => sig
-    ; <put-signature> (sig, node)
 
-  annotate-signature =
-     ?(C, node@DefsCons(ValDef(Some(Public()), x, e), defs))
-    // TODO: add error if x is defined in C
-    ; <annotate-kind> (C, e)
-    ; <get-kind> e => T
-    ; <put-type> (T, x)
-    ; <annotate-signature> (CtxBindVar(C, x, T), defs)
-    ; <get-signature> defs => sig
-    ; <put-signature> (sig, node)
-    ; <put-signature> (SigBindVar(x, T, sig), node)
+~%X notin dom(~C)
+~C |- ~T :: ~K
+(~C;~%X::~K=~T) |- ~=defs ==> ~sig
+=================================== S-TypeCons
+~C |- type ~%X = ~T ~=defs ==> ~sig 
+
+
+~%X notin dom(~C)
+~C |- ~T :: ~K
+(~C;~%X::~K=~T) |- ~=defs ==> ~sig
+======================================================= S-PubTypeCons
+~C |- public type ~%X = ~T ~=defs ==> (~%X::~K=~T;~sig)
+
+
+~%x notin dom(~C)
+~C |- ~e : ~T
+(~C;~%x:~T) |- ~=defs ==> ~sig
+================================== S-ValCons
+~C |- val ~%x = ~e ~=defs ==> ~sig
+
+
+~%x notin dom(~C)
+~C |- ~e : ~T
+(~C;~%x:~T) |- ~=defs ==> ~sig
+================================================== S-PubValCons
+~C |- public val ~%x = ~e ~=defs ==> (~%x:~T;~sig)
+
+
+
+//rules
+//
+//  annotate-signature =
+//      ?(C, node@DefsEnd(TypeDef(None(), X, T)))
+//    // TODO: add error if X is defined in C
+//    ; <annotate-kind> (C, T)
+//    ; <get-kind> T => K
+//    ; <put-kind> (K, X)
+//    ; <put-signature> (SigEmpty(), node)
+//
+//  annotate-signature =
+//      ?(C, node@DefsEnd(TypeDef(Some(Public()), X, T)))
+//    // TODO: add error if X is defined in C
+//    ; <annotate-kind> (C, T)
+//    ; <get-kind> T => K
+//    ; <put-kind> (K, X)
+//    ; <put-signature> (SigBindTVarDef(X, K, T, SigEmpty()), node)
+//
+//  annotate-signature =
+//     ?(C, node@DefsCons(TypeDef(None(), X, T), defs))
+//    // TODO: add error if X is defined in C
+//    ; <annotate-kind> (C, T)
+//    ; <get-kind> T => K
+//    ; <put-kind> (K, X)
+//    ; <annotate-signature> (CtxBindTVarDef(C, X, K, T), defs)
+//    ; <get-signature> defs => sig
+//    ; <put-signature> (sig, node)
+//
+//  annotate-signature =
+//     ?(C, node@DefsCons(TypeDef(Some(Public()), X, T), defs))
+//    // TODO: add error if X is defined in C
+//    ; <annotate-kind> (C, T)
+//    ; <get-kind> T => K
+//    ; <put-kind> (K, X)
+//    ; <annotate-signature> (CtxBindTVarDef(C, X, K, T), defs)
+//    ; <get-signature> defs => sig
+//    ; <put-signature> (sig, node)
+//    ; <put-signature> (SigBindTVarDef(X, K, T, sig), node)
+//
+//  annotate-signature =
+//      ?(C, node@DefsEnd(ValDef(None(), x, e)))
+//    // TODO: add error if x is defined in C
+//    ; <annotate-type> (C, e)
+//    ; <get-type> e => T
+//    ; <put-type> (T, x)
+//    ; <put-signature> (SigEmpty(), node)
+//
+//  annotate-signature =
+//      ?(C, node@DefsEnd(ValDef(Some(Public()), x, e)))
+//    // TODO: add error if x is defined in C
+//    ; <annotate-type> (C, e)
+//    ; <get-type> e => T
+//    ; <put-type> (T, x)
+//    ; <put-signature> (SigBindVar(x, T, SigEmpty()), node)
+//
+//  annotate-signature =
+//     ?(C, node@DefsCons(ValDef(None(), x, e), defs))
+//    // TODO: add error if x is defined in C
+//    ; <annotate-type> (C, e)
+//    ; <get-type> e => T
+//    ; <put-type> (T, x)
+//    ; <annotate-signature> (CtxBindVar(C, x, T), defs)
+//    ; <get-signature> defs => sig
+//    ; <put-signature> (sig, node)
+//
+//  annotate-signature =
+//     ?(C, node@DefsCons(ValDef(Some(Public()), x, e), defs))
+//    // TODO: add error if x is defined in C
+//    ; <annotate-kind> (C, e)
+//    ; <get-kind> e => T
+//    ; <put-type> (T, x)
+//    ; <annotate-signature> (CtxBindVar(C, x, T), defs)
+//    ; <get-signature> defs => sig
+//    ; <put-signature> (sig, node)
+//    ; <put-signature> (SigBindVar(x, T, sig), node)
