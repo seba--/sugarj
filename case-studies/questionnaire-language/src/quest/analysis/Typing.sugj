@@ -5,7 +5,7 @@ import quest.analysis.Naming;
 
 public sugar Typing {
   analyses 
-    references-are-resolved; Questionnaire(id, id, analyze-types)
+    Questionnaire(id, id, analyze-types)
   
   rules
     analyze-types = QNil
@@ -91,7 +91,7 @@ public sugar Typing {
     hast-type = where(get-anno(|"type"))
     has-type(|t) = where(retrieve-type; equal(|t)) 
     retrieve-type = get-anno(|"type")
-    put-type(|t) = put-anno(|"type", t)
+    put-type(|t) = rm-anno(|"type-error"); put-anno(|"type", t)
     
     unexpected-type-error(|expected) =
       if retrieve-type => was

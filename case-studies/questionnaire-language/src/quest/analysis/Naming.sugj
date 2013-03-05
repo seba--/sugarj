@@ -45,7 +45,7 @@ public sugar Naming {
     is-reference = where(get-anno(|"reference"))
     is-reference-to(|t) = where(retrieve-reference; equal(|t)) 
     retrieve-reference = get-anno(|"reference")
-    put-reference(|t) = put-anno(|"reference", t)
+    put-reference(|t) = rm-anno(|"name-error");put-anno(|"reference", t)
     
     has-name-error = where(get-anno(|"name-error"))
     retrieve-name-error = get-anno(|"name-error")
