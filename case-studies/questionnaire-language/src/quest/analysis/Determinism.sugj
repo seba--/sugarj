@@ -6,7 +6,6 @@ import quest.analysis.Satisfiability;
 
 public sugar Determinism {
   analyses
-    references-are-resolved;
     {| ActiveQuestCond, ConditionalContext:
        rules ( ConditionalContext := Lit(Bool(True)) );
        Questionnaire(id, id, analyze-determinism)

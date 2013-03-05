@@ -1,0 +1,24 @@
+module extension.adt.Syntax
+
+
+context-free syntax
+  FomegaPublic? "data" FomegaID DataParams "=" DataCons -> FomegaDef {cons("DataDef")}
+
+                            -> DataParams {cons("DataParamsNil")}
+  "(" KiDecl ")" DataParams -> DataParams {cons("DataParamsCons")}
+
+  FomegaID "::" FomegaKind -> KiDecl {cons("KiDecl")}
+
+  FomegaID FomegaID DataConParams -> DataCon {cons("DataCon")}
+
+  DataCon              -> DataCons {cons("DataConsEnd")}
+  DataCon "|" DataCons -> DataCons {cons("DataConsCons")}
+
+                                     -> DataConParams {cons("DataConParamsNil")} 
+  "(" FomegaTyDecl ")" DataConParams -> DataConParams {cons("DataConParamsCons")}
+
+lexical syntax
+  "data" -> FomegaKeyword
+
+lexical restrictions
+  "data" -/- [a-zA-Z0-9]

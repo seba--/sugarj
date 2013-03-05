@@ -1,0 +1,9 @@
+package tuples;
+
+import tuples.Sugar;
+
+public class Test {
+  private (String, Integer, Boolean) p = ("12", 34, false);
+}
+
+

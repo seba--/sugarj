@@ -7,12 +7,33 @@ signature
     TyUnknown: FomegaType
     IDUnknown: FomegaID
 
-rules
-  typeOf = typeOf1
+
+rules // Type of expressions
+
+  typeOf = // debug(!"TYPEOF IN:  "); 
+           typeOf1
+           // ; debug(!"TYPEOF OUT: ")
 
   typeOf1 = typeOfKnown <+ typeOfUnknown
 
   typeOfKnown = fail
 
   typeOfUnknown :
-    (ctx, e) -> (TyUnknown(), [(e, "Missing typing rule")])
+    (ctx, e) -> (TyUnknown(), [(e, <concat-strings> [ "Missing typing rule for "
+                                                    , <write-to-string> (<strip-annos> e)
+                                                    , " in context "
+                                                    , <write-to-string> (<strip-annos> ctx)])])
+
+
+rules // Type of branches
+
+  typeOfBrs = // debug(!"TYPEOFBRS IN:  "); 
+              typeOfBrs1
+              // ; debug(!"TYPEOFBRS OUT: ")
+
+  typeOfBrs1 = typeOfBrsKnown <+ typeOfBrsUnknown
+
+  typeOfBrsKnown = fail
+
+  typeOfBrsUnknown :
+    (ctx, decls, brs) -> (TyUnknown(), [(brs, "Missing branch typing rule")])

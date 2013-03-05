@@ -1,0 +1,23 @@
+module typing.extensions.countermonad.Syntax
+
+import org.sugarj.languages.Fomega
+
+
+context-free syntax
+  "do" "{" FomegaExpr "}"                  -> FomegaExpr {cons("DoCMAtomic")}
+  "do" "{" DoCMBindings ";" FomegaExpr "}" -> FomegaExpr {cons("DoCMSeq")}
+
+  FomegaID ":" FomegaType "<-" FomegaExpr      -> DoCMBinding {cons("DoCMGen")}
+
+  DoCMBinding                  -> DoCMBindings {cons("DoCMBindingsEnd")}
+  DoCMBinding ";" DoCMBindings -> DoCMBindings {cons("DoCMBindingsCons")}
+
+
+context-free syntax
+  "~" StrategoVar -> DoCMBindings {cons("Metavar")}
+
+lexical syntax
+  "do"  -> FomegaKeyword 
+
+lexical restrictions
+  "do" -/- [A-Za-z0-9]

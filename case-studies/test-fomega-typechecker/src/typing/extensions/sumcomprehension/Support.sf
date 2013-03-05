@@ -1,0 +1,10 @@
+module typing.extensions.sumcomprehension.Support
+
+import typing.rules.TypeChecker
+
+public val sum = \n:Nat. \m:Nat. \f:Nat->Nat. 1
+// Should calculate f(n) + f(n+1) + ... + f(m).
+// We do not have arithmetic primitives right now, hence
+// this dummy definition.
+
+public val sum1 = sum 1

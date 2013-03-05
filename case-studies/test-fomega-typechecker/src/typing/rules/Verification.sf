@@ -5,6 +5,8 @@ import typing.rules.Desugaring // for premises-to-list
 
 // import typing.rules.ExprTypeRules
 
+import typing.extensions.Declaration
+
 rules
 
   constraint-error = verify-type-rule
@@ -13,18 +15,44 @@ rules
 rules
 
   verify-type-rule :
-    tr@TypeRule(premises, RuleName(sep, Some(Var(name))), TypingJudgment(C, e, T)) ->
-      [(tr, <concat-strings> [name, ": ", text-des-e])]
-    where <desugar <+ id> e => des-e
-        ; <write-to-string> des-e => text-des-e
+    TypeRule(premises, RuleName(sep, Some(Var(name))), TypingJudgment(C, e, T)) ->
+      result
+    where // TODO: only allow desugar-extension-internal; extension declaration 
+          //       requires this rule to be successfully applicable to subject
+          <bottomup(strip-annos); (desugar-extension-internal <+ desugar <+ id)> e => des-e 
+        ; <nice-analysis-data-term; debug(!"Desugared conclusion term: ")> des-e 
         ; <premises-to-list> premises => premises-list
-        ; {| Dynamic-Axioms:
+        ; {| Dynamic-TypeOf, Dynamic-KindOf, Dynamic-ParReduce1, Dynamic-Lookup-Expr-Var:
                <activate-dynamic-axioms> premises-list
-             ; <typeOf> (C, des-e) => (U, errs)
+             ; <typeOf> (<strip-annos> C, <strip-annos> des-e) => (U, errs)
+               // strip-annos is necessary since dynamic rules without annotations
+               // do not match annotated terms.
+             ; if !errs; ?[] then
+                   <norm> (<strip-annos> C, <strip-annos> T) => T'
+                 ; <norm> (<strip-annos> C, <strip-annos> U) => U'
+               else
+                 !T; ?T'; !U; ?U'
+               end
           |}
-        ; <debug(!"Expected type: ")> T
-        ; <debug(!"Actual type:   ")> U
+        ; <debug(!"Expected type: ")> T'
+        ; <debug(!"Actual type:   ")> U'
         ; <debug(!"Type errors:   ")> errs
+        ; if !errs; ?[] then
+              <typeEq> (T', U') => msgs
+            ; if !msgs; ?[] then
+                debug(!(<concat-strings> ["Successfully verified typing rule ", name, "."])); fail
+              else
+                ![( name
+                 , <concat-strings> [ "Could not verify typing rule ", name, ".\n"
+                                    , "Expected type: ", <write-to-string> T', ".\n"
+                                    , "But got type:  ", <write-to-string> U', "."])]
+              end
+          else
+            ![( name
+              , <concat-strings> [ "Could not verify typing rule ", name, ".\n"
+                                 , "The type checker returned the following errors:\n"
+                                 , <write-to-string> errs])]
+          end => result
 
   activate-dynamic-axioms :
     [] -> []
@@ -36,24 +64,43 @@ rules
 
   activate-dynamic-axiom =
     ?TypingJudgment(C, e, T);
-    rules(Dynamic-TypeOf : (C, e) -> (T, []));
-    <debug(!"Activated TJ ")> (C, e, T)
+    <strip-annos> e => e1;
+    <strip-annos> C => C1;
+    <strip-annos> T => T1;
+    rules(Dynamic-TypeOf : (C1, e1) -> (T1, []))
+    // ; <debug(!"Activated TJ ")> (C1, e1, T1)
 
   activate-dynamic-axiom =
     ?KindingJudgment(C, T, K);
-    rules(Dynamic-KindOf : (C, T) -> (K, []));
-    <debug(!"Activated KJ ")> (C, T, K)
+    <strip-annos> T => T1;
+    <strip-annos> C => C1;
+    <strip-annos> K => K1;
+    rules(Dynamic-KindOf : (C1, T1) -> (K1, []))
+    // ; <debug(!"Activated KJ ")> (C1, T1, K1)
 
   activate-dynamic-axiom =
     ?NormalizationJudgment(C, T, T');
-    rules(Dynamic-ParReduce1 : (C, T) -> T');
-    <debug(!"Activated PJ ")> (C, T, T')
+    <strip-annos> T => T1;
+    <strip-annos> C => C1;
+    <strip-annos> T' => T'1;
+    rules(Dynamic-ParReduce1 : (C1, T1) -> T'1)
+    // ; <debug(!"Activated PJ ")> (C1, T1, T'1)
 
   activate-dynamic-axiom =
     ?VarInContextJudgment(x, T, C);
-    rules(Dynamic-Lookup-Expr-Var : (x, C) -> (T, []));
-    <debug(!"Activated VJ ")> (x, T, C)
+    <strip-annos> x => x1;
+    <strip-annos> C => C1;
+    <strip-annos> T => T1;
+    rules(Dynamic-Lookup-Expr-Var : (x1, C1) -> (T1, []))
+    // ; <debug(!"Activated VJ ")> (x1, T1, C)
 
+  activate-dynamic-axiom =
+    ?QVarInContextJudgment(qx, T, C);
+    <strip-annos> qx => qx1;
+    <strip-annos> C => C1;
+    <strip-annos> T => T1;
+    rules(Dynamic-Lookup-Expr-Var : (qx1, C1) -> (T1, []))
+    // ; <debug(!"Activated VQJ ")> (qx1, T1, C1)
 
 rules // Rules to hook in dynamic axioms into the judgment implementations
 

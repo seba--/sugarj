@@ -1,0 +1,34 @@
+module concretesyntax.Metavars
+
+import org.sugarj.languages.Fomega
+
+import concretesyntax.MetaExplode
+
+
+signature
+  constructors
+    Metavar: String -> Term
+
+
+context-free syntax
+
+  "~"  StrategoVar  -> Context        {cons("Metavar")}
+  "~:" StrategoVar  -> FomegaTyDecls1  {cons("Metavar")}
+  "~"  StrategoVar  -> FomegaTyDecls  {cons("Metavar")}
+  "~"  StrategoVar  -> FomegaBranches {cons("Metavar")}
+  "~=" StrategoVar  -> FomegaFields1   {cons("Metavar")}
+  "~"  StrategoVar  -> FomegaFields   {cons("Metavar")}
+  "~"  StrategoVar  -> FomegaExpr     {cons("Metavar")}
+  "~"  StrategoVar  -> FomegaType     {cons("Metavar")}
+  "~"  StrategoVar  -> FomegaKind     {cons("Metavar")}
+
+  "~%" StrategoVar -> FomegaID       {cons("Metavar")}
+  "~&" StrategoVar -> FomegaQID      {cons("Metavar")}
+
+  "~#" StrategoVar -> FomegaNAT      {cons("Metavar")}
+  "~$" StrategoVar -> FomegaSTRING   {cons("Metavar")}
+
+
+rules
+
+  TrmFromTerm = ?Metavar(<MetaExplode>)

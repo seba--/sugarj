@@ -3,7 +3,7 @@ module typing.rules.ExprTypeRules
 import typing.rules.Syntax
 import typing.rules.Desugaring
 
-// TODO: fold/unfold, case/variant, record/selection
+// TODO: fold/unfold
 
 ~C |- ~e1 : ~T1
 ~C |- ~e2 : ~T2
@@ -73,3 +73,55 @@ import typing.rules.Desugaring
 ~&qx:~T in ~C
 =============== T-QVar
 ~C |- ~&qx : ~T
+
+
+============= T-RecordNil
+~C |- {} : {}
+
+
+~C |- ~e : ~T
+~C |- {~flds} : ~S
+~C |- ~S ~> {~decls}
+~%x notin sel(~decls)
+======================================== T-RecordCons
+~C |- {~%x=~e, ~flds} : {~%x:~T, ~decls}
+
+
+~C |- ~e : ~T
+~C |- ~T ~> {~decls}
+~%x:~S in decls ~decls
+====================== T-Select
+~C |- ~e!~%x : ~S
+
+
+~C |- ~T :: *
+~C |- ~e : ~S
+~C |- ~S ~> ~U
+~C |- ~T ~> <~decls>
+~%x:~U in decls ~decls
+========================= T-Variant
+~C |- <~%x=~e> as ~T : ~T
+
+
+~C |- ~e : ~S
+~C |- ~S ~> <~decls>
+lab(~decls) ~= tag(~brs)
+~C | ~decls |- ~brs : ~T
+========================== T-Case
+~C |- case ~e of ~brs : ~T
+
+
+~%x:~S in decls ~decls
+(~C;~%y:~S) |- ~e : ~T
+=================================== TB-End
+~C | ~decls |- <~%x=~%y> => ~e : ~T
+
+
+~%x notin tag(~brs)
+~%x:~S in decls ~decls
+(~C;~%y:~S) |- ~e : ~T1
+~C |- ~T1 ~> ~U
+~C | ~decls |- ~brs : ~T2
+~C |- ~T2 ~> ~U
+========================================= TB-Cons
+~C | ~decls |- <~%x=~%y> => ~e; ~brs : ~U

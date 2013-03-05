@@ -1,0 +1,9 @@
+module test.ADT
+
+import extension.adt.Syntax
+import extension.adt.Desugaring
+
+
+data Tree (k::*) (v::*) = Nil isNil
+                        | Leaf isLeaf (value: v)
+                        | Node isNode (left: Tree k v) (key: k) (right: Tree k v)

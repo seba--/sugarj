@@ -1,0 +1,79 @@
+module typing.extensions.sumcomprehension.Semantics
+
+import org.sugarj.languages.Fomega
+import concretesyntax.Fomega
+
+import typing.rules.Syntax
+import typing.rules.Desugaring
+import typing.rules.ExprTypeRules
+import typing.rules.Verification
+
+import typing.extensions.sumcomprehension.Syntax
+
+
+~C |- ~e : ~T
+~C |- ~T ~> Nat
+typing.extensions.sumcomprehension.Support.sum1:Nat -> (Nat -> Nat) -> Nat in ~C
+================================================================================ T-DoSumAtomic
+~C |- dosum { ~e } : Nat
+
+~C |- ~e1 : ~T1
+~C |- ~T1 ~> Nat
+(~C;~%x:Nat) |- ~e2 : ~T2
+~C |- ~T2 ~> Nat
+typing.extensions.sumcomprehension.Support.sum1:Nat -> (Nat -> Nat) -> Nat in ~C
+================================================================================ T-DoSumGen1
+~C |- dosum { ~%x <- ~e1; ~e2 } : Nat
+
+~C |- ~e1 : ~T1
+~C |- ~T1 ~> Nat
+(~C;~%x:Nat) |- ~e2 : ~T2
+~C |- ~T2 ~> Nat
+typing.extensions.sumcomprehension.Support.sum1:Nat -> (Nat -> Nat) -> Nat in ~C
+================================================================================ T-DoSumLet1
+~C |- dosum { let ~%x = ~e1; ~e2 } : Nat
+
+~C |- ~e1 : ~T1
+~C |- ~T1 ~> Nat
+(~C;~%x:Nat) |- dosum { ~bs; ~e2 } : Nat
+typing.extensions.sumcomprehension.Support.sum1:Nat -> (Nat -> Nat) -> Nat in ~C
+================================================================================ T-DoSumGen2
+~C |- dosum { ~%x <- ~e1; ~bs; ~e2} : Nat
+
+~C |- ~e1 : ~T1
+~C |- ~T1 ~> Nat
+(~C;~%x:Nat) |- dosum { ~bs; ~e2 } : Nat
+typing.extensions.sumcomprehension.Support.sum1:Nat -> (Nat -> Nat) -> Nat in ~C
+================================================================================ T-DoSumGen2
+~C |- dosum { let ~%x = ~e1; ~bs; ~e2 } : Nat
+
+
+desugarings
+  dosum-desugar
+
+rules
+
+  dosum-desugar :
+    fomega |[ dosum { ~e } ]|
+    ->
+    fomega |[ ~e ]|
+
+  dosum-desugar :
+    |[ dosum { ~%x <- ~e1; ~e2 } ]|
+    ->
+    |[ typing.extensions.sumcomprehension.Support.sum1 ~e1 (\~%x:Nat. ~e2) ]|
+
+  dosum-desugar :
+    |[ dosum { let ~%x = ~e1; ~e2 } ]|
+    ->
+    |[ (\~%x:Nat. ~e2) ~e1 ]|
+
+  dosum-desugar :
+    |[ dosum { ~%x <- ~e1; ~bs; ~e2 } ]|
+    ->
+    |[ typing.extensions.sumcomprehension.Support.sum1 ~e1 (\~%x:Nat. dosum { ~bs; ~e2 }) ]|
+
+  dosum-desugar :
+    |[ dosum { let ~%x = ~e1; ~bs; ~e2 } ]|
+    ->
+    |[ (\~%x:Nat. dosum { ~bs; ~e2 }) ~e1 ]|

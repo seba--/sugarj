@@ -33,7 +33,7 @@ public class FomegaLibFactory extends LanguageLibFactory {
 
   @Override
   public String getVersion() {
-    return "fomega-0.1f";
+    return "fomega-0.2";
   }
   
   @Override

@@ -44,8 +44,6 @@ import org.spoofax.jsglr_layout.shared.TokenExpectedException;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.lang.StrategoException;
-import org.strategoxt.stratego_aterm.stratego_aterm;
-import org.strategoxt.stratego_gpp.stratego_gpp;
 import org.sugarj.LanguageLib;
 import org.sugarj.LanguageLibFactory;
 import org.sugarj.common.ATermCommands;

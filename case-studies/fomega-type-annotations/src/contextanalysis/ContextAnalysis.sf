@@ -1,0 +1,28 @@
+module contextanalysis.ContextAnalysis
+
+import org.sugarj.languages.Fomega
+
+import contextanalysis.SignatureChecker
+import contextanalysis.Editor
+
+
+analyses
+  context-analysis
+
+rules
+
+  // TODO: Establish context from imports instead of empty context
+  context-analysis =
+      ?FomegaBody(defs)
+    ; <debug-analysis(!"Before checking: "); where(annotate-signature)> (CtxEmpty(), defs)
+    ; debug-analysis(!"After checking: ")
+
+
+rules
+
+  constraint-error :
+    FomegaBody(defs) -> <context-errors-as-alist> defs
+
+
+colorer
+// dummy declaration to ensure export of editor service

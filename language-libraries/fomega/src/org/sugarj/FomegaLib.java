@@ -23,11 +23,12 @@ import org.sugarj.common.path.RelativePath;
 import org.sugarj.fomega.FomegaSourceFileContent;
 import org.sugarj.languagelib.SourceFileContent;
 import org.sugarj.languagelib.SourceImport;
+import org.sugarj.languagelib.primitive.IPrettyPrint;
 
 /**
  * @author Florian Lorenzen <florian.lorenzen at tu-berlin de>
  */
-public class FomegaLib extends LanguageLib {
+public class FomegaLib extends LanguageLib implements IPrettyPrint {
 
   private static final long serialVersionUID = 6325786656556068937L;
 

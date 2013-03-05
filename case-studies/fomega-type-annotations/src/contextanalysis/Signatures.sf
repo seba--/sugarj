@@ -1,0 +1,12 @@
+module contextanalysis.Signatures
+
+import org.sugarj.languages.Fomega
+
+
+signature
+  sorts Signature
+
+  constructors
+    SigEmpty:       Signature
+    SigBindTVarDef: FomegaID * FomegaKind * FomegaType * Signature -> Signature
+    SigBindVar:     FomegaID * FomegaType * Signature -> Signature

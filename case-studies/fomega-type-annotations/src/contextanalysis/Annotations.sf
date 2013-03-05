@@ -1,0 +1,34 @@
+module contextanalysis.Annotations
+
+
+rules
+
+  add-context-errors =
+      ?(msgs, node)
+    ; <get-context-errors> node => msgs-old
+    ; <put-anno(|"context-errors", <conc> (msgs, msgs-old))> node
+
+  get-context-errors = get-anno(|"context-errors") <+ ![]
+
+  collect-all-context-errors = collect-all(get-context-errors); concat
+
+  context-errors-as-alist =
+    let as-alist =
+      { node, errs:
+          ?node
+        ; <get-context-errors> node => errs
+        ; if !errs; ?[] then fail else ![(node, errs)] end
+      }
+    in collect-all(as-alist) end
+
+  get-kind = get-anno(|"kind")
+
+  put-kind = ?(K, node); <put-anno(|"kind", K)> node
+
+  get-signature = get-anno(|"signature")
+
+  put-signature = ?(sig, node); <put-anno(|"signature", sig)> node
+
+  get-type = get-anno(|"type")
+
+  put-type = ?(T, node); <put-anno(|"type", T)> node

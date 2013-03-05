@@ -1,6 +1,7 @@
-module typing.extensions.let.TypDes
+module typing.extensions.let.Semantics
 
 import org.sugarj.languages.Fomega
+import concretesyntax.Fomega
 
 import typing.rules.Syntax
 import typing.rules.Desugaring
@@ -24,5 +25,4 @@ desugarings
 
 rules
   desugar-let :
-    Let(x, T, e1, e2) -> App(Abs(x, T, e1), e2)
-    // Wrong translation on purpose: error must be found by Verification
+    |[ let ~%x : ~T = ~e1 in ~e2 ]| -> |[ (\~%x:~T. ~e2) ~e1 ]|

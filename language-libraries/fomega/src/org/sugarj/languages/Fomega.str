@@ -2,45 +2,61 @@ module org/sugarj/languages/Fomega
 
 signature
   constructors
-    Qualified  : FomegaQualified
-    Public     : FomegaPublic
-    TypeDef    : Option(FomegaPublic) * FomegaID * FomegaType -> FomegaDef
-    ValDef     : Option(FomegaPublic) * FomegaID * FomegaExpr -> FomegaDef
-    Import     : Option(FomegaQualified) * FomegaMID -> FomegaImport
-    Module     : FomegaModuleDec * List(FomegaImport) * List(FomegaDef) -> FomegaModule
-    ModuleDec  : FomegaMID -> FomegaModuleDec
-    Branch     : FomegaID * FomegaID * FomegaExpr -> FomegaBranch
-    Field      : FomegaID * FomegaExpr -> FomegaField
-    Case       : FomegaExpr * List(FomegaBranch) -> FomegaExpr
-    Cond       : FomegaExpr * FomegaExpr * FomegaExpr -> FomegaExpr
-    TAbs       : FomegaID * FomegaKind * FomegaExpr -> FomegaExpr
-    Abs        : FomegaID * FomegaType * FomegaExpr -> FomegaExpr
-    Ascription : FomegaExpr * FomegaType -> FomegaExpr
-    Unfold     : FomegaType * FomegaExpr -> FomegaExpr
-    Fold       : FomegaType * FomegaExpr -> FomegaExpr
-    TApp       : FomegaExpr * FomegaType -> FomegaExpr
-    App        : FomegaExpr * FomegaExpr -> FomegaExpr
-    SelectRcd  : FomegaExpr * FomegaID -> FomegaExpr
-    String     : FomegaSTRING -> FomegaExpr
-    Nat        : FomegaNAT -> FomegaExpr
-    False      : FomegaExpr
-    True       : FomegaExpr
-    Variant    : FomegaField * FomegaType -> FomegaExpr
-    Record     : List(FomegaField) -> FomegaExpr
-    QVar       : FomegaQID -> FomegaExpr
-    Var        : FomegaID -> FomegaExpr
-    KiArrow    : FomegaKind * FomegaKind -> FomegaKind
-    KiStar     : FomegaKind
-    TyDecl     : FomegaID * FomegaType -> FomegaTypeDecl
-    TyMu       : FomegaID * FomegaType -> FomegaType
-    TyAbs      : FomegaID * FomegaKind * FomegaType -> FomegaType
-    TyForall   : FomegaID * FomegaKind * FomegaType -> FomegaType
-    TyArrow    : FomegaType * FomegaType -> FomegaType
-    TyApp      : FomegaType * FomegaType -> FomegaType
-    TyQVar     : FomegaQID -> FomegaType
-    TyVariant  : List(FomegaTypeDecl) -> FomegaType
-    TyRecord   : List(FomegaTypeDecl) -> FomegaType
-    TyString   : FomegaType
-    TyBool     : FomegaType
-    TyNat      : FomegaType
-    TyVar      : FomegaID -> FomegaType
+    Qualified      : FomegaQualified
+    Public         : FomegaPublic
+    TypeDef        : Option(FomegaPublic) * FomegaID * FomegaType -> FomegaDef
+    ValDef         : Option(FomegaPublic) * FomegaID * FomegaExpr -> FomegaDef
+    FomegaBody     : FomegaDefs -> FomegaDefinitions
+    DefsEnd        : FomegaDef -> FomegaDefs
+    DefsCons       : FomegaDef * FomegaDefs -> FomegaDefs
+    Import         : Option(FomegaQualified) * FomegaMID -> FomegaImport
+    FomegaImports  : List(FomegaImport) -> FomegaImports
+    Module         : FomegaModuleDec * FomegaImports * FomegaDefinitions -> FomegaModule
+    ModuleDec      : FomegaMID -> FomegaModuleDec
+    BranchesCons   : FomegaBranch * FomegaBranches -> FomegaBranches
+    BranchesEnd    : FomegaBranch -> FomegaBranches
+    Branch         : FomegaID * FomegaID * FomegaExpr -> FomegaBranch
+    FieldsCons     : FomegaField * FomegaFields -> FomegaFields
+    FieldsNil      : FomegaFields
+    Field          : FomegaID * FomegaExpr -> FomegaField
+    Case           : FomegaExpr * FomegaBranches -> FomegaExpr
+    Cond           : FomegaExpr * FomegaExpr * FomegaExpr -> FomegaExpr
+    TAbs           : FomegaID * FomegaKind * FomegaExpr -> FomegaExpr
+    Abs            : FomegaID * FomegaType * FomegaExpr -> FomegaExpr
+    Ascription     : FomegaExpr * FomegaType -> FomegaExpr
+    Unfold         : FomegaType * FomegaExpr -> FomegaExpr
+    Fold           : FomegaType * FomegaExpr -> FomegaExpr
+    TApp           : FomegaExpr * FomegaType -> FomegaExpr
+    App            : FomegaExpr * FomegaExpr -> FomegaExpr
+    SelectRcd      : FomegaExpr * FomegaID -> FomegaExpr
+    String         : FomegaSTRING -> FomegaExpr
+    Nat            : FomegaNAT -> FomegaExpr
+    False          : FomegaExpr
+    True           : FomegaExpr
+    Variant        : FomegaField * FomegaType -> FomegaExpr
+    Record         : FomegaFields -> FomegaExpr
+    QVar           : FomegaQID -> FomegaExpr
+    Var            : FomegaID -> FomegaExpr
+    KiArrow        : FomegaKind * FomegaKind -> FomegaKind
+    KiStar         : FomegaKind
+    KiEmpty        : FomegaKind
+    KiPair         : FomegaKind * FomegaKind -> FomegaKind
+    TyDeclsCons    : FomegaTyDecl * FomegaTyDecls -> FomegaTyDecls
+    TyDeclsNil     : FomegaTyDecls
+    TyDecl         : FomegaID * FomegaType -> FomegaTyDecl
+    TyEmpty        : FomegaType
+    TyPair         : FomegaType * FomegaType -> FomegaType
+    TyFst          : FomegaType -> FomegaType
+    TySnd          : FomegaType -> FomegaType
+    TyMu           : FomegaKind * FomegaType * FomegaType -> FomegaType
+    TyAbs          : FomegaID * FomegaKind * FomegaType -> FomegaType
+    TyForall       : FomegaID * FomegaKind * FomegaType -> FomegaType
+    TyArrow        : FomegaType * FomegaType -> FomegaType
+    TyApp          : FomegaType * FomegaType -> FomegaType
+    TyQVar         : FomegaQID -> FomegaType
+    TyVariant      : FomegaTyDecls -> FomegaType
+    TyRecord       : FomegaTyDecls -> FomegaType
+    TyString       : FomegaType
+    TyBool         : FomegaType
+    TyNat          : FomegaType
+    TyVar          : FomegaID -> FomegaType
