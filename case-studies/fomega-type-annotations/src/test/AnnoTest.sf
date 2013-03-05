@@ -42,5 +42,6 @@ val x13 = case x12 of
   <y=y> => y;
   <z=z> => z!a
  
- val xLast = "dummy"
- 
+type x14 = {b:Nat,a:Bool}
+
+val xLast = "dummy"

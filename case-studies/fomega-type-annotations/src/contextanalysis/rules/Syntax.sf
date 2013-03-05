@@ -76,7 +76,7 @@ context-free syntax // *** Syntax for judgments ***
   Context "|-" FomegaExpr ":" FomegaType  -> TypingJudgment        {cons("TypingJudgment")}
   Context "|-" FomegaType "~>" FomegaType -> NormalizationJudgment {cons("NormalizationJudgment")}
 
-  FomegaID "notin" "sel" "(" FomegaFields ")"        -> NotinSelJudgment       {cons("NotinSelJudgment")}
+  FomegaID "notin" "lab" "(" FomegaFields ")"        -> NotinLabJudgment       {cons("NotinLabJudgment")}
   FomegaID ":" FomegaType "in" "decls" FomegaTyDecls -> InDeclJudgment         {cons("InDeclJudgment")}
   FomegaID ":" FomegaType "in" Context               -> VarInContextJudgment   {cons("VarInContextJudgment")}
   FomegaQID ":" FomegaType "in" Context              -> QVarInContextJudgment  {cons("QVarInContextJudgment")}
@@ -87,7 +87,7 @@ context-free syntax // *** Syntax for judgments ***
   KindingJudgment       -> TypingRuleJudgment
   TypingJudgment        -> TypingRuleJudgment
   NormalizationJudgment -> TypingRuleJudgment
-  NotinSelJudgment      -> TypingRuleJudgment
+  NotinLabJudgment      -> TypingRuleJudgment
   InDeclJudgment        -> TypingRuleJudgment
   VarInContextJudgment  -> TypingRuleJudgment
   QVarInContextJudgment -> TypingRuleJudgment
@@ -96,6 +96,7 @@ context-free syntax // *** Syntax for judgments ***
   KindingJudgment        -> KindingRuleJudgment
   TVarInContextJudgment  -> KindingRuleJudgment
   QTVarInContextJudgment -> KindingRuleJudgment
+  NotinLabJudgment       -> KindingRuleJudgment
 
 
 context-free syntax // *** Substitution on level of types

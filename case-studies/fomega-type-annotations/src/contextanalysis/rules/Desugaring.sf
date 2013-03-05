@@ -114,16 +114,18 @@ rules // Translate a judgment
 
   translate-judgment :
     (ts, KindingJudgment(C, T, K)) ->
-      (ts3, |[   <annotate-kind> (term~tC, term~tT)
-               ; <get-kind> term~tT => term~result-var
+      (ts4, |[   <reinit-for-analysis> term~tT => term~result-var1 
+               ; <annotate-kind> (term~tC, term~result-var1)
+               ; <get-kind> term~result-var1 => term~result-var
                ; strategy~inspect-result
             ]|)
     where <trm-explode> C => tC
         ; <trm-explode> T => tT
         ; <trm-explode> K => tK
         ; <fresh-result-var> ts => (ts1, result-var)
-        ; <ts-add-blame> (ts1, tK, tT) => ts2
-        ; <translate-kind-expectation> (ts2, tT, result-var, K) => (ts3, inspect-result)
+        ; <fresh-result-var> ts1 => (ts2, result-var1)
+        ; <ts-add-blame> (ts2, tK, tT) => ts3
+        ; <translate-kind-expectation> (ts3, result-var1, result-var, K) => (ts4, inspect-result)
 
   translate-judgment :
     (ts, NormalizationJudgment(C, T, T')) ->
@@ -171,7 +173,7 @@ rules // Translate a judgment
     (ts, QTVarInContextJudgment(qX, K, C)) -> <translate-judgment> (ts, TVarInContextJudgment(qX, K, C))
 
   translate-judgment :
-    (ts, NotinSelJudgment(x, decls)) ->
+    (ts, NotinLabJudgment(x, decls)) ->
       (ts, |[ if <not(elem(structurally-equal))> (term~tx, <lab> term~tdecls) then
                 id
               else
@@ -192,8 +194,6 @@ rules // Translate a judgment
         ; <fresh-msgs-var> ts => (ts1, msgs-var)
         ; <fresh-result-var> ts1 => (ts2, result-var)
         ; <translate-type-expectation> (ts2, tx, result-var, [], T, []) => (ts3, inspect-result)
-
-  // TODO: missing NotinTagJudgment, etc.
 
 
 rules // Translate a type expectation
@@ -357,8 +357,28 @@ rules // Translate a kind expectation
     where <fresh-msgs-var> ts => (ts1, msgs-var)
 
   translate-kind-expectation :
+    (ts, tblame, result-var, KiEmpty()) ->
+      (ts1, |[   <kind-eq-empty> term~result-var => term~msgs-var
+               ; <add-context-errors> (term~msgs-var, term~tblame)
+            ]|)
+    where <fresh-msgs-var> ts => (ts1, msgs-var)
+
+  translate-kind-expectation :
     (ts, tblame, result-var, KiArrow(K1, K2)) ->
       (ts5, |[   <kind-eq-arrow> term~result-var => (term~result-var1, term~result-var2, term~msgs-var)
+               ; <add-context-errors> (term~msgs-var, term~tblame)
+               ; strategy~inspect-result1
+               ; strategy~inspect-result2
+            ]|)
+    where <fresh-result-var> ts => (ts1, result-var1)
+        ; <fresh-result-var> ts1 => (ts2, result-var2)
+        ; <fresh-msgs-var> ts2 => (ts3, msgs-var)
+        ; <translate-kind-expectation> (ts3, tblame, result-var1, K1) => (ts4, inspect-result1)
+        ; <translate-kind-expectation> (ts4, tblame, result-var2, K2) => (ts5, inspect-result2)
+
+  translate-kind-expectation :
+    (ts, tblame, result-var, KiPair(K1, K2)) ->
+      (ts5, |[   <kind-eq-pair> term~result-var => (term~result-var1, term~result-var2, term~msgs-var)
                ; <add-context-errors> (term~msgs-var, term~tblame)
                ; strategy~inspect-result1
                ; strategy~inspect-result2

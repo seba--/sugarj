@@ -83,7 +83,7 @@ import concretesyntax.Fomega
 ~C |- ~e : ~T
 ~C |- {~flds} : ~S
 ~C |- ~S ~> {~decls}
-~%x notin sel(~decls)
+~%x notin lab(~decls)
 ======================================== T-RecordCons
 ~C |- {~%x=~e ~=flds} : {~%x:~T ~:decls}
 
