@@ -8,14 +8,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.runtime.FileLocator;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
@@ -34,8 +32,6 @@ import org.sugarj.java.JavaSourceFileContent;
 public class JavaLib extends LanguageLib implements Serializable {
 
   private static final long serialVersionUID = 1817193221140795776L;
-
-  private transient File libDir;
 
   private Set<RelativePath> generatedJavaClasses = new HashSet<RelativePath>();
 
@@ -85,28 +81,6 @@ public class JavaLib extends LanguageLib implements Serializable {
     return "org/sugarj/java/init/initEditor";
   }
 
-  @Override
-  public File getLibraryDirectory() {
-    if (libDir == null) { // set up directories first
-      String thisClassPath = "org/sugarj/JavaLib.class";
-      URL thisClassURL = JavaLib.class.getClassLoader().getResource(thisClassPath);
-
-      if (thisClassURL.getProtocol().equals("bundleresource"))
-        try {
-          thisClassURL = FileLocator.resolve(thisClassURL);
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-
-      String classPath = thisClassURL.getPath();
-      String binPath = classPath.substring(0, classPath.length() - thisClassPath.length());
-
-      libDir = new File(binPath);
-    }
-
-    return libDir;
-  }
-
   public static void main(String args[]) throws URISyntaxException {
     JavaLib jl = new JavaLib();
 
@@ -116,7 +90,6 @@ public class JavaLib extends LanguageLib implements Serializable {
     exists(jl.getInitGrammar());
     exists(jl.getInitTrans());
     exists(jl.getInitEditor());
-    exists(jl.libDir);
   }
 
   private static void exists(File file) {
