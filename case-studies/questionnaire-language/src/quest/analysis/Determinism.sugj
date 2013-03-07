@@ -19,11 +19,9 @@ public sugar Determinism {
     analyze-determinism = DerivedValue(id, QuestId(new-active-name-cond), id)
     analyze-determinism = QuestGroup(id, analyze-determinism)
     analyze-determinism =
-      ConditionalQuest(?QuestExpr(cond), analyze-determinism-limited-context(|cond))
-    analyze-determinism =
       ConditionalQuest(?QuestExpr(cond),
                        analyze-determinism-limited-context(|cond), 
-                       analyze-determinism-limited-context(|Not(cond)))
+                       ?None + Some(analyze-determinism-limited-context(|Not(cond))))
     analyze-determinism = ?LocalQuest(_)
     analyze-determinism = QuestRef(QuestId(new-active-name-cond))
 

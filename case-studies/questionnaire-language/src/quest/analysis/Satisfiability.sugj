@@ -11,8 +11,8 @@ public sugar Satisfiability {
   rules
     is-satisfiable =
       innermost(reduce);
-      repeat(remove-equation);
-      innermost(reduce);
+      // repeat(remove-equation);
+      // innermost(reduce);
       repeat(remove-variable);
       innermost(reduce);
       ?Lit(Bool(True))
@@ -31,8 +31,18 @@ public sugar Satisfiability {
     
     reduce : LazyAnd(Lit(Bool(False)), _) -> Lit(Bool(False))
     reduce : LazyAnd(Lit(Bool(True)), t2) -> t2
+    reduce : LazyAnd(_ ,Lit(Bool(False))) -> Lit(Bool(False))
+    reduce : LazyAnd(t1, Lit(Bool(True))) -> t1
+    reduce : LazyAnd(t, Not(t)) -> Lit(Bool(False))
+    reduce : LazyAnd(Not(t), t) -> Lit(Bool(False))
+    
     reduce : LazyOr(Lit(Bool(True)), _) -> Lit(Bool(True))
     reduce : LazyOr(Lit(Bool(False)), t2) -> t2
+    reduce : LazyOr(_, Lit(Bool(True))) -> Lit(Bool(True))
+    reduce : LazyOr(t1, Lit(Bool(False))) -> t1
+    reduce : LazyOr(t, Not(t)) -> Lit(Bool(True))
+    reduce : LazyOr(Not(t), t) -> Lit(Bool(True))
+    
     reduce : Not(Lit(Bool(True))) -> Lit(Bool(False))
     reduce : Not(Lit(Bool(False))) -> Lit(Bool(True))
     

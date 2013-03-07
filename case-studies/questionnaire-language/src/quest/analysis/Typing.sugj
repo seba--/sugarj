@@ -22,8 +22,7 @@ public sugar Typing {
         else DerivedValue(id, id, QuestExpr(unexpected-type-error(|type)))
       end
     analyze-types = QuestGroup(id, analyze-types)
-    analyze-types = ConditionalQuest(analyze-expr-type, analyze-types)
-    analyze-types = ConditionalQuest(analyze-expr-type, analyze-types, analyze-types)
+    analyze-types = ConditionalQuest(analyze-expr-type, analyze-types, ?None + Some(analyze-types))
     analyze-types = ?LocalQuest(Question(QuestType(type), _, _)); put-type(|<strip-annos> type)
     analyze-types =
       ?QuestRef(_);

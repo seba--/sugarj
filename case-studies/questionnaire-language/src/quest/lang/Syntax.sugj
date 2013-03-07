@@ -1,6 +1,7 @@
 package quest.lang;
 
 public sugar Syntax {
+  // top-level questionnaire declaration
   context-free syntax
     Quest -> ToplevelDeclaration
     AnnoOrSugarMod* "questionnaire" JavaId QuestList

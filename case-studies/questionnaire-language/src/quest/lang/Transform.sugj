@@ -139,9 +139,6 @@ public sugar Transform {
   
   rules
     desugar-conditional-group :
-      ConditionalQuest(cond, qs) -> ConditionalQuest(cond, qs, QNil)
-    
-    desugar-conditional-group :
       ConditionalQuest(QuestExpr(cond), qs1, qs2) ->
       <conc> 
       (java_bstm* |[
@@ -184,7 +181,7 @@ public sugar Transform {
       <newname> "elseContainer" => java_x_else; 
       
       <flatten-questlist> qs1 => flat-qs1;
-      <flatten-questlist> qs2 => flat-qs2;
+      <?None;![] + ?Some(<flatten-questlist>)> qs2 => flat-qs2;
 
       <newname> "cond" => java_x;
       <newname> "cond" => java_x_not;
@@ -229,3 +226,4 @@ public sugar Transform {
     put-mods(|mods) = ClassDec(ClassDecHead(!mods,id,id,id,id),id)
     put-fields(|fields) = ClassDec(id,ClassBody(!(fields,<id>);conc))
 }
+
