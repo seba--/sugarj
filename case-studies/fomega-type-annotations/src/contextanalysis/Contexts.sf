@@ -79,6 +79,11 @@ rules
 
   lookup-type-var-def :
     (X, CtxBindTVar(C, Y, K)) -> <lookup-type-var-def> (X, C)
+    where <not(structurally-equal)> (Y, X)
+
+  lookup-type-var-def :
+    (X, CtxBindTVar(C, Y, K)) -> (TyUnknown(), [<concat-strings> ["no definition for ", X]])
+    where <structurally-equal> (Y, X)
 
   lookup-type-var-def :
     (X, CtxBindTVarDef(C, Y, K, T)) -> <lookup-type-var-def> (X, C)

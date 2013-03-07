@@ -48,7 +48,7 @@ signature
     TyPair         : FomegaType * FomegaType -> FomegaType
     TyFst          : FomegaType -> FomegaType
     TySnd          : FomegaType -> FomegaType
-    TyMu           : FomegaKind * FomegaType * FomegaType -> FomegaType
+    TyMu           : FomegaType * FomegaType -> FomegaType
     TyAbs          : FomegaID * FomegaKind * FomegaType -> FomegaType
     TyForall       : FomegaID * FomegaKind * FomegaType -> FomegaType
     TyArrow        : FomegaType * FomegaType -> FomegaType

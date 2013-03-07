@@ -1,4 +1,4 @@
-module contextanalysis.rules.RuleSyntax
+module contextanalysis.rules.Syntax
 
 import org.sugarj.languages.Stratego
 import org.sugarj.languages.Fomega
@@ -18,47 +18,71 @@ context-free syntax
 
 context-free syntax // *** Syntax for typing rules ***
 
-  TypeRule -> SugarDefElem
+  TypingRule -> SugarDefElem
 
-  RulePremises RuleSepName RuleConsequence
-    -> TypeRule {cons("TypeRule"),
-                 layout(1.first.col == 2.first.col &&
-                        2.first.col == 3.first.col)}
+  TypingRulePremises RuleSepName TypingRuleConsequence
+    -> TypingRule {cons("TypingRule"),
+                   layout(1.first.col == 2.first.col &&
+                          2.first.col == 3.first.col)}
 
-  PremiseList -> RulePremises {cons("PremiseList")}
-              -> RulePremises {cons("NoPremises")}
+  TypingRulePremiseList -> TypingRulePremises {cons("PremiseList")}
+                        -> TypingRulePremises {cons("NoPremises")}
 
-  OffTypingJudgment -> RuleConsequence
+  OffTypingJudgment -> TypingRuleConsequence
 
   TypingJudgment -> OffTypingJudgment {layout(1.first.col < 1.left.col)}
 
-  OffTypeRuleJudgment -> PremiseList
-  OffTypeRuleJudgment PremiseList -> PremiseList {cons("PremiseCons"), layout(1.first.col == 2.first.col)}
+  OffTypingRuleJudgment -> TypingRulePremiseList
+  OffTypingRuleJudgment TypingRulePremiseList -> TypingRulePremiseList {cons("PremiseCons"),
+                                                                        layout(1.first.col == 2.first.col)}
 
-  TypeRuleJudgment -> OffTypeRuleJudgment {layout(1.first.col < 1.left.col)}
+  TypingRuleJudgment -> OffTypingRuleJudgment {layout(1.first.col < 1.left.col)}
 
 
-context-free syntax // *** Syntax for branch typing rules ***
+context-free syntax // *** Syntax for kinding rules ***
 
-  BranchTypeRule -> SugarDefElem
+  KindingRule -> SugarDefElem
 
-  BranchTypeRulePremises RuleSepName BranchTypeRuleConsequence
-    -> BranchTypeRule {cons("BranchTypeRule"),
-                       layout(1.first.col == 2.first.col &&
-                              2.first.col == 3.first.col)}
+  KindingRulePremises RuleSepName KindingRuleConsequence
+    -> KindingRule {cons("KindingRule"),
+                    layout(1.first.col == 2.first.col &&
+                           2.first.col == 3.first.col)}
 
-  BranchTypeRulePremiseList -> BranchTypeRulePremises {cons("PremiseList")}
-                            -> BranchTypeRulePremises {cons("NoPremises")}
+  KindingRulePremiseList -> KindingRulePremises {cons("PremiseList")}
+                         -> KindingRulePremises {cons("NoPremises")}
 
-  OffBranchTypingJudgment -> BranchTypeRuleConsequence
-  
-  BranchTypingJudgment -> OffBranchTypingJudgment {layout(1.first.col < 1.left.col)}
+  OffKindingJudgment -> KindingRuleConsequence
 
-  OffBranchTypeRuleJudgment                           -> BranchTypeRulePremiseList
-  OffBranchTypeRuleJudgment BranchTypeRulePremiseList -> BranchTypeRulePremiseList {cons("PremiseCons"),
-                                                                                    layout(1.first.col == 2.first.col)}
+  KindingJudgment -> OffKindingJudgment {layout(1.first.col < 1.left.col)}
 
-  BranchTypeRuleJudgment -> OffBranchTypeRuleJudgment {layout(1.first.col < 1.left.col)}
+  OffKindingRuleJudgment -> KindingRulePremiseList
+  OffKindingRuleJudgment KindingRulePremiseList -> KindingRulePremiseList {cons("PremiseCons"),
+                                                                           layout(1.first.col == 2.first.col)}
+
+  KindingRuleJudgment -> OffKindingRuleJudgment {layout(1.first.col < 1.left.col)}
+
+
+context-free syntax // *** Syntax for signature rules ***
+
+  SignatureRule -> SugarDefElem
+
+  SignatureRulePremises RuleSepName SignatureRuleConsequence
+    -> SignatureRule {cons("SignatureRule"),
+                      layout(1.first.col == 2.first.col &&
+                             2.first.col == 3.first.col)}
+
+  SignatureRulePremiseList -> SignatureRulePremises {cons("PremiseList")}
+                           -> SignatureRulePremises {cons("NoPremises")}
+
+  OffSignatureJudgment -> SignatureRuleConsequence
+
+  SignatureJudgment -> OffSignatureJudgment {layout(1.first.col < 1.left.col)}
+
+  OffSignatureRuleJudgment -> SignatureRulePremiseList
+  OffSignatureRuleJudgment SignatureRulePremiseList -> SignatureRulePremiseList {cons("PremiseCons"),
+                                                                                 layout(1.first.col == 2.first.col)}
+
+  SignatureRuleJudgment -> OffSignatureRuleJudgment {layout(1.first.col < 1.left.col)}
 
 
 context-free syntax // *** Syntax for contexts ***
@@ -69,40 +93,49 @@ context-free syntax // *** Syntax for contexts ***
   "(" Context ";" FomegaID "::" FomegaKind "=" FomegaType ")" -> Context {cons("CtxBindTVarDef")}
 
 
+context-free syntax // *** Syntax for signatures ***
+
+  "()"                                                          -> Signature {cons("SigEmpty")}
+  "(" FomegaID "::" FomegaKind "=" FomegaType ";" Signature ")" -> Signature {cons("SigBindTVarDef")}
+  "(" FomegaID ":" FomegaType ";" Signature ")"                 -> Signature {cons("SigBindVar")}
+
+
 context-free syntax // *** Syntax for judgments ***
 
-  Context "|-" FomegaType "::" FomegaKind                      -> KindingJudgment       {cons("KindingJudgment")} 
-  Context "|-" FomegaExpr ":" FomegaType                       -> TypingJudgment        {cons("TypingJudgment")}
-  Context "|-" FomegaType "~>" FomegaType                      -> NormalizationJudgment {cons("NormalizationJudgment")}
-  Context "|" FomegaTyDecls "|-" FomegaBranches ":" FomegaType -> BranchTypingJudgment  {cons("BranchTypingJudgment")}
+  Context "|-" FomegaType "::" FomegaKind -> KindingJudgment       {cons("KindingJudgment")} 
+  Context "|-" FomegaExpr ":" FomegaType  -> TypingJudgment        {cons("TypingJudgment")}
+  Context "|-" FomegaType "~>" FomegaType -> NormalizationJudgment {cons("NormalizationJudgment")}
+  Context "|-" FomegaDefs "==>" Signature -> SignatureJudgment     {cons("SignatureJudgment")}
 
-  "lab" "(" FomegaTyDecls ")" "~=" "tag" "(" FomegaBranches ")" ->
-    LabelTagJudgment {cons("LabelTagJudgment")}
-
-  FomegaID "notin" "tag" "(" FomegaBranches ")"      -> NotinTagJudgment      {cons("NotinTagJudgment")}
-  FomegaID "notin" "sel" "(" FomegaFields ")"        -> NotinSelJudgment      {cons("NotinSelJudgment")}
-  FomegaID ":" FomegaType "in" "decls" FomegaTyDecls -> InDeclJudgment        {cons("InDeclJudgment")}
-  FomegaID ":" FomegaType "in" Context               -> VarInContextJudgment  {cons("VarInContextJudgment")}
-  FomegaQID ":" FomegaType "in" Context              -> QVarInContextJudgment {cons("QVarInContextJudgment")}
+  FomegaID "notin" "lab" "(" FomegaFields ")"        -> NotinLabJudgment       {cons("NotinLabJudgment")}
+  FomegaID ":" FomegaType "in" "decls" FomegaTyDecls -> InDeclJudgment         {cons("InDeclJudgment")}
+  FomegaID ":" FomegaType "in" Context               -> VarInContextJudgment   {cons("VarInContextJudgment")}
+  FomegaQID ":" FomegaType "in" Context              -> QVarInContextJudgment  {cons("QVarInContextJudgment")}
+  FomegaID "::" FomegaKind "in" Context              -> TVarInContextJudgment  {cons("TVarInContextJudgment")}
+  FomegaQID "::" FomegaKind "in" Context             -> QTVarInContextJudgment {cons("QTVarInContextJudgment")}
+  FomegaID "notin" "dom" "(" Context ")"             -> NotinDomJudgment       {cons("NotinDomJudgment")}
 
   // Judgments allowed as premises in typing rules
-  KindingJudgment       -> TypeRuleJudgment
-  TypingJudgment        -> TypeRuleJudgment
-  NormalizationJudgment -> TypeRuleJudgment
-  BranchTypingJudgment  -> TypeRuleJudgment
-  NotinTagJudgment      -> TypeRuleJudgment
-  NotinSelJudgment      -> TypeRuleJudgment
-  InDeclJudgment        -> TypeRuleJudgment
-  VarInContextJudgment  -> TypeRuleJudgment
-  QVarInContextJudgment -> TypeRuleJudgment
-  LabelTagJudgment      -> TypeRuleJudgment
+  KindingJudgment       -> TypingRuleJudgment
+  TypingJudgment        -> TypingRuleJudgment
+  NormalizationJudgment -> TypingRuleJudgment
+  NotinLabJudgment      -> TypingRuleJudgment
+  InDeclJudgment        -> TypingRuleJudgment
+  VarInContextJudgment  -> TypingRuleJudgment
+  QVarInContextJudgment -> TypingRuleJudgment
 
-  // Judgments allowed as premises in branch typing rules
-  TypingJudgment        -> BranchTypeRuleJudgment
-  InDeclJudgment        -> BranchTypeRuleJudgment
-  NotinTagJudgment      -> BranchTypeRuleJudgment
-  NormalizationJudgment -> BranchTypeRuleJudgment
-  BranchTypingJudgment  -> BranchTypeRuleJudgment
+  // Judgments allowed as premises in kinding rules
+  KindingJudgment        -> KindingRuleJudgment
+  TVarInContextJudgment  -> KindingRuleJudgment
+  QTVarInContextJudgment -> KindingRuleJudgment
+  NotinLabJudgment       -> KindingRuleJudgment
+
+  // Judgments allowed as premises of signature rules
+  KindingJudgment       -> SignatureRuleJudgment
+  TypingJudgment        -> SignatureRuleJudgment
+  SignatureJudgment     -> SignatureRuleJudgment
+  NotinDomJudgment      -> SignatureRuleJudgment
+  NormalizationJudgment -> SignatureRuleJudgment
 
 
 context-free syntax // *** Substitution on level of types
@@ -112,4 +145,3 @@ context-free syntax // *** Substitution on level of types
 signature
   constructors
     Subst: FomegaID * FomegaType * FomegaType -> FomegaType
-

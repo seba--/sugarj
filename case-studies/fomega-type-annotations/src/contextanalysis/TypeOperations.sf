@@ -69,6 +69,9 @@ rules
     (TyString(), TyString()) -> []
 
   type-eq-proper :
+    (TyEmpty(), TyEmpty()) -> []
+
+  type-eq-proper :
     (Metavar(mvar1), Metavar(mvar2)) -> []
     where <structurally-equal> (mvar1, mvar2)
 
@@ -84,6 +87,17 @@ rules
     (TyArrow(T1, T2), TyArrow(S1, S2)) -> <conc> (msgs1, msgs2)
     where <type-eq> (T1, S1) => msgs1
         ; <type-eq> (T2, S2) => msgs2
+
+  type-eq-proper :
+    (TyPair(T1, T2), TyPair(S1, S2)) -> <conc> (msgs1, msgs2)
+    where <type-eq> (T1, S1) => msgs1
+        ; <type-eq> (T2, S2) => msgs2
+
+  type-eq-proper :
+    (TyFst(T), TyFst(S)) -> <type-eq> (T, S)
+
+  type-eq-proper :
+    (TySnd(T), TySnd(S)) -> <type-eq> (T, S)
 
   type-eq-proper :
     (TyRecord(decls1), TyRecord(decls2)) -> msgs
@@ -107,14 +121,13 @@ rules
 
   type-eq-proper :
     (TyApp(T1, T2), TyApp(S1, S2)) -> <conc> (msgs1, msgs2)
-    where <type-eq> (T1, T2) => msgs1
+    where <type-eq> (T1, S1) => msgs1
         ; <type-eq> (T2, S2) => msgs2
 
   type-eq-proper :
-    (TyMu(K, T1, T2), TyMu(J, S1, S2)) -> <conc> (msgs1, msgs2, msgs3)
-    where <kind-eq> (K, J) => msgs1
-        ; <type-eq> (T1, S1) => msgs2
-        ; <type-eq> (T2, S2) => msgs3
+    (TyMu(T1, T2), TyMu(S1, S2)) -> <conc> (msgs1, msgs2)
+    where <type-eq> (T1, S1) => msgs1
+        ; <type-eq> (T2, S2) => msgs2
 
   type-eq-proper :
     (TyForall(X, K, T), TyForall(Y, J, S)) -> <conc> (msgs1, msgs2)
@@ -160,6 +173,22 @@ rules
     T -> [<concat-strings> ["type mismatch, expected Bool type but found ", <pp-type> T]]
 
 
+rules
+
+  type-eq-empty = type-eq-empty-proper <+ type-eq-empty-unexpected
+
+  type-eq-empty-proper :
+    TyUnknown() -> []
+
+  type-eq-empty-proper :
+    TyBool() -> []
+
+  type-eq-empty-unexpected :
+    T -> [<concat-strings> ["type mismatch, expected [] type but found ", <pp-type> T]]
+
+
+rules
+
   type-eq-nat = type-eq-nat-proper <+ type-eq-nat-unexpected
 
   type-eq-nat-proper :
@@ -171,6 +200,8 @@ rules
   type-eq-nat-unexpected :
     T -> [<concat-strings> ["type mismatch, expected Nat type but found ", <pp-type> T]]
 
+
+rules
 
   type-eq-string = type-eq-string-proper <+ type-eq-string-unexpected
 
@@ -184,6 +215,8 @@ rules
     T -> [<concat-strings> ["type mismatch, expected String type but found ", <pp-type> T]]
 
 
+rules
+
   type-eq-variant = type-eq-variant-proper <+ type-eq-variant-unexpected
 
   type-eq-variant-proper :
@@ -195,6 +228,8 @@ rules
   type-eq-variant-unexpected :
     T -> (TyDeclsNil(), [<concat-strings> ["type mismatch, expected variant type but found ", <pp-type> T]])
 
+
+rules
 
   type-eq-record = type-eq-record-proper <+ type-eq-record-unexpected
 
@@ -208,17 +243,21 @@ rules
     T -> (TyDeclsNil(), [<concat-strings> ["type mismatch, expected record type but found ", <pp-type> T]])
 
 
+rules
+
   type-eq-mu = type-eq-mu-proper <+ type-eq-mu-unexpected
 
   type-eq-mu-proper :
-    TyUnknown() -> (IDUnknown(), TyUnknown(), [])
+    TyUnknown() -> (TyUnknown(), TyUnknown(), [])
 
   type-eq-mu-proper :
-    TyMu(K, T1, T2) -> (K, T1, T2, [])
+    TyMu(T1, T2) -> (T1, T2, [])
 
   type-eq-mu-unexpected :
-    T -> (KiUnknown(), TyUnknown(), TyUnknown(), [<concat-strings> ["type mismatch, expected recursive type but found ", <pp-type> T]])
+    T -> (TyUnknown(), TyUnknown(), [<concat-strings> ["type mismatch, expected recursive type but found ", <pp-type> T]])
 
+
+rules
 
   type-eq-forall = type-eq-forall-proper <+ type-eq-forall-unexpected
 
@@ -231,6 +270,8 @@ rules
   type-eq-forall-unexpected :
     T -> (IDUnknown(), KiUnknown(), TyUnknown(), [<concat-strings> ["type mismatch, expected polymorphic type but found ", <pp-type> T]])
 
+
+rules
 
   type-eq-arrow = type-eq-arrow-proper <+ type-eq-arrow-unexpected
 
@@ -246,10 +287,27 @@ rules
 
 rules
 
-  free-vars : TyMu(K, T1, T2) -> <union(structurally-equal)> (<free-vars> T1, <free-vars> T2)
+  type-eq-arrow = type-eq-pair-proper <+ type-eq-pair-unexpected
+
+  type-eq-pair-proper :
+    TyUnknown() -> (TyUnknown(), TyUnknown(), [])
+
+  type-eq-pair-proper :
+    TyPair(T1, T2) -> (T1, T2, [])
+
+  type-eq-pair-unexpected :
+    T -> (TyUnknown(), TyUnknown(), [<concat-strings> ["type mismatch, expected pair type but found ", <pp-type> T]])
+
+
+rules
+
+  free-vars : TyMu(T1, T2) -> <union(structurally-equal)> (<free-vars> T1, <free-vars> T2)
   free-vars : TyAbs(X, K, T) -> <diff(structurally-equal)> (<free-vars> T, [X])
   free-vars : TyForall(X, K, T) -> <diff(structurally-equal)> (<free-vars> T, [X])
   free-vars : TyArrow(T1, T2) -> <union(structurally-equal)> (<free-vars> T1, <free-vars> T2)
+  free-vars : TyPair(T1, T2) -> <union(structurally-equal)> (<free-vars> T1, <free-vars> T2)
+  free-vars : TyFst(T) -> <free-vars> T
+  free-vars : TySnd(T) -> <free-vars> T
   free-vars : TyApp(T1, T2) -> <union(structurally-equal)> (<free-vars> T1, <free-vars> T2)
   free-vars : TyQVar(qX) -> []
   free-vars : TyVariant(decls) -> <unions(structurally-equal)> (<map-decls-to-list(free-vars-decl)> decls)
@@ -257,6 +315,8 @@ rules
   free-vars : TyString() -> []
   free-vars : TyNat() -> []
   free-vars : TyBool() -> []
+  free-vars : TyEmpty() -> []
+  free-vars : TyUnknown() -> []
   free-vars : TyVar(X) -> [X]
 
   free-vars-decl : TyDecl(x, T) -> <free-vars> T
@@ -285,7 +345,7 @@ rules
     (X, S, Metavar(mvar)) -> Metavar(mvar)
 
   subst :
-    (X, S, TyMu(K, T1, T2)) -> TyMu(K, <subst> (X, S, T1), <subst> (X, S, T2))
+    (X, S, TyMu(T1, T2)) -> TyMu(<subst> (X, S, T1), <subst> (X, S, T2))
 
   subst :
     (X, S, TyAbs(Y, K, T)) -> TyAbs(X, K, T)
@@ -321,6 +381,15 @@ rules
     (X, S, TyArrow(T1, T2)) -> TyArrow(<subst> (X, S, T1), <subst> (X, S, T2))
 
   subst :
+    (X, S, TyPair(T1, T2)) -> TyPair(<subst> (X, S, T1), <subst> (X, S, T2))
+
+  subst :
+    (X, S, TyFst(T)) -> TyFst(<subst> (X, S, T))
+
+  subst :
+    (X, S, TySnd(T)) -> TySnd(<subst> (X, S, T))
+
+  subst :
     (X, S, TyApp(T1, T2)) -> TyApp(<subst> (X, S, T1), <subst> (X, S, T2))
 
   subst :
@@ -342,6 +411,12 @@ rules
     (X, S, TyBool()) -> TyBool()
 
   subst :
+    (X, S, TyEmpty()) -> TyEmpty()
+
+  subst :
+    (X, S, TyUnknown()) -> TyUnknown()
+
+  subst :
     (X, S, TyVar(Y)) -> S
     where <structurally-equal> (X, Y)
 
@@ -354,26 +429,26 @@ rules
 
 
 rules
-  norm = // debug(!"NORM IN: ");
+  norm = // debug-analysis(!"NORM IN: ");
          iterate-par-reduce
-         // ; debug(!"NORM OUT: ")
+         // ; debug-analysis(!"NORM OUT: ")
 
   iterate-par-reduce :
     (C, T) -> T'
     where <par-reduce> (C, T) => S
-        ; <// debug(!"EQ IN  ");
+        ; <// debug-analysis(!"EQ IN  ");
            type-eq
-           // ; debug(!"EQ OUT ")
+           // ; debug-analysis(!"EQ OUT ")
           > (T, S) => msgs
-        ; if (!msgs; ?[]) then
+        ; if !msgs; ?[] then
             !T
           else
             !(<norm> (C, S))
           end => T'
 
-  par-reduce = // debug(!"PR IN:  ");
+  par-reduce = // debug-analysis(!"PR IN:  ");
               (par-reduce-type <+ par-reduce-metavar)
-              // ; debug(!"PR OUT: ")
+              // ; debug-analysis(!"PR OUT: ")
     // Identity on meta-variables only as a fallback
     // since dynamic axioms might establish more specific
     // reductions.
@@ -394,6 +469,9 @@ rules
     (C, TyBool()) -> TyBool()
 
   par-reduce-type :
+    (C, TyEmpty()) -> TyEmpty()
+
+  par-reduce-type :
     (C, TyVar(X)) -> S
     where <lookup-type-var-def> (X, C) => (T, msgs)
         ; if !msgs; ?[] then
@@ -412,7 +490,7 @@ rules
           end => S
 
   par-reduce-type :
-    (C, TyMu(K, T1, T2)) -> TyMu(K, <par-reduce> T1, <par-reduce> T2)
+    (C, TyMu(T1, T2)) -> TyMu(<par-reduce> (C, T1), <par-reduce> (C, T2))
 
   par-reduce-type :
     (C, TyAbs(X, K, T)) -> TyAbs(X, K, <par-reduce> (CtxBindTVar(C, X, K), T))
@@ -422,6 +500,23 @@ rules
 
   par-reduce-type :
     (C, TyArrow(T1, T2)) -> TyArrow(<par-reduce> (C, T1), <par-reduce> (C, T2))
+
+  par-reduce-type :
+    (C, TyPair(T1, T2)) -> TyPair(<par-reduce> (C, T1), <par-reduce> (C, T2))
+
+  par-reduce-type :
+    (C, TyFst(T)) -> TyFst(<par-reduce> (C, T))
+    where if !T; ?TyPair(_, _) then fail else id end
+
+  par-reduce-type :
+    (C, TyFst(TyPair(T1, T2))) -> <par-reduce> (C, T1)
+
+  par-reduce-type :
+    (C, TySnd(T)) -> TySnd(<par-reduce> (C, T))
+    where if !T; ?TyPair(_, _) then fail else id end
+
+  par-reduce-type :
+    (C, TySnd(TyPair(T1, T2))) -> <par-reduce> (C, T2)
 
   par-reduce-type :
     (C, TyApp(T1, T2)) -> TyApp(<par-reduce> (C, T1), <par-reduce> (C, T2))

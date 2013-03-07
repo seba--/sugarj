@@ -5,13 +5,13 @@ import contextanalysis.rules.Syntax
 context-free syntax
   "syntax" "{" Grammar* "}" -> ToplevelDeclaration {cons("SyntaxExtension")}
   "desugaring" StrategoId "{" StrategoDef* "}" -> ToplevelDeclaration {cons("DesugaringExtension")}
-  "typing" "{" TypeRule* "}" -> ToplevelDeclaration {cons("TypingExtension")}
+  "typing" "{" TypingRule* "}" -> ToplevelDeclaration {cons("TypingExtension")}
 
 rules
   constraint-error = check-typing-rule-subject
   
   check-typing-rule-subject :
-    TypeRule(_, _, TypingJudgment(C, e, T)) ->
+    TypingRule(_, _, TypingJudgment(C, e, T)) ->
     [(e, "Subject does not match desugaring rule.")]
   where <not(desugar-extension-internal)> e
   

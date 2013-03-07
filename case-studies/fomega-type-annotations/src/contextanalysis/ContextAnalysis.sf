@@ -2,7 +2,7 @@ module contextanalysis.ContextAnalysis
 
 import org.sugarj.languages.Fomega
 
-import contextanalysis.SignatureChecker
+import contextanalysis.SignatureRelation
 import contextanalysis.Editor
 
 

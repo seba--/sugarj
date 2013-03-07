@@ -3,8 +3,6 @@ module contextanalysis.rules.Verification
 import contextanalysis.rules.Syntax
 import contextanalysis.rules.Desugaring // for premises-to-list
 
-// import typing.rules.ExprTypeRules
-
 // import extension.Declaration
 
 rules // TODO: these two definitions belong to Analyze.str
@@ -21,15 +19,15 @@ rules // TODO: these two definitions belong to Analyze.str
 
 rules
 
-  constraint-error = verify-type-rule
+  constraint-error = verify-context-rule
 
 
 rules
 
   desugar-extension-internal = fail
 
-  verify-type-rule :
-    TypeRule(premises, RuleName(sep, Some(Var(name))), TypingJudgment(C, e, T)) ->
+  verify-context-rule :
+    TypingRule(premises, RuleName(sep, Some(Var(name))), TypingJudgment(C, e, T)) ->
       result
     where // TODO: only allow desugar-extension-internal; extension declaration 
           //       requires this rule to be successfully applicable to subject

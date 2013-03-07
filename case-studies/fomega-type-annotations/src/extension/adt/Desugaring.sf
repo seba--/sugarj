@@ -2,6 +2,13 @@ module extension.adt.Desugaring
 
 import org.sugarj.languages.Fomega
 
+import concretesyntax.Fomega
+import concretesyntax.Metavars
+
+import contextanalysis.rules.Syntax
+import contextanalysis.rules.Desugaring
+// import contextanalysis.rules.Verification
+
 import extension.adt.Syntax
 
 
@@ -9,154 +16,177 @@ desugarings
   desugar-data
 
 
+signature
+  constructors
+    ADT-TYPE: FomegaID * DataParams * DataCons -> StrategoTerm
+
 rules
 
   desugar-data :
-    DefsCons(def@DataDef(public, X, params, dcons), defs)
-      -> DefsCons(<make-type-synonym> def, <make-con-defs> DefsCons(def, defs))
+    |[ data ~%X ~params = ~dcons ~=defs ]| -> |[ type ~%X = M~ADT-TYPE(X, params, dcons) ~=defs]|
 
-  desugar-data :
-    DefsEnd(def@DataDef(public, X, params, dcons))
-      -> DefsCons(<make-type-synonym> def, <make-con-defs> DataEnd(def))
-
-
-rules
-
-  make-type-synonym :
-    DefsCons(def@DataDef(public, X, params, dcons), defs) -> DefsCons(<make-type-synonym> def, DefsCons(def, defs))
-
-  make-type-synonym :
-    DefsEnd(def@DataDef(public, X, params, dcons)) -> DefsEnd(<make-type-synonym> def)
-
-  make-type-synonym :
-    DataDef(public, X, params, dcons) -> TypeDef(public, X, <debug(!"HELLO ");make-type-rhs> (X, params, dcons))
+~%X notin dom(~C)
+~C |- M~ADT-TYPE(X, params, dcons) :: ~K
+(~C;~%X::~K=M~EVAL(ADT-TYPE(X, params, dcons))) |- ~=defs ==> ~sig
+================================================================== S-DataCons
+~C |- data ~%X ~params = ~dcons ~=defs ==> ~sig
 
 
-rules
-
-  make-type-rhs :
-    (X, params, dcons) -> <make-type-op> (params, <debug(!"D1 ");make-type-mu;debug(!"D2 ")> (X, params, dcons))
 
 
-rules
-
-  make-type-op :
-    (DataParamsNil(), e) -> e
-
-  // make-type-op :
-  //   (DataParamsCons(KiDecl(X, K), params), e) -> TyAbs(X, K, (params, e))
-  make-type-op :
-    (DataParamsCons(KiDecl(X, K), params), e) -> TyAbs(X, K, <make-type-op> (params, e))
 
 
-rules
-
-  make-type-mu :
-    (X, params, dcons) -> TyMu(<make-type-pair-kind;debug(!"D3 ")> params, <make-type-mu-op;debug(!"D4 ")> (X, params, dcons), <make-type-pair-args> params)
-
-
-rules
-
-  make-type-pair-kind :
-    DataParamsNil() -> KiEmpty()
-
-  // make-type-pair-kind :
-  //   DataParamsCons(KiDecl(X, K), params) -> KiPair(K, params)
-  make-type-pair-kind :
-    DataParamsCons(KiDecl(X, K), params) -> KiPair(K, <make-type-pair-kind> params)
-
-
-rules
-
-  make-type-mu-op :
-    (X, params, dcons) ->
-      TyAbs( X
-           , KiArrow(<make-type-pair-kind> params, KiStar())
-           , TyAbs( "args"
-                  , <make-type-pair-kind> params
-                  , <make-type-uncurry; debug(!"D6 ")> (X, params, TyVariant(<make-type-tydecls;debug(!"D5 ")> dcons))))
-
-
-rules
-
-  make-type-uncurry :
-    (X, params, e) ->
-      TyApp( TyAbs( X
-                  , <make-type-curry-kind; debug(!"D8 ")> params
-                  , <debug(!"D9 ");make-type-curry-args; debug(!"D7 ")> (params, TyVar("args"), <make-type-op> (params, e)))
-           , <make-type-op> (params, TyApp(TyVar(X), <make-type-pair-args> params)))
-
-
-rules
-
-  make-type-tydecls :
-    DataConsEnd(dcon) -> TyDeclsCons(<make-type-tydecl> dcon, TyDeclsNil)
-
-  make-type-tydecls :
-    DataConsCons(dcon, dcons) -> TyDeclsCons(<make-type-tydecl> dcon, <make-type-tydecls> dcons)
-
-  make-type-tydecl :
-    DataCon(X-con, X-discr, dcon-params) -> TyDecl(X-con, TyRecord(<make-tydecls-from-dcon-params> dcon-params))
-
-  make-tydecls-from-dcon-params :
-    DataConParamsNil -> TyDeclsNil
-
-  make-tydecls-from-dcon-params :
-    DataConParamsCons(decl, dcon-params) -> TyDeclsCons(decl, <make-tydecls-from-dcon-params> dcon-params)
-
-
-rules
-
-  make-type-curry-args :
-    (DataParamsNil(), args, e) -> e
-
-  make-type-curry-args :
-    (DataParamsCons(KiDecl(X, K), params), args, e) -> <make-type-curry-args> (params, TySnd(args), TyApp(e, TyFst(args)))
-
-
-rules
-
-  make-type-curry-kind :
-    DataParamsNil() -> KiStar()
-
-  make-type-curry-kind :
-    DataParamsCons(KiDecl(X, K), params) -> KiArrow(K, <make-type-curry-kind> params)
-
-
-rules
-
-  make-type-pair-args :
-    DataParamsNil() -> TyEmpty()
-
-  // make-type-pair-args :
-  //   DataParamsCons(KiDecl(X, K), params) -> TyPair(TyVar(X), params)
-  make-type-pair-args :
-    DataParamsCons(KiDecl(X, K), params) -> TyPair(TyVar(X), <make-type-pair-args> params)
-
-
-rules
+// rules
+// 
+//   desugar-data :
+//     DefsCons(def@DataDef(public, X, params, dcons), defs)
+//       -> DefsCons(<make-type-synonym> def, defs) // <make-con-defs> DefsCons(def, defs))
+// 
+//   desugar-data :
+//     DefsEnd(def@DataDef(public, X, params, dcons))
+//       -> DefsEnd(<make-type-synonym> def) //, <make-con-defs> DataEnd(def))
+// 
+// 
+// rules
+// 
+//   make-type-synonym :
+//     DefsCons(def@DataDef(public, X, params, dcons), defs) -> DefsCons(<make-type-synonym> def, DefsCons(def, defs))
+// 
+//   make-type-synonym :
+//     DefsEnd(def@DataDef(public, X, params, dcons)) -> DefsEnd(<make-type-synonym> def)
+// 
+//   make-type-synonym :
+//     DataDef(public, X, params, dcons) -> TypeDef(public, X, <debug(!"HELLO ");make-type-rhs> (X, params, dcons))
+// 
+// 
+// rules
+// 
+//   make-type-rhs :
+//     (X, params, dcons) -> <make-type-op> (params, <debug(!"D1 ");make-type-mu;debug(!"D2 ")> (X, params, dcons))
+// 
+// 
+// rules
+// 
+//   make-type-op :
+//     (DataParamsNil(), T) -> T
+// 
+//   // make-type-op :
+//   //   (DataParamsCons(KiDecl(X, K), params), T) -> TyAbs(X, K, (params, T))
+//   make-type-op :
+//     (DataParamsCons(KiDecl(X, K), params), T) -> TyAbs(X, K, <make-type-op> (params, T))
+// 
+// 
+// rules
+// 
+//   make-type-mu :
+//     (X, params, dcons) -> TyMu(<make-type-pair-kind> params, <make-type-mu-op;debug(!"D4 ")> (X, params, dcons), <make-type-pair-args> params)
+// 
+// 
+// rules
+// 
+//   make-type-pair-kind :
+//     DataParamsNil() -> KiEmpty()
+// 
+//   // make-type-pair-kind :
+//   //   DataParamsCons(KiDecl(X, K), params) -> KiPair(K, params)
+//   make-type-pair-kind :
+//     DataParamsCons(KiDecl(X, K), params) -> KiPair(K, <make-type-pair-kind> params)
+// 
+// 
+// rules
+// 
+//   make-type-mu-op :
+//     (X, params, dcons) ->
+//       TyAbs( X
+//            , KiArrow(<make-type-pair-kind> params, KiStar())
+//            , TyAbs( "args"
+//                   , <make-type-pair-kind> params
+//                   , <make-type-uncurry; debug(!"D6 ")> (X, params, TyVariant(<make-type-tydecls;debug(!"D5 ")> dcons))))
+// 
+// 
+// rules
+// 
+//   make-type-uncurry :
+//     (X, params, T) ->
+//       TyApp( TyAbs( X
+//                   , <make-type-curry-kind; debug(!"D8 ")> params
+//                   , <debug(!"D9 ");make-type-curry-args; debug(!"D7 ")> (params, TyVar("args"), <make-type-op> (params, T)))
+//            , <make-type-op> (params, TyApp(TyVar(X), <make-type-pair-args> params)))
+// 
+// 
+// rules
+// 
+//   make-type-tydecls :
+//     DataConsEnd(dcon) -> TyDeclsCons(<make-type-tydecl> dcon, TyDeclsNil)
+// 
+//   make-type-tydecls :
+//     DataConsCons(dcon, dcons) -> TyDeclsCons(<make-type-tydecl> dcon, <make-type-tydecls> dcons)
+// 
+//   make-type-tydecl :
+//     DataCon(X-con, X-discr, dcon-params) -> TyDecl(X-con, TyRecord(<make-tydecls-from-dcon-params> dcon-params))
+// 
+//   make-tydecls-from-dcon-params :
+//     DataConParamsNil -> TyDeclsNil
+// 
+//   make-tydecls-from-dcon-params :
+//     DataConParamsCons(decl, dcon-params) -> TyDeclsCons(decl, <make-tydecls-from-dcon-params> dcon-params)
+// 
+// 
+// rules
+// 
+//   make-type-curry-args :
+//     (DataParamsNil(), args, e) -> e
+// 
+//   make-type-curry-args :
+//     (DataParamsCons(KiDecl(X, K), params), args, e) -> <make-type-curry-args> (params, TySnd(args), TyApp(e, TyFst(args)))
+// 
+// 
+// rules
+// 
+//   make-type-curry-kind :
+//     DataParamsNil() -> KiStar()
+// 
+//   make-type-curry-kind :
+//     DataParamsCons(KiDecl(X, K), params) -> KiArrow(K, <make-type-curry-kind> params)
+// 
+// 
+// rules
+// 
+//   make-type-pair-args :
+//     DataParamsNil() -> TyEmpty()
+// 
+//   // make-type-pair-args :
+//   //   DataParamsCons(KiDecl(X, K), params) -> TyPair(TyVar(X), params)
+//   make-type-pair-args :
+//     DataParamsCons(KiDecl(X, K), params) -> TyPair(TyVar(X), <make-type-pair-args> params)
+// 
+// 
+// rules
 
   // |[ data ~public ~X ~params = ~X-con ~X-discr ~dcon-params
   //                            | ~dcons
   //    ~defs ]| ->
-  // |[ val ~X-con = ...
-  //    data ~public ~X ~params = ~dcons
+  // |[ ~public val ~X-con = ...
+  //    ~public data ~public ~X ~params = ~dcons
   //    ~defs ]|
-  make-con-defs :
-    DefsCons(DataDef(public, X, params, DataConsCons(DataCon(X-con, X-discr, dcon-params), dcons)), defs) ->
-      defs
+  //make-con-defs :
+  //  DefsCons(DataDef(public, X, params, DataConsCons(DataCon(X-con, X-discr, dcon-params), dcons)), defs) ->
+  //    DefsCons( ValDef(public, X-con, <make-con-rhs> (X, params, dcon-params))
+  //            , DefsCons(DataDef(public, X, params, dcons))
+  //            , defs)
 
   // |[ data ~public ~X ~params = ~dcon ~defs ]| -> ...
-  make-con-defs :
-    DefsCons(DataDef(public, X, params, DataConsEnd(DataCon(X-con, X-discr, dcon-params))), defs) ->
-      defs
+  //make-con-defs :
+  //  DefsCons(DataDef(public, X, params, DataConsEnd(DataCon(X-con, X-discr, dcon-params))), defs) ->
+  //    defs
 
   // |[ data ~public ~X ~params = ~dcon | ~dcons ]| -> ...
-  make-con-defs :
-    DefsEnd(DataDef(public, X, params, DataConsCons(DataCon(X-con, X-discr, dcon-params)))) ->
-      ValDef(None(), "nyi", String("nyi"))
+  //make-con-defs :
+  //  DefsEnd(DataDef(public, X, params, DataConsCons(DataCon(X-con, X-discr, dcon-params)))) ->
+  //    ValDef(None(), "nyi", String("nyi"))
 
   // |[ data ~public ~X ~params = ~dcon ]| -> ...
-  make-con-defs :
-    DefsEnd(DataDef(public, X, params, DataConsEnd(DataCon(X-con, X-discr, dcon-params)))) ->
-      ValDef(None(), "nyi", String("nyi"))
+  //make-con-defs :
+  //  DefsEnd(DataDef(public, X, params, DataConsEnd(DataCon(X-con, X-discr, dcon-params)))) ->
+  //    ValDef(None(), "nyi", String("nyi"))
+

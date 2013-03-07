@@ -23,7 +23,7 @@
    TyArrow                   -- _1 KW["->"] _2,
    TyForall                  -- KW["forall"] _1 KW["::"] _2 KW["."] _3,
    TyAbs                     -- KW["\\"] _1 KW["::"] _2 KW["."] _3,
-   TyMu                      -- KW["mu"] _1 KW["."] KW["("] _2 KW[","] _3 KW[")"],
+   TyMu                      -- KW["mu"] KW["("] _1 KW[","] _2 KW[")"],
    ModuleDec                 -- KW["module"] _1,
    Module                    -- _1 _2 _3,
    FomegaImports             -- _1,

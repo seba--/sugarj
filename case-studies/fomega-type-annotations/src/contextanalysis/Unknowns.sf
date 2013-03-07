@@ -3,21 +3,23 @@ module contextanalysis.Unknowns
 import org.sugarj.languages.Fomega
 
 import contextanalysis.Annotations
+import contextanalysis.Signatures
 
 
 signature
   constructors
     TyUnknown: FomegaType
     KiUnknown: FomegaKind
-    IDUnknown: FomegID
+    IDUnknown: FomegaID
+
 
 // TODO: the following definitions should go to contextanalysis.rules. ...
 rules // Type of expressions
 
   annotate-type =
-    // debug(!"ANNO TYPE IN:  "); 
+    // debug-analysis(!"ANNO TYPE IN:  "); 
     (annotate-type-defined <+ annotate-type-missing)
-    // ; debug(!"ANNO TYPE OUT: ") 
+    // ; debug-analysis(!"ANNO TYPE OUT: ") 
 
   annotate-type-defined = fail
 
@@ -31,16 +33,39 @@ rules // Type of expressions
                            , e)
 
 
-rules // Type of branches
+rules // Kind of types
 
-  annotate-type-branches =
-    // debug(!"ANNO TYPE BRS IN:  "); 
-    annotate-type-branches-defined <+ annotate-type-branches-missing
-    // ; debug(!"ANNO TYPE BRS OUT: ")
+  annotate-kind =
+    // debug-analysis(!"ANNO KIND IN:  "); 
+    (annotate-kind-defined <+ annotate-kind-missing)
+    // ; debug-analysis(!"ANNO KIND OUT: ") 
 
-  annotate-type-branches-defined = fail
+  annotate-kind-defined = fail
 
-  annotate-type-branches-missing =
-      ?(C, decls, brs)
-    ; <put-type> (TyUnknown(), brs)
-    ; <add-context-errors> (["Missing branch typing rule"], brs)
+  annotate-kind-missing =
+      ?(C, T)
+    ; <put-kind> (KiUnknown(), T)
+    ; <add-context-errors> ( [ <concat-strings> [ "Missing kinding rule for "
+                                                , <write-to-string> (<strip-annos> T)
+                                                , " in context "
+                                                , <write-to-string> (<strip-annos> C)] ]
+                           , T)
+
+
+rules // Signature of definitions
+
+  annotate-signature =
+    // debug-analysis(!"ANNO SIGNATURE IN:  "); 
+    (annotate-signature-defined <+ annotate-signature-missing)
+    // ; debug-analysis(!"ANNO SIGNATURE OUT: ") 
+
+  annotate-signature-defined = fail
+
+  annotate-signature-missing =
+      ?(C, defs)
+    ; <put-kind> (SigEmpty(), defs)
+    ; <add-context-errors> ( [ <concat-strings> [ "Missing signature rule for "
+                                                , <write-to-string> (<strip-annos> defs)
+                                                , " in context "
+                                                , <write-to-string> (<strip-annos> C)] ]
+                           , defs)
