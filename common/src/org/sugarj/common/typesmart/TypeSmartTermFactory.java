@@ -46,10 +46,6 @@ public class TypeSmartTermFactory extends AbstractTermFactory {
     String smartCtrName = "smart-" + ctr.getName();
     smartCtrName = smartCtrName.replace("-", "_") + "_0_" + terms.length;
 
-    VarScope debugScope = context.getVarScope();
-    while (debugScope.getParent() != null)
-      debugScope = debugScope.getParent();
-    
     try {
       SDefT sdef = context.lookupSVar(smartCtrName);
 
