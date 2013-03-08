@@ -107,7 +107,7 @@ context-free syntax // *** Syntax for judgments ***
   Context "|-" FomegaType "~>" FomegaType -> NormalizationJudgment {cons("NormalizationJudgment")}
   Context "|-" FomegaDefs "==>" Signature -> SignatureJudgment     {cons("SignatureJudgment")}
 
-  FomegaID "notin" "lab" "(" FomegaFields ")"        -> NotinLabJudgment       {cons("NotinLabJudgment")}
+  FomegaID "notin" "lab" "(" FomegaTyDecls ")"       -> NotinLabJudgment       {cons("NotinLabJudgment")}
   FomegaID ":" FomegaType "in" "decls" FomegaTyDecls -> InDeclJudgment         {cons("InDeclJudgment")}
   FomegaID ":" FomegaType "in" Context               -> VarInContextJudgment   {cons("VarInContextJudgment")}
   FomegaQID ":" FomegaType "in" Context              -> QVarInContextJudgment  {cons("QVarInContextJudgment")}

@@ -3,6 +3,7 @@ module test.ADT
 import extension.adt.Syntax
 import extension.adt.Desugaring
 
+import contextanalysis.ContextAnalysis
 
 data Tree (k::*) (v::*) = Nil isNil {}
                         | Leaf isLeaf {value: v}
