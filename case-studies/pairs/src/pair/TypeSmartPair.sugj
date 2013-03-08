@@ -1,0 +1,10 @@
+package pair;
+
+public sugar TypeSmartPair {
+  rules
+    smart-Invoke(|method, args) :
+      _ -> <unsafe-build(|"Invoke")> [method, args]
+      where !args => [x, y]
+    
+    unsafe-build(|ctr) = prim("SUGARJ_unsafe_build", ctr)
+}
