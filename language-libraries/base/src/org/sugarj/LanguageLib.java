@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.spoofax.interpreter.library.AbstractStrategoOperatorRegistry;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.HybridInterpreter;
@@ -101,6 +103,29 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
     return f;
   }
   
+  private File libDir;
+  
+  public File getLibraryDirectory() {
+    if (libDir == null) { // set up directories first
+      String thisClassPath = getClass().getCanonicalName().replace(".", "/") + ".class";
+      URL thisClassURL = getClass().getClassLoader().getResource(thisClassPath);
+      
+      if (thisClassURL.getProtocol().equals("bundleresource"))
+        try {
+          thisClassURL = FileLocator.resolve(thisClassURL);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      
+      String classPath = thisClassURL.getPath();
+      String binPath = classPath.substring(0, classPath.length() - thisClassPath.length());
+      
+      libDir = new File(binPath);
+    }
+    
+    return libDir;
+  }
+
   public          boolean isModelDec(IStrategoTerm decl) { return false; }
 	public          boolean isTransformationDec(IStrategoTerm decl) { return false; }
 	public          boolean isTransformationImportDec(IStrategoTerm decl) { return false; }

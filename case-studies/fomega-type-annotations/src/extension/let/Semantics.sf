@@ -26,4 +26,4 @@ desugarings
 
 rules
   desugar-let :
-    |[ let ~%x : ~S = ~e1 in ~e2 ]| -> |[ (\~%x:~S. ~e2) ~e1 ]|
+    |[ let ~%x : ~S = ~e1 in ~e2 ]| -> |[ (\~%y:~S. ~e2) ~e1 ]|
