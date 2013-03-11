@@ -5,6 +5,7 @@ rules
 
   add-context-errors =
       ?(msgs, node)
+    ; if !msgs; ?[] then id else <debug-analysis(!"ADD-CTX-ERRS ")> (msgs, node) end
     ; <get-context-errors> node => msgs-old
     ; <put-anno(|"context-errors", <conc> (msgs, msgs-old))> node
 

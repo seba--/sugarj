@@ -44,6 +44,11 @@ rules
 ================================================================== S-DataCons
 ~C |- data ~%X ~params = ~dcons ~=defs ==> ~sig
 
+~%X notin dom(~C)
+~C |- M~ADT-TYPE(X, params, dcons) :: ~K
+================================================================== S-DataEnd
+~C |- data ~%X ~params = ~dcons ==> ()
+
 
 rules // ADT-TYPE
 
@@ -68,7 +73,7 @@ rules // ADT-ABS
 ============================================= ADT-ABSNil
 ~C |- M~ADT-ABS(fomega-params |[ ]|, T) :: ~K 
 
-~C |- M~ADT-ABS(params, T) :: ~K2
+(~C;~%X::~K1) |- M~ADT-ABS(params, T) :: ~K2
 ======================================================================== ADT-ABSCons
 ~C |- M~ADT-ABS(fomega-params |[ (~%X::~K1) ~params ]|, T) :: ~K1 => ~K2
 
@@ -82,7 +87,7 @@ rules // ADT-OP
                          M~ADT-UNCURRY(X, params, |[ <M~(ADT-DECLS(dcons))> ]|)
                   ]| 
 
-((~C;~%X :: M~EVAL(ADT-PK(params)) => *);args::M~EVAL(ADT-PK(params))) |-
+((~C; ~%X :: M~EVAL(ADT-PK(params)) => *); args :: M~EVAL(ADT-PK(params))) |-
                                      M~ADT-UNCURRY(X, params, |[ <M~(ADT-DECLS(dcons))> ]|) :: *
 ================================================================================================ ADT-OP
 ~C |- M~ADT-OP(X, params, dcons) :: (M~EVAL(ADT-PK(params)) => *) => M~EVAL(ADT-PK(params)) => *
@@ -97,11 +102,11 @@ rules // ADT-UNCURRY
                      M~ADT-ABS(params, fomega-type |[ ~%X M~(ADT-ARG(params)) ]|)
                   ]|
 
-~%X :: M~EVAL(ADT-PK(params)) => * in ~C
-args :: M~EVAL(ADT-PK(params)) in ~C
-~C |- M~(ADT-ARG(params)) :: M~EVAL(PK(params))
-~C |- M~ADT-CA(params, fomega-type |[ args ]|, ADT-ABS(params, T)) :: *
-===================================================== ADT-UNCURRY
+~C |- ~%X :: M~EVAL(ADT-PK(params)) => *
+~C |- args :: M~EVAL(ADT-PK(params))
+~C |- M~(ADT-ARG(params)) :: M~EVAL(ADT-PK(params))
+(~C; ~%X :: M~EVAL(ADT-CK(params))) |- M~ADT-CA(params, fomega-type |[ args ]|, ADT-ABS(params, T)) :: *
+======================================================================================================== ADT-UNCURRY
 ~C |- M~ADT-UNCURRY(X, params, T) :: *
 
 
@@ -123,10 +128,10 @@ rules // ADT-CA
     ADT-CA(fomega-params |[ (~%X::~K) ~params ]|, args, T) ->
       ADT-CA(params, fomega-type |[ ~args.2 ]|, fomega-type |[ ~T (~args.1) ]|)
 
-~C |- ~args :: M~EVAL(ADT-PK(params))
-~C |- ~T :: M~EVAL(ADT-CK(params))
-===================================== ADT-CAInd
-~C |- M~ADT-CA(params, args, T) :: *
+//~C |- ~args :: M~EVAL(ADT-PK(params))
+//~C |- ~T :: M~EVAL(ADT-CK(params))
+//===================================== ADT-CAInd
+//~C |- M~ADT-CA(params, args, T) :: *
 
 ~C |- ~args :: []
 ~C |- ~T :: * 
@@ -150,14 +155,18 @@ rules // ADT-DECLS
       fomega-tydecls |[ ~%Xcon : { ~decls } Mtydecls1~(ADT-DECLS(dcons)) ]|
 
 ~C |- { ~decls } :: *
-====================================================================== ADT-DECLSEnd
+======================================================================== ADT-DECLSEnd
 ~C |- M~ADT-DECLS(fomega-datacons |[ ~%Xcon ~%Xdiscr { ~decls } ]|) :: *
 
 ~C |- M~(ADT-DECLS(dcons)) :: *
 ~C |- { ~decls } :: *
-~%Xcon notin lab(M~(ADT-DECLS(dcons)))
+~%Xcon notin lab(M~(EVAL(ADT-DECLS(dcons))))
 ================================================================================= ADT-DECLSCons
 ~C |- M~ADT-DECLS(fomega-datacons |[ ~%Xcon ~%Xdiscr { ~decls } | ~dcons ]|) :: *
+
+~C |- M~(ADT-DECLS(decls)) :: *
+=============================== ADT-DECLSVariant
+~C |- <M~ADT-DECLS(decls)> :: *
 
 
 rules // ADT-ARG
@@ -168,12 +177,20 @@ rules // ADT-ARG
   desugar-data :
     ADT-ARG(|[ (~%X::~K) ~params ]|) -> fomega-type |[ {~%X, M~(ADT-ARG(params))} ]|
 
+========================================== ADT-ARGNil
+~C |- M~ADT-ARG(fomega-params |[ ]|) :: []
 
-  // ADT-PK
+~C |- ~%X :: ~K
+~C |- M~(ADT-ARG(params)) :: M~(EVAL(ADT-PK(params)))
+======================================================================================== ADT-ARGCons
+~C |- M~ADT-ARG(fomega-params |[ (~%X::~K) ~params ]|) :: {~K, M~(EVAL(ADT-PK(params)))}
+
+
+rules // ADT-PK
 
   desugar-data :
-    fomega-type |[ M~ADT-PK(fomega-params |[ ]|) ]| -> fomega-type |[ [] ]|
+    fomega-type |[ M~ADT-PK(fomega-params |[ ]|) ]| -> fomega-kind |[ [] ]|
 
   desugar-data :
-    fomega-type |[ M~ADT-PK(|[ (~%X::~K) ~params ]|) ]| -> fomega-type |[ {~K, M~(ADT-PK(params))} ]|
+    fomega-type |[ M~ADT-PK(|[ (~%X::~K) ~params ]|) ]| -> fomega-kind |[ {~K, M~(ADT-PK(params))} ]|
 
