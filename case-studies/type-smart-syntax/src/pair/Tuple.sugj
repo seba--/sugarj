@@ -1,0 +1,5 @@
+package pair;
+
+public sugar Tuple {
+
+}

@@ -1,0 +1,33 @@
+grammar-elem(
+  context-free-syntax(
+    [ prod(
+        [ lit("\"(\"")
+        , sort("JavaType")
+        , lit("\",\"")
+        , sort("JavaType")
+        , lit("\")\"")
+        ]
+      , sort("JavaType")
+      , attrs(
+          [term(
+             default(appl(unquoted("cons"), [fun(quoted("\"PType\""))]))
+           )]
+        )
+      )
+    , prod(
+        [ lit("\"(\"")
+        , sort("JavaExpr")
+        , lit("\",\"")
+        , sort("JavaExpr")
+        , lit("\")\"")
+        ]
+      , sort("JavaExpr")
+      , attrs(
+          [term(
+             default(appl(unquoted("cons"), [fun(quoted("\"PExpr\""))]))
+           )]
+        )
+      )
+    ]
+  )
+)

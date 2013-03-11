@@ -1,0 +1,54 @@
+package typesmart;
+
+import concretesyntax.Stratego;
+
+public sugar GenSyntaxConstructors {
+  desugarings
+    gen-syntax-constructors
+    
+  rules
+    gen-syntax-constructors =
+      is-list; ?list;
+      filter(?grammar-elem(<id>));
+      not(?[]);
+      map(
+        (?context-free-syntax(<id>) + ?context-free-priorities(<id>));
+        map(gen-syntax-constructors-prod);
+        !transformation-elem(Rules(<id>));
+        debug);
+      ?smart-cons-list;
+      !Locked(<conc> (list, smart-cons-list))
+  
+    gen-syntax-constructors-prod :
+      prod(lhs, rhs, attrs(as)) ->
+      strat
+    where
+	      <filter(?term(default(fun(quoted(<id>)))) 
+	            + ?term(default(appl(unquoted("cons"), [fun(quoted(<id>))]))))> as => [cons-with-quotes]
+	    ; <unquote(?'"')> cons-with-quotes => cons
+	    ; <conc-strings> ("smart-", cons) => smart-cons
+	   
+	    ; <filter(get-symbol-name)> lhs => arg-sorts
+	    ; <get-symbol-name> rhs => res-sort
+	    
+	    ; <make-arg-list(|1)> arg-sorts => args
+	    ; <zip; map(gen-arg-check)> (args, arg-sorts) => arg-checks
+	    
+	    ; <map(!Var(<id>)); !NoAnnoList(List(<id>))> args => args-term
+	    ; !stratego-strategy|[ <prim("SUGARJ_unsafe_build", string~cons)> term~args-term ]| => build
+	    ; !|[ put-anno(|"syntax-sort", string~res-sort) ]| => put-res
+	    ; <debug; conc; debug;foldr(!Id, \ (x,y) -> Seq(x,y) \);debug> (arg-checks, [build, put-res]) => body
+	    
+	    ; <map(!DefaultVarDec(<id>))> args => var-decs
+	    ; !SDefT(smart-cons, [], var-decs, body) => strat
+    
+    gen-arg-check :
+      (arg, arg-sort) -> |[ where(<get-anno(|"syntax-sort")> id~arg => string~arg-sort) ]|
+    
+    make-arg-list(|n) :
+      [] -> []
+    make-arg-list(|n) :
+      [_|rest] -> [arg| <make-arg-list(|<inc> n)> rest]
+      where <conc-strings> ("arg", <int-to-string> n) => arg
+}
+

@@ -1,0 +1,25 @@
+package pair;
+
+import org.sugarj.languages.Java;
+import concretesyntax.Java;
+
+public sugar Sugar {
+  context-free syntax
+    "(" JavaType "," JavaType ")" -> JavaType {cons("PType")}
+    "(" JavaExpr "," JavaExpr ")" -> JavaExpr {cons("PExpr")}
+  
+  desugarings
+    desugar-pair-type
+    desugar-pair-expr
+
+  rules
+    desugar-pair-type :
+      PType(t1, t2) -> |[ pair.Pair<~t1, ~t2> ]| 
+
+    desugar-pair-expr : 
+      PExpr(e1, e2) -> |[ pair.Pair.create(~e1, ~e2) ]|
+}
+
+
+
+

@@ -117,28 +117,28 @@ rules
     where <get-symbol-name> sym => name
 
   get-symbol-name :
-    seq(_, _) -> "seq"
+    seq(x, y) -> <conc-strings> ("Seq(", <get-symbol-name> x, ",", <get-symbol-name> y, ")")
 
   get-symbol-name :
-    opt(_) -> "opt"
+    opt(x) -> <conc-strings> ("Option(", <get-symbol-name> x, ")")
 
   get-symbol-name :
-    iter(_) -> "iter"
+    iter(x) -> <conc-strings> ("List(", <get-symbol-name> x, ")")
 
   get-symbol-name :
-    iter-star(_) -> "iter-star"
+    iter-star(x) -> <conc-strings> ("List(", <get-symbol-name> x, ")")
 
   get-symbol-name :
-    iter-sep(_, _) -> "iter-sep"
+    iter-sep(x, _) -> <conc-strings> ("List(", <get-symbol-name> x, ")")
 
   get-symbol-name :
-    iter-star-sep(_, _) -> "iter-star-sep"
+    iter-star-sep(x, _) -> <conc-strings> ("List(", <get-symbol-name> x, ")")
 
   get-symbol-name :
-    tuple(_, _) -> "tuple"
+    tuple(x, y) -> <conc-strings> ("Tuple(", <get-symbol-name> x, ",", <get-symbol-name> y, ")")
 
   get-symbol-name :
-    alt(_, _) -> "alt"
+    alt(x, y) -> <conc-strings> ("Alt(", <get-symbol-name> x, ",", <get-symbol-name> y, ")")
 
   get-symbol-name :
     cf(sym) -> <concat-strings> ["cf", name]
