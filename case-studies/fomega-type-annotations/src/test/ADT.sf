@@ -5,6 +5,18 @@ import extension.adt.Desugaring
 
 import contextanalysis.ContextAnalysis
 
+type Id = \X::*=>*=>*. X
+
 data Tree (k::*) (v::*) = Nil isNil {}
                         | Leaf isLeaf {value: v}
                         | Node isNode {left: Tree k v, key: k, right: Tree k v}
+
+
+data D = Foo isFoo {foo:Nat} 
+
+// type E = mu ( \ D :: [] => * . \ args :: [] . ( \ D :: * . < Foo : { foo : Nat
+// }  > ) ( ( D ) ( [] ) ) , [] ) 
+
+type X = Tree Nat Nat
+
+val x = fold [D] (<Foo={foo=1}> as <Foo:{foo:Nat}>)

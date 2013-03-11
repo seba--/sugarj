@@ -26,7 +26,7 @@ signature
 
 rules
   desugar-EVAL :
-    Op("EVAL", x) -> BA(CallNoArgs(SVar("desugar")), x)
+    Op("EVAL", x) -> stratego-strategy |[ <desugar-main> term~x ]|
 
 
 rules
@@ -80,12 +80,15 @@ rules // Translate a kinding rule
     |[ rules
          annotate-kind-defined =
              ?(term~tC, node@term~tT)
+           ; <debug-analysis(<concat-strings> ["IN  ", term~tname, " "])> (term~tC, node)
            ; strategy~premises-implementation
            ; <put-kind> (term~tK, node)
+           ; <debug-analysis(<concat-strings> ["OUT ", term~tname, " "])> term~tK
     ]|
     where <trm-explode> C => tC
         ; <trm-explode> T => tT
         ; <trm-explode> K => tK
+        ; <trm-explode> name => tname
         ; <premises-to-list> premises => premises-list
         ; <translate-premises> (<ts-initial> (), premises-list) => (ts1, premises-implementation)
 
@@ -477,14 +480,15 @@ rules // Translate a kind expectation
         ; <translate-kind-expectation> (ts4, tblame, result-var2, K2) => (ts5, inspect-result2)
 
   translate-kind-expectation :
-    (ts, tblame, result-var, kind-expression) ->
-      (ts2, |[   !term~expected-kind; ?term~result-var1
+    (ts, tblame, result-var, K) ->
+      (ts2, |[   strategy~tK; ?term~result-var1
                ; <kind-eq> (term~result-var1, term~result-var) => term~msgs-var
                ; <add-context-errors> (term~msgs-var, term~tblame)
             ]|)
     where <fresh-result-var> ts => (ts1, result-var1)
         ; <fresh-msgs-var> ts1 => (ts2, msgs-var)
-        ; <desugar-EVAL> (<trm-explode> kind-expression) => expected-kind
+        ; <trm-explode> K => tK
+        //; <desugar-EVAL> (<trm-explode> kind-expression) => expected-kind
 
 
 rules // Translate a substitution operator in a type
