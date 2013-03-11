@@ -31,7 +31,8 @@ rules
       result
     where // TODO: only allow desugar-extension-internal; extension declaration 
           //       requires this rule to be successfully applicable to subject
-          if <(desugar-extension-internal <+ desugar); reinit-for-analysis> e => e-desugared then
+          <debug(!"*** Verify rule ")> name
+        ; if <(desugar-extension-internal <+ desugar); reinit-for-analysis> e => e-desugared then
               <strip-annos; debug(<concat-strings> ["Original conclusion term  (", name, "): "])> e
             ; <strip-annos; debug(<concat-strings> ["Desugared conclusion term (", name, "): "])> e-desugared
             ; <premises-to-list> premises => premises-list
@@ -67,13 +68,15 @@ rules
                                      , <write-to-string> errs])]
               end
           else
-            ![( name, <concat-strings> ["Could not desugar the conclusion of typing rule ", name, ".\n"])]
+              <debug(!" Could not desugar the conclusion of rule ")> name
+            ; ![( name, <concat-strings> ["Could not desugar the conclusion of typing rule ", name, ".\n"])]
           end => result
 
   verify-context-rule :
     KindingRule(premises, RuleName(sep, Some(Var(name))), KindingJudgment(C, T, K)) ->
       result
-    where if <(desugar-extension-internal <+ (trm-explode; desugar)); reinit-for-analysis> T => T-desugared then
+    where <debug(!"*** Verify rule ")> name
+        ; if <(desugar-extension-internal <+ desugar); reinit-for-analysis> T => T-desugared then
               <strip-annos; debug(<concat-strings> ["Original conclusion type  (", name, "): "])> T
             ; <strip-annos; debug(<concat-strings> ["Desugared conclusion type (", name, "): "])> T-desugared
             ; <premises-to-list> premises => premises-list
@@ -103,7 +106,8 @@ rules
                                      , <write-to-string> errs])]
               end
           else
-            ![( name, <concat-strings> ["Could not desugar the conclusion of kinding rule ", name, ".\n"])]
+              <debug(!" Could not desugar the conclusion of rule ")> name
+            ; ![( name, <concat-strings> ["Could not desugar the conclusion of kinding rule ", name, ".\n"])]
           end => result
 
   activate-dynamic-axioms :

@@ -3,11 +3,10 @@ module extension.adt.Desugaring
 import org.sugarj.languages.Fomega
 
 import concretesyntax.Fomega
-import concretesyntax.Metavars
 
 import contextanalysis.rules.Syntax
 import contextanalysis.rules.Desugaring
-import contextanalysis.rules.Verification
+// import contextanalysis.rules.Verification
 
 import extension.adt.Syntax
 
