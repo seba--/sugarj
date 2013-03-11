@@ -18,12 +18,25 @@ desugarings
 
 signature
   constructors
-    ADT-TYPE: FomegaID * DataParams * DataCons -> StrategoTerm
+    ADT-TYPE:    FomegaID * DataParams * DataCons -> StrategoTerm
+    ADT-ABS:     DataParams * FomegaType -> StrategoTerm
+    ADT-OP:      FomegaID * DataParams * DataCons -> StrategoTerm 
+    ADT-ARG:     DataParams -> StrategoTerm
+    ADT-PK:      DataParams -> StrategoTerm
+    ADT-DECLS:   DataCons -> StrategoTerm
+    ADT-CK:      DataParams -> StrategoTerm
+    ADT-CA:      DataParams * FomegaType * FomegaType -> StrategoTerm
+    ADT-UNCURRY: FomegaID * DataParams * FomegaType -> StrategoTerm
+
 
 rules
 
   desugar-data :
-    |[ data ~%X ~params = ~dcons ~=defs ]| -> |[ type ~%X = M~ADT-TYPE(X, params, dcons) ~=defs]|
+    |[ data ~%X ~params = ~dcons ~=defs ]| -> |[ type ~%X = M~ADT-TYPE(X, params, dcons) ~=defs ]|
+
+  desugar-data :
+    |[ data ~%X ~params = ~dcons ]| -> |[ type ~%X = M~ADT-TYPE(X, params, dcons) ]|
+
 
 ~%X notin dom(~C)
 ~C |- M~ADT-TYPE(X, params, dcons) :: ~K
@@ -32,161 +45,135 @@ rules
 ~C |- data ~%X ~params = ~dcons ~=defs ==> ~sig
 
 
+rules // ADT-TYPE
+
+  desugar-data :
+    ADT-TYPE(X, params, dcons) ->
+      fomega-type |[ M~ADT-ABS(params, |[ mu (M~ADT-OP(X, params, dcons), M~(ADT-ARG(params))) ]|) ]|
+
+~C |- M~ADT-ABS(params, |[ mu (M~ADT-OP(X, params, dcons), M~(ADT-ARG(params))) ]|) :: ~K
+========================================================================================= ADT-TYPE
+~C |- M~ADT-TYPE(X, params, dcons) :: ~K
 
 
+rules // ADT-ABS
+
+  desugar-data :
+    ADT-ABS(fomega-params |[ ]|, T) -> fomega-type |[ ~T ]|
+
+  desugar-data :
+    ADT-ABS(|[ (~%X::~K) ~params ]|, T) -> fomega-type |[ \~%X::~K. M~ADT-ABS(params, T) ]|
+
+~C |- ~T :: ~K
+============================================= ADT-ABSNil
+~C |- M~ADT-ABS(fomega-params |[ ]|, T) :: ~K 
+
+~C |- M~ADT-ABS(params, T) :: ~K2
+======================================================================== ADT-ABSCons
+~C |- M~ADT-ABS(fomega-params |[ (~%X::~K1) ~params ]|, T) :: ~K1 => ~K2
 
 
-// rules
-// 
-//   desugar-data :
-//     DefsCons(def@DataDef(public, X, params, dcons), defs)
-//       -> DefsCons(<make-type-synonym> def, defs) // <make-con-defs> DefsCons(def, defs))
-// 
-//   desugar-data :
-//     DefsEnd(def@DataDef(public, X, params, dcons))
-//       -> DefsEnd(<make-type-synonym> def) //, <make-con-defs> DataEnd(def))
-// 
-// 
-// rules
-// 
-//   make-type-synonym :
-//     DefsCons(def@DataDef(public, X, params, dcons), defs) -> DefsCons(<make-type-synonym> def, DefsCons(def, defs))
-// 
-//   make-type-synonym :
-//     DefsEnd(def@DataDef(public, X, params, dcons)) -> DefsEnd(<make-type-synonym> def)
-// 
-//   make-type-synonym :
-//     DataDef(public, X, params, dcons) -> TypeDef(public, X, <debug(!"HELLO ");make-type-rhs> (X, params, dcons))
-// 
-// 
-// rules
-// 
-//   make-type-rhs :
-//     (X, params, dcons) -> <make-type-op> (params, <debug(!"D1 ");make-type-mu;debug(!"D2 ")> (X, params, dcons))
-// 
-// 
-// rules
-// 
-//   make-type-op :
-//     (DataParamsNil(), T) -> T
-// 
-//   // make-type-op :
-//   //   (DataParamsCons(KiDecl(X, K), params), T) -> TyAbs(X, K, (params, T))
-//   make-type-op :
-//     (DataParamsCons(KiDecl(X, K), params), T) -> TyAbs(X, K, <make-type-op> (params, T))
-// 
-// 
-// rules
-// 
-//   make-type-mu :
-//     (X, params, dcons) -> TyMu(<make-type-pair-kind> params, <make-type-mu-op;debug(!"D4 ")> (X, params, dcons), <make-type-pair-args> params)
-// 
-// 
-// rules
-// 
-//   make-type-pair-kind :
-//     DataParamsNil() -> KiEmpty()
-// 
-//   // make-type-pair-kind :
-//   //   DataParamsCons(KiDecl(X, K), params) -> KiPair(K, params)
-//   make-type-pair-kind :
-//     DataParamsCons(KiDecl(X, K), params) -> KiPair(K, <make-type-pair-kind> params)
-// 
-// 
-// rules
-// 
-//   make-type-mu-op :
-//     (X, params, dcons) ->
-//       TyAbs( X
-//            , KiArrow(<make-type-pair-kind> params, KiStar())
-//            , TyAbs( "args"
-//                   , <make-type-pair-kind> params
-//                   , <make-type-uncurry; debug(!"D6 ")> (X, params, TyVariant(<make-type-tydecls;debug(!"D5 ")> dcons))))
-// 
-// 
-// rules
-// 
-//   make-type-uncurry :
-//     (X, params, T) ->
-//       TyApp( TyAbs( X
-//                   , <make-type-curry-kind; debug(!"D8 ")> params
-//                   , <debug(!"D9 ");make-type-curry-args; debug(!"D7 ")> (params, TyVar("args"), <make-type-op> (params, T)))
-//            , <make-type-op> (params, TyApp(TyVar(X), <make-type-pair-args> params)))
-// 
-// 
-// rules
-// 
-//   make-type-tydecls :
-//     DataConsEnd(dcon) -> TyDeclsCons(<make-type-tydecl> dcon, TyDeclsNil)
-// 
-//   make-type-tydecls :
-//     DataConsCons(dcon, dcons) -> TyDeclsCons(<make-type-tydecl> dcon, <make-type-tydecls> dcons)
-// 
-//   make-type-tydecl :
-//     DataCon(X-con, X-discr, dcon-params) -> TyDecl(X-con, TyRecord(<make-tydecls-from-dcon-params> dcon-params))
-// 
-//   make-tydecls-from-dcon-params :
-//     DataConParamsNil -> TyDeclsNil
-// 
-//   make-tydecls-from-dcon-params :
-//     DataConParamsCons(decl, dcon-params) -> TyDeclsCons(decl, <make-tydecls-from-dcon-params> dcon-params)
-// 
-// 
-// rules
-// 
-//   make-type-curry-args :
-//     (DataParamsNil(), args, e) -> e
-// 
-//   make-type-curry-args :
-//     (DataParamsCons(KiDecl(X, K), params), args, e) -> <make-type-curry-args> (params, TySnd(args), TyApp(e, TyFst(args)))
-// 
-// 
-// rules
-// 
-//   make-type-curry-kind :
-//     DataParamsNil() -> KiStar()
-// 
-//   make-type-curry-kind :
-//     DataParamsCons(KiDecl(X, K), params) -> KiArrow(K, <make-type-curry-kind> params)
-// 
-// 
-// rules
-// 
-//   make-type-pair-args :
-//     DataParamsNil() -> TyEmpty()
-// 
-//   // make-type-pair-args :
-//   //   DataParamsCons(KiDecl(X, K), params) -> TyPair(TyVar(X), params)
-//   make-type-pair-args :
-//     DataParamsCons(KiDecl(X, K), params) -> TyPair(TyVar(X), <make-type-pair-args> params)
-// 
-// 
-// rules
+rules // ADT-OP
 
-  // |[ data ~public ~X ~params = ~X-con ~X-discr ~dcon-params
-  //                            | ~dcons
-  //    ~defs ]| ->
-  // |[ ~public val ~X-con = ...
-  //    ~public data ~public ~X ~params = ~dcons
-  //    ~defs ]|
-  //make-con-defs :
-  //  DefsCons(DataDef(public, X, params, DataConsCons(DataCon(X-con, X-discr, dcon-params), dcons)), defs) ->
-  //    DefsCons( ValDef(public, X-con, <make-con-rhs> (X, params, dcon-params))
-  //            , DefsCons(DataDef(public, X, params, dcons))
-  //            , defs)
+  desugar-data :
+    ADT-OP(X, params, dcons) ->
+      fomega-type |[ \~%X :: M~(ADT-PK(params)) => *.
+                       \args :: M~(ADT-PK(params)).
+                         M~ADT-UNCURRY(X, params, |[ <M~(ADT-DECLS(dcons))> ]|)
+                  ]| 
 
-  // |[ data ~public ~X ~params = ~dcon ~defs ]| -> ...
-  //make-con-defs :
-  //  DefsCons(DataDef(public, X, params, DataConsEnd(DataCon(X-con, X-discr, dcon-params))), defs) ->
-  //    defs
+((~C;~%X :: M~EVAL(ADT-PK(params)) => *);args::M~EVAL(ADT-PK(params))) |-
+                                     M~ADT-UNCURRY(X, params, |[ <M~(ADT-DECLS(dcons))> ]|) :: *
+================================================================================================ ADT-OP
+~C |- M~ADT-OP(X, params, dcons) :: (M~EVAL(ADT-PK(params)) => *) => M~EVAL(ADT-PK(params)) => *
 
-  // |[ data ~public ~X ~params = ~dcon | ~dcons ]| -> ...
-  //make-con-defs :
-  //  DefsEnd(DataDef(public, X, params, DataConsCons(DataCon(X-con, X-discr, dcon-params)))) ->
-  //    ValDef(None(), "nyi", String("nyi"))
 
-  // |[ data ~public ~X ~params = ~dcon ]| -> ...
-  //make-con-defs :
-  //  DefsEnd(DataDef(public, X, params, DataConsEnd(DataCon(X-con, X-discr, dcon-params)))) ->
-  //    ValDef(None(), "nyi", String("nyi"))
+rules // ADT-UNCURRY
+
+  desugar-data :
+    ADT-UNCURRY(X, params, T) ->
+      fomega-type |[ (\~%X :: M~(ADT-CK(params)).
+                       M~ADT-CA(params, fomega-type |[ args ]|, ADT-ABS(params, T)))
+                     M~ADT-ABS(params, fomega-type |[ ~%X M~(ADT-ARG(params)) ]|)
+                  ]|
+
+~%X :: M~EVAL(ADT-PK(params)) => * in ~C
+args :: M~EVAL(ADT-PK(params)) in ~C
+~C |- M~(ADT-ARG(params)) :: M~EVAL(PK(params))
+~C |- M~ADT-CA(params, fomega-type |[ args ]|, ADT-ABS(params, T)) :: *
+===================================================== ADT-UNCURRY
+~C |- M~ADT-UNCURRY(X, params, T) :: *
+
+
+rules // ADT-CK
+
+  desugar-data :
+    ADT-CK(fomega-params |[ ]|) -> |[ * ]|
+
+  desugar-data :
+    ADT-CK(fomega-params |[ (~%X::~K) ~params ]|) -> |[ ~K => M~(ADT-CK(params)) ]|
+
+
+rules // ADT-CA
+
+  desugar-data :
+    ADT-CA(fomega-params |[ ]|, args, T) -> T
+
+  desugar-data :
+    ADT-CA(fomega-params |[ (~%X::~K) ~params ]|, args, T) ->
+      ADT-CA(params, fomega-type |[ ~args.2 ]|, fomega-type |[ ~T (~args.1) ]|)
+
+~C |- ~args :: M~EVAL(ADT-PK(params))
+~C |- ~T :: M~EVAL(ADT-CK(params))
+===================================== ADT-CAInd
+~C |- M~ADT-CA(params, args, T) :: *
+
+~C |- ~args :: []
+~C |- ~T :: * 
+================================================= ADT-CANil
+~C |- M~ADT-CA(fomega-params |[ ]|, args, T) :: *
+
+~C |- ~args :: {~K, M~EVAL(ADT-PK(params))}
+~C |- ~T :: ~K => M~EVAL(ADT-CK(params))
+=================================================================== ADT-CACons
+~C |- M~ADT-CA(fomega-params |[ (~%X::~K) ~params ]|, args, T) :: *
+
+
+rules // ADT-DECLS
+
+  desugar-data :
+    ADT-DECLS(fomega-datacons |[ ~%Xcon ~%Xdiscr { ~decls } ]|) -> 
+      fomega-tydecls |[ ~%Xcon : { ~decls } ]|
+
+  desugar-data :
+    ADT-DECLS(fomega-datacons |[ ~%Xcon ~%Xdiscr { ~decls } | ~dcons ]|) ->
+      fomega-tydecls |[ ~%Xcon : { ~decls } Mtydecls1~(ADT-DECLS(dcons)) ]|
+
+~C |- { ~decls } :: *
+====================================================================== ADT-DECLSEnd
+~C |- M~ADT-DECLS(fomega-datacons |[ ~%Xcon ~%Xdiscr { ~decls } ]|) :: *
+
+~C |- M~(ADT-DECLS(dcons)) :: *
+~C |- { ~decls } :: *
+~%Xcon notin lab(M~(ADT-DECLS(dcons)))
+================================================================================= ADT-DECLSCons
+~C |- M~ADT-DECLS(fomega-datacons |[ ~%Xcon ~%Xdiscr { ~decls } | ~dcons ]|) :: *
+
+
+rules // ADT-ARG
+
+  desugar-data :
+    ADT-ARG(fomega-params |[ ]|) -> fomega-type |[ [] ]|
+
+  desugar-data :
+    ADT-ARG(|[ (~%X::~K) ~params ]|) -> fomega-type |[ {~%X, M~(ADT-ARG(params))} ]|
+
+
+  // ADT-PK
+
+  desugar-data :
+    fomega-type |[ M~ADT-PK(fomega-params |[ ]|) ]| -> fomega-type |[ [] ]|
+
+  desugar-data :
+    fomega-type |[ M~ADT-PK(|[ (~%X::~K) ~params ]|) ]| -> fomega-type |[ {~K, M~(ADT-PK(params))} ]|
 

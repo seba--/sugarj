@@ -476,6 +476,16 @@ rules // Translate a kind expectation
         ; <translate-kind-expectation> (ts3, tblame, result-var1, K1) => (ts4, inspect-result1)
         ; <translate-kind-expectation> (ts4, tblame, result-var2, K2) => (ts5, inspect-result2)
 
+  translate-kind-expectation :
+    (ts, tblame, result-var, kind-expression) ->
+      (ts2, |[   !term~expected-kind; ?term~result-var1
+               ; <kind-eq> (term~result-var1, term~result-var) => term~msgs-var
+               ; <add-context-errors> (term~msgs-var, term~tblame)
+            ]|)
+    where <fresh-result-var> ts => (ts1, result-var1)
+        ; <fresh-msgs-var> ts1 => (ts2, msgs-var)
+        ; <desugar-EVAL> (<trm-explode> kind-expression) => expected-kind
+
 
 rules // Translate a substitution operator in a type
 

@@ -15,6 +15,14 @@ context-free syntax
   "fomega"      "|[" FomegaType "]|" -> StrategoTerm {cons("ToMetaExpr")}
                 "|[" FomegaType "]|" -> StrategoTerm {cons("ToMetaExpr")}
 
+  "fomega-kind" "|[" FomegaKind "]|" -> StrategoTerm {cons("ToMetaExpr")}
+  "fomega"      "|[" FomegaKind "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                "|[" FomegaKind "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+  "fomega-tydecls" "|[" FomegaTyDecls "]|" -> StrategoTerm {cons("ToMetaExpr")}
+  "fomega"         "|[" FomegaTyDecls "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                   "|[" FomegaTyDecls "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
   "fomega-branches" "|[" FomegaBranches "]|" -> StrategoTerm {cons("ToMetaExpr")}
   "fomega"          "|[" FomegaBranches "]|" -> StrategoTerm {cons("ToMetaExpr")}
                     "|[" FomegaBranches "]|" -> StrategoTerm {cons("ToMetaExpr")}
@@ -28,5 +36,14 @@ context-free syntax
   "~%" StrategoTerm -> StrategoId {cons("FromMetaExpr")}
 
 context-free syntax
-  "M~" StrategoTerm -> FomegaExpr {cons("FromMetaExpr")}
-  "M~" StrategoTerm -> FomegaType {cons("FromMetaExpr")}
+  "M~" StrategoTerm -> FomegaExpr     {cons("FromMetaExpr")}
+  "M~" StrategoTerm -> FomegaType     {cons("FromMetaExpr")}
+  "M~" StrategoTerm -> FomegaTyDecls  {cons("FromMetaExpr")}
+  "M~" StrategoTerm -> FomegaTyDecls1 {cons("FromMetaExpr")}
+  "M~" StrategoTerm -> FomegaKind     {cons("FromMetaExpr")}
+
+  "Mexpr~" StrategoTerm     -> FomegaExpr     {cons("FromMetaExpr")}
+  "Mtype~" StrategoTerm     -> FomegaType     {cons("FromMetaExpr")}
+  "Mtydecls~" StrategoTerm  -> FomegaTyDecls  {cons("FromMetaExpr")}
+  "Mtydecls1~" StrategoTerm -> FomegaTyDecls1 {cons("FromMetaExpr")}
+  "Mkind~" StrategoTerm     -> FomegaKind     {cons("FromMetaExpr")}
