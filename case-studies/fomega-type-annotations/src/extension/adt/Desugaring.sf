@@ -128,20 +128,21 @@ rules // ADT-CA
     ADT-CA(fomega-params |[ (~%X::~K) ~params ]|, args, T) ->
       ADT-CA(params, fomega-type |[ ~args.2 ]|, fomega-type |[ ~T (~args.1) ]|)
 
-//~C |- ~args :: M~EVAL(ADT-PK(params))
-//~C |- ~T :: M~EVAL(ADT-CK(params))
-//===================================== ADT-CAInd
-//~C |- M~ADT-CA(params, args, T) :: *
+~C |- ~args :: M~EVAL(ADT-PK(params))
+~C |- ~T :: M~EVAL(ADT-CK(params))
+===================================== ADT-CAInd
+~C |- M~ADT-CA(params, args, T) :: *
 
-~C |- ~args :: []
-~C |- ~T :: * 
-================================================= ADT-CANil
-~C |- M~ADT-CA(fomega-params |[ ]|, args, T) :: *
+//~C |- ~args :: []
+//~C |- ~T :: * 
+//================================================= ADT-CANil
+//~C |- M~ADT-CA(fomega-params |[ ]|, args, T) :: *
 
-~C |- ~args :: {~K, M~EVAL(ADT-PK(params))}
-~C |- ~T :: ~K => M~EVAL(ADT-CK(params))
-=================================================================== ADT-CACons
-~C |- M~ADT-CA(fomega-params |[ (~%X::~K) ~params ]|, args, T) :: *
+//~C |- ~args :: {~K, M~EVAL(ADT-PK(params))}
+//~C |- ~T :: ~K => M~EVAL(ADT-CK(params))
+//~C |- M~ADT-CA(params, fomega-type |[ ~args.2 ]|, fomega-type |[ ~T (~args.1) ]|) :: *
+//=================================================================== ADT-CACons
+//~C |- M~ADT-CA(fomega-params |[ (~%X::~K) ~params ]|, args, T) :: *
 
 
 rules // ADT-DECLS
