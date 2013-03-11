@@ -14,9 +14,6 @@ data Tree (k::*) (v::*) = Nil isNil {}
 
 data D = Foo isFoo {foo:Nat} 
 
-// type E = mu ( \ D :: [] => * . \ args :: [] . ( \ D :: * . < Foo : { foo : Nat
-// }  > ) ( ( D ) ( [] ) ) , [] ) 
-
 type X = Tree Nat Nat
 
 val x = fold [D] (<Foo={foo=1}> as <Foo:{foo:Nat}>)
