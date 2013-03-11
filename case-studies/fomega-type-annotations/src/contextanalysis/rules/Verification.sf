@@ -31,39 +31,79 @@ rules
       result
     where // TODO: only allow desugar-extension-internal; extension declaration 
           //       requires this rule to be successfully applicable to subject
-          <(desugar-extension-internal <+ desugar <+ id); reinit-for-analysis> e => e-desugared 
-        ; <strip-annos; debug(!"Desugared conclusion term: ")> e-desugared
-        ; <premises-to-list> premises => premises-list
-        ; {| Dynamic-Annotate-Type, Dynamic-Annotate-Kind, Dynamic-Par-Reduce-Type, Dynamic-Lookup-Expr-Var:
-               <activate-dynamic-axioms> premises-list
-             ; <annotate-type> (C, e-desugared)
-             ; <collect-all-context-errors> e-desugared => errs
-             ; <get-type> e-desugared => U
-             ; if !errs; ?[] then
-                   <norm> (C, T) => T'
-                 ; <norm> (C, U) => U'
-               else
-                 !T; ?T'; !U; ?U'
-               end
-          |}
-        ; <strip-annos; debug(!"Expected type: ")> T'
-        ; <strip-annos; debug(!"Actual type:   ")> U'
-        ; <debug(!"Type errors:   ")> errs
-        ; if !errs; ?[] then
-              <type-eq> (T', U') => msgs
-            ; if !msgs; ?[] then
-                debug(!(<concat-strings> ["Successfully verified typing rule ", name, "."])); fail
+          if <(desugar-extension-internal <+ desugar); reinit-for-analysis> e => e-desugared then
+              <strip-annos; debug(<concat-strings> ["Original conclusion term  (", name, "): "])> e
+            ; <strip-annos; debug(<concat-strings> ["Desugared conclusion term (", name, "): "])> e-desugared
+            ; <premises-to-list> premises => premises-list
+            ; {| Dynamic-Annotate-Type, Dynamic-Annotate-Kind, Dynamic-Par-Reduce-Type, Dynamic-Lookup-Expr-Var:
+                   <activate-dynamic-axioms> premises-list
+                 ; <annotate-type> (C, e-desugared)
+                 ; <collect-all-context-errors> e-desugared => errs
+                 ; <get-type> e-desugared => U
+                 ; if !errs; ?[] then
+                       <norm> (C, T) => T'
+                     ; <norm> (C, U) => U'
+                   else
+                     !T; ?T'; !U; ?U'
+                   end
+              |}
+            ; <strip-annos; debug(!"Expected type: ")> T'
+            ; <strip-annos; debug(!"Actual type:   ")> U'
+            ; <debug(!"Type errors:   ")> errs
+            ; if !errs; ?[] then
+                  <type-eq> (T', U') => msgs
+                ; if !msgs; ?[] then
+                    debug(!(<concat-strings> ["Successfully verified typing rule ", name, "."])); fail
+                  else
+                    ![( name
+                     , <concat-strings> [ "Could not verify typing rule ", name, ".\n"
+                                        , "Expected type: ", <write-to-string> T', ".\n"
+                                        , "But got type:  ", <write-to-string> U', "."])]
+                  end
               else
                 ![( name
-                 , <concat-strings> [ "Could not verify typing rule ", name, ".\n"
-                                    , "Expected type: ", <write-to-string> T', ".\n"
-                                    , "But got type:  ", <write-to-string> U', "."])]
+                  , <concat-strings> [ "Could not verify typing rule ", name, ".\n"
+                                     , "The type checker returned the following errors:\n"
+                                     , <write-to-string> errs])]
               end
           else
-            ![( name
-              , <concat-strings> [ "Could not verify typing rule ", name, ".\n"
-                                 , "The type checker returned the following errors:\n"
-                                 , <write-to-string> errs])]
+            ![( name, <concat-strings> ["Could not desugar the conclusion of typing rule ", name, ".\n"])]
+          end => result
+
+  verify-context-rule :
+    KindingRule(premises, RuleName(sep, Some(Var(name))), KindingJudgment(C, T, K)) ->
+      result
+    where if <(desugar-extension-internal <+ (trm-explode; desugar)); reinit-for-analysis> T => T-desugared then
+              <strip-annos; debug(<concat-strings> ["Original conclusion type  (", name, "): "])> T
+            ; <strip-annos; debug(<concat-strings> ["Desugared conclusion type (", name, "): "])> T-desugared
+            ; <premises-to-list> premises => premises-list
+            ; {| Dynamic-Annotate-Kind, Dynamic-Lookup-Type-Var:
+                   <activate-dynamic-axioms> premises-list
+                 ; <annotate-kind> (C, T-desugared)
+                 ; <collect-all-context-errors> T-desugared => errs
+                 ; <get-kind> T-desugared => J
+              |}
+            ; <strip-annos; debug(!"Expected kind: ")> K
+            ; <strip-annos; debug(!"Actual kind:   ")> J
+            ; <debug(!"Kind errors:   ")> errs
+            ; if !errs; ?[] then
+                  <kind-eq> (K, J) => msgs
+                ; if !msgs; ?[] then
+                    debug(!(<concat-strings> ["Successfully verified kinding rule ", name, "."])); fail
+                  else
+                    ![( name
+                     , <concat-strings> [ "Could not verify kinding rule ", name, ".\n"
+                                        , "Expected kind: ", <write-to-string> K, ".\n"
+                                        , "But got kind:  ", <write-to-string> J, "."])]
+                  end
+              else
+                ![( name
+                  , <concat-strings> [ "Could not verify kinding rule ", name, ".\n"
+                                     , "The kind checker returned the following errors:\n"
+                                     , <write-to-string> errs])]
+              end
+          else
+            ![( name, <concat-strings> ["Could not desugar the conclusion of kinding rule ", name, ".\n"])]
           end => result
 
   activate-dynamic-axioms :

@@ -7,12 +7,12 @@ import concretesyntax.Metavars
 
 import contextanalysis.rules.Syntax
 import contextanalysis.rules.Desugaring
-// import contextanalysis.rules.Verification
+import contextanalysis.rules.Verification
 
 import extension.adt.Syntax
 
 
-desugarings
+desugarings 
   desugar-data
 
 
@@ -166,7 +166,7 @@ rules // ADT-DECLS
 ================================================================================= ADT-DECLSCons
 ~C |- M~ADT-DECLS(fomega-datacons |[ ~%Xcon ~%Xdiscr { ~decls } | ~dcons ]|) :: *
 
-~C |- M~(ADT-DECLS(decls)) :: *
+~C |- M~(ADT-DECLS(decls)) :: * 
 =============================== ADT-DECLSVariant
 ~C |- <M~ADT-DECLS(decls)> :: *
 
