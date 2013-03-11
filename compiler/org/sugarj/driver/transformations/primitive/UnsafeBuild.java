@@ -6,13 +6,14 @@ import org.spoofax.interpreter.library.AbstractPrimitive;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
-import org.spoofax.terms.StrategoConstructor;
 import org.spoofax.terms.StrategoList;
 import org.sugarj.common.ATermCommands;
+import org.sugarj.common.typesmart.TypeSmartTermFactory;
 
 /**
- * Primitive for looking up and loading a model according to the current environment.
- * If successful, this primitive returns the loaded model as a term.
+ * Builds an application term using the given term factory.
+ * The constructor name is expected as a term argument, 
+ * the argument list is expected as the current term.
  * 
  * @author seba
  */
@@ -22,7 +23,10 @@ class UnsafeBuild extends AbstractPrimitive {
   
   public UnsafeBuild(ITermFactory factory) {
     super("SUGARJ_unsafe_build", 0, 1);
-    this.factory = factory;
+    if (factory instanceof TypeSmartTermFactory)
+      this.factory = ((TypeSmartTermFactory) factory).getBaseFactory();
+    else
+      this.factory = factory;
   }
 
   @Override
@@ -30,7 +34,9 @@ class UnsafeBuild extends AbstractPrimitive {
     String ctr = ATermCommands.getString(tvars[0]);
     StrategoList args = (StrategoList) context.current();
     
-    IStrategoTerm unsafeTerm = factory.makeAppl(factory.makeConstructor(ctr, args.size()), ATermCommands.getList(args).toArray(new IStrategoTerm[args.size()]));
+    IStrategoTerm[] argArray = ATermCommands.getList(args).toArray(new IStrategoTerm[args.size()]);
+    IStrategoTerm unsafeTerm = factory.makeAppl(factory.makeConstructor(ctr, argArray.length), argArray);
+    
     context.setCurrent(unsafeTerm);
     return true;
   }

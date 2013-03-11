@@ -2,7 +2,6 @@ package org.sugarj.common.typesmart;
 
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.InterpreterException;
-import org.spoofax.interpreter.core.VarScope;
 import org.spoofax.interpreter.stratego.CallT;
 import org.spoofax.interpreter.stratego.SDefT;
 import org.spoofax.interpreter.stratego.Strategy;
@@ -20,8 +19,12 @@ import org.spoofax.terms.AbstractTermFactory;
 import org.strategoxt.lang.StrategoException;
 
 /**
+ * When constructing an application term, this term factory
+ * looks for the existing of a type-smart constructor. If such
+ * constructor exists, it is used for the construction of the term.
+ * Otherwise, a standard build is performed using the base factory.
+ * 
  * @author seba
- *
  */
 public class TypeSmartTermFactory extends AbstractTermFactory {
   
@@ -35,7 +38,7 @@ public class TypeSmartTermFactory extends AbstractTermFactory {
   }
   
   public TypeSmartTermFactory(ITermFactory baseFactory, IContext context) {
-    super(IStrategoTerm.MUTABLE);
+    super(baseFactory.getDefaultStorageType());
     this.baseFactory = baseFactory;
     this.context = context;
   }
@@ -53,12 +56,7 @@ public class TypeSmartTermFactory extends AbstractTermFactory {
       if (sdef == null)
         return baseFactory.makeAppl(ctr, terms, annotations);
       
-      if (sdef.getStrategyParams().length != 0)
-        throw new StrategoException("A smart constructor is not supposed to have strategy arguments, in : " + sdef.getName());
-
-      if (sdef.getTermParams().length != terms.length)
-        throw new StrategoException("Smart constructor " + sdef.getName() + " expects " + sdef.getTermParams().length + " arguments, but actually got " + terms.length + " arguments.");
-
+      // apply smart constructor to argument terms
       CallT smartCall = new CallT(smartCtrName, new Strategy[0], new IStrategoTerm[0]);
       boolean smartOk = smartCall.evaluateWithArgs(context, new Strategy[0], terms);
       
@@ -75,15 +73,8 @@ public class TypeSmartTermFactory extends AbstractTermFactory {
 
       return appl;
     } catch (InterpreterException e) {
-      e.printStackTrace();
+      throw new StrategoException("Type-unsafe constructor application " + ctr, e);
     }
-    
-    boolean typeSafe = true;
-    
-    if (typeSafe) 
-      return baseFactory.makeAppl(ctr, terms, annotations);
-    
-    throw new StrategoException("Type-unsafe constructor application " + ctr);
   }
 
   @Override
