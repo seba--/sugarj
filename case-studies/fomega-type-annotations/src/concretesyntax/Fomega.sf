@@ -34,16 +34,3 @@ context-free syntax
 context-free syntax
   "~" StrategoTerm  -> StrategoId {cons("FromMetaExpr")}
   "~%" StrategoTerm -> StrategoId {cons("FromMetaExpr")}
-
-context-free syntax
-  "M~" StrategoTerm -> FomegaExpr     {cons("FromMetaExpr")}
-  "M~" StrategoTerm -> FomegaType     {cons("FromMetaExpr")}
-  "M~" StrategoTerm -> FomegaTyDecls  {cons("FromMetaExpr")}
-  "M~" StrategoTerm -> FomegaTyDecls1 {cons("FromMetaExpr")}
-  "M~" StrategoTerm -> FomegaKind     {cons("FromMetaExpr")}
-
-  "Mexpr~" StrategoTerm     -> FomegaExpr     {cons("FromMetaExpr")}
-  "Mtype~" StrategoTerm     -> FomegaType     {cons("FromMetaExpr")}
-  "Mtydecls~" StrategoTerm  -> FomegaTyDecls  {cons("FromMetaExpr")}
-  "Mtydecls1~" StrategoTerm -> FomegaTyDecls1 {cons("FromMetaExpr")}
-  "Mkind~" StrategoTerm     -> FomegaKind     {cons("FromMetaExpr")}

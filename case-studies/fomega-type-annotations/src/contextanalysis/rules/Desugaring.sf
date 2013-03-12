@@ -103,7 +103,7 @@ rules // Translate a signature rule
     |[ rules
          annotate-signature-defined =
              ?(term~tC, node@term~tdefs)
-           ; strategy~premises-implementation
+           ; debug(!"sig-check: "); (strategy~premises-implementation < debug(!"sig-check ok:") + debug(!"sig-check failed:") )
            ; <put-signature> (term~tsig, node)
            ; <put-context> (term~tC, node)
     ]|
@@ -246,7 +246,7 @@ rules // Translate a judgment
 
   translate-judgment :
     (ts, NotinDomJudgment(x, C)) ->
-      (ts, |[ if <not(elem(structurally-equal))> (term~tx, <dom> term~tC) then
+      (ts, |[ if <not-in-dom> (term~tx, term~tC) then
                 id
               else
                 <add-context-errors> ([<concat-strings> ["duplicate definition for ", term~tx]], term~tx)

@@ -9,6 +9,7 @@ import contextanalysis.rules.Syntax
 import contextanalysis.rules.Desugaring
 import contextanalysis.rules.Verification
 import contextanalysis.TypingRelation
+import contextanalysis.SignatureRelation
 
 syntax {
 	context-free syntax
@@ -75,7 +76,7 @@ typing {
   
 ~%X notin dom(~C)
 ~C |- M~ADT-TYPE(X, params, dcons) :: ~K
-(~C;~%X::~K=M~EVAL(ADT-TYPE(X, params, dcons))) |- ~=defs ==> ~sig
+(~C;~%X::~K=M~ADT-TYPE(X, params, dcons)) |- ~=defs ==> ~sig
 ================================================================== S-DataCons
 ~C |- data ~%X ~params = ~dcons ~=defs ==> ~sig
 
