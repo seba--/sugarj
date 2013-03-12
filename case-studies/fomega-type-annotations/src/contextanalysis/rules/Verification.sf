@@ -68,8 +68,10 @@ rules
                                      , <write-to-string> errs])]
               end
           else
-              <debug(!" Could not desugar the conclusion of rule ")> name
-            ; ![( name, <concat-strings> ["Could not desugar the conclusion of typing rule ", name, ".\n"])]
+              <debug(!"Could not desugar the conclusion of rule ")> name
+            ; <strip-annos; debug(!"  ")> e 
+            ; ![( name, <concat-strings> [ "Could not desugar the conclusion of typing rule ", name, ":\n"
+                                         , <strip-annos; write-to-string> e])]
           end => result
 
   verify-context-rule :
@@ -106,8 +108,10 @@ rules
                                      , <write-to-string> errs])]
               end
           else
-              <debug(!" Could not desugar the conclusion of rule ")> name
-            ; ![( name, <concat-strings> ["Could not desugar the conclusion of kinding rule ", name, ".\n"])]
+              <debug(!"Could not desugar the conclusion of rule ")> name
+            ; <strip-annos; debug(!"  ")> T
+            ; ![( name, <concat-strings> [ "Could not desugar the conclusion of kinding rule ", name, ":"
+                                         , <strip-annos; write-to-string> T])]
           end => result
 
   activate-dynamic-axioms :
