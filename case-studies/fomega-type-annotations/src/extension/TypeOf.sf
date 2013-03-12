@@ -1,0 +1,15 @@
+module extension.TypeOf
+
+import org.sugarj.languages.Fomega
+import concretesyntax.Stratego
+
+
+context-free syntax
+  "$" "(" "typeof" FomegaExpr ")" -> FomegaType {cons("TypeOf")}
+
+rules
+  desugar-typeof :
+    TypeOf(e) -> <get-type> e
+
+desugarings
+  desugar-typeof

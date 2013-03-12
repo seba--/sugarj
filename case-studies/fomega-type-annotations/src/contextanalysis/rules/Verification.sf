@@ -3,6 +3,8 @@ module contextanalysis.rules.Verification
 import contextanalysis.rules.Syntax
 import contextanalysis.rules.Desugaring // for premises-to-list
 
+import extension.TypeOf
+
 // import extension.Declaration
 
 rules // TODO: these two definitions belong to Analyze.str
@@ -114,33 +116,54 @@ rules
                                          , <strip-annos; write-to-string> T])]
           end => result
 
+
+rules // Activate dynamic axioms in the order of appearance in the typing rule
+
   activate-dynamic-axioms :
     [] -> []
 
   activate-dynamic-axioms :
     [judgment|judgments] ->
-      <activate-dynamic-axiom> judgment
-      where <activate-dynamic-axioms> judgments
+      <activate-dynamic-axioms> judgments
+      where <activate-dynamic-axiom> judgment
 
   activate-dynamic-axiom =
       ?TypingJudgment(C, e, T)
-    ; <strip-annos> (C, e, T) => (C-stripped, e-stripped, T-stripped)
+    ; <strip-annos> (e, T) => (e-stripped, T-stripped)
+    ; <norm-context; strip-annos> C => C-stripped
     ; rules(
         Dynamic-Annotate-Type-Defined :+
           arg -> res
-          where <strip-annos> arg => (C-stripped, e-stripped)
+          where <strip-annos> arg => (C-any, e-stripped)
+              ; <norm-context; strip-annos> C-any => C-stripped
               ; !arg => (C-arg, e-arg)
               ; <put-type> (T, e-arg) => res
+      )
+    ; rules(
+        Dynamic-Par-Reduce-Type :+
+          arg -> res
+          where <strip-annos> arg => (C-any, TypeOf(e-stripped))
+              ; !T => res
+      )
+    ; rules(
+        Dynamic-Annotate-Kind :+
+          arg -> res
+          where <strip-annos> arg => (C-any, TypeOf(e-stripped))
+              ; <norm-context; strip-annos> C-any => C-stripped
+              ; !arg => (C-arg, T-arg)
+              ; <put-kind> (KiStar(), T-arg) => res
       )
     // ; <debug(!"Activated TJ ")> (C-stripped, e-stripped, T-stripped)
 
   activate-dynamic-axiom =
       ?KindingJudgment(C, T, K)
-    ; <strip-annos> (C, T, K) => (C-stripped, T-stripped, K-stripped)
+    ; <strip-annos> (T, K) => (T-stripped, K-stripped)
+    ; <norm-context; strip-annos> C => C-stripped
     ; rules(
         Dynamic-Annotate-Kind :+
           arg -> res
-          where <strip-annos> arg => (C-stripped, T-stripped)
+          where <strip-annos> arg => (C-any, T-stripped)
+              ; <norm-context; strip-annos> C-any => C-stripped
               ; !arg => (C-arg, T-arg)
               ; <put-kind> (K, T-arg) => res
       )
@@ -148,11 +171,13 @@ rules
 
   activate-dynamic-axiom =
       ?NormalizationJudgment(C, T, T')
-    ; <strip-annos> (C, T, T') => (C-stripped, T-stripped, T-stripped')
+    ; <strip-annos> (T, T') => (T-stripped, T-stripped')
+    ; <norm-context; strip-annos> C => C-stripped
     ; rules(
         Dynamic-Par-Reduce-Type :+
           arg -> res
-          where <strip-annos> arg => (C-stripped, T-stripped)
+          where <strip-annos> arg => (C-any, T-stripped)
+              ; <norm-context; strip-annos> C-any => C-stripped
               ; !T' => res
     )
     // ; <debug(!"Activated PJ ")> (C-stripped, T-stripped, T-stripped')
@@ -168,6 +193,29 @@ rules
     ; <strip-annos> (qx, T, C) => (qx-stripped, T-stripped, C-stripped)
     ; rules(Dynamic-Lookup-Expr-Var : (qx-stripped, C-stripped) -> (T, []))
     // ; <debug(!"Activated VQJ ")> (qx-stripped, T-stripped, C-stripped)
+
+
+rules // norm-context
+
+  norm-context :
+    CtxEmpty() -> CtxEmpty()
+
+  norm-context :
+    CtxBindVar(C, x, T) -> CtxBindVar(C', x, T')
+    where <norm-context> C => C'
+        ; <norm> (C', T) => T'
+
+  norm-context :
+    CtxBindTVar(C, X, K) -> CtxBindTVar(C', X, K)
+    where <norm-context> C => C'
+
+  norm-context :
+    CtxBindTVarDef(C, X, K, T) -> CtxBindTVarDef(C', X, K, T')
+    where <norm-context> C => C'
+        ; <norm> (C', T) => T'
+
+  norm-context :
+    Metavar(mvar) -> Metavar(mvar)
 
 
 rules // Rules to hook in dynamic axioms into the judgment implementations
