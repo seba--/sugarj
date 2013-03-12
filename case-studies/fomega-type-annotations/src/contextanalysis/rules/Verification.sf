@@ -82,33 +82,35 @@ rules
 
   resolve-typeof1(|C) :
     TypeOf(e) -> R
-    where <annotate-type;debug-analysis(!"C1 ")> (C, e)
-        ; <get-type;debug-analysis(!"C2 ")> e => R
+    where <annotate-type> (C, e)
+        ; <get-type> e => R
         ; <strip-annos> R => R-stripped
         ; rules(
             Dynamic-Annotate-Kind :+
               arg -> res
-              where <strip-annos;debug-analysis(!"C3 ")> arg => (C-any, R-stripped)
+              where <strip-annos> arg => (C-any, R-stripped)
                   ; !arg => (C-arg, T-arg)
-                  ; <debug-analysis(!"C4 ");put-kind> (KiStar(), T-arg) => res
+                  ; <put-kind> (KiStar(), T-arg) => res
           )
 
   resolve-typeof1(|C) :
     TypeOfAs(T, e, S) -> U
-    where <annotate-type;debug-analysis(!"B1 ")> (C, e)
-        ; <get-type;debug-analysis(!"B2 ")> e => R
-        ; <norm;debug-analysis(!"B3 ")> (C, R) => R'
-        ; <norm;debug-analysis(!"B4 ")> (C, S) => S'
-        ; <unify-types;debug-analysis(!"B5 ")> (S', R') => sub
-        ; <apply-subst;debug-analysis(!"B6 ")> (sub, T) => U
+    where <annotate-type> (C, e)
+        ; <get-type> e => R
+        ; <norm> (C, R) => R'
+        ; <norm> (C, S) => S'
+        ; <unify-types> (S', R') => sub
+        ; <apply-subst> (sub, T) => U
         ; <strip-annos> U => U-stripped
         ; rules(
             Dynamic-Annotate-Kind :+
               arg -> res
-              where <strip-annos;debug-analysis(!"C3 ")> arg => (C-any, U-stripped)
+              where <strip-annos> arg => (C-any, U-stripped)
                   ; !arg => (C-arg, T-arg)
-                  ; <debug-analysis(!"C4 ");put-kind> (KiStar(), T-arg) => res
+                  ; <put-kind> (KiStar(), T-arg) => res
           )
+          // Since we only annotate types of kind `*' we may add this dynamic rule.
+          // This invariant must not be violated by typing rules of extensions.
 
   verify-context-rule :
     KindingRule(premises, RuleName(sep, Some(Var(name))), KindingJudgment(C, T, K)) ->

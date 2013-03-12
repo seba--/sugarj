@@ -24,9 +24,10 @@ desugarings
   desugar-matchpair
 
 rules
-  desugar-extension-internal = debug(!"INTERNAL "); desugar-matchpair
+  desugar-extension-internal = desugar-matchpair
 
   desugar-matchpair :
+    // TODO: enable concrete syntax
     // |[ match (~%x1, ~%x2) = ~e1 in ~e2 ]| ->
     //   |[ (\~%x1: $(~T1 from typeof ~e1 as {fst:~T1, snd:~T2}).
     //        \~%x2: $(~T2 from typeof ~e2 as {fst:~T1, snd:~T2}). ~e2)

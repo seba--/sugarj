@@ -5,6 +5,7 @@ import concretesyntax.Stratego
 
 import contextanalysis.TypeOperations
 
+// TODO: this syntax is not working correctly (see extension.matchpair.Semantics)
 context-free syntax
   "$" "(" "typeof" "~" TypeOfExpr ")"                                   -> FomegaType {cons("TypeOf")}
   "$" "(" FomegaType "from" "typeof" "~" TypeOfExpr "as" FomegaType ")" -> FomegaType {cons("TypeOfAs")}
@@ -13,16 +14,15 @@ context-free syntax
 rules
   desugar-typeof :
     TypeOf(e) -> <desugar-typeofas> TypeOfAs(Metavar(Var("T")), e, Metavar(Var("T")))
-    // <get-type> e
 
   desugar-typeofas :
     TypeOfAs(T, e, S) -> U
-    where <get-type;debug(!"A1 ")> e => R
-        ; <get-context;debug(!"A2 ")> e => C
-        ; <norm;debug(!"A3 ")> (C, R) => R'
-        ; <norm;debug(!"A4 ")> (C, S) => S'
-        ; <unify-types;debug(!"A5 ")> (S', R') => sub
-        ; <apply-subst;debug(!"A6 ")> (sub, T) => U
+    where <get-type> e => R
+        ; <get-context> e => C
+        ; <norm> (C, R) => R'
+        ; <norm> (C, S) => S'
+        ; <unify-types> (S', R') => sub
+        ; <apply-subst> (sub, T) => U
 
 desugarings
   desugar-typeof desugar-typeofas
