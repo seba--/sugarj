@@ -33,7 +33,7 @@ rules
       result
     where // TODO: only allow desugar-extension-internal; extension declaration 
           //       requires this rule to be successfully applicable to subject
-          <debug(!"*** Verify rule ")> name
+          <debug(!"*** Verify type rule ")> name
         ; if <desugar-extension-internal; reinit-for-analysis> e => e-desugared then
               <strip-annos; debug(<concat-strings> ["Original conclusion term  (", name, "): "])> e
             ; <strip-annos; debug(<concat-strings> ["Desugared conclusion term (", name, "): "])> e-desugared
@@ -79,7 +79,7 @@ rules
   verify-context-rule :
     KindingRule(premises, RuleName(sep, Some(Var(name))), KindingJudgment(C, T, K)) ->
       result
-    where <debug(!"*** Verify rule ")> name
+    where <debug(!"*** Verify kind rule ")> name
         ; if <desugar-extension-internal; reinit-for-analysis> T => T-desugared then
               <strip-annos; debug(<concat-strings> ["Original conclusion type  (", name, "): "])> T
             ; <strip-annos; debug(<concat-strings> ["Desugared conclusion type (", name, "): "])> T-desugared

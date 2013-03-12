@@ -4,8 +4,8 @@ import contextanalysis.rules.Syntax
 
 context-free syntax
   "syntax" "{" Grammar* "}" -> ToplevelDeclaration {cons("SyntaxExtension")}
-  "desugaring" StrategoId "{" StrategoDef* "}" -> ToplevelDeclaration {cons("DesugaringExtension")}
-  "typing" "{" TypingRule* "}" -> ToplevelDeclaration {cons("TypingExtension")}
+  "desugaring" StrategoId "{" StrategoDef* StrategoDecl* "}" -> ToplevelDeclaration {cons("DesugaringExtension")}
+  "typing" "{" InferenceRule* "}" -> ToplevelDeclaration {cons("TypingExtension")}
 
 rules
   constraint-error = check-typing-rule-subject
@@ -27,14 +27,14 @@ rules
     ; rules( Extension-Syntax := body )
   
   desugar-extension :
-    DesugaringExtension(desugar-strat, trafos) ->
+    DesugaringExtension(desugar-strat, trafos, decls) ->
     SugarBody(<conc> (grammars, body))
   where
       (Extension-Syntax <+ ![]) => grammars 
     ; !transformation-elem(Desugarings([PureDesugaring(CallNoArgs(SVar(desugar-strat)))])) => desugaring
     ; !transformation-elem(Rules([SDefNoArgs("desugar-extension-internal", CallNoArgs(SVar(desugar-strat)))])) => rinternal
-    ; ![rinternal, transformation-elem(Rules(trafos))] => body
-    ; rules( Extension-Trafos := [desugaring | body] )
+    ; ![rinternal, transformation-elem(Rules(trafos)) | <map(!transformation-elem(<id>))> decls] => body
+    ; rules( Extension-Trafos := [body] )
   
   desugar-extension :
     TypingExtension(checks) ->
