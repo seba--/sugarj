@@ -10,7 +10,7 @@ import contextanalysis.KindOperations
 
 rules
 
-  lab : TyDeclsNil -> []
+  lab : TyDeclsNil() -> []
   lab : TyDeclsCons(TyDecl(x, T), decls) -> [x | <lab> decls]
 
   lab-type = lab-type-proper <+ lab-type-unexpected
@@ -318,6 +318,7 @@ rules
   free-vars : TyEmpty() -> []
   free-vars : TyUnknown() -> []
   free-vars : TyVar(X) -> [X]
+  free-vars : Metavar(mvar) -> []
 
   free-vars-decl : TyDecl(x, T) -> <free-vars> T
 
@@ -535,40 +536,89 @@ rules
     (C, TyDecl(x, T)) -> TyDecl(x, <par-reduce> (C, T))
 
 
-rules // Unification of types
+rules // Unification of types (Metavar(Var(mvar)) is a variable
+      // and all type terms are considered as first order)
 
   unify-types :
-    (S, T) -> <unify-type-eqs> (<empty-subst> (), [(S, T)])
+    (S, T) -> <unify-types-eqs> (<empty-subst> (), [(S, T)])
 
-  unify-type-eqs :
+  unify-types-eqs :
     (sub, []) -> sub
 
-  unify-type-eqs :
+  unify-types-eqs :
     (sub, [ (T, S) | eqs ]) ->
-      <unify-type-eqs> (sub, <apply-subst> (sub, T), <apply-subst> (sub, S), eqs)
+      <unify-types-lr> (sub, <apply-subst> (sub, T), <apply-subst> (sub, S), eqs)
 
-  unify-type-eqs :
-    (sub, TyNat(), TyNat(), eqs) -> <unify-type-eqs> (sub, eqs)
+  unify-types-lr =
+       unify-types-equal
+    <+ unify-types-metavar
+    <+ unify-types-arrow
+    <+ unify-types-forall
+    <+ unify-types-abs
+    <+ unify-types-app
+    <+ unify-types-pair
+    <+ unify-types-mu
+    <+ unify-types-record
+    <+ unify-types-variant
 
-  unify-type-eqs :
+  unify-types-equal :
+    (sub, T, S, eqs) -> <unify-types-eqs> (sub, eqs)
+    where <structurally-equal> (T, S)
+
+  unify-types-metavar :
     (sub, Metavar(Var(mvar)), S, eqs) ->
-      <debug(!"A ");unify-type-eqs> (<compose-substs> (<singleton-subst> (mvar, S), sub), eqs)
+      <unify-types-eqs> (<compose-substs> (<singleton-subst> (mvar, S), sub), eqs)
     where <not(occurs)> (mvar, S)
 
-  unify-type-eqs :
-    (sub, T, Metavar(Var(mvar)), eqs) -> <unify-type-eqs> (sub, Metavar(Var(mvar)), T, eqs)
+  unify-types-metavar :
+    (sub, T, Metavar(Var(mvar)), eqs) -> <unify-types-metavar> (sub, Metavar(Var(mvar)), T, eqs)
 
-  unify-type-eqs :
+  unify-types-arrow :
     (sub, TyArrow(T1, T2), TyArrow(S1, S2), eqs) ->
-      <unify-type-eqs> (sub, [ (T1, S1), (T2, S2) | eqs])
+      <unify-types-eqs> (sub, [ (T1, S1), (T2, S2) | eqs])
 
-  unify-type-eqs :
+  unify-types-forall :
     (sub, TyForall(X, K, T), TyForall(Y, J, S), eqs) ->
-      <unify-type-eqs> (sub, [ (T', S') | eqs ])
+      <unify-types-eqs> (sub, [ (T, S) | eqs ])
     where <structurally-equal> (K, J)
-        ; <fresh> (X, [T, S]) => Z
-        ; <subst> (X, TyVar(Z), T) => T'
-        ; <subst> (Y, TyVar(Z), S) => S'
+        ; <structurally-equal> (X, Y)
+
+  unify-types-abs :
+    (sub, TyAbs(X, K, T), TyAbs(Y, J, S), eqs) ->
+      <unify-types-eqs> (sub, [ (T, S) | eqs ])
+    where <structurally-equal> (K, J)
+        ; <structurally-equal> (X, Y)
+
+  unify-types-app :
+    (sub, TyApp(T1, T2), TyApp(S1, S2), eqs) ->
+      <unify-types-eqs> (sub, [ (T1, S1), (T2, S2) | eqs])
+
+  unify-types-pair :
+    (sub, TyPair(T1, T2), TyPair(S1, S2), eqs) ->
+      <unify-types-eqs> (sub, [ (T1, S1), (T2, S2) | eqs])
+
+  unify-types-mu :
+      (sub, TyMu(T1, T2), TyMu(S1, S2), eqs) ->
+      <unify-types-eqs> (sub, [ (T1, S1), (T2, S2) | eqs])
+
+  unify-types-record :
+    (sub, TyRecord(decls1), TyRecord(decls2), eqs) ->
+      <unify-decls> (sub, decls1, decls2, eqs)
+    where <set-eq(structurally-equal)> (<lab> decls1, <lab> decls2)
+
+  unify-types-variant :
+    (sub, TyVariant(decls1), TyVariant(decls2), eqs) ->
+      <unify-decls> (sub, decls1, decls2, eqs)
+    where <set-eq(structurally-equal)> (<lab> decls1, <lab> decls2)
+
+  unify-decls :
+    (sub, TyDeclsNil(), decls2, eqs) ->
+      <unify-types-eqs> (sub, eqs)
+
+  unify-decls :
+    (sub, TyDeclsCons(TyDecl(x, T), decls1), decls2, eqs) ->
+      <unify-decls> (sub, decls1, decls2, [ (T, S) | eqs ])
+    where <lab-type-proper> (x, decls2) => (S, [])
 
   occurs =
       ?(mvar, T)

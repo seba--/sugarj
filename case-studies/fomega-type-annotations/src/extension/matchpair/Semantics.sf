@@ -5,7 +5,7 @@ import concretesyntax.Fomega
 
 import contextanalysis.rules.Syntax
 import contextanalysis.rules.Desugaring
-// import contextanalysis.rules.Verification
+import contextanalysis.rules.Verification
 
 import contextanalysis.TypingRelation
 
@@ -20,10 +20,25 @@ import extension.TypeOf
 ~C |- match (~%x1, ~%x2) = ~e1 in ~e2 : ~T2
 
 
+desugarings
+  desugar-matchpair
+
 rules
-//  desugar-matchpair :
-//    |[ match (~%x1, ~%x2) = ~e1 in ~e2 ]| ->
-//      |[ (\~%x1: $(~T1 from typeof ~e1 as {fst:~T1, snd:~T2}).
-//           \~%x2: $(~T2 from typeof ~e2 as {fst:~T1, snd:~T2}). ~e2)
-//         (~e1!fst) (~e1!snd)
-//      ]|
+  desugar-extension-internal = debug(!"INTERNAL "); desugar-matchpair
+
+  desugar-matchpair :
+    // |[ match (~%x1, ~%x2) = ~e1 in ~e2 ]| ->
+    //   |[ (\~%x1: $(~T1 from typeof ~e1 as {fst:~T1, snd:~T2}).
+    //        \~%x2: $(~T2 from typeof ~e2 as {fst:~T1, snd:~T2}). ~e2)
+    //      (~e1!fst) (~e1!snd)
+    //   ]|
+    Match(x1, x2, e1, e2) ->
+      App(App(
+        Abs(x1, TypeOfAs(Metavar(Var("T1")), e1,
+                         TyRecord(TyDeclsCons(TyDecl("fst", Metavar(Var("T1"))),
+                                              TyDeclsCons(TyDecl("snd", Metavar(Var("T2"))), TyDeclsNil())))),
+          Abs(x2, TypeOfAs(Metavar(Var("T2")), e1,
+                           TyRecord(TyDeclsCons(TyDecl("fst", Metavar(Var("T1"))),
+                                                TyDeclsCons(TyDecl("snd", Metavar(Var("T2"))), TyDeclsNil())))), e2)),
+        SelectRcd(e1, "fst")),
+        SelectRcd(e1, "snd"))
