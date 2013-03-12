@@ -290,27 +290,27 @@ rules // Activate dynamic axioms in the order of appearance in the typing rule
    activate-dynamic-axiom = debug-analysis(!"failed to activate dynamic axiom: "); fail
 
 
-// rules // norm-context
-// 
-//   norm-context :
-//     CtxEmpty() -> CtxEmpty()
-// 
-//   norm-context :
-//     CtxBindVar(C, x, T) -> CtxBindVar(C', x, T')
-//     where <norm-context> C => C'
-//         ; <norm> (C', T) => T'
-// 
-//   norm-context :
-//     CtxBindTVar(C, X, K) -> CtxBindTVar(C', X, K)
-//     where <norm-context> C => C'
-// 
-//   norm-context :
-//     CtxBindTVarDef(C, X, K, T) -> CtxBindTVarDef(C', X, K, T')
-//     where <norm-context> C => C'
-//         ; <norm> (C', T) => T'
-// 
-//   norm-context :
-//     Metavar(mvar) -> Metavar(mvar)
+rules // norm-context
+
+  norm-context :
+    CtxEmpty() -> CtxEmpty()
+
+  norm-context :
+    CtxBindVar(C, x, T) -> CtxBindVar(C', x, T')
+    where <norm-context> C => C'
+        ; <norm> (C', T) => T'
+
+  norm-context :
+    CtxBindTVar(C, X, K) -> CtxBindTVar(C', X, K)
+    where <norm-context> C => C'
+
+  norm-context :
+    CtxBindTVarDef(C, X, K, T) -> CtxBindTVarDef(C', X, K, T')
+    where <norm-context> C => C'
+        ; <norm> (C', T) => T'
+
+  norm-context :
+    Metavar(mvar) -> Metavar(mvar)
 
 
 rules // Rules to hook in dynamic axioms into the judgment implementations
