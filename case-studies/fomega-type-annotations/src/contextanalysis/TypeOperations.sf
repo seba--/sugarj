@@ -533,3 +533,63 @@ rules
 
   par-reduce-decl :
     (C, TyDecl(x, T)) -> TyDecl(x, <par-reduce> (C, T))
+
+
+rules // Unification of types
+
+  unify-types :
+    (S, T) -> <unify-type-eqs> (<empty-subst> (), [(S, T)])
+
+  unify-type-eqs :
+    (sub, []) -> sub
+
+  unify-type-eqs :
+    (sub, [ (T, S) | eqs ]) ->
+      <unify-type-eqs> (sub, <apply-subst> (sub, T), <apply-subst> (sub, S), eqs)
+
+  unify-type-eqs :
+    (sub, TyNat(), TyNat(), eqs) -> <unify-type-eqs> (sub, eqs)
+
+  unify-type-eqs :
+    (sub, Metavar(Var(mvar)), S, eqs) ->
+      <debug(!"A ");unify-type-eqs> (<compose-substs> (<singleton-subst> (mvar, S), sub), eqs)
+    where <not(occurs)> (mvar, S)
+
+  unify-type-eqs :
+    (sub, T, Metavar(Var(mvar)), eqs) -> <unify-type-eqs> (sub, Metavar(Var(mvar)), T, eqs)
+
+  unify-type-eqs :
+    (sub, TyArrow(T1, T2), TyArrow(S1, S2), eqs) ->
+      <unify-type-eqs> (sub, [ (T1, S1), (T2, S2) | eqs])
+
+  unify-type-eqs :
+    (sub, TyForall(X, K, T), TyForall(Y, J, S), eqs) ->
+      <unify-type-eqs> (sub, [ (T', S') | eqs ])
+    where <structurally-equal> (K, J)
+        ; <fresh> (X, [T, S]) => Z
+        ; <subst> (X, TyVar(Z), T) => T'
+        ; <subst> (Y, TyVar(Z), S) => S'
+
+  occurs =
+      ?(mvar, T)
+    ; <collect-all(?Metavar(_))> T => mvars
+    ; <elem(structurally-equal)> (Metavar(Var(mvar)), mvars)
+
+
+rules // Substitution
+
+  empty-subst = ![]
+
+  singleton-subst = ![<id>]
+
+  compose-substs = conc
+
+  apply-subst :
+    (sub, T) -> <foldr(!T, \ (ssub, S) -> <apply-ssubst(|ssub)> S \)> sub
+
+  apply-ssubst(|ssub) = topdown(apply-ssubst-mvar(|ssub) <+ id)
+
+  apply-ssubst-mvar(|ssub) =
+      ?node@Metavar(Var(mvar))
+    ; !ssub; ?(var, S)
+    ; if <structurally-equal> (mvar, var) then !S else !node end 
