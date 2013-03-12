@@ -13,17 +13,17 @@ import extension.let.Syntax
 import extension.TypeOf
 
 
-~C |- ~e1 : ~T1
-(~C;~%x:~T1) |- ~e2 : ~T2
-======================================= T-Let
-~C |- (let ~%x = ~e1 in ~e2) : ~T2
-
-
-desugarings
-  desugar-let
-
-rules
-  desugar-extension-internal = desugar-let
-
-  desugar-let :
-    |[ let ~%x = ~e1 in ~e2 ]| -> |[ (\~%x:$(typeof ~e1). ~e2) ~e1 ]|
+// ~C |- ~e1 : ~T1
+// (~C;~%x:~T1) |- ~e2 : ~T2
+// ======================================= T-Let
+// ~C |- (let ~%x = ~e1 in ~e2) : ~T2
+// 
+// 
+// desugarings
+//   desugar-let
+// 
+// rules
+//   desugar-extension-internal = desugar-let
+// 
+//   desugar-let :
+//     |[ let ~%x = ~e1 in ~e2 ]| -> |[ (\~%x:$(typeof ~e1). ~e2) ~e1 ]|
