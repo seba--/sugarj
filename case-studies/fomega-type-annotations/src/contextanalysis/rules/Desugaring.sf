@@ -63,6 +63,7 @@ rules // Translate a typing rule
              ?(term~tC, node@term~te)
            ; strategy~premises-implementation
            ; <put-type> (term~tT, node)
+           ; <put-context> (term~tC, node)
     ]|
     where <trm-explode> C => tC
         ; <trm-explode> e => te
@@ -83,6 +84,7 @@ rules // Translate a kinding rule
            ; <debug-analysis(<concat-strings> ["IN  ", term~tname, " "])> (term~tC, node)
            ; strategy~premises-implementation
            ; <put-kind> (term~tK, node)
+           ; <put-context> (term~tC, node)
            ; <debug-analysis(<concat-strings> ["OUT ", term~tname, " "])> term~tK
     ]|
     where <trm-explode> C => tC
@@ -103,6 +105,7 @@ rules // Translate a signature rule
              ?(term~tC, node@term~tdefs)
            ; strategy~premises-implementation
            ; <put-signature> (term~tsig, node)
+           ; <put-context> (term~tC, node)
     ]|
     where <trm-explode> C => tC
         ; <trm-explode> defs => tdefs

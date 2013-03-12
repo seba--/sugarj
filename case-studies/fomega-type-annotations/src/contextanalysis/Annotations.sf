@@ -33,3 +33,7 @@ rules
   get-type = get-anno(|"type")
 
   put-type = ?(T, node); <put-anno(|"type", T)> node
+
+  get-context = get-anno(|"context")
+
+  put-context = ?(C, node); <put-anno(|"context", C)> node
