@@ -1,0 +1,83 @@
+module extension.adt.ADT
+
+import org.sugarj.languages.Fomega
+import concretesyntax.Fomega
+
+import extension.Declaration
+
+import contextanalysis.rules.Syntax
+import contextanalysis.rules.Desugaring
+import contextanalysis.rules.Verification
+import contextanalysis.TypingRelation
+import contextanalysis.SignatureRelation
+
+syntax {
+	context-free syntax
+	  FomegaPublic? "data" FomegaID DataParams "=" DataCons -> FomegaDef {cons("DataDef")}
+	
+	                            -> DataParams {cons("DataParamsNil")}
+	  "(" KiDecl ")" DataParams -> DataParams {cons("DataParamsCons")}
+	
+	  FomegaID "::" FomegaKind -> KiDecl {cons("KiDecl")}
+	
+	  FomegaID FomegaID "{" FomegaTyDecls "}" -> DataCon {cons("DataCon")}
+	
+	  DataCon              -> DataCons {cons("DataConsEnd")}
+	  DataCon "|" DataCons -> DataCons {cons("DataConsCons")}
+	
+	lexical syntax
+	  "data" -> FomegaKeyword
+	
+	lexical restrictions
+	  "data" -/- [a-zA-Z0-9]
+	
+	context-free syntax
+	  "~" StrategoVar -> DataParams    {cons("Metavar")}
+	  "~" StrategoVar -> DataCons      {cons("Metavar")}
+	  "~" StrategoVar -> DataConParams {cons("Metavar")}
+	
+	  "fomega-params" "|[" DataParams "]|" -> StrategoTerm {cons("ToMetaExpr")}
+	  "fomega"        "|[" DataParams "]|" -> StrategoTerm {cons("ToMetaExpr")}
+	                  "|[" DataParams "]|" -> StrategoTerm {cons("ToMetaExpr")}
+	
+	  "fomega-datacons" "|[" DataCons "]|" -> StrategoTerm {cons("ToMetaExpr")}
+	  "fomega"          "|[" DataCons "]|" -> StrategoTerm {cons("ToMetaExpr")}
+	                    "|[" DataCons "]|" -> StrategoTerm {cons("ToMetaExpr")}
+}
+
+
+desugaring desugar-data {
+signature
+  constructors
+    ADT-TYPE:    FomegaID * DataParams * DataCons -> StrategoTerm
+    ADT-ABS:     DataParams * FomegaType -> StrategoTerm
+    ADT-OP:      FomegaID * DataParams * DataCons -> StrategoTerm 
+    ADT-ARG:     DataParams -> StrategoTerm
+    ADT-PK:      DataParams -> StrategoTerm
+    ADT-DECLS:   DataCons -> StrategoTerm
+    ADT-CK:      DataParams -> StrategoTerm
+    ADT-CA:      DataParams * FomegaType * FomegaType -> StrategoTerm
+    ADT-UNCURRY: FomegaID * DataParams * FomegaType -> StrategoTerm
+
+
+rules
+  desugar-data :
+    |[ data ~%X ~params = ~dcons ~=defs ]| -> |[ type ~%X = M~ADT-TYPE(X, params, dcons) ~=defs ]|
+
+  desugar-data :
+    |[ data ~%X ~params = ~dcons ]| -> |[ type ~%X = M~ADT-TYPE(X, params, dcons) ]|
+
+  desugar-data :
+    ADT-TYPE(X, params, dcons) ->
+      fomega-type |[ M~ADT-ABS(params, |[ mu (M~ADT-OP(X, params, dcons), M~(ADT-ARG(params))) ]|) ]|
+}
+
+typing {
+  
+~%X notin dom(~C)
+~C |- M~ADT-TYPE(X, params, dcons) :: ~K
+(~C;~%X::~K=M~ADT-TYPE(X, params, dcons)) |- ~=defs ==> ~sig
+================================================================== S-DataCons
+~C |- data ~%X ~params = ~dcons ~=defs ==> ~sig
+
+}

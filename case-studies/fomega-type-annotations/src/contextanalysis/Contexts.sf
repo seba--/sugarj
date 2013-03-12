@@ -95,3 +95,8 @@ rules
 
   lookup-type-var-def :
     (X, CtxBindVar(C, y, T)) -> <lookup-type-var-def> (X, C)
+
+rules
+  not-in-dom =
+    where(\(x,C) -> <not(elem(structurally-equal))> (x, <dom> C)\)
+

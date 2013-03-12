@@ -19,6 +19,7 @@ context-free syntax
 context-free syntax // *** Syntax for typing rules ***
 
   TypingRule -> SugarDefElem
+  TypingRule -> InferenceRule
 
   TypingRulePremises RuleSepName TypingRuleConsequence
     -> TypingRule {cons("TypingRule"),
@@ -42,6 +43,7 @@ context-free syntax // *** Syntax for typing rules ***
 context-free syntax // *** Syntax for kinding rules ***
 
   KindingRule -> SugarDefElem
+  KindingRule -> InferenceRule
 
   KindingRulePremises RuleSepName KindingRuleConsequence
     -> KindingRule {cons("KindingRule"),
@@ -65,6 +67,7 @@ context-free syntax // *** Syntax for kinding rules ***
 context-free syntax // *** Syntax for signature rules ***
 
   SignatureRule -> SugarDefElem
+  SignatureRule -> InferenceRule
 
   SignatureRulePremises RuleSepName SignatureRuleConsequence
     -> SignatureRule {cons("SignatureRule"),

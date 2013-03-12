@@ -868,7 +868,7 @@ public class Driver{
         log.log("Need to compile imported module " + modulePath + " first.", Log.IMPORT);
         
         res = subcompile(toplevelDecl, importSourceFile);
-        if (res.hasFailed())
+        if (res == null || res.hasFailed())
           setErrorMessage("Problems while compiling " + modulePath);
           
         log.log("CONTINUE PROCESSING'" + sourceFile + "'.", Log.CORE);

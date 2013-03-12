@@ -10,6 +10,7 @@ signature
   constructors
     TyUnknown: FomegaType
     KiUnknown: FomegaKind
+    SigUnknown: FomegaSignature
     IDUnknown: FomegaID
 
 
@@ -63,7 +64,8 @@ rules // Signature of definitions
 
   annotate-signature-missing =
       ?(C, defs)
-    ; <put-kind> (SigEmpty(), defs)
+    ; debug-analysis(!"signature missing: ")
+    ; <put-signature> (SigUnknown(), defs)
     ; <add-context-errors> ( [ <concat-strings> [ "Missing signature rule for "
                                                 , <write-to-string> (<strip-annos> defs)
                                                 , " in context "
