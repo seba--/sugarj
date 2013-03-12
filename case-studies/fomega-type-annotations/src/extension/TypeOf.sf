@@ -5,11 +5,19 @@ import concretesyntax.Stratego
 
 
 context-free syntax
-  "$" "(" "typeof" FomegaExpr ")" -> FomegaType {cons("TypeOf")}
+  "$" "(" "typeof" "~" StrategoVar ")"                                   -> FomegaType {cons("TypeOf")}
+  "$" "(" FomegaType "from" "typeof" "~" StrategoVar "as" FomegaType ")" -> FomegaType {cons("TypeOfAs")}
 
 rules
   desugar-typeof :
-    TypeOf(e) -> <get-type> e
+    TypeOf(e) -> TypeOfAs(Metavar(Var("T")), e, Metavar(Var("T"))) // <get-type> e
+
+  desugar-typeofas :
+    TypeOfAs(T, e, S) -> U
+    where <get-type> e => R
+        // ; <unify-type> (R, S) => subst
+        // ; <apply-subst> (subst, T) => U
+        ; !R => U
 
 desugarings
-  desugar-typeof
+  desugar-typeof desugar-typeofas
