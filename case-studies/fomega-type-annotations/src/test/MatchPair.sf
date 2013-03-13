@@ -5,4 +5,4 @@ import extension.matchpair.Semantics
 
 import contextanalysis.ContextAnalysis
 
-val x = match (a,b) = {fst=1,snd=2} in {a=true,b=a}
+val x = match (a,b) = {fst=1,snd="x"} in {a=true,b=b}

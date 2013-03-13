@@ -40,9 +40,11 @@ rules
             ; <premises-to-list> premises => premises-list
             ; {| Dynamic-Annotate-Type, Dynamic-Annotate-Kind, Dynamic-Par-Reduce-Type, Dynamic-Lookup-Expr-Var:
                    <activate-dynamic-axioms> premises-list
-                 ; <annotate-type> (C, e-desugared)
-                 ; <collect-all-context-errors> e-desugared => errs
-                 ; <get-type> e-desugared => U
+                 ; <resolve-typeof(|C); reinit-for-analysis> e-desugared => e-resolved
+                 ; <strip-annos; debug(<concat-strings> ["Resolved conclusion term  (", name, "): "])> e-resolved 
+                 ; <annotate-type> (C, e-resolved)
+                 ; <collect-all-context-errors> e-resolved => errs
+                 ; <get-type> e-resolved => U
                  ; if !errs; ?[] then
                        <norm> (C, T) => T'
                      ; <norm> (C, U) => U'
@@ -75,6 +77,40 @@ rules
             ; ![( name, <concat-strings> [ "Could not desugar the conclusion of typing rule ", name, ":\n"
                                          , <strip-annos; write-to-string> e])]
           end => result
+
+  resolve-typeof(|C) = bottomup(resolve-typeof1(|C) <+ id)
+
+  resolve-typeof1(|C) :
+    TypeOf(e) -> R
+    where <annotate-type> (C, e)
+        ; <get-type> e => R
+        ; <strip-annos> R => R-stripped
+        ; rules(
+            Dynamic-Annotate-Kind :+
+              arg -> res
+              where <strip-annos> arg => (C-any, R-stripped)
+                  ; !arg => (C-arg, T-arg)
+                  ; <put-kind> (KiStar(), T-arg) => res
+          )
+
+  resolve-typeof1(|C) :
+    TypeOfAs(T, e, S) -> U
+    where <annotate-type> (C, e)
+        ; <get-type> e => R
+        ; <norm> (C, R) => R'
+        ; <norm> (C, S) => S'
+        ; <unify-types> (S', R') => sub
+        ; <apply-subst> (sub, T) => U
+        ; <strip-annos> U => U-stripped
+        ; rules(
+            Dynamic-Annotate-Kind :+
+              arg -> res
+              where <strip-annos> arg => (C-any, U-stripped)
+                  ; !arg => (C-arg, T-arg)
+                  ; <put-kind> (KiStar(), T-arg) => res
+          )
+          // Since we only annotate types of kind `*' we may add this dynamic rule.
+          // This invariant must not be violated by typing rules of extensions.
 
   verify-context-rule :
     KindingRule(premises, RuleName(sep, Some(Var(name))), judge@KindingJudgment(C, T, K)) ->
@@ -167,41 +203,40 @@ rules // Activate dynamic axioms in the order of appearance in the typing rule
 
   activate-dynamic-axiom =
       ?TypingJudgment(C, e, T)
-    ; <strip-annos> (e, T) => (e-stripped, T-stripped)
-    ; <norm-context; strip-annos> C => C-stripped
+    ; <strip-annos> (C, e, T) => (C-stripped, e-stripped, T-stripped)
+    // ; <norm-context; strip-annos> C => C-stripped
     ; rules(
         Dynamic-Annotate-Type-Defined :+
           arg -> res
-          where <strip-annos> arg => (C-any, e-stripped)
-              ; <norm-context; strip-annos> C-any => C-stripped
+          where <strip-annos> arg => (C-stripped, e-stripped)
+              // ; <norm-context; strip-annos> C-any => C-stripped
               ; !arg => (C-arg, e-arg)
               ; <put-type> (T, e-arg) => res
       )
-    ; rules(
-        Dynamic-Par-Reduce-Type :+
-          arg -> res
-          where <strip-annos> arg => (C-any, TypeOf(e-stripped))
-              ; !T => res
-      )
-    ; rules(
-        Dynamic-Annotate-Kind :+
-          arg -> res
-          where <strip-annos> arg => (C-any, TypeOf(e-stripped))
-              ; <norm-context; strip-annos> C-any => C-stripped
-              ; !arg => (C-arg, T-arg)
-              ; <put-kind> (KiStar(), T-arg) => res
-      )
+    // ; rules(
+    //     Dynamic-Par-Reduce-Type :+
+    //       arg -> res
+    //       where <strip-annos> arg => (C-any, TypeOf(e-stripped))
+    //           ; !T => res
+    //   )
+    // ; rules(
+    //     Dynamic-Annotate-Kind :+
+    //       arg -> res
+    //       where <strip-annos> arg => (C-stripped, TypeOf(e-stripped))
+    //           ; !arg => (C-arg, T-arg)
+    //           ; <put-kind> (KiStar(), T-arg) => res
+    //   )
     // ; <debug(!"Activated TJ ")> (C-stripped, e-stripped, T-stripped)
 
   activate-dynamic-axiom =
       ?KindingJudgment(C, T, K)
-    ; <strip-annos> (T, K) => (T-stripped, K-stripped)
-    ; <norm-context; strip-annos> C => C-stripped
+    ; <strip-annos> (C, T, K) => (C-stripped, T-stripped, K-stripped)
+    // ; <norm-context; strip-annos> C => C-stripped
     ; rules(
         Dynamic-Annotate-Kind :+
           arg -> res
-          where <strip-annos; debug(!"test dyn-kind: "); where(<debug> T-stripped)> arg => (C-any, T-stripped)
-              ; <debug(!"dyn-kind norm ctx: "); norm-context; strip-annos; debug(!"dyn-kind norm ctx: ")> C-any => C-stripped
+          where <strip-annos> arg => (C-any, T-stripped)
+              ; <norm-context; strip-annos> C-any => C-stripped
               ; !arg => (C-arg, T-arg)
               ; <put-kind> (K, T-arg) => res
       )
@@ -209,13 +244,13 @@ rules // Activate dynamic axioms in the order of appearance in the typing rule
 
   activate-dynamic-axiom =
       ?NormalizationJudgment(C, T, T')
-    ; <strip-annos> (T, T') => (T-stripped, T-stripped')
-    ; <norm-context; strip-annos> C => C-stripped
+    ; <strip-annos> (C, T, T') => (C-stripped, T-stripped, T-stripped')
+    // ; <norm-context; strip-annos> C => C-stripped
     ; rules(
         Dynamic-Par-Reduce-Type :+
           arg -> res
-          where <strip-annos> arg => (C-any, T-stripped)
-              ; <norm-context; strip-annos> C-any => C-stripped
+          where <strip-annos> arg => (C-stripped, T-stripped)
+              //; <norm-context; strip-annos> C-any => C-stripped
               ; !T' => res
     )
     // ; <debug(!"Activated PJ ")> (C-stripped, T-stripped, T-stripped')
