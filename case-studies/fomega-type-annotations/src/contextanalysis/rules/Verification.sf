@@ -134,8 +134,7 @@ rules
             ; <strip-annos; debug(!"Actual signature:   ")> Sig2
             ; <debug(!"Signature errors:   ")> errs
             ; if !errs; ?[] then
-                  <structurally-equal> (Sig, Sig2) => msgs
-                ; if !msgs; ?[] then
+                  if <structurally-equal> (Sig, Sig2) then
                     debug(!(<concat-strings> ["Successfully verified signature rule ", name, "."])); fail
                   else
                     ![( name
@@ -164,7 +163,7 @@ rules // Activate dynamic axioms in the order of appearance in the typing rule
   activate-dynamic-axioms :
     [judgment|judgments] ->
       <activate-dynamic-axioms> judgments
-      where <activate-dynamic-axiom> judgment
+      where <metaexpr-implode; activate-dynamic-axiom> judgment
 
   activate-dynamic-axiom =
       ?TypingJudgment(C, e, T)
@@ -201,8 +200,8 @@ rules // Activate dynamic axioms in the order of appearance in the typing rule
     ; rules(
         Dynamic-Annotate-Kind :+
           arg -> res
-          where <strip-annos> arg => (C-any, T-stripped)
-              ; <norm-context; strip-annos> C-any => C-stripped
+          where <strip-annos; debug(!"test dyn-kind: "); where(<debug> T-stripped)> arg => (C-any, T-stripped)
+              ; <debug(!"dyn-kind norm ctx: "); norm-context; strip-annos; debug(!"dyn-kind norm ctx: ")> C-any => C-stripped
               ; !arg => (C-arg, T-arg)
               ; <put-kind> (K, T-arg) => res
       )
@@ -249,11 +248,30 @@ rules // Activate dynamic axioms in the order of appearance in the typing rule
   activate-dynamic-axiom =
       ?NotinDomJudgment(x, C)
     ; <strip-annos> (x, C) => (x-stripped, C-stripped)
-    ; rules(Dynamic-Not-In-Dom :+ t@(x-stripped, C-stripped) -> t)
-    // ; <debug(!"Activated VQJ ")> (qx-stripped, T-stripped, C-stripped)
+    ; rules(
+        Dynamic-Not-In-Dom :+
+          arg -> arg 
+          where <strip-annos> arg => (x-stripped, C-stripped); <debug(!"dyn not-in-dom ok: "); strip-annos> arg)
       
    activate-dynamic-axiom = debug-analysis(!"failed to activate dynamic axiom: "); fail
 
+rules // implode MetaExpr
+  
+  metaexpr-implode =
+    bottomup(try(?MetaExpr(<trm-metaexpr-implode>)))
+
+  trm-metaexpr-implode =
+    ?NoAnnoList(<debug-analysis(!"bef: ");pre-metaexpr-implode;debug-analysis(!"aft: ")>)
+  + strip-annos;\ Var(v) -> Metavar(Var(v)) \
+  
+  pre-metaexpr-implode =
+    ?Char(<id>) + ?Int(<id>) + ?Real(<id>) + ?Str(<id>)
+  + ?Tuple(<map(trm-metaexpr-implode)>)
+  + ?List(<map(trm-metaexpr-implode)>)
+  + strip-annos;\ ListTail(hs, tl) -> <conc> (<map(trm-metaexpr-implode)> hs, <trm-metaexpr-implode> tl) \
+  + strip-annos;\ Op(n, args) -> n#(<map(trm-metaexpr-implode)> args) \
+  + strip-annos;\ Var(v) -> Metavar(Var(v)) \
+  
 
 rules // norm-context
 
@@ -284,10 +302,10 @@ rules // Rules to hook in dynamic axioms into the judgment implementations
 
   par-reduce-type = Dynamic-Par-Reduce-Type
 
-  annotate-kind = Dynamic-Annotate-Kind
+  annotate-kind-defined = Dynamic-Annotate-Kind
 
   lookup-expr-var = Dynamic-Lookup-Expr-Var
 
-  annotate-signature = Dynamic-Annotate-Signature
+  annotate-signature-defined = Dynamic-Annotate-Signature
   
   not-in-dom = Dynamic-Not-In-Dom

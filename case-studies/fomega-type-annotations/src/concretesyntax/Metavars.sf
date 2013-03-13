@@ -38,6 +38,5 @@ context-free syntax
   "Mkind~" StrategoTerm     -> FomegaKind     {cons("MetaExpr")}
 
 rules
-
   TrmFromTerm = ?Metavar(<MetaExplode>)
   TrmFromTerm = ?MetaExpr(<MetaExplode>)

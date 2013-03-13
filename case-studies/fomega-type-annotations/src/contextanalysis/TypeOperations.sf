@@ -72,12 +72,8 @@ rules
     (TyEmpty(), TyEmpty()) -> []
 
   type-eq-proper :
-    (Metavar(mvar1), Metavar(mvar2)) -> []
-    where <structurally-equal> (mvar1, mvar2)
-
-  type-eq-proper :
-    (MetaExpr(mexpr1), MetaExpr(mexpr2)) -> []
-    where <structurally-equal> (mexpr1, mexpr2)
+    (meta1, meta2) -> []
+    where <structurally-equal> (meta1, meta2)
 
   type-eq-proper :
     (TyQVar(qX), TyQVar(qY)) -> []
@@ -461,9 +457,7 @@ rules
     // reductions.
 
   par-reduce-metavar :
-    (C, Metavar(mvar)) -> Metavar(mvar)
-  par-reduce-metavar :
-    (C, MetaExpr(mexpr)) -> MetaExpr(mexpr)
+    (C, e) -> e
 
   par-reduce-type :
     (C, TyUnknown()) -> TyUnknown()
