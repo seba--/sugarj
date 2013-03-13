@@ -1,8 +1,7 @@
 module test.MatchPair
 
-import extension.matchpair.Syntax
-import extension.matchpair.Semantics
+import extensions.MatchPair
 
 import contextanalysis.ContextAnalysis
 
-val x = match (a,b) = {fst=1,snd="x"} in {a=true,b=b}
+val x = match (a,b) = {fst=1, snd="x"} in {a=true, b=b}

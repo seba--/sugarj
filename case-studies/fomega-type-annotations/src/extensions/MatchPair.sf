@@ -1,32 +1,31 @@
-module extension.matchpair.Semantics
+module extensions.MatchPair
 
 import org.sugarj.languages.Fomega
 import concretesyntax.Fomega
+import concretesyntax.Metavars
 
-import contextanalysis.rules.Syntax
-import contextanalysis.rules.Desugaring
-import contextanalysis.rules.Verification
-
-import contextanalysis.TypingRelation
-
-import extension.matchpair.Syntax
+import extension.Declaration
 import extension.TypeOf
 
 
-~C |- ~e1 : ~S
-~C |- ~S ~> {fst:~S1, snd:~S2}
-((~C; ~%x1:~S1); ~%x2:~S2) |- ~e2 : ~T2
-=========================================== T-MatchPair
-~C |- match (~%x1, ~%x2) = ~e1 in ~e2 : ~T2
+syntax {
+  context-free syntax
+    "match" "(" FomegaID "," FomegaID ")" "=" FomegaExpr "in" FomegaExpr -> FomegaExpr {cons("Match")}
 
+  context-free priorities
+    FomegaExpr FomegaExpr -> FomegaExpr >
+    "match" "(" FomegaID "," FomegaID ")" "=" FomegaExpr "in" FomegaExpr -> FomegaExpr
 
-desugarings
-  desugar-matchpair
+  lexical syntax
+    "match" -> Keyword
+    "in"    -> Keyword
 
-rules
-  desugar-extension-internal = desugar-matchpair
+  lexical restrictions
+    "match" "in" -/- [A-Za-z0-9]
+}
 
-  desugar-matchpair :
+desugaring desugar-match-pair {
+  desugar-match-pair :
     // TODO: enable concrete syntax
     // |[ match (~%x1, ~%x2) = ~e1 in ~e2 ]| ->
     //   |[ (\~%x1: $(~T1 from typeof ~e1 as {fst:~T1, snd:~T2}).
@@ -43,3 +42,12 @@ rules
                                                 TyDeclsCons(TyDecl("snd", Metavar(Var("T2"))), TyDeclsNil())))), e2)),
         SelectRcd(e1, "fst")),
         SelectRcd(e1, "snd"))
+}
+
+typing {
+  ~C |- ~e1 : ~S
+  ~C |- ~S ~> {fst:~S1, snd:~S2}
+  ((~C; ~%x1:~S1); ~%x2:~S2) |- ~e2 : ~T2
+  =========================================== T-MatchPair
+  ~C |- match (~%x1, ~%x2) = ~e1 in ~e2 : ~T2
+}
