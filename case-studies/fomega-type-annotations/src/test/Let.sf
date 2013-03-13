@@ -1,7 +1,6 @@
 module test.Let
 
-import extension.let.Syntax
-import extension.let.Semantics
+import extensions.Let
 
 import contextanalysis.ContextAnalysis
 

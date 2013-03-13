@@ -1,7 +1,6 @@
 module test.AnnotatedLet
 
-import extension.annotatedlet.Syntax
-import extension.annotatedlet.Semantics
+import extensions.AnnotatedLet
 
 import contextanalysis.ContextAnalysis
 
