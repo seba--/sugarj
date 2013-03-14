@@ -17,6 +17,7 @@ rules // TODO: these two definitions belong to Analyze.str
     if !ana-annos; ?[] then ![("analysis-data", <new-hashtable>)] else !ana-annos end => new-ana-annos;
     <set-annotations> (node, <conc> (annos, new-ana-annos))
 
+  write-to-string-analysis = nice-analysis-data-term; write-to-string
 
 rules
 
@@ -26,8 +27,13 @@ rules
 rules
 
   desugar-extension-internal = fail
+  
+  verify-context-rule =
+    (?TypingRule(_,_,_) + ?KindingRule(_,_,_) + ?SignatureRule(_,_,_));
+    metaexpr-implode;
+    verify-context-rule-internal
 
-  verify-context-rule :
+  verify-context-rule-internal :
     TypingRule(premises, RuleName(sep, Some(Var(name))), TypingJudgment(C, e, T)) ->
       result
     where // TODO: only allow desugar-extension-internal; extension declaration 
@@ -61,23 +67,23 @@ rules
                   else
                     ![( name
                      , <concat-strings> [ "Could not verify typing rule ", name, ".\n"
-                                        , "Expected type: ", <write-to-string> T', ".\n"
-                                        , "But got type:  ", <write-to-string> U', "."])]
+                                        , "Expected type: ", <write-to-string-analysis> T', ".\n"
+                                        , "But got type:  ", <write-to-string-analysis> U', "."])]
                   end
               else
                 ![( name
                   , <concat-strings> [ "Could not verify typing rule ", name, ".\n"
                                      , "The type checker returned the following errors:\n"
-                                     , <write-to-string> errs])]
+                                     , <write-to-string-analysis> errs])]
               end
           else
               <debug(!"Could not desugar the conclusion of rule ")> name
             ; <strip-annos; debug(!"  ")> e 
             ; ![( name, <concat-strings> [ "Could not desugar the conclusion of typing rule ", name, ":\n"
-                                         , <strip-annos; write-to-string> e])]
+                                         , <write-to-string-analysis> e])]
           end => result
 
-  verify-context-rule :
+  verify-context-rule-internal :
     KindingRule(premises, RuleName(sep, Some(Var(name))), judge@KindingJudgment(C, T, K)) ->
       result
     where <debug(!"*** Verify kind rule ")> (name, <strip-annos> judge)
@@ -101,23 +107,23 @@ rules
                   else
                     ![( name
                      , <concat-strings> [ "Could not verify kinding rule ", name, ".\n"
-                                        , "Expected kind: ", <write-to-string> K, ".\n"
-                                        , "But got kind:  ", <write-to-string> J, "."])]
+                                        , "Expected kind: ", <write-to-string-analysis> K, ".\n"
+                                        , "But got kind:  ", <write-to-string-analysis> J, "."])]
                   end
               else
                 ![( name
                   , <concat-strings> [ "Could not verify kinding rule ", name, ".\n"
                                      , "The kind checker returned the following errors:\n"
-                                     , <write-to-string> errs])]
+                                     , <write-to-string-analysis> errs])]
               end
           else
               <debug(!"Could not desugar the conclusion of rule ")> name
             ; <strip-annos; debug(!"  ")> T
             ; ![( name, <concat-strings> [ "Could not desugar the conclusion of kinding rule ", name, ":"
-                                         , <strip-annos; write-to-string> T])]
+                                         , <write-to-string-analysis> T])]
           end => result
 
-  verify-context-rule :
+  verify-context-rule-internal :
     SignatureRule(premises, RuleName(sep, Some(Var(name))), judge@SignatureJudgment(C, Defs, Sig)) ->
       result
     where <debug-analysis(!"*** Verify signature rule ")> (name, judge)
@@ -140,20 +146,20 @@ rules
                   else
                     ![( name
                      , <concat-strings> [ "Could not verify signature rule ", name, ".\n"
-                                        , "Expected signature: ", <write-to-string> Sig, ".\n"
-                                        , "But got signature:  ", <write-to-string> Sig2, "."])]
+                                        , "Expected signature: ", <write-to-string-analysis> Sig, ".\n"
+                                        , "But got signature:  ", <write-to-string-analysis> Sig2, "."])]
                   end
               else
                 ![( name
                   , <concat-strings> [ "Could not verify signature rule ", name, ".\n"
                                      , "The signature checker returned the following errors:\n"
-                                     , <write-to-string> errs])]
+                                     , <write-to-string-analysis> errs])]
               end
           else
               <debug(!"Could not desugar the conclusion of rule ")> name
             ; <strip-annos; debug(!"  ")> Defs
             ; ![( name, <concat-strings> [ "Could not desugar the conclusion of signature rule ", name, ":"
-                                         , <strip-annos; write-to-string> Defs])]
+                                         , <write-to-string-analysis> Defs])]
           end => result
 
 
@@ -202,7 +208,7 @@ rules // Activate dynamic axioms in the order of appearance in the typing rule
   activate-dynamic-axioms :
     [judgment|judgments] ->
       <activate-dynamic-axioms> judgments
-      where <metaexpr-implode; activate-dynamic-axiom> judgment
+      where <activate-dynamic-axiom> judgment
 
   activate-dynamic-axiom =
       ?TypingJudgment(C, e, T)
@@ -217,11 +223,11 @@ rules // Activate dynamic axioms in the order of appearance in the typing rule
 
   activate-dynamic-axiom =
       ?KindingJudgment(C, T, K)
-    ; <strip-annos> (C, T, K) => (C-stripped, T-stripped, K-stripped)
+    ; <strip-annos;debug-analysis(!"dyn kinding rule: ")> (C, T, K) => (C-stripped, T-stripped, K-stripped)
     ; rules(
         Dynamic-Annotate-Kind :+
           arg -> res
-          where <strip-annos> arg => (C-any, T-stripped)
+          where <strip-annos; debug-analysis(!"dyn kind was: "); where(!(C-stripped,T-stripped); debug-analysis(!"dyn kind exp: "))> arg => (C-any, T-stripped)
               ; <norm-context; strip-annos> C-any => C-stripped
               ; !arg => (C-arg, T-arg)
               ; <put-kind> (K, T-arg) => res
@@ -270,7 +276,7 @@ rules // Activate dynamic axioms in the order of appearance in the typing rule
     ; rules(
         Dynamic-Not-In-Dom :+
           arg -> arg 
-          where <strip-annos> arg => (x-stripped, C-stripped); <debug(!"dyn not-in-dom ok: "); strip-annos> arg)
+          where <strip-annos> arg => (x-stripped, C-stripped); <strip-annos> arg)
 
    activate-dynamic-axiom = debug-analysis(!"failed to activate dynamic axiom: "); fail
 
@@ -281,12 +287,13 @@ rules // implode MetaExpr
     bottomup(try(?MetaExpr(<trm-metaexpr-implode>)))
 
   trm-metaexpr-implode =
-    ?NoAnnoList(<debug-analysis(!"bef: ");pre-metaexpr-implode;debug-analysis(!"aft: ")>)
+    ?NoAnnoList(<pre-metaexpr-implode>)
   + strip-annos;\ Var(v) -> Metavar(Var(v)) \
+  + ?ToMetaExpr(<id>)
   
   pre-metaexpr-implode =
     ?Char(<id>) + ?Int(<id>) + ?Real(<id>) + ?Str(<id>)
-  + ?Tuple(<map(trm-metaexpr-implode)>)
+  + strip-annos;\ Tuple(ts) -> ""#(<map(trm-metaexpr-implode)> ts) \;try(?""#([<id>]))
   + ?List(<map(trm-metaexpr-implode)>)
   + strip-annos;\ ListTail(hs, tl) -> <conc> (<map(trm-metaexpr-implode)> hs, <trm-metaexpr-implode> tl) \
   + strip-annos;\ Op(n, args) -> n#(<map(trm-metaexpr-implode)> args) \

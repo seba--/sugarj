@@ -103,7 +103,7 @@ rules // Translate a signature rule
     |[ rules
          annotate-signature-defined =
              ?(term~tC, node@term~tdefs)
-           ; debug(!"sig-check: "); (strategy~premises-implementation < debug(!"sig-check ok:") + debug(!"sig-check failed:") )
+           ; strategy~premises-implementation
            ; <put-signature> (term~tsig, node)
            ; <put-context> (term~tC, node)
     ]|

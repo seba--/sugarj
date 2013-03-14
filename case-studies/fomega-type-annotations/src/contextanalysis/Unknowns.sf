@@ -64,7 +64,6 @@ rules // Signature of definitions
 
   annotate-signature-missing =
       ?(C, defs)
-    ; debug-analysis(!"signature missing: ")
     ; <put-signature> (SigUnknown(), defs)
     ; <add-context-errors> ( [ <concat-strings> [ "Missing signature rule for "
                                                 , <write-to-string> (<strip-annos> defs)

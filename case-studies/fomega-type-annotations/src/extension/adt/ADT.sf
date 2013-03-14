@@ -68,8 +68,9 @@ rules
     |[ data ~%X ~params = ~dcons ]| -> |[ type ~%X = M~ADT-TYPE(X, params, dcons) ]|
 
   desugar-data :
-    ADT-TYPE(X, params, dcons) ->
+    a@ADT-TYPE(X, params, dcons) ->
       fomega-type |[ M~ADT-ABS(params, |[ mu (M~ADT-OP(X, params, dcons), M~(ADT-ARG(params))) ]|) ]|
+      where <debug(!"desugared: ")> a
 }
 
 typing {
@@ -80,5 +81,13 @@ typing {
 ================================================================== S-DataCons
 ~C |- data ~%X ~params = ~dcons ~=defs ==> ~sig
 
-}
+~%X notin dom(~C)
+~C |- M~ADT-TYPE(X, params, dcons) :: ~K
+================================================================== S-DataEnd
+~C |- data ~%X ~params = ~dcons ==> ()
 
+~C |- M~ADT-ABS(params, |[ mu (M~ADT-OP(X, params, dcons), M~(ADT-ARG(params))) ]|) :: ~K
+========================================================================================= ADT-TYPE
+~C |- M~ADT-TYPE(X, params, dcons) :: ~K
+
+}

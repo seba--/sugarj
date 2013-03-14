@@ -39,6 +39,10 @@ rules
     where <kind-eq> (J1, K1) => msgs1
         ; <kind-eq> (J2, K2) => msgs2
 
+  kind-eq-proper :
+    (meta1, meta2) -> []
+    where <structurally-equal> (meta1, meta2)
+  
   kind-eq-unknown :
     (KiUnknown(), K) -> []
 

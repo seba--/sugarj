@@ -6,7 +6,7 @@ import concretesyntax.Fomega
 
 import contextanalysis.rules.Syntax
 import contextanalysis.rules.Desugaring
-import contextanalysis.rules.Verification
+// import contextanalysis.rules.Verification
 
 import extension.adt.Syntax
 
