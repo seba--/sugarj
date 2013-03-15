@@ -26,12 +26,13 @@ rules // Type of expressions
 
   annotate-type-missing =
       ?(C, e)
-    ; !e // <put-type> (TyUnknown(), e)
-    ; <add-fresh-context-errors> ( [ <concat-strings> [ "Missing typing rule for "
+    ; ![ <concat-strings> [ "Missing typing rule for "
                                                 , <write-to-string> (<strip-annos> e)
                                                 , " in context "
                                                 , <write-to-string> (<strip-annos> C)] ]
-                           , e)
+      => msgs
+    ; !e // <put-type> (TyUnknown(), e)
+    ; add-fresh-context-errors(|msgs)
     ; fail
 
 
@@ -46,12 +47,13 @@ rules // Kind of types
 
   annotate-kind-missing =
       ?(C, T)
-    ; !T  // <put-kind> (KiUnknown(), T)
-    ; <add-fresh-context-errors> ( [ <concat-strings> [ "Missing kinding rule for "
+    ; ![ <concat-strings> [ "Missing kinding rule for "
                                                 , <write-to-string> (<strip-annos> T)
                                                 , " in context "
                                                 , <write-to-string> (<strip-annos> C)] ]
-                           , T)
+      => msgs
+    ; !T  // <put-kind> (KiUnknown(), T)
+    ; add-fresh-context-errors(|msgs)
     ; fail
 
 
@@ -66,10 +68,11 @@ rules // Signature of definitions
 
   annotate-signature-missing =
       ?(C, defs)
-    ; !defs // <put-signature> (SigUnknown(), defs)
-    ; <add-fresh-context-errors> ( [ <concat-strings> [ "Missing signature rule for "
+    ; ![ <concat-strings> [ "Missing signature rule for "
                                                 , <write-to-string> (<strip-annos> defs)
                                                 , " in context "
                                                 , <write-to-string> (<strip-annos> C)] ]
-                           , defs)
+      => msgs
+    ; !defs // <put-signature> (SigUnknown(), defs)
+    ; add-fresh-context-errors
     ; fail

@@ -20,8 +20,8 @@ rules
 
 rules
 
-  constraint-error :
-    FomegaBody(defs) -> <context-errors-as-alist> defs
+  constraint-error =
+    ?node; get-context-errors; not(?[]); !(node, <id>)
 
 
 colorer

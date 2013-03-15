@@ -3,16 +3,19 @@ module contextanalysis.Annotations
 
 rules
 
-  add-context-errors =
-      ?(msgs, node)
-    ; if !msgs; ?[] then id else <debug-analysis(!"ADD-CTX-ERRS ")> (msgs, node) end
-    ; <get-context-errors> node => msgs-old
-    ; <put-anno(|"context-errors", <conc> (msgs, msgs-old))> node
+  add-context-errors(|msgs) =
+      if ?[]
+      then id
+      else 
+         where(?node; <debug-analysis(!"ADD-CTX-ERRS ")> (msgs, node))
+       ; get-context-errors => msgs-old
+       ; put-anno(|"context-errors", <conc> (msgs, msgs-old))
+      end
   
-  add-fresh-context-errors =
+  add-fresh-context-errors(|msgs) =
       if oncetd(get-context-errors; not(?[]))
         then id
-        else add-context-errors
+        else add-context-errors(|msgs)
       end
 
   get-context-errors = get-anno(|"context-errors") <+ ![]
