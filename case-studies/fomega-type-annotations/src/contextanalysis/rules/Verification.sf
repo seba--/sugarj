@@ -36,12 +36,10 @@ rules
   verify-context-rule-internal :
     TypingRule(premises, RuleName(sep, Some(Var(name))), TypingJudgment(C, e, T)) ->
       result
-    where // TODO: only allow desugar-extension-internal; extension declaration 
-          //       requires this rule to be successfully applicable to subject
-          <debug(!"*** Verify type rule ")> name
+    where <debug(!"*** Verify type rule ")> name
+        ; <debug-analysis(<concat-strings> ["Original conclusion term  (", name, "): "])> e
         ; if <desugar-extension-internal; reinit-for-analysis> e => e-desugared then
-              <strip-annos; debug(<concat-strings> ["Original conclusion term  (", name, "): "])> e
-            ; <strip-annos; debug(<concat-strings> ["Desugared conclusion term (", name, "): "])> e-desugared
+              <debug-analysis(<concat-strings> ["Desugared conclusion term (", name, "): "])> e-desugared
             ; <premises-to-list> premises => premises-list
             ; {| Dynamic-Annotate-Type, Dynamic-Annotate-Kind, Dynamic-Par-Reduce-Type, Dynamic-Lookup-Expr-Var:
                    <activate-dynamic-axioms> premises-list
@@ -87,9 +85,9 @@ rules
     KindingRule(premises, RuleName(sep, Some(Var(name))), judge@KindingJudgment(C, T, K)) ->
       result
     where <debug(!"*** Verify kind rule ")> (name, <strip-annos> judge)
+        ; <debug-analysis(<concat-strings> ["Original conclusion type  (", name, "): "])> T
         ; if <desugar-extension-internal; reinit-for-analysis> T => T-desugared then
-              <strip-annos; debug(<concat-strings> ["Original conclusion type  (", name, "): "])> T
-            ; <strip-annos; debug(<concat-strings> ["Desugared conclusion type (", name, "): "])> T-desugared
+              <debug-analysis(<concat-strings> ["Desugared conclusion type (", name, "): "])> T-desugared
             ; <premises-to-list> premises => premises-list
             ; {| Dynamic-Annotate-Kind, Dynamic-Lookup-Type-Var:
                    <activate-dynamic-axioms> premises-list
@@ -127,9 +125,9 @@ rules
     SignatureRule(premises, RuleName(sep, Some(Var(name))), judge@SignatureJudgment(C, Defs, Sig)) ->
       result
     where <debug-analysis(!"*** Verify signature rule ")> (name, judge)
+        ; <debug-analysis(<concat-strings> ["Original conclusion defs  (", name, "): "])> Defs
         ; if <desugar-extension-internal; reinit-for-analysis> Defs => Defs-desugared then
-              <strip-annos; debug(<concat-strings> ["Original conclusion defs  (", name, "): "])> Defs
-            ; <strip-annos; debug(<concat-strings> ["Desugared conclusion defs (", name, "): "])> Defs-desugared
+              <debug-analysis(<concat-strings> ["Desugared conclusion defs (", name, "): "])> Defs-desugared
             ; <premises-to-list> premises => premises-list
             ; {| Dynamic-Annotate-Type, Dynamic-Annotate-Kind, Dynamic-Par-Reduce-Type, Dynamic-Lookup-Expr-Var, Dynamic-Annotate-Signature:
                    <activate-dynamic-axioms> premises-list

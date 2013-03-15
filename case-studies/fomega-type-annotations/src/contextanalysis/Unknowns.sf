@@ -26,12 +26,13 @@ rules // Type of expressions
 
   annotate-type-missing =
       ?(C, e)
-    ; <put-type> (TyUnknown(), e)
+    ; !e // <put-type> (TyUnknown(), e)
     ; <add-context-errors> ( [ <concat-strings> [ "Missing typing rule for "
                                                 , <write-to-string> (<strip-annos> e)
                                                 , " in context "
                                                 , <write-to-string> (<strip-annos> C)] ]
                            , e)
+    ; fail
 
 
 rules // Kind of types
@@ -45,12 +46,13 @@ rules // Kind of types
 
   annotate-kind-missing =
       ?(C, T)
-    ; <put-kind> (KiUnknown(), T)
+    ; !T  // <put-kind> (KiUnknown(), T)
     ; <add-context-errors> ( [ <concat-strings> [ "Missing kinding rule for "
                                                 , <write-to-string> (<strip-annos> T)
                                                 , " in context "
                                                 , <write-to-string> (<strip-annos> C)] ]
                            , T)
+    ; fail
 
 
 rules // Signature of definitions
@@ -64,9 +66,10 @@ rules // Signature of definitions
 
   annotate-signature-missing =
       ?(C, defs)
-    ; <put-signature> (SigUnknown(), defs)
+    ; !defs // <put-signature> (SigUnknown(), defs)
     ; <add-context-errors> ( [ <concat-strings> [ "Missing signature rule for "
                                                 , <write-to-string> (<strip-annos> defs)
                                                 , " in context "
                                                 , <write-to-string> (<strip-annos> C)] ]
                            , defs)
+    ; fail

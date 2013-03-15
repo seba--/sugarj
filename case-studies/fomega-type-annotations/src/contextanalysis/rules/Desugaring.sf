@@ -61,12 +61,16 @@ rules // Translate a typing rule
     |[ rules
          annotate-type-defined =
              ?(term~tC, node@term~te)
-           ; strategy~premises-implementation
+           ; <debug-analysis(<concat-strings> ["IN  ", term~tname, " "])> (term~tC, node)
+           ; (strategy~premises-implementation
+                 <+ <debug-analysis(<concat-strings> ["FAILED  ", term~tname, " "])> (term~tC, node); fail)
            ; <put-type> (term~tT, node)
            ; <put-context> (term~tC, node)
+           ; <debug-analysis(<concat-strings> ["OUT ", term~tname, " "])> (term~tC, node)
     ]|
     where <trm-explode> C => tC
         ; <trm-explode> e => te
+        ; <trm-explode> name => tname
         ; <translate-subst> T => tT
         ; <premises-to-list> premises => premises-list
         ; <ts-set-blame> (<ts-initial> (), Var("node")) => ts
@@ -82,10 +86,11 @@ rules // Translate a kinding rule
          annotate-kind-defined =
              ?(term~tC, node@term~tT)
            ; <debug-analysis(<concat-strings> ["IN  ", term~tname, " "])> (term~tC, node)
-           ; strategy~premises-implementation
+           ; (strategy~premises-implementation
+                 <+ <debug-analysis(<concat-strings> ["FAILED  ", term~tname, " "])> (term~tC, node); fail)
            ; <put-kind> (term~tK, node)
            ; <put-context> (term~tC, node)
-           ; <debug-analysis(<concat-strings> ["OUT ", term~tname, " "])> term~tK
+           ; <debug-analysis(<concat-strings> ["OUT ", term~tname, " "])> (term~tC, node)
     ]|
     where <trm-explode> C => tC
         ; <trm-explode> T => tT
@@ -103,13 +108,17 @@ rules // Translate a signature rule
     |[ rules
          annotate-signature-defined =
              ?(term~tC, node@term~tdefs)
-           ; strategy~premises-implementation
+           ; <debug-analysis(<concat-strings> ["IN  ", term~tname, " "])> (term~tC, node)
+           ; (strategy~premises-implementation
+                 <+ <debug-analysis(<concat-strings> ["FAILED  ", term~tname, " "])> (term~tC, node); fail)
            ; <put-signature> (term~tsig, node)
            ; <put-context> (term~tC, node)
+           ; <debug-analysis(<concat-strings> ["OUT ", term~tname, " "])> (term~tC, node)
     ]|
     where <trm-explode> C => tC
         ; <trm-explode> defs => tdefs
         ; <trm-explode> sig => tsig
+        ; <trm-explode> name => tname
         ; <premises-to-list> premises => premises-list
         ; <translate-premises> (<ts-initial> (), premises-list) => (ts1, premises-implementation)
 
