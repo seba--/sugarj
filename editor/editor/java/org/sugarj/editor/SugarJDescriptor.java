@@ -53,12 +53,18 @@ public class SugarJDescriptor extends Descriptor {
       Class<T> type, SGLRParseController controller)
       throws BadDescriptorException {
     
-    if (controller != null && controller.getParser() instanceof SugarJParser) {
+    if (controller != null && controller.getParser() instanceof SugarJParser && ((SugarJParser) controller.getParser()).isInitialized()) {
       List<IStrategoTerm> services = ((SugarJParser) controller.getParser()).getEditorServices();
       if (services != null && !services.equals(lastServices)) {
-        reloadEditors(controller);
         setDocument(composeDefinitions(baseDocument, services));
+        reloadEditors(controller);
         lastServices = services;
+        
+        String s = services.toString();
+        int start = s.indexOf("SemanticProvider(");
+        int end = s.indexOf(")", start);
+        String f = s.substring(start + "SemanticProvider(".length() + 1, end - 1);
+        System.out.println("Load provider: " + f);
       }
     }
     

@@ -41,6 +41,7 @@ import org.sugarj.driver.ModuleSystemCommands;
 import org.sugarj.driver.Result;
 import org.sugarj.editor.SugarJConsole;
 import org.sugarj.editor.SugarJParseController;
+import org.sugarj.editor.SugarJParser;
 import org.sugarj.util.ProcessingListener;
 
 /**
@@ -192,8 +193,10 @@ public class Builder extends IncrementalProjectBuilder {
 
             RelativePath depFile = new RelativePath(environment.getBin(), FileCommands.dropExtension(input.sourceFile.getRelativePath()) + ".dep");
             Result res = Result.readDependencyFile(depFile);
-            if (res == null || !res.isUpToDate(input.sourceFile, environment))
+            if (res == null || !res.isUpToDate(input.sourceFile, environment)) {
               res = Driver.run(input.sourceFile, environment, monitor, input.langLibFactory);
+              SugarJParser.putResult(input.sourceFile.getAbsolutePath(), res);
+            }
             
             IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
             for (IWorkbenchWindow workbenchWindow : workbenchWindows)

@@ -410,16 +410,8 @@ public class Driver{
       }
         
       driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
-      
-      if (currentGrammarTBL != null)
-        driverResult.registerParseTable(currentGrammarTBL);
-      
-      if (currentTransProg != null) {
-        driverResult.addEditorService(
-            ATermCommands.atermFromString(
-              "Builders(\"sugarj checking\", [SemanticObserver(Strategy(\"sugarj-analyze\"))])"));
-        driverResult.registerEditorDesugarings(currentTransProg);
-      }
+      driverResult.registerParseTable(currentGrammarTBL);
+      driverResult.registerEditorDesugarings(currentTransProg);
 
       if (environment.doGenerateFiles())
         driverResult.writeDependencyFile(depOutFile);
