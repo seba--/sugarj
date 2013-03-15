@@ -77,8 +77,8 @@ rules
           else
               <debug(!"Could not desugar the conclusion of rule ")> name
             ; <strip-annos; debug(!"  ")> e 
-            ; ![( name, <concat-strings> [ "Could not desugar the conclusion of typing rule ", name, ":\n"
-                                         , <write-to-string-analysis> e])]
+            ; ![( e, <concat-strings> [ "Could not desugar the conclusion of typing rule ", name, ":\n"
+                                      , <write-to-string-analysis> e])]
           end => result
 
   verify-context-rule-internal :
@@ -117,8 +117,8 @@ rules
           else
               <debug(!"Could not desugar the conclusion of rule ")> name
             ; <strip-annos; debug(!"  ")> T
-            ; ![( name, <concat-strings> [ "Could not desugar the conclusion of kinding rule ", name, ":"
-                                         , <write-to-string-analysis> T])]
+            ; ![( T, <concat-strings> [ "Could not desugar the conclusion of kinding rule ", name, ":"
+                                      , <write-to-string-analysis> T])]
           end => result
 
   verify-context-rule-internal :
@@ -156,7 +156,7 @@ rules
           else
               <debug(!"Could not desugar the conclusion of rule ")> name
             ; <strip-annos; debug(!"  ")> Defs
-            ; ![( name, <concat-strings> [ "Could not desugar the conclusion of signature rule ", name, ":"
+            ; ![( Defs, <concat-strings> [ "Could not desugar the conclusion of signature rule ", name, ":"
                                          , <write-to-string-analysis> Defs])]
           end => result
 

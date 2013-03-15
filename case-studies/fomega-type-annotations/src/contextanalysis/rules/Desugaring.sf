@@ -286,6 +286,12 @@ rules // Translate a type expectation
     where <not(ts-in-eqs)> (ts, mvar)
 
   translate-type-expectation :
+    (ts, tblame, result-var, MetaExpr(exp), fv2) ->
+      (<ts-append-eqs> (ts, mvars), |[ !term~result-var; ?term~exp ]|)
+    where <freevars-metaexpr> exp => mvars
+        ; <isect> (<ts-get-eqs> ts, mvars) => []
+
+  translate-type-expectation :
     (ts, tblame, result-var, fv1, TyBool(), fv2) ->
       (ts1, |[   <type-eq-bool> term~result-var => term~msgs-var
                ; <add-context-errors> (term~msgs-var, term~tblame)
@@ -409,6 +415,12 @@ rules // Generate code to expect a type declaration
     where <not(ts-in-eqs)> (ts, mvar)
 
   translate-decls-expectation :
+    (ts, tblame, result-var, MetaExpr(exp), fv2) ->
+      (<ts-append-eqs> (ts, mvars), |[ !term~result-var; ?term~exp ]|)
+    where <freevars-metaexpr> exp => mvars
+        ; <isect> (<ts-get-eqs> ts, mvars) => []
+
+  translate-decls-expectation :
     (ts, tblame, result-var, fv1, Metavar(mvar), fv2) ->
       ( ts1
       , |[   <decls-eq> (term~mvar, term~result-var) => term~msgs-var
@@ -441,6 +453,12 @@ rules // Translate a kind expectation
     (ts, tblame, result-var, Metavar(mvar)) ->
       (<ts-append-eq> (ts, mvar), |[ !term~result-var; ?term~mvar ]|)
     where <not(ts-in-eqs)> (ts, mvar)
+
+  translate-kind-expectation :
+    (ts, tblame, result-var, MetaExpr(exp)) ->
+      (<ts-append-eqs> (ts, mvars), |[ !term~result-var; ?term~exp ]|)
+    where <freevars-metaexpr> exp => mvars
+        ; <isect> (<ts-get-eqs> ts, mvars) => []
 
   translate-kind-expectation :
     (ts, tblame, result-var, Metavar(mvar)) ->
@@ -490,16 +508,6 @@ rules // Translate a kind expectation
         ; <fresh-msgs-var> ts2 => (ts3, msgs-var)
         ; <translate-kind-expectation> (ts3, tblame, result-var1, K1) => (ts4, inspect-result1)
         ; <translate-kind-expectation> (ts4, tblame, result-var2, K2) => (ts5, inspect-result2)
-
-  translate-kind-expectation :
-    (ts, tblame, result-var, K) ->
-      (ts2, |[   strategy~tK; ?term~result-var1
-               ; <kind-eq> (term~result-var1, term~result-var) => term~msgs-var
-               ; <add-context-errors> (term~msgs-var, term~tblame)
-            ]|)
-    where <fresh-result-var> ts => (ts1, result-var1)
-        ; <fresh-msgs-var> ts1 => (ts2, msgs-var)
-        ; <trm-explode> K => tK
 
 
 rules // Translate a substitution operator in a type
@@ -651,6 +659,13 @@ rules // Translation state handling
   ts-set-eqs :
     ((n, eqs, errs, blame), eqs-new) -> (n, eqs-new, errs, blame)
 
+  ts-append-eqs :
+    (ts, []) -> ts
+  ts-append-eqs :
+    (ts, [v|vars]) -> ts''
+    where <ts-append-eq> (ts, v) => ts'
+        ; <ts-append-eqs> (ts', vars) => ts''
+
   ts-append-eq :
     (ts, var) -> ts1
     where <ts-get-eqs> ts => eqs-old
@@ -663,6 +678,15 @@ rules // Translation state handling
 
   ts-set-blame :
     ((n, eqs, errs, blame), blame-new) -> (n, eqs, errs, blame-new)
+
+
+rules
+  freevars-metaexpr : Var(v) -> [v]
+  freevars-metaexpr : ToMetaExpr(e) -> <freevars-metaexpr-out> e
+  freevars-metaexpr : c#(xs) -> <mapconcat(freevars-metaexpr)> xs
+
+  freevars-metaexpr-out : MetaExpr(e) -> <freevars-metaexpr> e
+  freevars-metaexpr-out : c#(xs) -> <mapconcat(freevars-metaexpr-out)> xs
 
 
 rules // Debug definitions to find rewrite failures

@@ -1,7 +1,7 @@
 module test.ADT
 
 import extension.adt.Syntax
-import extension.adt.Desugaring
+import extension.adt.ADT
 
 import contextanalysis.ContextAnalysis
 

@@ -194,4 +194,3 @@ rules // ADT-PK
 
   desugar-data :
     fomega-type |[ M~ADT-PK(|[ (~%X::~K) ~params ]|) ]| -> fomega-kind |[ {~K, M~(ADT-PK(params))} ]|
-

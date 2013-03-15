@@ -8,6 +8,12 @@ rules
     ; if !msgs; ?[] then id else <debug-analysis(!"ADD-CTX-ERRS ")> (msgs, node) end
     ; <get-context-errors> node => msgs-old
     ; <put-anno(|"context-errors", <conc> (msgs, msgs-old))> node
+  
+  add-fresh-context-errors =
+      if oncetd(get-context-errors; not(?[]))
+        then id
+        else add-context-errors
+      end
 
   get-context-errors = get-anno(|"context-errors") <+ ![]
 
