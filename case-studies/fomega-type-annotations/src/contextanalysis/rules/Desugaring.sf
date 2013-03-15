@@ -17,16 +17,16 @@ import contextanalysis.rules.Syntax
 
 desugarings
   desugar-context-rule
-  desugar-EVAL
 
-
-signature
-  constructors
-    EVAL: StrategoTerm -> StrategoTerm
-
-rules
-  desugar-EVAL :
-    Op("EVAL", x) -> stratego-strategy |[ <desugar-main> term~x ]|
+//  desugar-EVAL
+//
+// signature
+//   constructors
+//     EVAL: StrategoTerm -> StrategoTerm
+// 
+// rules
+//   desugar-EVAL :
+//     Op("EVAL", x) -> stratego-strategy |[ <desugar-main> term~x ]|
 
 
 rules
@@ -500,7 +500,6 @@ rules // Translate a kind expectation
     where <fresh-result-var> ts => (ts1, result-var1)
         ; <fresh-msgs-var> ts1 => (ts2, msgs-var)
         ; <trm-explode> K => tK
-        //; <desugar-EVAL> (<trm-explode> kind-expression) => expected-kind
 
 
 rules // Translate a substitution operator in a type
