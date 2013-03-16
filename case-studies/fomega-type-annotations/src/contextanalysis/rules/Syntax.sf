@@ -88,6 +88,54 @@ context-free syntax // *** Syntax for signature rules ***
   SignatureRuleJudgment -> OffSignatureRuleJudgment {layout(1.first.col < 1.left.col)}
 
 
+context-free syntax // *** Syntax for type normalization rules ***
+
+  NormalizationRule -> SugarDefElem
+  NormalizationRule -> InferenceRule
+
+  NormalizationRulePremises RuleSepName NormalizationRuleConsequence
+    -> NormalizationRule {cons("NormalizationRule"),
+                      layout(1.first.col == 2.first.col &&
+                             2.first.col == 3.first.col)}
+
+  NormalizationRulePremiseList -> NormalizationRulePremises {cons("PremiseList")}
+                               -> NormalizationRulePremises {cons("NoPremises")}
+
+  OffNormalizationJudgment -> NormalizationRuleConsequence
+
+  NormalizationJudgment -> OffNormalizationJudgment {layout(1.first.col < 1.left.col)}
+
+  OffNormalizationRuleJudgment -> NormalizationRulePremises
+  OffNormalizationRuleJudgment NormalizationRulePremises -> NormalizationRulePremises {cons("PremiseCons"),
+                                                                                 layout(1.first.col == 2.first.col)}
+
+  NormalizationRuleJudgment -> OffNormalizationRuleJudgment {layout(1.first.col < 1.left.col)}
+
+
+context-free syntax // *** Syntax for kind nomalization rules ***
+
+  KindNormalizationRule -> SugarDefElem
+  KindNormalizationRule -> InferenceRule
+
+  KindNormalizationRulePremises RuleSepName KindNormalizationRuleConsequence
+    -> KindNormalizationRule {cons("KindNormalizationRule"),
+                      layout(1.first.col == 2.first.col &&
+                             2.first.col == 3.first.col)}
+
+  KindNormalizationRulePremiseList -> KindNormalizationRulePremises {cons("PremiseList")}
+                           -> KindNormalizationRulePremises {cons("NoPremises")}
+
+  OffKindNormalizationJudgment -> KindNormalizationRuleConsequence
+
+  KindNormalizationJudgment -> OffKindNormalizationJudgment {layout(1.first.col < 1.left.col)}
+
+  OffKindNormalizationRuleJudgment -> KindNormalizationRulePremiseList
+  OffKindNormalizationRuleJudgment KindNormalizationRulePremiseList -> KindNormalizationRulePremiseList {cons("PremiseCons"),
+                                                                                 layout(1.first.col == 2.first.col)}
+
+  KindNormalizationRuleJudgment -> OffKindNormalizationRuleJudgment {layout(1.first.col < 1.left.col)}
+
+
 context-free syntax // *** Syntax for contexts ***
 
   "()"                                                        -> Context {cons("CtxEmpty")}
@@ -109,6 +157,7 @@ context-free syntax // *** Syntax for judgments ***
   Context "|-" FomegaExpr ":" FomegaType  -> TypingJudgment        {cons("TypingJudgment")}
   Context "|-" FomegaType "~>" FomegaType -> NormalizationJudgment {cons("NormalizationJudgment")}
   Context "|-" FomegaDefs "==>" Signature -> SignatureJudgment     {cons("SignatureJudgment")}
+               FomegaKind "=::=>" FomegaKind -> KindNormalizationJudgment {cons("KindNormalizationJudgment")}
 
   FomegaID "notin" "lab" "(" FomegaTyDecls ")"       -> NotinLabJudgment       {cons("NotinLabJudgment")}
   FomegaID ":" FomegaType "in" "decls" FomegaTyDecls -> InDeclJudgment         {cons("InDeclJudgment")}
@@ -140,6 +189,11 @@ context-free syntax // *** Syntax for judgments ***
   NotinDomJudgment      -> SignatureRuleJudgment
   NormalizationJudgment -> SignatureRuleJudgment
 
+  // Judgments allowed as premises of type normalization rules
+  NormalizationJudgment -> NormalizationRuleJudgment
+
+  // Judgments allowed as premises of kind equality rules
+  KindNormalizationJudgment -> KindNormalizationRuleJudgment
 
 context-free syntax // *** Substitution on level of types
 

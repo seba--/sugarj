@@ -35,10 +35,13 @@ rules
 
   reinit-analysis-data-annotation =
     ?node;
-    <get-annotations; filter(not(?("analysis-data", _)))> node => annos;
     <get-annotations; filter(?("analysis-data", _))> node => ana-annos;
-    if !ana-annos; ?[] then ![("analysis-data", <new-hashtable>)] else !ana-annos end => new-ana-annos;
-    <set-annotations> (node, <conc> (annos, new-ana-annos))
+    if !ana-annos; ?[] 
+    then ![("analysis-data", <new-hashtable>)] => new-ana-annos
+       ; <get-annotations; filter(not(?("analysis-data", _)))> node => annos
+       ; <set-annotations> (node, <conc> (annos, new-ana-annos)) 
+    else !node
+    end
 
   desugar-context-rule :
     TypingRule(premises, RuleName(sep, optional-name), conclusion) ->
@@ -51,6 +54,10 @@ rules
   desugar-context-rule :
     SignatureRule(premises, RuleName(sep, optional-name), conclusion) ->
       transformation-elem(<translate-signature-rule> (optional-name, premises, conclusion))
+
+  desugar-context-rule :
+    KindNormalizationRule(premises, RuleName(sep, optional-name), conclusion) ->
+      transformation-elem(<translate-kindnormalization-rule> (optional-name, premises, conclusion))
 
 
 rules // Translate a typing rule
@@ -123,6 +130,28 @@ rules // Translate a signature rule
         ; <translate-premises> (<ts-initial> (), premises-list) => (ts1, premises-implementation)
 
 
+rules // Translate a kind equality rule
+
+  translate-kindnormalization-rule :
+    (Some(Var(name)), premises, KindNormalizationJudgment(K1, K2)) ->
+    stratego-decl
+    |[ rules
+         kind-norm-internal =
+             ?node@term~tK1
+           ; debug-analysis(<concat-strings> ["IN  ", term~tname, " "])
+           ; (strategy~premises-implementation
+                <+ <debug-analysis(<concat-strings> ["FAILED  ", term~tname, " "])> node; fail)
+           ; !term~tK2
+           ; debug-analysis(<concat-strings> ["OUT ", term~tname, " "])
+    ]|
+    where <trm-explode> K1 => tK1
+        ; <trm-explode> K2 => tK2
+        ; <trm-explode> name => tname
+        ; <premises-to-list> premises => premises-list
+        ; <translate-error-premises> (<ts-initial> (), premises-list) => (ts1, premises-implementation)
+
+
+
 rules // Code for all kind of rules
 
   premises-to-list :
@@ -145,6 +174,21 @@ rules // Code for all kind of rules
     where <translate-judgment> (ts, judgment)   => (ts1, judgment-implementation)
         ; <translate-premises> (ts1, judgments) => (ts2, judgments-implementation)
 
+  translate-error-premises :
+    (ts, []) -> (ts, |[ ![] ]|)
+
+  translate-error-premises :
+    (ts, [judgment | judgments]) ->
+      (ts2, |[ {msgs: 
+                 where(strategy~judgment-implementation => msgs);
+                 if <?[]> msgs
+                   then strategy~judgments-implementation
+                   else !msgs
+                 end
+               } 
+            ]|)
+    where <translate-judgment> (ts, judgment)   => (ts1, judgment-implementation)
+        ; <translate-premises> (ts1, judgments) => (ts2, judgments-implementation)
 
 rules // Translate a judgment
 
@@ -167,11 +211,14 @@ rules // Translate a judgment
       (ts3, |[   <reinit-for-analysis> term~tT => term~result-var1 
                ; <annotate-kind> (term~tC, term~result-var1)
                ; <get-kind> term~result-var1 => term~result-var
+               ; <debug-analysis(!"match kinds: ")> (term~result-var, term~tK-pp)
                ; strategy~inspect-result
+               ; where(<debug-analysis(!"match kinds: ")> "ok")
             ]|)
     where <trm-explode> C => tC
         ; <trm-explode> T => tT
         ; <trm-explode> K => tK
+        ; <pp-kind;trm-explode> K => tK-pp
         ; <fresh-result-var> ts => (ts1, result-var)
         ; <fresh-result-var> ts1 => (ts2, result-var1)
         ; <translate-kind-expectation> (ts2, result-var1, result-var, K) => (ts3, inspect-result)
@@ -263,6 +310,12 @@ rules // Translate a judgment
            ]|)
     where <trm-explode> x => tx
         ; <trm-explode> C => tC
+          
+  translate-judgment :
+    (ts, KindNormalizationJudgment(K1, K2)) ->
+      (ts, |[ !term~tK1; kind-norm-internal; ?term~tK2 ]|)
+    where <trm-explode> K1 => tK1
+        ; <trm-explode> K2 => tK2
 
 
 rules // Translate a type expectation
@@ -450,17 +503,27 @@ rules // Generate code to expect a type declaration
 rules // Translate a kind expectation
 
   translate-kind-expectation :
+    (ts, tblame, result-var, expect) ->
+      (ts2, |[ !term~result-var
+             ; kind-norm => term~result-var1
+             ; strategy~inspect-expectation
+             ]|)
+    where <fresh-result-var> ts => (ts1, result-var1)
+        ; <translate-kind-expectation-normed> (ts1, tblame, result-var1, expect) => (ts2, inspect-expectation)
+
+
+  translate-kind-expectation-normed :
     (ts, tblame, result-var, Metavar(mvar)) ->
       (<ts-append-eq> (ts, mvar), |[ !term~result-var; ?term~mvar ]|)
     where <not(ts-in-eqs)> (ts, mvar)
 
-  translate-kind-expectation :
+  translate-kind-expectation-normed :
     (ts, tblame, result-var, MetaExpr(exp)) ->
       (<ts-append-eqs> (ts, mvars), |[ !term~result-var; ?term~exp ]|)
     where <freevars-metaexpr> exp => mvars
         ; <isect> (<ts-get-eqs> ts, mvars) => []
 
-  translate-kind-expectation :
+  translate-kind-expectation-normed :
     (ts, tblame, result-var, Metavar(mvar)) ->
       ( ts1
       , |[   <kind-eq> (term~mvar, term~result-var) => term~msgs-var
@@ -469,21 +532,21 @@ rules // Translate a kind expectation
     where <ts-in-eqs> (ts, mvar)
         ; <fresh-msgs-var> ts => (ts1, msgs-var)
 
-  translate-kind-expectation :
+  translate-kind-expectation-normed :
     (ts, tblame, result-var, KiStar()) ->
       (ts1, |[   <kind-eq-star> term~result-var => term~msgs-var
                ; <add-context-errors(|term~msgs-var)> term~tblame
             ]|)
     where <fresh-msgs-var> ts => (ts1, msgs-var)
 
-  translate-kind-expectation :
+  translate-kind-expectation-normed :
     (ts, tblame, result-var, KiEmpty()) ->
       (ts1, |[   <kind-eq-empty> term~result-var => term~msgs-var
                ; <add-context-errors(|term~msgs-var)> term~tblame
             ]|)
     where <fresh-msgs-var> ts => (ts1, msgs-var)
 
-  translate-kind-expectation :
+  translate-kind-expectation-normed :
     (ts, tblame, result-var, KiArrow(K1, K2)) ->
       (ts5, |[   <kind-eq-arrow> term~result-var => (term~result-var1, term~result-var2, term~msgs-var)
                ; <add-context-errors(|term~msgs-var)> term~tblame
@@ -496,7 +559,7 @@ rules // Translate a kind expectation
         ; <translate-kind-expectation> (ts3, tblame, result-var1, K1) => (ts4, inspect-result1)
         ; <translate-kind-expectation> (ts4, tblame, result-var2, K2) => (ts5, inspect-result2)
 
-  translate-kind-expectation :
+  translate-kind-expectation-normed :
     (ts, tblame, result-var, KiPair(K1, K2)) ->
       (ts5, |[   <kind-eq-pair> term~result-var => (term~result-var1, term~result-var2, term~msgs-var)
                ; <add-context-errors(|term~msgs-var)> term~tblame

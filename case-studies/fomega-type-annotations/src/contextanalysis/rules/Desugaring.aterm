@@ -1,0 +1,25 @@
+NoAnnoList(
+  Tuple(
+    [ Var("ts")
+    , amb(
+        [ ToMetaExpr(
+            BA(
+              CallNoArgs(SVar("kind-eq"))
+            , NoAnnoList(
+                Tuple([FromMetaExpr(Var("tK1")), FromMetaExpr(Var("tK2"))])
+              )
+            )
+          )
+        , ToMetaExpr(
+            App(
+              CallNoArgs(SVar("kind-eq"))
+            , NoAnnoList(
+                Tuple([FromMetaExpr(Var("tK1")), FromMetaExpr(Var("tK2"))])
+              )
+            )
+          )
+        ]
+      )
+    ]
+  )
+)

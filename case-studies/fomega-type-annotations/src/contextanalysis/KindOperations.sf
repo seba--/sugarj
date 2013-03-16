@@ -21,7 +21,11 @@ rules
 
 rules
 
-  kind-eq = kind-eq-proper <+ kind-eq-unknown <+ kind-eq-unexpected
+  kind-eq =
+    (kind-norm, kind-norm);
+    where(debug-analysis(!"IN kind eq: "));
+    (kind-eq-proper <+ kind-eq-unknown <+ kind-eq-unexpected);where(debug-analysis(!"OUT kind eq: "))
+      <+ where(debug-analysis(!"FAILED kind eq: "))
 
   kind-eq-proper :
     (KiEmpty(), KiEmpty()) -> []
@@ -114,3 +118,9 @@ rules
 
   kind-eq-empty-unexpected :
     K -> [<concat-strings> ["kind mismatch, expected [] but found " , <pp-kind> K]]
+
+
+rules // kind normalization
+
+  kind-norm = try(?was; kind-norm-internal; where(<debug-analysis(!"kind normalized: ")> (was, <id>)))
+  kind-norm-internal = fail
