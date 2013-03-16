@@ -5,15 +5,7 @@ import extension.adt.ADT
 
 import contextanalysis.ContextAnalysis
 
-type Id = \X::*=>*=>*. X
+// type Id = \X::*=>*=>*. X
 
-data Tree (k::*) (v::*) = Nil isNil {}
-                        | Leaf isLeaf {value: v}
-                        | Node isNode {left: Tree k v, key: k, right: Tree k v}
+data Tree = Nil isNil {}
 
-
-data D = Foo isFoo {foo:Nat} 
-
-type X = Tree Nat Nat
-
-val x = fold [D] (<Foo={foo=1}> as <Foo:{foo:Nat}>)

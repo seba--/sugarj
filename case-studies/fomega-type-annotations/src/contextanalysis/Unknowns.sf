@@ -74,5 +74,5 @@ rules // Signature of definitions
                                                 , <write-to-string> (<strip-annos> C)] ]
       => msgs
     ; !defs // <put-signature> (SigUnknown(), defs)
-    ; add-fresh-context-errors
+    ; add-fresh-context-errors(|msgs)
     ; fail
