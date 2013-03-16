@@ -122,5 +122,8 @@ rules
 
 rules // kind normalization
 
-  kind-norm = try(?was; kind-norm-internal; where(<debug-analysis(!"kind normalized: ")> (was, <id>)))
+  kind-norm =
+    ?was
+    ; innermost(kind-norm-internal) 
+    ; where(try(not(?was); <debug-analysis(!"kind normalized: ")> (was, <id>)))
   kind-norm-internal = fail

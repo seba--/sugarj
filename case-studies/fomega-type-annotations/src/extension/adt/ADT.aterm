@@ -1,8 +1,1 @@
-SignatureRule(
-  NoPremises()
-, RuleName("================================", Some(Var("ADT-PKNil")))
-, KindEqJudgment(
-    MetaExpr(NoAnnoList(Op("ADT-PK", [ToMetaExpr(DataParamsNil())])))
-  , KiEmpty()
-  )
-)
+KindingJudgment(Metavar(Var("C")), Metavar(Var("T")), KiStar())

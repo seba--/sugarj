@@ -211,7 +211,7 @@ rules // Translate a judgment
       (ts3, |[   <reinit-for-analysis> term~tT => term~result-var1 
                ; <annotate-kind> (term~tC, term~result-var1)
                ; <get-kind> term~result-var1 => term~result-var
-               ; <debug-analysis(!"match kinds: ")> (term~result-var, term~tK-pp)
+               ; <debug(!"match kinds: ")> (term~result-var, term~tK-pp)
                ; strategy~inspect-result
                ; where(<debug-analysis(!"match kinds: ")> "ok")
             ]|)
@@ -505,7 +505,7 @@ rules // Translate a kind expectation
   translate-kind-expectation :
     (ts, tblame, result-var, expect) ->
       (ts2, |[ !term~result-var
-             ; kind-norm => term~result-var1
+             ; id /*kind-norm*/ => term~result-var1
              ; strategy~inspect-expectation
              ]|)
     where <fresh-result-var> ts => (ts1, result-var1)
@@ -514,14 +514,38 @@ rules // Translate a kind expectation
 
   translate-kind-expectation-normed :
     (ts, tblame, result-var, Metavar(mvar)) ->
-      (<ts-append-eq> (ts, mvar), |[ !term~result-var; ?term~mvar ]|)
+      (<ts-append-eq> (ts, mvar), |[ !term~result-var; {t*: ?term~mvar{t*} } ]|)
     where <not(ts-in-eqs)> (ts, mvar)
 
   translate-kind-expectation-normed :
-    (ts, tblame, result-var, MetaExpr(exp)) ->
-      (<ts-append-eqs> (ts, mvars), |[ !term~result-var; ?term~exp ]|)
-    where <freevars-metaexpr> exp => mvars
-        ; <isect> (<ts-get-eqs> ts, mvars) => []
+    (ts, tblame, result-var, MetaExpr(Var(v))) ->
+      <translate-kind-expectation-normed> (ts, tblame, result-var, MetaVar(Var(v)))
+
+  translate-kind-expectation-normed :
+    (ts, tblame, result-var, MetaExpr(NoAnnoList(Op(cons, args)))) ->
+      (ts2, 
+       |[ !term~result-var
+        ; ?(string~cons)#(term~args-var); strategy~args-expectation
+        ]|)
+    where <fresh-result-var> ts => (ts1, args-var)
+        ; <translate-kind-expectation-metaexpr-args> (ts1, tblame, args-var, args) => (ts2, args-expectation)
+
+  translate-kind-expectation-metaexpr-args :
+    (ts, tblame, args-var, []) ->
+      (ts, |[ id ]|)
+
+  translate-kind-expectation-metaexpr-args :
+    (ts, tblame, args-var, [arg|args]) ->
+      (ts3, 
+      |[ <?[term~arg-var|term~rest-var]> term~args-var
+       ; strategy~check-arg
+       ; strategy~check-args
+      ]|)
+    where <fresh-result-var> ts => (ts0, arg-var)
+        ; <fresh-result-var> ts0 => (ts1, rest-var)
+        ; <translate-kind-expectation-normed> (ts1, tblame, arg-var, MetaExpr(arg)) => (ts2, check-arg)
+        ; <translate-kind-expectation-metaexpr-args> (ts2, tblame, rest-var, args) => (ts3, check-args)
+
 
   translate-kind-expectation-normed :
     (ts, tblame, result-var, Metavar(mvar)) ->
