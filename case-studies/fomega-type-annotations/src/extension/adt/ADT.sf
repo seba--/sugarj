@@ -122,7 +122,6 @@ rules
     ADT-ARG(|[ (~%X::~K) ~params ]|) -> fomega-type |[ {~%X, M~(ADT-ARG(params))} ]|
 
 
-  // TODO: type rules missing for ADT-PK
   desugar-data :
     ADT-PK(dataparams |[ ]|) -> fomega-kind |[ [] ]|
 
@@ -198,15 +197,6 @@ typing {
 ~C |- <M~ADT-DECLS(datacons |[ ~%Xcon ~%Xdiscr { ~decls } | ~dcons ]|)> :: *
 
 
-
-=================================== ADT-PKNil
-M~ADT-PK(dataparams |[ ]|) =::=> []
-
-M~ADT-PK(params) =::=> ~K2
-================================================= ADT-PKCons
-M~ADT-PK(|[ (~%X::~K) ~params ]|) =::=> {~K, ~K2}
-
-
 ========================================== ADT-ARGNil
 ~C |- M~ADT-ARG(dataparams |[ ]|) :: M~ADT-PK(dataparams |[ ]|)
 
@@ -214,6 +204,33 @@ M~ADT-PK(|[ (~%X::~K) ~params ]|) =::=> {~K, ~K2}
 ~C |- M~(ADT-ARG(params)) :: M~(ADT-PK(params))
 ======================================================================================== ADT-ARGCons
 ~C |- M~ADT-ARG(dataparams |[ (~%X::~K) ~params ]|) :: {~K, M~(ADT-PK(params))}
+
+
+ 
+=================================== ADT-PKNil
+M~ADT-PK(dataparams |[ ]|) =::=> []
+
+M~ADT-PK(params) =::=> ~K2
+================================================= ADT-PKCons
+M~ADT-PK(|[ (~%X::~K) ~params ]|) =::=> {~K, ~K2}
+ 
+================================== ADT-CKNil
+M~ADT-CK(dataparams |[ ]|) =::=> *
+
+M~ADT-CK(params) =::=> ~K2
+============================================================= ADT-PKCons
+M~ADT-CK(dataparams |[ (~%X::~K) ~params ]|)  =::=> ~K => ~K2
+
+
+~%Xcon != ~%Xcon2
+========================================================================== ADT-DECLSEnd-Lab
+~%Xcon notin lab(M~(ADT-DECLS(datacons |[ ~%Xcon2 ~%Xdiscr { ~decls } ]|)))
+
+~%Xcon != ~%Xcon2
+~%Xcon notin lab(M~(ADT-DECLS(dcons)))
+==================================================================================== ADT-DECLSCons-Lab
+~%Xcon notin lab(M~(ADT-DECLS(datacons |[ ~%Xcon2 ~%Xdiscr { ~decls } | ~dcons ]|)))
+
 
 }
 

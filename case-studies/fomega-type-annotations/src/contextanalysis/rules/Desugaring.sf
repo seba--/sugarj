@@ -59,6 +59,10 @@ rules
     KindNormalizationRule(premises, RuleName(sep, optional-name), conclusion) ->
       transformation-elem(<translate-kindnormalization-rule> (optional-name, premises, conclusion))
 
+  desugar-context-rule :
+    NotinLabRule(premises, RuleName(sep, optional-name), conclusion) ->
+      transformation-elem(<translate-notinlab-rule> (optional-name, premises, conclusion))
+
 
 rules // Translate a typing rule
 
@@ -162,7 +166,7 @@ rules // Translate a not-in-lab rule
              ?(term~tx, term~tdecls)
            ; debug-analysis(<concat-strings> ["IN  ", term~tname, " "])
            ; (strategy~premises-implementation
-                <+ <debug-analysis(<concat-strings> ["FAILED  ", term~tname, " "])> node; fail)
+                <+ debug-analysis(<concat-strings> ["FAILED  ", term~tname, " "]); fail)
            ; debug-analysis(<concat-strings> ["OUT ", term~tname, " "])
     ]|
     where <trm-explode> x => tx
@@ -335,6 +339,16 @@ rules // Translate a judgment
       (ts, |[ !term~tK1; kind-norm-internal; ?term~tK2 ]|)
     where <trm-explode> K1 => tK1
         ; <trm-explode> K2 => tK2
+
+  translate-judgment :
+    (ts, UnequalNamesJudgment(x1, x2)) ->
+      (ts, |[ if <unequal-names> (term~tx1, term~tx2) then
+                id
+              else
+                <add-context-errors(|[<concat-strings> ["duplicate label ", term~tx2]])> term~tx2
+              end ]|)
+    where <trm-explode> x1 => tx1
+        ; <trm-explode> x2 => tx2
 
 
 rules // Translate a type expectation

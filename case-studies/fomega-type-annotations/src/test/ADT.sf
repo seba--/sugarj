@@ -11,4 +11,3 @@ data Tree (k::*) (v::*) = Nil isNil {}
                         | Leaf isLeaf {value: v}
 
 
-

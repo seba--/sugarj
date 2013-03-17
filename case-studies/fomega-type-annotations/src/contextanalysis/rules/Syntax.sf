@@ -138,26 +138,26 @@ context-free syntax // *** Syntax for kind nomalization rules ***
 
 context-free syntax // *** Syntax for not-in-lab rules ***
 
-  NotInLabRule -> SugarDefElem
-  NotInLabRule -> InferenceRule
+  NotinLabRule -> SugarDefElem
+  NotinLabRule -> InferenceRule
 
-  NotInLabRulePremises RuleSepName NotInLabRuleConsequence
-    -> NotInLabRule {cons("NotInLabRule"),
+  NotinLabRulePremises RuleSepName NotinLabRuleConsequence
+    -> NotinLabRule {cons("NotinLabRule"),
                       layout(1.first.col == 2.first.col &&
                              2.first.col == 3.first.col)}
 
-  NotInLabRulePremiseList -> NotInLabRulePremises {cons("PremiseList")}
-                           -> NotInLabRulePremises {cons("NoPremises")}
+  NotinLabRulePremiseList -> NotinLabRulePremises {cons("PremiseList")}
+                           -> NotinLabRulePremises {cons("NoPremises")}
 
-  OffNotinLabJudgment -> NotInLabRuleConsequence
+  OffNotinLabJudgment -> NotinLabRuleConsequence
 
   NotinLabJudgment -> OffNotinLabJudgment {layout(1.first.col < 1.left.col)}
 
-  OffNotInLabRuleJudgment -> NotInLabRulePremiseList
-  OffNotInLabRuleJudgment NotInLabRulePremiseList -> NotInLabRulePremiseList {cons("PremiseCons"),
+  OffNotinLabRuleJudgment -> NotinLabRulePremiseList
+  OffNotinLabRuleJudgment NotinLabRulePremiseList -> NotinLabRulePremiseList {cons("PremiseCons"),
                                                                                  layout(1.first.col == 2.first.col)}
 
-  NotInLabRuleJudgment -> OffNotInLabRuleJudgment {layout(1.first.col < 1.left.col)}
+  NotinLabRuleJudgment -> OffNotinLabRuleJudgment {layout(1.first.col < 1.left.col)}
 
 
 
@@ -191,6 +191,7 @@ context-free syntax // *** Syntax for judgments ***
   FomegaID "::" FomegaKind "in" Context              -> TVarInContextJudgment  {cons("TVarInContextJudgment")}
   FomegaQID "::" FomegaKind "in" Context             -> QTVarInContextJudgment {cons("QTVarInContextJudgment")}
   FomegaID "notin" "dom" "(" Context ")"             -> NotinDomJudgment       {cons("NotinDomJudgment")}
+  FomegaID "!=" FomegaID                             -> UnequalNamesJudgment   {cons("UnequalNamesJudgment")}
 
   // Judgments allowed as premises in typing rules
   KindingJudgment       -> TypingRuleJudgment
@@ -221,7 +222,8 @@ context-free syntax // *** Syntax for judgments ***
   KindNormalizationJudgment -> KindNormalizationRuleJudgment
 
   // Judgments allowed as premises of not-in-lab rules
-  NotinLabJudgment -> NotInLabRuleJudgment
+  NotinLabJudgment     -> NotinLabRuleJudgment
+  UnequalNamesJudgment -> NotinLabRuleJudgment
 
 context-free syntax // *** Substitution on level of types
 
