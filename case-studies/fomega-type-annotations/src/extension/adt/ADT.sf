@@ -192,11 +192,12 @@ typing {
 ======================================================================== ADT-DECLSEnd
 ~C |- <M~ADT-DECLS(datacons |[ ~%Xcon ~%Xdiscr { ~decls } ]|)> :: *
 
-~C |- M~(ADT-DECLS(dcons)) :: *
+~C |- <M~(ADT-DECLS(dcons))> :: *
 ~C |- { ~decls } :: *
 ~%Xcon notin lab(M~(ADT-DECLS(dcons)))
 ================================================================================= ADT-DECLSCons
 ~C |- <M~ADT-DECLS(datacons |[ ~%Xcon ~%Xdiscr { ~decls } | ~dcons ]|)> :: *
+
 
 
 =================================== ADT-PKNil

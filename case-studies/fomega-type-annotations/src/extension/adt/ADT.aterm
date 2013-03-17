@@ -1,1 +1,8 @@
-KindingJudgment(Metavar(Var("C")), Metavar(Var("T")), KiStar())
+NotinLabJudgment(
+  Metavar(Var("Xcon"))
+, MetaExpr(
+    NoAnnoList(
+      Tuple([NoAnnoList(Op("ADT-DECLS", [Var("dcons")]))])
+    )
+  )
+)

@@ -8,7 +8,7 @@ rules
       then id
       else 
          where(!(msgs, <id>); debug-analysis(!"ADD-CTX-ERRS "))
-       ; where(get-context-errors; !(msgs, <id>); conc => all-msgs)
+       ; where(get-context-errors; !(msgs, <id>); conc; nub => all-msgs)
        ; put-anno(|"context-errors", all-msgs)
       end
   

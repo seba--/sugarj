@@ -1,15 +1,6 @@
-ToMetaExpr(
-  LChoice(
-    Seq(
-      Build(FromMetaExpr(Var("result-var")))
-    , Match(FromMetaExpr(Var("mvar")))
-    )
-  , LChoice(
-      Seq(CallNoArgs(SVar("strip-annos")), Match(FromMetaExpr(Var("mvar"))))
-    , Seq(
-        CallNoArgs(SVar("strip-annos"))
-      , Seq(CallNoArgs(SVar("kind-norm")), Match(FromMetaExpr(Var("mvar"))))
-      )
-    )
+NoAnnoList(
+  Op(
+    "Metavar"
+  , [NoAnnoList(Op("Var", [Var("v")]))]
   )
 )

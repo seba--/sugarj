@@ -103,8 +103,9 @@ rules // Translate a kinding rule
         ; <trm-explode> T => tT
         ; <trm-explode> K => tK
         ; <trm-explode> name => tname
+        ; <collect-all(?Var(_))> (tC,tT) => fresh-in-vars
         ; <premises-to-list> premises => premises-list
-        ; <translate-premises> (<ts-initial> (), premises-list) => (ts1, premises-implementation)
+        ; <translate-premises> (<ts-initial> fresh-in-vars, premises-list) => (ts1, premises-implementation)
 
 
 rules // Translate a signature rule
@@ -211,7 +212,7 @@ rules // Translate a judgment
       (ts3, |[   <reinit-for-analysis> term~tT => term~result-var1 
                ; <annotate-kind> (term~tC, term~result-var1)
                ; <get-kind> term~result-var1 => term~result-var
-               ; <debug(!"match kinds: ")> (term~result-var, term~tK-pp)
+               ; <debug-analysis(!"match kinds: ")> (term~result-var, term~tK-pp)
                ; strategy~inspect-result
                ; where(<debug-analysis(!"match kinds: ")> "ok")
             ]|)
@@ -279,10 +280,10 @@ rules // Translate a judgment
 
   translate-judgment :
     (ts, NotinLabJudgment(x, decls)) ->
-      (ts, |[ if <not(elem(structurally-equal))> (term~tx, <lab> term~tdecls) then
+      (ts, |[ if <not-in-lab> (term~tx, term~tdecls) then
                 id
               else
-                <add-context-errors(|[<concat-strings> ["duplicate label ", term~tx]])> term~tx
+                <add-context-errors(|[<concat-strings> ["duplicate label ", term~tx, " in ", term~tdecls]])> term~tx
               end
            ]|)
     where <trm-explode> decls => tdecls
@@ -504,13 +505,22 @@ rules // Translate a kind expectation
 
   translate-kind-expectation :
     (ts, tblame, result-var, expect) ->
-      (ts2, |[ !term~result-var
-             ; id /*kind-norm*/ => term~result-var1
-             ; strategy~inspect-expectation
+      (ts3, |[ <kind-norm> term~result-var => term~result-var1
+             ; <kind-norm> term~expect-remeta => term~result-var2
+             ; <kind-match> (term~result-var2, term~result-var1)
+             ; strategy~fresh-vars-tuple-match
              ]|)
     where <fresh-result-var> ts => (ts1, result-var1)
-        ; <translate-kind-expectation-normed> (ts1, tblame, result-var1, expect) => (ts2, inspect-expectation)
+        ; <fresh-result-var> ts1 => (ts2, result-var2)
+        ; <trm-explode> expect => expect-exploded
+        ; <debug-analysis; bottomup(try(remeta-fresh-vars(|ts))); debug-analysis> expect-exploded => expect-remeta
+        ; <collect-all({v: ?Var(v); where(<not(ts-in-eqs)> (ts, Var(v)))}, conc)> expect-exploded => fresh-vars
+        ; !Match(List(fresh-vars)) => fresh-vars-tuple-match
+        ; <ts-append-eqs> (ts2, fresh-vars) => ts3
 
+  remeta-fresh-vars(|ts) :
+    Var(v) -> stratego-term |[ Metavar(Var(string~v)) ]| 
+    where <not(ts-in-eqs)> (ts, Var(v))
 
   translate-kind-expectation-normed :
     (ts, tblame, result-var, Metavar(mvar)) ->
@@ -521,36 +531,6 @@ rules // Translate a kind expectation
          <+ (strip-annos; repeat-until(kind-norm-step, ?term~mvar))
        ]|)
     where <not(ts-in-eqs)> (ts, mvar)
-
-  translate-kind-expectation-normed :
-    (ts, tblame, result-var, MetaExpr(Var(v))) ->
-      <translate-kind-expectation-normed> (ts, tblame, result-var, Metavar(Var(v)))
-
-  translate-kind-expectation-normed :
-    (ts, tblame, result-var, MetaExpr(NoAnnoList(Op(cons, args)))) ->
-      (ts2, 
-       |[ !term~result-var
-        ; ?(string~cons)#(term~args-var); strategy~args-expectation
-        ]|)
-    where <fresh-result-var> ts => (ts1, args-var)
-        ; <translate-kind-expectation-metaexpr-args> (ts1, tblame, args-var, args) => (ts2, args-expectation)
-
-  translate-kind-expectation-metaexpr-args :
-    (ts, tblame, args-var, []) ->
-      (ts, |[ id; <?[]> term~args-var ]|)
-
-  translate-kind-expectation-metaexpr-args :
-    (ts, tblame, args-var, [arg|args]) ->
-      (ts3, 
-      |[ <?[term~arg-var|term~rest-var]> term~args-var
-       ; strategy~check-arg
-       ; strategy~check-args
-      ]|)
-    where <fresh-result-var> ts => (ts0, arg-var)
-        ; <fresh-result-var> ts0 => (ts1, rest-var)
-        ; <translate-kind-expectation-normed> (ts1, tblame, arg-var, MetaExpr(arg)) => (ts2, check-arg)
-        ; <translate-kind-expectation-metaexpr-args> (ts2, tblame, rest-var, args) => (ts3, check-args)
-
 
   translate-kind-expectation-normed :
     (ts, tblame, result-var, Metavar(mvar)) ->
@@ -600,6 +580,32 @@ rules // Translate a kind expectation
         ; <fresh-msgs-var> ts2 => (ts3, msgs-var)
         ; <translate-kind-expectation> (ts3, tblame, result-var1, K1) => (ts4, inspect-result1)
         ; <translate-kind-expectation> (ts4, tblame, result-var2, K2) => (ts5, inspect-result2)
+
+  translate-kind-expectation-normed :
+    (ts, tblame, result-var, cons#(args)) ->
+      (ts2, 
+       |[ !term~result-var
+        ; ?(string~cons)#(term~args-var); strategy~args-expectation
+        ]|)
+    where <fresh-result-var> ts => (ts1, args-var)
+        ; <translate-kind-expectation-metaexpr-args> (ts1, tblame, args-var, args) => (ts2, args-expectation)
+
+  translate-kind-expectation-metaexpr-args :
+    (ts, tblame, args-var, []) ->
+      (ts, stratego-strategy |[ <?[]> term~args-var ]|)
+
+  translate-kind-expectation-metaexpr-args :
+    (ts, tblame, args-var, [arg|args]) ->
+      (ts3, 
+      |[ <?[term~arg-var|term~rest-var]> term~args-var
+       ; strategy~check-arg
+       ; strategy~check-args
+      ]|)
+    where <fresh-result-var> ts => (ts0, arg-var)
+        ; <fresh-result-var> ts0 => (ts1, rest-var)
+        ; <translate-kind-expectation-normed> (ts1, tblame, arg-var, arg) => (ts2, check-arg)
+        ; <translate-kind-expectation-metaexpr-args> (ts2, tblame, rest-var, args) => (ts3, check-args)
+
 
 
 rules // Translate a substitution operator in a type
@@ -724,6 +730,9 @@ rules // Translation state handling
 
   ts-initial :
     () -> (0, [], [], ())
+  
+  ts-initial :
+    eqs -> (0, eqs, [], ())
 
   ts-get-counter :
     (n, eqs, errs, blame) -> n

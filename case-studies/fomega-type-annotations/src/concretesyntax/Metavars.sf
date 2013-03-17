@@ -40,3 +40,23 @@ context-free syntax
 rules
   TrmFromTerm = ?Metavar(<MetaExplode>)
   TrmFromTerm = ?MetaExpr(<MetaExplode>)
+
+
+rules // implode MetaExpr
+
+  metaexpr-implode =
+    bottomup(try(?MetaExpr(<trm-metaexpr-implode>)))
+
+  trm-metaexpr-implode =
+    ?NoAnnoList(<pre-metaexpr-implode>)
+  + strip-annos;\ Var(v) -> Metavar(Var(v)) \
+  + ?ToMetaExpr(<id>)
+  
+  pre-metaexpr-implode =
+    ?Char(<id>) + ?Int(<id>) + ?Real(<id>) + ?Str(<id>)
+  + strip-annos;\ Tuple(ts) -> ""#(<map(trm-metaexpr-implode)> ts) \;try(?""#([<id>]))
+  + ?List(<map(trm-metaexpr-implode)>)
+  + strip-annos;\ ListTail(hs, tl) -> <conc> (<map(trm-metaexpr-implode)> hs, <trm-metaexpr-implode> tl) \
+  + strip-annos;\ Op(n, args) -> n#(<map(trm-metaexpr-implode)> args) \
+  + strip-annos;\ Var(v) -> Metavar(Var(v)) \
+

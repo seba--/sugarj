@@ -1,7 +1,7 @@
 module contextanalysis.KindOperations
 
 import org.sugarj.languages.Fomega
-
+import concretesyntax.Metavars
 import contextanalysis.Unknowns
 
 
@@ -132,3 +132,29 @@ rules // kind normalization
     ; where(try(not(?was); <debug-analysis(!"kind normalized: ")> (was, <id>)))
   kind-norm-step = kind-norm-internal
   kind-norm-internal = fail
+  
+  
+  
+rules // kind-match
+  kind-match :
+    (KiEmpty(), KiEmpty()) -> []
+
+  kind-match :
+    (KiStar(), KiStar()) -> []
+
+  kind-match :
+    (KiArrow(J1, J2), KiArrow(K1, K2)) -> <conc> (res1, res2)
+    where <kind-match> (J1, K1) => res1
+        ; <kind-match> (J2, K2) => res2
+
+  kind-match :
+    (KiPair(J1, J2), KiPair(K1, K2)) -> <conc> (res1, res2)
+    where <kind-match> (J1, K1) => res1
+        ; <kind-match> (J2, K2) => res2
+
+  kind-match :
+    (Metavar(Var(v)), k) -> [k]
+
+  kind-match :
+    (c#(xs), c#(ys)) -> all-res
+    where <zip(kind-match); concat> (xs,ys) => all-res

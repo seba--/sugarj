@@ -7,7 +7,7 @@ import contextanalysis.ContextAnalysis
 
 // type Id = \X::*=>*=>*. X
 
-data Tree = Nil isNil {}
-
+data Tree (k::*) (v::*) = Nil isNil {}
+                        | Leaf isLeaf {value: v}
 
 

@@ -42,20 +42,20 @@ rules
         ; if <desugar-extension-term; reinit-for-analysis> e => e-desugared then
               <debug-analysis(<concat-strings> ["Desugared conclusion term (", name, "): "])> e-desugared
             ; <premises-to-list> premises => premises-list
-            ; {| Dynamic-Annotate-Type, Dynamic-Annotate-Kind, Dynamic-Par-Reduce-Type, Dynamic-Lookup-Expr-Var:
-                   <activate-dynamic-axioms> premises-list
-                 ; <resolve-all-typeofs(|C); reinit-for-analysis> e-desugared => e-resolved
-                 ; <strip-annos; debug(<concat-strings> ["Resolved conclusion term  (", name, "): "])> e-resolved 
-                 ; <annotate-type> (C, e-resolved)
-                 ; <collect-all-context-errors> e-resolved => errs
-                 ; <get-type> e-resolved => U
-                 ; if !errs; ?[] then
-                       <norm> (C, T) => T'
-                     ; <norm> (C, U) => U'
-                   else
-                     !T; ?T'; !U; ?U'
-                   end
-              |}
+            ; with-scoped-axioms(
+                <activate-dynamic-axioms> premises-list
+              ; <resolve-all-typeofs(|C); reinit-for-analysis> e-desugared => e-resolved
+              ; <strip-annos; debug(<concat-strings> ["Resolved conclusion term  (", name, "): "])> e-resolved 
+              ; <annotate-type> (C, e-resolved)
+              ; <collect-all-context-errors> e-resolved => errs
+              ; <get-type> e-resolved => U
+              ; if !errs; ?[] then
+                    <norm> (C, T) => T'
+                  ; <norm> (C, U) => U'
+                else
+                  !T; ?T'; !U; ?U'
+                end
+            )
             ; <strip-annos; debug(!"Expected type: ")> T'
             ; <strip-annos; debug(!"Actual type:   ")> U'
             ; <debug(!"Type errors:   ")> errs
@@ -90,14 +90,15 @@ rules
         ; if <desugar-extension-term; reinit-for-analysis> T => T-desugared then
               <debug-analysis(<concat-strings> ["Desugared conclusion type (", name, "): "])> T-desugared
             ; <premises-to-list> premises => premises-list
-            ; {| Dynamic-Annotate-Kind, Dynamic-Lookup-Type-Var:
-                   <activate-dynamic-axioms> premises-list
-                 ; <annotate-kind> (C, T-desugared)
-                 ; <collect-all-context-errors> T-desugared => errs
-                 ; <get-kind> T-desugared => J
-              |}
+            ; with-scoped-axioms(
+              ( <activate-dynamic-axioms> premises-list
+              ; <annotate-kind> (C, T-desugared)
+              ; <get-kind> T-desugared => J)
+              <+ !KiUnknown => J
+            )
             ; <strip-annos; debug(!"Expected kind: ")> K
             ; <strip-annos; debug(!"Actual kind:   ")> J
+            ; <collect-all-context-errors> (premises-list, T-desugared) => errs
             ; <debug(!"Kind errors:   ")> errs
             ; if !errs; ?[] then
                   <kind-eq> (K, J) => msgs
@@ -130,12 +131,12 @@ rules
         ; if <desugar-extension-term; reinit-for-analysis> Defs => Defs-desugared then
               <debug-analysis(<concat-strings> ["Desugared conclusion defs (", name, "): "])> Defs-desugared
             ; <premises-to-list> premises => premises-list
-            ; {| Dynamic-Annotate-Type, Dynamic-Annotate-Kind, Dynamic-Par-Reduce-Type, Dynamic-Lookup-Expr-Var, Dynamic-Annotate-Signature:
-                   <activate-dynamic-axioms> premises-list
-                 ; <annotate-signature> (C, Defs-desugared)
-                 ; <collect-all-context-errors> Defs-desugared => errs
-                 ; <get-signature> Defs-desugared => Sig2
-              |}
+            ; with-scoped-axioms(
+                <activate-dynamic-axioms> premises-list
+              ; <annotate-signature> (C, Defs-desugared)
+              ; <collect-all-context-errors> Defs-desugared => errs
+              ; <get-signature> Defs-desugared => Sig2
+            )
             ; <strip-annos; debug(!"Expected signature: ")> Sig
             ; <strip-annos; debug(!"Actual signature:   ")> Sig2
             ; <debug(!"Signature errors:   ")> errs
@@ -275,28 +276,18 @@ rules // Activate dynamic axioms in the order of appearance in the typing rule
     ; rules(
         Dynamic-Not-In-Dom :+
           arg -> arg 
-          where <strip-annos> arg => (x-stripped, C-stripped); <strip-annos> arg)
+          where <strip-annos> arg => (x-stripped, C-stripped))
 
-   activate-dynamic-axiom = debug-analysis(!"failed to activate dynamic axiom: "); fail
+  activate-dynamic-axiom =
+      ?NotinLabJudgment(x, decls)
+    ; <strip-annos> (x, decls) => (x-stripped, decls-stripped)
+    ; rules(
+        Dynamic-Not-In-Lab :+
+          arg -> arg 
+          where <strip-annos> arg => (x-stripped, decls-stripped))
 
+   activate-dynamic-axiom = add-context-errors(|["Failed to activate as axiom for verification."])
 
-rules // implode MetaExpr
-
-  metaexpr-implode =
-    bottomup(try(?MetaExpr(<trm-metaexpr-implode>)))
-
-  trm-metaexpr-implode =
-    ?NoAnnoList(<pre-metaexpr-implode>)
-  + strip-annos;\ Var(v) -> Metavar(Var(v)) \
-  + ?ToMetaExpr(<id>)
-  
-  pre-metaexpr-implode =
-    ?Char(<id>) + ?Int(<id>) + ?Real(<id>) + ?Str(<id>)
-  + strip-annos;\ Tuple(ts) -> ""#(<map(trm-metaexpr-implode)> ts) \;try(?""#([<id>]))
-  + ?List(<map(trm-metaexpr-implode)>)
-  + strip-annos;\ ListTail(hs, tl) -> <conc> (<map(trm-metaexpr-implode)> hs, <trm-metaexpr-implode> tl) \
-  + strip-annos;\ Op(n, args) -> n#(<map(trm-metaexpr-implode)> args) \
-  + strip-annos;\ Var(v) -> Metavar(Var(v)) \
 
 
 rules // norm-context
@@ -324,14 +315,22 @@ rules // norm-context
 
 rules // Rules to hook in dynamic axioms into the judgment implementations
 
+  with-scoped-axioms(s) =
+    { Dynamic-Annotate-Type-Defined
+    , Dynamic-Par-Reduce-Type 
+    , Dynamic-Annotate-Kind
+    , Dynamic-Lookup-Expr-Var
+    , Dynamic-Annotate-Signature
+    , Dynamic-Not-In-Dom
+    , Dynamic-Not-In-Lab
+    : s      
+    }
+  
   annotate-type-defined = Dynamic-Annotate-Type-Defined
-
   par-reduce-type = Dynamic-Par-Reduce-Type
-
   annotate-kind-defined = Dynamic-Annotate-Kind
-
   lookup-expr-var = Dynamic-Lookup-Expr-Var
-
   annotate-signature-defined = Dynamic-Annotate-Signature
-
   not-in-dom = Dynamic-Not-In-Dom
+  not-in-lab = Dynamic-Not-In-Lab
+  

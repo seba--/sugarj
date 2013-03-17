@@ -10,6 +10,9 @@ import contextanalysis.KindOperations
 
 rules
 
+  not-in-lab =
+    where(\(x, decls) -> <not(elem(structurally-equal))> (x, <lab> decls)\)
+
   lab : TyDeclsNil() -> []
   lab : TyDeclsCons(TyDecl(x, T), decls) -> [x | <lab> decls]
 
