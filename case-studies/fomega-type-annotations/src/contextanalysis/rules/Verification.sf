@@ -27,6 +27,7 @@ rules
 rules
 
   desugar-extension-internal = fail
+  desugar-extension-term = oncetd(desugar-extension-internal)
   
   verify-context-rule =
     (?TypingRule(_,_,_) + ?KindingRule(_,_,_) + ?SignatureRule(_,_,_));
@@ -38,7 +39,7 @@ rules
       result
     where <debug(!"*** Verify type rule ")> name
         ; <debug-analysis(<concat-strings> ["Original conclusion term  (", name, "): "])> e
-        ; if <desugar-extension-internal; reinit-for-analysis> e => e-desugared then
+        ; if <desugar-extension-term; reinit-for-analysis> e => e-desugared then
               <debug-analysis(<concat-strings> ["Desugared conclusion term (", name, "): "])> e-desugared
             ; <premises-to-list> premises => premises-list
             ; {| Dynamic-Annotate-Type, Dynamic-Annotate-Kind, Dynamic-Par-Reduce-Type, Dynamic-Lookup-Expr-Var:
@@ -86,7 +87,7 @@ rules
       result
     where <debug(!"*** Verify kind rule ")> (name, <strip-annos> judge)
         ; <debug-analysis(<concat-strings> ["Original conclusion type  (", name, "): "])> T
-        ; if <desugar-extension-internal; reinit-for-analysis> T => T-desugared then
+        ; if <desugar-extension-term; reinit-for-analysis> T => T-desugared then
               <debug-analysis(<concat-strings> ["Desugared conclusion type (", name, "): "])> T-desugared
             ; <premises-to-list> premises => premises-list
             ; {| Dynamic-Annotate-Kind, Dynamic-Lookup-Type-Var:
@@ -126,7 +127,7 @@ rules
       result
     where <debug-analysis(!"*** Verify signature rule ")> (name, judge)
         ; <debug-analysis(<concat-strings> ["Original conclusion defs  (", name, "): "])> Defs
-        ; if <desugar-extension-internal; reinit-for-analysis> Defs => Defs-desugared then
+        ; if <desugar-extension-term; reinit-for-analysis> Defs => Defs-desugared then
               <debug-analysis(<concat-strings> ["Desugared conclusion defs (", name, "): "])> Defs-desugared
             ; <premises-to-list> premises => premises-list
             ; {| Dynamic-Annotate-Type, Dynamic-Annotate-Kind, Dynamic-Par-Reduce-Type, Dynamic-Lookup-Expr-Var, Dynamic-Annotate-Signature:

@@ -190,18 +190,13 @@ typing {
 
 ~C |- { ~decls } :: *
 ======================================================================== ADT-DECLSEnd
-~C |- M~ADT-DECLS(datacons |[ ~%Xcon ~%Xdiscr { ~decls } ]|) :: *
+~C |- <M~ADT-DECLS(datacons |[ ~%Xcon ~%Xdiscr { ~decls } ]|)> :: *
 
 ~C |- M~(ADT-DECLS(dcons)) :: *
 ~C |- { ~decls } :: *
 ~%Xcon notin lab(M~(ADT-DECLS(dcons)))
 ================================================================================= ADT-DECLSCons
-~C |- M~ADT-DECLS(datacons |[ ~%Xcon ~%Xdiscr { ~decls } | ~dcons ]|) :: *
-
-// Cannot desugar subject, but is this needed? Seems to be a property of variants in general.
-// ~C |- M~(ADT-DECLS(decls)) :: * 
-// =============================== ADT-DECLSVariant
-// ~C |- <M~ADT-DECLS(decls)> :: *
+~C |- <M~ADT-DECLS(datacons |[ ~%Xcon ~%Xdiscr { ~decls } | ~dcons ]|)> :: *
 
 
 =================================== ADT-PKNil

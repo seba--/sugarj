@@ -514,12 +514,17 @@ rules // Translate a kind expectation
 
   translate-kind-expectation-normed :
     (ts, tblame, result-var, Metavar(mvar)) ->
-      (<ts-append-eq> (ts, mvar), |[ !term~result-var; {t*: ?term~mvar{t*} } ]|)
+      (<ts-append-eq> (ts, mvar), 
+      |[ !term~result-var
+       ; ?term~mvar 
+         <+ (strip-annos; ?term~mvar)
+         <+ (strip-annos; repeat-until(kind-norm-step, ?term~mvar))
+       ]|)
     where <not(ts-in-eqs)> (ts, mvar)
 
   translate-kind-expectation-normed :
     (ts, tblame, result-var, MetaExpr(Var(v))) ->
-      <translate-kind-expectation-normed> (ts, tblame, result-var, MetaVar(Var(v)))
+      <translate-kind-expectation-normed> (ts, tblame, result-var, Metavar(Var(v)))
 
   translate-kind-expectation-normed :
     (ts, tblame, result-var, MetaExpr(NoAnnoList(Op(cons, args)))) ->
@@ -532,7 +537,7 @@ rules // Translate a kind expectation
 
   translate-kind-expectation-metaexpr-args :
     (ts, tblame, args-var, []) ->
-      (ts, |[ id ]|)
+      (ts, |[ id; <?[]> term~args-var ]|)
 
   translate-kind-expectation-metaexpr-args :
     (ts, tblame, args-var, [arg|args]) ->
