@@ -137,24 +137,39 @@ rules // kind normalization
   
 rules // kind-match
   kind-match :
-    (KiEmpty(), KiEmpty()) -> []
+    (KiEmpty(), KiEmpty(), vars) -> ([], vars)
 
   kind-match :
-    (KiStar(), KiStar()) -> []
+    (KiStar(), KiStar(), vars) -> ([], vars)
 
   kind-match :
-    (KiArrow(J1, J2), KiArrow(K1, K2)) -> <conc> (res1, res2)
-    where <kind-match> (J1, K1) => res1
-        ; <kind-match> (J2, K2) => res2
+    (KiArrow(J1, J2), KiArrow(K1, K2), vars1) -> (<conc> (res1, res2), vars3)
+    where <kind-match> (J1, K1, vars1) => (res1, vars2)
+        ; <kind-match> (J2, K2, vars2) => (res2, vars3)
 
   kind-match :
-    (KiPair(J1, J2), KiPair(K1, K2)) -> <conc> (res1, res2)
-    where <kind-match> (J1, K1) => res1
-        ; <kind-match> (J2, K2) => res2
+    (KiPair(J1, J2), KiPair(K1, K2), vars1) -> (<conc> (res1, res2), vars3)
+    where <kind-match> (J1, K1, vars1) => (res1, vars2)
+        ; <kind-match> (J2, K2, vars2) => (res2, vars3)
 
   kind-match :
-    (Metavar(Var(v)), k) -> [k]
+    (Metavar(Var(v)), k, [Var(w)|vars]) -> ([k], vars)
+    where <strip-annos; equal> (v,w)
+  kind-match :
+    (Metavar(Var(v)), k, vars) -> ([], vars)
+    where <  ?[] 
+          <+ ?[Var(w)|_]; !(v,w); strip-annos; not(equal)> vars
 
   kind-match :
-    (c#(xs), c#(ys)) -> all-res
-    where <zip(kind-match); concat> (xs,ys) => all-res
+    (c#([]), c#([]), vars) -> ([], vars)
+  kind-match :
+    (c#(xs), c#(ys), vars) -> res
+    where <zip> (xs,ys) => pairs
+        ; <foldl(kind-match-foldl-op)> (pairs, ([], vars)) => res
+  
+  kind-match-foldl-op :
+    ((x,y), (res, vars)) -> (<conc> (res, res2), vars2)
+    where <kind-match> (x,y,vars) => (res2, vars2)
+
+  kind-match =
+    debug(!"kind mismatch: "); fail

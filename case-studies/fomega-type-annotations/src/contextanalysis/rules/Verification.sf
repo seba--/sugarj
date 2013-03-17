@@ -17,8 +17,6 @@ rules // TODO: these two definitions belong to Analyze.str
     if !ana-annos; ?[] then ![("analysis-data", <new-hashtable>)] else !ana-annos end => new-ana-annos;
     <set-annotations> (node, <conc> (annos, new-ana-annos))
 
-  write-to-string-analysis = nice-analysis-data-term; write-to-string
-
 rules
 
   constraint-error = verify-context-rule

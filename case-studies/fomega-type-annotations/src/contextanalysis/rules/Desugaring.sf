@@ -131,7 +131,7 @@ rules // Translate a signature rule
         ; <translate-premises> (<ts-initial> (), premises-list) => (ts1, premises-implementation)
 
 
-rules // Translate a kind equality rule
+rules // Translate a kind normalization rule
 
   translate-kindnormalization-rule :
     (Some(Var(name)), premises, KindNormalizationJudgment(K1, K2)) ->
@@ -147,6 +147,26 @@ rules // Translate a kind equality rule
     ]|
     where <trm-explode> K1 => tK1
         ; <trm-explode> K2 => tK2
+        ; <trm-explode> name => tname
+        ; <premises-to-list> premises => premises-list
+        ; <translate-error-premises> (<ts-initial> (), premises-list) => (ts1, premises-implementation)
+
+
+rules // Translate a not-in-lab rule
+
+  translate-notinlab-rule :
+    (Some(Var(name)), premises, NotinLabJudgment(x, decls)) ->
+    stratego-decl
+    |[ rules
+         not-in-lab =
+             ?(term~tx, term~tdecls)
+           ; debug-analysis(<concat-strings> ["IN  ", term~tname, " "])
+           ; (strategy~premises-implementation
+                <+ <debug-analysis(<concat-strings> ["FAILED  ", term~tname, " "])> node; fail)
+           ; debug-analysis(<concat-strings> ["OUT ", term~tname, " "])
+    ]|
+    where <trm-explode> x => tx
+        ; <trm-explode> decls => tdecls
         ; <trm-explode> name => tname
         ; <premises-to-list> premises => premises-list
         ; <translate-error-premises> (<ts-initial> (), premises-list) => (ts1, premises-implementation)
@@ -212,9 +232,7 @@ rules // Translate a judgment
       (ts3, |[   <reinit-for-analysis> term~tT => term~result-var1 
                ; <annotate-kind> (term~tC, term~result-var1)
                ; <get-kind> term~result-var1 => term~result-var
-               ; <debug-analysis(!"match kinds: ")> (term~result-var, term~tK-pp)
                ; strategy~inspect-result
-               ; where(<debug-analysis(!"match kinds: ")> "ok")
             ]|)
     where <trm-explode> C => tC
         ; <trm-explode> T => tT
@@ -283,7 +301,7 @@ rules // Translate a judgment
       (ts, |[ if <not-in-lab> (term~tx, term~tdecls) then
                 id
               else
-                <add-context-errors(|[<concat-strings> ["duplicate label ", term~tx, " in ", term~tdecls]])> term~tx
+                <add-context-errors(|[<concat-strings> ["duplicate label ", term~tx, " in ", <strip-annos;write-to-string> term~tdecls]])> term~tx
               end
            ]|)
     where <trm-explode> decls => tdecls
@@ -306,7 +324,7 @@ rules // Translate a judgment
       (ts, |[ if <not-in-dom> (term~tx, term~tC) then
                 id
               else
-                <add-context-errors(|[<concat-strings> ["duplicate definition for ", term~tx]])> term~tx
+                <add-context-errors(|[<concat-strings> ["duplicate definition ", term~tx, " in ", <strip-annos;write-to-string> term~tC]])> term~tx
               end
            ]|)
     where <trm-explode> x => tx
@@ -507,15 +525,21 @@ rules // Translate a kind expectation
     (ts, tblame, result-var, expect) ->
       (ts3, |[ <kind-norm> term~result-var => term~result-var1
              ; <kind-norm> term~expect-remeta => term~result-var2
-             ; <kind-match> (term~result-var2, term~result-var1)
-             ; strategy~fresh-vars-tuple-match
+             ; <debug-analysis(!"match kinds: ")> (term~result-var2, term~result-var1, term~fresh-var-list)
+             //TODO treat dynamically occurring meta(pattern)variables
+             ; <kind-match> (term~result-var2, term~result-var1, term~fresh-var-list)
+             ; debug-analysis(!"match kinds res: ")
+             ; ?(<id>, [])
+             ; strategy~fresh-vars-match
+             ; debug-analysis(!"match kinds ok: ")
              ]|)
     where <fresh-result-var> ts => (ts1, result-var1)
         ; <fresh-result-var> ts1 => (ts2, result-var2)
         ; <trm-explode> expect => expect-exploded
-        ; <debug-analysis; bottomup(try(remeta-fresh-vars(|ts))); debug-analysis> expect-exploded => expect-remeta
+        ; <bottomup(try(remeta-fresh-vars(|ts)))> expect-exploded => expect-remeta
         ; <collect-all({v: ?Var(v); where(<not(ts-in-eqs)> (ts, Var(v)))}, conc)> expect-exploded => fresh-vars
-        ; !Match(List(fresh-vars)) => fresh-vars-tuple-match
+        ; <trm-explode> fresh-vars => fresh-var-list
+        ; !Match(List(fresh-vars)) => fresh-vars-match
         ; <ts-append-eqs> (ts2, fresh-vars) => ts3
 
   remeta-fresh-vars(|ts) :

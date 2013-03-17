@@ -1,8 +1,0 @@
-NotinLabJudgment(
-  Metavar(Var("Xcon"))
-, MetaExpr(
-    NoAnnoList(
-      Tuple([NoAnnoList(Op("ADT-DECLS", [Var("dcons")]))])
-    )
-  )
-)

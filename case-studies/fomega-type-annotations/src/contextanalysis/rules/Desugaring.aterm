@@ -1,6 +1,0 @@
-NoAnnoList(
-  Op(
-    "Metavar"
-  , [NoAnnoList(Op("Var", [Var("v")]))]
-  )
-)
