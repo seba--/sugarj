@@ -84,8 +84,7 @@ rules
 
   desugar-data :
     ADT-UNCURRY(X, params, T) ->
-      fomega-type |[ (\~%X :: M~(ADT-CK(params)).
-                       M~ADT-CA(params, fomega-type |[ args ]|, ADT-ABS(params, T)))
+      fomega-type |[ (\~%X :: M~(ADT-CK(params)).  M~ADT-CA(params, fomega-type |[ args ]|, ADT-ABS(params, T)))
                      M~ADT-ABS(params, fomega-type |[ ~%X M~(ADT-ARG(params)) ]|)
                   ]|
 
@@ -170,7 +169,7 @@ typing {
 ~C |- M~ADT-ABS(params, T) ~> ~T2
 ========================================== ADT-ABSCons-Norm
 ~C |- M~ADT-ABS(dataparams |[ (~%X::~K) ~params ]|, T)
-   ~> \~%X::~K. T2
+   ~> \~%X::~K. ~T2
 
 
 
@@ -179,6 +178,10 @@ typing {
 ================================================================================================ ADT-OP
 ~C |- M~ADT-OP(X, params, dcons) :: (M~ADT-PK(params) => *) => M~ADT-PK(params) => *
 
+============================================================================================================================ ADT-OP-Norm
+~C |- M~ADT-OP(X, params, dcons) 
+   ~> \~%X :: M~(ADT-PK(params)) => *.  \args :: M~(ADT-PK(params)).  M~ADT-UNCURRY(X, params, |[ <M~(ADT-DECLS(dcons))> ]|)
+
 
 (~C; ~%X :: M~ADT-CK(params)) |- M~ADT-CA(params, fomega-type |[ args ]|, ADT-ABS(params, T)) :: *
 ~C |- M~ADT-ABS(params, fomega-type |[ ~%X M~(ADT-ARG(params)) ]|) :: M~(ADT-CK(params))
@@ -186,17 +189,30 @@ typing {
 ~C |- M~ADT-UNCURRY(X, params, T) :: *
 
 
+================================================================================================= ADT-UNCURRY-Norm
+~C |- M~ADT-UNCURRY(X, params, T)
+   ~> (\~%X :: M~(ADT-CK(params)).  M~ADT-CA(params, fomega-type |[ args ]|, ADT-ABS(params, T)))
+      M~ADT-ABS(params, fomega-type |[ ~%X M~(ADT-ARG(params)) ]|)
+
+
 ~C |- ~args :: []
 ~C |- ~T :: *
 ================================================= ADT-CANil
 ~C |- M~ADT-CA(dataparams |[ ]|, args, T) :: *
 
+=============================================== ADT-CANil-Norm
+~C |- M~ADT-CA(dataparams |[ ]|, args, T) ~> ~T
 
 //~C |- ~args :: {~K, M~ADT-PK(params)}
 //~C |- ~T :: ~K => M~ADT-CK(params)
 ~C |- M~ADT-CA(params, fomega-type |[ ~args.2 ]|, fomega-type |[ ~T (~args.1) ]|) :: *
 =================================================================== ADT-CACons
 ~C |- M~ADT-CA(dataparams |[ (~%X::~K) ~params ]|, args, T) :: *
+
+
+================================================================================= ADT-CACons-Norm
+~C |- M~ADT-CA(dataparams |[ (~%X::~K) ~params ]|, args, T)
+   ~> M~ADT-CA(params, fomega-type |[ ~args.2 ]|, fomega-type |[ ~T (~args.1) ]|)
 
 
 ~C |- { ~decls } :: *

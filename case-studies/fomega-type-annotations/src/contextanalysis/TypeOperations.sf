@@ -470,7 +470,7 @@ rules
   par-reduce-metavar :
     (C, m@MetaExpr(_)) -> m
   par-reduce-metavar :
-    (C, m) -> <debug-analysis(!"par-reduce-metavar: ")> m
+    (C, m) -> m
 
   par-reduce-strengthened : // Expression variable bindings do not
                             // influence parallel reduction

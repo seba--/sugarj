@@ -1,0 +1,42 @@
+ToMetaExpr(
+  TyApp(
+    TyAbs(
+      Metavar(Var("X"))
+    , MetaExpr(
+        NoAnnoList(
+          Tuple([NoAnnoList(Op("ADT-CK", [Var("params")]))])
+        )
+      )
+    , MetaExpr(
+        NoAnnoList(
+          Op(
+            "ADT-CA"
+          , [ Var("params")
+            , ToMetaExpr(TyVar("args"))
+            , NoAnnoList(Op("ADT-ABS", [Var("params"), Var("T")]))
+            ]
+          )
+        )
+      )
+    )
+  , MetaExpr(
+      NoAnnoList(
+        Op(
+          "ADT-ABS"
+        , [ Var("params")
+          , ToMetaExpr(
+              TyApp(
+                TyVar(Metavar(Var("X")))
+              , MetaExpr(
+                  NoAnnoList(
+                    Tuple([NoAnnoList(Op("ADT-ARG", [Var("params")]))])
+                  )
+                )
+              )
+            )
+          ]
+        )
+      )
+    )
+  )
+)
