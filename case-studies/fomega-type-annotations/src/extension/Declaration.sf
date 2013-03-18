@@ -37,7 +37,7 @@ rules
     ; !transformation-elem(Desugarings([PureDesugaring(CallNoArgs(SVar(desugar-strat)))])) => desugaring
     ; !transformation-elem(Rules([SDefNoArgs("desugar-extension-internal", CallNoArgs(SVar(desugar-strat)))])) => rinternal
     ; ![rinternal, transformation-elem(Rules(trafos)) | <map(!transformation-elem(<id>))> decls] => body
-    ; rules( Extension-Trafos := [body] )
+    ; rules( Extension-Trafos := [desugaring | body] )
   
   desugar-extension :
     TypingExtension(checks) ->

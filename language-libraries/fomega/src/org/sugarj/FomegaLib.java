@@ -187,6 +187,8 @@ public class FomegaLib extends LanguageLib implements IPrettyPrint {
     String text = null;
     try {
       text = prettyPrint(toplevelDecl);
+      if (text == null)
+        throw new NullPointerException();
     } catch (NullPointerException e) {
       ATermCommands.setErrorMessage(toplevelDecl, "pretty printing Fomega failed");
     }
