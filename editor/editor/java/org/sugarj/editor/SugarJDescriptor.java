@@ -60,13 +60,13 @@ public class SugarJDescriptor extends Descriptor {
         reloadEditors(controller);
         lastServices = services;
         
-        String s = services.toString();
-        int start = s.indexOf("SemanticProvider(");
-        int end = s.indexOf(")", start);
-        if (start > 0) {
-          String f = s.substring(start + "SemanticProvider(".length() + 1, end - 1);
-          System.out.println("Load provider: " + f);
-        }
+//        String s = services.toString();
+//        int start = s.indexOf("SemanticProvider(");
+//        int end = s.indexOf(")", start);
+//        if (start > 0) {
+//          String f = s.substring(start + "SemanticProvider(".length() + 1, end - 1);
+//          System.out.println("Load provider: " + f);
+//        }
       }
     }
     
