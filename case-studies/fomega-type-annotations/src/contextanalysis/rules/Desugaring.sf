@@ -56,6 +56,10 @@ rules
       transformation-elem(<translate-signature-rule> (optional-name, premises, conclusion))
 
   desugar-context-rule :
+    NormalizationRule(premises, RuleName(sep, optional-name), conclusion) ->
+      transformation-elem(<translate-normalization-rule> (optional-name, premises, conclusion))
+
+  desugar-context-rule :
     KindNormalizationRule(premises, RuleName(sep, optional-name), conclusion) ->
       transformation-elem(<translate-kindnormalization-rule> (optional-name, premises, conclusion))
 
@@ -133,6 +137,28 @@ rules // Translate a signature rule
         ; <trm-explode> name => tname
         ; <premises-to-list> premises => premises-list
         ; <translate-premises> (<ts-initial> (), premises-list) => (ts1, premises-implementation)
+
+
+rules // Translate a type normalization rule
+
+  translate-normalization-rule :
+    (Some(Var(name)), premises, NormalizationJudgment(C, T1, T2)) ->
+    stratego-decl
+    |[ rules
+         par-reduce-type =
+             ?(term~tC, term~tT1)
+           ; debug-analysis(<concat-strings> ["IN  ", term~tname, " "])
+           ; (strategy~premises-implementation
+                <+ debug-analysis(<concat-strings> ["FAILED  ", term~tname, " "]); fail)
+           ; !term~tT2
+           ; debug-analysis(<concat-strings> ["OUT ", term~tname, " "])
+    ]|
+    where <trm-explode> T1 => tT1
+        ; <trm-explode> T2 => tT2
+        ; <trm-explode> C  => tC
+        ; <trm-explode> name => tname
+        ; <premises-to-list> premises => premises-list
+        ; <translate-error-premises> (<ts-initial> (), premises-list) => (ts1, premises-implementation)
 
 
 rules // Translate a kind normalization rule

@@ -90,7 +90,6 @@ rules
                   ]|
 
 
-  // TODO: type rules missing for ADT-CK
   desugar-data :
     ADT-CK(dataparams |[ ]|) -> |[ * ]|
 
@@ -139,6 +138,7 @@ typing {
 ~C |- data ~%X ~params2 = ~dcons ~=defs ==> ~sig
 
 
+
 ~%X notin dom(~C)
 ~C |- M~ADT-TYPE(X, params, dcons) :: ~K
 ================================================================== S-DataEnd
@@ -149,15 +149,28 @@ typing {
 ========================================================================================= ADT-TYPE
 ~C |- M~ADT-TYPE(X, params, dcons) :: ~K
 
+=================================================================================== ADT-TYPE-Norm
+~C |- M~ADT-TYPE(X, params, dcons) 
+   ~> M~ADT-ABS(params, |[ mu (M~ADT-OP(X, params, dcons), M~(ADT-ARG(params))) ]|)
+
+
 
 ~C |- ~T :: ~K
 ============================================= ADT-ABSNil
 ~C |- M~ADT-ABS(dataparams |[ ]|, T) :: ~K 
 
+========================================== ADT-ABSNil-Norm
+~C |- M~ADT-ABS(dataparams |[ ]|, T) ~> ~T
+
 
 (~C;~%X::~K1) |- M~ADT-ABS(params, T) :: ~K2
 ======================================================================== ADT-ABSCons
 ~C |- M~ADT-ABS(dataparams |[ (~%X::~K1) ~params ]|, T) :: ~K1 => ~K2
+
+~C |- M~ADT-ABS(params, T) ~> ~T2
+========================================== ADT-ABSCons-Norm
+~C |- M~ADT-ABS(dataparams |[ (~%X::~K) ~params ]|, T)
+   ~> \~%X::~K. T2
 
 
 
@@ -206,7 +219,7 @@ typing {
 ~C |- M~ADT-ARG(dataparams |[ (~%X::~K) ~params ]|) :: {~K, M~(ADT-PK(params))}
 
 
- 
+
 =================================== ADT-PKNil
 M~ADT-PK(dataparams |[ ]|) =::=> []
 

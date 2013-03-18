@@ -105,8 +105,8 @@ context-free syntax // *** Syntax for type normalization rules ***
 
   NormalizationJudgment -> OffNormalizationJudgment {layout(1.first.col < 1.left.col)}
 
-  OffNormalizationRuleJudgment -> NormalizationRulePremises
-  OffNormalizationRuleJudgment NormalizationRulePremises -> NormalizationRulePremises {cons("PremiseCons"),
+  OffNormalizationRuleJudgment -> NormalizationRulePremiseList
+  OffNormalizationRuleJudgment NormalizationRulePremiseList -> NormalizationRulePremiseList {cons("PremiseCons"),
                                                                                  layout(1.first.col == 2.first.col)}
 
   NormalizationRuleJudgment -> OffNormalizationRuleJudgment {layout(1.first.col < 1.left.col)}
