@@ -172,7 +172,6 @@ typing {
    ~> \~%X::~K. ~T2
 
 
-
 ((~C; ~%X :: M~ADT-PK(params) => *); args :: M~ADT-PK(params)) |-
                                      M~ADT-UNCURRY(X, params, |[ <M~(ADT-DECLS(dcons))> ]|) :: *
 ================================================================================================ ADT-OP
