@@ -215,6 +215,7 @@ typing {
    ~> M~ADT-CA(params, fomega-type |[ ~args.2 ]|, fomega-type |[ ~T (~args.1) ]|)
 
 
+
 ~C |- { ~decls } :: *
 ======================================================================== ADT-DECLSEnd
 ~C |- <M~ADT-DECLS(datacons |[ ~%Xcon ~%Xdiscr { ~decls } ]|)> :: *

@@ -458,9 +458,9 @@ rules
             !(<norm> (C, S))
           end => T'
 
-  par-reduce = // debug-analysis(!"PR IN:  ");
-              (par-reduce-type <+ par-reduce-strengthened <+ par-reduce-metavar )
-              // ; debug-analysis(!"PR OUT: ")
+  par-reduce = debug-analysis(!"PR IN:  ");
+              (par-reduce-type <+ par-reduce-metavar <+ par-reduce-strengthened <+ ?(_,<id>))
+              ; debug-analysis(!"PR OUT: ")
     // Identity on meta-variables only as a fallback
     // since dynamic axioms might establish more specific
     // reductions.
@@ -469,12 +469,12 @@ rules
     (C, m@Metavar(_)) -> m
   par-reduce-metavar :
     (C, m@MetaExpr(_)) -> m
-  par-reduce-metavar :
-    (C, m) -> m
 
-  par-reduce-strengthened : // Expression variable bindings do not
+  par-reduce-strengthened : // expression variable bindings do not
                             // influence parallel reduction
     (CtxBindVar(C, x, S), T) -> <par-reduce> (C, T) 
+  par-reduce-strengthened : // try again with reduced context
+    (CtxBindTVar(C, X, K), T) -> <par-reduce> (C, T) 
 
   par-reduce-type :
     (C, TyUnknown()) -> TyUnknown()
