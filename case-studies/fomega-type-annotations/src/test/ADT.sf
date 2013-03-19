@@ -16,3 +16,4 @@ data D = Foo isFoo {foo:Nat}
 type X = Tree Nat Nat
 
 val x = fold [D] (<Foo={foo=1}> as <Foo:{foo:Nat}>)
+

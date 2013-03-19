@@ -1,0 +1,29 @@
+NormalizationJudgment(
+  Metavar(Var("C"))
+, TyVariant(
+    MetaExpr(
+      NoAnnoList(
+        Op(
+          "ADT-DECLS"
+        , [ ToMetaExpr(
+              DataConsCons(
+                DataCon(
+                  Metavar(Var("Xcon"))
+                , Metavar(Var("Xdiscr"))
+                , Metavar(Var("decls"))
+                )
+              , Metavar(Var("dcons"))
+              )
+            )
+          ]
+        )
+      )
+    )
+  )
+, TyVariant(
+    TyDeclsCons(
+      TyDecl(Metavar(Var("Xcon")), TyRecord(Metavar(Var("decls"))))
+    , Metavar(Var("rest"))
+    )
+  )
+)

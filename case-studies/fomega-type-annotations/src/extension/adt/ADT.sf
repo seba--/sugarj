@@ -220,14 +220,24 @@ typing {
 ======================================================================== ADT-DECLSEnd
 ~C |- <M~ADT-DECLS(datacons |[ ~%Xcon ~%Xdiscr { ~decls } ]|)> :: *
 
+============================================================== ADT-DECLSEnd-Norm
+~C |- <M~ADT-DECLS(datacons |[ ~%Xcon ~%Xdiscr { ~decls } ]|)> 
+   ~> <~%Xcon : { ~decls }>
+
 ~C |- <M~(ADT-DECLS(dcons))> :: *
 ~C |- { ~decls } :: *
 ~%Xcon notin lab(M~(ADT-DECLS(dcons)))
 ================================================================================= ADT-DECLSCons
 ~C |- <M~ADT-DECLS(datacons |[ ~%Xcon ~%Xdiscr { ~decls } | ~dcons ]|)> :: *
 
+~C |- <M~ADT-DECLS(datacons |[ ~dcons ]|)> ~> <~rest>
+======================================================================= ADT-DECLSCons-Norm
+~C |- <M~ADT-DECLS(datacons |[ ~%Xcon ~%Xdiscr { ~decls } | ~dcons ]|)> 
+   ~> <~%Xcon : { ~decls } ~:rest>
 
-========================================== ADT-ARGNil
+
+
+=============================================================== ADT-ARGNil
 ~C |- M~ADT-ARG(dataparams |[ ]|) :: M~ADT-PK(dataparams |[ ]|)
 
 ~C |- ~%X :: ~K
@@ -260,6 +270,7 @@ M~ADT-CK(dataparams |[ (~%X::~K) ~params ]|)  =::=> ~K => ~K2
 ~%Xcon notin lab(M~(ADT-DECLS(dcons)))
 ==================================================================================== ADT-DECLSCons-Lab
 ~%Xcon notin lab(M~(ADT-DECLS(datacons |[ ~%Xcon2 ~%Xdiscr { ~decls } | ~dcons ]|)))
+
 
 
 }

@@ -438,6 +438,8 @@ rules
 
   subst-decl :
     (X, S, TyDecl(x, T)) -> TyDecl(x, <subst> (X, S, T))
+    
+  subst = debug-analysis(!"subst error: "); fail
 
 
 rules
@@ -447,7 +449,7 @@ rules
 
   iterate-par-reduce :
     (C, T) -> T'
-    where <par-reduce> (C, T) => S
+    where <par-reduce <+ ?(_,<id>)> (C, T) => S
         ; <// debug-analysis(!"EQ IN  ");
            type-eq
            // ; debug-analysis(!"EQ OUT ")
@@ -458,9 +460,9 @@ rules
             !(<norm> (C, S))
           end => T'
 
-  par-reduce = debug-analysis(!"PR IN:  ");
-              (par-reduce-type <+ par-reduce-metavar <+ par-reduce-strengthened <+ ?(_,<id>))
-              ; debug-analysis(!"PR OUT: ")
+  par-reduce = where(?(_,<id>);debug-analysis(!"PR IN:  "));
+              (par-reduce-type <+ par-reduce-metavar <+ par-reduce-strengthened <+ ?(_,<id>);debug-analysis(!"PR FAILED:  ");fail)
+              ; debug-analysis(!"PR OUT:  ")
     // Identity on meta-variables only as a fallback
     // since dynamic axioms might establish more specific
     // reductions.
@@ -540,7 +542,7 @@ rules
 
   par-reduce-type :
     (C, TyApp(T1, T2)) -> TyApp(<par-reduce> (C, T1), <par-reduce> (C, T2))
-    where if !T1; ?(TyAbs(_, _, _)) then fail else id end
+    where <not(?TyAbs(_, _, _))> T1
 
   par-reduce-type :
     (C, TyApp(TyAbs(X, K11, T12), T2)) -> <subst> (X, <par-reduce> (C, T2), <par-reduce> (CtxBindTVar(C, X, K11), T12))
