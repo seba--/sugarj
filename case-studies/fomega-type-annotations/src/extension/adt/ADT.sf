@@ -239,11 +239,18 @@ typing {
 =============================================================== ADT-ARGNil
 ~C |- M~ADT-ARG(dataparams |[ ]|) :: M~ADT-PK(dataparams |[ ]|)
 
+======================================= ADT-ARGNil-Norm
+~C |- M~ADT-ARG(dataparams |[ ]|) ~> []
+
 ~C |- ~%X :: ~K
 ~C |- M~(ADT-ARG(params)) :: M~(ADT-PK(params))
 ======================================================================================== ADT-ARGCons
 ~C |- M~ADT-ARG(dataparams |[ (~%X::~K) ~params ]|) :: {~K, M~(ADT-PK(params))}
 
+~C |- M~(ADT-ARG(params)) ~> ~T
+=================================================== ADT-ARGCons-Norm
+~C |- M~ADT-ARG(dataparams |[ (~%X::~K) ~params ]|)
+   ~> {~%X, ~T}
 
 
 =================================== ADT-PKNil
