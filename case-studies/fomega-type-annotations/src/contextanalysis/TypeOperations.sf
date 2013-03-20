@@ -203,7 +203,7 @@ rules
     TyUnknown() -> []
 
   type-eq-nat-proper :
-    TyBool() -> []
+    TyNat() -> []
 
   type-eq-nat-unexpected :
     T -> [<concat-strings> ["type mismatch, expected Nat type but found ", <pp-type> T]]
@@ -217,7 +217,7 @@ rules
     TyUnknown() -> []
 
   type-eq-string-proper :
-    TyBool() -> []
+    TyString() -> []
 
   type-eq-string-unexpected :
     T -> [<concat-strings> ["type mismatch, expected String type but found ", <pp-type> T]]
@@ -295,7 +295,21 @@ rules
 
 rules
 
-  type-eq-arrow = type-eq-pair-proper <+ type-eq-pair-unexpected
+  type-eq-app = type-eq-app-proper <+ type-eq-app-unexpected
+
+  type-eq-app-proper :
+    TyUnknown() -> (TyUnknown(), TyUnknown(), [])
+
+  type-eq-app-proper :
+    TyApp(T1, T2) -> (T1, T2, [])
+
+  type-eq-app-unexpected :
+    T -> (TyUnknown(), TyUnknown(), [<concat-strings> ["type mismatch, expected operator aplication but found ", <pp-type> T]])
+
+
+rules
+
+  type-eq-pair = type-eq-pair-proper <+ type-eq-pair-unexpected
 
   type-eq-pair-proper :
     TyUnknown() -> (TyUnknown(), TyUnknown(), [])
