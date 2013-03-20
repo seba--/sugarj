@@ -28,7 +28,7 @@ rules
   desugar-extension-term = oncetd(desugar-extension-internal)
   
   verify-context-rule =
-    (?TypingRule(_,_,_) + ?KindingRule(_,_,_) + ?SignatureRule(_,_,_) + ?NormalizationRule(_,_,_) + ?KindNormalizationRule(_,_,_));
+    (?TypingRule(_,_,_) + ?KindingRule(_,_,_) + ?SignatureRule(_,_,_) + ?NormalizationRule(_,_,_) + ?KindNormalizationRule(_,_,_) + ?NotinLabRule(_,_,_));
     metaexpr-implode;
     verify-context-rule-internal
 
@@ -225,6 +225,31 @@ rules
             ; ![( K1, <concat-strings> [ "Could not desugar the conclusion of kind normalization rule ", name, ":\n"
                                        , <write-to-string-analysis> K1])]
           end => result
+          
+  verify-context-rule-internal :
+    NotinLabRule(premises, RuleName(sep, Some(Var(name))), NotinLabJudgment(con, decls)) ->
+      result
+    where <debug(!"*** Verify not-in-lab rule ")> name
+        ; <debug-analysis(<concat-strings> ["Original conclusion term  (", name, "): "])> decls
+        ; if <desugar-extension-term; reinit-for-analysis> decls => decls-desugared then
+              <debug-analysis(<concat-strings> ["Desugared conclusion term (", name, "): "])> decls-desugared
+            ; <premises-to-list> premises => premises-list
+            ; with-scoped-axioms(
+                <activate-dynamic-axioms> premises-list
+              ; <not-in-lab < !"ok" + !"not ok"> (con, decls-desugared) => res
+            )
+            ; if !res; ?"ok" then
+                debug(!(<concat-strings> ["Successfully verified not-in-lab rule ", name, "."])); fail
+              else
+                ![( name
+                 , <concat-strings> [ "Could not verify not-in-lab rule ", name, ".\n"])]
+              end
+          else
+              <debug(!"Could not desugar the conclusion of rule ")> name
+            ; <strip-annos; debug(!"  ")> decls
+            ; ![( decls, <concat-strings> [ "Could not desugar the conclusion of not-in-lab rule ", name, ":\n"
+                                       , <write-to-string-analysis> decls])]
+          end => result
 
 rules // Resolve TypeOf(As) in desugared subjects
 
@@ -358,7 +383,17 @@ rules // Activate dynamic axioms in the order of appearance in the typing rule
           where <strip-annos> arg => K-stripped
               ; !K' => res
     )
-    // ; <debug(!"Activated parallel reduction judgment ")> (C-stripped, T-stripped, T-stripped')
+    // ; <debug(!"Activated kind normalization judgment ")> (C-stripped, T-stripped, T-stripped')
+
+  activate-dynamic-axiom =
+      ?UnequalNamesJudgment(con1, con2)
+    ; <strip-annos> (con1, con2) => (con1-stripped, con2-stripped')
+    ; rules(
+        Dynamic-Unequal-Names :+
+          arg -> arg
+          where <strip-annos> arg => (con1-stripped, con2-stripped)
+    )
+    // ; <debug(!"Activated unequal names judgment ")> (C-stripped, T-stripped, T-stripped')
 
    activate-dynamic-axiom = add-context-errors(|["Failed to activate as axiom for verification."])
 
@@ -398,6 +433,7 @@ rules // Rules to hook in dynamic axioms into the judgment implementations
     , Dynamic-Not-In-Dom
     , Dynamic-Not-In-Lab
     , Dynamic-Kind-Norm
+    , Dynamic-Unequal-Names
     : s      
     }
   
@@ -409,4 +445,4 @@ rules // Rules to hook in dynamic axioms into the judgment implementations
   not-in-dom = Dynamic-Not-In-Dom
   not-in-lab = Dynamic-Not-In-Lab
   kind-norm-internal = Dynamic-Kind-Norm
-  
+  unequal-names = Dynamic-Unequal-Names
