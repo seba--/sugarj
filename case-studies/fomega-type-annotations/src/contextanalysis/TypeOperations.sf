@@ -354,9 +354,6 @@ rules
     (X, S, Metavar(mvar)) -> Metavar(mvar)
 
   subst :
-    (X, S, MetaExpr(mexpr)) -> MetaExpr(mexpr)
-
-  subst :
     (X, S, TyMu(T1, T2)) -> TyMu(<subst> (X, S, T1), <subst> (X, S, T2))
 
   subst :
@@ -436,6 +433,9 @@ rules
     (X, S, TyVar(Y)) -> TyVar(Y)
     where <not(structurally-equal)> (X, Y)
 
+  subst :
+    (X, S, c#(xs)) -> c#(<map(!(X,S,<id>);subst)> xs)
+
   subst-decl :
     (X, S, TyDecl(x, T)) -> TyDecl(x, <subst> (X, S, T))
     
@@ -460,9 +460,9 @@ rules
             !(<norm> (C, S))
           end => T'
 
-  par-reduce = where(?(_,<id>);debug-analysis(!"PR IN:  "));
+  par-reduce = // where(?(_,<id>);debug-analysis(!"PR IN:  "));
               (par-reduce-type <+ par-reduce-metavar <+ par-reduce-strengthened <+ par-reduce-other <+ ?(_,<id>);debug-analysis(!"PR Failed:  ");fail)
-              ; debug-analysis(!"PR OUT:  ")
+              // ; debug-analysis(!"PR OUT:  ")
     // Identity on meta-variables only as a fallback
     // since dynamic axioms might establish more specific
     // reductions.
@@ -501,6 +501,8 @@ rules
     (C, TyEmpty()) -> TyEmpty()
 
   par-reduce-type :
+    (C, v@TyVar(Metavar(_))) -> v
+  par-reduce-type :
     (C, TyVar(X)) -> S
     where <lookup-type-var-def> (X, C) => (T, msgs)
         ; if !msgs; ?[] then
@@ -509,6 +511,8 @@ rules
             !TyVar(X)
           end => S
 
+  par-reduce-type :
+    (C, v@TyQVar(Metavar(_))) -> v
   par-reduce-type :
     (C, TyQVar(qX)) -> S
     where <lookup-type-var-def> (qX, C) => (T, msgs)
@@ -535,22 +539,19 @@ rules
 
   par-reduce-type :
     (C, TyFst(T)) -> TyFst(<par-reduce> (C, T))
-    where if !T; ?TyPair(_, _) then fail else id end
-
+    where <not(?TyPair(_, _))> T
   par-reduce-type :
     (C, TyFst(TyPair(T1, T2))) -> <par-reduce> (C, T1)
 
   par-reduce-type :
     (C, TySnd(T)) -> TySnd(<par-reduce> (C, T))
-    where if !T; ?TyPair(_, _) then fail else id end
-
+    where <not(?TyPair(_, _))> T
   par-reduce-type :
     (C, TySnd(TyPair(T1, T2))) -> <par-reduce> (C, T2)
 
   par-reduce-type :
     (C, TyApp(T1, T2)) -> TyApp(<par-reduce> (C, T1), <par-reduce> (C, T2))
     where <not(?TyAbs(_, _, _))> T1
-
   par-reduce-type :
     (C, TyApp(TyAbs(X, K11, T12), T2)) -> <subst> (X, <par-reduce> (C, T2), <par-reduce> (CtxBindTVar(C, X, K11), T12))
 
