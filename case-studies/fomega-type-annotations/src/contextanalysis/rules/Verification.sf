@@ -28,7 +28,7 @@ rules
   desugar-extension-term = oncetd(desugar-extension-internal)
   
   verify-context-rule =
-    (?TypingRule(_,_,_) + ?KindingRule(_,_,_) + ?SignatureRule(_,_,_) + ?NormalizationRule(_,_,_));
+    (?TypingRule(_,_,_) + ?KindingRule(_,_,_) + ?SignatureRule(_,_,_) + ?NormalizationRule(_,_,_) + ?KindNormalizationRule(_,_,_));
     metaexpr-implode;
     verify-context-rule-internal
 
@@ -83,7 +83,7 @@ rules
   verify-context-rule-internal :
     KindingRule(premises, RuleName(sep, Some(Var(name))), judge@KindingJudgment(C, T, K)) ->
       result
-    where <debug(!"*** Verify kind rule ")> (name, <strip-annos> judge)
+    where <debug-analysis(!"*** Verify kind rule ")> (name, <strip-annos> judge)
         ; <debug-analysis(<concat-strings> ["Original conclusion type  (", name, "): "])> T
         ; if <desugar-extension-term; reinit-for-analysis> T => T-desugared then
               <debug-analysis(<concat-strings> ["Desugared conclusion type (", name, "): "])> T-desugared
@@ -164,7 +164,7 @@ rules
   verify-context-rule-internal :
     NormalizationRule(premises, RuleName(sep, Some(Var(name))), NormalizationJudgment(C, T1, T2)) ->
       result
-    where <debug(!"*** Verify type normalization rule ")> name
+    where <debug(!"*** Verify kind normalization rule ")> name
         ; <debug-analysis(<concat-strings> ["Original conclusion term  (", name, "): "])> T1
         ; if <desugar-extension-term; reinit-for-analysis> T1 => T1-desugared then
               <debug-analysis(<concat-strings> ["Desugared conclusion term (", name, "): "])> T1-desugared
@@ -189,8 +189,41 @@ rules
           else
               <debug(!"Could not desugar the conclusion of rule ")> name
             ; <strip-annos; debug(!"  ")> T1
-            ; ![( T1, <concat-strings> [ "Could not desugar the conclusion of typing rule ", name, ":\n"
+            ; ![( T1, <concat-strings> [ "Could not desugar the conclusion of type normalization ", name, ":\n"
                                        , <write-to-string-analysis> T1])]
+          end => result
+          
+
+  verify-context-rule-internal :
+    KindNormalizationRule(premises, RuleName(sep, Some(Var(name))), KindNormalizationJudgment(K1, K2)) ->
+      result
+    where <debug(!"*** Verify kind normalization rule ")> name
+        ; <debug-analysis(<concat-strings> ["Original conclusion term  (", name, "): "])> K1
+        ; if <desugar-extension-term; reinit-for-analysis> K1 => K1-desugared then
+              <debug-analysis(<concat-strings> ["Desugared conclusion term (", name, "): "])> K1-desugared
+            ; <premises-to-list> premises => premises-list
+            ; with-scoped-axioms(
+                <activate-dynamic-axioms> premises-list
+              ; <kind-norm> K1-desugared => K1'
+              ; <debug-analysis> "NEXT" 
+              ; <kind-norm> K2 => K2'
+            )
+            ; <strip-annos; debug(!"Expected kind: ")> K2'
+            ; <strip-annos; debug(!"Actual kind:   ")> K1'
+            ; <kind-eq> (K2', K1') => msgs
+            ; if !msgs; ?[] then
+                debug(!(<concat-strings> ["Successfully verified kind normalization rule ", name, "."])); fail
+              else
+                ![( name
+                 , <concat-strings> [ "Could not verify kind normalization rule ", name, ".\n"
+                                    , "Expected type: ", <write-to-string-analysis> K2', ".\n"
+                                    , "But got type:  ", <write-to-string-analysis> K1', "."])]
+              end
+          else
+              <debug(!"Could not desugar the conclusion of rule ")> name
+            ; <strip-annos; debug(!"  ")> K1
+            ; ![( K1, <concat-strings> [ "Could not desugar the conclusion of kind normalization rule ", name, ":\n"
+                                       , <write-to-string-analysis> K1])]
           end => result
 
 rules // Resolve TypeOf(As) in desugared subjects
@@ -270,11 +303,10 @@ rules // Activate dynamic axioms in the order of appearance in the typing rule
     ; rules(
         Dynamic-Par-Reduce-Type :+
           arg -> res
-          where <debug-analysis(!"dyn norm expect: ")> (C-stripped, T-stripped) ;
-                <strip-annos; debug-analysis(!"dyn norm was: ")> arg => (C-stripped, T-stripped)
+          where <strip-annos> arg => (C-stripped, T-stripped)
               ; !T' => res
     )
-    ; <debug(!"Activated parallel reduction judgment ")> (C-stripped, T-stripped, T-stripped')
+    // ; <debug(!"Activated parallel reduction judgment ")> (C-stripped, T-stripped, T-stripped')
 
   activate-dynamic-axiom =
       ?VarInContextJudgment(x, T, C)
@@ -317,6 +349,17 @@ rules // Activate dynamic axioms in the order of appearance in the typing rule
           arg -> arg 
           where <strip-annos> arg => (x-stripped, decls-stripped))
 
+  activate-dynamic-axiom =
+      ?KindNormalizationJudgment(K, K')
+    ; <strip-annos> (K, K') => (K-stripped, K-stripped')
+    ; rules(
+        Dynamic-Kind-Norm :+
+          arg -> res
+          where <strip-annos> arg => K-stripped
+              ; !K' => res
+    )
+    // ; <debug(!"Activated parallel reduction judgment ")> (C-stripped, T-stripped, T-stripped')
+
    activate-dynamic-axiom = add-context-errors(|["Failed to activate as axiom for verification."])
 
 
@@ -354,6 +397,7 @@ rules // Rules to hook in dynamic axioms into the judgment implementations
     , Dynamic-Annotate-Signature
     , Dynamic-Not-In-Dom
     , Dynamic-Not-In-Lab
+    , Dynamic-Kind-Norm
     : s      
     }
   
@@ -364,4 +408,5 @@ rules // Rules to hook in dynamic axioms into the judgment implementations
   annotate-signature-defined = Dynamic-Annotate-Signature
   not-in-dom = Dynamic-Not-In-Dom
   not-in-lab = Dynamic-Not-In-Lab
+  kind-norm-internal = Dynamic-Kind-Norm
   
