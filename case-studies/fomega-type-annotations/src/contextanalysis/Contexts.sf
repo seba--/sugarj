@@ -41,8 +41,8 @@ rules
 
 rules
 
-  lookup-expr-var :
-    (x, CtxEmpty()) -> (TyUnknown(), [<concat-strings> ["undefined identifier ", x]])
+  // lookup-expr-var :
+  //   (x, CtxEmpty()) -> (TyUnknown(), [<concat-strings> ["undefined identifier ", x]])
 
   lookup-expr-var :
     (x, CtxBindTVar(C, Y, K)) -> <lookup-expr-var> (x, C)
@@ -60,8 +60,8 @@ rules
 
 rules
 
-  lookup-type-var :
-    (X, CtxEmpty()) -> (KiUnknown(), [<concat-strings> ["undefined identifier ", X]])
+  // lookup-type-var :
+  //   (X, CtxEmpty()) -> (KiUnknown(), [<concat-strings> ["undefined identifier ", X]])
 
   lookup-type-var :
     (X, CtxBindTVar(C, Y, K)) -> <lookup-type-var> (X, C)
@@ -85,16 +85,16 @@ rules
 
 rules
 
-  lookup-type-var-def :
-    (X, CtxEmpty()) -> (TyUnknown(), [<concat-strings> ["undefined identifier ", X]])
+  // lookup-type-var-def :
+  //   (X, CtxEmpty()) -> (TyUnknown(), [<concat-strings> ["undefined identifier ", X]])
 
   lookup-type-var-def :
     (X, CtxBindTVar(C, Y, K)) -> <lookup-type-var-def> (X, C)
     where <not(structurally-equal)> (Y, X)
 
-  lookup-type-var-def :
-    (X, CtxBindTVar(C, Y, K)) -> (TyUnknown(), [<concat-strings> ["no definition for ", X]])
-    where <structurally-equal> (Y, X)
+  // lookup-type-var-def :
+  //   (X, CtxBindTVar(C, Y, K)) -> (TyUnknown(), [<concat-strings> ["no definition for ", X]])
+  //   where <structurally-equal> (Y, X)
 
   lookup-type-var-def :
     (X, CtxBindTVarDef(C, Y, K, T)) -> <lookup-type-var-def> (X, C)

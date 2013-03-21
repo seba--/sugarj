@@ -267,11 +267,12 @@ rules // Activate dynamic axioms in the order of appearance in the typing rule
     ; rules(
         Dynamic-Annotate-Kind :+
           arg -> res
-          where <strip-annos> arg => (C-normed, T-normed)
+          where <debug(!"exp: ")> (C-normed, T-normed);
+                <strip-annos;debug(!"was: ")> arg => (C-normed, T-normed)
               ; !arg => (_, T-arg)
               ; <put-kind> (K, T-arg) => res
       )
-    // ; <debug(!"Activated kinding judgment ")> (C-stripped, T-stripped, K-stripped)
+    ; <debug-analysis(!"Activated kinding judgment ")> (C-normed, T-normed, K)
 
   activate-dynamic-axiom =
       ?NormalizationJudgment(C, T, T')

@@ -58,3 +58,6 @@ rules
   get-context = get-anno(|"context")
 
   put-context = ?(C, node); <put-anno(|"context", C)> node
+  
+  mark-context-normalized = reinit-analysis-data-annotation; put-anno(|"context-normalized", ())
+  is-context-normalized = where(get-anno(|"context-normalized"))

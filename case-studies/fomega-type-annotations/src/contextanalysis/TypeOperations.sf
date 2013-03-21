@@ -467,6 +467,8 @@ rules
     // since dynamic axioms might establish more specific
     // reductions.
 
+  try-par-reduce = par-reduce <+ ?(_,<id>)
+
   par-reduce-metavar :
     (C, m@Metavar(_)) -> m
   par-reduce-metavar :
@@ -523,7 +525,9 @@ rules
           end => S
 
   par-reduce-type :
-    (C, TyMu(T1, T2)) -> TyMu(<par-reduce> (C, T1), <par-reduce> (C, T2))
+    (C, TyMu(T1, T2)) -> TyMu(<par-reduce> (C, T1), <try-par-reduce> (C, T2))
+  par-reduce-type :
+    (C, TyMu(T1, T2)) -> TyMu(T1, <par-reduce> (C, T2))
 
   par-reduce-type :
     (C, TyAbs(X, K, T)) -> TyAbs(X, K, <par-reduce> (CtxBindTVar(C, X, K), T))
@@ -532,10 +536,14 @@ rules
     (C, TyForall(X, K, T)) -> TyForall(X, K, <par-reduce> (CtxBindTVar(C, X, K), T))
 
   par-reduce-type :
-    (C, TyArrow(T1, T2)) -> TyArrow(<par-reduce> (C, T1), <par-reduce> (C, T2))
+    (C, TyArrow(T1, T2)) -> TyArrow(<par-reduce> (C, T1), <try-par-reduce> (C, T2))
+  par-reduce-type :
+    (C, TyArrow(T1, T2)) -> TyArrow(T1, <par-reduce> (C, T2))
 
   par-reduce-type :
-    (C, TyPair(T1, T2)) -> TyPair(<par-reduce> (C, T1), <par-reduce> (C, T2))
+    (C, TyPair(T1, T2)) -> TyPair(<par-reduce> (C, T1), <try-par-reduce> (C, T2))
+  par-reduce-type :
+    (C, TyPair(T1, T2)) -> TyPair(T1, <par-reduce> (C, T2))
 
   par-reduce-type :
     (C, TyFst(T)) -> TyFst(<par-reduce> (C, T))
@@ -550,24 +558,31 @@ rules
     (C, TySnd(TyPair(T1, T2))) -> <par-reduce> (C, T2)
 
   par-reduce-type :
-    (C, TyApp(T1, T2)) -> TyApp(<par-reduce> (C, T1), <par-reduce> (C, T2))
+    (C, TyApp(T1, T2)) -> TyApp(<par-reduce> (C, T1), <try-par-reduce> (C, T2))
     where <not(?TyAbs(_, _, _))> T1
   par-reduce-type :
-    (C, TyApp(TyAbs(X, K11, T12), T2)) -> <subst> (X, <par-reduce> (C, T2), <par-reduce> (CtxBindTVar(C, X, K11), T12))
+    (C, TyApp(T1, T2)) -> TyApp(T1, <par-reduce> (C, T2))
+    where <not(?TyAbs(_, _, _))> T1
+  par-reduce-type :
+    (C, TyApp(TyAbs(X, K11, T12), T2)) -> <subst> (X, <try-par-reduce> (C, T2), <try-par-reduce> (CtxBindTVar(C, X, K11), T12))
 
   par-reduce-type :
     (C, TyVariant(TyDeclsNil)) -> TyVariant(TyDeclsNil)
   par-reduce-type :
-    (C, TyVariant(TyDeclsCons(decl, decls))) -> TyVariant(TyDeclsCons(<par-reduce-decl> (C, decl), decls'))
+    (C, TyVariant(TyDeclsCons(decl, decls))) -> TyVariant(TyDeclsCons(<try(par-reduce-decl)> (C, decl), decls'))
     where <par-reduce> (C, TyVariant(decls)) => TyVariant(decls')
+  par-reduce-type :
+    (C, TyVariant(TyDeclsCons(decl, decls))) -> TyVariant(TyDeclsCons(<par-reduce-decl> (C, decl), decls))
   par-reduce-type :
     (C, TyVariant(m)) -> TyVariant(<par-reduce-metavar> (C, m))
 
   par-reduce-type :
     (C, TyRecord(TyDeclsNil)) -> TyRecord(TyDeclsNil)
   par-reduce-type :
-    (C, TyRecord(TyDeclsCons(decl, decls))) -> TyRecord(TyDeclsCons(<par-reduce-decl> (C, decl), decls'))
+    (C, TyRecord(TyDeclsCons(decl, decls))) -> TyRecord(TyDeclsCons(<try(par-reduce-decl)> (C, decl), decls'))
     where <par-reduce> (C, TyVariant(decls)) => TyVariant(decls')
+  par-reduce-type :
+    (C, TyRecord(TyDeclsCons(decl, decls))) -> TyRecord(TyDeclsCons(<par-reduce-decl> decl, decls))
   par-reduce-type :
     (C, TyRecord(m)) -> TyRecord(<par-reduce-metavar> (C, m))
 
@@ -577,22 +592,25 @@ rules
 
 rules // normalize contexts
 
+  context-norm =
+    is-context-normalized
+
   context-norm : 
     CtxEmpty -> CtxEmpty
 
   context-norm : 
-    CtxBindTVar(C, X, K) -> CtxBindTVar(C', X, K')
+    CtxBindTVar(C, X, K) -> <mark-context-normalized> CtxBindTVar(C', X, K')
     where <context-norm> C => C'
         ; <kind-norm> K => K'
 
   context-norm : 
-    CtxBindTVarDef(C, X, K, T) -> CtxBindTVarDef(C', X, K', T')
+    CtxBindTVarDef(C, X, K, T) -> <mark-context-normalized> CtxBindTVarDef(C', X, K', T')
     where <context-norm> C => C'
         ; <kind-norm> K => K'
         ; <norm> (C', T) => T'
 
   context-norm : 
-    CtxBindVar(C, x, T) -> CtxBindVar(C', x, T')
+    CtxBindVar(C, x, T) -> <mark-context-normalized> CtxBindVar(C', x, T')
     where <context-norm> C => C'
         ; <norm> (C', T) => T'
 

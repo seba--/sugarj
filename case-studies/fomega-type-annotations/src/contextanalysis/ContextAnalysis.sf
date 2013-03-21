@@ -18,8 +18,9 @@ rules
 
 rules
   annotate-type =
-    // debug-analysis(!"ANNO TYPE IN:  "); 
-       annotate-type-normalized
+    // debug-analysis(!"ANNO TYPE IN:  ");
+       ?(_,<get-type>) 
+    <+ annotate-type-normalized
     <+ annotate-type-defined
     <+ strengthened-context(annotate-type)
     <+ annotate-type-missing
@@ -38,7 +39,8 @@ rules
 rules
   annotate-kind =
     // debug-analysis(!"ANNO KIND IN:  "); 
-       annotate-kind-normalized 
+       ?(_,<get-kind>) 
+    <+ annotate-kind-normalized 
     <+ annotate-kind-defined
     <+ strengthened-context(annotate-kind)
     <+ annotate-kind-missing
@@ -58,15 +60,16 @@ rules
 rules
   annotate-signature =
     // debug-analysis(!"ANNO SIGNATURE IN:  "); 
-       annotate-signature-normalized
+       ?(_,<get-signature>) 
+    <+ annotate-signature-normalized
     <+ annotate-signature-defined
     <+ strengthened-context(annotate-signature)
     <+ annotate-signature-missing
-    // ; debug-analysis(!"ANNO SIGNATURE OUT: ") 
+    // ;debug-analysis(!"ANNO SIGNATURE OUT: ") 
 
   annotate-signature-normalized =
       ?(C, defs)
-    ; <context-norm> C => C'
+    ; <debug-analysis(!"CTX NORM: ");context-norm;debug-analysis(!"CTX OUT:  ")> C => C'
     ; <not(structurally-equal)> (C, C')
     ; <annotate-signature> (C', defs)
 
