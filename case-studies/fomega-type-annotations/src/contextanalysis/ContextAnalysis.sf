@@ -22,7 +22,7 @@ rules
        ?(_,<get-type>) 
     <+ annotate-type-normalized
     <+ annotate-type-defined
-    <+ strengthened-context(annotate-type)
+    // <+ strengthened-context(annotate-type)
     <+ annotate-type-missing
     // ; debug-analysis(!"ANNO TYPE OUT: ") 
 
@@ -42,7 +42,7 @@ rules
        ?(_,<get-kind>) 
     <+ annotate-kind-normalized 
     <+ annotate-kind-defined
-    <+ strengthened-context(annotate-kind)
+    // <+ strengthened-context(annotate-kind)
     <+ annotate-kind-missing
     // ; debug-analysis(!"ANNO KIND OUT: ") 
 
@@ -63,7 +63,7 @@ rules
        ?(_,<get-signature>) 
     <+ annotate-signature-normalized
     <+ annotate-signature-defined
-    <+ strengthened-context(annotate-signature)
+    // <+ strengthened-context(annotate-signature)
     <+ annotate-signature-missing
     // ;debug-analysis(!"ANNO SIGNATURE OUT: ") 
 
