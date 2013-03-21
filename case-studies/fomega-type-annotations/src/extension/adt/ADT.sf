@@ -172,7 +172,6 @@ typing {
    ~> \~%X::~K. ~T2
 
 
-
 ((~C; ~%X :: M~ADT-PK(params) => *); args :: M~ADT-PK(params)) |-
                                      M~ADT-UNCURRY(X, params, |[ <M~(ADT-DECLS(dcons))> ]|) :: *
 ================================================================================================ ADT-OP
@@ -215,9 +214,14 @@ typing {
    ~> M~ADT-CA(params, fomega-type |[ ~args.2 ]|, fomega-type |[ ~T (~args.1) ]|)
 
 
+
 ~C |- { ~decls } :: *
 ======================================================================== ADT-DECLSEnd
 ~C |- <M~ADT-DECLS(datacons |[ ~%Xcon ~%Xdiscr { ~decls } ]|)> :: *
+
+============================================================== ADT-DECLSEnd-Norm
+~C |- <M~ADT-DECLS(datacons |[ ~%Xcon ~%Xdiscr { ~decls } ]|)> 
+   ~> <~%Xcon : { ~decls }>
 
 ~C |- <M~(ADT-DECLS(dcons))> :: *
 ~C |- { ~decls } :: *
@@ -225,15 +229,28 @@ typing {
 ================================================================================= ADT-DECLSCons
 ~C |- <M~ADT-DECLS(datacons |[ ~%Xcon ~%Xdiscr { ~decls } | ~dcons ]|)> :: *
 
+~C |- <M~ADT-DECLS(datacons |[ ~dcons ]|)> ~> <~rest>
+======================================================================= ADT-DECLSCons-Norm
+~C |- <M~ADT-DECLS(datacons |[ ~%Xcon ~%Xdiscr { ~decls } | ~dcons ]|)> 
+   ~> <~%Xcon : { ~decls } ~:rest>
 
-========================================== ADT-ARGNil
+
+
+=============================================================== ADT-ARGNil
 ~C |- M~ADT-ARG(dataparams |[ ]|) :: M~ADT-PK(dataparams |[ ]|)
+
+======================================= ADT-ARGNil-Norm
+~C |- M~ADT-ARG(dataparams |[ ]|) ~> []
 
 ~C |- ~%X :: ~K
 ~C |- M~(ADT-ARG(params)) :: M~(ADT-PK(params))
 ======================================================================================== ADT-ARGCons
 ~C |- M~ADT-ARG(dataparams |[ (~%X::~K) ~params ]|) :: {~K, M~(ADT-PK(params))}
 
+~C |- M~(ADT-ARG(params)) ~> ~T
+=================================================== ADT-ARGCons-Norm
+~C |- M~ADT-ARG(dataparams |[ (~%X::~K) ~params ]|)
+   ~> {~%X, ~T}
 
 
 =================================== ADT-PKNil
@@ -259,6 +276,7 @@ M~ADT-CK(dataparams |[ (~%X::~K) ~params ]|)  =::=> ~K => ~K2
 ~%Xcon notin lab(M~(ADT-DECLS(dcons)))
 ==================================================================================== ADT-DECLSCons-Lab
 ~%Xcon notin lab(M~(ADT-DECLS(datacons |[ ~%Xcon2 ~%Xdiscr { ~decls } | ~dcons ]|)))
+
 
 
 }

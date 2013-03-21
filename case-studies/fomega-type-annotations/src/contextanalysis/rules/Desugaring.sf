@@ -282,8 +282,7 @@ rules // Translate a judgment
         ; <trm-explode> T' => tT'
         ; <fresh-result-var> ts => (ts1, result-var)
         ; <fresh-result-var> ts1 => (ts2, result-var1)
-        ; <ts-get-blame> ts2 => tblame
-        ; <translate-type-expectation> (ts2, tblame, result-var, [], T', []) => (ts3 , inspect-result)
+        ; <translate-type-expectation> (ts2, tT, result-var, [], T', []) => (ts3 , inspect-result)
 
   translate-judgment :
     (ts, SignatureJudgment(C, defs, sig)) ->
@@ -581,7 +580,7 @@ rules // Translate a kind expectation
              //TODO treat dynamically occurring meta(pattern)variables
              ; <kind-match> (term~result-var2, term~result-var1, term~fresh-var-list)
              ; debug-analysis(!"match kinds res: ")
-             ; ?(<id>, [])
+             ; ?(<strip-annos>, [])
              ; strategy~fresh-vars-match
              ; debug-analysis(!"match kinds ok: ")
              ]|)
@@ -597,91 +596,6 @@ rules // Translate a kind expectation
   remeta-fresh-vars(|ts) :
     Var(v) -> stratego-term |[ Metavar(Var(string~v)) ]| 
     where <not(ts-in-eqs)> (ts, Var(v))
-
-  translate-kind-expectation-normed :
-    (ts, tblame, result-var, Metavar(mvar)) ->
-      (<ts-append-eq> (ts, mvar), 
-      |[ !term~result-var
-       ; ?term~mvar 
-         <+ (strip-annos; ?term~mvar)
-         <+ (strip-annos; repeat-until(kind-norm-step, ?term~mvar))
-       ]|)
-    where <not(ts-in-eqs)> (ts, mvar)
-
-  translate-kind-expectation-normed :
-    (ts, tblame, result-var, Metavar(mvar)) ->
-      ( ts1
-      , |[   <kind-eq> (term~mvar, term~result-var) => term~msgs-var
-           ; <add-context-errors(|term~msgs-var)> term~tblame
-        ]|)
-    where <ts-in-eqs> (ts, mvar)
-        ; <fresh-msgs-var> ts => (ts1, msgs-var)
-
-  translate-kind-expectation-normed :
-    (ts, tblame, result-var, KiStar()) ->
-      (ts1, |[   <kind-eq-star> term~result-var => term~msgs-var
-               ; <add-context-errors(|term~msgs-var)> term~tblame
-            ]|)
-    where <fresh-msgs-var> ts => (ts1, msgs-var)
-
-  translate-kind-expectation-normed :
-    (ts, tblame, result-var, KiEmpty()) ->
-      (ts1, |[   <kind-eq-empty> term~result-var => term~msgs-var
-               ; <add-context-errors(|term~msgs-var)> term~tblame
-            ]|)
-    where <fresh-msgs-var> ts => (ts1, msgs-var)
-
-  translate-kind-expectation-normed :
-    (ts, tblame, result-var, KiArrow(K1, K2)) ->
-      (ts5, |[   <kind-eq-arrow> term~result-var => (term~result-var1, term~result-var2, term~msgs-var)
-               ; <add-context-errors(|term~msgs-var)> term~tblame
-               ; strategy~inspect-result1
-               ; strategy~inspect-result2
-            ]|)
-    where <fresh-result-var> ts => (ts1, result-var1)
-        ; <fresh-result-var> ts1 => (ts2, result-var2)
-        ; <fresh-msgs-var> ts2 => (ts3, msgs-var)
-        ; <translate-kind-expectation> (ts3, tblame, result-var1, K1) => (ts4, inspect-result1)
-        ; <translate-kind-expectation> (ts4, tblame, result-var2, K2) => (ts5, inspect-result2)
-
-  translate-kind-expectation-normed :
-    (ts, tblame, result-var, KiPair(K1, K2)) ->
-      (ts5, |[   <kind-eq-pair> term~result-var => (term~result-var1, term~result-var2, term~msgs-var)
-               ; <add-context-errors(|term~msgs-var)> term~tblame
-               ; strategy~inspect-result1
-               ; strategy~inspect-result2
-            ]|)
-    where <fresh-result-var> ts => (ts1, result-var1)
-        ; <fresh-result-var> ts1 => (ts2, result-var2)
-        ; <fresh-msgs-var> ts2 => (ts3, msgs-var)
-        ; <translate-kind-expectation> (ts3, tblame, result-var1, K1) => (ts4, inspect-result1)
-        ; <translate-kind-expectation> (ts4, tblame, result-var2, K2) => (ts5, inspect-result2)
-
-  translate-kind-expectation-normed :
-    (ts, tblame, result-var, cons#(args)) ->
-      (ts2, 
-       |[ !term~result-var
-        ; ?(string~cons)#(term~args-var); strategy~args-expectation
-        ]|)
-    where <fresh-result-var> ts => (ts1, args-var)
-        ; <translate-kind-expectation-metaexpr-args> (ts1, tblame, args-var, args) => (ts2, args-expectation)
-
-  translate-kind-expectation-metaexpr-args :
-    (ts, tblame, args-var, []) ->
-      (ts, stratego-strategy |[ <?[]> term~args-var ]|)
-
-  translate-kind-expectation-metaexpr-args :
-    (ts, tblame, args-var, [arg|args]) ->
-      (ts3, 
-      |[ <?[term~arg-var|term~rest-var]> term~args-var
-       ; strategy~check-arg
-       ; strategy~check-args
-      ]|)
-    where <fresh-result-var> ts => (ts0, arg-var)
-        ; <fresh-result-var> ts0 => (ts1, rest-var)
-        ; <translate-kind-expectation-normed> (ts1, tblame, arg-var, arg) => (ts2, check-arg)
-        ; <translate-kind-expectation-metaexpr-args> (ts2, tblame, rest-var, args) => (ts3, check-args)
-
 
 
 rules // Translate a substitution operator in a type

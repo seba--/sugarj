@@ -24,7 +24,7 @@ rules
   kind-eq =
       where(debug-analysis(!"IN kind eq: "))
     ; (kind-eq-proper 
-       <+ kind-eq-unknown
+       // <+ kind-eq-unknown
        <+ (kind-norm-step,id); kind-eq
        <+ (id,kind-norm-step); kind-eq
        <+ kind-eq-unexpected)
@@ -100,8 +100,8 @@ rules
 
   kind-eq-star = kind-eq-star-proper <+ kind-norm-step; kind-eq-star <+ kind-eq-star-unexpected
 
-  kind-eq-star-proper :
-    KiUnknown() -> []
+  // kind-eq-star-proper :
+  //   KiUnknown() -> []
 
   kind-eq-star-proper :
     KiStar() -> []
@@ -114,8 +114,8 @@ rules
 
   kind-eq-empty = kind-eq-empty-proper <+ kind-norm-step; kind-eq-empty <+ kind-eq-empty-unexpected
 
-  kind-eq-empty-proper :
-    KiUnknown() -> []
+  // kind-eq-empty-proper :
+  //   KiUnknown() -> []
 
   kind-eq-empty-proper :
     KiEmpty() -> []
@@ -128,7 +128,9 @@ rules // kind normalization
 
   kind-norm =
     ?was
+    // ; debug-analysis(!"IN kind norm:  ")
     ; innermost(kind-norm-step) 
+    // ; debug-analysis(!"OUT kind norm: ")
     ; where(try(not(?was); <debug-analysis(!"kind normalized: ")> (was, <id>)))
   kind-norm-step = kind-norm-internal
   kind-norm-internal = fail

@@ -1041,8 +1041,14 @@ public class Driver{
       if (CommandExecution.FULL_COMMAND_LINE && environment.doGenerateFiles())
         log.log("Wrote SDF file to '" + sdfExtension.getAbsolutePath() + "'.", Log.DETAIL);
       
-      String strExtensionTerm = "Module(" + "\"" + fullExtName+ "\"" + ", " + strExtract + ")" + "\n";
-      String strExtensionContent = SDFCommands.prettyPrintSTR(ATermCommands.atermFromString(strExtensionTerm), langLib.getInterpreter());
+      String strExtensionString = "Module(" + "\"" + fullExtName+ "\"" + ", " + strExtract + ")" + "\n";
+      IStrategoTerm strExtensionTerm = ATermCommands.atermFromString(strExtensionString);
+      try {
+        strExtensionTerm = STRCommands.assimilate("strip-annos", currentTransProg, strExtensionTerm, langLib.getInterpreter());
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+      String strExtensionContent = SDFCommands.prettyPrintSTR(strExtensionTerm, langLib.getInterpreter());
       
       int index = strExtensionContent.indexOf('\n');
       if (index >= 0)

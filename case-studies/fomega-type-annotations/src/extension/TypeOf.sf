@@ -13,7 +13,8 @@ context-free syntax
 
 rules
   desugar-typeof :
-    TypeOf(e) -> <desugar-typeofas> TypeOfAs(Metavar(Var("T")), e, Metavar(Var("T")))
+    TypeOf(e) -> T
+    where <get-type> e => T    
 
   desugar-typeofas :
     TypeOfAs(T, e, S) -> U
@@ -26,3 +27,19 @@ rules
 
 desugarings
   desugar-typeof desugar-typeofas
+
+
+rules
+  // implement type-of via type normalization
+  par-reduce-type = resolve-type
+
+  resolve-type :
+    (C, TypeOf(e)) -> T
+    where <get-type> e => T
+  resolve-type :
+    (C, TypeOf(e)) -> T
+    where  <get-context <+ !C> e => C'
+         ; <reinit-for-analysis> e => e'
+         ; <annotate-type> (C',e')
+         ; <get-type> e' => T
+         ; <try(put-type)> (T, e)
