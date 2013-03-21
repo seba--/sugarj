@@ -449,20 +449,23 @@ rules
 
   iterate-par-reduce :
     (C, T) -> T'
-    where <par-reduce <+ ?(_,<id>)> (C, T) => S
-        ; <// debug-analysis(!"EQ IN  ");
+    where <try-par-reduce> (C, T) => S
+        ; < // debug-analysis(!"EQ IN  ");
            type-eq
-           // ; debug-analysis(!"EQ OUT ")
+            // ; debug-analysis(!"EQ OUT ")
           > (T, S) => msgs
         ; if !msgs; ?[] then
             !T
+          else if <structurally-equal> (T, S) then 
+              <debug-analysis(!"illegal, type-eq should be reflexive: ")> T
+            ; !T
           else
             !(<norm> (C, S))
-          end => T'
+          end end => T'
 
   par-reduce = // where(?(_,<id>);debug-analysis(!"PR IN:  "));
-              (par-reduce-type <+ par-reduce-strengthened <+ par-reduce-metavar <+ par-reduce-other /*<+ ?(_,<id>);debug-analysis(!"PR Failed:  ");fail*/)
-              // ; debug-analysis(!"PR OUT:  ")
+              (par-reduce-type <+ par-reduce-strengthened <+ par-reduce-metavar <+ par-reduce-other <+ ?(_,<id>);debug-analysis(!"PR Failed:  ");fail)
+               //; debug-analysis(!"PR OUT:  ")
     // Identity on meta-variables only as a fallback
     // since dynamic axioms might establish more specific
     // reductions.
@@ -569,7 +572,7 @@ rules
   par-reduce-type :
     (C, TyVariant(TyDeclsNil)) -> TyVariant(TyDeclsNil)
   par-reduce-type :
-    (C, TyVariant(TyDeclsCons(decl, decls))) -> TyVariant(TyDeclsCons(<try(par-reduce-decl)> (C, decl), decls'))
+    (C, TyVariant(TyDeclsCons(decl, decls))) -> TyVariant(TyDeclsCons(<try-par-reduce-decl> (C, decl), decls'))
     where <par-reduce> (C, TyVariant(decls)) => TyVariant(decls')
   par-reduce-type :
     (C, TyVariant(TyDeclsCons(decl, decls))) -> TyVariant(TyDeclsCons(<par-reduce-decl> (C, decl), decls))
@@ -579,13 +582,14 @@ rules
   par-reduce-type :
     (C, TyRecord(TyDeclsNil)) -> TyRecord(TyDeclsNil)
   par-reduce-type :
-    (C, TyRecord(TyDeclsCons(decl, decls))) -> TyRecord(TyDeclsCons(<try(par-reduce-decl)> (C, decl), decls'))
+    (C, TyRecord(TyDeclsCons(decl, decls))) -> TyRecord(TyDeclsCons(<try-par-reduce-decl> (C, decl), decls'))
     where <par-reduce> (C, TyVariant(decls)) => TyVariant(decls')
   par-reduce-type :
     (C, TyRecord(TyDeclsCons(decl, decls))) -> TyRecord(TyDeclsCons(<par-reduce-decl> decl, decls))
   par-reduce-type :
     (C, TyRecord(m)) -> TyRecord(<par-reduce-metavar> (C, m))
 
+  try-par-reduce-decl = par-reduce-decl <+ ?(_,<id>)
   par-reduce-decl :
     (C, TyDecl(x, T)) -> TyDecl(x, <par-reduce> (C, T))
 
