@@ -1,6 +1,5 @@
 module test.ADT
 
-import extension.adt.Syntax
 import extension.adt.ADT
 
 import contextanalysis.ContextAnalysis

@@ -31,6 +31,7 @@ desugaring desugar-let {
 
 typing {
   ~C |- ~e1 : ~T1
+  ~C |- ~T1 :: *
   (~C;~%x:~T1) |- ~e2 : ~T2
   ======================================= T-Let
   ~C |- (let ~%x = ~e1 in ~e2) : ~T2
