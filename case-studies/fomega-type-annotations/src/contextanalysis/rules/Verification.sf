@@ -380,11 +380,11 @@ rules // Rules to hook in dynamic axioms into the judgment implementations
     : s      
     }
   
-  annotate-type-defined = Dynamic-Annotate-Type-Defined
-  par-reduce-type = Dynamic-Par-Reduce-Type
-  annotate-kind-defined = Dynamic-Annotate-Kind
+  annotate-type-defined = rec x (Dynamic-Annotate-Type-Defined <+ strengthened-context(x))
+  par-reduce-type = rec x (Dynamic-Par-Reduce-Type <+ strengthened-context(x))
+  annotate-kind-defined = rec x (Dynamic-Annotate-Kind <+ strengthened-context(x))
   lookup-expr-var = Dynamic-Lookup-Expr-Var
-  annotate-signature-defined = Dynamic-Annotate-Signature
+  annotate-signature-defined = rec x (Dynamic-Annotate-Signature <+ strengthened-context(x))
   not-in-dom = Dynamic-Not-In-Dom
   not-in-lab = Dynamic-Not-In-Lab
   kind-norm-internal = Dynamic-Kind-Norm
