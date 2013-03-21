@@ -27,10 +27,10 @@ rules
 
   annotate-type-normalized =
       ?(C, e)
-    ; <debug-analysis(!"IN CTX NORM:  ")> C
+    // ; <debug-analysis(!"IN CTX NORM:  ")> C
     ; <context-norm> C => C'
-    ; <not(structurally-equal) <+ debug-analysis(!"FAILED CTX NORM: ");fail> (C, C')
-    ; <debug-analysis(!"OUT CTX NORM: ")> C'
+    ; <not(structurally-equal)> (C, C')
+    // ; <debug-analysis(!"OUT CTX NORM: ")> C'
     ; <annotate-type> (C', e)
      
   annotate-type-defined = fail

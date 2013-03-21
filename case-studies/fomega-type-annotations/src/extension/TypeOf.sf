@@ -31,6 +31,8 @@ desugarings
 
 rules
   // implement type-of via type normalization
+  par-reduce-type = resolve-type
+
   resolve-type :
     (C, TypeOf(e)) -> T
     where <get-type> e => T
@@ -40,21 +42,4 @@ rules
          ; <reinit-for-analysis> e => e'
          ; <annotate-type> (C',e')
          ; <get-type> e' => T
-
-  par-reduce-type = resolve-type
-
-  // annotate-type-resolve =
-  //     ?(C, e)
-  //   ; <once-found(?TypeOf(_), !(C,<id>); resolve-type)> e => e'
-  //   ; <annotate-type-defined> (C, e')
-
-  // the kind of a type-of can be computed after type normalization
-  // annotate-kind-defined =
-  //     ?(C, T)
-  //   ; <resolve-type> (C, T) => T'
-  //   ; <annotate-kind-defined> (C, T')
-
-  // once-found(atest, f) =
-  //     oncetd(atest; (f; where("ok" => res) <+ where("fail" => res)))
-  //   ; <?"ok"> res
-  //     
+         ; <try(put-type)> (T, e)
