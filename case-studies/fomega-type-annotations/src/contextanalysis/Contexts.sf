@@ -14,6 +14,17 @@ signature
     CtxBindTVarDef: Context * FomegaID * FomegaKind * FomegaType -> Context
     CtxBindVar:     Context * FomegaID * FomegaType -> Context
 
+rules      
+  strengthened-context(s) =
+    ?(CtxBindTVar(C, _, _), v);
+    <s> (C, v) 
+  strengthened-context(s) =
+    ?(CtxBindTVarDef(C, _, _, _), v);
+    <s> (C, v) 
+  strengthened-context(s) =
+    ?(CtxBindVar(C, _, _), v);
+    <s> (C, v) 
+
 
 rules
 

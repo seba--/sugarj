@@ -10,12 +10,68 @@ analyses
   context-analysis
 
 rules
-
   // TODO: Establish context from imports instead of empty context
   context-analysis =
       ?FomegaBody(defs)
     ; <debug-analysis(!"Before checking: "); where(annotate-signature)> (CtxEmpty(), defs)
     ; debug-analysis(!"After checking: ")
+
+rules
+  annotate-type =
+    // debug-analysis(!"ANNO TYPE IN:  "); 
+       annotate-type-normalized
+    <+ annotate-type-defined
+    <+ strengthened-context(annotate-type)
+    <+ annotate-type-missing
+    // ; debug-analysis(!"ANNO TYPE OUT: ") 
+
+  annotate-type-normalized =
+      ?(C, e)
+    ; <debug-analysis(!"IN CTX NORM:  ")> C
+    ; <context-norm> C => C'
+    ; <not(structurally-equal) <+ debug-analysis(!"FAILED CTX NORM: ");fail> (C, C')
+    ; <debug-analysis(!"OUT CTX NORM: ")> C'
+    ; <annotate-type> (C', e)
+     
+  annotate-type-defined = fail
+
+rules
+  annotate-kind =
+    // debug-analysis(!"ANNO KIND IN:  "); 
+       annotate-kind-normalized 
+    <+ annotate-kind-defined
+    <+ strengthened-context(annotate-kind)
+    <+ annotate-kind-missing
+    // ; debug-analysis(!"ANNO KIND OUT: ") 
+
+  annotate-kind-normalized =
+      ?(C, T)
+    ; <context-norm> C => C'
+    ; <norm> (C', T) => T'
+    ; (<not(structurally-equal)> (C, C') + <not(structurally-equal)> (T, T')) 
+    ; <annotate-kind> (C', T')
+    ; <get-kind> T' => K
+    ; <put-kind> (K, T)
+
+  annotate-kind-defined = fail
+
+rules
+  annotate-signature =
+    // debug-analysis(!"ANNO SIGNATURE IN:  "); 
+       annotate-signature-normalized
+    <+ annotate-signature-defined
+    <+ strengthened-context(annotate-signature)
+    <+ annotate-signature-missing
+    // ; debug-analysis(!"ANNO SIGNATURE OUT: ") 
+
+  annotate-signature-normalized =
+      ?(C, defs)
+    ; <context-norm> C => C'
+    ; <not(structurally-equal)> (C, C')
+    ; <annotate-signature> (C', defs)
+
+  annotate-signature-defined = fail
+
 
 
 rules

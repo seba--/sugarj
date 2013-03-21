@@ -461,16 +461,16 @@ rules
           end => T'
 
   par-reduce = // where(?(_,<id>);debug-analysis(!"PR IN:  "));
-              (par-reduce-type <+ par-reduce-metavar <+ par-reduce-strengthened <+ par-reduce-other <+ ?(_,<id>);debug-analysis(!"PR Failed:  ");fail)
+              (par-reduce-type <+ par-reduce-strengthened <+ par-reduce-metavar <+ par-reduce-other /*<+ ?(_,<id>);debug-analysis(!"PR Failed:  ");fail*/)
               // ; debug-analysis(!"PR OUT:  ")
     // Identity on meta-variables only as a fallback
     // since dynamic axioms might establish more specific
     // reductions.
 
   par-reduce-metavar :
-    (C, m@Metavar(_)) -> <debug-analysis(!"par-reduce Metavar: ")> m
+    (C, m@Metavar(_)) -> m
   par-reduce-metavar :
-    (C, m@MetaExpr(_)) -> <debug-analysis(!"par-reduce MetaExpr: ")> m
+    (C, m@MetaExpr(_)) -> m
   
   par-reduce-other :
     (C, t@c#(_)) -> t
@@ -573,6 +573,30 @@ rules
 
   par-reduce-decl :
     (C, TyDecl(x, T)) -> TyDecl(x, <par-reduce> (C, T))
+
+
+rules // normalize contexts
+
+  context-norm : 
+    CtxEmpty -> CtxEmpty
+
+  context-norm : 
+    CtxBindTVar(C, X, K) -> CtxBindTVar(C', X, K')
+    where <context-norm> C => C'
+        ; <kind-norm> K => K'
+
+  context-norm : 
+    CtxBindTVarDef(C, X, K, T) -> CtxBindTVarDef(C', X, K', T')
+    where <context-norm> C => C'
+        ; <kind-norm> K => K'
+        ; <norm> (C', T) => T'
+
+  context-norm : 
+    CtxBindVar(C, x, T) -> CtxBindVar(C', x, T')
+    where <context-norm> C => C'
+        ; <norm> (C', T) => T'
+
+  context-norm = id
 
 
 rules // Unification of types (Metavar(Var(mvar)) is a variable

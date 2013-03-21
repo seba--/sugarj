@@ -49,8 +49,8 @@ import concretesyntax.Fomega
 ~C |- \~%X::~K1. ~e2 : forall ~%X::~K1. ~T2
 
 
-(~C;~%x:~T1) |- ~e2 : ~T2
 ~C |- ~T1 :: *
+(~C;~%x:~T1) |- ~e2 : ~T2
 ================================ T-Abs
 ~C |- \~%x:~T1. ~e2 : ~T1 -> ~T2
 

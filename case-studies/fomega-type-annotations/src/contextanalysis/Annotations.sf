@@ -1,5 +1,17 @@
 module contextanalysis.Annotations
 
+rules // TODO: these two definitions belong to Analyze.str
+
+  reinit-for-analysis = bottomup(reinit-analysis-data-annotation)
+
+  reinit-analysis-data-annotation =
+    try(?node
+      ; <get-annotations; filter(?("analysis-data", _)) <+ ![]> node => ana-annos
+      ; <?[]> ana-annos
+      ; <get-annotations; filter(not(?("analysis-data", _))) <+ ![]> node => annos
+      ; ![("analysis-data", <new-hashtable>)] => new-ana-annos
+      ; <set-annotations> (node, <conc> (annos, new-ana-annos))    
+    )
 
 rules
 

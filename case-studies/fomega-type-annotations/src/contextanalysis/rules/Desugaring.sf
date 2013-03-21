@@ -80,7 +80,7 @@ rules // Translate a typing rule
            ; (strategy~premises-implementation
                  <+ <debug-analysis(<concat-strings> ["FAILED  ", term~tname, " "])> (term~tC, node); fail)
            ; <put-type> (term~tT, node)
-           // ; <put-context> (term~tC, node)
+           ; <put-context> (term~tC, node)
            ; <debug-analysis(<concat-strings> ["OUT ", term~tname, " "])> (term~tC, node)
     ]|
     where <trm-explode> C => tC
@@ -104,7 +104,7 @@ rules // Translate a kinding rule
            ; (strategy~premises-implementation
                  <+ <debug-analysis(<concat-strings> ["FAILED  ", term~tname, " "])> (term~tC, node); fail)
            ; <put-kind> (term~tK, node)
-           // ; <put-context> (term~tC, node)
+           ; <put-context> (term~tC, node)
            ; <debug-analysis(<concat-strings> ["OUT ", term~tname, " "])> (term~tC, node)
     ]|
     where <trm-explode> C => tC
@@ -128,7 +128,7 @@ rules // Translate a signature rule
            ; (strategy~premises-implementation
                  <+ <debug-analysis(<concat-strings> ["FAILED  ", term~tname, " "])> (term~tC, node); fail)
            ; <put-signature> (term~tsig, node)
-           // ; <put-context> (term~tC, node)
+           ; <put-context> (term~tC, node)
            ; <debug-analysis(<concat-strings> ["OUT ", term~tname, " "])> (term~tC, node)
     ]|
     where <trm-explode> C => tC
