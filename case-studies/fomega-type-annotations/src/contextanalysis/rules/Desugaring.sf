@@ -375,6 +375,27 @@ rules // Translate a judgment
     where <trm-explode> x1 => tx1
         ; <trm-explode> x2 => tx2
 
+  translate-type-expectation :
+    (ts, tblame, result-var, fv1, TyApp(T1, T2), fv2) ->
+      (ts5, |[   <type-eq-app> term~result-var => (term~result-var1, term~result-var2, term~msgs-var)
+               ; <add-context-errors(|term~msgs-var)> term~tblame
+               ; strategy~inspect-result1
+               ; strategy~inspect-result2
+            ]|)
+    where <fresh-result-var> ts => (ts1, result-var1)
+        ; <fresh-result-var> ts1 => (ts2, result-var2)
+        ; <fresh-msgs-var> ts2 => (ts3, msgs-var)
+        ; <translate-type-expectation> (ts3, tblame, result-var1, fv1, T1, fv2) => (ts4, inspect-result1)
+        ; <translate-type-expectation> (ts4, tblame, result-var2, fv1, T2, fv2) => (ts5, inspect-result2)
+
+  translate-type-expectation :
+    (ts, tblame, result-var, fv1, TyVar(X), fv2) ->
+      (ts1, |[   <type-eq> (TyVar(term~tX), term~result-var) => term~msgs-var
+               ; <add-context-errors(|term~msgs-var)> term~tblame
+            ]|)
+    where <fresh-msgs-var> ts => (ts1, msgs-var)
+        ; <trm-explode> X => tX
+
 
 rules // Translate a type expectation
 

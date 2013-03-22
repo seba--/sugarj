@@ -309,6 +309,20 @@ rules
 
 rules
 
+  type-eq-var = type-eq-var-proper <+ type-eq-var-unexpected
+
+  type-eq-var-proper :
+    TyUnknown() -> (IDUnknown(), [])
+
+  type-eq-var-proper :
+    TyVar(X) -> (X, [])
+
+  type-eq-var-unexpected :
+    T -> (IDUnknown(), [<concat-strings> ["type mismatch, expected type variable but found ", <pp-type> T]])
+
+
+rules
+
   type-eq-pair = type-eq-pair-proper <+ type-eq-pair-unexpected
 
   type-eq-pair-proper :
