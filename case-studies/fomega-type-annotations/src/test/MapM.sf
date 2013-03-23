@@ -2,7 +2,7 @@ module test.MapM
 
 import contextanalysis.ContextAnalysis
 
-import extensions.DoBlock
+import extensions.DoBlock2
 
 type Fix = \A::*.\B::*. mu (\Rec::[]=>*. \arg::[]. Rec arg -> A -> B, [])
 
@@ -44,7 +44,7 @@ val mapM = \M::*=>*. \bind:BindType M. \return:ReturnType M.
         if isNil xs then
           return [B] Nil
         else
-          do List B {
+          do [List B] {
               x1:B <- f (hd [A] xs)
             ; xs1:List B <- mapM f (tl [A] xs)
             ; return (Cons [B] x1 xs1)

@@ -2,7 +2,7 @@ module test.CounterMonad
 
 import contextanalysis.ContextAnalysis
 
-import extensions.DoBlock
+import extensions.DoBlock2
 import extensions.AnnotatedLet
 
 val succ = \n:Nat. n
@@ -23,7 +23,7 @@ val tick = (\n:Nat. {fst={}, snd=succ n}) as CM {}
 val get = (\n:Nat. {fst=n, snd=n}) as CM Nat
 
 
-val test1 = (do Nat {
+val test1 = (do [Nat] {
     y:Nat <- return [Nat] 1 
   ; x:String <- return [String] "foo"
   ; return [Nat] y
