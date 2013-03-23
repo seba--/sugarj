@@ -1,0 +1,80 @@
+module extensions.CounterMonad
+
+import org.sugarj.languages.Fomega
+import concretesyntax.Fomega
+import concretesyntax.Metavars
+
+import extension.Declaration
+import extension.TypeOf
+// 
+// 
+// syntax {
+//   context-free syntax
+//     "docm" "{" FomegaExpr "}"                  -> FomegaExpr {cons("DoCMAtomic")}
+//     "docm" "{" DoCMBindings ";" FomegaExpr "}" -> FomegaExpr {cons("DoCMSeq")}
+// 
+//     FomegaID "<-" FomegaExpr -> DoCMBinding {cons("DoCMArrow")}
+//     FomegaExpr               -> DoCMBinding {cons("DoCMNoReturn")}
+// 
+//     DoCMBinding                  -> DoCMBindings {cons("DoCMBindingsEnd")}
+//     DoCMBinding ";" DoCMBindings -> DoCMBindings {cons("DoCMBindingsCons")}
+// 
+//   context-free syntax
+//     "~" StrategoVar -> DoSUmBindings {cons("Metavar")}
+// 
+//   lexical syntax
+//     "docm" -> FomegaKeyword
+// 
+//   lexical restrictions
+//     "docm" -/- [a-zA-Z0-09]
+// }
+// 
+// desugaring desugar-docm {
+//   desugar-docm :
+//     fomega-expr |[ docm { ~e } ]|
+//     ->
+//     fomega-expr |[ ~e ]|
+// 
+//   desugar-docm :
+//   //  fomega |[ docm { ~%x <- ~e1; ~e2 } ]|
+//   //  ->
+//   //  fomega |[ bind [$(~%A from typeof ~e1 as CM ~%A)]
+//   //              [$(~%B from typeof ~e2 as CM ~%B)] ~e1
+//   //                (\~%x:$(~%A from ~e1 as CM ~%A). ~e2) ]|
+//     DoCMSeq(DoCMBindingsEnd(DoCMArrow(x, e1)), e2)
+//     ->
+//     App(
+//       App(
+//         TApp(
+//           TApp(
+//             Var("bind"),
+//             TypeOfAs(Metavar(Var("A")), e1, TyApp(TyVar("CM"), Metavar(Var("A"))))),
+//           TypeOfAs(Metavar(Var("B")), e2, TyApp(TyVar("CM"), Metavar(Var("B"))))),
+//         e1),
+//       Abs(x, TypeOfAs(Metavar(Var("A")), e1, TyApp(TyVar("CM"), Metavar(Var("A")))), e2))
+// 
+//   desugar-docm :
+//   //  fomega |[ docm { ~%x <- ~e1; ~bs; ~e2 } ]|
+//   //  ->
+//   //  fomega |[ bind [$(~%A from typeof ~e1 as CM ~%A)]
+//   //              [$(~%B from typeof docm { ~bs; ~e2 } as CM ~%B)] ~e1
+//   //                (\~%x:$(~%A from typeof ~e1 as CM ~%A). docm { ~bs; ~e2 }) ]|
+//     DoCMSeq(DoCMBindingsCons(DoCMArrow(x, e1), bs), e2)
+//     ->
+//     App(
+//       App(
+//         TApp(
+//           TApp(
+//             Var("bind"),
+//             TypeOfAs(Metavar(Var("A")), e1, TyApp(TyVar("CM"), Metavar(Var("A"))))),
+//           TypeOfAs(Metavar(Var("B")), DoCMSeq(bs, e2), TyApp(TyVar("CM"), Metavar(Var("B"))))),
+//         e1),
+//       Abs(x, TypeOfAs(Metavar(Var("A")), e1, TyApp(TyVar("CM"), Metavar(Var("A")))), DoCMSeq(bs, e2)))
+// }
+// 
+// typing {
+//   ~C |- ~e : ~T
+//   ~C |- ~T ~> Nat -> {c:Nat, v:~S}
+//   ================================ T-DoCMAtomic
+//   ~C |- docm { ~e } : ~T
+// }
