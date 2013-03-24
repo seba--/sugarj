@@ -2,6 +2,7 @@ module extension.adt.ADT
 
 import org.sugarj.languages.Fomega
 import concretesyntax.Fomega
+import concretesyntax.Metavars
 
 import extension.Declaration
 
@@ -35,6 +36,7 @@ syntax {
 	  "~" StrategoVar -> DataParams    {cons("Metavar")}
 	  "~" StrategoVar -> DataCons      {cons("Metavar")}
 	  "~" StrategoVar -> DataConParams {cons("Metavar")}
+	  "~#" StrategoVar -> DataCon       {cons("Metavar")}
 	
 	  "dataparams" "|[" DataParams "]|" -> StrategoTerm {cons("ToMetaExpr")}
 	               "|[" DataParams "]|" -> StrategoTerm {cons("ToMetaExpr")}
@@ -57,30 +59,94 @@ signature
     ADT-CA:      DataParams * FomegaType * FomegaType -> StrategoTerm
     ADT-UNCURRY: FomegaID * DataParams * FomegaType -> StrategoTerm
 
+    ADT-DCONS:       FomegaID * DataParams * DataCons * DataCons * FomegaDefs -> StrategoTerm
+    ADT-DCONS-END:   FomegaID * DataParams * DataCons * DataCons -> StrategoTerm
+    ADT-DCON:        FomegaID * DataParams * FomegaID * FomegaDecls * DataCons -> StrategoTerm
+    ADT-DCON-ARGS:   FomegaDecls * FomegaExpr -> StrategoTerm
+    ADT-OP-APP:      FomegaType * DataParams -> StrategoTerm
+    ADT-DCON-FIELDS: FomegaDecls -> StrategoTerm
 
 rules
   desugar-data :
-    |[ data ~%X ~params = ~dcons ~=defs ]| -> |[ type ~%X = M~ADT-TYPE(X, params, dcons) ~=defs ]|
+    |[ data ~%X ~params = ~dcons ~=defs ]| ->
+      |[ type ~%X = M~ADT-TYPE(X, params, dcons) Mdefs~ADT-DCONS(X, params, dcons, dcons, defs) ]|
 
   desugar-data :
-    |[ data ~%X ~params = ~dcons ]| -> |[ type ~%X = M~ADT-TYPE(X, params, dcons) ]|
+    |[ data ~%X ~params = ~dcons ]| ->
+      |[ type ~%X = M~ADT-TYPE(X, params, dcons) Mdefs~ADT-DCONS-END(X, params, dcons, dcons) ]|
+
+
+  desugar-data :
+    ADT-DCONS(X, params, datacons |[ ~%Xcon ~%Xdiscr { ~decls } ]|, dcons-all, defs) ->
+      fomega-defs |[ val ~%Xcon = M~ADT-DCON(X, params, Xcon, decls, dcons-all) ~=defs ]|
+
+  desugar-data :
+    ADT-DCONS(X, params, datacons |[ ~%Xcon ~%Xdiscr { ~decls } | ~dcons ]|, dcons-all, defs) ->
+      fomega-defs |[ val ~%Xcon = M~ADT-DCON(X, params, Xcon, decls, dcons-all)
+                     Mdefs~ADT-DCONS(X, params, dcons, dcons-all, defs) ]|
+
+
+  desugar-data :
+    ADT-DCONS-END(X, params, datacons |[ ~%Xcon ~%Xdiscr { ~decls } ]|, dcons-all) ->
+      fomega-defs |[ val ~%Xcon = M~ADT-DCON(X, params, Xcon, decls, dcons-all) ]|
+
+  desugar-data :
+    ADT-DCONS-END(X, params, datacons |[ ~%Xcon ~%Xdiscr { ~decls } | ~dcons ]|, dcons-all) ->
+      fomega-defs |[ val ~%Xcon = M~ADT-DCON(X, params, Xcon, decls, dcons-all)
+                     Mdefs~ADT-DCONS-END(X, params, dcons, dcons-all) ]|
+
+
+  desugar-data :
+    ADT-DCON(X, params, Xcon, decls, dcons-all) ->
+      ADT-ABS(params,
+        ADT-DCON-ARGS(decls,
+          fomega-expr |[ fold [M~ADT-OP-APP(X, params)]
+                           (<~%Xcon={M~(ADT-DCON-FIELDS(decls))}> as <M~(ADT-DECLS(dcons-all))>) ]|))
+
+
+  desugar-data :
+    ADT-OP-APP(T, dataparams |[ ]|) -> T
+
+  desugar-data :
+    ADT-OP-APP(T, dataparams |[ (~%X::~K) ~params ]|) ->
+      ADT-OP-APP(fomega-type |[ ~T ~%X ]|, params)
+
+
+  desugar-data :
+    ADT-DCON-ARGS(fomega-tydecls |[ ]|, e) -> e
+
+  desugar-data :
+    ADT-DCON-ARGS(fomega-tydecls |[ ~%x:~T ~:decls ]|, e) ->
+      fomega-expr |[ \~%x:~T. M~ADT-DCON-ARGS(decls, e) ]|
+
+
+  desugar-data :
+    ADT-DCON-FIELDS(fomega-tydecls |[ ]|) -> fomega-fields |[ ]|
+
+  desugar-data :
+    ADT-DCON-FIELDS(fomega-tydecls |[ ~%x:~T ~:decls ]|) ->
+      fomega-fields |[ ~%x=~%x M~(ADT-DCON-FIELDS(decls)) ]|
+
 
   desugar-data :
     ADT-TYPE(X, params, dcons) ->
       fomega-type |[ M~ADT-ABS(params, |[ mu (M~ADT-OP(X, params, dcons), M~(ADT-ARG(params))) ]|) ]|
+
 
   desugar-data :
     ADT-ABS(dataparams |[ ]|, T) -> fomega-type |[ ~T ]|
 
   desugar-data :
     ADT-ABS(|[ (~%X::~K) ~params ]|, T) -> fomega-type |[ \~%X::~K. M~ADT-ABS(params, T) ]|
-    
+
+
   desugar-data :
     ADT-OP(X, params, dcons) ->
       fomega-type |[ \~%X :: M~(ADT-PK(params)) => *.
                        \args :: M~(ADT-PK(params)).
                          M~ADT-UNCURRY(X, params, |[ <M~(ADT-DECLS(dcons))> ]|)
                   ]| 
+
 
   desugar-data :
     ADT-UNCURRY(X, params, T) ->
@@ -125,23 +191,39 @@ rules
 
   desugar-data :
     ADT-PK(|[ (~%X::~K) ~params ]|) -> fomega-kind |[ {~K, M~(ADT-PK(params))} ]|
-
 }
 
 typing {
-  
+
 ~%X notin dom(~C)
 ~C |- M~ADT-TYPE(X, params2, dcons) :: ~K
-(~C;~%X::~K=M~ADT-TYPE(X, params2, dcons)) |- ~=defs ==> ~sig
-================================================================== S-DataCons
+(~C;~%X::~K=M~ADT-TYPE(X, params2, dcons)) |-
+  M~ADT-DCONS(X, params2, dcons, dcons, defs) ==> ~sig
+==================================================== S-DataCons
 ~C |- data ~%X ~params2 = ~dcons ~=defs ==> ~sig
 
 
 
 ~%X notin dom(~C)
 ~C |- M~ADT-TYPE(X, params, dcons) :: ~K
+(~C;~%X::~K=M~ADT-TYPE(X, params2, dcons)) |-
+  M~ADT-DCONS-END(X, params2, dcons, dcons) ==> ~sig
 ================================================================== S-DataEnd
-~C |- data ~%X ~params = ~dcons ==> ()
+~C |- data ~%X ~params = ~dcons ==> ~sig
+
+
+~%Xcon notin dom(~C)
+~C |- M~ADT-DCON(X, params, Xcon, decls, dcons-all) :: TYPE-OF-DCON
+(~C; ~%Xcon:TYPE-OF-DCON) |- ADT-DCONS(X, params, dcons, dcons-all, defs) ==> sig
+==================================================================================== S-ADT-DCONS-Cons
+~C |- M~ADT-DCONS(X, params,
+        datacons |[ ~%Xcon ~%Xdiscr { ~decls } | ~dcons ]|, dcons-all, defs) ==> sig
+
+~%Xcon notin dom(~C)
+~C |- M~ADT-DCON(X, params, Xcon, decls, dcons-all) :: TYPE-OF-DCON
+(~C; ~%Xcon:TYPE-OF-DCON) |- ~defs ==> sig
+=================================================================== S-ADT-DCONS-End
+~C | M~ADT-DCONS(X, params, datacons |[]|, dcons-all, defs) ==> sig
 
 
 ~C |- M~ADT-ABS(params, |[ mu (M~ADT-OP(X, params, dcons), M~(ADT-ARG(params))) ]|) :: ~K
