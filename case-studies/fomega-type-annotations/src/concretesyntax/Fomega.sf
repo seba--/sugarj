@@ -23,6 +23,10 @@ context-free syntax
   "fomega"         "|[" FomegaTyDecls "]|" -> StrategoTerm {cons("ToMetaExpr")}
                    "|[" FomegaTyDecls "]|" -> StrategoTerm {cons("ToMetaExpr")}
 
+  "fomega-fields" "|[" FomegaFields "]|" -> StrategoTerm {cons("ToMetaExpr")}
+  "fomega"        "|[" FomegaFields "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                  "|[" FomegaFields "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
   "fomega-branches" "|[" FomegaBranches "]|" -> StrategoTerm {cons("ToMetaExpr")}
   "fomega"          "|[" FomegaBranches "]|" -> StrategoTerm {cons("ToMetaExpr")}
                     "|[" FomegaBranches "]|" -> StrategoTerm {cons("ToMetaExpr")}
