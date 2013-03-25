@@ -4,20 +4,23 @@ import extension.adt.ADT
 
 import contextanalysis.ContextAnalysis
 
-type Id = \X::*=>*=>*. X
+// type Id = \X::*=>*=>*. X
 
 data Tree (K::*) (V::*) = Nil isNil {}
                         | Leaf isLeaf {value: V}
                         | Node isNode {left: Tree K V, key: K, right: Tree K V}
-type TreeBody = \K::*. \V::*.
-  <Nil: {}, Leaf: {value: V}, Node: {left: Tree K V, key: K, right: Tree K V}>
+ 
+val foo = 1
+// val foo = 1
+//type TreeBody = \K::*. \V::*.
+//  <Nil: {}, Leaf: {value: V}, Node: {left: Tree K V, key: K, right: Tree K V}>
 
-val Nil = \K::*. \V::*.
-  fold [Tree K V] (<Nil={}> as TreeBody K V)
-val Leaf = \K::*. \V::*.
-  \v:V. fold [Tree K V] (<Leaf={value=v}> as TreeBody K V)
-val Node = \K::*. \V::*.
-  \l:Tree K V. \k:K. \r:Tree K V.
-     fold [Tree K V] (<Node={left=l, key=k, right=r}> as TreeBody K V)
+//val Nil = \K::*. \V::*.
+//  fold [Tree K V] (<Nil={}> as TreeBody K V)
+//val Leaf = \K::*. \V::*.
+//  \v:V. fold [Tree K V] (<Leaf={value=v}> as TreeBody K V)
+//val Node = \K::*. \V::*.
+//  \l:Tree K V. \k:K. \r:Tree K V.
+//     fold [Tree K V] (<Node={left=l, key=k, right=r}> as TreeBody K V)
 
-val t = Node[Nat][Bool] (Nil[Nat][Bool]) 17 (Leaf[Nat][Bool] true)
+//val t = Node[Nat][Bool] (Nil[Nat][Bool]) 17 (Leaf[Nat][Bool] true)

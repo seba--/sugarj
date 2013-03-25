@@ -245,8 +245,9 @@ typing {
 // * Signature rules *
 
 ~%x-con notin dom(~C)
-~C |- M~ADT-DCON(X, params, x-con, decls, dcons-all) :
-  M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(ADT-TYPE(X, params, dcons-all), params)))
+~C |- M~ADT-DCON(X, params, x-con, decls, dcons-all) : ~T
+~C |- ~T ~> ~U
+~C |- M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(ADT-TYPE(X, params, dcons-all), params))) ~> ~U
 (~C; ~%x-con:M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(ADT-TYPE(X, params, dcons-all), params)))) |-
   M~ADT-DCONS(X, params, dcons, dcons-all, defs) ==> ~sig
 ==================================================================================== S-ADT-DCONSCons
@@ -254,8 +255,9 @@ typing {
       datacons |[ ~%x-con ~%x-discr { ~decls } | ~dcons ]|, dcons-all, defs) ==> ~sig
 
 ~%x-con notin dom(~C)
-~C |- M~ADT-DCON(X, params, x-con, decls, dcons-all) :
-  M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(ADT-TYPE(X, params, dcons-all), params)))
+~C |- M~ADT-DCON(X, params, x-con, decls, dcons-all) : ~T
+~C |- ~T ~> ~U
+~C |- M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(ADT-TYPE(X, params, dcons-all), params))) ~> ~U
 (~C; ~%x-con:M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(ADT-TYPE(X, params, dcons-all), params)))) |-
   ~=defs ==> ~sig
 =================================================================================================== S-ADT-DCONEnd
@@ -266,9 +268,10 @@ typing {
         ADT-DCON-ARGS(decls,
           fomega-expr |[ fold [M~ADT-OP-APP(ADT-TYPE(X, params, dcons), params)]
                            (<~%x-con={M~(ADT-DCON-FIELDS(decls))}>
-                             as <M~(ADT-DECLS(dcons))>) ]|)) :
-  M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(ADT-TYPE(X, params, dcons), params)))
-=========================================================================================== T-ADT-DCON
+                             as <M~(ADT-DECLS(dcons))>) ]|)) : ~T
+~C |- M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(ADT-TYPE(X, params, dcons), params))) ~> ~U
+~C |- ~T ~> ~U
+================================================================================================== T-ADT-DCON 
 ~C |- M~ADT-DCON(X, params, x-con, decls, dcons) :
   M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(ADT-TYPE(X, params, dcons), params)))
 
@@ -306,24 +309,27 @@ typing {
 
 // * Normalization *
 
-===================================================== N-ADT-DCON-ARROWNil
-~C |- M~ADT-DCON-ARROW(fomega-tydecls |[ ]|, T) ~> ~T
+~C |- ~T ~> ~T'
+====================================================== N-ADT-DCON-ARROWNil
+~C |- M~ADT-DCON-ARROW(fomega-tydecls |[ ]|, T) ~> ~T'
 
 ~C |- M~ADT-DCON-ARROW(decls, T) ~> ~S
 ========================================================================= N-ADT-DCON-ARROWCons
 ~C |- M~ADT-DCON-ARROW(fomega-tydecls |[ ~%x:~T ~decls ]|, T) ~> ~T -> ~S
 
 
-============================================= N-ADT-OP-APPNil
-~C |- M~ADT-OP-APP(T, dataparams |[ ]|) ~> ~T
+~C |- ~T ~> ~T'
+============================================= N-ADT-OP-APPNil   
+~C |- M~ADT-OP-APP(T, dataparams |[ ]|) ~> ~T'
 
 ~C |- M~ADT-OP-APP(fomega-type |[ ~T ~%X ]|, params) ~> ~S
 =============================================================== N-ADT-OP-APPCons
 ~C |- M~ADT-OP-APP(T, dataparams |[ (~%X::~K) ~params ]|) ~> ~S
 
 
+~C |- ~T ~> ~T'
 ===================================================== N-ADT-DCON-FORALLNil
-~C |- M~ADT-DCON-ARROW(fomega-tydecls |[ ]|, T) ~> ~T
+~C |- M~ADT-DCON-ARROW(fomega-tydecls |[ ]|, T) ~> ~T'
 
 ~C |- M~ADT-DCON-FORALL(params, T) ~> ~S
 ==================================================================================== N-ADT-DCON-FORALLCons

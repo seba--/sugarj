@@ -18,6 +18,8 @@ import contextanalysis.rules.Syntax
 desugarings
   desugar-context-rule
 
+
+
 //  desugar-EVAL
 //
 // signature
@@ -45,7 +47,7 @@ rules
 
   desugar-context-rule :
     TypingRule(premises, RuleName(sep, optional-name), conclusion) ->
-      transformation-elem(<translate-typing-rule> (optional-name, premises, conclusion))
+      transformation-elem(<debug-analysis(!"TRANSLATE TYPING RULE IN  "); translate-typing-rule; debug-analysis(!"TRANSLATE TYPING RULE OUT ")> (optional-name, premises, conclusion))
 
   desugar-context-rule :
     KindingRule(premises, RuleName(sep, optional-name), conclusion) ->
@@ -89,7 +91,7 @@ rules // Translate a typing rule
         ; <translate-subst> T => tT
         ; <premises-to-list> premises => premises-list
         ; <ts-set-blame> (<ts-initial> (), Var("node")) => ts
-        ; <translate-premises> (ts, premises-list) => (ts1, premises-implementation)
+        ; <debug(!"TRANS PREM IN ");translate-premises;debug(!"TRANS PREM OUT ")> (ts, premises-list) => (ts1, premises-implementation)
 
 
 rules // Translate a kinding rule
@@ -282,7 +284,8 @@ rules // Translate a judgment
         ; <trm-explode> T' => tT'
         ; <fresh-result-var> ts => (ts1, result-var)
         ; <fresh-result-var> ts1 => (ts2, result-var1)
-        ; <translate-type-expectation> (ts2, tT, result-var, [], T', []) => (ts3 , inspect-result)
+        ; <ts-get-blame> ts => tblame
+        ; <translate-type-expectation> (ts2, tblame, result-var, [], T', []) => (ts3 , inspect-result)
 
   translate-judgment :
     (ts, SignatureJudgment(C, defs, sig)) ->
@@ -418,10 +421,10 @@ rules // Translate a type expectation
     where <not(ts-in-eqs)> (ts, mvar)
 
   translate-type-expectation :
-    (ts, tblame, result-var, MetaExpr(exp), fv2) ->
+    (ts, tblame, result-var, fv1, MetaExpr(exp), fv2) ->
       (<ts-append-eqs> (ts, mvars), |[ !term~result-var; ?term~exp ]|)
-    where <freevars-metaexpr> exp => mvars
-        ; <isect> (<ts-get-eqs> ts, mvars) => []
+    where <debug-analysis(!"DEBUG IN FREEVARS "); freevars-metaexpr; debug-analysis(!"DEBUG FREEVARS METAEXPR ")> exp => mvars
+        ; <isect; debug-analysis(!"OUT ISECT ")> (<ts-get-eqs> ts, mvars) => []
 
   translate-type-expectation :
     (ts, tblame, result-var, fv1, TyBool(), fv2) ->
@@ -640,6 +643,9 @@ rules // Translate a substitution operator in a type
 
   translate-subst :
     Metavar(mvar) -> mvar
+
+  translate-subst :
+    MetaExpr(m) -> m
 
   translate-subst :
     TyVar(X) -> stratego-term |[ TyVar(term~tX) ]|

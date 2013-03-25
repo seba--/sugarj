@@ -49,9 +49,9 @@ import contextanalysis.rules.Desugaring
 ~C |- ~T1 ~T2 :: ~K12
 
 
-~C |- ~T :: *
+// ~C |- ~T :: *
 =================== K-VariantEnd
-~C |- <~%x:~T> :: *
+~C |- <> :: *
 
 
 ~C |- ~T :: *
