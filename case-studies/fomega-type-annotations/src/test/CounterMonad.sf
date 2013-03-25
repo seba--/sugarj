@@ -1,0 +1,37 @@
+module test.CounterMonad
+
+import contextanalysis.ContextAnalysis
+
+import extensions.DoBlock2
+import extensions.AnnotatedLet
+
+val succ = \n:Nat. n
+
+type CM = \A::*. Nat -> {fst:A, snd:Nat}
+
+val returnCM = \A::*. \x:A. (\n:Nat. {fst=x,snd=n}) as CM A
+
+val bindCM = \A::*. \B::*. \m:CM A. \f:A -> CM B.
+  (\n:Nat. let st:{fst:A,snd:Nat} = m n
+           in f (st!fst) (st!snd)) as CM B
+
+
+val reset = (\n:Nat. {fst={}, snd=0}) as CM {}
+
+val tick = (\n:Nat. {fst={}, snd=succ n}) as CM {}
+
+val get = (\n:Nat. {fst=n, snd=n}) as CM Nat
+
+
+val test1 = (do [Nat] {
+    y:Nat <- return [Nat] 1 
+  ; x:String <- return [String] "foo"
+  ; return [Nat] y
+}) // [CM] bindCM returnCM
+
+// This code cannot work!
+// val test2 = (do Nat {
+//     y:Nat <- get
+//   ; x:String <- return [String] "foo"
+//   ; return [Nat] y
+// }) [CM] bindCM returnCM
