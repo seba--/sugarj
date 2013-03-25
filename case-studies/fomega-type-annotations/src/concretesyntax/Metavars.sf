@@ -39,6 +39,8 @@ context-free syntax
   "Mtydecls1~" StrategoTerm -> FomegaTyDecls1 {cons("MetaExpr")}
   "Mkind~" StrategoTerm     -> FomegaKind     {cons("MetaExpr")}
   "Mfields~" StrategoTerm   -> FomegaFields   {cons("MetaExpr")}
+  "Mfields1~" StrategoTerm  -> FomegaFields1  {cons("MetaExpr")}
+
   "Mdefs~" StrategoTerm     -> FomegaDefs     {cons("MetaExpr")}
 
 rules

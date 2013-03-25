@@ -129,7 +129,7 @@ rules
 
   desugar-data :
     ADT-DCON-FIELDS(fomega-tydecls |[ ~%x:~T ~:decls ]|) ->
-      fomega-fields |[ ~%x=~%x M~(ADT-DCON-FIELDS(decls)) ]|
+      fomega-fields |[ ~%x=~%x Mfields1~(ADT-DCON-FIELDS(decls)) ]|
 
   desugar-data :
     ADT-TABS(dataparams |[ ]|, e) -> fomega-expr |[ ~e ]|
@@ -222,13 +222,14 @@ rules
 
 typing { 
 
+// *** Rules for the definition ***
+
 ~%X notin dom(~C)
 ~C |- M~ADT-TYPE(X, params, dcons) :: ~K
 (~C;~%X::~K=M~ADT-TYPE(X, params, dcons)) |-
   M~ADT-DCONS(X, params, dcons, dcons, defs) ==> ~sig
 ===================================================== S-DataCons
 ~C |- data ~%X ~params = ~dcons ~=defs ==> ~sig
-
 
 
 ~%X notin dom(~C)
@@ -239,21 +240,25 @@ typing {
 ~C |- data ~%X ~params = ~dcons ==> ~sig
 
 
+// *** Rules related to constructors ***
+
+// * Signature rules *
+
 ~%x-con notin dom(~C)
 ~C |- M~ADT-DCON(X, params, x-con, decls, dcons-all) :
-  M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(ADT-TYPE(X, params, dcons), params)))
-(~C; ~%x-con:M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(ADT-TYPE(X, params, dcons), params)))) |-
+  M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(ADT-TYPE(X, params, dcons-all), params)))
+(~C; ~%x-con:M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(ADT-TYPE(X, params, dcons-all), params)))) |-
   M~ADT-DCONS(X, params, dcons, dcons-all, defs) ==> ~sig
-==================================================================================== S-ADT-DCONS-Cons
+==================================================================================== S-ADT-DCONSCons
 ~C |- M~ADT-DCONS(X, params,
       datacons |[ ~%x-con ~%x-discr { ~decls } | ~dcons ]|, dcons-all, defs) ==> ~sig
 
 ~%x-con notin dom(~C)
 ~C |- M~ADT-DCON(X, params, x-con, decls, dcons-all) :
-  M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(ADT-TYPE(X, params, dcons), params)))
-(~C; ~%x-con:M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(ADT-TYPE(X, params, dcons), params)))) |-
+  M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(ADT-TYPE(X, params, dcons-all), params)))
+(~C; ~%x-con:M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(ADT-TYPE(X, params, dcons-all), params)))) |-
   ~=defs ==> ~sig
-=================================================================================================== S-ADT-DCONS-End
+=================================================================================================== S-ADT-DCONEnd
 ~C |- M~ADT-DCONS(X, params, datacons |[ ~%x-con ~%x-discr { ~decls } ]|, dcons-all, defs) ==> ~sig
 
 
@@ -273,44 +278,67 @@ typing {
 ~C |- M~ADT-TABS(dataparams |[ ]|, e) : ~T
 
 (~C; ~%X::~K) |- M~ADT-TABS(params, e) : ~T
-========================================== T-ADT-TABSCons
+============================================================================ T-ADT-TABSCons
 ~C |- M~ADT-TABS(dataparams |[ (~%X::~K) ~params ]|, e) : forall ~%X::~K. ~T 
 
 
 ~C |- ~e : ~T
-============================================================ T-ADT-DCON-ARGSNil
+=================================================== T-ADT-DCON-ARGSNil
 ~C |- M~ADT-DCON-ARGS(fomega-tydecls |[ ]|, e) : ~T
 
 ~C |- ~T :: *
 (~C; ~%x:~T) |- M~ADT-DCON-ARGS(decls, e) : ~S
-======================================================================= T-ADT-DCON-ARGSCons
+======================================================================== T-ADT-DCON-ARGSCons
 ~C |- M~ADT-DCON-ARGS(fomega-tydecls |[ ~%x:~T ~:decls ]|, e) : ~T -> ~S
 
 
+==================================================== T-ADT-DCON-FIELDSNil
+~C |- {M~ADT-DCON-FIELDS(fomega-tydecls |[ ]|)} : {}
+
+~C |- ~%x : ~T
+~C |- {M~ADT-DCON-FIELDS(decls)} : ~S
+~C |- ~S ~> {~decls}
+~%x notin lab(~decls)
+//~C |- {~%x=~%x Mfields1~ADT-DCON-FIELDS(decls)} : {}
+=================================================================================== T-ADT-DCON-FIELDSCons 
+~C |- {M~ADT-DCON-FIELDS(fomega-tydecls |[ ~%x:~T ~:decls ]|)} : { ~%x:~T ~:decls }
+
+
+// * Normalization *
 
 ===================================================== N-ADT-DCON-ARROWNil
 ~C |- M~ADT-DCON-ARROW(fomega-tydecls |[ ]|, T) ~> ~T
 
 ~C |- M~ADT-DCON-ARROW(decls, T) ~> ~S
-======================================================================= N-ADT-DCON-ARROWCons
+========================================================================= N-ADT-DCON-ARROWCons
 ~C |- M~ADT-DCON-ARROW(fomega-tydecls |[ ~%x:~T ~decls ]|, T) ~> ~T -> ~S
 
 
-========================================== N-ADT-OP-APPNil
-~C |- M~ADT-OP-APP(T, dataparams |[ ]|) ~> T
+============================================= N-ADT-OP-APPNil
+~C |- M~ADT-OP-APP(T, dataparams |[ ]|) ~> ~T
 
 ~C |- M~ADT-OP-APP(fomega-type |[ ~T ~%X ]|, params) ~> ~S
 =============================================================== N-ADT-OP-APPCons
 ~C |- M~ADT-OP-APP(T, dataparams |[ (~%X::~K) ~params ]|) ~> ~S
 
 
-=================================================== N-ADT-DCON-FORALLNil
+===================================================== N-ADT-DCON-FORALLNil
 ~C |- M~ADT-DCON-ARROW(fomega-tydecls |[ ]|, T) ~> ~T
 
 ~C |- M~ADT-DCON-FORALL(params, T) ~> ~S
-================================================================================== N-ADT-DCON-FORALLCons
+==================================================================================== N-ADT-DCON-FORALLCons
 ~C |- M~ADT-DCON-FORALL(dataparams |[ (~%X::~K) ~params ]|, T) ~> forall ~%X::~K. ~S
 
+
+// * Kinding *
+
+~C |- ~T :: *
+============================================ K-ADT-OP-APPNil
+~C |- M~ADT-OP-APP(T, dataparams |[ ]|) :: *
+
+~C |- M~ADT-OP-APP(fomega-type |[ ~T ~%X ]|, params) :: *
+============================================================== K-ADT-OP-APPCons
+~C |- M~ADT-OP-APP(T, dataparams |[ (~%X::~K) ~params ]|) :: *
 
 
 
@@ -409,7 +437,7 @@ typing {
 
 
 =============================================================== ADT-ARGNil
-~C |- M~ADT-ARG(dataparams |[ ]|) :: M~ADT-PK(dataparams |[ ]|)
+~C |- M~ADT-ARG(dataparams |[ ]|) :: [] //M~ADT-PK(dataparams |[ ]|)
 
 ======================================= ADT-ARGNil-Norm
 ~C |- M~ADT-ARG(dataparams |[ ]|) ~> []
