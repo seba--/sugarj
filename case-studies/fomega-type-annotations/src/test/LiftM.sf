@@ -13,6 +13,13 @@ val liftM2 = \M::*=>*. \bind:BindType M. \return:ReturnType M.
         x:A <- m1
       ; y:B <- m2
       ; return [C] (f x y)
-    }
+    } [M] bind return
 
-val test = liftM2
+type Id = \X::*. X
+val idBind = \A::*. \B::*. \a:A. \f:(A -> B). f a
+val idReturn = \A::*. \a:A. a
+
+val op = \x:Nat. \y:String. x
+val mop = (liftM2 [Id] idBind idReturn) [Nat] [String] [Nat] op
+
+val test = mop 5 "foo"

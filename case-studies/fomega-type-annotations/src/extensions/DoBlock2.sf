@@ -11,7 +11,7 @@ syntax {
   context-free syntax
     "do" "[" FomegaType "]" "{" Statements "}" -> FomegaExpr {cons("DoBlock")}
 
-    Statement                -> Statements {cons("StatementsEnd")}
+    FomegaExpr               -> Statements {cons("StatementsEnd")}
     Statement ";" Statements -> Statements {cons("StatementsCons")}
 
     FomegaID ":" FomegaType "<-" FomegaExpr -> Statement {cons("StatementBind")}
@@ -41,8 +41,17 @@ desugaring desugar-do {
     fomega-expr |[ \M::*=>*.
                      \bind:forall A::*. forall B::*. M A -> (A -> M B) -> M B.
                        \return: forall A::*. A -> M A.
-                         bind [~S] [~T] ~e1 (\~%x:~S. (do [~T] { ~!stmts }) [M] bind return)
+                         bind [~S] [~T] ~e1 (\~%x:~S. do [~T] { ~!stmts } [M] bind return)
                 ]|
+// 
+//   desugar-do :
+//     fomega-expr |[ do [~T] {~e1; ~!stmts } ]|
+//     ->
+//     fomega-expr |[ \M::*=>*.
+//                      \bind:forall A::*. forall B::*. M A -> (A -> M B) -> M B.
+//                        \return: forall A::*. A -> M A.
+//                           bind [$typeof(e1)] [~T] ~e1 ((\y:M ~T. \x:$typeof(e1). y) (do [~T] { ~!stmts } [M] bind return))
+//                 ]|
 }
 
 typing {
@@ -75,4 +84,20 @@ typing {
     forall M::*=>*. 
       (forall A::*. forall B::*. M A -> (A -> M B) -> M B) ->
         (forall A::*. A -> M A) -> M ~T
+
+  // (~C; M::*=>*) |- ~T :: *
+  // (((~C; M::*=>*); bind:forall A::*. forall B::*. M A -> (A -> M B) -> M B);
+  //   return: forall A::*. A -> M A) |- ~e1 : ~R1
+  // (~C; M::*=>*) |- ~R1 ~> M ~U1
+  // (~C; M::*=>*) |- ~U1 :: *
+  // ((((~C; M::*=>*); bind:forall A::*. forall B::*. M A -> (A -> M B) -> M B);
+  //   return: forall A::*. A -> M A)) |- do [~T] { ~!stmts } :
+  //     forall M::*=>*. 
+  //       (forall A::*. forall B::*. M A -> (A -> M B) -> M B) ->
+  //         (forall A::*. A -> M A) -> M ~T
+  // =========================================================================== T-DoConsExp
+  // ~C |- do [~T] { ~e1; ~!stmts } :
+  //   forall M::*=>*. 
+  //     (forall A::*. forall B::*. M A -> (A -> M B) -> M B) ->
+  //       (forall A::*. A -> M A) -> M ~T
 }

@@ -90,7 +90,7 @@ typing {
 
   (~C; M::*=>*) |- ~S :: *
   (~C; M::*=>*) |- ~T :: *
-  (((~C; M::*=>*); bind:forall A::*. forall B::*. M A -> (A -> M B) -> M B);
+  (~C; M::*=>*; bind:forall A::*. forall B::*. M A -> (A -> M B) -> M B;
     return: forall A::*. A -> M A) |- ~e1 : ~R1
   (~C; M::*=>*) |- ~R1 ~> M ~U1
   (~C; M::*=>*) |- ~U1 :: *
