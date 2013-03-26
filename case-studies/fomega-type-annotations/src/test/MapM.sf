@@ -41,11 +41,11 @@ val mapM = \M::*=>*. \bind:BindType M. \return:ReturnType M.
   \A::*. \B::*. fix [A->M B] [List A -> M (List B)]
     (\mapM: (A->M B) -> List A -> M (List B).
       \f:A->M B. \xs:List A.
-        if isNil xs then
-          return [B] Nil
+        if isNil [A] xs then
+          return [List B] (Nil [B])
         else
-          do [List B] {
+          (do [List B] {
               x1:B <- f (hd [A] xs)
             ; xs1:List B <- mapM f (tl [A] xs)
             ; return (Cons [B] x1 xs1)
-          })
+          } [M] bind return))
