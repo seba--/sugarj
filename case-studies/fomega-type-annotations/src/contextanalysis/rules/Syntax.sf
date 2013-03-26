@@ -163,10 +163,11 @@ context-free syntax // *** Syntax for not-in-lab rules ***
 
 context-free syntax // *** Syntax for contexts ***
 
-  "()"                                                        -> Context {cons("CtxEmpty")}
-  "(" Context ";" FomegaID ":" FomegaType ")"                 -> Context {cons("CtxBindVar")}
-  "(" Context ";" FomegaID "::" FomegaKind ")"                -> Context {cons("CtxBindTVar")}
-  "(" Context ";" FomegaID "::" FomegaKind "=" FomegaType ")" -> Context {cons("CtxBindTVarDef")}
+  "()"                                                -> Context {cons("CtxEmpty")}
+  Context ";" FomegaID ":" FomegaType                 -> Context {cons("CtxBindVar")}
+  Context ";" FomegaID "::" FomegaKind                -> Context {cons("CtxBindTVar")}
+  Context ";" FomegaID "::" FomegaKind "=" FomegaType -> Context {cons("CtxBindTVarDef")}
+  "(" Context ")" -> Context {bracket}
 
 
 context-free syntax // *** Syntax for signatures ***

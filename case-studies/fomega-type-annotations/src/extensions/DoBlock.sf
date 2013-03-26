@@ -95,8 +95,8 @@ typing {
   (~C; M::*=>*) |- ~R1 ~> M ~U1
   (~C; M::*=>*) |- ~U1 :: *
   (~C; M::*=>*) |- ~S ~> ~U1
-  ((((~C; M::*=>*); bind:forall A::*. forall B::*. M A -> (A -> M B) -> M B);
-    return: forall A::*. A -> M A); ~%x:~S) |- do ~T { ~bs; ~e2 } :
+  (~C; M::*=>*; bind:forall A::*. forall B::*. M A -> (A -> M B) -> M B;
+    return: forall A::*. A -> M A; ~%x:~S) |- do ~T { ~bs; ~e2 } :
       forall M::*=>*. 
         (forall A::*. forall B::*. M A -> (A -> M B) -> M B) ->
           (forall A::*. A -> M A) -> M ~T
