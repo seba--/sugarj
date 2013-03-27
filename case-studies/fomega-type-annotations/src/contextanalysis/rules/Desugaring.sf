@@ -149,7 +149,7 @@ rules // Translate a type normalization rule
     stratego-decl
     |[ rules
          par-reduce-type =
-             ?(term~tC, term~tT1)
+             ?(term~tC, node@term~tT1)
            ; debug-analysis(<concat-strings> ["IN  ", term~tname, " "])
            ; (strategy~premises-implementation
                 <+ debug-analysis(<concat-strings> ["FAILED  ", term~tname, " "]); fail)
@@ -161,7 +161,8 @@ rules // Translate a type normalization rule
         ; <trm-explode> C  => tC
         ; <trm-explode> name => tname
         ; <premises-to-list> premises => premises-list
-        ; <translate-error-premises> (<ts-initial> (), premises-list) => (ts1, premises-implementation)
+        ; <ts-set-blame> (<ts-initial> (), Var("node")) => ts
+        ; <translate-error-premises> (ts, premises-list) => (ts1, premises-implementation)
 
 
 rules // Translate a kind normalization rule
@@ -285,7 +286,7 @@ rules // Translate a judgment
         ; <trm-explode> T' => tT'
         ; <fresh-result-var> ts => (ts1, result-var)
         ; <fresh-result-var> ts1 => (ts2, result-var1)
-        ; <ts-get-blame> ts => tblame
+        ; <ts-get-blame <+ !T> ts => tblame
         ; <translate-type-expectation> (ts2, tblame, result-var, [], T', []) => (ts3 , inspect-result)
 
   translate-judgment :
@@ -793,7 +794,8 @@ rules // Translation state handling
   ts-in-eqs = ?(ts, var); where(<ts-get-eqs> ts => eqs); <elem(structurally-equal)> (var, eqs)
 
   ts-get-blame :
-    (n, eqs, errs, blame) -> blame
+    (n, eqs, errs, blame) -> result
+    where if !blame; ?() then fail else !blame end => result
 
   ts-set-blame :
     ((n, eqs, errs, blame), blame-new) -> (n, eqs, errs, blame-new)
