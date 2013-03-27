@@ -17,7 +17,7 @@ rules
     TypingRule(_, _, TypingJudgment(C, e, T)) ->
     [(e, <concat-strings> ["Subject does not match desugaring rule. ", <strip-annos; write-to-string> e-imploded])]
   where <metaexpr-implode> e => e-imploded
-      ; <not(debug-analysis(!"IN DEI ");desugar-extension-internal;debug-analysis(!"OUT DEI "))> e-imploded
+      ; <not(debug-analysis(!"IN DEI ");oncetd(desugar-extension-internal);debug-analysis(!"OUT DEI "))> e-imploded
   
   // is generated from DesugaringExtension
   desugar-extension-internal = fail

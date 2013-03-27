@@ -138,7 +138,8 @@ rules // Translate a signature rule
         ; <trm-explode> sig => tsig
         ; <trm-explode> name => tname
         ; <premises-to-list> premises => premises-list
-        ; <translate-premises> (<ts-initial> (), premises-list) => (ts1, premises-implementation)
+        ; <ts-set-blame> (<ts-initial> (), Var("node")) => ts
+        ; <translate-premises> (ts, premises-list) => (ts1, premises-implementation)
 
 
 rules // Translate a type normalization rule
