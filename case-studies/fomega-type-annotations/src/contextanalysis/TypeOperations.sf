@@ -472,12 +472,7 @@ rules
 
 rules
   norm = // debug-analysis(!"NORM IN: ");
-         ?(C, T)
-       ; <try(annotate-kind)> (C, T)
-       ; if <get-kind> T
-           then iterate-par-reduce (C, T)
-           else !T
-         end
+         iterate-par-reduce
          // ; debug-analysis(!"NORM OUT: ")
 
   iterate-par-reduce :

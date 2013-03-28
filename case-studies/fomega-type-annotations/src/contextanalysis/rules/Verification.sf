@@ -22,8 +22,8 @@ rules
     TypingRule(premises, RuleName(sep, Some(Var(name))), TypingJudgment(C, e, T)) ->
       result
     where <debug(!"*** Verify type rule ")> name
-        ; <debug-analysis(<concat-strings> ["Original conclusion term  (", name, "): "])> e
-        ; if <desugar-extension-term; reinit-for-analysis> e => e-desugared then
+        ; <strip-annos; debug-analysis(<concat-strings> ["Original conclusion term  (", name, "): "])> e
+        ; if <strip-annos; desugar-extension-term; reinit-for-analysis> e => e-desugared then
               <debug-analysis(<concat-strings> ["Desugared conclusion term (", name, "): "])> e-desugared
             ; <premises-to-list> premises => premises-list
             ; with-scoped-axioms(
