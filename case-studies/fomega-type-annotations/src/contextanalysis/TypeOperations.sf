@@ -472,7 +472,12 @@ rules
 
 rules
   norm = // debug-analysis(!"NORM IN: ");
-         iterate-par-reduce
+         ?(C, T)
+       ; <try(annotate-kind)> (C, T)
+       ; if <get-kind> T
+           then iterate-par-reduce (C, T)
+           else !T
+         end
          // ; debug-analysis(!"NORM OUT: ")
 
   iterate-par-reduce :
@@ -639,11 +644,15 @@ rules // normalize contexts
     CtxBindTVarDef(C, X, K, T) -> <mark-context-normalized> CtxBindTVarDef(C', X, K', T')
     where <context-norm> C => C'
         ; <kind-norm> K => K'
+        // ; <try(annotate-kind)> (C', T)
+        // ; <where(?(_,<get-kind>));norm <+ ?(_,<id>)> (C', T) => T'
         ; <norm> (C', T) => T'
 
   context-norm : 
     CtxBindVar(C, x, T) -> <mark-context-normalized> CtxBindVar(C', x, T')
     where <context-norm> C => C'
+        // ; <try(annotate-kind)> (C', T)
+        // ; <where(?(_,<get-kind>));norm <+ ?(_,<id>)> (C', T) => T'
         ; <norm> (C', T) => T'
 
   context-norm = id

@@ -49,11 +49,8 @@ rules
   annotate-kind-normalized =
       ?(C, T)
     ; <context-norm> C => C'
-    ; <norm> (C', T) => T'
-    ; (<not(structurally-equal)> (C, C') + <not(structurally-equal)> (T, T')) 
-    ; <annotate-kind> (C', T')
-    ; <get-kind> T' => K
-    ; <put-kind> (K, T)
+    ; <not(structurally-equal)> (C, C') 
+    ; <annotate-kind> (C', T)
 
   annotate-kind-defined = fail
 
