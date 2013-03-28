@@ -237,7 +237,7 @@ typing {
 ~C |- M~ADT-TYPE(X, params, dcons) :: ~K
 (~C;~%X::~K=M~ADT-TYPE(X, params, dcons)) |-
   M~ADT-DCONS-END(X, params, dcons, dcons) ==> ~sig
-================================================================ S-DataEnd
+=================================================== S-DataEnd
 ~C |- data ~%X ~params = ~dcons ==> ~sig
 
 
@@ -251,9 +251,9 @@ typing {
 ~C |- M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(fomega-type |[ ~%X ]|, params))) ~> ~U
 (~C; ~%x-con:M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(fomega-type |[ ~%X ]|, params)))) |-
   M~ADT-DCONS(X, params, dcons, dcons-all, defs) ==> ~sig
-==================================================================================== S-ADT-DCONSCons
-~C |- M~ADT-DCONS(X, params,
-      datacons |[ ~%x-con ~%x-discr { ~decls } | ~dcons ]|, dcons-all, defs) ==> ~sig
+============================================================================================================ S-ADT-DCONSCons
+~C |- M~ADT-DCONS(X, params, datacons |[ ~%x-con ~%x-discr { ~decls } | ~dcons ]|, dcons-all, defs) ==> ~sig
+
 
 ~%x-con notin dom(~C)
 ~C |- M~ADT-DCON(X, params, x-con, decls, dcons-all) : ~T
@@ -261,7 +261,7 @@ typing {
 ~C |- M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(fomega-type |[ ~%X ]|, params))) ~> ~U
 (~C; ~%x-con:M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(fomega-type |[ ~%X ]|, params)))) |-
   ~=defs ==> ~sig
-=================================================================================================== S-ADT-DCONEnd
+============================================================================================================ S-ADT-DCONSEnd
 ~C |- M~ADT-DCONS(X, params, datacons |[ ~%x-con ~%x-discr { ~decls } ]|, dcons-all, defs) ==> ~sig
 
 
@@ -270,9 +270,10 @@ typing {
           fomega-expr |[ fold [M~ADT-OP-APP(fomega-type |[ ~%X ]|, params)]
                            (<~%x-con={M~(ADT-DCON-FIELDS(decls))}>
                              as <M~(ADT-DECLS(dcons))>) ]|)) : ~T
-~C |- M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(fomega-type |[ ~%X ]|, params))) ~> ~U
+~C |- M~ADT-DCON-FORALL(params,
+        ADT-DCON-ARROW(decls, ADT-OP-APP(fomega-type |[ ~%X ]|, params))) ~> ~U
 ~C |- ~T ~> ~U
-================================================================================================== T-ADT-DCON
+============================================================================================= T-ADT-DCON
 ~C |- M~ADT-DCON(X, params, x-con, decls, dcons) :
   M~ADT-DCON-FORALL(params, ADT-DCON-ARROW(decls, ADT-OP-APP(fomega-type |[ ~%X ]|, params)))
 
@@ -280,6 +281,7 @@ typing {
 ~C |- ~e : ~T
 ========================================== T-ADT-TABSNil 
 ~C |- M~ADT-TABS(dataparams |[ ]|, e) : ~T
+
 
 (~C; ~%X::~K) |- M~ADT-TABS(params, e) : ~T
 ============================================================================ T-ADT-TABSCons
@@ -290,6 +292,7 @@ typing {
 =================================================== T-ADT-DCON-ARGSNil
 ~C |- M~ADT-DCON-ARGS(fomega-tydecls |[ ]|, e) : ~T
 
+
 ~C |- ~T :: *
 (~C; ~%x:~T) |- M~ADT-DCON-ARGS(decls, e) : ~S
 ======================================================================== T-ADT-DCON-ARGSCons
@@ -299,13 +302,13 @@ typing {
 ==================================================== T-ADT-DCON-FIELDSNil
 ~C |- {M~ADT-DCON-FIELDS(fomega-tydecls |[ ]|)} : {}
 
+
 ~C |- ~%x : ~T1
 ~C |- ~T1 ~> ~U
 ~C |- ~T ~> ~U
 ~C |- {M~ADT-DCON-FIELDS(decls)} : ~S
 ~C |- ~S ~> {~decls1}
 ~%x notin lab(~decls1)
-//~C |- {~%x=~%x Mfields1~ADT-DCON-FIELDS(decls)} : {}
 =================================================================================== T-ADT-DCON-FIELDSCons 
 ~C |- {M~ADT-DCON-FIELDS(fomega-tydecls |[ ~%x:~T ~:decls ]|)} : { ~%x:~T ~:decls1 }
 
@@ -317,13 +320,14 @@ typing {
 ~C |- M~ADT-DCON-ARROW(fomega-tydecls |[ ]|, T) ~> ~T'
 
 ~C |- M~ADT-DCON-ARROW(decls, T2) ~> ~S2
-========================================================================= N-ADT-DCON-ARROWCons
+============================================================================== N-ADT-DCON-ARROWCons
 ~C |- M~ADT-DCON-ARROW(fomega-tydecls |[ ~%x:~T1 ~:decls ]|, T2) ~> ~T1 -> ~S2
 
 
 ~C |- ~T ~> ~T'
-============================================= N-ADT-OP-APPNil   
+============================================= N-ADT-OP-APPNil
 ~C |- M~ADT-OP-APP(T, dataparams |[ ]|) ~> ~T'
+
 
 ~C |- M~ADT-OP-APP(fomega-type |[ ~T ~%X ]|, params) ~> ~S
 =============================================================== N-ADT-OP-APPCons
@@ -333,6 +337,7 @@ typing {
 ~C |- ~T ~> ~T'
 ===================================================== N-ADT-DCON-FORALLNil
 ~C |- M~ADT-DCON-FORALL(dataparams |[ ]|, T) ~> ~T'
+
 
 ~C |- M~ADT-DCON-FORALL(params, T) ~> ~S
 ==================================================================================== N-ADT-DCON-FORALLCons
@@ -345,6 +350,7 @@ typing {
 ============================================ K-ADT-OP-APPNil
 ~C |- M~ADT-OP-APP(T, dataparams |[ ]|) :: *
 
+
 ~C |- M~ADT-OP-APP(fomega-type |[ ~T ~%X ]|, params) :: *
 ============================================================== K-ADT-OP-APPCons
 ~C |- M~ADT-OP-APP(T, dataparams |[ (~%X::~K) ~params ]|) :: *
@@ -354,53 +360,51 @@ typing {
 // *** Rules related to the type synonym ***
 
 ~C |- M~ADT-ABS(params, |[ mu (M~ADT-OP(X, params, dcons), M~(ADT-ARG(params))) ]|) :: ~K
-========================================================================================= ADT-TYPE
+========================================================================================= K-ADT-TYPE
 ~C |- M~ADT-TYPE(X, params, dcons) :: ~K
 
-//~C |- M~ADT-OP(X, params, dcons) ~> ~T1
-//~C |- M~(ADT-ARG(params)) ~> T2
-//~C |- M~ADT-ABS(params, fomega-type |[ mu (~T1, ~T2) ]|) ~> ~T
-=================================================================================== ADT-TYPE-Norm
+
+=================================================================================== N-ADT-TYPE
 ~C |- M~ADT-TYPE(X, params, dcons)
     ~> M~ADT-ABS(params, |[ mu (M~ADT-OP(X, params, dcons), M~(ADT-ARG(params))) ]|)
-
 
 
 ~C |- ~T :: ~K
 ============================================= ADT-ABSNil
 ~C |- M~ADT-ABS(dataparams |[ ]|, T) :: ~K 
 
-========================================== ADT-ABSNil-Norm
+========================================== N-ADT-ABSNil
 ~C |- M~ADT-ABS(dataparams |[ ]|, T) ~> ~T
 
 
 (~C;~%X::~K1) |- M~ADT-ABS(params, T) :: ~K2
-======================================================================== ADT-ABSCons
+======================================================================== K-ADT-ABSCons
 ~C |- M~ADT-ABS(dataparams |[ (~%X::~K1) ~params ]|, T) :: ~K1 => ~K2
 
 ~C |- M~ADT-ABS(params, T) ~> ~T2
-========================================== ADT-ABSCons-Norm
-~C |- M~ADT-ABS(dataparams |[ (~%X::~K) ~params ]|, T)
-   ~> \~%X::~K. ~T2
+======================================================================= N-ADT-ABSCons
+~C |- M~ADT-ABS(dataparams |[ (~%X::~K) ~params ]|, T) ~> \~%X::~K. ~T2
 
 
 ((~C; ~%X :: M~ADT-PK(params) => *); args :: M~ADT-PK(params)) |-
                                      M~ADT-UNCURRY(X, params, |[ <M~(ADT-DECLS(dcons))> ]|) :: *
-================================================================================================ ADT-OP
+================================================================================================ K-ADT-OP
 ~C |- M~ADT-OP(X, params, dcons) :: (M~ADT-PK(params) => *) => M~ADT-PK(params) => *
 
-============================================================================================================================ ADT-OP-Norm
+
+============================================================================================ N-ADT-OP
 ~C |- M~ADT-OP(X, params, dcons) 
-   ~> \~%X :: M~(ADT-PK(params)) => *.  \args :: M~(ADT-PK(params)).  M~ADT-UNCURRY(X, params, |[ <M~(ADT-DECLS(dcons))> ]|)
+   ~> \~%X :: M~(ADT-PK(params)) => *.
+        \args :: M~(ADT-PK(params)).  M~ADT-UNCURRY(X, params, |[ <M~(ADT-DECLS(dcons))> ]|)
 
 
 (~C; ~%X :: M~ADT-CK(params)) |- M~ADT-CA(params, fomega-type |[ args ]|, ADT-ABS(params, T)) :: *
 ~C |- M~ADT-ABS(params, fomega-type |[ ~%X M~(ADT-ARG(params)) ]|) :: M~(ADT-CK(params))
-======================================================================================================== ADT-UNCURRY
+================================================================================================== K-ADT-UNCURRY
 ~C |- M~ADT-UNCURRY(X, params, T) :: *
 
 
-================================================================================================= ADT-UNCURRY-Norm
+================================================================================================= N-ADT-UNCURRY
 ~C |- M~ADT-UNCURRY(X, params, T)
    ~> (\~%X :: M~(ADT-CK(params)).  M~ADT-CA(params, fomega-type |[ args ]|, ADT-ABS(params, T)))
       M~ADT-ABS(params, fomega-type |[ ~%X M~(ADT-ARG(params)) ]|)
@@ -408,85 +412,95 @@ typing {
 
 ~C |- ~args :: []
 ~C |- ~T :: *
-================================================= ADT-CANil
+================================================= K-ADT-CANil
 ~C |- M~ADT-CA(dataparams |[ ]|, args, T) :: *
 
-=============================================== ADT-CANil-Norm
+
+=============================================== N-ADT-CANil
 ~C |- M~ADT-CA(dataparams |[ ]|, args, T) ~> ~T
+
 
 //~C |- ~args :: {~K, M~ADT-PK(params)}
 //~C |- ~T :: ~K => M~ADT-CK(params)
 ~C |- M~ADT-CA(params, fomega-type |[ ~args.2 ]|, fomega-type |[ ~T (~args.1) ]|) :: *
-=================================================================== ADT-CACons
+====================================================================================== K-ADT-CACons
 ~C |- M~ADT-CA(dataparams |[ (~%X::~K) ~params ]|, args, T) :: *
 
 
-================================================================================= ADT-CACons-Norm
+================================================================================= N-ADT-CACons
 ~C |- M~ADT-CA(dataparams |[ (~%X::~K) ~params ]|, args, T)
    ~> M~ADT-CA(params, fomega-type |[ ~args.2 ]|, fomega-type |[ ~T (~args.1) ]|)
 
 
-
 ~C |- { ~decls } :: *
-======================================================================== ADT-DECLSEnd
+===================================================================== K-ADT-DECLSEnd
 ~C |- <M~ADT-DECLS(datacons |[ ~%x-con ~%x-discr { ~decls } ]|)> :: *
 
-============================================================== ADT-DECLSEnd-Norm
+
+================================================================ N-ADT-DECLSEnd
 ~C |- <M~ADT-DECLS(datacons |[ ~%x-con ~%x-discr { ~decls } ]|)> 
    ~> <~%x-con : { ~decls }>
+
 
 ~C |- <M~(ADT-DECLS(dcons))> :: *
 ~C |- { ~decls } :: *
 ~%x-con notin lab(M~(ADT-DECLS(dcons)))
-================================================================================= ADT-DECLSCons
+============================================================================== K-ADT-DECLSCons
 ~C |- <M~ADT-DECLS(datacons |[ ~%x-con ~%x-discr { ~decls } | ~dcons ]|)> :: *
 
+
 ~C |- <M~ADT-DECLS(datacons |[ ~dcons ]|)> ~> <~rest>
-======================================================================= ADT-DECLSCons-Norm
+========================================================================= N-ADT-DECLSCons
 ~C |- <M~ADT-DECLS(datacons |[ ~%x-con ~%x-discr { ~decls } | ~dcons ]|)> 
    ~> <~%x-con : { ~decls } ~:rest>
 
 
+======================================= K-ADT-ARGNil
+~C |- M~ADT-ARG(dataparams |[ ]|) :: []
 
-=============================================================== ADT-ARGNil
-~C |- M~ADT-ARG(dataparams |[ ]|) :: [] //M~ADT-PK(dataparams |[ ]|)
 
-======================================= ADT-ARGNil-Norm
+======================================= N-ADT-ARGNil
 ~C |- M~ADT-ARG(dataparams |[ ]|) ~> []
+
 
 ~C |- ~%X :: ~K
 ~C |- M~(ADT-ARG(params)) :: M~(ADT-PK(params))
-======================================================================================== ADT-ARGCons
+=============================================================================== K-ADT-ARGCons
 ~C |- M~ADT-ARG(dataparams |[ (~%X::~K) ~params ]|) :: {~K, M~(ADT-PK(params))}
 
+
 ~C |- M~(ADT-ARG(params)) ~> ~T
-=================================================== ADT-ARGCons-Norm
+=================================================== N-ADT-ARGCons
 ~C |- M~ADT-ARG(dataparams |[ (~%X::~K) ~params ]|)
    ~> {~%X, ~T}
 
 
-=================================== ADT-PKNil
+=================================== KN-ADT-PKNil
 M~ADT-PK(dataparams |[ ]|) =::=> []
 
+
 M~ADT-PK(params) =::=> ~K2
-================================================= ADT-PKCons
+================================================= KN-ADT-PKCons
 M~ADT-PK(|[ (~%X::~K) ~params ]|) =::=> {~K, ~K2}
 
-================================== ADT-CKNil
+
+================================== KN-ADT-CKNil
 M~ADT-CK(dataparams |[ ]|) =::=> *
 
+
 M~ADT-CK(params) =::=> ~K2
-============================================================= ADT-PKCons
+============================================================= KN-ADT-PKCons
 M~ADT-CK(dataparams |[ (~%X::~K) ~params ]|)  =::=> ~K => ~K2
 
 
 ~%x-con != ~%x-con2
-========================================================================== ADT-DECLSEnd-Lab
+============================================================================== L-ADT-DECLSEnd
 ~%x-con notin lab(M~(ADT-DECLS(datacons |[ ~%x-con2 ~%x-discr { ~decls } ]|)))
+
 
 ~%x-con != ~%x-con2
 ~%x-con notin lab(M~(ADT-DECLS(dcons)))
-==================================================================================== ADT-DECLSCons-Lab
+======================================================================================= L-ADT-DECLSCons
 ~%x-con notin lab(M~(ADT-DECLS(datacons |[ ~%x-con2 ~%x-discr { ~decls } | ~dcons ]|)))
 
 }

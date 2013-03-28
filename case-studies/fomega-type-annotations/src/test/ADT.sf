@@ -12,16 +12,15 @@ import contextanalysis.ContextAnalysis
 
 data List (a::*) = Nil isNil {}
                  | Cons isCons {hd:a, tl:List a}
-  
+
 type L = List
 val C = Cons
 val foo = Nil [Nat]
 val x1 = foo
 val bar = (Cons [Nat] 1 (Nil [Nat])) as (List Nat)
 val x2 = bar
-//val x3 = Cons
-//val x4 = x3 
-// val foo = 1
+
+
 //type TreeBody = \K::*. \V::*.
 //  <Nil: {}, Leaf: {value: V}, Node: {left: Tree K V, key: K, right: Tree K V}>
 
