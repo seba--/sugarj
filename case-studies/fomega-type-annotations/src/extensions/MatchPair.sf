@@ -62,10 +62,10 @@ typing {
   // The pair:~S binding in the context shows that the desugaring introduces a
   // name and that therefore the body ~e2 should not contain that name free.
   // TODO: in future, we should offer support for fresh variables.
+
   ~C |- ~e1 : ~S
+  ~C |- ~S  :: *
   ~C |- ~S ~> {fst:~S1, snd:~S2}
-  ~C |- ~S1 :: *
-  ~C |- ~S2 :: *
   (((~C; pair:~S); ~%x1:~S1); ~%x2:~S2) |- ~e2 : ~T2
   ================================================== T-MatchPair
   ~C |- match (~%x1, ~%x2) = ~e1 in ~e2 : ~T2
