@@ -12,11 +12,12 @@ context-free syntax
 
 rules
   constraint-error = check-typing-rule-subject
-  
+  // TODO check-signature-rule subject etc are missing.
   check-typing-rule-subject :
     TypingRule(_, _, TypingJudgment(C, e, T)) ->
-    [(e, "Subject does not match desugaring rule.")]
-  where <not(desugar-extension-internal)> e
+    [(e, <concat-strings> ["Subject does not match desugaring rule. ", <strip-annos; write-to-string> e-imploded])]
+  where <metaexpr-implode> e => e-imploded
+      ; <not(debug-analysis(!"IN DEI ");oncetd(desugar-extension-internal);debug-analysis(!"OUT DEI "))> e-imploded
   
   // is generated from DesugaringExtension
   desugar-extension-internal = fail
