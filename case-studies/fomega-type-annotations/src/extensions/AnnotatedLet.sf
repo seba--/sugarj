@@ -30,9 +30,9 @@ desugaring desugar-annotatedlet {
 
 typing {
   ~C |- ~e1 : ~T1
+  ~C |- ~S :: *
   ~C |- ~S ~> ~U
   ~C |- ~T1 ~> ~U
-  ~C |- ~U :: *
   (~C;~%x:~S) |- ~e2 : ~T2
   ======================================= T-AnnotatedLet
   ~C |- (let ~%x : ~S = ~e1 in ~e2) : ~T2
