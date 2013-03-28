@@ -26,7 +26,8 @@ rules
         ; <apply-subst> (sub, T) => U
 
 desugarings
-  desugar-typeof desugar-typeofas
+  desugar-typeof
+  desugar-typeofas
 
 
 rules
@@ -43,3 +44,9 @@ rules
          ; <annotate-type> (C',e')
          ; <get-type> e' => T
          ; <try(put-type)> (T, e)
+
+rules
+  annotate-kind =
+      ?(C, T)
+    ; <resolve-type> (C, T) => T'
+    ; <annotate-kind> (C, T')
