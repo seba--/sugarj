@@ -1,6 +1,6 @@
 module test.ADT
 
-import extension.adt.ADT
+import extensions.ADT
 
 import contextanalysis.ContextAnalysis
 

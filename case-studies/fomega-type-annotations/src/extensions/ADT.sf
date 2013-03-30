@@ -1,4 +1,4 @@
-module extension.adt.ADT
+module extensions.ADT
 
 import org.sugarj.languages.Fomega
 import concretesyntax.Fomega
