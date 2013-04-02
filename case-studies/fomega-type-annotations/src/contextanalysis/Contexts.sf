@@ -14,6 +14,17 @@ signature
     CtxBindTVarDef: Context * FomegaID * FomegaKind * FomegaType -> Context
     CtxBindVar:     Context * FomegaID * FomegaType -> Context
 
+rules      
+  strengthened-context(s) =
+    ?(CtxBindTVar(C, _, _), v);
+    <s> (C, v) 
+  strengthened-context(s) =
+    ?(CtxBindTVarDef(C, _, _, _), v);
+    <s> (C, v) 
+  strengthened-context(s) =
+    ?(CtxBindVar(C, _, _), v);
+    <s> (C, v) 
+
 
 rules
 
@@ -79,6 +90,11 @@ rules
 
   lookup-type-var-def :
     (X, CtxBindTVar(C, Y, K)) -> <lookup-type-var-def> (X, C)
+    where <not(structurally-equal)> (Y, X)
+
+  lookup-type-var-def :
+    (X, CtxBindTVar(C, Y, K)) -> (TyUnknown(), [<concat-strings> ["no definition for ", X]])
+    where <structurally-equal> (Y, X)
 
   lookup-type-var-def :
     (X, CtxBindTVarDef(C, Y, K, T)) -> <lookup-type-var-def> (X, C)
@@ -90,3 +106,8 @@ rules
 
   lookup-type-var-def :
     (X, CtxBindVar(C, y, T)) -> <lookup-type-var-def> (X, C)
+
+rules
+  not-in-dom =
+    where(\(x,C) -> <not(elem(structurally-equal))> (x, <dom> C)\)
+

@@ -3,44 +3,58 @@ module contextanalysis.Unknowns
 import org.sugarj.languages.Fomega
 
 import contextanalysis.Annotations
+import contextanalysis.Signatures
 
 
 signature
   constructors
     TyUnknown: FomegaType
     KiUnknown: FomegaKind
-    IDUnknown: FomegID
+    SigUnknown: FomegaSignature
+    IDUnknown: FomegaID
+
 
 // TODO: the following definitions should go to contextanalysis.rules. ...
 rules // Type of expressions
 
-  annotate-type =
-    // debug(!"ANNO TYPE IN:  "); 
-    (annotate-type-defined <+ annotate-type-missing)
-    // ; debug(!"ANNO TYPE OUT: ") 
-
-  annotate-type-defined = fail
-
+  annotate-type = fail
   annotate-type-missing =
       ?(C, e)
-    ; <put-type> (TyUnknown(), e)
-    ; <add-context-errors> ( [ <concat-strings> [ "Missing typing rule for "
+    ; ![ <concat-strings> [ "Missing typing rule for "
                                                 , <write-to-string> (<strip-annos> e)
                                                 , " in context "
                                                 , <write-to-string> (<strip-annos> C)] ]
-                           , e)
+      => msgs
+    ; !e // <put-type> (TyUnknown(), e)
+    ; add-fresh-context-errors(|msgs)
+    ; fail
 
 
-rules // Type of branches
+rules // Kind of types
+  
+  annotate-kind = fail
+  annotate-kind-missing =
+      ?(C, T)
+    ; ![ <concat-strings> [ "Missing kinding rule for "
+                                                , <write-to-string> (<strip-annos> T)
+                                                , " in context "
+                                                , <write-to-string> (<strip-annos> C)] ]
+      => msgs
+    ; !T  // <put-kind> (KiUnknown(), T)
+    ; add-fresh-context-errors(|msgs)
+    ; fail
 
-  annotate-type-branches =
-    // debug(!"ANNO TYPE BRS IN:  "); 
-    annotate-type-branches-defined <+ annotate-type-branches-missing
-    // ; debug(!"ANNO TYPE BRS OUT: ")
 
-  annotate-type-branches-defined = fail
+rules // Signature of definitions
 
-  annotate-type-branches-missing =
-      ?(C, decls, brs)
-    ; <put-type> (TyUnknown(), brs)
-    ; <add-context-errors> (["Missing branch typing rule"], brs)
+  annotate-signature = fail
+  annotate-signature-missing =
+      ?(C, defs)
+    ; ![ <concat-strings> [ "Missing signature rule for "
+                                                , <write-to-string> (<strip-annos> defs)
+                                                , " in context "
+                                                , <write-to-string> (<strip-annos> C)] ]
+      => msgs
+    ; !defs // <put-signature> (SigUnknown(), defs)
+    ; add-fresh-context-errors(|msgs)
+    ; fail

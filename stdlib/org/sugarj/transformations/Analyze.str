@@ -79,7 +79,8 @@ rules
   
   debug-analysis = debug-analysis(id)
   debug-analysis(s) = where(nice-analysis-data-term; debug(s))
-  
+  write-to-string-analysis = nice-analysis-data-term; write-to-string
+
 rules
   // desugar =
   //   changed-tree(desugar-analyses)

@@ -288,29 +288,16 @@ public class ATermCommands {
   }
   
   public static List<IStrategoTerm> registerSemanticProvider(Collection<IStrategoTerm> editorServices, Path jarfile) throws IOException {
+    List<IStrategoTerm> newServices = new ArrayList<IStrategoTerm>(editorServices);
+
+    if (jarfile == null)
+      return newServices;
+    
     String jarfilePath = jarfile.getAbsolutePath().replace("\\", "\\\\").replace("\"", "\\\"");
-    IStrategoTerm semanticProvider = atermFromString("SemanticProvider(\"" + jarfilePath + "\")");
-    
-    List<IStrategoTerm> newServices = new ArrayList<IStrategoTerm>();
-    
-    for (IStrategoTerm service : editorServices)
-    {
-      if (ATermCommands.isApplication(service, "Builders")) {
-        IStrategoTerm name = ATermCommands.getApplicationSubterm(service, "Builders", 0);
-        IStrategoTerm builders = ATermCommands.getApplicationSubterm(service, "Builders", 1);
-        if (ATermCommands.isList(builders)) {
-          List<IStrategoTerm> builderList = new ArrayList<IStrategoTerm>();
-          builderList.add(semanticProvider);
-          builderList.addAll(getList(builders));
-          builders = ATermCommands.makeList("SemanticRule*", builderList);
-        }
-        
-        service = ATermCommands.makeAppl("Builders", "Section", 2, name, builders);
-      }
-      
-      newServices.add(service);
-    }
-    
+    IStrategoTerm builder = ATermCommands.atermFromString(
+        "Builders(\"sugarj checking\", [SemanticObserver(Strategy(\"sugarj-analyze\")), SemanticProvider(\"" + jarfilePath + "\")])");
+    newServices.add(builder);
+
     return newServices;
   }
 

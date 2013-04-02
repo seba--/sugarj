@@ -1,0 +1,10 @@
+module test.AnnotatedLet
+
+import extensions.AnnotatedLet
+
+import contextanalysis.ContextAnalysis
+
+
+val x = let a:Nat = 1 in a
+
+val y = let a: Nat->Nat = \x:Nat. x in a x

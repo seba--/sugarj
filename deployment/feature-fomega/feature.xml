@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.sugarj.haskell"
-      label="SugarJ Haskell"
+      id="org.sugarj.fomega"
+      label="SugarFomega"
       version="1.0.0.qualifier"
-      provider-name="sugarj.org">
+      provider-name="sugarj.prg">
 
    <description url="http://sugarj.org">
-      SugarJ and Sugarclipse
+      SugarFomega and Sugarclipse
    </description>
 
    <copyright>
       Copyrights of SugarJ and Sugarclipse belong to its authors.
    </copyright>
 
-   <license>
+   <license url="">
       The SugarJ compiler and editor are released under the GNU GENERAL PUBLIC LICENSE, Version 3, 29 June 2007
 The SugarJ standard library is released under the GNU GENERAL PUBLIC LICENSE, Version 3, 29 June 2007 and  GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007
    </license>
@@ -32,7 +32,7 @@ The SugarJ standard library is released under the GNU GENERAL PUBLIC LICENSE, Ve
    </requires>
 
    <plugin
-         id="org.sugarj.haskell"
+         id="org.sugarj.fomega"
          download-size="0"
          install-size="0"
          version="0.0.0"/>

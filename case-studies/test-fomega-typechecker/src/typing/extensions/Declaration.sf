@@ -4,7 +4,7 @@ import typing.rules.Syntax
 
 context-free syntax
   "syntax" "{" Grammar* "}" -> ToplevelDeclaration {cons("SyntaxExtension")}
-  "desugaring" StrategoId "{" StrategoDef* "}" -> ToplevelDeclaration {cons("DesugaringExtension")}
+  "desugaring" StrategoId "{" StrategoDef* StrategoDecl* "}" -> ToplevelDeclaration {cons("DesugaringExtension")}
   "typing" "{" TypeRule* "}" -> ToplevelDeclaration {cons("TypingExtension")}
 
 rules
@@ -29,14 +29,14 @@ rules
     ; rules( Extension-Syntax := body )
   
   desugar-extension :
-    DesugaringExtension(desugar-strat, trafos) ->
+    DesugaringExtension(desugar-strat, (trafos, decls)) ->
     SugarBody(<conc> (grammars, body, checks))
   where
       (Extension-Syntax <+ ![]) => grammars 
     ; (Extension-Checks <+ ![]) => checks
     ; !transformation-elem(Desugarings([PureDesugaring(CallNoArgs(SVar(desugar-strat)))])) => desugaring
     ; !transformation-elem(Rules([SDefNoArgs("desugar-extension-internal", CallNoArgs(SVar(desugar-strat)))])) => rinternal
-    ; ![desugaring, rinternal, transformation-elem(Rules(trafos))] => body
+    ; ![desugaring, rinternal, transformation-elem(Rules(trafos)) | <map(!transformation-elem(<id>))> decls] => body
     ; rules( Extension-Trafos := body )
   
   desugar-extension :

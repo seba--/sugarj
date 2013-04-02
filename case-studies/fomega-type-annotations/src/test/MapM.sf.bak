@@ -1,0 +1,51 @@
+module test.MapM
+
+import contextanalysis.ContextAnalysis
+
+import extensions.DoBlock2
+
+type Fix = \A::*.\B::*. mu (\Rec::[]=>*. \arg::[]. Rec arg -> A -> B, [])
+
+val fix = \A::*. \B::*. \f:(A->B)->(A->B).
+  (\x:Fix A B. (\y:A. f ((unfold [Fix A B] x) x) y))
+  (fold [Fix A B]
+    (\x:Fix A B. (\y:A. f ((unfold [Fix A B] x) x) y)))
+
+type List = \A::*.
+  mu (\List:: {*, []} => *. \args:: {*, []}.
+        <Nil: {}, Cons: {hd: args.1, tl: List args}>,
+      {A, []})
+
+val Nil = \A::*. fold [List A] (<Nil={}> as <Nil:{}, Cons:{hd:A, tl:List A}>)
+
+val Cons = \A::*. \x:A. \xs:List A.
+  fold [List A] (<Cons={hd=x,tl=xs}> as <Nil:{}, Cons:{hd:A, tl:List A}>)
+
+val isNil = \A::*. \xs:List A.
+ case unfold [List A] xs of
+    <Nil=nil> => true;
+    <Cons=cons> => false
+
+val hd = \A::*. \xs:List A.
+  case unfold [List A] xs of
+    <Cons=cons> => cons!hd
+
+val tl = \A::*. \xs:List A.
+  case unfold [List A] xs of
+    <Cons=cons> => cons!tl
+
+type BindType = \M::*=>*. forall A::*. forall B::*. M A -> (A -> M B) -> M B
+type ReturnType = \M::*=>*. forall A::*. A -> M A
+
+val mapM = \M::*=>*. \bind:BindType M. \return:ReturnType M.
+  \A::*. \B::*. fix [A->M B] [List A -> M (List B)]
+    (\mapM: (A->M B) -> List A -> M (List B).
+      \f:A->M B. \xs:List A.
+        if isNil [A] xs then
+          return [List B] (Nil [B])
+        else
+          (do [List B] {
+              x1:B <- f (hd [A] xs)
+            ; xs1:List B <- mapM f (tl [A] xs)
+            ; return (Cons [B] x1 xs1)
+          } [M] bind return))

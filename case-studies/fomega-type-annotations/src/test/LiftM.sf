@@ -1,0 +1,25 @@
+module test.LiftM
+
+import contextanalysis.ContextAnalysis
+
+import extensions.DoBlock2
+
+type BindType = \M::*=>*. forall A::*. forall B::*. M A -> (A -> M B) -> M B
+type ReturnType = \M::*=>*. forall A::*. A -> M A
+
+val liftM2 = \M::*=>*. \bind:BindType M. \return:ReturnType M.
+  \A::*. \B::*. \C::*. \f:A -> B -> C. \m1:M A. \m2:M B.
+    do [C] {
+        x:A <- m1
+      ; y:B <- m2
+      ; return [C] (f x y)
+    } [M] bind return
+
+type Id = \X::*. X
+val idBind = \A::*. \B::*. \a:A. \f:(A -> B). f a
+val idReturn = \A::*. \a:A. a
+
+val op = \x:Nat. \y:String. x
+val mop = (liftM2 [Id] idBind idReturn) [Nat] [String] [Nat] op
+
+val test = mop 5 "foo"

@@ -1,19 +1,23 @@
 module extension.Declaration
 
 import contextanalysis.rules.Syntax
+import contextanalysis.rules.Desugaring
+import contextanalysis.rules.Verification
+import contextanalysis.ContextAnalysis
 
 context-free syntax
   "syntax" "{" Grammar* "}" -> ToplevelDeclaration {cons("SyntaxExtension")}
-  "desugaring" StrategoId "{" StrategoDef* "}" -> ToplevelDeclaration {cons("DesugaringExtension")}
-  "typing" "{" TypeRule* "}" -> ToplevelDeclaration {cons("TypingExtension")}
+  "desugaring" StrategoId "{" StrategoDef* StrategoDecl* "}" -> ToplevelDeclaration {cons("DesugaringExtension")}
+  "typing" "{" InferenceRule* "}" -> ToplevelDeclaration {cons("TypingExtension")}
 
 rules
   constraint-error = check-typing-rule-subject
-  
+  // TODO check-signature-rule subject etc are missing.
   check-typing-rule-subject :
-    TypeRule(_, _, TypingJudgment(C, e, T)) ->
-    [(e, "Subject does not match desugaring rule.")]
-  where <not(desugar-extension-internal)> e
+    TypingRule(_, _, TypingJudgment(C, e, T)) ->
+    [(e, <concat-strings> ["Subject does not match desugaring rule. ", <strip-annos; write-to-string> e-imploded])]
+  where <metaexpr-implode> e => e-imploded
+      ; <not(debug-analysis(!"IN DEI ");oncetd(desugar-extension-internal);debug-analysis(!"OUT DEI "))> e-imploded
   
   // is generated from DesugaringExtension
   desugar-extension-internal = fail
@@ -21,23 +25,20 @@ rules
 rules
   desugar-extension :
     SyntaxExtension(grammars) ->
-    SugarBody(<conc> (body, trafos, checks))
+    SugarBody(body)
   where
-      (Extension-Trafos <+ ![]) => trafos 
-    ; (Extension-Checks <+ ![]) => checks
-    ; <map(!grammar-elem(<id>))> grammars => body 
+      <map(!grammar-elem(<id>))> grammars => body 
     ; rules( Extension-Syntax := body )
   
   desugar-extension :
-    DesugaringExtension(desugar-strat, trafos) ->
-    SugarBody(<conc> (grammars, body, checks))
+    DesugaringExtension(desugar-strat, trafos, decls) ->
+    SugarBody(<conc> (grammars, body))
   where
       (Extension-Syntax <+ ![]) => grammars 
-    ; (Extension-Checks <+ ![]) => checks
     ; !transformation-elem(Desugarings([PureDesugaring(CallNoArgs(SVar(desugar-strat)))])) => desugaring
     ; !transformation-elem(Rules([SDefNoArgs("desugar-extension-internal", CallNoArgs(SVar(desugar-strat)))])) => rinternal
-    ; ![desugaring, rinternal, transformation-elem(Rules(trafos))] => body
-    ; rules( Extension-Trafos := body )
+    ; ![rinternal, transformation-elem(Rules(trafos)) | <map(!transformation-elem(<id>))> decls] => body
+    ; rules( Extension-Trafos := [desugaring | body] )
   
   desugar-extension :
     TypingExtension(checks) ->
@@ -45,7 +46,8 @@ rules
   where
       (Extension-Syntax <+ ![]) => grammars 
     ; (Extension-Trafos <+ ![]) => trafos
-    ; rules( Extension-Checks := checks )
+//    ; rules( Extension-Checks := checks )
   
 desugarings
   desugar-extension
+

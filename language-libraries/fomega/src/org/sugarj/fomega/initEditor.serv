@@ -1,4 +1,4 @@
-module org/sugarj/haskell/initEditor
+module org/sugarj/fomega/initEditor
 
 colorer Default, token-based highlighting
                                   

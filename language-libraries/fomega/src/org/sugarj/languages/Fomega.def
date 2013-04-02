@@ -81,9 +81,11 @@ exports
     "," TyDecl TyDecls1 -> TyDecls1 {cons("TyDeclsCons")}
 
     "*"                   -> Kind {cons("KiStar")}
-    Kind "=>" Kind        -> Kind {cons("KiArrow")}
+    Kind "=>" Kind        -> Kind {cons("KiArrow"), right}
     "[]"                  -> Kind {cons("KiEmpty")}
     "{" Kind "," Kind "}" -> Kind {cons("KiPair")}
+
+    "(" Kind ")" -> Kind {bracket}
 
     QID -> Type {cons("TyQVar")}
 
@@ -91,7 +93,7 @@ exports
     Type "->" Type                      -> Type {cons("TyArrow"), right}
     "forall" ID "::" Kind "." Type      -> Type {cons("TyForall")}
     "\\" ID "::" Kind "." Type          -> Type {cons("TyAbs")}
-    "mu" Kind "." "(" Type "," Type ")" -> Type {cons("TyMu")}
+    "mu" "(" Type "," Type ")"          -> Type {cons("TyMu")}
 
   context-free priorities
       Type Type      -> Type

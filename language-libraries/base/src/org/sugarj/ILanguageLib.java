@@ -26,8 +26,6 @@ public interface ILanguageLib {
   public abstract File getInitEditor();
   public abstract String getInitEditorModule();
 
-  public abstract File getLibraryDirectory();
-
   public abstract void setupSourceFile(RelativePath sourceFile, Environment environment);
   public abstract SourceFileContent getSource();
   public abstract Path getOutFile();

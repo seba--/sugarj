@@ -1,0 +1,67 @@
+module contextanalysis.SignatureRelation
+
+//import org.sugarj.languages.Fomega
+
+import contextanalysis.rules.Syntax
+import contextanalysis.rules.Desugaring
+
+import contextanalysis.KindingRelation
+import contextanalysis.TypingRelation
+
+//import contextanalysis.Annotations
+//import contextanalysis.KindChecker
+//import contextanalysis.Signatures
+//import contextanalysis.TypeChecker
+
+
+~%X notin dom(~C)
+~C |- ~T :: ~K
+========================== S-TypeEnd
+~C |- type ~%X = ~T ==> ()
+
+
+~%X notin dom(~C)
+~C |- ~T :: ~K
+============================================== S-PubTypeEnd
+~C |- public type ~%X = ~T ==> (~%X::~K=~T;())
+
+
+~%x notin dom(~C)
+~C |- ~e : ~T
+========================= S-ValEnd
+~C |- val ~%x = ~e ==> ()
+
+
+~%x notin dom(~C)
+~C |- ~e : ~T
+========================================= S-PubValEnd
+~C |- public val ~%x = ~e ==> (~%x:~T;())
+
+
+~%X notin dom(~C)
+~C |- ~T :: ~K
+(~C;~%X::~K=~T) |- ~=defs ==> ~sig
+=================================== S-TypeCons
+~C |- type ~%X = ~T ~=defs ==> ~sig 
+
+
+~%X notin dom(~C)
+~C |- ~T :: ~K
+(~C;~%X::~K=~T) |- ~=defs ==> ~sig
+======================================================= S-PubTypeCons
+~C |- public type ~%X = ~T ~=defs ==> (~%X::~K=~T;~sig)
+
+
+~%x notin dom(~C)
+~C |- ~e : ~T
+(~C;~%x:~T) |- ~=defs ==> ~sig
+================================== S-ValCons
+~C |- val ~%x = ~e ~=defs ==> ~sig
+
+
+~%x notin dom(~C)
+~C |- ~e : ~T
+(~C;~%x:~T) |- ~=defs ==> ~sig
+================================================== S-PubValCons
+~C |- public val ~%x = ~e ~=defs ==> (~%x:~T;~sig)
+
