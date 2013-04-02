@@ -33,9 +33,9 @@ rules
     with
       editor-init;
       // try(analyze);
-      errors   := <collect-all(constraint-error, conc)> ast;
-      warnings := <collect-all(constraint-warning, conc)> ast;
-      notes    := <collect-all(constraint-note, conc)> ast
+      errors   := <collect-all(constraint-error; ensure-list, conc)> ast;
+      warnings := <collect-all(constraint-warning; ensure-list, conc)> ast;
+      notes    := <collect-all(constraint-note; ensure-list, conc)> ast
 
     editor-init =
       // Ensure all dynamic rules are properly scoped
@@ -45,7 +45,8 @@ rules
     constraint-error = fail
     constraint-warning = fail
     constraint-note = fail
-
+    
+    ensure-list = is-list <+ ![<id>]
 
   change-annotations-only(s) = 
   	where(analysis-data-as-list => t1);

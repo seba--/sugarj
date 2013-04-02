@@ -392,7 +392,11 @@ public class Driver{
       checkCurrentTransformation();
       
       stepped();
-      
+
+      driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
+      driverResult.registerParseTable(currentGrammarTBL);
+      driverResult.registerEditorDesugarings(currentTransProg);
+
       // COMPILE the generated java file
       if (circularLinks.isEmpty())
         compileGeneratedFiles();
@@ -409,10 +413,6 @@ public class Driver{
           throw new IllegalStateException("Could not delegate compilation of circular dependency to other compiler instance.");
       }
         
-      driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
-      driverResult.registerParseTable(currentGrammarTBL);
-      driverResult.registerEditorDesugarings(currentTransProg);
-
       if (environment.doGenerateFiles())
         driverResult.writeDependencyFile(depOutFile);
 
@@ -609,6 +609,7 @@ public class Driver{
   public Pair<IStrategoTerm, Integer> currentParse(String remainingInput, ITreeBuilder treeBuilder, boolean recovery) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
     
     currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfCache, environment, langLib);
+    driverResult.addFileDependency(currentGrammarTBL);
 
     ParseTable table = ATermCommands.parseTableManager.loadFromFile(currentGrammarTBL.getAbsolutePath());
     
@@ -647,6 +648,7 @@ public class Driver{
     log.beginTask("analyze", "ANALYZE toplevel declaration.", Log.CORE);
     try {
       currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(), strParser, strCache, environment, langLib);
+      driverResult.addFileDependency(currentTransProg);
     
       return STRCommands.assimilate("analyze-main", currentTransProg, term, langLib.getInterpreter());
     } catch (StrategoException e) {

@@ -24,6 +24,12 @@ strategies
   desugar-main = internal-main
   internal-main = traverse(desugar); unlock
   main = io-wrap(internal-main)
+  
+strategies
+  debug-strat(what, s) =
+    debug-analysis(!<conc-strings>("IN ", <what>, ": "));
+    (s < debug-analysis(!<conc-strings>("OUT ", <what>, ": "))
+       + debug-analysis(!<conc-strings>("FAILED ", <what>, ": ")); fail)
 
 strategies
   generate-desugared :
