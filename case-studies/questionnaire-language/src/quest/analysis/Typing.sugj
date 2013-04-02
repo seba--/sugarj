@@ -4,10 +4,11 @@ import quest.lang.Syntax;
 import quest.analysis.Naming;
 
 public sugar Typing {
-  analyses 
-    Questionnaire(id, id, analyze-types)
-  
+  analyses
+    analyze-types
+    
   rules
+    analyze-types = Questionnaire(id, id, analyze-types)
     analyze-types = QNil
     analyze-types = QCons(analyze-types, analyze-types)
     

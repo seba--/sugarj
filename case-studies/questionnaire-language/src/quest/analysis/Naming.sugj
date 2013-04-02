@@ -3,10 +3,21 @@ package quest.analysis;
 import quest.lang.Syntax;
 
 public sugar Naming {
+  rules
+    is-reference = where(get-anno(|"reference"))
+    is-reference-to(|t) = where(retrieve-reference; equal(|t)) 
+    retrieve-reference = get-anno(|"reference")
+    put-reference(|t) = rm-anno(|"name-error");put-anno(|"reference", t)
+    
+    has-name-error = where(get-anno(|"name-error"))
+    retrieve-name-error = get-anno(|"name-error")
+    put-name-error(|t) = put-anno(|"name-error", t)
+    
   analyses
-    {| LocalQuest, ActiveQuest: Questionnaire(id, id, analyze-names) |}
+    {| LocalQuest, ActiveQuest: analyze-names |}
   
   rules
+    analyze-names = Questionnaire(id, id, analyze-names)
     analyze-names = QNil
     analyze-names = QCons(analyze-names, analyze-names)
     
@@ -41,16 +52,6 @@ public sugar Naming {
     new-active-name(|name) = ?t; rules ( ActiveQuest : name{t*} -> t) 
 
 
-  rules
-    is-reference = where(get-anno(|"reference"))
-    is-reference-to(|t) = where(retrieve-reference; equal(|t)) 
-    retrieve-reference = get-anno(|"reference")
-    put-reference(|t) = rm-anno(|"name-error");put-anno(|"reference", t)
-    
-    has-name-error = where(get-anno(|"name-error"))
-    retrieve-name-error = get-anno(|"name-error")
-    put-name-error(|t) = put-anno(|"name-error", t)
-    
   rules
     constraint-error =
       where(retrieve-name-error => err);

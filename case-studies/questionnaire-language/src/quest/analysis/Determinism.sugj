@@ -8,10 +8,11 @@ public sugar Determinism {
   analyses
     {| ActiveQuestCond, ConditionalContext:
        rules ( ConditionalContext := Lit(Bool(True)) );
-       Questionnaire(id, id, analyze-determinism)
+       analyze-determinism
     |}
   
   rules
+    analyze-determinism = Questionnaire(id, id, analyze-determinism)
     analyze-determinism = QNil
     analyze-determinism = QCons(analyze-determinism, analyze-determinism)
     
@@ -48,11 +49,11 @@ public sugar Determinism {
         !LazyAnd(other-cond, this-inlined-cond) => check-cond);
       if <strip-annos; is-satisfiable> check-cond
         then where(<conc-strings> 
-                     ("Overlapping definition of '", name,
-                      "' in ", <strip-annos; repeat(reduce); aterm-to-string> other-cond,
-                      " and ", <strip-annos; repeat(reduce); aterm-to-string> this-cond, ".") => msg);
+                     ("Potentially overlapping definition of '", name,
+                      "' in ", <strip-annos; repeat(reduce); aterm-to-string; escape> other-cond,
+                      " and ", <strip-annos; repeat(reduce); aterm-to-string; escape> this-cond, ".") => msg);
              put-determinism-error(|msg)
-        else rules ( ActiveQuestCond : name{t*} -> LazyOr(other-cond, this-cond))
+        else rules ( ActiveQuestCond :+ name{t*} -> LazyOr(other-cond, this-cond))
       end
     
   rules
@@ -62,6 +63,6 @@ public sugar Determinism {
     
   rules
     constraint-error =
-      where(retrieve-determinism-error => err);
+      where(retrieve-determinism-error; debug => err);
       !(<id>,<conc-strings>("Determinsm error: ", err))
 }

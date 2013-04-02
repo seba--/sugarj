@@ -11,17 +11,19 @@ public sugar Satisfiability {
   rules
     is-satisfiable =
       innermost(reduce);
-      // repeat(remove-equation);
-      // innermost(reduce);
+      repeat(remove-equation);
+      innermost(reduce);
       repeat(remove-variable);
       innermost(reduce);
       ?Lit(Bool(True))
 
     remove-equation =
       ?t; oncetd({c: where(?c#([_,_]); <elem> (c, ["Lt", "Gt", "LtEq", "GtEq", "Eq", "NotEq"])); ?op});
-      <bottomup({t*: try(?op{t*}; !Lit(Bool(True)))})> t => with-true;
-      <bottomup({t*: try(?op{t*}; !Lit(Bool(False)))})> t => with-false;
-      !LazyOr(with-true, with-false)
+      // <bottomup({t*: try(?op{t*}; !Lit(Bool(True)))})> t => with-true;
+      // <bottomup({t*: try(?op{t*}; !Lit(Bool(False)))})> t => with-false;
+      // !LazyOr(with-true, with-false)
+      <newname> "arithEq" => x;
+      <bottomup({t*: try(?op{t*}; !ExprName(Id(x)))})> t
     
     remove-variable =
       ?t; oncetd(ExprName(Id(?name)));
@@ -35,6 +37,7 @@ public sugar Satisfiability {
     reduce : LazyAnd(t1, Lit(Bool(True))) -> t1
     reduce : LazyAnd(t, Not(t)) -> Lit(Bool(False))
     reduce : LazyAnd(Not(t), t) -> Lit(Bool(False))
+    reduce : LazyAnd(t, t) -> t
     
     reduce : LazyOr(Lit(Bool(True)), _) -> Lit(Bool(True))
     reduce : LazyOr(Lit(Bool(False)), t2) -> t2
@@ -42,6 +45,7 @@ public sugar Satisfiability {
     reduce : LazyOr(t1, Lit(Bool(False))) -> t1
     reduce : LazyOr(t, Not(t)) -> Lit(Bool(True))
     reduce : LazyOr(Not(t), t) -> Lit(Bool(True))
+    reduce : LazyOr(t, t) -> t
     
     reduce : Not(Lit(Bool(True))) -> Lit(Bool(False))
     reduce : Not(Lit(Bool(False))) -> Lit(Bool(True))
