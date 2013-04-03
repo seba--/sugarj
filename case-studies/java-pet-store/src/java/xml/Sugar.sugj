@@ -33,3 +33,6 @@ public sugar Sugar {
 		pprint : CharDataPart(s) -> s
 		pprint : JavaEscape(_) -> "%s"
 }
+
+public editor services Sugar {
+}

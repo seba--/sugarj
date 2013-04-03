@@ -213,15 +213,15 @@ public class CatalogXmlAction implements ControllerAction {
             for (Item i : items) {
                 sb.append(@Validate{jpsi}
                           <item>
-							<id>${i.getItemID()}</id>
-							<product-id>${i.getProductID()}</product-id>
-							<rating>${i.checkAverageRating()}</rating>
-							<name>${i.getName()}</name>
-							<description>${"<![CDATA[" + i.getDescription() + "]]>"}</description>
-							<price>${NumberFormat.getCurrencyInstance(Locale.US).format(i.getPrice())}</price>
-							<image-url>${baseURL + i.getImageURL()}</image-url>
-							<image-tb-url>${baseURL + i.getImageThumbURL()}</image-tb-url>
-						  </item>);
+              <id>${i.getItemID()}</id>
+              <product-id>${i.getProductID()}</product-id>
+              <rating>${i.checkAverageRating()}</rating>
+              <name>${i.getName()}</name>
+              <description>${"<![CDATA[" + i.getDescription() + "]]>"}</description>
+              <price>${NumberFormat.getCurrencyInstance(Locale.US).format(i.getPrice())}</price>
+              <image-url>${baseURL + i.getImageURL()}</image-url>
+              <image-tb-url>${baseURL + i.getImageThumbURL()}</image-tb-url>
+              </item>);
             }
             sb.append("</items>");
         }
@@ -233,7 +233,7 @@ public class CatalogXmlAction implements ControllerAction {
         StringBuffer allItemsFromCategory = new StringBuffer();
         for (Item i : cf.getAllItemsFromCategory(categoryId)) {
             allItemsFromCategory.append(
-			  @Validate{jpsi}
+        @Validate{jpsi}
               <item>
                 <id>${i.getItemID()}</id>
                 <prod-id>${i.getProductID()}</prod-id>
@@ -255,14 +255,14 @@ public class CatalogXmlAction implements ControllerAction {
     private String handleItem(String targetId){
         Item i = cf.getItem(targetId);
         return @Validate{jpsi}
-				<item>
-					<id>${i.getItemID()}</id>
-					<cat-id>${i.getProductID()}</cat-id>
-					<name>${i.getName()}</name>
-        			<description>${"<![CDATA[" + i.getDescription() + "]]>"}</description>
-        			<image-url>${i.getImageURL()}</image-url>
-        			<price>${NumberFormat.getCurrencyInstance(Locale.US).format(i.getPrice())}</price>
-				</item>;
+        <item>
+          <id>${i.getItemID()}</id>
+          <cat-id>${i.getProductID()}</cat-id>
+          <name>${i.getName()}</name>
+              <description>${"<![CDATA[" + i.getDescription() + "]]>"}</description>
+              <image-url>${i.getImageURL()}</image-url>
+              <price>${NumberFormat.getCurrencyInstance(Locale.US).format(i.getPrice())}</price>
+        </item>;
     }
     
     private String handleCategories(HttpServletResponse response, String format, String callback){
@@ -331,14 +331,15 @@ public class CatalogXmlAction implements ControllerAction {
 
             sb.append("<categories>\n");
             for (Category c : cf.getCategories()) {
-                sb.append(@Validate{jpsc}
-                          <category>
-                			<id>${c.getCategoryID()}</id>
-                			<cat-id>${c.getCategoryID()}</cat-id>
-                			<name>${c.getName()}</name>
-                			<description>${"<![CDATA[" + c.getDescription() + "]]>"}</description>
-                			<image-url>${c.getImageURL()}</image-url>
-						</category>);
+                sb.append(
+                  @Validate{jpsc}
+                  <category>
+                    <id>${c.getCategoryID()}</id>
+                    <cat-id>${c.getCategoryID()}</cat-id>
+                    <name>${c.getName()}</name>
+                    <description>${"<![CDATA[" + c.getDescription() + "]]>"}</description>
+                    <image-url>${c.getImageURL()}</image-url>
+                  </category>);
             }
             sb.append("</categories>\n");
         }
