@@ -93,64 +93,65 @@ rules
     where <is-layout> sym
 
   get-symbol-type :
-    sym -> ConstType(Sort(name, []))
-    where <get-symbol-name> sym => name
+    sym -> ConstType(sort)
+    where <get-symbol-sort> sym => sort
 
-  get-symbol-name :
-    start() -> "<START>"
+rules
+  get-symbol-sort :
+    start() -> SortNoArgs("<START>")
 
-  get-symbol-name :
-    file-start() -> "<Start>"
+  get-symbol-sort :
+    file-start() -> SortNoArgs("<Start>")
 
-  get-symbol-name :
-    label(_, sym) -> name
-    where <get-symbol-name> sym => name
+  get-symbol-sort :
+    label(_, sym) -> sort
+    where <get-symbol-sort> sym => sort
 
-  get-symbol-name :
-    sort(name) -> name
+  get-symbol-sort :
+    sort(name) -> SortNoArgs(name)
 
-  get-symbol-name :
-    parameterized-sort(name, _) -> name
+  get-symbol-sort :
+    parameterized-sort(name, _) -> SortNoArgs(name)
 
-  get-symbol-name :
+  get-symbol-sort :
     lifting(sym) -> name
-    where <get-symbol-name> sym => name
+    where <get-symbol-sort> sym => SortNoArgs(name)
 
-  get-symbol-name :
-    seq(x, y) -> <conc-strings> ("Seq(", <get-symbol-name> x, ",", <get-symbol-name> y, ")")
+  get-symbol-sort :
+    seq(x, y) -> Sort("Seq", [<get-symbol-sort> x, <get-symbol-sort> y])
 
-  get-symbol-name :
-    opt(x) -> <conc-strings> ("Option(", <get-symbol-name> x, ")")
+  get-symbol-sort :
+    opt(x) -> Sort("Option", [<get-symbol-sort> x])
 
-  get-symbol-name :
-    iter(x) -> <conc-strings> ("List(", <get-symbol-name> x, ")")
+  get-symbol-sort :
+    iter(x) -> Sort("List", [<get-symbol-sort> x])
 
-  get-symbol-name :
-    iter-star(x) -> <conc-strings> ("List(", <get-symbol-name> x, ")")
+  get-symbol-sort :
+    iter-star(x) -> Sort("List", [<get-symbol-sort> x])
 
-  get-symbol-name :
-    iter-sep(x, _) -> <conc-strings> ("List(", <get-symbol-name> x, ")")
+  get-symbol-sort :
+    iter-sep(x, _) -> Sort("List", [<get-symbol-sort> x])
 
-  get-symbol-name :
-    iter-star-sep(x, _) -> <conc-strings> ("List(", <get-symbol-name> x, ")")
+  get-symbol-sort :
+    iter-star-sep(x, _) -> Sort("List", [<get-symbol-sort> x])
 
-  get-symbol-name :
-    tuple(x, y) -> <conc-strings> ("Tuple(", <get-symbol-name> x, ",", <get-symbol-name> y, ")")
+  get-symbol-sort :
+    tuple(x, y) -> SortTuple([<get-symbol-sort> x, <get-symbol-sort> y])
 
-  get-symbol-name :
-    alt(x, y) -> <conc-strings> ("Alt(", <get-symbol-name> x, ",", <get-symbol-name> y, ")")
+  get-symbol-sort :
+    alt(x, y) -> Sort("Alt", [<get-symbol-sort> x, <get-symbol-sort> y])
 
-  get-symbol-name :
-    cf(sym) -> <concat-strings> ["cf", name]
-    where <get-symbol-name> sym => name
+  get-symbol-sort :
+    cf(sym) -> sort
+    where <get-symbol-sort> sym => sort
 
-  get-symbol-name :
-    lex(sym) -> <concat-strings> ["lex", name]
-    where <get-symbol-name> sym => name
+  get-symbol-sort :
+    lex(sym) -> sort
+    where <get-symbol-sort> sym => sort
 
-  get-symbol-name :
-    varsym(sym) -> <concat-strings> ["var", name]
-    where <get-symbol-name> sym => name
+  get-symbol-sort :
+    varsym(sym) -> sort
+    where <get-symbol-sort> sym => sort
     
     
   is-layout = ?layout()
