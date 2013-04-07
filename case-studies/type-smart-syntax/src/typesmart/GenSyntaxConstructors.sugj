@@ -5,17 +5,18 @@ import concretesyntax.Stratego;
 public sugar GenSyntaxConstructors {
   desugarings
     gen-syntax-constructors
-    
+  
   rules
     gen-syntax-constructors =
       is-list; ?list;
-      filter(?grammar-elem(<id>));
+      filter(?grammar-elem(<id>);
+             (  ?context-free-syntax(<id>)
+              + ?context-free-priorities(<id>)
+              + ?syntax(<id>)));
       not(?[]);
       map(
-        (?context-free-syntax(<id>) + ?context-free-priorities(<id>));
-        map(gen-syntax-constructors-prod);
-        !transformation-elem(Rules(<id>));
-        debug);
+        filter(gen-syntax-constructors-prod);
+        !transformation-elem(Rules(<id>)));
       ?smart-cons-list;
       !Locked(<conc> (list, smart-cons-list))
   
@@ -28,27 +29,31 @@ public sugar GenSyntaxConstructors {
 	    ; <unquote(?'"')> cons-with-quotes => cons
 	    ; <conc-strings> ("smart-", cons) => smart-cons
 	   
-	    ; <filter(get-symbol-name)> lhs => arg-sorts
-	    ; <get-symbol-name> rhs => res-sort
+	    ; <filter(get-symbol-sort)> lhs => arg-sorts
+	    ; <get-symbol-sort> rhs => res-sort
 	    
 	    ; <make-arg-list(|1)> arg-sorts => args
 	    ; <zip; map(gen-arg-check)> (args, arg-sorts) => arg-checks
 	    
 	    ; <map(!Var(<id>)); !NoAnnoList(List(<id>))> args => args-term
 	    ; !stratego-strategy|[ <prim("SUGARJ_unsafe_build", string~cons)> term~args-term ]| => build
-	    ; !|[ put-anno(|"syntax-sort", string~res-sort) ]| => put-res
-	    ; <debug; conc; debug;foldr(!Id, \ (x,y) -> Seq(x,y) \);debug> (arg-checks, [build, put-res]) => body
+	    ; !|[ put-anno(|"syntax-sort", term~<trm-explode>res-sort) ]| => put-res
+	    ; <conc; foldr(!Id, \ (x,y) -> Seq(x,y) \)> (arg-checks, [build, put-res]) => body
 	    
 	    ; <map(!DefaultVarDec(<id>))> args => var-decs
 	    ; !SDefT(smart-cons, [], var-decs, body) => strat
     
     gen-arg-check :
-      (arg, arg-sort) -> |[ where(<get-anno(|"syntax-sort")> id~arg => string~arg-sort) ]|
+      (arg, arg-sort) -> |[ where(
+                              <is-subsort-of> 
+                              (<get-anno(|"syntax-sort")> id~arg, term~<trm-explode>arg-sort))  ]|
     
     make-arg-list(|n) :
       [] -> []
     make-arg-list(|n) :
       [_|rest] -> [arg| <make-arg-list(|<inc> n)> rest]
       where <conc-strings> ("arg", <int-to-string> n) => arg
+      
+    is-subsort-of = structurally-equal
 }
 
