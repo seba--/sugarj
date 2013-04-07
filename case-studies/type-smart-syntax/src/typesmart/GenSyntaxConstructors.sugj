@@ -15,7 +15,7 @@ public sugar GenSyntaxConstructors {
               + ?syntax(<id>)));
       not(?[]);
       map(
-        filter(gen-syntax-constructors-prod);
+        filter(gen-syntax-constructors-prod + gen-subsort-of-inject);
         !transformation-elem(Rules(<id>)));
       ?smart-cons-list;
       !Locked(<conc> (list, smart-cons-list))
@@ -43,17 +43,35 @@ public sugar GenSyntaxConstructors {
 	    ; <map(!DefaultVarDec(<id>))> args => var-decs
 	    ; !SDefT(smart-cons, [], var-decs, body) => strat
     
+    gen-subsort-of-inject :
+      prod ->
+      strat
+    where
+        <?prod(lhs, rhs, attrs(as)) + ?prod(lhs, rhs, no-attrs); ![]=>as> prod 
+      ; <filter(?term(default(fun(quoted(<id>)))) 
+              + ?term(default(appl(unquoted("cons"), [fun(quoted(<id>))])))); debug-analysis> as => []
+      ; <filter(get-symbol-sort);debug-analysis> lhs => [arg-sort]
+      ; <get-symbol-sort;debug-analysis> rhs => res-sort
+      ; body := |[ is-subsort-of-inject(|term~<trm-explode>arg-sort,term~<trm-explode>res-sort) ]|
+      ; !SDefT("is-subtype-of", [], [], body) => strat
+
     gen-arg-check :
-      (arg, arg-sort) -> |[ where(
-                              <is-subsort-of> 
-                              (<get-anno(|"syntax-sort")> id~arg, term~<trm-explode>arg-sort))  ]|
+      (arg, arg-sort) -> |[ where(<has-sort> (id~arg, term~<trm-explode>arg-sort))  ]|
     
     make-arg-list(|n) :
       [] -> []
     make-arg-list(|n) :
       [_|rest] -> [arg| <make-arg-list(|<inc> n)> rest]
       where <conc-strings> ("arg", <int-to-string> n) => arg
-      
-    is-subsort-of = structurally-equal
+    
+    has-sort = (get-anno(|"syntax-sort"), id); is-subsort-of
+    is-subsort-of = is-subsort-of-refl
+    is-subsort-of-refl = structurally-equal
+    is-subsort-of-inject(|arg-sort,res-sort) =
+        ?(sub-sort,sup-sort)
+      ; <structurally-equal> (sub-sort, arg-sort) 
+      ; ( <structurally-equal> (sup-sort, res-sort)
+       <+ <is-subsort-of> (res-sort, sup-sort)) 
+    
 }
 

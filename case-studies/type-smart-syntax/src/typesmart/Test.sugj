@@ -6,5 +6,7 @@ public sugar Test {
   context-free syntax
     "foo" -> Foo {cons("FooCons")}
     Foo "bar" -> Bar {cons("BarCons")}
+    "baz" -> Baz
+    Baz-> Foo
 }
 
