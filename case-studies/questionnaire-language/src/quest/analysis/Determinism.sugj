@@ -47,7 +47,7 @@ public sugar Determinism {
         ConditionalContext => this-cond;
         where(<inline-derived-values> this-cond => this-inlined-cond);
         !LazyAnd(other-cond, this-inlined-cond) => check-cond);
-      if <strip-annos; is-satisfiable> check-cond
+      if <is-satisfiable> check-cond
         then where(<conc-strings> 
                      ("Potentially overlapping definition of '", name,
                       "' in ", <strip-annos; repeat(reduce); aterm-to-string; escape> other-cond,
