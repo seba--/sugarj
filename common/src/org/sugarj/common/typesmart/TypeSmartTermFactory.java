@@ -59,12 +59,19 @@ public class TypeSmartTermFactory extends AbstractTermFactory {
       
       // apply smart constructor to argument terms
       CallT smartCall = new CallT(smartCtrName, new Strategy[0], new IStrategoTerm[0]);
-      boolean smartOk = smartCall.evaluateWithArgs(context, new Strategy[0], terms);
+      IStrategoTerm currentWas = context.current();
+      IStrategoTerm t;
+      try {
+        boolean smartOk = smartCall.evaluateWithArgs(context, new Strategy[0], terms);
       
-      if (!smartOk)
-        throw new StrategoException("Smart constructor failed for: " + baseFactory.makeAppl(ctr, terms, annotations));
+        if (!smartOk)
+          throw new StrategoException("Smart constructor failed for: " + baseFactory.makeAppl(ctr, terms, annotations));
+
+        t = context.current();
+      } finally {
+        context.setCurrent(currentWas);
+      }
       
-      IStrategoTerm t = context.current();
       if (!(t instanceof IStrategoAppl))
         throw new StrategoException("Smart constructor should have returned an application term, but was: " + t);
       
