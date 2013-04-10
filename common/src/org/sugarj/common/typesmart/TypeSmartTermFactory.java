@@ -16,6 +16,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.IStrategoTuple;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.AbstractTermFactory;
+import org.spoofax.terms.Term;
 import org.strategoxt.lang.StrategoException;
 
 /**
@@ -83,8 +84,20 @@ public class TypeSmartTermFactory extends AbstractTermFactory {
   }
 
   @Override
-  public IStrategoTerm annotateTerm(IStrategoTerm arg0, IStrategoList arg1) {
-    return baseFactory.annotateTerm(arg0, arg1);
+  public IStrategoTerm annotateTerm(IStrategoTerm t, IStrategoList annos) {
+    if (annos.isEmpty()) {
+      IStrategoList actualAnnos = t.getAnnotations();
+      while (actualAnnos != null && !actualAnnos.isEmpty()) {
+        if (Term.isTermTuple(actualAnnos.head()) && 
+            actualAnnos.head().getSubtermCount() == 2 &&
+            Term.isTermString(actualAnnos.head().getSubterm(0)) &&
+            Term.asJavaString(actualAnnos.head().getSubterm(0)).equals("analysis-data"))
+          return t;
+        actualAnnos = actualAnnos.tail();
+      }
+    }
+    
+    return baseFactory.annotateTerm(t, annos);
   }
 
   @Override
