@@ -290,6 +290,8 @@ public class Driver{
   }
   
   private void init(ToplevelDeclarationProvider declProvider, RelativePath sourceFile, IProgressMonitor monitor) throws FileNotFoundException, IOException, InvalidParseTableException {
+    Log.log.setLoggingLevel(Log.ALWAYS);
+    
     this.monitor = monitor;
     environment.getIncludePath().add(new AbsolutePath(langLib.getLibraryDirectory().getAbsolutePath()));
   

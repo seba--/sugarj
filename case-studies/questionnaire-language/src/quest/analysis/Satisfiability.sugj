@@ -10,6 +10,7 @@ package quest.analysis;
 public sugar Satisfiability {
   rules
     is-satisfiable =
+      strip-annos;
       innermost(reduce);
       repeat(remove-equation);
       innermost(reduce);
