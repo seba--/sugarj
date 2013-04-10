@@ -3,6 +3,16 @@ package typesmart;
 import concretesyntax.Stratego;
 
 public sugar GenSyntaxConstructors {
+  rules
+    put-syntax-sort(|sort) =
+      (where(get-analysis-data-annotation) <+ init-analysis-data-annotation);
+      put-anno(|"syntax-sort", sort);
+      where(get-syntax-sort)
+    get-syntax-sort =
+      get-anno(|"syntax-sort")
+    has-syntax-sort =
+      where(get-syntax-sort)
+    
   desugarings
     gen-syntax-constructors
   
@@ -11,14 +21,18 @@ public sugar GenSyntaxConstructors {
       is-list; ?list;
       filter(?grammar-elem(<id>);
              (  ?context-free-syntax(<id>)
-              + ?context-free-priorities(<id>)
+              + ?context-free-priorities(<collect-all(?prod(_,_,_))>)
               + ?syntax(<id>)));
       not(?[]);
+      where(map(!context-free-syntax(<id>); 
+                gen-signature-from-grammar;
+                !transformation-elem(<id>))
+            => sig-list);
       map(
         filter(gen-syntax-constructors-prod + gen-subsort-of-inject);
         !transformation-elem(Rules(<id>)));
       ?smart-cons-list;
-      !Locked(<conc> (list, smart-cons-list))
+      !Locked(<conc> (list, sig-list, smart-cons-list))
   
     gen-syntax-constructors-prod :
       prod(lhs, rhs, attrs(as)) ->
@@ -33,11 +47,11 @@ public sugar GenSyntaxConstructors {
 	    ; <get-symbol-sort> rhs => res-sort
 	    
 	    ; <make-arg-list(|1)> arg-sorts => args
-	    ; <zip; map(gen-arg-check)> (args, arg-sorts) => arg-checks
+	    ; <zip; map(gen-arg-check(|cons))> (args, arg-sorts) => arg-checks
 	    
 	    ; <map(!Var(<id>)); !NoAnnoList(List(<id>))> args => args-term
 	    ; !stratego-strategy|[ <prim("SUGARJ_unsafe_build", string~cons)> term~args-term ]| => build
-	    ; !|[ put-anno(|"syntax-sort", term~<trm-explode>res-sort) ]| => put-res
+	    ; !|[ put-syntax-sort(|term~<trm-explode>res-sort) ]| => put-res
 	    ; <conc; foldr(!Id, \ (x,y) -> Seq(x,y) \)> (arg-checks, [build, put-res]) => body
 	    
 	    ; <map(!DefaultVarDec(<id>))> args => var-decs
@@ -49,14 +63,30 @@ public sugar GenSyntaxConstructors {
     where
         <?prod(lhs, rhs, attrs(as)) + ?prod(lhs, rhs, no-attrs); ![]=>as> prod 
       ; <filter(?term(default(fun(quoted(<id>)))) 
-              + ?term(default(appl(unquoted("cons"), [fun(quoted(<id>))])))); debug-analysis> as => []
-      ; <filter(get-symbol-sort);debug-analysis> lhs => [arg-sort]
-      ; <get-symbol-sort;debug-analysis> rhs => res-sort
+              + ?term(default(appl(unquoted("cons"), [fun(quoted(<id>))]))))> as => []
+      ; <filter(get-symbol-sort)> lhs => [arg-sort]
+      ; <get-symbol-sort> rhs => res-sort
       ; body := |[ is-subsort-of-inject(|term~<trm-explode>arg-sort,term~<trm-explode>res-sort) ]|
       ; !SDefT("is-subtype-of", [], [], body) => strat
 
-    gen-arg-check :
-      (arg, arg-sort) -> |[ where(<has-sort> (id~arg, term~<trm-explode>arg-sort))  ]|
+    gen-arg-check(|cons) :
+      (arg, arg-sort) -> 
+      |[ where(<has-sort 
+               <+ (log-mismatching-sort-error(|term~<trm-explode>cons);fail)>
+               (id~arg, term~<trm-explode>arg-sort))  ]|
+    
+    log-mismatching-sort-error =
+      (not(get-syntax-sort), id);
+      debug(!"Constructor argument lacks sort annotation: ")
+    
+    log-mismatching-sort-error(|cons) =
+      (get-syntax-sort, id);
+      ?(was, exp);
+      where(<conc-strings> 
+              ("Mismatching argument sort for constructor '", cons, "'.",
+               " Was ", <write-to-string> was, ",",
+               " expected ", <write-to-string> exp) => s);
+      <debug(!s)> "."
     
     make-arg-list(|n) :
       [] -> []
@@ -64,7 +94,13 @@ public sugar GenSyntaxConstructors {
       [_|rest] -> [arg| <make-arg-list(|<inc> n)> rest]
       where <conc-strings> ("arg", <int-to-string> n) => arg
     
-    has-sort = (get-anno(|"syntax-sort"), id); is-subsort-of
+    has-sort = ?([], Sort("List", _))
+    has-sort = ?(None, Sort("Option", _))
+    has-sort = ?(Some(x), Sort("Option", [xsort]));
+               !(x, xsort);
+               has-sort
+    has-sort = (get-syntax-sort, id); is-subsort-of
+    
     is-subsort-of = is-subsort-of-refl
     is-subsort-of-refl = structurally-equal
     is-subsort-of-inject(|arg-sort,res-sort) =

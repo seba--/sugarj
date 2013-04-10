@@ -1,0 +1,10 @@
+package typesmart.xml;
+
+import typesmart.xml.JSON;
+
+public class Test {
+  private String foo = {A: {B: }};
+}
+
+
+

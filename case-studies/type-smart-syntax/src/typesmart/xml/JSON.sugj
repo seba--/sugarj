@@ -1,0 +1,29 @@
+package typesmart.xml;
+
+import typesmart.xml.XmlSyntax;
+
+public sugar JSON {
+  context-free syntax
+    JSONElement -> JavaExpr
+  
+    "{" NCName ":" JSONElement* "}" -> JSONElement {cons("JSONElement")}
+    
+  rules
+    smart-JSONElement(|name, kids) =
+      <prim("SUGARJ_unsafe_build", "JSONElement")> [name, kids];
+      where(<put-syntax-sort(|SortNoArgs("NCName"))> name);
+      put-syntax-sort(|SortNoArgs("JSONElement"))
+  
+  desugarings
+    json-to-xml
+    xml-to-foo
+  
+  rules
+    json-to-xml :
+      JSONElement(name, kids) ->
+      Element(qname, [], kids, qname)
+    where qname := ElemName(QName(None, name))
+          
+    xml-to-foo :
+      Element(ElemName(QName(None, name)),_,_,_) -> Lit(String([Chars(name)]))
+}
