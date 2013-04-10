@@ -88,7 +88,8 @@ public class SugarJDescriptor extends Descriptor {
         try {
           observer.getLock().lockInterruptibly();
           observer.setPrototypeAllowed(false);
-          ((StrategoObserver) observer).getRuntime(); // eagerly initilize w/ current document
+          observer.reinitialize(SugarJDescriptor.this);
+          observer.getRuntime(); // eagerly initilize w/ current document
         } catch (InterruptedException e) {
           Environment.logException("could not reinitialize editor: interrupted", e);
         } catch (Exception e) {
