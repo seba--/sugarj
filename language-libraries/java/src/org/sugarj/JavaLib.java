@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.java_front.pp_java_string_0_0;
@@ -27,6 +28,7 @@ import org.sugarj.common.JavaCommands;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
+import org.sugarj.common.typesmart.TypeSmartTermFactory;
 import org.sugarj.java.JavaSourceFileContent;
 
 public class JavaLib extends LanguageLib implements Serializable {
@@ -205,10 +207,19 @@ public class JavaLib extends LanguageLib implements Serializable {
    */
   private String prettyPrint(IStrategoTerm term) {
     Context ctx = interp.getCompiledContext();
-    IStrategoTerm string = pp_java_string_0_0.instance.invoke(ctx, term);
-    if (string != null)
-      return Term.asJavaString(string);
 
+    ITermFactory oldFactory = ctx.getFactory();
+    try {
+      if (oldFactory instanceof TypeSmartTermFactory) {
+        ctx.setFactory(((TypeSmartTermFactory) ctx.getFactory()).getBaseFactory());
+      }
+      IStrategoTerm string = pp_java_string_0_0.instance.invoke(ctx, term);
+      if (string != null)
+        return Term.asJavaString(string);
+    } finally {
+      ctx.setFactory(oldFactory);
+    }
+    
     throw new RuntimeException("pretty printing java AST failed: " + term);
   }
 
