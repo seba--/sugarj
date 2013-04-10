@@ -47,10 +47,15 @@ public class Result implements IErrorLogger {
   
   private boolean generateFiles;
   
+  // other results it depends on
   private Map<Path, Integer> dependencies = new HashMap<Path, Integer>();
+  // circular dependencies to other results
   private Set<Path> circularDependencies = new HashSet<Path>();
+  // generated during compilation
   private Map<Path, Integer> generatedFileHashes = new HashMap<Path, Integer>();
+  // files touched/read during compilation
   private Map<Path, Integer> dependingFileHashes = new HashMap<Path, Integer>();
+
   private Set<IStrategoTerm> editorServices = new HashSet<IStrategoTerm>();
   private List<String> collectedErrors = new LinkedList<String>();
   private Set<BadTokenException> parseErrors = new HashSet<BadTokenException>();
