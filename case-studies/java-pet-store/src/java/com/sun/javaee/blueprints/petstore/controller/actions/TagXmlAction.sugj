@@ -36,9 +36,9 @@ public class TagXmlAction implements ControllerAction {
             ee.printStackTrace();
         }
         out.println(<response>
-        	          <itemId>${itemId}</itemId>
+        	            <itemId>${itemId}</itemId>
                       <tags>${cf.getItem(itemId).tagsAsString()}</tags>
-		            </response>);
+                    </response>);
         out.close();
     }
 }

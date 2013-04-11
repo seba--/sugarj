@@ -8,6 +8,7 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import com.sun.javaee.blueprints.petstore.search.IndexDocument;
 
 /**
  * This class is used to encapsulate the Lucene functionality

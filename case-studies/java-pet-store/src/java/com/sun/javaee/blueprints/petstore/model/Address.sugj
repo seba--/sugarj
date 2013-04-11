@@ -25,15 +25,15 @@ public class Address implements java.io.Serializable {
     public Address() { }
     
     @TableGenerator(name="ADDRESS_ID_GEN",
-            table="ID_GEN",
-            pkColumnName="GEN_KEY",
-            valueColumnName="GEN_VALUE",
-            pkColumnValue="ADDRESS_ID",
-            allocationSize=1)
-            @GeneratedValue(strategy=GenerationType.TABLE,generator="ADDRESS_ID_GEN")
-            @Id
-            public String getAddressID() {
-        return addressID;
+    table="ID_GEN",
+    pkColumnName="GEN_KEY",
+    valueColumnName="GEN_VALUE",
+    pkColumnValue="ADDRESS_ID",
+    allocationSize=1)
+    @GeneratedValue(strategy=GenerationType.TABLE,generator="ADDRESS_ID_GEN")
+    @Id
+    public String getAddressID() {
+      return addressID;
     }
   
     public String addressToString() {

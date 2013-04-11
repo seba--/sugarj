@@ -4,7 +4,7 @@ import org.sugarj.languages.Java;
 
 public sugar Accessors {
 	context-free syntax
-	    (JavaAnno | JavaFieldMod)* JavaType {JavaVarDec ","}+ AccDecs ";" -> AccFieldDec {cons("AccFieldDec")}
+    (JavaAnno | JavaFieldMod)* JavaType {JavaVarDec ","}+ AccDecs ";" -> AccFieldDec {cons("AccFieldDec")}
 		"{" AccClassBodyDec* "}" -> AccClassBody {cons("AccClassBody")}
 		AccFieldDec -> AccClassBodyDec
 		JavaClassBodyDec -> AccClassBodyDec
@@ -24,7 +24,7 @@ public sugar Accessors {
 		ClassOrInterfaceType : Name -> ClassOrInterfaceType
 
 	desugarings
-		acc : AccClassDec -> JavaClassDec
+		strip-annos;acc : AccClassDec -> JavaClassDec
 
 	rules
 		acc : AccClassDec(ClassDecHead(mods, Id(classname), a, b, c), AccClassBody(l))
