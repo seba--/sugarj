@@ -165,7 +165,7 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
         writeToFile(generateFiles, generatedFileHashes, deferredSource.a, code);
         outFiles.add(deferredSource.a);
       } catch (ClassNotFoundException e) {
-        throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + outFile);
+        throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + outFile, e);
       }
     }
 
