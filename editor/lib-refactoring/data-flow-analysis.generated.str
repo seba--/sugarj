@@ -1,0 +1,89 @@
+/**
+ * Language generic template strategy for data-flow analysis.
+ */
+module lib-refactoring/data-flow-analysis.generated
+
+rules //rules that implement the language specific part of the data-flow analysis
+
+  /**
+   * Associates a df-anno to the declared variable. 
+   * The df-anno is set as an annotation on the name of the declared variable, and stored to annotate its subsequent  read accesses. 
+   *
+   * @example VarDecl(name, type) -> VarDecl(<set-new-df-value> name, type)
+   * @type VarDecl -> VarDecl
+   */  
+  df-anno-declare = fail
+    
+  /**
+   * Associates a new df-anno to the assigned variable. 
+   * The df-anno is set as an annotation on the name of the assigned variable, and stored to annotate its subsequent read accesses. 
+   * @example
+   *   Assign(name, value) -> Assign(df-name, value')
+   *   where
+   *     value' := <df-anno> value;
+   *     df-name := <set-new-df-value> name      
+   * @type VarAssignment -> VarAssignment
+   */  
+  df-anno-assign = fail
+    
+  /**
+   * Implements the data-flow for constructs that affect the control flow (and thus also the data-flow).
+   *
+   * @example
+   *   If(c, if-block, else-block) -> If(c, if-block', else-block')
+   *   where
+   *     if-block' := <df-anno> if-block
+   *       \DFAnno/
+   *     else-block' := <df-anno> else-block
+   * @type T -> T
+   */
+  df-anno-control-flow = fail 
+
+    
+rules //helper rules 
+  
+  /**
+   * Helper rule to associate a new, unique df-anno to the name of a declared or assigned variable.
+   * The df-anno is stored to annotate the names of its subsequent read accesses.
+   * @type String -> String{List(String)}
+   */
+  set-new-df-value:
+    name -> name{[df-anno]}
+    where
+      df-anno := <newname> "df_";
+      rules(DFAnno :  name  ->  df-anno)
+
+  
+rules //rules that implement the language generic part of the data-flow analysis
+  
+  /**
+   * Sets data-flow annotations on variable names, so that: 
+   * - variables with the same df-anno have the same value, e.g., 
+   *   VarDecl("a{df-x}"); VarAssign("a{df-y}"); VarUse("a{df-y}"); VarUse("a{df-y}"); VarAssign("a{df-z}"); VarUse("a{df-z}");
+   * - multiple df-annos can be set to represent different control flows, e.g., 
+   *   If(c, VarAssign("a{df-x}");, VarAssign("a{df-y}");); VarUse("a{[df-x, df-y]}")
+   *
+   * @type T -> T
+   */
+  analyze-dataflow:
+    trm -> trm'
+    where
+      {|DFAnno:
+        trm' := <df-anno> trm
+      |}
+  
+  //controls the dataflow traversal
+  df-anno =
+    df-anno-use <+
+    df-anno-declare <+
+    df-anno-assign <+
+    df-anno-control-flow <+ 
+    all(df-anno)
+  
+  //annotates read accesses with a list of df-predecessors
+  //@type String -> String{List(String)} 
+  df-anno-use:
+    name -> name{df-annos} 
+    where
+      <is-string> name;
+      df-annos := <bagof-DFAnno> name

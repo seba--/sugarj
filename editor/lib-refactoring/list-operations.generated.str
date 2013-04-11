@@ -1,0 +1,253 @@
+module lib-refactoring/list-operations.generated
+
+imports
+  lib/editor-common.generated
+  lib-refactoring/fetch-positions.generated  
+  
+  
+rules //select list-elements at position
+    
+  /**
+   * Returns the (sub)list that corresponds to the given AST positions 
+   * @param The position of the first element as List(Int)
+   * @param The position of the last element as List(Int)
+   * @type ATerm -> List(a)
+  */
+  select-sublist(|from, to):
+    ast -> sublist
+    where
+      <equal> (<init> from, <init> to) 
+    where
+      list-pos := <init> from;
+      list := <term-at-position(|list-pos)> ast;
+      sublist := <select-partial-list(|<last> from, <last> to)> list
+      
+  /**
+   * Returns the (sub)list that corresponds to the given list indexes 
+   * @param The index of the first element
+   * @param The index of the last element
+   * @type ATerm -> List(a)
+  */
+  select-partial-list(|from, to): 
+    list -> mid-part
+    where 
+      (prefix, suffix) := <split-at(|<inc> to)> list;
+      (pre, mid-part) := <split-at(|from)> prefix
+      
+  /**
+   * Selects a (sub)list based on origin matching
+   *
+   * @param The subsequent list elements to be removed
+   * @type ATerm -> ATerm
+  */    
+  select-sublist(|sublist):
+    term -> <select-sublist(|from, to)> term
+    where
+      (from, to) := <position-of-sublist-from-to(|term)> sublist
+    
+rules //remove list-elements at position
+      
+  /**
+   * Removes list elements at a given position in the AST
+   *
+   * @param The position of the first element to be removed (from) as List(Int)
+   * @param The position of the last element to be removed (to) as List(Int)
+   * @type ATerm -> ATerm
+  */
+  remove-sublist(|from, to):
+    ast -> ast-with-deletion
+    where
+      <equal> (<init> from, <init> to) 
+    where
+      list-pos := <init> from;
+      ast-with-deletion := <at-position-preserve(remove-partial-list(|<last> from, <last> to)|list-pos)> ast
+  
+  /**
+   * Removes elements from a list
+   *
+   * @param The index of the first element to be removed (from)  
+   * @param The index of the last element to be removed (to)
+   * @type List(T) -> List(T)
+  */
+  remove-partial-list(|from, to): 
+    list -> list-after-deletion
+    where 
+      (part1, tail):=<split-at(|from)> list; 
+      (prefix, part2):=<split-at(|<inc> to)> list;
+      list-after-deletion:=<conc> (part1, part2)//TODO: origin tracking
+  
+  /**
+   * Removes an element at a given position in the AST
+   *
+   * @param The position of the element to be removed  
+   * @type ATerm -> ATerm
+  */
+  remove-list-element(|position)=
+    remove-sublist(|position, position)
+
+    
+rules //insert list elements at position
+  
+  /**
+   * Inserts list elements at a given position 
+   *
+   * @param The position for inserting the sublist as List(Int)  
+   * @param The sublist that will be inserted
+   * @type ATerm -> ATerm
+  */
+  insert-sublist(|position, sublist):
+    ast -> ast-with-insertion
+    where
+      list-pos:=<take(|<length; dec> position)> position;
+      ast-with-insertion:=<at-position-preserve(insert-partial-list(|<last> position, sublist)|list-pos)> ast
+  
+  /**
+   * Inserts list elements at a given index 
+   *
+   * @param The index for inserting the sublist  
+   * @param The sublist that will be inserted
+   * @type ATerm -> ATerm
+  */
+  insert-partial-list(|index, sublist): 
+    list -> list-with-insertion
+    where
+      (prefix, suffix):=<split-at(|index)>;
+      list-with-insertion:=<conc> (prefix, sublist, suffix)
+  
+  /**
+   * Inserts an element at a given position 
+   *
+   * @param The position for inserting the sublist as List(Int)
+   * @param The element that will be inserted
+   * @type ATerm -> ATerm
+  */
+  insert-list-element(|position, element)=
+    insert-sublist(|position, [element])
+  
+
+rules //replace list elements at a certain position
+  
+  /**
+   * Replaces a sublist in the AST with another sublist
+   *
+   * @param The position of the first element of the sublist to be replaced (from)  
+   * @param The position of the last element of the sublist to be replaced (to)
+   * @param The new sublist
+   * @type ATerm -> ATerm
+  */
+  replace-sublist(|from, to, sublist)=
+    remove-sublist(|from, to); 
+    insert-sublist(|from, sublist)
+  
+  /**
+   * Replaces a sublist in the AST with a single list element
+   *
+   * @param The position of the first element of the sublist to be replaced (from)  
+   * @param The position of the last element of the sublist to be replaced (to)
+   * @param The new list element
+   * @type ATerm -> ATerm
+  */
+  replace-sublist-with-element(|from, to, element)=
+    replace-sublist(|from, to, [element])
+  
+  /**
+   * Replaces a list-element in the AST with a sublist
+   *
+   * @param The position of the list element that ill be removed   
+   * @param The sublist that will be inserted
+   * @param The new list element
+   * @type ATerm -> ATerm
+  */
+  replace-all-elements-with-sublist-in-list(|position, sublist)=
+    replace-sublist(|position, position, sublist)
+  
+  
+rules //remove list-elements that match a certain criterion
+  
+  /**
+   * Removes all elements matching s  
+   * @param Strategy that determines the elements that will be removed  
+   * @type ATerm -> ATerm
+  */
+  remove-all-elements(s) =
+    topdown(try(remove-all-elements-from-list(s)))
+  
+  /**
+   * Removes all list elements matching s  
+   * @param Strategy that determines the elements that will be removed  
+   * @type List -> List
+  */
+  remove-all-elements-from-list(s) =
+    replace-all-elements-with-sublist-in-list(s|[])
+
+  /**
+   * Removes elements of a (sub)list from a list that is a subterm of the given term
+   *
+   * @param The subsequent list elements to be removed
+   * @type ATerm -> ATerm
+  */    
+  remove-sublist(|sublist):
+    term -> <remove-sublist(|from, to)> term
+    where
+      (from, to) := <position-of-sublist-from-to(|term)> sublist
+
+rules //replace elements that match a certain criterion
+  
+  /**
+   * Replaces all elements in the AST that match a given strategy with a sublist 
+   * @param Strategy that determines the elements that will be replaced
+   * @param Sublist that replaces the elements
+   * @type ATerm -> ATerm
+  */
+  replace-all-elements-with-sublist(s|sublist)=
+    topdown(try(replace-all-elements-with-sublist-in-list(s|sublist)))
+  
+  /**
+   * Replaces list elements matching a certain strategy with a sublist 
+   * @param Strategy that determines the elements that will be replaced
+   * @param Sublist that replaces the elements
+   * @type List -> List
+  */  
+  replace-all-elements-with-sublist-in-list(s|sublist):
+    list -> result-list
+    where 
+      result-list:=<
+        try(
+          split-fetch(s); 
+          <conc>(
+            <Fst>, 
+            sublist, 
+            <Snd; replace-all-elements-with-sublist-in-list(s|sublist)>
+          )
+        )
+      > list
+  
+  
+rules //helpers
+
+  /**
+   * Applies s at the given position in the AST, while preserving the annotations and origin-term. 
+   *
+   * @type AST -> AST
+   * @param strategy to apply
+   * @param position in AST as List(Int) 
+   */  
+  at-position-preserve(s|position) =
+    origin-track-forced(
+      preserve-annos(
+        at-position-preserve-internal(s|position)
+      )
+    )
+  
+  at-position-preserve-internal(s|position):
+    c#(t*) -> t'
+    where
+      !position => [i | position']
+    where
+      t' := c#(<at-index(at-position-preserve(s|position'))> (i, t*))
+
+  at-position-preserve-internal(s|position):
+    t -> t'
+    where
+      !position => [];
+      t' := <s> t

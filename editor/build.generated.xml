@@ -2,37 +2,54 @@
 
 <project name="build.generated">
 
-        <target name="spoofaximp.default" depends="spoofaximp.default.ctree"/>
-        <target name="spoofaximp.default.ctree" depends="
-			check-classpath,
-			init,
-			sdf2table,
-			meta-sdf2table,
-			ppgen,
-			pppack,
-			sdf2imp.eclipse,
-			sdf2imp.standalone,
-			sdf2parenthesize,
-			stratego.aster,
-			java.jar,
-			stratego.ctree,
-			refresh,
-			sdf2imp.eclipse.load"/>
-        <target name="spoofaximp.default.jar" depends="
-			check-classpath,
-			init,
-			sdf2table,
-			meta-sdf2table,
-			ppgen,
-			pppack,
-			sdf2imp.eclipse,
-			sdf2imp.standalone,
-			sdf2parenthesize,
-			stratego.aster,
-			java.jar,
-			stratego.jar.helper,
-			refresh,
-			sdf2imp.eclipse.load"/>
+			  <target name="spoofaximp.default" depends="spoofaximp.default.ctree"/>
+			  <target name="spoofaximp.default.ctree" depends="
+			      check-classpath,
+			      call-onsave,
+			      init,
+			      sdf2table,
+			      meta-sdf2table,
+			      ppgen,
+			      pppack,
+			      sdf2imp.eclipse,
+			      sdf2imp.standalone,
+			      sdf2parenthesize,
+			      stratego.aster,
+			      java.jar,
+			      stratego.ctree,
+			      refresh,
+			      sdf2imp.eclipse.load"/>
+			  <target name="spoofaximp.default.jar" depends="
+			      check-classpath,
+			      call-onsave,
+			      init,
+			      sdf2table,
+			      meta-sdf2table,
+			      ppgen,
+			      pppack,
+			      sdf2imp.eclipse,
+			      sdf2imp.standalone,
+			      sdf2parenthesize,
+			      stratego.aster,
+			      java.jar,
+			      stratego.jar.helper,
+			      refresh,
+			      sdf2imp.eclipse.load"/>
+			  <target name="spoofaximp.default.nostr" depends="
+			      check-classpath,
+			      call-onsave,
+			      init,
+			      sdf2table,
+			      meta-sdf2table,
+			      ppgen,
+			      pppack,
+			      sdf2imp.eclipse,
+			      sdf2imp.standalone,
+			      sdf2parenthesize,
+			      stratego.aster,
+			      java.jar,
+			      refresh,
+			      sdf2imp.eclipse.load"/>
     
         <!-- Initialization -->
         <available file="${src-gen}/org/sugarj/editor/strategies/Main.java" property="java.jar.enabled"/>
@@ -73,6 +90,23 @@
         <mkdir dir="${include}"/>
         <mkdir dir="${lib}"/>
         <mkdir dir="${syntax}"/>
+
+			  <!-- The files for which the on-save handler is called before building -->
+			  <path id="call-onsave.files">
+			    <fileset dir=".">
+			      <include name="**/*.tmpl"/>
+			      <include name="**/*.nd"/>
+			      <include name="**/*.nab"/>
+			    </fileset>
+			  </path>
+				
+				<!-- Call on-save handler for template and name binding files so that their generated files are present -->
+				<target name="call-onsave">
+					<pathconvert pathsep=" " property="call-onsave.args" refid="call-onsave.files"/>
+					<java classname="org.strategoxt.imp.metatooling.building.AntForceOnSave">
+						<arg line="${call-onsave.args}"/>
+					</java>
+				</target>
 
         <target name="sdf2imp" depends="sdf2table,sdf2imp.eclipse,sdf2imp.standalone,sdf2parenthesize"/>
         
@@ -195,6 +229,7 @@
             <copy file="${eclipse.spoofaximp.jars}/make_permissive.jar" todir="utils" failonerror="false"/>
             <copy file="${eclipse.spoofaximp.jars}/sdf2imp.jar" todir="utils" failonerror="false"/>
             <copy file="${eclipse.spoofaximp.jars}/aster.jar" todir="utils" failonerror="false"/>
+            <copy file="${eclipse.spoofaximp.jars}/StrategoMix.def" todir="utils" failonerror="false"/>
             <copy file="${eclipse.spoofaximp.strategojar}" todir="utils" failonerror="false"/>
         </target>
     
@@ -419,6 +454,13 @@
     
         <!-- Stratego to Java interpreter -->
         <target name="stratego.ctree" depends="rtg2sig">
+            <fail message="Main stratego file '${strmodule}.str' not found.">
+                <condition>
+                    <not>
+                        <isset property="build.stratego.enabled"/>
+                    </not>
+                </condition>
+            </fail>
             <dependset>
                 <srcfileset dir="${basedir}">
                     <include name="**/*.str"/>
@@ -437,6 +479,13 @@
     
         <!-- Stratego to Java compiler -->
         <target name="stratego.jar" depends="rtg2sig,utils-files">
+            <fail message="Main stratego file '${strmodule}.str' not found.">
+                <condition>
+                    <not>
+                        <isset property="build.stratego.enabled"/>
+                    </not>
+                </condition>
+            </fail>
             <dependset>
                 <srcfileset dir="${basedir}">
                     <include name="**/*.str"/>
