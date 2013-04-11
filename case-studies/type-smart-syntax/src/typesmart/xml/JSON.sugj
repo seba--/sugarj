@@ -3,27 +3,41 @@ package typesmart.xml;
 import typesmart.xml.XmlSyntax;
 
 public sugar JSON {
+  signature constructors
+    XML : Document -> JavaExpr
+  
   context-free syntax
-    JSONElement -> JavaExpr
+    JSONElement -> JavaExpr {cons("JSON")}
   
     "{" NCName ":" JSONElement* "}" -> JSONElement {cons("JSONElement")}
     
   rules
+    smart-JSON(|el) =
+      <prim("SUGARJ_unsafe_build", "JSON")> [el];
+      put-syntax-sort(|SortNoArgs("JSON"))
+    
     smart-JSONElement(|name, kids) =
       <prim("SUGARJ_unsafe_build", "JSONElement")> [name, kids];
       where(<put-syntax-sort(|SortNoArgs("NCName"))> name);
       put-syntax-sort(|SortNoArgs("JSONElement"))
   
   desugarings
-    json-to-xml
-    xml-to-foo
+    desugar-json
+    desugar-xml
   
   rules
+    desugar-json :
+      JSON(json) -> XML(<bottomup(try(json-to-xml))> json) 
+
     json-to-xml :
       JSONElement(name, kids) ->
       Element(qname, [], kids, qname)
     where qname := ElemName(QName(None, name))
-          
+
+  rules
+    desugar-xml : 
+      XML(xml) -> <bottomup(try(xml-to-foo))> xml
+    
     xml-to-foo :
       Element(ElemName(QName(None, name)),_,_,_) -> Lit(String([Chars(name)]))
 }

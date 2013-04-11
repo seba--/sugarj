@@ -6,5 +6,3 @@ public class Test {
   private String foo = {A: {B: }};
 }
 
-
-
