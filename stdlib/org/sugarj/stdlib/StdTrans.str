@@ -23,7 +23,7 @@ strategies
 
   desugar-main = internal-main
   internal-main = traverse(desugar); unlock
-  main = io-wrap(internal-main)
+//  main = io-wrap(internal-main)
 
 strategies
   generate-desugared :

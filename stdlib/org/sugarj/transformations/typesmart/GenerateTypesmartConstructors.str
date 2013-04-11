@@ -3,10 +3,17 @@ module org/sugarj/transformations/typesmart/GenerateTypesmartConstructors
 imports org/sugarj/transformations/Analyze
         org/sugarj/languages/Sdf2
         org/sugarj/languages/Stratego
-        org/sugarj/languages/Sugar
         org/sugarj/stdlib/StdTrans
         org/sugarj/transformations/GenerateSignatures
-        
+
+rules
+  main = io-wrap(
+    ![1,2,3]
+    //   parse def file
+    // ; collect and concat bodies of all SDF modules in a single list
+    // ; apply gen-syntax-constructors to this list
+    // ; put resulting constructors in a single Stratego module
+  )        
 
 rules
   put-syntax-sort(|sort) =
@@ -20,12 +27,9 @@ rules
   
 rules
   gen-syntax-constructors =
-    is-list; ?list;
-    filter(?grammar-elem(<id>);
-           (  ?context-free-syntax(<id>)
-            + ?context-free-priorities(<collect-all(?prod(_,_,_))>)
-            + ?syntax(<id>)));
-    not(?[]);
+    filter( ?context-free-syntax(<id>)
+           + ?context-free-priorities(<collect-all(?prod(_,_,_))>)
+           + ?syntax(<id>));
     where(map(!context-free-syntax(<id>); 
               gen-signature-from-grammar;
               !transformation-elem(<id>))
@@ -34,7 +38,7 @@ rules
       filter(gen-syntax-constructors-prod + gen-subsort-of-inject);
       !transformation-elem(Rules(<id>)));
     ?smart-cons-list;
-    !Locked(<conc> (list, sig-list, smart-cons-list))
+    <conc> (sig-list, smart-cons-list)
 
   gen-syntax-constructors-prod :
     prod(lhs, rhs, attrs(as)) ->
