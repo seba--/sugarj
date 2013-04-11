@@ -555,9 +555,6 @@ public class Driver{
       
       List<IStrategoTerm> editorServices = ATermCommands.getList(services);
       
-      // XXX if (currentTransProg != null)
-      editorServices = ATermCommands.registerSemanticProvider(editorServices, currentTransProg);
-
       Path editorServicesFile = environment.createBinPath(langLib.getRelativeNamespaceSep() + extName + ".serv");
       
       log.log("writing editor services to " + editorServicesFile, Log.DETAIL);
