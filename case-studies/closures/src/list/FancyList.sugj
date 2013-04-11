@@ -1,6 +1,8 @@
 package list;
 
-import closure.Sugar;
+import closure.Syntax;
+import closure.Desugar;
+import closure.Editor;
 import tuples.Sugar;
 
 import java.util.Collections;
