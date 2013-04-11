@@ -2,11 +2,10 @@ package closure;
 
 import concretesyntax.Java;
 import closure.Syntax;
-import closure.Analysis;
 
 public sugar Wildcard {
   context-free syntax
-    JavaType "(" "_" ")" "=>" JavaExpr -> JavaExpr {cons("WildcardClosure")}
+    JavaType "(" "_" ")" "=>" JavaExpr -> JavaExpr {cons("WildcardClosure"), longest-match}
 
   desugarings
     desugar-wildcard-closure
@@ -21,4 +20,16 @@ public sugar Wildcard {
         <freshname> names => name
     
     freshname : names -> "fresh" 
+
+    /*
+     * this is approximate: we ignore that methods in anonymous class expressions bind variables
+     */
+    free-local-vars-expr : ExprName(Id(name)) -> [name]
+    free-local-vars-expr : AmbName(Id(name)) -> [name]
+    
+    free-local-vars-expr : Closure(_, _, Id(v), e) -> free-vars
+      where all-vars := <free-local-vars-expr> e
+          ; free-vars := <filter(not(?v))> all-vars
+    
+    free-local-vars-expr : c#(xs) -> <mapconcat(free-local-vars-expr)> xs
 }

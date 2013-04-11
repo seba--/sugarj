@@ -31,4 +31,8 @@ public sugar Strategies {
       where
         !position => [];
         t' := <s> t
+
+
+    find = ?(x, [(x', y) | _]); <structurally-equal> (x,x'); !y
+    find = ?(x, [_ | xs]); !(x, xs); find
 }

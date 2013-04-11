@@ -3,7 +3,8 @@ package list;
 import closure.Syntax;
 import closure.Desugar;
 import closure.Editor;
-import closure.Analysis;
+import closure.NameResolution;
+
 import closure.Lib;
 import closure.Wildcard;
 
@@ -94,7 +95,9 @@ public class Test {
     System.out.println(nums);
     
     // multiplies pairs of integers
-    ((Integer, Integer) => Integer) mult = Integer((Integer, Integer) p) => p.a * p.b;
+    ((Integer, Integer) => Integer) mult = 
+      Integer((Integer, Integer) p)
+      => p.a * p.b;
     
     System.out.println(nums.map(mult));
     
@@ -104,11 +107,5 @@ public class Test {
     System.out.println(nums1.map(dbl));
 
     System.out.println();
-  }
-  
-  private static void testAnalysis() {
-    (Integer => Integer => Integer) foo =
-      (Integer => Integer)(Integer i) =>
-      Integer(Integer i) => 0;
   }
 }

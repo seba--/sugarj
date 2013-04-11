@@ -3,11 +3,4 @@ package closure;
 public editor services Editor {
   colorer
     _.FunType : blue
-  
-  completions
-    completion template : JavaTypeName =
-      <T> " => " <T>
-      
-    completion template : JavaExprName =
-      <T> "(" <T> " " <v> ")" " => " <e>
 }

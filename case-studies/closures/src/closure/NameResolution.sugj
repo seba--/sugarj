@@ -1,0 +1,39 @@
+package closure;
+
+import closure.Syntax;
+import util.Strategies;
+
+public sugar NameResolution {
+  analyses
+    name-resolution(|[])
+  
+  rules
+    name-resolution(|names) =
+      where(
+        ?Closure(Res, Arg, x@Id(name), body);
+        new-names := [(name, x) | names];
+        <name-resolution(|new-names)> body
+      )
+    
+    name-resolution(|names) =
+      ?ExprName(Id(name));
+      where(t := <find> (name, names));
+      put-anno(|"name", t)
+
+    name-resolution(|names) =
+      ?AmbName(Id(name));
+      where(t := <find> (name, names));
+      put-anno(|"name", t)
+
+    name-resolution(|names) =
+      all(name-resolution(|names))
+
+  rules
+    resolve-reference = ?(<find-annotation(get-anno(|"name"))>,_,_,_,_)
+    find-annotation(s) = s <+ ?c#([<find-annotation(s)>])
+}
+
+public editor services NameResolution {
+  references
+    reference _ : resolve-reference
+}

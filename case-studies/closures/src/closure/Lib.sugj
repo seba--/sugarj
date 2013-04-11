@@ -3,7 +3,8 @@ package closure;
 import closure.Syntax;
 import closure.Desugar;
 import closure.Editor;
-import closure.Analysis;
+
+import closure.NameResolution;
 
 import tuples.Sugar;
 
