@@ -1,0 +1,12 @@
+[ FunType(
+    ClassOrInterfaceType(TypeName(Id("A")), None())
+  , ClassOrInterfaceType(TypeName(Id("C")), None())
+  )
+, PType(
+    [ FunType(
+        ClassOrInterfaceType(TypeName(Id("A")), None())
+      , ClassOrInterfaceType(TypeName(Id("C")), None())
+      )
+    ]
+  )
+]

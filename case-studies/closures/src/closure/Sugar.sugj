@@ -1,0 +1,14 @@
+package closure;
+
+import closure.Syntax;
+import closure.Desugar;
+import closure.Editor;
+import closure.Analysis;
+
+public sugar Sugar {
+  
+}
+
+public editor services Sugar {
+   
+}

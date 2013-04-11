@@ -1,0 +1,58 @@
+package list;
+
+import closure.Sugar;
+import tuples.Sugar;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+
+public class FancyList<T> {
+  private List<T> list;
+  
+  public FancyList(List<T> list) {
+    this.list = list;
+  }
+
+  public FancyList(T... ts) {
+    this.list = new LinkedList<T>();
+    for (T t : ts)
+      list.add(t);
+  }
+  
+  public List<T> getList() {
+    return list;
+  }
+  
+  public <U> FancyList<U> map((T => U) f) {
+    List<U> newlist = new LinkedList<U>();
+    for (T t : list)
+      newlist.add(f.apply(t));
+    return new FancyList(newlist);
+  }
+  
+  public FancyList<T> sortBy(final (T => T => Integer) comp) {
+    Comparator<T> comparator = new Comparator<T>() {
+      public int compare(T t1, T t2) {
+        return comp.apply(t1).apply(t2);
+      }
+    };
+     
+    Collections.sort(list, comparator);
+    return this;
+  }
+  
+  public <U> FancyList<(T, U)> zip(FancyList<U> other) {
+    assert list.size() == other.list.size();
+    
+    List<(T, U)> newlist = new LinkedList<(T, U)>();
+    for (int i = 0; i < list.size(); i++)
+      newlist.add((list.get(i), other.list.get(i)));
+    return new FancyList(newlist);
+  }
+  
+  public String toString() {
+    return list.toString();
+  }
+}

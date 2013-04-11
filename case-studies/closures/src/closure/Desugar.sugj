@@ -1,0 +1,28 @@
+package closure;
+
+import concretesyntax.Java;
+import closure.Closure;
+import closure.Syntax;
+
+public sugar Desugar {
+  desugarings
+    desugar-closure-type
+    desugar-closure-expr
+  
+  rules
+    desugar-closure-type :
+      |[ ~type:t1 => ~type:t2 ]|
+      ->
+      |[ closure.Closure<~t1, ~t2> ]|
+      
+  rules
+    desugar-closure-expr :
+      |[ ~res (~arg ~id:v) => ~e ]| 
+      ->
+      |[ new closure.Closure<~arg, ~res>() {
+           public ~res apply(final ~arg ~id:v) {
+             return ~e;
+           }
+         } 
+       ]|
+}

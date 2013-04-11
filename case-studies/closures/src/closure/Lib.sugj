@@ -1,0 +1,22 @@
+package closure;
+
+import closure.Syntax;
+import closure.Desugar;
+import closure.Editor;
+import closure.Analysis;
+
+import tuples.Sugar;
+
+public class Lib {
+  public static <A, B, C> (A => C) compose(final (A => B) f, final (B => C) g) {
+    return C(A a) => g.apply(f.apply(a));
+  }
+  
+  public static <A, B, C> (A => B => C) curry(final ((A, B) => C) f) {
+     return (B => C)(A a) => C(B b) => f.apply((a, b));
+  }
+  
+  public static <A, B, C> ((A, B) => C) uncurry(final (A => B => C) f) {
+    return C((A, B) p) => f.apply(p.a).apply(p.b);
+  }
+}

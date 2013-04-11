@@ -1,6 +1,6 @@
-package javaclosure;
+package closure;
 
-import javaclosure.Syntax;
+import closure.Syntax;
 
 import org.sugarj.languages.Java;
 
@@ -12,13 +12,17 @@ public analysis Analysis {
     free-local-vars-expr : ExprName(Id(name)) -> [name]
     free-local-vars-expr : AmbName(Id(name)) -> [name]
     
-    free-local-vars-expr : Closure(_, Id(v), e) ->
-      <diff> (<free-local-vars-expr> e, [v])
+    free-local-vars-expr : Closure(_, _, Id(v), e) -> free-vars
+      where all-vars := <free-local-vars-expr> e
+          ; free-vars := <filter(not(?v))> all-vars
     
     free-local-vars-expr : c#(xs) -> <mapconcat(free-local-vars-expr)> xs
     
   warnings
-    Closure(_, Id(v), e) =
+    Closure(_, _, Id(v), e) =
     [(v, <concat-strings> ["unused variable: ", v])]
-    where <not(elem)> (v, <free-local-vars-expr> e)
+      where all-vars := <free-local-vars-expr> e
+          ; <debug(!"is free? ")> v
+          ; <debug(!"in: ")> all-vars
+          ; [v] := <filter(?v)> all-vars
 }

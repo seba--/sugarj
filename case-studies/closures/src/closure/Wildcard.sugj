@@ -1,0 +1,24 @@
+package closure;
+
+import concretesyntax.Java;
+import closure.Syntax;
+import closure.Analysis;
+
+public sugar Wildcard {
+  context-free syntax
+    JavaType "(" "_" ")" "=>" JavaExpr -> JavaExpr {cons("WildcardClosure")}
+
+  desugarings
+    desugar-wildcard-closure
+
+  rules 
+    desugar-wildcard-closure :
+      WildcardClosure(ty, e) ->
+      Closure(ty, objectType, Id(name), e)
+      where
+        !ClassOrInterfaceType(TypeName(Id("Object")), None()) => objectType;
+        <free-local-vars-expr> e => names;
+        <freshname> names => name
+    
+    freshname : names -> "fresh" 
+}

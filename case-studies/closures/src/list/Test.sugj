@@ -1,0 +1,114 @@
+package list;
+
+import closure.Syntax;
+import closure.Desugar;
+import closure.Editor;
+import closure.Analysis;
+import closure.Lib;
+import closure.Wildcard;
+
+import tuples.Sugar;
+
+import java.util.List;
+import java.util.LinkedList;
+
+public class Test {
+  public static void main (String[] args) {
+    testMap();
+    testSort();
+    testCompose();
+    testCurry();
+  }
+  
+  private static void testMap() {
+    System.out.println("test map:");
+    
+    FancyList<Integer> list = new FancyList<Integer>(1, 2, 3, 4, 5);
+    System.out.println(list);
+    
+    // standard increment functions
+    (Integer => Integer) inc = Integer(Integer i) => i + 1;
+    
+    // increment list elements once or twice
+    System.out.println(list.map(inc));
+    System.out.println(list.map(inc).map(inc));
+    
+    System.out.println();
+  }
+  
+  private static void testSort() {
+    System.out.println("test sort:");
+    
+    FancyList<Integer> list = new FancyList<Integer>(3, 1, 4, 5, 2);
+    System.out.println(list);
+    
+    // sort in ascending order
+    (Integer => Integer => Integer) comp1 = 
+      (Integer => Integer)(Integer i) =>
+      Integer(Integer j) => i.compareTo(j);
+    
+    System.out.println(list.sortBy(comp1));
+    
+    // sort in descending order
+    (Integer => Integer => Integer) comp2 = 
+      (Integer => Integer)(Integer i) =>
+      Integer(Integer j) => j.compareTo(i);
+      
+    System.out.println(list.sortBy(comp2));
+    
+    System.out.println();
+  }
+  
+  private static void testCompose() {
+    System.out.println("test compose:");
+    
+    FancyList<Integer> list = new FancyList<Integer>(1, 2, 3, 4, 5);
+    System.out.println(list);
+    
+    // standard square and increment functions
+    (Integer => Integer) square = Integer(Integer i) => i * i;
+    (Integer => Integer) inc = Integer(Integer i) => i + 1;
+    
+    System.out.println(list.map(square));
+    System.out.println(list.map(square).map(inc));
+    
+    // compose the two: square . inc === \x -> inc(square(x))
+    (Integer => Integer) incSquare = closure.Lib.compose(square, inc);
+    
+    System.out.println(list.map(incSquare));
+    
+    System.out.println();
+  }
+  
+  private static void testCurry() {
+    System.out.println("test curry:");
+    
+    FancyList<Integer> nums1 = new FancyList<Integer>(1, 2, 3, 4, 5);
+    FancyList<Integer> nums2 = new FancyList<Integer>(5, 4, 3, 2, 1);
+    
+    // zip the two lists
+    FancyList<(Integer, Integer)> nums = nums1.zip(nums2);
+    
+    System.out.println(nums1);
+    System.out.println(nums2);
+    System.out.println(nums);
+    
+    // multiplies pairs of integers
+    ((Integer, Integer) => Integer) mult = Integer((Integer, Integer) p) => p.a * p.b;
+    
+    System.out.println(nums.map(mult));
+    
+    // partial application of mult
+    (Integer => Integer) dbl = closure.Lib.curry(mult).apply(2);
+    
+    System.out.println(nums1.map(dbl));
+
+    System.out.println();
+  }
+  
+  private static void testAnalysis() {
+    (Integer => Integer => Integer) foo =
+      (Integer => Integer)(Integer i) =>
+      Integer(Integer i) => 0;
+  }
+}

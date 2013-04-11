@@ -1,0 +1,5 @@
+package closure;
+
+public interface Closure<Arg, Res> {
+  public Res apply(Arg a);
+}

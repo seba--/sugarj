@@ -1,0 +1,13 @@
+package closure;
+
+public sugar Syntax {
+  context-free syntax
+    JavaType "=>" JavaType -> JavaType {cons("FunType"), right}
+  
+  context-free syntax
+    JavaType "(" JavaType JavaId ")" "=>" JavaExpr -> JavaExpr {cons("Closure")}
+    
+  context-free priorities
+    JavaLHS "=" JavaExpr -> JavaExpr
+  > JavaType "(" JavaType JavaId ")" "=>" JavaExpr -> JavaExpr
+}
