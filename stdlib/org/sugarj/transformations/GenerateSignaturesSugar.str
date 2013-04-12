@@ -1,0 +1,8 @@
+module org/sugarj/transformations/GenerateSignaturesSugar
+
+imports org/sugarj/transformations/GenerateSignatures
+        org/sugarj/stdlib/Common
+
+strategies
+  desugar =
+    changed-tree(gen-signature)

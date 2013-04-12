@@ -1,0 +1,8 @@
+module org/sugarj/stdlib/Common
+
+signature
+  constructors
+    Locked : a -> a
+
+rules
+  changed-tree(s) = ?t; s; not(equal(|t))

@@ -1,9 +1,10 @@
 module org/sugarj/stdlib/StdTrans
 imports libstrategolib
 
-imports org/sugarj/transformations/Analyze
+imports org/sugarj/stdlib/Common
+imports org/sugarj/transformations/AnalyzeSugar
 imports org/sugarj/transformations/ATerm
-imports org/sugarj/transformations/GenerateSignatures
+imports org/sugarj/transformations/GenerateSignaturesSugar
 imports org/sugarj/transformations/LayoutSugar
 imports org/sugarj/transformations/Renaming
 
@@ -15,7 +16,6 @@ strategies
   compile-error(|msg) = !CompileError(msg,<id>)
   
   desugar = fail
-  changed-tree(s) = ?t; s; not(equal(|t))
   
   unlocked-bottomup(s) = ?Locked(t) < id + all(unlocked-bottomup(s)); s
   traverse(s) = compile-error <+ unlocked-bottomup(try(s; traverse(s)))
@@ -46,7 +46,6 @@ strategies
   
 signature
   constructors
-    Locked : a -> a
     CompileError : A * B -> C
 
 signature
