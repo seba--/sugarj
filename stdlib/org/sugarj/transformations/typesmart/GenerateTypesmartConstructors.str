@@ -25,6 +25,12 @@ rules
 		    end
   )        
 
+  debug-pp-stratego =
+  	bottomup(try( not(is-string)
+  	            ; not(is-list)
+  	            ; not(pp-stratego-string)
+  	            ; debug(!"cannot pp stratego: ")))
+
 rules
   typesmart-options = 
     ArgOption(
@@ -56,22 +62,21 @@ rules
     filter( ?context-free-syntax(<id>)
            + ?context-free-priorities(<collect-all(?prod(_,_,_))>)
            + ?syntax(<id>));
-    where(map(!context-free-syntax(<id>); 
-              gen-signature-from-grammar)
+    where( concat
+         ; !context-free-syntax(<id>)
+    	   ; gen-signature-from-grammar
           => sig-list);
     map(
       filter(gen-syntax-constructors-prod + gen-subsort-of-inject);
       !Rules(<id>));
     ?smart-cons-list;
-    <conc> (sig-list, smart-cons-list)
+    <conc> ([sig-list], smart-cons-list)
 
   gen-syntax-constructors-prod :
     prod(lhs, rhs, attrs(as)) ->
     strat
   where
-      <filter(?term(default(fun(quoted(<id>)))) 
-            + ?term(default(appl(unquoted("cons"), [fun(quoted(<id>))]))))> as => [cons-with-quotes]
-    ; <unquote(?'"')> cons-with-quotes => cons
+      <filter(get-cons-attribute)> as => [cons]
     ; <conc-strings> ("smart-", cons) => smart-cons
    
     ; <filter(get-symbol-sort)> lhs => arg-sorts
@@ -93,8 +98,7 @@ rules
     strat
   where
       <?prod(lhs, rhs, attrs(as)) + ?prod(lhs, rhs, no-attrs()); ![]=>as> prod 
-    ; <filter(?term(default(fun(quoted(<id>)))) 
-            + ?term(default(appl(unquoted("cons"), [fun(quoted(<id>))]))))> as => []
+    ; <filter(get-cons-attribute)> as => []
     ; <filter(get-symbol-sort)> lhs => [arg-sort]
     ; <get-symbol-sort> rhs => res-sort
     ; body := CallT(SVar("is-subsort-of-inject"), []
@@ -102,13 +106,14 @@ rules
 
     ; !SDefT("is-subtype-of", [], [], body) => strat
 
+    
   gen-arg-check(|cons) :
     (arg, arg-sort) -> 
     Where(BA(LChoice(
         CallNoArgs(SVar("has-sort"))
       , Seq(CallT(SVar("log-mismatching-sort-error"), [], [<trm-explode> cons])
         , Fail()))
-    , NoAnnoList(Tuple([arg, <trm-explode> arg-sort]))))
+    , NoAnnoList(Tuple([NoAnnoList(Str(arg)), <trm-explode> arg-sort]))))
   
   log-mismatching-sort-error =
     (not(get-syntax-sort), id);

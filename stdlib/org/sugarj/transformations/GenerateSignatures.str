@@ -46,23 +46,21 @@ rules
 
   gen-opdecl-from-prod :
     prod(arg-symbols, res-symbol, attributes) -> OpDecl(cons, type)
-    where <get-cons-attribute> attributes => cons
+    where <find-cons-attribute> attributes => cons
           ; <get-prod-type> (arg-symbols, res-symbol) => type
 
-  get-cons-attribute :
-    attrs(attributes) -> cons
-    where <getfirst(
-             ?term(
-                default(
-                  appl(
-                    unquoted("cons")
-                  , [fun(quoted(<id>))]
-                  )
-                )
-              )
-           )> attributes => consQuoted
-          ; <unquote(?'"')> consQuoted => cons
+signature constructors
+  cons : a -> b
 
+rules
+  get-cons-attribute =
+      ?term(default(fun(quoted(<id>)))) 
+    + ?term(default(appl(unquoted("cons"), [fun(quoted(<id>))])))
+    + ?term(cons(<id>))
+    
+  find-cons-attribute =
+    ?attrs(<getfirst(get-cons-attribute; try(unquote(?'"')))>)
+    
   get-prod-type :
     ([], res) -> type
     where <get-symbol-type> res => type
