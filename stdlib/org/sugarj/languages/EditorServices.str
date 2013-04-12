@@ -1,146 +1,1174 @@
 module org/sugarj/languages/EditorServices
 
+imports
+  org/sugarj/transformations/typesmart/Runtime
+  org/sugarj/languages/Stratego
+
+
 signature
   constructors
-    ImportRenamed              : ModuleName * Id -> Import
-    Import                     : ModuleName -> Import
-    NoImports                  : Imports
-    Imports                    : List(Import) -> Imports
-    Module                     : ModuleName * Imports * List(Section) -> Module
-                               : String -> ModuleName
-    Source                     : BuilderOption
-    Cursor                     : BuilderOption
-    Meta                       : BuilderOption
-    Persistent                 : BuilderOption
-    RealTime                   : BuilderOption
+    Refactorings               : SectionName * List(RefactoringRule) -> Section
+    PPTable                    : StrategoCall -> RefactoringRule
+    PrettyPrint                : StrategoCall -> RefactoringRule
+    Refactoring                : List(SemanticNode) * String * StrategoCall * List(BuilderOption) -> RefactoringRule
+    Builders                   : SectionName * List(BuilderRule) -> Section
+    Builders                   : SectionName * List(BuilderRule) -> Section
+    SemanticObserver           : StrategoCall -> BuilderRule
+    Builder                    : String * StrategoCall * List(BuilderOption) -> BuilderRule
+    BuilderCaption             : PropertyValue -> BuilderRule
     OpenEditor                 : BuilderOption
-    Blank                      : CompletionAnno
-    Disable                    : CompletionAnno
-    None                       : CompletionAnno
+    RealTime                   : BuilderOption
+    Persistent                 : BuilderOption
+    Meta                       : BuilderOption
+    Cursor                     : BuilderOption
+    Source                     : BuilderOption
+    Completions                : SectionName * List(CompletionRule) -> Section
+    CompletionProposer         : StrategoCall -> CompletionRule
+    IdentifierLexical          : PropertyValue -> CompletionRule
+    IdentifierLexical          : PropertyValue -> CompletionRule
+    CompletionKeyword          : PropertyValue * CompletionAnno -> CompletionRule
+    CompletionTemplate         : CompletionPart * List(CompletionPart) * CompletionAnno -> CompletionRule
+    CompletionTemplate         : Id * List(CompletionPart) * CompletionAnno -> CompletionRule
+    CompletionTemplateWithSort : Sort * CompletionPart * List(CompletionPart) * CompletionAnno -> CompletionRule
+    CompletionTemplate         : PropertyValue * List(CompletionPart) * CompletionAnno -> CompletionRule
+    CompletionTemplateWithSort : Sort * PropertyValue * List(CompletionPart) * CompletionAnno -> CompletionRule
+    CompletionTrigger          : PropertyValue * CompletionAnno -> CompletionRule
     Placeholder                : Placeholder -> CompletionPart
-                               : String -> CompletionPart
-                               : String -> Placeholder
-                               : String -> AttributeId
-                               : Id -> AttributeId
-                               : NoColor -> MaybeColor
-                               : Color -> MaybeColor
-    NoColor                    : NoColor
-    ColorRGB                   : Int * Int * Int -> Color
-    ColorDefault               : Color
-    BOLD_ITALIC                : Font
-    ITALIC                     : Font
-    BOLD                       : Font
-    NORMAL                     : Font
-    TK_UNKNOWN                 : TokenKindName
-    TK_ERROR                   : TokenKindName
-    TK_VAR                     : TokenKindName
-    TK_OPERATOR                : TokenKindName
-    TK_KEYWORD                 : TokenKindName
-    TK_STRING                  : TokenKindName
-    TK_LAYOUT                  : TokenKindName
-    TK_NUMBER                  : TokenKindName
-    TK_IDENTIFIER              : TokenKindName
-    Literal                    : Id -> ColorNode
-    Token                      : TokenKindName -> ColorNode
-                               : Node -> ColorNode
-    AttributeRef               : AttributeId -> Attribute
-    Attribute                  : Color * MaybeColor * Font -> Attribute
-    ColorDef                   : AttributeId * Attribute -> ColorRule
-    ColorRuleNamed             : ColorNode * String * Attribute -> ColorRule
-    ColorRuleAllNamed          : ColorNode * String * Attribute -> ColorRule
-    ColorRule                  : ColorNode * Attribute -> ColorRule
+    None                       : CompletionAnno
+    Disable                    : CompletionAnno
+    Disable                    : CompletionAnno
+    Blank                      : CompletionAnno
+    References                 : SectionName * List(ReferenceRule) -> Section
+    ReferenceHoverRule         : SemanticNode * StrategoCall * StrategoCall -> ReferenceRule
+    ReferenceRule              : SemanticNode * StrategoCall -> ReferenceRule
+    HoverRule                  : SemanticNode * StrategoCall -> ReferenceRule
+    OccurrenceRule             : SemanticNode * StrategoCall -> ReferenceRule
+    Colorer                    : SectionName * List(ColorRule) -> Section
     ColorRuleAll               : ColorNode * Attribute -> ColorRule
+    ColorRuleAll               : ColorNode * Attribute -> ColorRule
+    ColorRule                  : ColorNode * Attribute -> ColorRule
+    ColorRuleAllNamed          : ColorNode * String * Attribute -> ColorRule
+    ColorRuleAllNamed          : ColorNode * String * Attribute -> ColorRule
+    ColorRuleNamed             : ColorNode * String * Attribute -> ColorRule
+    Attribute                  : Color * MaybeColor * Font -> Attribute
+    AttributeRef               : AttributeId -> Attribute
+    Token                      : TokenKindName -> ColorNode
+    Literal                    : Id -> ColorNode
+    TK_IDENTIFIER              : TokenKindName
+    TK_NUMBER                  : TokenKindName
+    TK_LAYOUT                  : TokenKindName
+    TK_STRING                  : TokenKindName
+    TK_KEYWORD                 : TokenKindName
+    TK_OPERATOR                : TokenKindName
+    TK_VAR                     : TokenKindName
+    TK_ERROR                   : TokenKindName
+    TK_UNKNOWN                 : TokenKindName
+    NORMAL                     : Font
+    BOLD                       : Font
+    ITALIC                     : Font
+    BOLD_ITALIC                : Font
+    BOLD_ITALIC                : Font
+    ColorDefault               : Color
+    ColorRGB                   : Int * Int * Int -> Color
+    NoColor                    : NoColor
+    ColorDef                   : AttributeId * Attribute -> ColorRule
+    Outliner                   : SectionName * List(OutlineRule) -> Section
     OutlineRule                : Node -> OutlineRule
-    None                       : FoldingAnno
-    Folded                     : FoldingAnno
-    Disable                    : FoldingAnno
-    FoldRuleAll                : Node * FoldingAnno -> FoldingRule
+    Folding                    : SectionName * List(FoldingRule) -> Section
     FoldRule                   : Node * FoldingAnno -> FoldingRule
-    IndentDef                  : PropertyValue -> IndentDef
-    FenceDef                   : PropertyValue * PropertyValue -> FenceDef
-    NoContinuation             : NoContinuation
-    BlockCommentDef            : PropertyValue * NoContinuation * PropertyValue -> BlockCommentDef
-    BlockCommentDef            : PropertyValue * PropertyValue * PropertyValue -> BlockCommentDef
-    IdentifierLexical          : PropertyValue -> LanguageProperty
-    IndentDefs                 : List(IndentDef) -> LanguageProperty
-    FenceDefs                  : List(FenceDef) -> LanguageProperty
-    BlockCommentDefs           : BlockCommentDef -> LanguageProperty
-    LineCommentPrefix          : PropertyValue -> LanguageProperty
-    UnmanagedTablePrefix       : Id -> LanguageProperty
-    Aliases                    : PropertyValues -> LanguageProperty
-    Extends                    : PropertyValues -> LanguageProperty
-    URL                        : URL -> LanguageProperty
-    StartSymbols               : PropertyValues -> LanguageProperty
-    StartSymbols               : List(Sort) -> LanguageProperty
-    TableProvider              : StrategoCall -> LanguageProperty
-    Table                      : PropertyValue -> LanguageProperty
-    Description                : PropertyValue -> LanguageProperty
-    Extensions                 : PropertyValues -> LanguageProperty
-    LanguageId                 : PropertyValue -> LanguageProperty
-    LanguageName               : PropertyValue -> LanguageProperty
-    Values                     : List(PropertyValue) -> PropertyValues
-                               : String -> URL
-                               : String -> PropertyValue
-                               : String -> PropertyValue
-    Refactorings               : String * List(SemanticRule) -> Section
-    Builders                   : String * List(SemanticRule) -> Section
-    Completions                : String * List(SemanticRule) -> Section
-    References                 : String * List(SemanticRule) -> Section
-    Colorer                    : String * List(ColorRule) -> Section
-    Outliner                   : String * List(OutlineRule) -> Section
-    Folding                    : String * List(FoldingRule) -> Section
-    Language                   : String * List(LanguageProperty) -> Section
-    None                       : OnSaveAnno
-    Attribute                  : StrategoId -> StrategoCall
+    FoldRuleAll                : Node * FoldingAnno -> FoldingRule
+    Disable                    : FoldingAnno
+    Disable                    : FoldingAnno
+    Folded                     : FoldingAnno
+    None                       : FoldingAnno
+    SemanticProvider           : PropertyValue -> RefactoringRule
+    SemanticProvider           : PropertyValue -> RefactoringRule
+    OnSave                     : StrategoCall * OnSaveAnno -> RefactoringRule
+    SemanticProvider           : PropertyValue -> BuilderRule
+    SemanticProvider           : PropertyValue -> BuilderRule
+    OnSave                     : StrategoCall * OnSaveAnno -> BuilderRule
+    SemanticProvider           : PropertyValue -> CompletionRule
+    SemanticProvider           : PropertyValue -> CompletionRule
+    OnSave                     : StrategoCall * OnSaveAnno -> CompletionRule
+    SemanticProvider           : PropertyValue -> ReferenceRule
+    SemanticProvider           : PropertyValue -> ReferenceRule
+    OnSave                     : StrategoCall * OnSaveAnno -> ReferenceRule
     Strategy                   : StrategoId -> StrategoCall
-    Refactoring                : List(SemanticNode) * String * StrategoCall * List(BuilderOption) -> SemanticRule
-    PrettyPrint                : StrategoCall -> SemanticRule
-    PPTable                    : StrategoCall -> SemanticRule
-    BuilderCaption             : PropertyValue -> SemanticRule
-    Builder                    : String * StrategoCall * List(BuilderOption) -> SemanticRule
-    SemanticObserver           : StrategoCall -> SemanticRule
-    CompletionTrigger          : PropertyValue * CompletionAnno -> SemanticRule
-    CompletionTemplateWithSort : Sort * PropertyValue * List(CompletionPart) * CompletionAnno -> SemanticRule
-    CompletionTemplate         : PropertyValue * List(CompletionPart) * CompletionAnno -> SemanticRule
-    CompletionTemplateWithSort : Sort * CompletionPart * List(CompletionPart) * CompletionAnno -> SemanticRule
-    CompletionTemplate         : Id * List(CompletionPart) * CompletionAnno -> SemanticRule
-    CompletionTemplate         : CompletionPart * List(CompletionPart) * CompletionAnno -> SemanticRule
-    CompletionKeyword          : PropertyValue * CompletionAnno -> SemanticRule
-    IdentifierLexical          : PropertyValue -> SemanticRule
-    CompletionProposer         : StrategoCall -> SemanticRule
-    OccurrenceRule             : SemanticNode * StrategoCall -> SemanticRule
-    HoverRule                  : SemanticNode * StrategoCall -> SemanticRule
-    ReferenceRule              : SemanticNode * StrategoCall -> SemanticRule
-    ReferenceHoverRule         : SemanticNode * StrategoCall * StrategoCall -> SemanticRule
-    OnSave                     : StrategoCall * OnSaveAnno -> SemanticRule
-    SemanticProvider           : PropertyValue -> SemanticRule
-                               : Node -> SemanticNode
-                               : String -> SemanticNode
-                               : String -> StrategoId
-    SortAndConstructor         : Sort * ConstructorId -> Node
-                               : Constructor -> Node
-                               : Sort -> Node
-    Constructor                : Id -> ConstructorId
-    ConstructorOnly            : ConstructorId -> Constructor
-    String                     : STRING -> String
-    ListSort                   : Id -> Sort
+    Attribute                  : StrategoId -> StrategoCall
+    None                       : OnSaveAnno
+    Language                   : SectionName * List(LanguageProperty) -> Section
+    Values                     : List(PropertyValue) -> PropertyValues
+    LanguageName               : PropertyValue -> LanguageProperty
+    LanguageId                 : PropertyValue -> LanguageProperty
+    Extensions                 : PropertyValues -> LanguageProperty
+    Description                : PropertyValue -> LanguageProperty
+    Table                      : PropertyValue -> LanguageProperty
+    TableProvider              : StrategoCall -> LanguageProperty
+    StartSymbols               : List(Sort) -> LanguageProperty
+    StartSymbols               : PropertyValues -> LanguageProperty
+    URL                        : URL -> LanguageProperty
+    Extends                    : PropertyValues -> LanguageProperty
+    Aliases                    : PropertyValues -> LanguageProperty
+    UnmanagedTablePrefix       : Id -> LanguageProperty
+    LineCommentPrefix          : PropertyValue -> LanguageProperty
+    BlockCommentDefs           : BlockCommentDef -> LanguageProperty
+    FenceDefs                  : List(FenceDef) -> LanguageProperty
+    IndentDefs                 : List(IndentDef) -> LanguageProperty
+    IdentifierLexical          : PropertyValue -> LanguageProperty
+    BlockCommentDef            : PropertyValue * PropertyValue * PropertyValue -> BlockCommentDef
+    BlockCommentDef            : PropertyValue * NoContinuation * PropertyValue -> BlockCommentDef
+    NoContinuation             : NoContinuation
+    FenceDef                   : PropertyValue * PropertyValue -> FenceDef
+    IndentDef                  : PropertyValue -> IndentDef
     Sort                       : Id -> Sort
-                               : String -> STRING
-                               : String -> Int
-                               : String -> Id
-    Recursive : a
-    ColorRuleOptions : n * a * os -> cr
-    ColorRuleNamedOptions : n * s * a * os -> cr
+    ListSort                   : Id -> Sort
+    String                     : STRING -> String
+    ConstructorOnly            : ConstructorId -> Constructor
+    Constructor                : Id -> ConstructorId
+    SortAndConstructor         : Sort * ConstructorId -> Node
+    Module                     : ModuleName * Imports * List(Section) -> Module
+    Imports                    : List(Import) -> Imports
+    NoImports                  : Imports
+    Import                     : ModuleName -> Import
+    ImportRenamed              : ModuleName * Id -> Import
 
 
-signature
-  constructors
-    Some : a -> Option(a)
-    None : Option(a)
+rules
+
+  smart-Refactorings(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Refactorings") ; fail)> ("arg1", SortNoArgs("SectionName")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Refactorings") ; fail)> ( "arg2"
+                                                                               , Sort(
+                                                                                   "List"
+                                                                                 , [SortNoArgs("RefactoringRule")]
+                                                                                 )
+                                                                               ))
+    ; <prim("SUGARJ_unsafe_build", "Refactorings")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Section"))
+    ; id
 
 
-signature
-  constructors
-    Cons : a * List(a) -> List(a)
-    Nil  : List(a)
-    Conc : List(a) * List(a) -> List(a)
+rules
+
+  smart-PPTable(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"PPTable") ; fail)> ("arg1", SortNoArgs("StrategoCall")))
+    ; <prim("SUGARJ_unsafe_build", "PPTable")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("RefactoringRule"))
+    ; id
+
+  smart-PrettyPrint(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"PrettyPrint") ; fail)> ("arg1", SortNoArgs("StrategoCall")))
+    ; <prim("SUGARJ_unsafe_build", "PrettyPrint")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("RefactoringRule"))
+    ; id
+
+  smart-Refactoring(|arg1, arg2, arg3, arg4) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Refactoring") ; fail)> ( "arg1"
+                                                                            , Sort(
+                                                                                "List"
+                                                                              , [SortNoArgs("SemanticNode")]
+                                                                              )
+                                                                            ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Refactoring") ; fail)> ("arg2", SortNoArgs("String")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Refactoring") ; fail)> ("arg3", SortNoArgs("StrategoCall")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Refactoring") ; fail)> ( "arg4"
+                                                                              , Sort(
+                                                                                  "List"
+                                                                                , [SortNoArgs("BuilderOption")]
+                                                                                )
+                                                                              ))
+    ; <prim("SUGARJ_unsafe_build", "Refactoring")> [arg1, arg2, arg3, arg4]
+    ; put-syntax-sort(|SortNoArgs("RefactoringRule"))
+    ; id
+
+
+rules
+
+  smart-Builders(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Builders") ; fail)> ("arg1", SortNoArgs("SectionName")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Builders") ; fail)> ( "arg2"
+                                                                           , Sort(
+                                                                               "List"
+                                                                             , [SortNoArgs("BuilderRule")]
+                                                                             )
+                                                                           ))
+    ; <prim("SUGARJ_unsafe_build", "Builders")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Section"))
+    ; id
+
+  smart-Builders(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Builders") ; fail)> ("arg1", SortNoArgs("SectionName")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Builders") ; fail)> ( "arg2"
+                                                                           , Sort(
+                                                                               "List"
+                                                                             , [SortNoArgs("BuilderRule")]
+                                                                             )
+                                                                           ))
+    ; <prim("SUGARJ_unsafe_build", "Builders")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Section"))
+    ; id
+
+
+rules
+
+  smart-SemanticObserver(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SemanticObserver") ; fail)> ("arg1", SortNoArgs("StrategoCall")))
+    ; <prim("SUGARJ_unsafe_build", "SemanticObserver")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("BuilderRule"))
+    ; id
+
+  smart-Builder(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Builder") ; fail)> ("arg1", SortNoArgs("String")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Builder") ; fail)> ("arg2", SortNoArgs("StrategoCall")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Builder") ; fail)> ( "arg3"
+                                                                          , Sort(
+                                                                              "List"
+                                                                            , [SortNoArgs("BuilderOption")]
+                                                                            )
+                                                                          ))
+    ; <prim("SUGARJ_unsafe_build", "Builder")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("BuilderRule"))
+    ; id
+
+  smart-BuilderCaption(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"BuilderCaption") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; <prim("SUGARJ_unsafe_build", "BuilderCaption")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("BuilderRule"))
+    ; id
+
+  smart-OpenEditor(|) =
+    <prim("SUGARJ_unsafe_build", "OpenEditor")> []
+    ; put-syntax-sort(|SortNoArgs("BuilderOption"))
+    ; id
+
+  smart-RealTime(|) =
+    <prim("SUGARJ_unsafe_build", "RealTime")> []
+    ; put-syntax-sort(|SortNoArgs("BuilderOption"))
+    ; id
+
+  smart-Persistent(|) =
+    <prim("SUGARJ_unsafe_build", "Persistent")> []
+    ; put-syntax-sort(|SortNoArgs("BuilderOption"))
+    ; id
+
+  smart-Meta(|) =
+    <prim("SUGARJ_unsafe_build", "Meta")> []
+    ; put-syntax-sort(|SortNoArgs("BuilderOption"))
+    ; id
+
+  smart-Cursor(|) =
+    <prim("SUGARJ_unsafe_build", "Cursor")> []
+    ; put-syntax-sort(|SortNoArgs("BuilderOption"))
+    ; id
+
+  smart-Source(|) =
+    <prim("SUGARJ_unsafe_build", "Source")> []
+    ; put-syntax-sort(|SortNoArgs("BuilderOption"))
+    ; id
+
+
+rules
+
+  smart-Completions(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Completions") ; fail)> ("arg1", SortNoArgs("SectionName")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Completions") ; fail)> ( "arg2"
+                                                                              , Sort(
+                                                                                  "List"
+                                                                                , [SortNoArgs("CompletionRule")]
+                                                                                )
+                                                                              ))
+    ; <prim("SUGARJ_unsafe_build", "Completions")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Section"))
+    ; id
+
+
+rules
+
+  smart-CompletionProposer(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"CompletionProposer") ; fail)> ("arg1", SortNoArgs("StrategoCall")))
+    ; <prim("SUGARJ_unsafe_build", "CompletionProposer")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("CompletionRule"))
+    ; id
+
+  smart-IdentifierLexical(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"IdentifierLexical") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; <prim("SUGARJ_unsafe_build", "IdentifierLexical")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("CompletionRule"))
+    ; id
+
+  smart-IdentifierLexical(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"IdentifierLexical") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; <prim("SUGARJ_unsafe_build", "IdentifierLexical")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("CompletionRule"))
+    ; id
+
+  smart-CompletionKeyword(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"CompletionKeyword") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CompletionKeyword") ; fail)> ("arg2", SortNoArgs("CompletionAnno")))
+    ; <prim("SUGARJ_unsafe_build", "CompletionKeyword")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("CompletionRule"))
+    ; id
+
+  smart-CompletionTemplate(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"CompletionTemplate") ; fail)> ("arg1", SortNoArgs("CompletionPart")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CompletionTemplate") ; fail)> ( "arg2"
+                                                                                     , Sort(
+                                                                                         "List"
+                                                                                       , [SortNoArgs("CompletionPart")]
+                                                                                       )
+                                                                                     ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CompletionTemplate") ; fail)> ("arg3", SortNoArgs("CompletionAnno")))
+    ; <prim("SUGARJ_unsafe_build", "CompletionTemplate")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("CompletionRule"))
+    ; id
+
+  smart-CompletionTemplate(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"CompletionTemplate") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CompletionTemplate") ; fail)> ( "arg2"
+                                                                                     , Sort(
+                                                                                         "List"
+                                                                                       , [SortNoArgs("CompletionPart")]
+                                                                                       )
+                                                                                     ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CompletionTemplate") ; fail)> ("arg3", SortNoArgs("CompletionAnno")))
+    ; <prim("SUGARJ_unsafe_build", "CompletionTemplate")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("CompletionRule"))
+    ; id
+
+  smart-CompletionTemplateWithSort(|arg1, arg2, arg3, arg4) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"CompletionTemplateWithSort") ; fail)> ("arg1", SortNoArgs("Sort")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CompletionTemplateWithSort") ; fail)> ("arg2", SortNoArgs("CompletionPart")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CompletionTemplateWithSort") ; fail)> ( "arg3"
+                                                                                             , Sort(
+                                                                                                 "List"
+                                                                                               , [SortNoArgs("CompletionPart")]
+                                                                                               )
+                                                                                             ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CompletionTemplateWithSort") ; fail)> ("arg4", SortNoArgs("CompletionAnno")))
+    ; <prim("SUGARJ_unsafe_build", "CompletionTemplateWithSort")> [arg1, arg2, arg3, arg4]
+    ; put-syntax-sort(|SortNoArgs("CompletionRule"))
+    ; id
+
+  smart-CompletionTemplate(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"CompletionTemplate") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CompletionTemplate") ; fail)> ( "arg2"
+                                                                                     , Sort(
+                                                                                         "List"
+                                                                                       , [SortNoArgs("CompletionPart")]
+                                                                                       )
+                                                                                     ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CompletionTemplate") ; fail)> ("arg3", SortNoArgs("CompletionAnno")))
+    ; <prim("SUGARJ_unsafe_build", "CompletionTemplate")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("CompletionRule"))
+    ; id
+
+  smart-CompletionTemplateWithSort(|arg1, arg2, arg3, arg4) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"CompletionTemplateWithSort") ; fail)> ("arg1", SortNoArgs("Sort")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CompletionTemplateWithSort") ; fail)> ("arg2", SortNoArgs("PropertyValue")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CompletionTemplateWithSort") ; fail)> ( "arg3"
+                                                                                             , Sort(
+                                                                                                 "List"
+                                                                                               , [SortNoArgs("CompletionPart")]
+                                                                                               )
+                                                                                             ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CompletionTemplateWithSort") ; fail)> ("arg4", SortNoArgs("CompletionAnno")))
+    ; <prim("SUGARJ_unsafe_build", "CompletionTemplateWithSort")> [arg1, arg2, arg3, arg4]
+    ; put-syntax-sort(|SortNoArgs("CompletionRule"))
+    ; id
+
+  smart-CompletionTrigger(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"CompletionTrigger") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CompletionTrigger") ; fail)> ("arg2", SortNoArgs("CompletionAnno")))
+    ; <prim("SUGARJ_unsafe_build", "CompletionTrigger")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("CompletionRule"))
+    ; id
+
+
+rules
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("ReservedName")
+    , SortNoArgs("StrategoCall")
+    )
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("String")
+    , SortNoArgs("CompletionPart")
+    )
+
+  smart-Placeholder(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Placeholder") ; fail)> ("arg1", SortNoArgs("Placeholder")))
+    ; <prim("SUGARJ_unsafe_build", "Placeholder")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("CompletionPart"))
+    ; id
+
+  smart-None(|) =
+    <prim("SUGARJ_unsafe_build", "None")> []
+    ; put-syntax-sort(|SortNoArgs("CompletionAnno"))
+    ; id
+
+  smart-Disable(|) =
+    <prim("SUGARJ_unsafe_build", "Disable")> []
+    ; put-syntax-sort(|SortNoArgs("CompletionAnno"))
+    ; id
+
+  smart-Disable(|) =
+    <prim("SUGARJ_unsafe_build", "Disable")> []
+    ; put-syntax-sort(|SortNoArgs("CompletionAnno"))
+    ; id
+
+  smart-Blank(|) =
+    <prim("SUGARJ_unsafe_build", "Blank")> []
+    ; put-syntax-sort(|SortNoArgs("CompletionAnno"))
+    ; id
+
+
+rules
+
+  smart-References(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"References") ; fail)> ("arg1", SortNoArgs("SectionName")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"References") ; fail)> ( "arg2"
+                                                                             , Sort(
+                                                                                 "List"
+                                                                               , [SortNoArgs("ReferenceRule")]
+                                                                               )
+                                                                             ))
+    ; <prim("SUGARJ_unsafe_build", "References")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Section"))
+    ; id
+
+
+rules
+
+  smart-ReferenceHoverRule(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ReferenceHoverRule") ; fail)> ("arg1", SortNoArgs("SemanticNode")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ReferenceHoverRule") ; fail)> ("arg2", SortNoArgs("StrategoCall")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ReferenceHoverRule") ; fail)> ("arg3", SortNoArgs("StrategoCall")))
+    ; <prim("SUGARJ_unsafe_build", "ReferenceHoverRule")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("ReferenceRule"))
+    ; id
+
+  smart-ReferenceRule(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ReferenceRule") ; fail)> ("arg1", SortNoArgs("SemanticNode")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ReferenceRule") ; fail)> ("arg2", SortNoArgs("StrategoCall")))
+    ; <prim("SUGARJ_unsafe_build", "ReferenceRule")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("ReferenceRule"))
+    ; id
+
+  smart-HoverRule(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"HoverRule") ; fail)> ("arg1", SortNoArgs("SemanticNode")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"HoverRule") ; fail)> ("arg2", SortNoArgs("StrategoCall")))
+    ; <prim("SUGARJ_unsafe_build", "HoverRule")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("ReferenceRule"))
+    ; id
+
+  smart-OccurrenceRule(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"OccurrenceRule") ; fail)> ("arg1", SortNoArgs("SemanticNode")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"OccurrenceRule") ; fail)> ("arg2", SortNoArgs("StrategoCall")))
+    ; <prim("SUGARJ_unsafe_build", "OccurrenceRule")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("ReferenceRule"))
+    ; id
+
+
+rules
+
+
+rules
+
+  smart-Colorer(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Colorer") ; fail)> ("arg1", SortNoArgs("SectionName")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Colorer") ; fail)> ( "arg2"
+                                                                          , Sort(
+                                                                              "List"
+                                                                            , [SortNoArgs("ColorRule")]
+                                                                            )
+                                                                          ))
+    ; <prim("SUGARJ_unsafe_build", "Colorer")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Section"))
+    ; id
+
+
+rules
+
+  smart-ColorRuleAll(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ColorRuleAll") ; fail)> ("arg1", SortNoArgs("ColorNode")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ColorRuleAll") ; fail)> ("arg2", SortNoArgs("Attribute")))
+    ; <prim("SUGARJ_unsafe_build", "ColorRuleAll")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("ColorRule"))
+    ; id
+
+  smart-ColorRuleAll(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ColorRuleAll") ; fail)> ("arg1", SortNoArgs("ColorNode")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ColorRuleAll") ; fail)> ("arg2", SortNoArgs("Attribute")))
+    ; <prim("SUGARJ_unsafe_build", "ColorRuleAll")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("ColorRule"))
+    ; id
+
+  smart-ColorRule(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ColorRule") ; fail)> ("arg1", SortNoArgs("ColorNode")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ColorRule") ; fail)> ("arg2", SortNoArgs("Attribute")))
+    ; <prim("SUGARJ_unsafe_build", "ColorRule")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("ColorRule"))
+    ; id
+
+  smart-ColorRuleAllNamed(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ColorRuleAllNamed") ; fail)> ("arg1", SortNoArgs("ColorNode")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ColorRuleAllNamed") ; fail)> ("arg2", SortNoArgs("String")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ColorRuleAllNamed") ; fail)> ("arg3", SortNoArgs("Attribute")))
+    ; <prim("SUGARJ_unsafe_build", "ColorRuleAllNamed")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("ColorRule"))
+    ; id
+
+  smart-ColorRuleAllNamed(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ColorRuleAllNamed") ; fail)> ("arg1", SortNoArgs("ColorNode")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ColorRuleAllNamed") ; fail)> ("arg2", SortNoArgs("String")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ColorRuleAllNamed") ; fail)> ("arg3", SortNoArgs("Attribute")))
+    ; <prim("SUGARJ_unsafe_build", "ColorRuleAllNamed")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("ColorRule"))
+    ; id
+
+  smart-ColorRuleNamed(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ColorRuleNamed") ; fail)> ("arg1", SortNoArgs("ColorNode")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ColorRuleNamed") ; fail)> ("arg2", SortNoArgs("String")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ColorRuleNamed") ; fail)> ("arg3", SortNoArgs("Attribute")))
+    ; <prim("SUGARJ_unsafe_build", "ColorRuleNamed")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("ColorRule"))
+    ; id
+
+  smart-Attribute(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Attribute") ; fail)> ("arg1", SortNoArgs("Color")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Attribute") ; fail)> ("arg2", SortNoArgs("MaybeColor")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Attribute") ; fail)> ("arg3", SortNoArgs("Font")))
+    ; <prim("SUGARJ_unsafe_build", "Attribute")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("Attribute"))
+    ; id
+
+  smart-AttributeRef(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"AttributeRef") ; fail)> ("arg1", SortNoArgs("AttributeId")))
+    ; <prim("SUGARJ_unsafe_build", "AttributeRef")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Attribute"))
+    ; id
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("Node")
+    , SortNoArgs("ColorNode")
+    )
+
+  smart-Token(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Token") ; fail)> ("arg1", SortNoArgs("TokenKindName")))
+    ; <prim("SUGARJ_unsafe_build", "Token")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("ColorNode"))
+    ; id
+
+  smart-Literal(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Literal") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; <prim("SUGARJ_unsafe_build", "Literal")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("ColorNode"))
+    ; id
+
+  smart-TK_IDENTIFIER(|) =
+    <prim("SUGARJ_unsafe_build", "TK_IDENTIFIER")> []
+    ; put-syntax-sort(|SortNoArgs("TokenKindName"))
+    ; id
+
+  smart-TK_NUMBER(|) =
+    <prim("SUGARJ_unsafe_build", "TK_NUMBER")> []
+    ; put-syntax-sort(|SortNoArgs("TokenKindName"))
+    ; id
+
+  smart-TK_LAYOUT(|) =
+    <prim("SUGARJ_unsafe_build", "TK_LAYOUT")> []
+    ; put-syntax-sort(|SortNoArgs("TokenKindName"))
+    ; id
+
+  smart-TK_STRING(|) =
+    <prim("SUGARJ_unsafe_build", "TK_STRING")> []
+    ; put-syntax-sort(|SortNoArgs("TokenKindName"))
+    ; id
+
+  smart-TK_KEYWORD(|) =
+    <prim("SUGARJ_unsafe_build", "TK_KEYWORD")> []
+    ; put-syntax-sort(|SortNoArgs("TokenKindName"))
+    ; id
+
+  smart-TK_OPERATOR(|) =
+    <prim("SUGARJ_unsafe_build", "TK_OPERATOR")> []
+    ; put-syntax-sort(|SortNoArgs("TokenKindName"))
+    ; id
+
+  smart-TK_VAR(|) =
+    <prim("SUGARJ_unsafe_build", "TK_VAR")> []
+    ; put-syntax-sort(|SortNoArgs("TokenKindName"))
+    ; id
+
+  smart-TK_ERROR(|) =
+    <prim("SUGARJ_unsafe_build", "TK_ERROR")> []
+    ; put-syntax-sort(|SortNoArgs("TokenKindName"))
+    ; id
+
+  smart-TK_UNKNOWN(|) =
+    <prim("SUGARJ_unsafe_build", "TK_UNKNOWN")> []
+    ; put-syntax-sort(|SortNoArgs("TokenKindName"))
+    ; id
+
+  smart-NORMAL(|) =
+    <prim("SUGARJ_unsafe_build", "NORMAL")> []
+    ; put-syntax-sort(|SortNoArgs("Font"))
+    ; id
+
+  smart-BOLD(|) =
+    <prim("SUGARJ_unsafe_build", "BOLD")> []
+    ; put-syntax-sort(|SortNoArgs("Font"))
+    ; id
+
+  smart-ITALIC(|) =
+    <prim("SUGARJ_unsafe_build", "ITALIC")> []
+    ; put-syntax-sort(|SortNoArgs("Font"))
+    ; id
+
+  smart-BOLD_ITALIC(|) =
+    <prim("SUGARJ_unsafe_build", "BOLD_ITALIC")> []
+    ; put-syntax-sort(|SortNoArgs("Font"))
+    ; id
+
+  smart-BOLD_ITALIC(|) =
+    <prim("SUGARJ_unsafe_build", "BOLD_ITALIC")> []
+    ; put-syntax-sort(|SortNoArgs("Font"))
+    ; id
+
+  smart-ColorDefault(|) =
+    <prim("SUGARJ_unsafe_build", "ColorDefault")> []
+    ; put-syntax-sort(|SortNoArgs("Color"))
+    ; id
+
+  smart-ColorRGB(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ColorRGB") ; fail)> ("arg1", SortNoArgs("Int")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ColorRGB") ; fail)> ("arg2", SortNoArgs("Int")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ColorRGB") ; fail)> ("arg3", SortNoArgs("Int")))
+    ; <prim("SUGARJ_unsafe_build", "ColorRGB")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("Color"))
+    ; id
+
+  smart-NoColor(|) =
+    <prim("SUGARJ_unsafe_build", "NoColor")> []
+    ; put-syntax-sort(|SortNoArgs("NoColor"))
+    ; id
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("Color")
+    , SortNoArgs("MaybeColor")
+    )
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("NoColor")
+    , SortNoArgs("MaybeColor")
+    )
+
+  smart-ColorDef(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ColorDef") ; fail)> ("arg1", SortNoArgs("AttributeId")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ColorDef") ; fail)> ("arg2", SortNoArgs("Attribute")))
+    ; <prim("SUGARJ_unsafe_build", "ColorDef")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("ColorRule"))
+    ; id
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("Id")
+    , SortNoArgs("AttributeId")
+    )
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("String")
+    , SortNoArgs("AttributeId")
+    )
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("Font")
+    , SortNoArgs("AttributeId")
+    )
+
+
+rules
+
+  smart-Outliner(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Outliner") ; fail)> ("arg1", SortNoArgs("SectionName")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Outliner") ; fail)> ( "arg2"
+                                                                           , Sort(
+                                                                               "List"
+                                                                             , [SortNoArgs("OutlineRule")]
+                                                                             )
+                                                                           ))
+    ; <prim("SUGARJ_unsafe_build", "Outliner")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Section"))
+    ; id
+
+
+rules
+
+  smart-OutlineRule(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"OutlineRule") ; fail)> ("arg1", SortNoArgs("Node")))
+    ; <prim("SUGARJ_unsafe_build", "OutlineRule")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("OutlineRule"))
+    ; id
+
+
+rules
+
+  smart-Folding(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Folding") ; fail)> ("arg1", SortNoArgs("SectionName")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Folding") ; fail)> ( "arg2"
+                                                                          , Sort(
+                                                                              "List"
+                                                                            , [SortNoArgs("FoldingRule")]
+                                                                            )
+                                                                          ))
+    ; <prim("SUGARJ_unsafe_build", "Folding")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Section"))
+    ; id
+
+
+rules
+
+  smart-FoldRule(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"FoldRule") ; fail)> ("arg1", SortNoArgs("Node")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"FoldRule") ; fail)> ("arg2", SortNoArgs("FoldingAnno")))
+    ; <prim("SUGARJ_unsafe_build", "FoldRule")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("FoldingRule"))
+    ; id
+
+  smart-FoldRuleAll(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"FoldRuleAll") ; fail)> ("arg1", SortNoArgs("Node")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"FoldRuleAll") ; fail)> ("arg2", SortNoArgs("FoldingAnno")))
+    ; <prim("SUGARJ_unsafe_build", "FoldRuleAll")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("FoldingRule"))
+    ; id
+
+  smart-Disable(|) =
+    <prim("SUGARJ_unsafe_build", "Disable")> []
+    ; put-syntax-sort(|SortNoArgs("FoldingAnno"))
+    ; id
+
+  smart-Disable(|) =
+    <prim("SUGARJ_unsafe_build", "Disable")> []
+    ; put-syntax-sort(|SortNoArgs("FoldingAnno"))
+    ; id
+
+  smart-Folded(|) =
+    <prim("SUGARJ_unsafe_build", "Folded")> []
+    ; put-syntax-sort(|SortNoArgs("FoldingAnno"))
+    ; id
+
+  smart-None(|) =
+    <prim("SUGARJ_unsafe_build", "None")> []
+    ; put-syntax-sort(|SortNoArgs("FoldingAnno"))
+    ; id
+
+
+rules
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("Node")
+    , SortNoArgs("SemanticNode")
+    )
+
+  smart-SemanticProvider(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SemanticProvider") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; <prim("SUGARJ_unsafe_build", "SemanticProvider")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("RefactoringRule"))
+    ; id
+
+  smart-SemanticProvider(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SemanticProvider") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; <prim("SUGARJ_unsafe_build", "SemanticProvider")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("RefactoringRule"))
+    ; id
+
+  smart-OnSave(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"OnSave") ; fail)> ("arg1", SortNoArgs("StrategoCall")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"OnSave") ; fail)> ("arg2", SortNoArgs("OnSaveAnno")))
+    ; <prim("SUGARJ_unsafe_build", "OnSave")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("RefactoringRule"))
+    ; id
+
+  smart-SemanticProvider(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SemanticProvider") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; <prim("SUGARJ_unsafe_build", "SemanticProvider")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("BuilderRule"))
+    ; id
+
+  smart-SemanticProvider(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SemanticProvider") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; <prim("SUGARJ_unsafe_build", "SemanticProvider")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("BuilderRule"))
+    ; id
+
+  smart-OnSave(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"OnSave") ; fail)> ("arg1", SortNoArgs("StrategoCall")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"OnSave") ; fail)> ("arg2", SortNoArgs("OnSaveAnno")))
+    ; <prim("SUGARJ_unsafe_build", "OnSave")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("BuilderRule"))
+    ; id
+
+  smart-SemanticProvider(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SemanticProvider") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; <prim("SUGARJ_unsafe_build", "SemanticProvider")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("CompletionRule"))
+    ; id
+
+  smart-SemanticProvider(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SemanticProvider") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; <prim("SUGARJ_unsafe_build", "SemanticProvider")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("CompletionRule"))
+    ; id
+
+  smart-OnSave(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"OnSave") ; fail)> ("arg1", SortNoArgs("StrategoCall")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"OnSave") ; fail)> ("arg2", SortNoArgs("OnSaveAnno")))
+    ; <prim("SUGARJ_unsafe_build", "OnSave")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("CompletionRule"))
+    ; id
+
+  smart-SemanticProvider(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SemanticProvider") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; <prim("SUGARJ_unsafe_build", "SemanticProvider")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("ReferenceRule"))
+    ; id
+
+  smart-SemanticProvider(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SemanticProvider") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; <prim("SUGARJ_unsafe_build", "SemanticProvider")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("ReferenceRule"))
+    ; id
+
+  smart-OnSave(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"OnSave") ; fail)> ("arg1", SortNoArgs("StrategoCall")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"OnSave") ; fail)> ("arg2", SortNoArgs("OnSaveAnno")))
+    ; <prim("SUGARJ_unsafe_build", "OnSave")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("ReferenceRule"))
+    ; id
+
+  smart-Strategy(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Strategy") ; fail)> ("arg1", SortNoArgs("StrategoId")))
+    ; <prim("SUGARJ_unsafe_build", "Strategy")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("StrategoCall"))
+    ; id
+
+  smart-Attribute(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Attribute") ; fail)> ("arg1", SortNoArgs("StrategoId")))
+    ; <prim("SUGARJ_unsafe_build", "Attribute")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("StrategoCall"))
+    ; id
+
+  smart-None(|) =
+    <prim("SUGARJ_unsafe_build", "None")> []
+    ; put-syntax-sort(|SortNoArgs("OnSaveAnno"))
+    ; id
+
+
+rules
+
+  smart-Language(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Language") ; fail)> ("arg1", SortNoArgs("SectionName")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Language") ; fail)> ( "arg2"
+                                                                           , Sort(
+                                                                               "List"
+                                                                             , [SortNoArgs("LanguageProperty")]
+                                                                             )
+                                                                           ))
+    ; <prim("SUGARJ_unsafe_build", "Language")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Section"))
+    ; id
+
+
+rules
+
+  smart-Values(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Values") ; fail)> ( "arg1"
+                                                                       , Sort(
+                                                                           "List"
+                                                                         , [SortNoArgs("PropertyValue")]
+                                                                         )
+                                                                       ))
+    ; <prim("SUGARJ_unsafe_build", "Values")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("PropertyValues"))
+    ; id
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("String")
+    , SortNoArgs("PropertyValue")
+    )
+
+  smart-LanguageName(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"LanguageName") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; <prim("SUGARJ_unsafe_build", "LanguageName")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("LanguageProperty"))
+    ; id
+
+  smart-LanguageId(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"LanguageId") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; <prim("SUGARJ_unsafe_build", "LanguageId")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("LanguageProperty"))
+    ; id
+
+  smart-Extensions(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Extensions") ; fail)> ("arg1", SortNoArgs("PropertyValues")))
+    ; <prim("SUGARJ_unsafe_build", "Extensions")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("LanguageProperty"))
+    ; id
+
+  smart-Description(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Description") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; <prim("SUGARJ_unsafe_build", "Description")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("LanguageProperty"))
+    ; id
+
+  smart-Table(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Table") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; <prim("SUGARJ_unsafe_build", "Table")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("LanguageProperty"))
+    ; id
+
+  smart-TableProvider(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"TableProvider") ; fail)> ("arg1", SortNoArgs("StrategoCall")))
+    ; <prim("SUGARJ_unsafe_build", "TableProvider")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("LanguageProperty"))
+    ; id
+
+  smart-StartSymbols(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"StartSymbols") ; fail)> ( "arg1"
+                                                                             , Sort(
+                                                                                 "List"
+                                                                               , [SortNoArgs("Sort")]
+                                                                               )
+                                                                             ))
+    ; <prim("SUGARJ_unsafe_build", "StartSymbols")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("LanguageProperty"))
+    ; id
+
+  smart-StartSymbols(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"StartSymbols") ; fail)> ("arg1", SortNoArgs("PropertyValues")))
+    ; <prim("SUGARJ_unsafe_build", "StartSymbols")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("LanguageProperty"))
+    ; id
+
+  smart-URL(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"URL") ; fail)> ("arg1", SortNoArgs("URL")))
+    ; <prim("SUGARJ_unsafe_build", "URL")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("LanguageProperty"))
+    ; id
+
+  smart-Extends(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Extends") ; fail)> ("arg1", SortNoArgs("PropertyValues")))
+    ; <prim("SUGARJ_unsafe_build", "Extends")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("LanguageProperty"))
+    ; id
+
+  smart-Aliases(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Aliases") ; fail)> ("arg1", SortNoArgs("PropertyValues")))
+    ; <prim("SUGARJ_unsafe_build", "Aliases")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("LanguageProperty"))
+    ; id
+
+  smart-UnmanagedTablePrefix(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"UnmanagedTablePrefix") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; <prim("SUGARJ_unsafe_build", "UnmanagedTablePrefix")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("LanguageProperty"))
+    ; id
+
+  smart-LineCommentPrefix(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"LineCommentPrefix") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; <prim("SUGARJ_unsafe_build", "LineCommentPrefix")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("LanguageProperty"))
+    ; id
+
+  smart-BlockCommentDefs(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"BlockCommentDefs") ; fail)> ("arg1", SortNoArgs("BlockCommentDef")))
+    ; <prim("SUGARJ_unsafe_build", "BlockCommentDefs")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("LanguageProperty"))
+    ; id
+
+  smart-FenceDefs(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"FenceDefs") ; fail)> ( "arg1"
+                                                                          , Sort(
+                                                                              "List"
+                                                                            , [SortNoArgs("FenceDef")]
+                                                                            )
+                                                                          ))
+    ; <prim("SUGARJ_unsafe_build", "FenceDefs")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("LanguageProperty"))
+    ; id
+
+  smart-IndentDefs(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"IndentDefs") ; fail)> ( "arg1"
+                                                                           , Sort(
+                                                                               "List"
+                                                                             , [SortNoArgs("IndentDef")]
+                                                                             )
+                                                                           ))
+    ; <prim("SUGARJ_unsafe_build", "IndentDefs")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("LanguageProperty"))
+    ; id
+
+  smart-IdentifierLexical(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"IdentifierLexical") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; <prim("SUGARJ_unsafe_build", "IdentifierLexical")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("LanguageProperty"))
+    ; id
+
+  smart-BlockCommentDef(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"BlockCommentDef") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"BlockCommentDef") ; fail)> ("arg2", SortNoArgs("PropertyValue")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"BlockCommentDef") ; fail)> ("arg3", SortNoArgs("PropertyValue")))
+    ; <prim("SUGARJ_unsafe_build", "BlockCommentDef")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("BlockCommentDef"))
+    ; id
+
+  smart-BlockCommentDef(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"BlockCommentDef") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"BlockCommentDef") ; fail)> ("arg2", SortNoArgs("NoContinuation")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"BlockCommentDef") ; fail)> ("arg3", SortNoArgs("PropertyValue")))
+    ; <prim("SUGARJ_unsafe_build", "BlockCommentDef")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("BlockCommentDef"))
+    ; id
+
+  smart-NoContinuation(|) =
+    <prim("SUGARJ_unsafe_build", "NoContinuation")> []
+    ; put-syntax-sort(|SortNoArgs("NoContinuation"))
+    ; id
+
+  smart-FenceDef(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"FenceDef") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"FenceDef") ; fail)> ("arg2", SortNoArgs("PropertyValue")))
+    ; <prim("SUGARJ_unsafe_build", "FenceDef")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("FenceDef"))
+    ; id
+
+  smart-IndentDef(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"IndentDef") ; fail)> ("arg1", SortNoArgs("PropertyValue")))
+    ; <prim("SUGARJ_unsafe_build", "IndentDef")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("IndentDef"))
+    ; id
+
+
+rules
+
+  smart-Sort(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Sort") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; <prim("SUGARJ_unsafe_build", "Sort")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Sort"))
+    ; id
+
+  smart-ListSort(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ListSort") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; <prim("SUGARJ_unsafe_build", "ListSort")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Sort"))
+    ; id
+
+  smart-String(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"String") ; fail)> ("arg1", SortNoArgs("STRING")))
+    ; <prim("SUGARJ_unsafe_build", "String")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("String"))
+    ; id
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("Sort")
+    , SortNoArgs("Sort")
+    )
+
+  smart-ConstructorOnly(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ConstructorOnly") ; fail)> ("arg1", SortNoArgs("ConstructorId")))
+    ; <prim("SUGARJ_unsafe_build", "ConstructorOnly")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Constructor"))
+    ; id
+
+  smart-Constructor(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Constructor") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; <prim("SUGARJ_unsafe_build", "Constructor")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("ConstructorId"))
+    ; id
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("Sort")
+    , SortNoArgs("Node")
+    )
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("Constructor")
+    , SortNoArgs("Node")
+    )
+
+  smart-SortAndConstructor(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SortAndConstructor") ; fail)> ("arg1", SortNoArgs("Sort")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"SortAndConstructor") ; fail)> ("arg2", SortNoArgs("ConstructorId")))
+    ; <prim("SUGARJ_unsafe_build", "SortAndConstructor")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Node"))
+    ; id
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("ReservedName")
+    , SortNoArgs("Node")
+    )
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("ReservedName")
+    , SortNoArgs("ModuleName")
+    )
+
+
+rules
+
+  smart-Module(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Module") ; fail)> ("arg1", SortNoArgs("ModuleName")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Module") ; fail)> ("arg2", SortNoArgs("Imports")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Module") ; fail)> ( "arg3"
+                                                                         , Sort(
+                                                                             "List"
+                                                                           , [SortNoArgs("Section")]
+                                                                           )
+                                                                         ))
+    ; <prim("SUGARJ_unsafe_build", "Module")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("Module"))
+    ; id
+
+  smart-Imports(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Imports") ; fail)> ( "arg1"
+                                                                        , Sort(
+                                                                            "List"
+                                                                          , [SortNoArgs("Import")]
+                                                                          )
+                                                                        ))
+    ; <prim("SUGARJ_unsafe_build", "Imports")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Imports"))
+    ; id
+
+  smart-NoImports(|) =
+    <prim("SUGARJ_unsafe_build", "NoImports")> []
+    ; put-syntax-sort(|SortNoArgs("Imports"))
+    ; id
+
+  smart-Import(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Import") ; fail)> ("arg1", SortNoArgs("ModuleName")))
+    ; <prim("SUGARJ_unsafe_build", "Import")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Import"))
+    ; id
+
+  smart-ImportRenamed(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ImportRenamed") ; fail)> ("arg1", SortNoArgs("ModuleName")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ImportRenamed") ; fail)> ("arg2", SortNoArgs("Id")))
+    ; <prim("SUGARJ_unsafe_build", "ImportRenamed")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Import"))
+    ; id

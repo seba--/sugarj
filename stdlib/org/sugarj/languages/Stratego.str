@@ -1,175 +1,1809 @@
 module org/sugarj/languages/Stratego
 
+imports
+  org/sugarj/transformations/typesmart/Runtime
+  org/sugarj/languages/Stratego
+
+
 signature
   constructors
-    RuleNames                : StrategoTerm -> StrategoRuleNames
-                             : List(StrategoId) -> StrategoRuleNames
-    RDecT                    : StrategoId * List(StrategoTypedid) * List(StrategoTypedid) -> StrategoRuleDec
-    RDec                     : StrategoId * List(StrategoTypedid) -> StrategoRuleDec
-    RDecNoArgs               : StrategoId -> StrategoRuleDec
-    DynRuleScopeId           : StrategoId -> StrategoDynRuleScopeId
-    LabeledDynRuleScopeId    : StrategoId * StrategoTerm -> StrategoDynRuleScopeId
-    DynRuleId                : StrategoRuleDec -> StrategoDynRuleId
-    AddLabelDynRuleId        : StrategoRuleDec * StrategoTerm -> StrategoDynRuleId
-    LabeledDynRuleId         : StrategoRuleDec * StrategoTerm -> StrategoDynRuleId
-    SetDynRuleDepends        : StrategoDynRuleId * StrategoRule * StrategoTerm -> StrategoDynRuleDef
-    DynRuleAssignAdd         : StrategoDynRuleId * StrategoTerm -> StrategoDynRuleDef
-    DynRuleAssign            : StrategoDynRuleId * StrategoTerm -> StrategoDynRuleDef
-    SetDynRuleMatch          : StrategoDynRuleId * StrategoTerm -> StrategoDynRuleDef
-    AddDynRule               : StrategoDynRuleId * StrategoRule -> StrategoDynRuleDef
-    SetDynRule               : StrategoDynRuleId * StrategoRule -> StrategoDynRuleDef
-    UndefineDynRule          : StrategoDynRuleId * StrategoTerm -> StrategoDynRuleDef
-    AddScopeLabel            : StrategoId * StrategoTerm -> StrategoDynRuleDef
-    ScopeLabels              : StrategoTerm -> StrategoScopeLabels
-                             : List(StrategoDynRuleScopeId) -> StrategoScopeLabels
-    WithClause               : StrategoStrategy -> StrategoRuleCond
-    WhereClause              : StrategoStrategy -> StrategoRuleCond
-    Rule                     : StrategoTerm * StrategoTerm * List(StrategoRuleCond) -> StrategoRule
-    Rule                     : StrategoTerm * StrategoTerm * StrategoStrategy -> StrategoRule
-    RuleNoCond               : StrategoTerm * StrategoTerm -> StrategoRule
-    RDefT                    : StrategoId * List(StrategoTypedid) * List(StrategoTypedid) * StrategoRule -> StrategoRuleDef
-    RDef                     : StrategoId * List(StrategoTypedid) * StrategoRule -> StrategoRuleDef
-    RDefNoArgs               : StrategoId * StrategoRule -> StrategoRuleDef
-    Overlay                  : StrategoId * List(StrategoId) * StrategoTerm -> StrategoOverlay
-    OverlayNoArgs            : StrategoId * StrategoTerm -> StrategoOverlay
-    SwitchCase               : StrategoStrategy * StrategoStrategy -> StrategoSwitchCase
-    StrategyCurly            : StrategoStrategy -> StrategoStrategyCurly
-                             : StrategoStrategy -> StrategoStrategyAngle
-    ListVar                  : StrategoLId -> StrategoLID
-    ImportWildcard           : StrategoModName -> StrategoImportModName
-    Import                   : StrategoModName -> StrategoImportModName
-    Overlays                 : List(StrategoOverlay) -> StrategoDecl
-    Rules                    : List(StrategoDef) -> StrategoDecl
-    Signature                : List(StrategoSdecl) -> StrategoDecl
-    Strategies               : List(StrategoDef) -> StrategoDecl
-    Imports                  : List(StrategoImportModName) -> StrategoDecl
-    Specification            : List(StrategoDecl) -> StrategoModule
-    Module                   : StrategoModName * List(StrategoDecl) -> StrategoModule
-                             : StrategoStrategy -> StrategoStrategyMid
-    ParenStrat               : StrategoStrategy -> StrategoStrategyParen
-    DefaultVarDec            : StrategoID -> StrategoTypedid
-    VarDec                   : StrategoID * StrategoType -> StrategoTypedid
-    SDef                     : StrategoId * List(StrategoTypedid) * StrategoStrategy -> StrategoStrategyDef
-    SDefNoArgs               : StrategoId * StrategoStrategy -> StrategoStrategyDef
-    ExtSDef                  : StrategoId * List(StrategoTypedid) * List(StrategoTypedid) -> StrategoStrategyDef
-    ExtSDefInl               : StrategoId * List(StrategoTypedid) * List(StrategoTypedid) * StrategoStrategy -> StrategoStrategyDef
-    SDefT                    : StrategoId * List(StrategoTypedid) * List(StrategoTypedid) * StrategoStrategy -> StrategoStrategyDef
-    DynRuleIntersectUnion    : StrategoStrategy * StrategoRuleNames * StrategoRuleNames * StrategoStrategy -> StrategoStrategy
-    DynRuleUnion             : StrategoStrategy * StrategoRuleNames * StrategoStrategy -> StrategoStrategy
-    DynRuleIntersect         : StrategoStrategy * StrategoRuleNames * StrategoStrategy -> StrategoStrategy
-    DynRuleIntersectUnionFix : StrategoRuleNames * StrategoRuleNames * StrategoStrategy -> StrategoStrategy
-    DynRuleUnionFix          : StrategoRuleNames * StrategoStrategy -> StrategoStrategy
-    DynRuleIntersectFix      : StrategoRuleNames * StrategoStrategy -> StrategoStrategy
-    GenDynRules              : List(StrategoDynRuleDef) -> StrategoStrategy
-    DynRuleScope             : StrategoScopeLabels * StrategoStrategy -> StrategoStrategy
-    Assign                   : StrategoTerm * StrategoTerm -> StrategoStrategy
-    AM                       : StrategoStrategy * StrategoTerm -> StrategoStrategy
-    SwitchChoice             : StrategoStrategy * List(StrategoSwitchCase) * StrategoStrategy -> StrategoStrategy
-    SwitchChoiceNoOtherwise  : StrategoStrategy * List(StrategoSwitchCase) -> StrategoStrategy
-    IfThen                   : StrategoStrategy * StrategoStrategy -> StrategoStrategy
-    CondChoice               : StrategoStrategy * StrategoStrategy * StrategoStrategy -> StrategoStrategy
-    RChoice                  : StrategoStrategy * StrategoStrategy -> StrategoStrategy
-    Choice                   : StrategoStrategy * StrategoStrategy -> StrategoStrategy
-    SRule                    : StrategoRule -> StrategoStrategy
-    LRule                    : StrategoRule -> StrategoStrategy
-    CallNoArgs               : StrategoSVar -> StrategoStrategy
-    ExplodeCong              : StrategoStrategy * StrategoStrategyParen -> StrategoStrategy
-    ListCong                 : List(StrategoStrategy) * StrategoStrategy -> StrategoStrategy
-    ListCongNoTail           : List(StrategoStrategy) -> StrategoStrategy
-    TupleCong                : StrategoStrategy * List(StrategoStrategy) -> StrategoStrategy
-    EmptyTupleCong           : StrategoStrategy
-    AnnoCong                 : StrategoStrategy * StrategoStrategyCurly -> StrategoStrategy
-    CongQ                    : StrategoString * List(StrategoStrategy) -> StrategoStrategy
-    CharCong                 : StrategoChar -> StrategoStrategy
-    RealCong                 : StrategoReal -> StrategoStrategy
-    IntCong                  : StrategoInt -> StrategoStrategy
-    StrCong                  : StrategoString -> StrategoStrategy
-    Prim                     : StrategoString * List(StrategoTerm) -> StrategoStrategy
-    PrimNoArgs               : StrategoString -> StrategoStrategy
-    Test                     : StrategoStrategy -> StrategoStrategy
-    With                     : StrategoStrategy -> StrategoStrategy
-    Where                    : StrategoStrategy -> StrategoStrategy
-    Not                      : StrategoStrategy -> StrategoStrategy
-    Rec                      : StrategoId * StrategoStrategy -> StrategoStrategy
-    LChoice                  : StrategoStrategy * StrategoStrategy -> StrategoStrategy
-    BA                       : StrategoStrategyAngle * StrategoTerm -> StrategoStrategy
-    ScopeDefault             : StrategoStrategy -> StrategoStrategy
-    Call                     : StrategoSVar * List(StrategoStrategy) -> StrategoStrategy
-    ImportTerm               : StrategoModName -> StrategoStrategy
-    All                      : StrategoStrategy -> StrategoStrategy
-    One                      : StrategoStrategy -> StrategoStrategy
-    Some                     : StrategoStrategy -> StrategoStrategy
-    PrimT                    : StrategoString * List(StrategoStrategy) * List(StrategoTerm) -> StrategoStrategy
-    GuardedLChoice           : StrategoStrategy * StrategoStrategyMid * StrategoStrategy -> StrategoStrategy
-    Seq                      : StrategoStrategy * StrategoStrategy -> StrategoStrategy
-    Scope                    : List(StrategoID) * StrategoStrategy -> StrategoStrategy
-    Build                    : StrategoTerm -> StrategoStrategy
-    Match                    : StrategoTerm -> StrategoStrategy
-    Id                       : StrategoStrategy
-    Fail                     : StrategoStrategy
-    CallDynamic              : StrategoTerm * List(StrategoStrategy) * List(StrategoTerm) -> StrategoStrategy
-    CallT                    : StrategoSVar * List(StrategoStrategy) * List(StrategoTerm) -> StrategoStrategy
-    Let                      : List(StrategoDef) * StrategoStrategy -> StrategoStrategy
-    SVar                     : StrategoId -> StrategoSVar
-                             : StrategoRuleDef -> StrategoDef
-                             : StrategoStrategyDef -> StrategoDef
-                             : StrategoConstType -> StrategoType
-                             : StrategoFunType -> StrategoType
-                             : StrategoType -> StrategoRetType
-                             : StrategoConstType -> StrategoArgType
-                             : StrategoType -> StrategoArgType
-    FunType                  : List(StrategoArgType) * StrategoRetType -> StrategoFunType
-    ConstType                : StrategoSort -> StrategoConstType
-    ExtOpDeclInj             : StrategoType -> StrategoOpdecl
-    ExtOpDeclQ               : StrategoString * StrategoType -> StrategoOpdecl
-    ExtOpDecl                : StrategoId * StrategoType -> StrategoOpdecl
-    OpDeclInj                : StrategoType -> StrategoOpdecl
-    OpDeclQ                  : StrategoString * StrategoType -> StrategoOpdecl
-    OpDecl                   : StrategoId * StrategoType -> StrategoOpdecl
-    SortTuple                : List(StrategoSort) -> StrategoSort
-    SortListTl               : List(StrategoSort) * StrategoSort -> StrategoSort
-    SortList                 : List(StrategoSort) -> StrategoSort
-    Sort                     : StrategoId * List(StrategoSort) -> StrategoSort
-    SortNoArgs               : StrategoUCID -> StrategoSort
-    SortVar                  : StrategoLCID -> StrategoSort
-    Constructors             : List(StrategoOpdecl) -> StrategoSdecl
-    Sorts                    : List(StrategoSort) -> StrategoSdecl
-    Wld                      : StrategoWld
-    RootApp                  : StrategoStrategyAngle -> StrategoTerm
-    App                      : StrategoStrategy * StrategoTerm -> StrategoTerm
-    NoAnnoList               : StrategoPreTerm -> StrategoTerm
-    AnnoList                 : StrategoPreTerm * List(StrategoTerm) -> StrategoTerm
-    BuildDefault             : StrategoTerm -> StrategoTerm
-    As                       : StrategoVar * StrategoTerm -> StrategoTerm
-    Anno                     : StrategoPreTerm * StrategoPreTerm -> StrategoTerm
-                             : StrategoWld -> StrategoTerm
-                             : StrategoVar -> StrategoTerm
-    ListTail                 : List(StrategoTerm) * StrategoTerm -> StrategoPreTerm
-    List                     : List(StrategoTerm) -> StrategoPreTerm
-    Tuple                    : List(StrategoTerm) -> StrategoPreTerm
-    RootApp                  : StrategoStrategyAngle -> StrategoPreTerm
-    App                      : StrategoStrategy * StrategoTerm -> StrategoPreTerm
-    Char                     : StrategoChar -> StrategoPreTerm
-    BuildDefaultPT           : StrategoPreTerm -> StrategoPreTerm
-    As                       : StrategoVar * StrategoPreTerm -> StrategoPreTerm
-    Explode                  : StrategoTerm * StrategoTerm -> StrategoPreTerm
-    OpQ                      : StrategoString * List(StrategoTerm) -> StrategoPreTerm
-    Op                       : StrategoId * List(StrategoTerm) -> StrategoPreTerm
-    Str                      : StrategoString -> StrategoPreTerm
-    Real                     : StrategoReal -> StrategoPreTerm
-    Int                      : StrategoInt -> StrategoPreTerm
-                             : StrategoWld -> StrategoPreTerm
-                             : StrategoVar -> StrategoPreTerm
-                             : StrategoLID -> StrategoID
-                             : StrategoId -> StrategoID
-    Var                      : StrategoLID -> StrategoVar
-    Var                      : StrategoId -> StrategoVar
-                             : String -> StrategoChar
-                             : String -> StrategoString
-                             : String -> StrategoReal
-                             : String -> StrategoInt
-                             : String -> StrategoUCID
-                             : String -> StrategoLCID
-                             : String -> StrategoLId
-                             : String -> StrategoId
-                             : String -> StrategoModName
+    OverlayNoArgs            : Id * Term -> Overlay
+    Overlay                  : Id * List(Id) * Term -> Overlay
+    DynRuleScope             : ScopeLabels * Strategy -> Strategy
+    ScopeLabels              : Term -> ScopeLabels
+    GenDynRules              : List(DynRuleDef) -> Strategy
+    AddScopeLabel            : Id * Term -> DynRuleDef
+    UndefineDynRule          : DynRuleId * Term -> DynRuleDef
+    SetDynRule               : DynRuleId * Rule -> DynRuleDef
+    AddDynRule               : DynRuleId * Rule -> DynRuleDef
+    SetDynRuleMatch          : DynRuleId * Term -> DynRuleDef
+    DynRuleAssign            : DynRuleId * Term -> DynRuleDef
+    DynRuleAssignAdd         : DynRuleId * Term -> DynRuleDef
+    SetDynRuleDepends        : DynRuleId * Rule * Term -> DynRuleDef
+    LabeledDynRuleId         : RuleDec * Term -> DynRuleId
+    AddLabelDynRuleId        : RuleDec * Term -> DynRuleId
+    DynRuleId                : RuleDec -> DynRuleId
+    LabeledDynRuleScopeId    : Id * Term -> DynRuleScopeId
+    DynRuleScopeId           : Id -> DynRuleScopeId
+    RDecNoArgs               : Id -> RuleDec
+    RDec                     : Id * List(Typedid) -> RuleDec
+    RDecT                    : Id * List(Typedid) * List(Typedid) -> RuleDec
+    RuleNames                : Term -> RuleNames
+    DynRuleIntersectFix      : RuleNames * Strategy -> Strategy
+    DynRuleUnionFix          : RuleNames * Strategy -> Strategy
+    DynRuleUnionFix          : RuleNames * Strategy -> Strategy
+    DynRuleIntersectUnionFix : RuleNames * RuleNames * Strategy -> Strategy
+    DynRuleIntersectUnionFix : RuleNames * RuleNames * Strategy -> Strategy
+    DynRuleIntersect         : Strategy * RuleNames * Strategy -> Strategy
+    DynRuleUnion             : Strategy * RuleNames * Strategy -> Strategy
+    DynRuleIntersectUnion    : Strategy * RuleNames * RuleNames * Strategy -> Strategy
+    BA                       : StrategyAngle * Term -> Strategy
+    DynRuleIntersectFix      : RuleNames * Strategy -> Strategy
+    AM                       : Strategy * Term -> Strategy
+    DynRuleIntersect         : Strategy * RuleNames * Strategy -> Strategy
+    DynRuleUnion             : Strategy * RuleNames * Strategy -> Strategy
+    DynRuleIntersectUnion    : Strategy * RuleNames * RuleNames * Strategy -> Strategy
+    Seq                      : Strategy * Strategy -> Strategy
+    RDefNoArgs               : Id * Rule -> RuleDef
+    RDef                     : Id * List(Typedid) * Rule -> RuleDef
+    RDefT                    : Id * List(Typedid) * List(Typedid) * Rule -> RuleDef
+    RuleNoCond               : Term * Term -> Rule
+    Rule                     : Term * Term * Strategy -> Rule
+    Rule                     : Term * Term * List(RuleCond) -> Rule
+    WhereClause              : Strategy -> RuleCond
+    WithClause               : Strategy -> RuleCond
+    SDefNoArgs               : Id * Strategy -> StrategyDef
+    SDef                     : Id * List(Typedid) * Strategy -> StrategyDef
+    DefaultVarDec            : ID -> Typedid
+    Call                     : SVar * List(Strategy) -> Strategy
+    ScopeDefault             : Strategy -> Strategy
+    BA                       : StrategyAngle * Term -> Strategy
+    LChoice                  : Strategy * Strategy -> Strategy
+    Rec                      : Id * Strategy -> Strategy
+    Not                      : Strategy -> Strategy
+    Where                    : Strategy -> Strategy
+    With                     : Strategy -> Strategy
+    Test                     : Strategy -> Strategy
+    PrimNoArgs               : String -> Strategy
+    Prim                     : String * List(Term) -> Strategy
+    StrCong                  : String -> Strategy
+    IntCong                  : Int -> Strategy
+    RealCong                 : Real -> Strategy
+    CharCong                 : Char -> Strategy
+    CongQ                    : String * List(Strategy) -> Strategy
+    AnnoCong                 : Strategy * StrategyCurly -> Strategy
+    StrategyCurly            : Strategy -> StrategyCurly
+    EmptyTupleCong           : Strategy
+    TupleCong                : Strategy * List(Strategy) -> Strategy
+    ListCongNoTail           : List(Strategy) -> Strategy
+    ListCong                 : List(Strategy) * Strategy -> Strategy
+    ExplodeCong              : Strategy * StrategyParen -> Strategy
+    CallNoArgs               : SVar -> Strategy
+    LRule                    : Rule -> Strategy
+    SRule                    : Rule -> Strategy
+    Choice                   : Strategy * Strategy -> Strategy
+    RChoice                  : Strategy * Strategy -> Strategy
+    CondChoice               : Strategy * Strategy * Strategy -> Strategy
+    IfThen                   : Strategy * Strategy -> Strategy
+    SwitchChoiceNoOtherwise  : Strategy * List(SwitchCase) -> Strategy
+    SwitchChoice             : Strategy * List(SwitchCase) * Strategy -> Strategy
+    SwitchCase               : Strategy * Strategy -> SwitchCase
+    AM                       : Strategy * Term -> Strategy
+    Assign                   : Term * Term -> Strategy
+    ListVar                  : LId -> LID
+    Var                      : LID -> Var
+    BuildDefaultPT           : PreTerm -> PreTerm
+    BuildDefault             : Term -> Term
+    Char                     : Char -> PreTerm
+    AnnoList                 : PreTerm * List(Term) -> Term
+    NoAnnoList               : PreTerm -> Term
+    App                      : Strategy * Term -> PreTerm
+    App                      : Strategy * Term -> Term
+    RootApp                  : StrategyAngle -> PreTerm
+    RootApp                  : StrategyAngle -> Term
+    Tuple                    : List(Term) -> PreTerm
+    List                     : List(Term) -> PreTerm
+    ListTail                 : List(Term) * Term -> PreTerm
+    Explode                  : Term * Term -> PreTerm
+    AnnoList                 : PreTerm * List(Term) -> Term
+    As                       : Var * Term -> Term
+    SortList                 : List(Sort) -> Sort
+    SortListTl               : List(Sort) * Sort -> Sort
+    SortTuple                : List(Sort) -> Sort
+    Star                     : Kind
+    StarStar                 : Kind
+    Sorts                    : List(Sort) -> Sdecl
+    Constructors             : List(Opdecl) -> Sdecl
+    SortVar                  : LCID -> Sort
+    SortNoArgs               : UCID -> Sort
+    Sort                     : Id * List(Sort) -> Sort
+    OpDecl                   : Id * Type -> Opdecl
+    OpDeclQ                  : String * Type -> Opdecl
+    OpDeclInj                : Type -> Opdecl
+    ExtOpDecl                : Id * Type -> Opdecl
+    ExtOpDeclQ               : String * Type -> Opdecl
+    ExtOpDeclInj             : Type -> Opdecl
+    ConstType                : Sort -> ConstType
+    FunType                  : List(ArgType) * RetType -> FunType
+    Var                      : Id -> Var
+    Wld                      : Wld
+    Int                      : Int -> PreTerm
+    Real                     : Real -> PreTerm
+    Str                      : String -> PreTerm
+    Op                       : Id * List(Term) -> PreTerm
+    OpQ                      : String * List(Term) -> PreTerm
+    Explode                  : Term * Term -> PreTerm
+    Anno                     : PreTerm * PreTerm -> Term
+    As                       : Var * Term -> Term
+    As                       : Var * PreTerm -> PreTerm
+    Explode                  : Term * Term -> PreTerm
+    As                       : Var * Term -> Term
+    SVar                     : Id -> SVar
+    Let                      : List(Def) * Strategy -> Strategy
+    CallT                    : SVar * List(Strategy) * List(Term) -> Strategy
+    CallDynamic              : Term * List(Strategy) * List(Term) -> Strategy
+    SDefT                    : Id * List(Typedid) * List(Typedid) * Strategy -> StrategyDef
+    ExtSDefInl               : Id * List(Typedid) * List(Typedid) * Strategy -> StrategyDef
+    ExtSDef                  : Id * List(Typedid) * List(Typedid) -> StrategyDef
+    VarDec                   : ID * Type -> Typedid
+    ParenStrat               : Strategy -> StrategyParen
+    Fail                     : Strategy
+    Id                       : Strategy
+    Match                    : Term -> Strategy
+    Build                    : Term -> Strategy
+    Scope                    : List(ID) * Strategy -> Strategy
+    Seq                      : Strategy * Strategy -> Strategy
+    GuardedLChoice           : Strategy * StrategyMid * Strategy -> Strategy
+    PrimT                    : String * List(Strategy) * List(Term) -> Strategy
+    Some                     : Strategy -> Strategy
+    One                      : Strategy -> Strategy
+    All                      : Strategy -> Strategy
+    Build                    : Term -> Strategy
+    Match                    : Term -> Strategy
+    Seq                      : Strategy * Strategy -> Strategy
+    GuardedLChoice           : Strategy * StrategyMid * Strategy -> Strategy
+    ImportTerm               : ModName -> Strategy
+    Module                   : ModName * List(Decl) -> Module
+    Specification            : List(Decl) -> Module
+    Imports                  : List(ImportModName) -> Decl
+    Strategies               : List(Def) -> Decl
+    Signature                : List(Sdecl) -> Decl
+    Import                   : ModName -> ImportModName
+    ImportWildcard           : ModName -> ImportModName
+    Rules                    : List(Def) -> Decl
+    Overlays                 : List(Overlay) -> Decl
+
+
+rules
+
+  smart-OverlayNoArgs(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"OverlayNoArgs") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"OverlayNoArgs") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "OverlayNoArgs")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Overlay"))
+    ; id
+
+  smart-Overlay(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Overlay") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Overlay") ; fail)> ( "arg2"
+                                                                          , Sort(
+                                                                              "List"
+                                                                            , [SortNoArgs("Id")]
+                                                                            )
+                                                                          ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Overlay") ; fail)> ("arg3", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "Overlay")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("Overlay"))
+    ; id
+
+
+rules
+
+  smart-DynRuleScope(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleScope") ; fail)> ("arg1", SortNoArgs("ScopeLabels")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleScope") ; fail)> ("arg2", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "DynRuleScope")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | Sort(
+        "List"
+      , [SortNoArgs("DynRuleScopeId")]
+      )
+    , SortNoArgs("ScopeLabels")
+    )
+
+  smart-ScopeLabels(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ScopeLabels") ; fail)> ("arg1", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "ScopeLabels")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("ScopeLabels"))
+    ; id
+
+
+rules
+
+  smart-GenDynRules(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"GenDynRules") ; fail)> ( "arg1"
+                                                                            , Sort(
+                                                                                "List"
+                                                                              , [SortNoArgs("DynRuleDef")]
+                                                                              )
+                                                                            ))
+    ; <prim("SUGARJ_unsafe_build", "GenDynRules")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-AddScopeLabel(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"AddScopeLabel") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"AddScopeLabel") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "AddScopeLabel")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("DynRuleDef"))
+    ; id
+
+  smart-UndefineDynRule(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"UndefineDynRule") ; fail)> ("arg1", SortNoArgs("DynRuleId")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"UndefineDynRule") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "UndefineDynRule")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("DynRuleDef"))
+    ; id
+
+  smart-SetDynRule(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SetDynRule") ; fail)> ("arg1", SortNoArgs("DynRuleId")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"SetDynRule") ; fail)> ("arg2", SortNoArgs("Rule")))
+    ; <prim("SUGARJ_unsafe_build", "SetDynRule")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("DynRuleDef"))
+    ; id
+
+  smart-AddDynRule(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"AddDynRule") ; fail)> ("arg1", SortNoArgs("DynRuleId")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"AddDynRule") ; fail)> ("arg2", SortNoArgs("Rule")))
+    ; <prim("SUGARJ_unsafe_build", "AddDynRule")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("DynRuleDef"))
+    ; id
+
+  smart-SetDynRuleMatch(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SetDynRuleMatch") ; fail)> ("arg1", SortNoArgs("DynRuleId")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"SetDynRuleMatch") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "SetDynRuleMatch")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("DynRuleDef"))
+    ; id
+
+  smart-DynRuleAssign(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleAssign") ; fail)> ("arg1", SortNoArgs("DynRuleId")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleAssign") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "DynRuleAssign")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("DynRuleDef"))
+    ; id
+
+  smart-DynRuleAssignAdd(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleAssignAdd") ; fail)> ("arg1", SortNoArgs("DynRuleId")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleAssignAdd") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "DynRuleAssignAdd")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("DynRuleDef"))
+    ; id
+
+  smart-SetDynRuleDepends(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SetDynRuleDepends") ; fail)> ("arg1", SortNoArgs("DynRuleId")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"SetDynRuleDepends") ; fail)> ("arg2", SortNoArgs("Rule")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"SetDynRuleDepends") ; fail)> ("arg3", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "SetDynRuleDepends")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("DynRuleDef"))
+    ; id
+
+  smart-LabeledDynRuleId(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"LabeledDynRuleId") ; fail)> ("arg1", SortNoArgs("RuleDec")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"LabeledDynRuleId") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "LabeledDynRuleId")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("DynRuleId"))
+    ; id
+
+  smart-AddLabelDynRuleId(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"AddLabelDynRuleId") ; fail)> ("arg1", SortNoArgs("RuleDec")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"AddLabelDynRuleId") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "AddLabelDynRuleId")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("DynRuleId"))
+    ; id
+
+  smart-DynRuleId(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleId") ; fail)> ("arg1", SortNoArgs("RuleDec")))
+    ; <prim("SUGARJ_unsafe_build", "DynRuleId")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("DynRuleId"))
+    ; id
+
+  smart-LabeledDynRuleScopeId(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"LabeledDynRuleScopeId") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"LabeledDynRuleScopeId") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "LabeledDynRuleScopeId")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("DynRuleScopeId"))
+    ; id
+
+  smart-DynRuleScopeId(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleScopeId") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; <prim("SUGARJ_unsafe_build", "DynRuleScopeId")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("DynRuleScopeId"))
+    ; id
+
+
+rules
+
+  smart-RDecNoArgs(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"RDecNoArgs") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; <prim("SUGARJ_unsafe_build", "RDecNoArgs")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("RuleDec"))
+    ; id
+
+  smart-RDec(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"RDec") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"RDec") ; fail)> ( "arg2"
+                                                                       , Sort(
+                                                                           "List"
+                                                                         , [SortNoArgs("Typedid")]
+                                                                         )
+                                                                       ))
+    ; <prim("SUGARJ_unsafe_build", "RDec")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("RuleDec"))
+    ; id
+
+  smart-RDecT(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"RDecT") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"RDecT") ; fail)> ( "arg2"
+                                                                        , Sort(
+                                                                            "List"
+                                                                          , [SortNoArgs("Typedid")]
+                                                                          )
+                                                                        ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"RDecT") ; fail)> ( "arg3"
+                                                                        , Sort(
+                                                                            "List"
+                                                                          , [SortNoArgs("Typedid")]
+                                                                          )
+                                                                        ))
+    ; <prim("SUGARJ_unsafe_build", "RDecT")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("RuleDec"))
+    ; id
+
+
+rules
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | Sort(
+        "List"
+      , [SortNoArgs("Id")]
+      )
+    , SortNoArgs("RuleNames")
+    )
+
+  smart-RuleNames(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"RuleNames") ; fail)> ("arg1", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "RuleNames")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("RuleNames"))
+    ; id
+
+  smart-DynRuleIntersectFix(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectFix") ; fail)> ("arg1", SortNoArgs("RuleNames")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectFix") ; fail)> ("arg2", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "DynRuleIntersectFix")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+
+rules
+
+  smart-DynRuleUnionFix(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleUnionFix") ; fail)> ("arg1", SortNoArgs("RuleNames")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleUnionFix") ; fail)> ("arg2", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "DynRuleUnionFix")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-DynRuleUnionFix(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleUnionFix") ; fail)> ("arg1", SortNoArgs("RuleNames")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleUnionFix") ; fail)> ("arg2", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "DynRuleUnionFix")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-DynRuleIntersectUnionFix(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectUnionFix") ; fail)> ("arg1", SortNoArgs("RuleNames")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectUnionFix") ; fail)> ("arg2", SortNoArgs("RuleNames")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectUnionFix") ; fail)> ("arg3", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "DynRuleIntersectUnionFix")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-DynRuleIntersectUnionFix(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectUnionFix") ; fail)> ("arg1", SortNoArgs("RuleNames")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectUnionFix") ; fail)> ("arg2", SortNoArgs("RuleNames")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectUnionFix") ; fail)> ("arg3", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "DynRuleIntersectUnionFix")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+
+rules
+
+  smart-DynRuleIntersect(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersect") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersect") ; fail)> ("arg2", SortNoArgs("RuleNames")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersect") ; fail)> ("arg3", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "DynRuleIntersect")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-DynRuleUnion(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleUnion") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleUnion") ; fail)> ("arg2", SortNoArgs("RuleNames")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleUnion") ; fail)> ("arg3", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "DynRuleUnion")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-DynRuleIntersectUnion(|arg1, arg2, arg3, arg4) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectUnion") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectUnion") ; fail)> ("arg2", SortNoArgs("RuleNames")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectUnion") ; fail)> ("arg3", SortNoArgs("RuleNames")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectUnion") ; fail)> ("arg4", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "DynRuleIntersectUnion")> [arg1, arg2, arg3, arg4]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+
+rules
+
+  smart-BA(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"BA") ; fail)> ("arg1", SortNoArgs("StrategyAngle")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"BA") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "BA")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-DynRuleIntersectFix(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectFix") ; fail)> ("arg1", SortNoArgs("RuleNames")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectFix") ; fail)> ("arg2", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "DynRuleIntersectFix")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-AM(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"AM") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"AM") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "AM")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-DynRuleIntersect(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersect") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersect") ; fail)> ("arg2", SortNoArgs("RuleNames")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersect") ; fail)> ("arg3", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "DynRuleIntersect")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-DynRuleUnion(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleUnion") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleUnion") ; fail)> ("arg2", SortNoArgs("RuleNames")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleUnion") ; fail)> ("arg3", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "DynRuleUnion")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-DynRuleIntersectUnion(|arg1, arg2, arg3, arg4) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectUnion") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectUnion") ; fail)> ("arg2", SortNoArgs("RuleNames")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectUnion") ; fail)> ("arg3", SortNoArgs("RuleNames")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectUnion") ; fail)> ("arg4", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "DynRuleIntersectUnion")> [arg1, arg2, arg3, arg4]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-Seq(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Seq") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Seq") ; fail)> ("arg2", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "Seq")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+
+rules
+
+  smart-RDefNoArgs(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"RDefNoArgs") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"RDefNoArgs") ; fail)> ("arg2", SortNoArgs("Rule")))
+    ; <prim("SUGARJ_unsafe_build", "RDefNoArgs")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("RuleDef"))
+    ; id
+
+  smart-RDef(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"RDef") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"RDef") ; fail)> ( "arg2"
+                                                                       , Sort(
+                                                                           "List"
+                                                                         , [SortNoArgs("Typedid")]
+                                                                         )
+                                                                       ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"RDef") ; fail)> ("arg3", SortNoArgs("Rule")))
+    ; <prim("SUGARJ_unsafe_build", "RDef")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("RuleDef"))
+    ; id
+
+  smart-RDefT(|arg1, arg2, arg3, arg4) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"RDefT") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"RDefT") ; fail)> ( "arg2"
+                                                                        , Sort(
+                                                                            "List"
+                                                                          , [SortNoArgs("Typedid")]
+                                                                          )
+                                                                        ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"RDefT") ; fail)> ( "arg3"
+                                                                        , Sort(
+                                                                            "List"
+                                                                          , [SortNoArgs("Typedid")]
+                                                                          )
+                                                                        ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"RDefT") ; fail)> ("arg4", SortNoArgs("Rule")))
+    ; <prim("SUGARJ_unsafe_build", "RDefT")> [arg1, arg2, arg3, arg4]
+    ; put-syntax-sort(|SortNoArgs("RuleDef"))
+    ; id
+
+
+rules
+
+  smart-RuleNoCond(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"RuleNoCond") ; fail)> ("arg1", SortNoArgs("Term")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"RuleNoCond") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "RuleNoCond")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Rule"))
+    ; id
+
+  smart-Rule(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Rule") ; fail)> ("arg1", SortNoArgs("Term")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Rule") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Rule") ; fail)> ("arg3", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "Rule")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("Rule"))
+    ; id
+
+  smart-Rule(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Rule") ; fail)> ("arg1", SortNoArgs("Term")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Rule") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Rule") ; fail)> ( "arg3"
+                                                                       , Sort(
+                                                                           "List"
+                                                                         , [SortNoArgs("RuleCond")]
+                                                                         )
+                                                                       ))
+    ; <prim("SUGARJ_unsafe_build", "Rule")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("Rule"))
+    ; id
+
+  smart-WhereClause(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"WhereClause") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "WhereClause")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("RuleCond"))
+    ; id
+
+  smart-WithClause(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"WithClause") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "WithClause")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("RuleCond"))
+    ; id
+
+
+rules
+
+  smart-SDefNoArgs(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SDefNoArgs") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"SDefNoArgs") ; fail)> ("arg2", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "SDefNoArgs")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("StrategyDef"))
+    ; id
+
+  smart-SDef(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SDef") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"SDef") ; fail)> ( "arg2"
+                                                                       , Sort(
+                                                                           "List"
+                                                                         , [SortNoArgs("Typedid")]
+                                                                         )
+                                                                       ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"SDef") ; fail)> ("arg3", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "SDef")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("StrategyDef"))
+    ; id
+
+
+rules
+
+  smart-DefaultVarDec(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"DefaultVarDec") ; fail)> ("arg1", SortNoArgs("ID")))
+    ; <prim("SUGARJ_unsafe_build", "DefaultVarDec")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Typedid"))
+    ; id
+
+
+rules
+
+  smart-Call(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Call") ; fail)> ("arg1", SortNoArgs("SVar")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Call") ; fail)> ( "arg2"
+                                                                       , Sort(
+                                                                           "List"
+                                                                         , [SortNoArgs("Strategy")]
+                                                                         )
+                                                                       ))
+    ; <prim("SUGARJ_unsafe_build", "Call")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-ScopeDefault(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ScopeDefault") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "ScopeDefault")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-BA(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"BA") ; fail)> ("arg1", SortNoArgs("StrategyAngle")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"BA") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "BA")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("Strategy")
+    , SortNoArgs("StrategyAngle")
+    )
+
+  smart-LChoice(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"LChoice") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"LChoice") ; fail)> ("arg2", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "LChoice")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-Rec(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Rec") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Rec") ; fail)> ("arg2", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "Rec")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-Not(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Not") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "Not")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-Where(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Where") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "Where")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-With(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"With") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "With")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-Test(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Test") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "Test")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-PrimNoArgs(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"PrimNoArgs") ; fail)> ("arg1", SortNoArgs("String")))
+    ; <prim("SUGARJ_unsafe_build", "PrimNoArgs")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-Prim(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Prim") ; fail)> ("arg1", SortNoArgs("String")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Prim") ; fail)> ( "arg2"
+                                                                       , Sort(
+                                                                           "List"
+                                                                         , [SortNoArgs("Term")]
+                                                                         )
+                                                                       ))
+    ; <prim("SUGARJ_unsafe_build", "Prim")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-StrCong(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"StrCong") ; fail)> ("arg1", SortNoArgs("String")))
+    ; <prim("SUGARJ_unsafe_build", "StrCong")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-IntCong(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"IntCong") ; fail)> ("arg1", SortNoArgs("Int")))
+    ; <prim("SUGARJ_unsafe_build", "IntCong")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-RealCong(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"RealCong") ; fail)> ("arg1", SortNoArgs("Real")))
+    ; <prim("SUGARJ_unsafe_build", "RealCong")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-CharCong(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"CharCong") ; fail)> ("arg1", SortNoArgs("Char")))
+    ; <prim("SUGARJ_unsafe_build", "CharCong")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-CongQ(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"CongQ") ; fail)> ("arg1", SortNoArgs("String")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CongQ") ; fail)> ( "arg2"
+                                                                        , Sort(
+                                                                            "List"
+                                                                          , [SortNoArgs("Strategy")]
+                                                                          )
+                                                                        ))
+    ; <prim("SUGARJ_unsafe_build", "CongQ")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-AnnoCong(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"AnnoCong") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"AnnoCong") ; fail)> ("arg2", SortNoArgs("StrategyCurly")))
+    ; <prim("SUGARJ_unsafe_build", "AnnoCong")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-StrategyCurly(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"StrategyCurly") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "StrategyCurly")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("StrategyCurly"))
+    ; id
+
+  smart-EmptyTupleCong(|) =
+    <prim("SUGARJ_unsafe_build", "EmptyTupleCong")> []
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("Strategy")
+    , SortNoArgs("Strategy")
+    )
+
+  smart-TupleCong(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"TupleCong") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"TupleCong") ; fail)> ( "arg2"
+                                                                            , Sort(
+                                                                                "List"
+                                                                              , [SortNoArgs("Strategy")]
+                                                                              )
+                                                                            ))
+    ; <prim("SUGARJ_unsafe_build", "TupleCong")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-ListCongNoTail(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ListCongNoTail") ; fail)> ( "arg1"
+                                                                               , Sort(
+                                                                                   "List"
+                                                                                 , [SortNoArgs("Strategy")]
+                                                                                 )
+                                                                               ))
+    ; <prim("SUGARJ_unsafe_build", "ListCongNoTail")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-ListCong(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ListCong") ; fail)> ( "arg1"
+                                                                         , Sort(
+                                                                             "List"
+                                                                           , [SortNoArgs("Strategy")]
+                                                                           )
+                                                                         ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ListCong") ; fail)> ("arg2", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "ListCong")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-ExplodeCong(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ExplodeCong") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ExplodeCong") ; fail)> ("arg2", SortNoArgs("StrategyParen")))
+    ; <prim("SUGARJ_unsafe_build", "ExplodeCong")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+
+rules
+
+  smart-CallNoArgs(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"CallNoArgs") ; fail)> ("arg1", SortNoArgs("SVar")))
+    ; <prim("SUGARJ_unsafe_build", "CallNoArgs")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-LRule(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"LRule") ; fail)> ("arg1", SortNoArgs("Rule")))
+    ; <prim("SUGARJ_unsafe_build", "LRule")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-SRule(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SRule") ; fail)> ("arg1", SortNoArgs("Rule")))
+    ; <prim("SUGARJ_unsafe_build", "SRule")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-Choice(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Choice") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Choice") ; fail)> ("arg2", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "Choice")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-RChoice(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"RChoice") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"RChoice") ; fail)> ("arg2", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "RChoice")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-CondChoice(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"CondChoice") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CondChoice") ; fail)> ("arg2", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CondChoice") ; fail)> ("arg3", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "CondChoice")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-IfThen(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"IfThen") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"IfThen") ; fail)> ("arg2", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "IfThen")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-SwitchChoiceNoOtherwise(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SwitchChoiceNoOtherwise") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"SwitchChoiceNoOtherwise") ; fail)> ( "arg2"
+                                                                                          , Sort(
+                                                                                              "List"
+                                                                                            , [SortNoArgs("SwitchCase")]
+                                                                                            )
+                                                                                          ))
+    ; <prim("SUGARJ_unsafe_build", "SwitchChoiceNoOtherwise")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-SwitchChoice(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SwitchChoice") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"SwitchChoice") ; fail)> ( "arg2"
+                                                                               , Sort(
+                                                                                   "List"
+                                                                                 , [SortNoArgs("SwitchCase")]
+                                                                                 )
+                                                                               ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"SwitchChoice") ; fail)> ("arg3", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "SwitchChoice")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-SwitchCase(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SwitchCase") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"SwitchCase") ; fail)> ("arg2", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "SwitchCase")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("SwitchCase"))
+    ; id
+
+  smart-AM(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"AM") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"AM") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "AM")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-Assign(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Assign") ; fail)> ("arg1", SortNoArgs("Term")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Assign") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "Assign")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+
+rules
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("Term")
+    , SortNoArgs("Strategy")
+    )
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("Term")
+    , SortNoArgs("Strategy")
+    )
+
+
+rules
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("Strategy")
+    , SortNoArgs("StrategyMid")
+    )
+
+
+rules
+
+
+rules
+
+  smart-ListVar(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ListVar") ; fail)> ("arg1", SortNoArgs("LId")))
+    ; <prim("SUGARJ_unsafe_build", "ListVar")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("LID"))
+    ; id
+
+  smart-Var(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Var") ; fail)> ("arg1", SortNoArgs("LID")))
+    ; <prim("SUGARJ_unsafe_build", "Var")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Var"))
+    ; id
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("LID")
+    , SortNoArgs("ID")
+    )
+
+
+rules
+
+  smart-BuildDefaultPT(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"BuildDefaultPT") ; fail)> ("arg1", SortNoArgs("PreTerm")))
+    ; <prim("SUGARJ_unsafe_build", "BuildDefaultPT")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("PreTerm"))
+    ; id
+
+  smart-BuildDefault(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"BuildDefault") ; fail)> ("arg1", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "BuildDefault")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Term"))
+    ; id
+
+  smart-Char(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Char") ; fail)> ("arg1", SortNoArgs("Char")))
+    ; <prim("SUGARJ_unsafe_build", "Char")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("PreTerm"))
+    ; id
+
+  smart-AnnoList(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"AnnoList") ; fail)> ("arg1", SortNoArgs("PreTerm")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"AnnoList") ; fail)> ( "arg2"
+                                                                           , Sort(
+                                                                               "List"
+                                                                             , [SortNoArgs("Term")]
+                                                                             )
+                                                                           ))
+    ; <prim("SUGARJ_unsafe_build", "AnnoList")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Term"))
+    ; id
+
+  smart-NoAnnoList(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"NoAnnoList") ; fail)> ("arg1", SortNoArgs("PreTerm")))
+    ; <prim("SUGARJ_unsafe_build", "NoAnnoList")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Term"))
+    ; id
+
+  smart-App(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"App") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"App") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "App")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("PreTerm"))
+    ; id
+
+  smart-App(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"App") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"App") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "App")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Term"))
+    ; id
+
+  smart-RootApp(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"RootApp") ; fail)> ("arg1", SortNoArgs("StrategyAngle")))
+    ; <prim("SUGARJ_unsafe_build", "RootApp")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("PreTerm"))
+    ; id
+
+  smart-RootApp(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"RootApp") ; fail)> ("arg1", SortNoArgs("StrategyAngle")))
+    ; <prim("SUGARJ_unsafe_build", "RootApp")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Term"))
+    ; id
+
+  smart-Tuple(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Tuple") ; fail)> ( "arg1"
+                                                                      , Sort(
+                                                                          "List"
+                                                                        , [SortNoArgs("Term")]
+                                                                        )
+                                                                      ))
+    ; <prim("SUGARJ_unsafe_build", "Tuple")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("PreTerm"))
+    ; id
+
+  smart-List(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"List") ; fail)> ( "arg1"
+                                                                     , Sort(
+                                                                         "List"
+                                                                       , [SortNoArgs("Term")]
+                                                                       )
+                                                                     ))
+    ; <prim("SUGARJ_unsafe_build", "List")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("PreTerm"))
+    ; id
+
+  smart-ListTail(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ListTail") ; fail)> ( "arg1"
+                                                                         , Sort(
+                                                                             "List"
+                                                                           , [SortNoArgs("Term")]
+                                                                           )
+                                                                         ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ListTail") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "ListTail")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("PreTerm"))
+    ; id
+
+
+rules
+
+  smart-Explode(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Explode") ; fail)> ("arg1", SortNoArgs("Term")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Explode") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "Explode")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("PreTerm"))
+    ; id
+
+  smart-AnnoList(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"AnnoList") ; fail)> ("arg1", SortNoArgs("PreTerm")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"AnnoList") ; fail)> ( "arg2"
+                                                                           , Sort(
+                                                                               "List"
+                                                                             , [SortNoArgs("Term")]
+                                                                             )
+                                                                           ))
+    ; <prim("SUGARJ_unsafe_build", "AnnoList")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Term"))
+    ; id
+
+  smart-As(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"As") ; fail)> ("arg1", SortNoArgs("Var")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"As") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "As")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Term"))
+    ; id
+
+
+rules
+
+  smart-SortList(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SortList") ; fail)> ( "arg1"
+                                                                         , Sort(
+                                                                             "List"
+                                                                           , [SortNoArgs("Sort")]
+                                                                           )
+                                                                         ))
+    ; <prim("SUGARJ_unsafe_build", "SortList")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Sort"))
+    ; id
+
+  smart-SortListTl(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SortListTl") ; fail)> ( "arg1"
+                                                                           , Sort(
+                                                                               "List"
+                                                                             , [SortNoArgs("Sort")]
+                                                                             )
+                                                                           ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"SortListTl") ; fail)> ("arg2", SortNoArgs("Sort")))
+    ; <prim("SUGARJ_unsafe_build", "SortListTl")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Sort"))
+    ; id
+
+  smart-SortTuple(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SortTuple") ; fail)> ( "arg1"
+                                                                          , Sort(
+                                                                              "List"
+                                                                            , [SortNoArgs("Sort")]
+                                                                            )
+                                                                          ))
+    ; <prim("SUGARJ_unsafe_build", "SortTuple")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Sort"))
+    ; id
+
+
+rules
+
+  smart-Star(|) =
+    <prim("SUGARJ_unsafe_build", "Star")> []
+    ; put-syntax-sort(|SortNoArgs("Kind"))
+    ; id
+
+  smart-StarStar(|) =
+    <prim("SUGARJ_unsafe_build", "StarStar")> []
+    ; put-syntax-sort(|SortNoArgs("Kind"))
+    ; id
+
+
+rules
+
+  smart-Sorts(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Sorts") ; fail)> ( "arg1"
+                                                                      , Sort(
+                                                                          "List"
+                                                                        , [SortNoArgs("Sort")]
+                                                                        )
+                                                                      ))
+    ; <prim("SUGARJ_unsafe_build", "Sorts")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Sdecl"))
+    ; id
+
+  smart-Constructors(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Constructors") ; fail)> ( "arg1"
+                                                                             , Sort(
+                                                                                 "List"
+                                                                               , [SortNoArgs("Opdecl")]
+                                                                               )
+                                                                             ))
+    ; <prim("SUGARJ_unsafe_build", "Constructors")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Sdecl"))
+    ; id
+
+
+rules
+
+  smart-SortVar(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SortVar") ; fail)> ("arg1", SortNoArgs("LCID")))
+    ; <prim("SUGARJ_unsafe_build", "SortVar")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Sort"))
+    ; id
+
+  smart-SortNoArgs(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SortNoArgs") ; fail)> ("arg1", SortNoArgs("UCID")))
+    ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Sort"))
+    ; id
+
+  smart-Sort(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Sort") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Sort") ; fail)> ( "arg2"
+                                                                       , Sort(
+                                                                           "List"
+                                                                         , [SortNoArgs("Sort")]
+                                                                         )
+                                                                       ))
+    ; <prim("SUGARJ_unsafe_build", "Sort")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Sort"))
+    ; id
+
+
+rules
+
+  smart-OpDecl(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"OpDecl") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"OpDecl") ; fail)> ("arg2", SortNoArgs("Type")))
+    ; <prim("SUGARJ_unsafe_build", "OpDecl")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Opdecl"))
+    ; id
+
+  smart-OpDeclQ(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"OpDeclQ") ; fail)> ("arg1", SortNoArgs("String")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"OpDeclQ") ; fail)> ("arg2", SortNoArgs("Type")))
+    ; <prim("SUGARJ_unsafe_build", "OpDeclQ")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Opdecl"))
+    ; id
+
+  smart-OpDeclInj(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"OpDeclInj") ; fail)> ("arg1", SortNoArgs("Type")))
+    ; <prim("SUGARJ_unsafe_build", "OpDeclInj")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Opdecl"))
+    ; id
+
+
+rules
+
+  smart-ExtOpDecl(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ExtOpDecl") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ExtOpDecl") ; fail)> ("arg2", SortNoArgs("Type")))
+    ; <prim("SUGARJ_unsafe_build", "ExtOpDecl")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Opdecl"))
+    ; id
+
+  smart-ExtOpDeclQ(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ExtOpDeclQ") ; fail)> ("arg1", SortNoArgs("String")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ExtOpDeclQ") ; fail)> ("arg2", SortNoArgs("Type")))
+    ; <prim("SUGARJ_unsafe_build", "ExtOpDeclQ")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Opdecl"))
+    ; id
+
+  smart-ExtOpDeclInj(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ExtOpDeclInj") ; fail)> ("arg1", SortNoArgs("Type")))
+    ; <prim("SUGARJ_unsafe_build", "ExtOpDeclInj")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Opdecl"))
+    ; id
+
+
+rules
+
+  smart-ConstType(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ConstType") ; fail)> ("arg1", SortNoArgs("Sort")))
+    ; <prim("SUGARJ_unsafe_build", "ConstType")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("ConstType"))
+    ; id
+
+  smart-FunType(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"FunType") ; fail)> ( "arg1"
+                                                                        , Sort(
+                                                                            "List"
+                                                                          , [SortNoArgs("ArgType")]
+                                                                          )
+                                                                        ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"FunType") ; fail)> ("arg2", SortNoArgs("RetType")))
+    ; <prim("SUGARJ_unsafe_build", "FunType")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("FunType"))
+    ; id
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("Type")
+    , SortNoArgs("ArgType")
+    )
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("ConstType")
+    , SortNoArgs("ArgType")
+    )
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("Type")
+    , SortNoArgs("RetType")
+    )
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("FunType")
+    , SortNoArgs("RetType")
+    )
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("FunType")
+    , SortNoArgs("Type")
+    )
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("ConstType")
+    , SortNoArgs("Type")
+    )
+
+
+rules
+
+  smart-Var(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Var") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; <prim("SUGARJ_unsafe_build", "Var")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Var"))
+    ; id
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("Id")
+    , SortNoArgs("ID")
+    )
+
+
+rules
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("Var")
+    , SortNoArgs("PreTerm")
+    )
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("Var")
+    , SortNoArgs("Term")
+    )
+
+  smart-Wld(|) =
+    <prim("SUGARJ_unsafe_build", "Wld")> []
+    ; put-syntax-sort(|SortNoArgs("Wld"))
+    ; id
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("Wld")
+    , SortNoArgs("PreTerm")
+    )
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("Wld")
+    , SortNoArgs("Term")
+    )
+
+  smart-Int(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Int") ; fail)> ("arg1", SortNoArgs("Int")))
+    ; <prim("SUGARJ_unsafe_build", "Int")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("PreTerm"))
+    ; id
+
+  smart-Real(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Real") ; fail)> ("arg1", SortNoArgs("Real")))
+    ; <prim("SUGARJ_unsafe_build", "Real")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("PreTerm"))
+    ; id
+
+  smart-Str(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Str") ; fail)> ("arg1", SortNoArgs("String")))
+    ; <prim("SUGARJ_unsafe_build", "Str")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("PreTerm"))
+    ; id
+
+  smart-Op(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Op") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Op") ; fail)> ( "arg2"
+                                                                     , Sort(
+                                                                         "List"
+                                                                       , [SortNoArgs("Term")]
+                                                                       )
+                                                                     ))
+    ; <prim("SUGARJ_unsafe_build", "Op")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("PreTerm"))
+    ; id
+
+  smart-OpQ(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"OpQ") ; fail)> ("arg1", SortNoArgs("String")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"OpQ") ; fail)> ( "arg2"
+                                                                      , Sort(
+                                                                          "List"
+                                                                        , [SortNoArgs("Term")]
+                                                                        )
+                                                                      ))
+    ; <prim("SUGARJ_unsafe_build", "OpQ")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("PreTerm"))
+    ; id
+
+  smart-Explode(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Explode") ; fail)> ("arg1", SortNoArgs("Term")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Explode") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "Explode")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("PreTerm"))
+    ; id
+
+  smart-Anno(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Anno") ; fail)> ("arg1", SortNoArgs("PreTerm")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Anno") ; fail)> ("arg2", SortNoArgs("PreTerm")))
+    ; <prim("SUGARJ_unsafe_build", "Anno")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Term"))
+    ; id
+
+  smart-As(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"As") ; fail)> ("arg1", SortNoArgs("Var")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"As") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "As")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Term"))
+    ; id
+
+  smart-As(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"As") ; fail)> ("arg1", SortNoArgs("Var")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"As") ; fail)> ("arg2", SortNoArgs("PreTerm")))
+    ; <prim("SUGARJ_unsafe_build", "As")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("PreTerm"))
+    ; id
+
+
+rules
+
+  smart-Explode(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Explode") ; fail)> ("arg1", SortNoArgs("Term")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Explode") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "Explode")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("PreTerm"))
+    ; id
+
+  smart-As(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"As") ; fail)> ("arg1", SortNoArgs("Var")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"As") ; fail)> ("arg2", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "As")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Term"))
+    ; id
+
+
+rules
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("StrategyDef")
+    , SortNoArgs("Def")
+    )
+
+  smart-SVar(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SVar") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; <prim("SUGARJ_unsafe_build", "SVar")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("SVar"))
+    ; id
+
+  smart-Let(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Let") ; fail)> ( "arg1"
+                                                                    , Sort(
+                                                                        "List"
+                                                                      , [SortNoArgs("Def")]
+                                                                      )
+                                                                    ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Let") ; fail)> ("arg2", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "Let")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-CallT(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"CallT") ; fail)> ("arg1", SortNoArgs("SVar")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CallT") ; fail)> ( "arg2"
+                                                                        , Sort(
+                                                                            "List"
+                                                                          , [SortNoArgs("Strategy")]
+                                                                          )
+                                                                        ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CallT") ; fail)> ( "arg3"
+                                                                        , Sort(
+                                                                            "List"
+                                                                          , [SortNoArgs("Term")]
+                                                                          )
+                                                                        ))
+    ; <prim("SUGARJ_unsafe_build", "CallT")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-CallDynamic(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"CallDynamic") ; fail)> ("arg1", SortNoArgs("Term")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CallDynamic") ; fail)> ( "arg2"
+                                                                              , Sort(
+                                                                                  "List"
+                                                                                , [SortNoArgs("Strategy")]
+                                                                                )
+                                                                              ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CallDynamic") ; fail)> ( "arg3"
+                                                                              , Sort(
+                                                                                  "List"
+                                                                                , [SortNoArgs("Term")]
+                                                                                )
+                                                                              ))
+    ; <prim("SUGARJ_unsafe_build", "CallDynamic")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+
+rules
+
+  smart-SDefT(|arg1, arg2, arg3, arg4) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"SDefT") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"SDefT") ; fail)> ( "arg2"
+                                                                        , Sort(
+                                                                            "List"
+                                                                          , [SortNoArgs("Typedid")]
+                                                                          )
+                                                                        ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"SDefT") ; fail)> ( "arg3"
+                                                                        , Sort(
+                                                                            "List"
+                                                                          , [SortNoArgs("Typedid")]
+                                                                          )
+                                                                        ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"SDefT") ; fail)> ("arg4", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "SDefT")> [arg1, arg2, arg3, arg4]
+    ; put-syntax-sort(|SortNoArgs("StrategyDef"))
+    ; id
+
+  smart-ExtSDefInl(|arg1, arg2, arg3, arg4) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ExtSDefInl") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ExtSDefInl") ; fail)> ( "arg2"
+                                                                             , Sort(
+                                                                                 "List"
+                                                                               , [SortNoArgs("Typedid")]
+                                                                               )
+                                                                             ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ExtSDefInl") ; fail)> ( "arg3"
+                                                                             , Sort(
+                                                                                 "List"
+                                                                               , [SortNoArgs("Typedid")]
+                                                                               )
+                                                                             ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ExtSDefInl") ; fail)> ("arg4", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "ExtSDefInl")> [arg1, arg2, arg3, arg4]
+    ; put-syntax-sort(|SortNoArgs("StrategyDef"))
+    ; id
+
+  smart-ExtSDef(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ExtSDef") ; fail)> ("arg1", SortNoArgs("Id")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ExtSDef") ; fail)> ( "arg2"
+                                                                          , Sort(
+                                                                              "List"
+                                                                            , [SortNoArgs("Typedid")]
+                                                                            )
+                                                                          ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"ExtSDef") ; fail)> ( "arg3"
+                                                                          , Sort(
+                                                                              "List"
+                                                                            , [SortNoArgs("Typedid")]
+                                                                            )
+                                                                          ))
+    ; <prim("SUGARJ_unsafe_build", "ExtSDef")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("StrategyDef"))
+    ; id
+
+
+rules
+
+  smart-VarDec(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"VarDec") ; fail)> ("arg1", SortNoArgs("ID")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"VarDec") ; fail)> ("arg2", SortNoArgs("Type")))
+    ; <prim("SUGARJ_unsafe_build", "VarDec")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Typedid"))
+    ; id
+
+
+rules
+
+  smart-ParenStrat(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ParenStrat") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "ParenStrat")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("StrategyParen"))
+    ; id
+
+  smart-Fail(|) =
+    <prim("SUGARJ_unsafe_build", "Fail")> []
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-Id(|) =
+    <prim("SUGARJ_unsafe_build", "Id")> []
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-Match(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Match") ; fail)> ("arg1", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "Match")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-Build(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Build") ; fail)> ("arg1", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "Build")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-Scope(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Scope") ; fail)> ( "arg1"
+                                                                      , Sort(
+                                                                          "List"
+                                                                        , [SortNoArgs("ID")]
+                                                                        )
+                                                                      ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Scope") ; fail)> ("arg2", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "Scope")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-Seq(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Seq") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Seq") ; fail)> ("arg2", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "Seq")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-GuardedLChoice(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"GuardedLChoice") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"GuardedLChoice") ; fail)> ("arg2", SortNoArgs("StrategyMid")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"GuardedLChoice") ; fail)> ("arg3", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "GuardedLChoice")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("Strategy")
+    , SortNoArgs("StrategyMid")
+    )
+
+  smart-PrimT(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"PrimT") ; fail)> ("arg1", SortNoArgs("String")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"PrimT") ; fail)> ( "arg2"
+                                                                        , Sort(
+                                                                            "List"
+                                                                          , [SortNoArgs("Strategy")]
+                                                                          )
+                                                                        ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"PrimT") ; fail)> ( "arg3"
+                                                                        , Sort(
+                                                                            "List"
+                                                                          , [SortNoArgs("Term")]
+                                                                          )
+                                                                        ))
+    ; <prim("SUGARJ_unsafe_build", "PrimT")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-Some(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Some") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "Some")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-One(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"One") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "One")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-All(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"All") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "All")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+
+rules
+
+  smart-Build(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Build") ; fail)> ("arg1", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "Build")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-Match(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Match") ; fail)> ("arg1", SortNoArgs("Term")))
+    ; <prim("SUGARJ_unsafe_build", "Match")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-Seq(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Seq") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Seq") ; fail)> ("arg2", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "Seq")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+  smart-GuardedLChoice(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"GuardedLChoice") ; fail)> ("arg1", SortNoArgs("Strategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"GuardedLChoice") ; fail)> ("arg2", SortNoArgs("StrategyMid")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"GuardedLChoice") ; fail)> ("arg3", SortNoArgs("Strategy")))
+    ; <prim("SUGARJ_unsafe_build", "GuardedLChoice")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+
+rules
+
+  smart-ImportTerm(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ImportTerm") ; fail)> ("arg1", SortNoArgs("ModName")))
+    ; <prim("SUGARJ_unsafe_build", "ImportTerm")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Strategy"))
+    ; id
+
+
+rules
+
+  smart-Module(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Module") ; fail)> ("arg1", SortNoArgs("ModName")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Module") ; fail)> ( "arg2"
+                                                                         , Sort(
+                                                                             "List"
+                                                                           , [SortNoArgs("Decl")]
+                                                                           )
+                                                                         ))
+    ; <prim("SUGARJ_unsafe_build", "Module")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("Module"))
+    ; id
+
+  smart-Specification(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Specification") ; fail)> ( "arg1"
+                                                                              , Sort(
+                                                                                  "List"
+                                                                                , [SortNoArgs("Decl")]
+                                                                                )
+                                                                              ))
+    ; <prim("SUGARJ_unsafe_build", "Specification")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Module"))
+    ; id
+
+
+rules
+
+  smart-Imports(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Imports") ; fail)> ( "arg1"
+                                                                        , Sort(
+                                                                            "List"
+                                                                          , [SortNoArgs("ImportModName")]
+                                                                          )
+                                                                        ))
+    ; <prim("SUGARJ_unsafe_build", "Imports")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Decl"))
+    ; id
+
+  smart-Strategies(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Strategies") ; fail)> ( "arg1"
+                                                                           , Sort(
+                                                                               "List"
+                                                                             , [SortNoArgs("Def")]
+                                                                             )
+                                                                           ))
+    ; <prim("SUGARJ_unsafe_build", "Strategies")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Decl"))
+    ; id
+
+  smart-Signature(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Signature") ; fail)> ( "arg1"
+                                                                          , Sort(
+                                                                              "List"
+                                                                            , [SortNoArgs("Sdecl")]
+                                                                            )
+                                                                          ))
+    ; <prim("SUGARJ_unsafe_build", "Signature")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Decl"))
+    ; id
+
+
+rules
+
+  smart-Import(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Import") ; fail)> ("arg1", SortNoArgs("ModName")))
+    ; <prim("SUGARJ_unsafe_build", "Import")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("ImportModName"))
+    ; id
+
+
+rules
+
+  smart-ImportWildcard(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ImportWildcard") ; fail)> ("arg1", SortNoArgs("ModName")))
+    ; <prim("SUGARJ_unsafe_build", "ImportWildcard")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("ImportModName"))
+    ; id
+
+
+rules
+
+  smart-Rules(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Rules") ; fail)> ( "arg1"
+                                                                      , Sort(
+                                                                          "List"
+                                                                        , [SortNoArgs("Def")]
+                                                                        )
+                                                                      ))
+    ; <prim("SUGARJ_unsafe_build", "Rules")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Decl"))
+    ; id
+
+  smart-Overlays(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Overlays") ; fail)> ( "arg1"
+                                                                         , Sort(
+                                                                             "List"
+                                                                           , [SortNoArgs("Overlay")]
+                                                                           )
+                                                                         ))
+    ; <prim("SUGARJ_unsafe_build", "Overlays")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Decl"))
+    ; id
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("RuleDef")
+    , SortNoArgs("Def")
+    )

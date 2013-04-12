@@ -17,7 +17,9 @@ rules
 		    ; collect-all(?exports(<id>) + ?hiddens(<id>))
 		    ; mapconcat(flatten-grammar)
 		    ; gen-syntax-constructors
-		    ; !Module(<OutputModule>, <id>)
+		    ; !Module(<OutputModule>,
+		              [Imports([ Import("org/sugarj/transformations/typesmart/Runtime")
+		                       , Import("org/sugarj/languages/Stratego")]) | <id>])
 		    ; pp-stratego-stream(|out)
 		    else
 		      !""
@@ -46,16 +48,6 @@ rules
       <+ \ conc-grammars(g1,g2) -> <conc> (<flatten-grammar> g1, <flatten-grammar> g2) \
       <+ \ g -> [g] \
       )
-
-rules
-  put-syntax-sort(|sort) =
-    (where(get-analysis-data-annotation) <+ init-analysis-data-annotation);
-    put-anno(|"syntax-sort", sort);
-    where(get-syntax-sort)
-  get-syntax-sort =
-    get-anno(|"syntax-sort")
-  has-syntax-sort =
-    where(get-syntax-sort)
   
 rules
   gen-syntax-constructors =
@@ -115,36 +107,9 @@ rules
         , Fail()))
     , NoAnnoList(Tuple([NoAnnoList(Str(arg)), <trm-explode> arg-sort]))))
   
-  log-mismatching-sort-error =
-    (not(get-syntax-sort), id);
-    debug(!"Constructor argument lacks sort annotation: ")
-  
-  log-mismatching-sort-error(|cons) =
-    (get-syntax-sort, id);
-    ?(was, exp);
-    where(<conc-strings> 
-            ("Mismatching argument sort for constructor '", cons, "'.",
-             " Was ", <write-to-string> was, ",",
-             " expected ", <write-to-string> exp) => s);
-    <debug(!s)> "."
-  
   make-arg-list(|n) :
     [] -> []
   make-arg-list(|n) :
     [_|rest] -> [arg| <make-arg-list(|<inc> n)> rest]
     where <conc-strings> ("arg", <int-to-string> n) => arg
   
-  has-sort = ?([], Sort("List", _))
-  has-sort = ?(None(), Sort("Option", _))
-  has-sort = ?(Some(x), Sort("Option", [xsort]));
-             !(x, xsort);
-             has-sort
-  has-sort = (get-syntax-sort, id); is-subsort-of
-  
-  is-subsort-of = is-subsort-of-refl
-  is-subsort-of-refl = structurally-equal
-  is-subsort-of-inject(|arg-sort,res-sort) =
-      ?(sub-sort,sup-sort)
-    ; <structurally-equal> (sub-sort, arg-sort) 
-    ; ( <structurally-equal> (sup-sort, res-sort)
-     <+ <is-subsort-of> (res-sort, sup-sort)) 

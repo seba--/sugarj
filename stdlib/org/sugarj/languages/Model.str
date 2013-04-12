@@ -1,5 +1,130 @@
 module org/sugarj/languages/Model
 
-signature constructors
-  TransApp : TransformationExpr * TransformationExpr -> TransformationExpr
-  TransformationDef : x * y -> z
+imports
+  org/sugarj/transformations/typesmart/Runtime
+  org/sugarj/languages/Stratego
+
+
+signature
+  constructors
+    ToModelTerm       : ATerm -> ModelTerm
+    TransformationDef : DirectTransformation * List(ModelTransformation) -> TransformationDef
+    Strategies        : List(StrategoDef) -> ModelTransformation
+    Signature         : List(StrategoSdecl) -> ModelTransformation
+    Rules             : List(StrategoDef) -> ModelTransformation
+    Overlays          : List(StrategoOverlay) -> ModelTransformation
+    TransApp          : TransformationExpr * TransformationExpr -> TransformationAppExpr
+
+
+rules
+
+  smart-ToModelTerm(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"ToModelTerm") ; fail)> ("arg1", SortNoArgs("ATerm")))
+    ; <prim("SUGARJ_unsafe_build", "ToModelTerm")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("ModelTerm"))
+    ; id
+
+
+rules
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | Sort(
+        "List"
+      , [SortNoArgs("ModelTransformation")]
+      )
+    , SortNoArgs("TransformationDef")
+    )
+
+  smart-TransformationDef(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"TransformationDef") ; fail)> ("arg1", SortNoArgs("DirectTransformation")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"TransformationDef") ; fail)> ( "arg2"
+                                                                                    , Sort(
+                                                                                        "List"
+                                                                                      , [SortNoArgs("ModelTransformation")]
+                                                                                      )
+                                                                                    ))
+    ; <prim("SUGARJ_unsafe_build", "TransformationDef")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("TransformationDef"))
+    ; id
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | Sort(
+        "List"
+      , [SortNoArgs("StrategoDef")]
+      )
+    , SortNoArgs("DirectTransformation")
+    )
+
+  smart-Strategies(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Strategies") ; fail)> ( "arg1"
+                                                                           , Sort(
+                                                                               "List"
+                                                                             , [SortNoArgs("StrategoDef")]
+                                                                             )
+                                                                           ))
+    ; <prim("SUGARJ_unsafe_build", "Strategies")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("ModelTransformation"))
+    ; id
+
+  smart-Signature(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Signature") ; fail)> ( "arg1"
+                                                                          , Sort(
+                                                                              "List"
+                                                                            , [SortNoArgs("StrategoSdecl")]
+                                                                            )
+                                                                          ))
+    ; <prim("SUGARJ_unsafe_build", "Signature")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("ModelTransformation"))
+    ; id
+
+  smart-Rules(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Rules") ; fail)> ( "arg1"
+                                                                      , Sort(
+                                                                          "List"
+                                                                        , [SortNoArgs("StrategoDef")]
+                                                                        )
+                                                                      ))
+    ; <prim("SUGARJ_unsafe_build", "Rules")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("ModelTransformation"))
+    ; id
+
+  smart-Overlays(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Overlays") ; fail)> ( "arg1"
+                                                                         , Sort(
+                                                                             "List"
+                                                                           , [SortNoArgs("StrategoOverlay")]
+                                                                           )
+                                                                         ))
+    ; <prim("SUGARJ_unsafe_build", "Overlays")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("ModelTransformation"))
+    ; id
+
+
+rules
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("ModuleName")
+    , SortNoArgs("TransformationExpr")
+    )
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("TransformationExpr")
+    , SortNoArgs("TransformationExpr")
+    )
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("TransformationAppExpr")
+    , SortNoArgs("TransformationExpr")
+    )
+
+  smart-TransApp(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"TransApp") ; fail)> ("arg1", SortNoArgs("TransformationExpr")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"TransApp") ; fail)> ("arg2", SortNoArgs("TransformationExpr")))
+    ; <prim("SUGARJ_unsafe_build", "TransApp")> [arg1, arg2]
+    ; put-syntax-sort(|SortNoArgs("TransformationAppExpr"))
+    ; id

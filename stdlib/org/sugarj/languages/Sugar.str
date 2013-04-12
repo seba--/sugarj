@@ -1,12 +1,224 @@
 module org/sugarj/languages/Sugar
-imports org/sugarj/languages/Model
 
-signature constructors
-    transformation-elem        : Transformation -> SugarDefElem
-    grammar-elem               : Grammar -> SugarDefElem
-    
-    Desugarings                : List(Desugaring) -> DesugaringDecl
-    InjectDesugaring           : StrategoId * Sdf2Symbol * Sdf2Symbol * Sdf2Attributes -> Desugaring
-    PureDesugaring             : StrategoId -> Desugaring
-    
-    Analyses                   : List(Strategy) -> Analyses
+imports
+  org/sugarj/transformations/typesmart/Runtime
+  org/sugarj/languages/Stratego
+
+
+signature
+  constructors
+    grammar-elem              : Grammar -> SugarDefElem
+    transformation-elem       : Transformation -> SugarDefElem
+    'sorts                    : Sdf2Symbols -> Grammar
+    syntax                    : Sdf2Productions -> Grammar
+    lexical-syntax            : Sdf2Productions -> Grammar
+    context-free-syntax       : Sdf2Productions -> Grammar
+    variables                 : Sdf2Productions -> Grammar
+    lexical-variables         : Sdf2Productions -> Grammar
+    priorities                : Sdf2Priorities -> Grammar
+    lexical-priorities        : Sdf2Priorities -> Grammar
+    context-free-priorities   : Sdf2Priorities -> Grammar
+    restrictions              : Sdf2Restrictions -> Grammar
+    lexical-restrictions      : Sdf2Restrictions -> Grammar
+    context-free-restrictions : Sdf2Restrictions -> Grammar
+    aliases                   : Sdf2Aliases -> Grammar
+    Strategies                : List(StrategoDef) -> Transformation
+    Signature                 : List(StrategoSdecl) -> Transformation
+    Rules                     : List(StrategoDef) -> Transformation
+    Overlays                  : List(StrategoOverlay) -> Transformation
+    Desugarings               : List(Desugaring) -> Transformation
+    Analyses                  : List(Analysis) -> Transformation
+    PureDesugaring            : StrategoStrategy -> Desugaring
+    InjectDesugaring          : StrategoStrategy * Sdf2Symbol * Sdf2Symbol * Sdf2Attributes -> Desugaring
+
+
+rules
+
+  smart-grammar-elem(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"grammar-elem") ; fail)> ("arg1", SortNoArgs("Grammar")))
+    ; <prim("SUGARJ_unsafe_build", "grammar-elem")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("SugarDefElem"))
+    ; id
+
+  smart-transformation-elem(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"transformation-elem") ; fail)> ("arg1", SortNoArgs("Transformation")))
+    ; <prim("SUGARJ_unsafe_build", "transformation-elem")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("SugarDefElem"))
+    ; id
+
+
+rules
+
+  smart-sorts(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"sorts") ; fail)> ("arg1", SortNoArgs("Sdf2Symbols")))
+    ; <prim("SUGARJ_unsafe_build", "sorts")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Grammar"))
+    ; id
+
+  smart-syntax(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"syntax") ; fail)> ("arg1", SortNoArgs("Sdf2Productions")))
+    ; <prim("SUGARJ_unsafe_build", "syntax")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Grammar"))
+    ; id
+
+  smart-lexical-syntax(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"lexical-syntax") ; fail)> ("arg1", SortNoArgs("Sdf2Productions")))
+    ; <prim("SUGARJ_unsafe_build", "lexical-syntax")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Grammar"))
+    ; id
+
+  smart-context-free-syntax(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"context-free-syntax") ; fail)> ("arg1", SortNoArgs("Sdf2Productions")))
+    ; <prim("SUGARJ_unsafe_build", "context-free-syntax")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Grammar"))
+    ; id
+
+  smart-variables(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"variables") ; fail)> ("arg1", SortNoArgs("Sdf2Productions")))
+    ; <prim("SUGARJ_unsafe_build", "variables")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Grammar"))
+    ; id
+
+  smart-lexical-variables(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"lexical-variables") ; fail)> ("arg1", SortNoArgs("Sdf2Productions")))
+    ; <prim("SUGARJ_unsafe_build", "lexical-variables")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Grammar"))
+    ; id
+
+  smart-priorities(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"priorities") ; fail)> ("arg1", SortNoArgs("Sdf2Priorities")))
+    ; <prim("SUGARJ_unsafe_build", "priorities")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Grammar"))
+    ; id
+
+  smart-lexical-priorities(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"lexical-priorities") ; fail)> ("arg1", SortNoArgs("Sdf2Priorities")))
+    ; <prim("SUGARJ_unsafe_build", "lexical-priorities")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Grammar"))
+    ; id
+
+  smart-context-free-priorities(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"context-free-priorities") ; fail)> ("arg1", SortNoArgs("Sdf2Priorities")))
+    ; <prim("SUGARJ_unsafe_build", "context-free-priorities")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Grammar"))
+    ; id
+
+  smart-restrictions(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"restrictions") ; fail)> ("arg1", SortNoArgs("Sdf2Restrictions")))
+    ; <prim("SUGARJ_unsafe_build", "restrictions")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Grammar"))
+    ; id
+
+  smart-lexical-restrictions(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"lexical-restrictions") ; fail)> ("arg1", SortNoArgs("Sdf2Restrictions")))
+    ; <prim("SUGARJ_unsafe_build", "lexical-restrictions")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Grammar"))
+    ; id
+
+  smart-context-free-restrictions(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"context-free-restrictions") ; fail)> ("arg1", SortNoArgs("Sdf2Restrictions")))
+    ; <prim("SUGARJ_unsafe_build", "context-free-restrictions")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Grammar"))
+    ; id
+
+  smart-aliases(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"aliases") ; fail)> ("arg1", SortNoArgs("Sdf2Aliases")))
+    ; <prim("SUGARJ_unsafe_build", "aliases")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Grammar"))
+    ; id
+
+
+rules
+
+  smart-Strategies(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Strategies") ; fail)> ( "arg1"
+                                                                           , Sort(
+                                                                               "List"
+                                                                             , [SortNoArgs("StrategoDef")]
+                                                                             )
+                                                                           ))
+    ; <prim("SUGARJ_unsafe_build", "Strategies")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Transformation"))
+    ; id
+
+  smart-Signature(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Signature") ; fail)> ( "arg1"
+                                                                          , Sort(
+                                                                              "List"
+                                                                            , [SortNoArgs("StrategoSdecl")]
+                                                                            )
+                                                                          ))
+    ; <prim("SUGARJ_unsafe_build", "Signature")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Transformation"))
+    ; id
+
+  smart-Rules(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Rules") ; fail)> ( "arg1"
+                                                                      , Sort(
+                                                                          "List"
+                                                                        , [SortNoArgs("StrategoDef")]
+                                                                        )
+                                                                      ))
+    ; <prim("SUGARJ_unsafe_build", "Rules")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Transformation"))
+    ; id
+
+  smart-Overlays(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Overlays") ; fail)> ( "arg1"
+                                                                         , Sort(
+                                                                             "List"
+                                                                           , [SortNoArgs("StrategoOverlay")]
+                                                                           )
+                                                                         ))
+    ; <prim("SUGARJ_unsafe_build", "Overlays")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Transformation"))
+    ; id
+
+
+rules
+
+  smart-Desugarings(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Desugarings") ; fail)> ( "arg1"
+                                                                            , Sort(
+                                                                                "List"
+                                                                              , [SortNoArgs("Desugaring")]
+                                                                              )
+                                                                            ))
+    ; <prim("SUGARJ_unsafe_build", "Desugarings")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Transformation"))
+    ; id
+
+  smart-Analyses(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Analyses") ; fail)> ( "arg1"
+                                                                         , Sort(
+                                                                             "List"
+                                                                           , [SortNoArgs("Analysis")]
+                                                                           )
+                                                                         ))
+    ; <prim("SUGARJ_unsafe_build", "Analyses")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Transformation"))
+    ; id
+
+
+rules
+
+  smart-PureDesugaring(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"PureDesugaring") ; fail)> ("arg1", SortNoArgs("StrategoStrategy")))
+    ; <prim("SUGARJ_unsafe_build", "PureDesugaring")> [arg1]
+    ; put-syntax-sort(|SortNoArgs("Desugaring"))
+    ; id
+
+  smart-InjectDesugaring(|arg1, arg2, arg3, arg4) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"InjectDesugaring") ; fail)> ("arg1", SortNoArgs("StrategoStrategy")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"InjectDesugaring") ; fail)> ("arg2", SortNoArgs("Sdf2Symbol")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"InjectDesugaring") ; fail)> ("arg3", SortNoArgs("Sdf2Symbol")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"InjectDesugaring") ; fail)> ("arg4", SortNoArgs("Sdf2Attributes")))
+    ; <prim("SUGARJ_unsafe_build", "InjectDesugaring")> [arg1, arg2, arg3, arg4]
+    ; put-syntax-sort(|SortNoArgs("Desugaring"))
+    ; id
+
+  is-subtype-of(|) =
+    is-subsort-of-inject(
+    | SortNoArgs("StrategoStrategy")
+    , SortNoArgs("Analysis")
+    )
