@@ -6,8 +6,7 @@ imports org/sugarj/transformations/Analyze
 rules
   put-syntax-sort(|sort) =
     (where(get-analysis-data-annotation) <+ init-analysis-data-annotation);
-    put-anno(|"syntax-sort", sort);
-    where(get-syntax-sort)
+    put-anno(|"syntax-sort", sort)
   get-syntax-sort =
     get-anno(|"syntax-sort")
   has-syntax-sort =
@@ -25,7 +24,12 @@ rules
            ; <has-sort> (x, xsort)
   has-sort = ?(x, Sort("Alt", [xsort1, xsort2]))
            ; (<has-sort> (x, xsort1) + <has-sort> (x, xsort2))
+  has-sort = ?(x, xsort)
+           ; <is-string> x
+           ; <is-lexical-sort> xsort
   has-sort = (get-syntax-sort, id); is-subsort-of
+  
+  is-lexical-sort = fail
   
   is-subsort-of = is-subsort-of-refl
   is-subsort-of-refl = structurally-equal

@@ -51,18 +51,22 @@ rules
   
 rules
   gen-syntax-constructors =
+  	?grammar;
     filter( ?context-free-syntax(<id>)
-           + ?context-free-priorities(<collect-all(?prod(_,_,_))>)
-           + ?syntax(<id>));
+          + ?context-free-priorities(<collect-all(?prod(_,_,_))>)
+          + ?syntax(<id>));
     where( concat
          ; !context-free-syntax(<id>)
          ; gen-signature-from-grammar
           => sig-list);
     map(
       filter(gen-syntax-constructors-prod + gen-subsort-of-inject);
-      !Rules(<id>));
-    ?smart-cons-list;
-    <conc> ([sig-list], smart-cons-list)
+      !Rules(<id>)) => smart-cons-list;
+    !grammar;
+    filter( ?lexical-syntax(<id>)
+          + ?lexical-priorities(<collect-all(?prod(_,_,_))>));
+    map(filter(gen-lexical-sort-prod); nub; !Rules(<id>)) => lexical-sort-list;
+    <conc> ([sig-list], lexical-sort-list, smart-cons-list)
 
   gen-syntax-constructors-prod :
     prod(lhs, rhs, attrs(as)) ->
@@ -98,7 +102,14 @@ rules
 
     ; !SDefT("is-subtype-of", [], [], body) => strat
 
-    
+  gen-lexical-sort-prod :
+    prod(lhs, rhs, _) ->
+    strat
+  where
+      <get-symbol-sort> rhs => res-sort
+    ; body := CallT(SVar("equal"), [], [<nosmart-trm-explode> res-sort])
+    ; !SDefT("is-lexical-sort", [], [], body) => strat
+
   gen-arg-check(|cons) :
     (arg, arg-sort) -> 
     Where(BA(LChoice(
