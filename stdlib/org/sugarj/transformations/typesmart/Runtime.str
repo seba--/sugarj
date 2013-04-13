@@ -14,11 +14,17 @@ rules
     where(get-syntax-sort)
 
 rules
-  has-sort = ?([], Sort("List", _))
+  has-sort = ?(xs, listsort@Sort("List", [xsort]))
+           ; <map(has-sort)> (xs, xsort)
+  has-sort = ?(""#(xs), listsort@Sort("Tuple", xsorts))
+           ; <equal> (<length> xs, <length> xsorts)
+           ; <zip> (xs, xsorts)
+           ; map(has-sort)
   has-sort = ?(None(), Sort("Option", _))
-  has-sort = ?(Some(x), Sort("Option", [xsort]));
-             !(x, xsort);
-             has-sort
+  has-sort = ?(Some(x), Sort("Option", [xsort]))
+           ; <has-sort> (x, xsort)
+  has-sort = ?(x, Sort("Alt", [xsort1, xsort2]))
+           ; (<has-sort> (x, xsort1) + <has-sort> (x, xsort2))
   has-sort = (get-syntax-sort, id); is-subsort-of
   
   is-subsort-of = is-subsort-of-refl

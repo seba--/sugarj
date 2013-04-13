@@ -13,25 +13,25 @@ rules
   main = io-stream-wrap(typesmart-options,
       ?(inp,out)
       ; if OutputModule then
-		      <parse-sdf-definition-stream> inp
-		    ; collect-all(?exports(<id>) + ?hiddens(<id>))
-		    ; mapconcat(flatten-grammar)
-		    ; gen-syntax-constructors
-		    ; !Module(<OutputModule>,
-		              [Imports([ Import("org/sugarj/transformations/typesmart/Runtime")
-		                       , Import("org/sugarj/languages/Stratego")]) | <id>])
-		    ; pp-stratego-stream(|out)
-		    else
-		      !""
-		    ; fatal-err(|"Need to specify an output module using the '-m' option.")
-		    end
+          <parse-sdf-definition-stream> inp
+        ; collect-all(?exports(<id>) + ?hiddens(<id>))
+        ; mapconcat(flatten-grammar)
+        ; gen-syntax-constructors
+        ; !Module(<OutputModule>,
+                  [Imports([ Import("org/sugarj/transformations/typesmart/Runtime")
+                           , Import("org/sugarj/languages/Stratego")]) | <id>])
+        ; pp-stratego-stream(|out)
+        else
+          !""
+        ; fatal-err(|"Need to specify an output module using the '-m' option.")
+        end
   )        
 
   debug-pp-stratego =
-  	bottomup(try( not(is-string)
-  	            ; not(is-list)
-  	            ; not(pp-stratego-string)
-  	            ; debug(!"cannot pp stratego: ")))
+    bottomup(try( not(is-string)
+                ; not(is-list)
+                ; not(pp-stratego-string)
+                ; debug(!"cannot pp stratego: ")))
 
 rules
   typesmart-options = 
@@ -56,7 +56,7 @@ rules
            + ?syntax(<id>));
     where( concat
          ; !context-free-syntax(<id>)
-    	   ; gen-signature-from-grammar
+         ; gen-signature-from-grammar
           => sig-list);
     map(
       filter(gen-syntax-constructors-prod + gen-subsort-of-inject);
@@ -79,7 +79,7 @@ rules
     
     ; <map(!Var(<id>)); !NoAnnoList(List(<id>))> args => args-term
     ; !BA(Prim("\"SUGARJ_unsafe_build\"", [NoAnnoList(Str(cons))]), args-term) => build
-    ; !CallT(SVar("put-syntax-sort"), [], [<trm-explode> res-sort]) => put-res
+    ; !CallT(SVar("put-syntax-sort"), [], [<nosmart-trm-explode> res-sort]) => put-res
     ; <conc; foldr(!Id(), \ (x,y) -> Seq(x,y) \)> (arg-checks, [build, put-res]) => body
     
     ; <map(!DefaultVarDec(<id>))> args => var-decs
@@ -94,7 +94,7 @@ rules
     ; <filter(get-symbol-sort)> lhs => [arg-sort]
     ; <get-symbol-sort> rhs => res-sort
     ; body := CallT(SVar("is-subsort-of-inject"), []
-                  , [ <trm-explode> arg-sort, <trm-explode> res-sort])
+                  , [ <nosmart-trm-explode> arg-sort, <nosmart-trm-explode> res-sort])
 
     ; !SDefT("is-subtype-of", [], [], body) => strat
 
@@ -103,13 +103,60 @@ rules
     (arg, arg-sort) -> 
     Where(BA(LChoice(
         CallNoArgs(SVar("has-sort"))
-      , Seq(CallT(SVar("log-mismatching-sort-error"), [], [<trm-explode> cons])
+      , Seq(CallT(SVar("log-mismatching-sort-error"), [], [<nosmart-trm-explode> cons])
         , Fail()))
-    , NoAnnoList(Tuple([NoAnnoList(Str(arg)), <trm-explode> arg-sort]))))
+    , NoAnnoList(Tuple([NoAnnoList(Str(arg)), <nosmart-trm-explode> arg-sort]))))
   
   make-arg-list(|n) :
     [] -> []
   make-arg-list(|n) :
     [_|rest] -> [arg| <make-arg-list(|<inc> n)> rest]
     where <conc-strings> ("arg", <int-to-string> n) => arg
+
+
+rules
+  nosmart-trm-explode =
+      nosmart-TrmAnno
+      <+ ConcAssocR; nosmart-trm-explode
+      <+ ConcCons; nosmart-trm-explode
+      <+ ConcNil; nosmart-trm-explode
+      <+ !NoAnnoList(<
+            TrmInt 
+            <+ TrmStr 
+      <+ nosmart-TrmConc 
+      <+ TrmNil 
+      <+ nosmart-TrmCons 
+      <+ nosmart-TrmOp
+          >)
   
+    nosmart-pretrm-explode = 
+      TrmInt 
+      <+ TrmStr 
+      <+ nosmart-TrmAnno; fatal-err(|"anno in anno")
+      <+ ConcAssocR; nosmart-pretrm-explode
+      <+ ConcCons; nosmart-pretrm-explode
+      <+ ConcNil; nosmart-pretrm-explode
+      <+ nosmart-TrmConc
+      <+ TrmNil 
+      <+ nosmart-TrmCons 
+      <+ nosmart-TrmOp
+
+    nosmart-TrmAnno : 
+      WithAnno(t1, t2) -> Anno(t1', t2')
+      where <nosmart-trm-explode; try(?NoAnnoList(<id>))> t1 => t1'
+          ; (<is-list>t2 <+ ![t2])
+          ; foldr(!NoAnnoList(Op("Nil",[]))
+           ,!NoAnnoList(Op("Cons", [<Fst>, <Snd>]))
+           , MetaExplode)
+          ; try(?NoAnnoList(<id>)) => t2'
+
+    nosmart-TrmConc :
+      Conc(t1, t2) -> Op("Conc", [<nosmart-trm-explode>t1, <nosmart-trm-explode>t2])
+
+    nosmart-TrmCons :
+      [x | xs] -> 
+      Op("Cons",[<nosmart-trm-explode>x, <nosmart-trm-explode> xs])
+
+    nosmart-TrmOp : 
+      op#(ts) -> 
+      BA(Prim("\"SUGARJ_unsafe_build\"", [NoAnnoList(Str(op))]), <nosmart-trm-explode> ts)
