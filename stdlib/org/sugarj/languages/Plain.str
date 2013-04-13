@@ -14,42 +14,60 @@ signature
 
 rules
 
+  is-lexical-sort(|) =
+    equal(
+    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PlainContent"]
+    )
+
+
+rules
+
   smart-PlainDec(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"PlainDec") ; fail)> ("arg1", SortNoArgs("PlainDecHead")))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"PlainDec") ; fail)> ("arg2", SortNoArgs("PlainBody")))
+    where(<(has-sort <+ log-mismatching-sort-error(|"PlainDec") ; fail)> ( "arg1"
+                                                                         , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PlainDecHead"]
+                                                                         ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"PlainDec") ; fail)> ( "arg2"
+                                                                           , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PlainBody"]
+                                                                           ))
     ; <prim("SUGARJ_unsafe_build", "PlainDec")> [arg1, arg2]
-    ; put-syntax-sort(|SortNoArgs("ToplevelDeclaration"))
+    ; put-syntax-sort(
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ToplevelDeclaration"]
+      )
     ; id
 
   smart-PlainDecHead(|arg1, arg2, arg3) =
     where(<(has-sort <+ log-mismatching-sort-error(|"PlainDecHead") ; fail)> ( "arg1"
-                                                                             , Sort(
-                                                                                 "List"
-                                                                               , [SortNoArgs("AnnoOrSugarMod")]
-                                                                               )
+                                                                             , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AnnoOrSugarMod"]]
+                                                                                                                             ]]
                                                                              ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"PlainDecHead") ; fail)> ("arg2", SortNoArgs("JavaId")))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"PlainDecHead") ; fail)> ( "arg2"
+                                                                               , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaId"]
+                                                                               ))
     ; where(<(has-sort <+ log-mismatching-sort-error(|"PlainDecHead") ; fail)> ( "arg3"
-                                                                               , Sort(
-                                                                                   "Option"
-                                                                                 , [SortNoArgs("PlainExtension")]
-                                                                                 )
+                                                                               , <prim("SUGARJ_unsafe_build", "Sort")> ["Option"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PlainExtension"]]
+                                                                                                                                 ]]
                                                                                ))
     ; <prim("SUGARJ_unsafe_build", "PlainDecHead")> [arg1, arg2, arg3]
-    ; put-syntax-sort(|SortNoArgs("PlainDecHead"))
+    ; put-syntax-sort(
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PlainDecHead"]
+      )
     ; id
 
   is-subtype-of(|) =
     is-subsort-of-inject(
-    | SortNoArgs("JavaID")
-    , SortNoArgs("PlainExtension")
+    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaID"]
+    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PlainExtension"]
     )
 
 
 rules
 
   smart-PlainBody(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"PlainBody") ; fail)> ("arg1", SortNoArgs("PlainContent")))
+    where(<(has-sort <+ log-mismatching-sort-error(|"PlainBody") ; fail)> ( "arg1"
+                                                                          , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PlainContent"]
+                                                                          ))
     ; <prim("SUGARJ_unsafe_build", "PlainBody")> [arg1]
-    ; put-syntax-sort(|SortNoArgs("PlainBody"))
+    ; put-syntax-sort(
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PlainBody"]
+      )
     ; id
