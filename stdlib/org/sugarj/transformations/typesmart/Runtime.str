@@ -40,9 +40,9 @@ rules
      <+ <is-subsort-of> (res-sort, sup-sort)) 
 
 rules
-  log-mismatching-sort-error =
+  log-mismatching-sort-error(|cons) =
     (not(get-syntax-sort), id);
-    debug(!"Constructor argument lacks sort annotation: ")
+    debug(<conc-strings> ("Constructor ", cons, " argument lacks sort annotation: "))
   
   log-mismatching-sort-error(|cons) =
     (get-syntax-sort, id);

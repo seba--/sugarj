@@ -11,7 +11,7 @@ rules
   analyze-debug = analyze-main; nice-analysis-data-term
   start-analysis = fail
   
-  init-for-analysis = bottomup(init-analysis-data-annotation)
+  init-for-analysis = bottomup(where(get-analysis-data-annotation) <+ init-analysis-data-annotation)
   
   get-analysis-data-annotation = get-annotations; <lookup> ("analysis-data",<id>)
   init-analysis-data-annotation = put-analysis-data-annotation(|<new-hashtable>)
