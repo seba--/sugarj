@@ -42,7 +42,7 @@ rules
 rules
   log-mismatching-sort-error(|cons) =
     (not(get-syntax-sort), id);
-    debug(<conc-strings> ("Constructor ", cons, " argument lacks sort annotation: "))
+    debug(<conc-strings> ("Argument of constructor ", cons, " lacks sort annotation, expected: "))
   
   log-mismatching-sort-error(|cons) =
     (get-syntax-sort, id);
