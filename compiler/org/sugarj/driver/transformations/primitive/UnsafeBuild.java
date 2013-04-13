@@ -32,6 +32,10 @@ class UnsafeBuild extends AbstractPrimitive {
   @Override
   public boolean call(IContext context, Strategy[] svars, IStrategoTerm[] tvars) throws InterpreterException {
     String ctr = ATermCommands.getString(tvars[0]);
+    
+    if (!(context.current() instanceof StrategoList))
+      return false;
+    
     StrategoList args = (StrategoList) context.current();
     
     IStrategoTerm[] argArray = ATermCommands.getList(args).toArray(new IStrategoTerm[args.size()]);
