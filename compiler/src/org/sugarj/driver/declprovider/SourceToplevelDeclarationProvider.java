@@ -41,14 +41,14 @@ public class SourceToplevelDeclarationProvider implements ToplevelDeclarationPro
   }
 
   @Override
-  public IStrategoTerm getNextToplevelDecl(boolean recovery) throws IOException, ParseException, InvalidParseTableException, SGLRException {
-    IncrementalParseResult parseResult = parseNextToplevelDeclaration(remainingInput, recovery);
+  public IStrategoTerm getNextToplevelDecl(boolean recovery, boolean lookahead) throws IOException, ParseException, InvalidParseTableException, SGLRException {
+    IncrementalParseResult parseResult = parseNextToplevelDeclaration(remainingInput, recovery, lookahead);
     lastRemainingInput = remainingInput;
     remainingInput = parseResult.getRest();
     return parseResult.getToplevelDecl();
   }
 
-  private IncrementalParseResult parseNextToplevelDeclaration(String input, boolean recovery)
+  private IncrementalParseResult parseNextToplevelDeclaration(String input, boolean recovery, boolean lookahead)
       throws IOException, ParseException, InvalidParseTableException, TokenExpectedException, SGLRException {
     int start = treeBuilder.getTokenizer() == null ? 0 : treeBuilder.getTokenizer().getStartOffset();
     log.beginTask("parsing", "PARSE next toplevel declaration.", Log.CORE);
@@ -115,7 +115,8 @@ public class SourceToplevelDeclarationProvider implements ToplevelDeclarationPro
       treeBuilder.getTokenizer().makeToken(treeBuilder.getTokenizer().getStartOffset() - 1, IToken.TK_EOF, true);
       IStrategoTerm term = ATermCommands.factory.makeString(input);
       ImploderAttachment.putImploderAttachment(term, false, "String", left, right);
-      driver.setErrorMessage(term, msg);
+      if (!lookahead)
+        driver.setErrorMessage(term, msg);
       return new IncrementalParseResult(term, "");
     } finally {
       log.endTask();

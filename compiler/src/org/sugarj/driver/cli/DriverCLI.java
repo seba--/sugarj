@@ -85,6 +85,8 @@ public class DriverCLI {
     
     boolean success = res.getCollectedErrors().isEmpty();
     
+    for (String s : res.getCollectedErrors())
+      log.log(s, Log.ALWAYS);
     for (BadTokenException e : res.getParseErrors())
       log.log("syntax error: line " + e.getLineNumber() + " column " + e.getColumnNumber() + ": " + e.getMessage(), Log.ALWAYS);
     
@@ -169,6 +171,8 @@ public class DriverCLI {
   private static List<Error> gatherNonFatalErrors(IStrategoTerm top) {
     List<Error> errors = new ArrayList<Error>();
     ITokenizer tokenizer = getTokenizer(top);
+    if (tokenizer == null)
+      return errors;
     for (int i = 0, max = tokenizer.getTokenCount(); i < max; i++) {
       IToken token = tokenizer.getTokenAt(i);
       String error = token.getError();

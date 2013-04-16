@@ -35,7 +35,7 @@ public class TermToplevelDeclarationProvider implements ToplevelDeclarationProvi
   }
   
   @Override
-  public IStrategoTerm getNextToplevelDecl(boolean recovery) {
+  public IStrategoTerm getNextToplevelDecl(boolean recovery, boolean lookahead) {
     return terms.get(index++);
   }
   

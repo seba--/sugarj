@@ -353,7 +353,7 @@ public class Driver{
         stepped();
         
         // PARSE the next top-level declaration
-        lastSugaredToplevelDecl = declProvider.getNextToplevelDecl(true);
+        lastSugaredToplevelDecl = declProvider.getNextToplevelDecl(true, false);
         
         stepped();
         
@@ -728,7 +728,7 @@ public class Driver{
       
       try {
         log.beginSilent();
-        term = declProvider.getNextToplevelDecl(false);
+        term = declProvider.getNextToplevelDecl(false, true);
       }
       catch (Throwable t) {
         term = null;

@@ -11,7 +11,9 @@ compiler="$sugarj/compiler/bin"
 stdlib="$sugarj/stdlib/bin"
 layout="$sugarj/layout-parsing/jsglr-layout/bin"
 cliroot="$sugarj/compiler"
-clijars="$cliroot/commons-cli-1.2.jar:$cliroot/strategoxt.jar:$cliroot/make_permissive.jar"
+strategoxt=/Users/seba/Library/eclipse-sugarj/plugins/org.strategoxt.strj_0.17.92.201212201448/java/strategoxt.jar
+make_permissive=/Users/seba/Library/eclipse-sugarj/plugins/org.strategoxt.imp.generator_0.1.2.201212201448/lib/make_permissive.jar
+clijars="$cliroot/commons-cli-1.2.jar:$strategoxt:$make_permissive"
 langroot="$sugarj/language-libraries"
 langlibs="$langroot/base/bin:$langroot/haskell/bin:$langroot/java/bin:$langroot/prolog/bin"
 
