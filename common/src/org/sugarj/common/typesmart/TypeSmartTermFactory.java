@@ -2,6 +2,7 @@ package org.sugarj.common.typesmart;
 
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.InterpreterException;
+import org.spoofax.interpreter.library.ssl.StrategoHashMap;
 import org.spoofax.interpreter.stratego.CallT;
 import org.spoofax.interpreter.stratego.SDefT;
 import org.spoofax.interpreter.stratego.Strategy;
@@ -103,7 +104,10 @@ public class TypeSmartTermFactory extends AbstractTermFactory {
         if (Term.isTermTuple(actualAnnos.head()) && 
             actualAnnos.head().getSubtermCount() == 2 &&
             Term.isTermString(actualAnnos.head().getSubterm(0)) &&
-            Term.asJavaString(actualAnnos.head().getSubterm(0)).equals("analysis-data"))
+            Term.asJavaString(actualAnnos.head().getSubterm(0)).equals("analysis-data") &&
+            actualAnnos.head().getSubterm(1).getSubtermCount() == 1 &&
+            actualAnnos.head().getSubterm(1).getSubterm(0) instanceof StrategoHashMap &&
+            !((StrategoHashMap) actualAnnos.head().getSubterm(1).getSubterm(0)).isEmpty())
           return t;
         actualAnnos = actualAnnos.tail();
       }
