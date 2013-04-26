@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.omg.CosNaming.IstringHelper;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoInt;
@@ -25,6 +26,7 @@ import org.spoofax.jsglr_layout.client.imploder.Tokenizer;
 import org.spoofax.jsglr_layout.io.ParseTableManager;
 import org.spoofax.terms.StrategoListIterator;
 import org.spoofax.terms.TermFactory;
+import org.spoofax.terms.TermTransformer;
 import org.spoofax.terms.attachments.ParentAttachment;
 import org.spoofax.terms.attachments.ParentTermFactory;
 import org.spoofax.terms.io.InlinePrinter;
@@ -501,5 +503,16 @@ public class ATermCommands {
     }
     
     return result;
+  }
+  
+  private static TermTransformer idTransformer = new TermTransformer(factory, false) {
+      @Override
+      public IStrategoTerm preTransform(IStrategoTerm term) {
+        return factory.annotateTerm(term, factory.makeList());
+      }
+    };
+  
+  public static IStrategoTerm stripAnnos(IStrategoTerm term) {
+    return idTransformer.transform(term);
   }
 }

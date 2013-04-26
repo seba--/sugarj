@@ -18,6 +18,7 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.AbstractTermFactory;
 import org.spoofax.terms.Term;
 import org.strategoxt.lang.StrategoException;
+import org.sugarj.common.ATermCommands;
 
 /**
  * When constructing an application term, this term factory
@@ -66,8 +67,10 @@ public class TypeSmartTermFactory extends AbstractTermFactory {
       try {
         boolean smartOk = smartCall.evaluateWithArgs(context, new Strategy[0], terms);
       
-        if (!smartOk)
-          throw new StrategoException("Smart constructor failed for: " + baseFactory.makeAppl(ctr, terms, annotations));
+        if (!smartOk) {
+          IStrategoTerm failedTerm = baseFactory.makeAppl(ctr, terms, annotations);
+          throw new StrategoException("Smart constructor failed for: " + ATermCommands.stripAnnos(failedTerm));
+        }
 
         t = context.current();
       } finally {
