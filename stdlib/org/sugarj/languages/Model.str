@@ -19,7 +19,7 @@ signature
 rules
 
   smart-ToModelTerm(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"ToModelTerm") ; fail)> ( "arg1"
+    where(<(has-sort <+ log-mismatching-sort-error(|"ToModelTerm") ; fail)> ( arg1
                                                                             , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ATerm"]
                                                                             ))
     ; <prim("SUGARJ_unsafe_build", "ToModelTerm")> [arg1]
@@ -31,7 +31,7 @@ rules
 
 rules
 
-  is-subtype-of(|) =
+  is-subsort-of(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModelTransformation"]]
                                                     ]]
@@ -39,10 +39,10 @@ rules
     )
 
   smart-TransformationDef(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"TransformationDef") ; fail)> ( "arg1"
+    where(<(has-sort <+ log-mismatching-sort-error(|"TransformationDef") ; fail)> ( arg1
                                                                                   , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["DirectTransformation"]
                                                                                   ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"TransformationDef") ; fail)> ( "arg2"
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"TransformationDef") ; fail)> ( arg2
                                                                                     , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModelTransformation"]]
                                                                                                                                     ]]
                                                                                     ))
@@ -52,7 +52,7 @@ rules
       )
     ; id
 
-  is-subtype-of(|) =
+  is-subsort-of(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoDef"]]
                                                     ]]
@@ -60,7 +60,7 @@ rules
     )
 
   smart-Strategies(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"Strategies") ; fail)> ( "arg1"
+    where(<(has-sort <+ log-mismatching-sort-error(|"Strategies") ; fail)> ( arg1
                                                                            , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoDef"]]
                                                                                                                            ]]
                                                                            ))
@@ -71,7 +71,7 @@ rules
     ; id
 
   smart-Signature(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"Signature") ; fail)> ( "arg1"
+    where(<(has-sort <+ log-mismatching-sort-error(|"Signature") ; fail)> ( arg1
                                                                           , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoSdecl"]]
                                                                                                                           ]]
                                                                           ))
@@ -82,7 +82,7 @@ rules
     ; id
 
   smart-Rules(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"Rules") ; fail)> ( "arg1"
+    where(<(has-sort <+ log-mismatching-sort-error(|"Rules") ; fail)> ( arg1
                                                                       , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoDef"]]
                                                                                                                       ]]
                                                                       ))
@@ -93,7 +93,7 @@ rules
     ; id
 
   smart-Overlays(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"Overlays") ; fail)> ( "arg1"
+    where(<(has-sort <+ log-mismatching-sort-error(|"Overlays") ; fail)> ( arg1
                                                                          , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoOverlay"]]
                                                                                                                          ]]
                                                                          ))
@@ -106,29 +106,29 @@ rules
 
 rules
 
-  is-subtype-of(|) =
+  is-subsort-of(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModuleName"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TransformationExpr"]
     )
 
-  is-subtype-of(|) =
+  is-subsort-of(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TransformationExpr"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TransformationExpr"]
     )
 
-  is-subtype-of(|) =
+  is-subsort-of(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TransformationAppExpr"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TransformationExpr"]
     )
 
   smart-TransApp(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"TransApp") ; fail)> ( "arg1"
+    where(<(has-sort <+ log-mismatching-sort-error(|"TransApp") ; fail)> ( arg1
                                                                          , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TransformationExpr"]
                                                                          ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"TransApp") ; fail)> ( "arg2"
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"TransApp") ; fail)> ( arg2
                                                                            , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TransformationExpr"]
                                                                            ))
     ; <prim("SUGARJ_unsafe_build", "TransApp")> [arg1, arg2]
