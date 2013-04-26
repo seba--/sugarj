@@ -72,7 +72,7 @@ rules
         where(get-analysis-data-annotation; hashtable-getlist => list);
 	      if <?[]> list
 	        then rm-analysis-data-annotation
-	        else put-analysis-data-annotation(|<bottomup(strip-annos)> list)
+	        else put-analysis-data-annotation(|<strip-annos> list)
 	      end)
     })
   

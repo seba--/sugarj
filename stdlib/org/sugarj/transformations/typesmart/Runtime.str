@@ -8,14 +8,17 @@ rules
     (where(get-analysis-data-annotation) <+ init-analysis-data-annotation);
     put-anno(|"syntax-sort", sort)
   get-syntax-sort =
-    get-anno(|"syntax-sort")
+    get-anno(|"syntax-sort") 
+    // during debug-analysis, the annotations are represented as an associative list
+    <+ get-analysis-data-annotation; !("syntax-sort", <id>); lookup'
   has-syntax-sort =
     where(get-syntax-sort)
 
 rules
-  has-sort = ?(xs, listsort@Sort("List", [xsort]))
-           ; <map(has-sort)> (xs, xsort)
-  has-sort = ?(""#(xs), listsort@Sort("Tuple", xsorts))
+  has-sort = Swap; debug-analysis(!"has sort? "); fail
+  has-sort = ?(xs, Sort("List", [xsort]))
+           ; <map(!(<id>, xsort); has-sort)> xs
+  has-sort = ?(""#(xs), Sort("Tuple", xsorts))
            ; <equal> (<length> xs, <length> xsorts)
            ; <zip> (xs, xsorts)
            ; map(has-sort)
@@ -27,22 +30,25 @@ rules
   has-sort = ?(x, xsort)
            ; <is-string> x
            ; <is-lexical-sort> xsort
-  has-sort = (get-syntax-sort, id); is-subsort-of
+  has-sort = (debug(!"has get syntax sort: ");get-syntax-sort, id); is-subsort-of
   
   is-lexical-sort = fail
   
+  is-subsort-of = debug-analysis(!"is-subsort-of: "); fail
   is-subsort-of = is-subsort-of-refl
   is-subsort-of-refl = structurally-equal
   is-subsort-of-inject(|arg-sort,res-sort) =
       ?(sub-sort,sup-sort)
-    ; <structurally-equal> (sub-sort, arg-sort) 
-    ; ( <structurally-equal> (sup-sort, res-sort)
-     <+ <is-subsort-of> (res-sort, sup-sort)) 
+    ; (structurally-equal
+      <+  <structurally-equal> (sub-sort, arg-sort) 
+        ; ( <structurally-equal> (sup-sort, res-sort)
+            <+ <is-subsort-of> (res-sort, sup-sort)) )
 
 rules
   log-mismatching-sort-error(|cons) =
     (not(get-syntax-sort), id);
-    debug(<conc-strings> ("Argument of constructor ", cons, " lacks sort annotation, expected: "))
+    Swap;
+    debug-analysis(<conc-strings> ("Argument of constructor ", cons, " lacks sort annotation, expected: "))
   
   log-mismatching-sort-error(|cons) =
     (get-syntax-sort, id);
@@ -51,5 +57,5 @@ rules
             ("Mismatching argument sort for constructor '", cons, "'.",
              " Was ", <write-to-string> was, ",",
              " expected ", <write-to-string> exp) => s);
-    <debug(!s)> "."
+    <debug-analysis(!s)> "."
   

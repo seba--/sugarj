@@ -100,7 +100,7 @@ rules
     ; body := CallT(SVar("is-subsort-of-inject"), []
                   , [ <nosmart-trm-explode> arg-sort, <nosmart-trm-explode> res-sort])
 
-    ; !SDefT("is-subtype-of", [], [], body) => strat
+    ; !SDefT("is-subsort-of", [], [], body) => strat
 
   gen-lexical-sort-prod :
     prod(lhs, rhs, _) ->
@@ -116,7 +116,7 @@ rules
         CallNoArgs(SVar("has-sort"))
       , Seq(CallT(SVar("log-mismatching-sort-error"), [], [<nosmart-trm-explode> cons])
         , Fail()))
-    , NoAnnoList(Tuple([NoAnnoList(Str(arg)), <nosmart-trm-explode> arg-sort]))))
+    , NoAnnoList(Tuple([Var(arg), <nosmart-trm-explode> arg-sort]))))
   
   make-arg-list(|n) :
     [] -> []
