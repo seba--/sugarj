@@ -1181,7 +1181,7 @@ public class Driver{
       RelativePath modelOutFile = environment.createBinPath(fullModelName + ".model");
       
       IStrategoTerm modelTerm = makeDesugaredSyntaxTree(body);
-      String string = ATermCommands.atermToString(modelTerm);
+      String string = ATermCommands.atermToString(ATermCommands.stripAnnos(modelTerm));
       driverResult.generateFile(modelOutFile, string);
       
       if (modelOutFile.equals(sourceFile))
