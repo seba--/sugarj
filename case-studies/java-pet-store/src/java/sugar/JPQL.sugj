@@ -184,7 +184,7 @@ public sugar JPQL {
     qls2str = bottomup(is-string <+ arglist); flatten-list; separate-by(|" "); concat-strings
 
   strategies
-    named-params = collect(\NamedInputParameter(name) -> name\)
+    named-params = collect-all(\NamedInputParameter(name) -> name\)
 
   strategies
     strip-colon = trim-chars(':')
@@ -194,9 +194,11 @@ public sugar JPQL {
 
   rules
     compileQuery : QueryCreation(ExprName(em-id), qls) ->
-      <foldr(!Invoke(Method(MethodName(AmbName(em-id), Id("createQuery"))),
-            [Lit(String([Chars(<qls2str> qls)]))]),
-        set-parameter)> <named-params> qls
+                   result
+     where <qls2str> qls => str
+         ; <named-params> qls => params
+    ; <foldr(!Invoke(Method(MethodName(AmbName(em-id), Id("createQuery"))), [Lit(String([Chars(str)]))]),
+             set-parameter)> params => result
 
   rules
     first : [x|_] -> x
@@ -237,4 +239,5 @@ public sugar JPQL {
     sq(|names) = ?Subquery(ssc, sfc, wc, gc, hc);
                  !sfc; idvdecs; ?addnames; <conc>(names, addnames); ?newnames;
                  ![ssc, wc, gc, hc]; map(collect-all(idv(|newnames) <+ pe(|newnames))); flatten-list
+
 }
