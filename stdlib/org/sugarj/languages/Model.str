@@ -31,7 +31,7 @@ rules
 
 rules
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModelTransformation"]]
                                                     ]]
@@ -52,7 +52,7 @@ rules
       )
     ; id
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoDef"]]
                                                     ]]
@@ -106,19 +106,19 @@ rules
 
 rules
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModuleName"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TransformationExpr"]
     )
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TransformationExpr"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TransformationExpr"]
     )
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TransformationAppExpr"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TransformationExpr"]

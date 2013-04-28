@@ -250,7 +250,7 @@ rules
       )
     ; id
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Alias"]]
                                                     ]]
@@ -306,7 +306,7 @@ rules
       )
     ; id
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Lookaheads"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Lookaheads"]
@@ -336,7 +336,7 @@ rules
       )
     ; id
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Restriction"]]
                                                     ]]
@@ -603,7 +603,7 @@ rules
 
 rules
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Character"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharRange"]
@@ -622,7 +622,7 @@ rules
       )
     ; id
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharRange"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharRanges"]
@@ -641,7 +641,7 @@ rules
       )
     ; id
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharRanges"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharRanges"]
@@ -723,7 +723,7 @@ rules
       )
     ; id
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharClass"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharClass"]
@@ -732,7 +732,7 @@ rules
 
 rules
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharClass"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharClass"]
@@ -893,7 +893,7 @@ rules
       )
     ; id
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Priority"]]
                                                     ]]
@@ -1059,19 +1059,19 @@ rules
 
 rules
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]
     )
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]
     )
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]
@@ -1120,7 +1120,7 @@ rules
 
 rules
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Module"]]
                                                     ]]
@@ -1164,7 +1164,7 @@ rules
       )
     ; id
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Section"]]
                                                     ]]
@@ -1224,7 +1224,7 @@ rules
       )
     ; id
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Import"]]
                                                     ]]
@@ -1254,7 +1254,7 @@ rules
       )
     ; id
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Import"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Import"]
@@ -1363,7 +1363,7 @@ rules
       )
     ; id
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Grammar"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Grammar"]
@@ -1372,13 +1372,13 @@ rules
 
 rules
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]
     )
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]]
                                                     ]]
@@ -1629,7 +1629,7 @@ rules
       )
     ; id
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Production"]]
                                                     ]]
@@ -1719,398 +1719,344 @@ rules
 
 rules
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Associativity"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Label"]
     )
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Associativity"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ATermAttribute"]
     )
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModuleName"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ATermAttribute"]
     )
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SDF"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2SDF"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2SDF"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SDF"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Aliases"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Aliases"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Aliases"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Aliases"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Alias"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Alias"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Alias"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Alias"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Restrictions"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Restrictions"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Restrictions"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Restrictions"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Restriction"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Restriction"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Restriction"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Restriction"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Label"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Label"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Label"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Label"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FunctionName"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2FunctionName"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2FunctionName"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FunctionName"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SingleQuotedStrCon"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2SingleQuotedStrCon"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2SingleQuotedStrCon"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SingleQuotedStrCon"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SingleQuotedStrChar"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2SingleQuotedStrChar"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2SingleQuotedStrChar"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SingleQuotedStrChar"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sort"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Sort"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Sort"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sort"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OptCharRanges"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2OptCharRanges"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2OptCharRanges"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OptCharRanges"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharRange"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2CharRange"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2CharRange"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharRange"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Character"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Character"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Character"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Character"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ShortChar"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ShortChar"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ShortChar"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ShortChar"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["NumChar"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2NumChar"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2NumChar"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["NumChar"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Priorities"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Priorities"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Priorities"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Priorities"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Priority"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Priority"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Priority"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Priority"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArgumentIndicator"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ArgumentIndicator"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ArgumentIndicator"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArgumentIndicator"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Associativity"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Associativity"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Associativity"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Associativity"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Import"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Import"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Import"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Import"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Imports"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Imports"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Imports"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Imports"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ImpSection"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ImpSection"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ImpSection"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ImpSection"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModuleName"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ModuleName"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ModuleName"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModuleName"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sections"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Sections"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Sections"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sections"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Section"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Section"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Section"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Section"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Module"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Module"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Module"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Module"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Definition"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Definition"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Definition"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Definition"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModuleId"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ModuleId"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ModuleId"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModuleId"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModuleWord"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ModuleWord"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ModuleWord"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModuleWord"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Renaming"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Renaming"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Renaming"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Renaming"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Renamings"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Renamings"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Renamings"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Renamings"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Productions"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Productions"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Productions"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Productions"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Production"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Production"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Production"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Production"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Attributes"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Attributes"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Attributes"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Attributes"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Attribute"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Attribute"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Attribute"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Attribute"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ATermAttribute"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ATermAttribute"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ATermAttribute"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ATermAttribute"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbols"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Symbols"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Symbols"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbols"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Annotation"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Annotation"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Annotation"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Annotation"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ATerm"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ATerm"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ATerm"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ATerm"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AFun"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2AFun"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2AFun"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AFun"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["IdCon"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2IdCon"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2IdCon"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["IdCon"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrCon"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2StrCon"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2StrCon"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrCon"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrChar"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2StrChar"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2StrChar"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrChar"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RealCon"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2RealCon"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2RealCon"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RealCon"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OptExp"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2OptExp"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2OptExp"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OptExp"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["IntCon"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2IntCon"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2IntCon"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["IntCon"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["NatCon"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2NatCon"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2NatCon"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["NatCon"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Lookahead"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Lookahead"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Lookahead"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Lookahead"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Grammar"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Grammar"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Grammar"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Grammar"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Symbol"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Symbol"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Group"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Group"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Group"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Group"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharRanges"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2CharRanges"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2CharRanges"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharRanges"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharClass"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2CharClass"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2CharClass"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharClass"]
 
 
-is-subsort-of(|) =
-  is-subsort-of-inject(
-  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Lookaheads"]
-  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Lookaheads"]
-  )
+unrename-sort(|) =
+  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Lookaheads"]
+   ; ?renamed)
+  ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Lookaheads"]

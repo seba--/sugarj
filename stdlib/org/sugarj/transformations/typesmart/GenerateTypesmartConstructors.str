@@ -113,7 +113,7 @@ rules
     ; body := CallT(SVar("is-subsort-of-inject"), []
                   , [ <nosmart-trm-explode> arg-sort, <nosmart-trm-explode> res-sort])
 
-    ; !SDefT("is-subsort-of", [], [], body) => strat
+    ; !SDefT("is-subsort-of-trans", [], [], body) => strat
 
   gen-renaming-inject :
     (from,to) ->
@@ -121,9 +121,13 @@ rules
   where
       <get-symbol-sort> from => arg-sort
     ; <get-symbol-sort> to => res-sort
-    ; body := CallT(SVar("is-subsort-of-inject"), []
-                  , [ <nosmart-trm-explode> arg-sort, <nosmart-trm-explode> res-sort])
-    ; !SDefT("is-subsort-of", [], [], body) => strat
+    ; body := 
+        Seq(
+        Seq(
+          Assign(Var("renamed"), <nosmart-trm-explode> res-sort),
+          Match(Var("renamed"))),
+          <nosmart-trm-explode> arg-sort)
+    ; !SDefT("unrename-sort", [], [], body) => strat
 
   gen-lexical-sort-prod :
     prod(lhs, rhs, _) ->

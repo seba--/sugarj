@@ -41,25 +41,25 @@ rules
 
 rules
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaPackageDec"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ToplevelDeclaration"]
     )
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaImportDec"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ToplevelDeclaration"]
     )
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTypeDec"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ToplevelDeclaration"]
     )
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SugarDec"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ToplevelDeclaration"]
@@ -119,19 +119,19 @@ rules
       )
     ; id
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaAnno"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AnnoOrSugarMod"]
     )
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SugarMod"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AnnoOrSugarMod"]
     )
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaPublic"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SugarMod"]
@@ -414,7 +414,7 @@ rules
       )
     ; id
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTypeName"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModuleName"]

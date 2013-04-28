@@ -53,7 +53,7 @@ rules
       )
     ; id
 
-  is-subsort-of(|) =
+  is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaID"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PlainExtension"]

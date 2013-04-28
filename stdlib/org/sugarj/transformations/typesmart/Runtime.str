@@ -31,8 +31,13 @@ rules
   is-lexical-sort = fail
   
   is-subsort-of = debug-analysis(!"is-subsort-of: "); fail
-  is-subsort-of = is-subsort-of-refl
+  is-subsort-of = is-subsort-of-refl <+ is-subsort-unrename <+ is-subsort-of-trans
   is-subsort-of-refl = structurally-equal
+  is-subsort-unrename = (unrename-sort, try(unrename-sort)); is-subsort-of
+  is-subsort-unrename = (id, unrename-sort); is-subsort-of
+  is-subsort-of-trans = fail
+  unrename-sort = fail
+  
   is-subsort-of-inject(|arg-sort,res-sort) =
       ?(sub-sort,sup-sort)
     ; (structurally-equal
@@ -54,4 +59,3 @@ rules
              " Was ", <write-to-string> was, ",",
              " expected ", <write-to-string> exp) => s);
     <debug-analysis(!s)> "."
-  
