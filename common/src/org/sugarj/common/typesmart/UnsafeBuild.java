@@ -1,4 +1,4 @@
-package org.sugarj.driver.transformations.primitive;
+package org.sugarj.common.typesmart;
 
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.InterpreterException;
@@ -8,7 +8,6 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.StrategoList;
 import org.sugarj.common.ATermCommands;
-import org.sugarj.common.typesmart.TypesmartTermFactory;
 
 /**
  * Builds an application term using the given term factory.
@@ -17,7 +16,7 @@ import org.sugarj.common.typesmart.TypesmartTermFactory;
  * 
  * @author seba
  */
-class UnsafeBuild extends AbstractPrimitive {
+public class UnsafeBuild extends AbstractPrimitive {
 
   private ITermFactory factory;
   

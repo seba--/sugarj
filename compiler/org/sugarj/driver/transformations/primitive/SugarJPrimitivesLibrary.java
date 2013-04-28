@@ -3,6 +3,9 @@ package org.sugarj.driver.transformations.primitive;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.spoofax.interpreter.library.AbstractStrategoOperatorRegistry;
 import org.sugarj.common.Environment;
+import org.sugarj.common.typesmart.GetTypesmartSort;
+import org.sugarj.common.typesmart.PutTypesmartSort;
+import org.sugarj.common.typesmart.UnsafeBuild;
 import org.sugarj.driver.Driver;
 import org.sugarj.driver.Result;
 
@@ -25,6 +28,8 @@ public class SugarJPrimitivesLibrary extends AbstractStrategoOperatorRegistry {
     add(new CompileTransformed(driver, environment));
     add(new WriteTransformed(driver, environment));
     add(new UnsafeBuild(driver.getLanguageLib().getInterpreter().getContext().getFactory()));
+    add(new GetTypesmartSort());
+    add(new PutTypesmartSort());
   }
   
   @Override

@@ -5,14 +5,9 @@ imports org/sugarj/transformations/Analyze
 
 rules
   put-syntax-sort(|sort) =
-    (where(get-analysis-data-annotation) <+ init-analysis-data-annotation);
-    put-anno(|"syntax-sort", sort)
+    prim("SUGARJ_put_typesmart_sort", sort)
   get-syntax-sort =
-    get-anno(|"syntax-sort") 
-    // during debug-analysis, the annotations are represented as an associative list
-    <+ get-analysis-data-annotation; !("syntax-sort", <id>); lookup'
-  has-syntax-sort =
-    where(get-syntax-sort)
+    prim("SUGARJ_get_typesmart_sort") 
 
 rules
   has-sort = Swap; debug-analysis(!"has sort? "); fail
