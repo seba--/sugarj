@@ -1724,3 +1724,367 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Import"]
       )
     ; id
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Import"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceImport"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Imports"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceImports"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Module"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceModule"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FileName"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceFileName"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["BuilderOption"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceBuilderOption"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionAnno"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceCompletionAnno"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionPart"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceCompletionPart"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PlaceholderChar"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServicePlaceholderChar"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Placeholder"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServicePlaceholder"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AttributeId"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceAttributeId"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["MaybeColor"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceMaybeColor"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["NoColor"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceNoColor"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Color"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceColor"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Font"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceFont"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TokenKindName"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceTokenKindName"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ColorNode"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceColorNode"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Attribute"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceAttribute"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ColorRule"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceColorRule"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OutlineRule"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceOutlineRule"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FoldingAnno"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceFoldingAnno"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FoldingRule"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceFoldingRule"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["IndentDef"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceIndentDef"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FenceDef"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceFenceDef"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["NoContinuation"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceNoContinuation"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["BlockCommentDef"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceBlockCommentDef"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["LanguageProperty"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceLanguageProperty"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PropertyValues"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServicePropertyValues"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["URL"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceURL"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PropertyValue"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServicePropertyValue"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ReservedName"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceReservedName"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Section"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceSection"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OnSaveAnno"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceOnSaveAnno"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoCall"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceStrategoCall"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RefactoringRule"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceRefactoringRule"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["BuilderRule"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceBuilderRule"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionRule"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceCompletionRule"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ReferenceRule"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceReferenceRule"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SemanticNode"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceSemanticNode"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoId"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceStrategoId"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModuleName"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceModuleName"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Node"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceNode"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ConstructorId"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceConstructorId"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Constructor"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceConstructor"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["String"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceString"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sort"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceSort"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SectionName"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceSectionName"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["BACKSLASH"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceBACKSLASH"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StringChar"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceStringChar"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["STRING"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceSTRING"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Int"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceInt"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["IdStar"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceIdStar"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Id"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceId"]
+  )

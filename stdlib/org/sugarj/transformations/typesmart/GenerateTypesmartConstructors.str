@@ -14,9 +14,7 @@ rules
       ?(inp,out)
       ; if OutputModule then
           <parse-sdf-definition-stream> inp
-        ; collect-all(?exports(<id>) + ?hiddens(<id>))
-        ; mapconcat(flatten-grammar)
-        ; gen-syntax-constructors
+        ; gen-syntax-constructors-from-module
         ; !Module(<OutputModule>,
                   [Imports([ Import("org/sugarj/transformations/typesmart/Runtime")
                            , Import("org/sugarj/languages/Stratego")]) | <id>])
@@ -40,16 +38,31 @@ rules
     , rules(OutputModule := <id>)
     , !"-m <module>      Module name of the output Stratego module"
     )
-
+  
 rules
+  gen-syntax-constructors-from-module =
+          ?mod
+        ; collect-all(?exports(<id>) + ?hiddens(<id>))
+        ; mapconcat(flatten-grammar)
+        ; gen-syntax-constructors => conses
+          
+        ; !mod
+        ; collect-all(?renamings(<id>))
+        ; mapconcat(filter(\ symbol(from,to) -> (from,to) \))
+        ; map(gen-renaming-inject) => renamings
+        
+        ; <conc> (conses, renamings)
+
   flatten-grammar =
       try(
          \ empty-grammar() -> [] \
       <+ \ conc-grammars(g1,g2) -> <conc> (<flatten-grammar> g1, <flatten-grammar> g2) \
       <+ \ g -> [g] \
       )
-  
-rules
+
+
+
+rules  
   gen-syntax-constructors =
   	?grammar;
     filter( ?context-free-syntax(<id>)
@@ -100,6 +113,16 @@ rules
     ; body := CallT(SVar("is-subsort-of-inject"), []
                   , [ <nosmart-trm-explode> arg-sort, <nosmart-trm-explode> res-sort])
 
+    ; !SDefT("is-subsort-of", [], [], body) => strat
+
+  gen-renaming-inject :
+    (from,to) ->
+    strat
+  where
+      <get-symbol-sort> from => arg-sort
+    ; <get-symbol-sort> to => res-sort
+    ; body := CallT(SVar("is-subsort-of-inject"), []
+                  , [ <nosmart-trm-explode> arg-sort, <nosmart-trm-explode> res-sort])
     ; !SDefT("is-subsort-of", [], [], body) => strat
 
   gen-lexical-sort-prod :

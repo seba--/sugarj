@@ -1736,3 +1736,381 @@ rules
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModuleName"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ATermAttribute"]
     )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SDF"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2SDF"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Aliases"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Aliases"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Alias"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Alias"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Restrictions"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Restrictions"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Restriction"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Restriction"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Label"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Label"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FunctionName"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2FunctionName"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SingleQuotedStrCon"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2SingleQuotedStrCon"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SingleQuotedStrChar"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2SingleQuotedStrChar"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sort"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Sort"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OptCharRanges"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2OptCharRanges"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharRange"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2CharRange"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Character"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Character"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ShortChar"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ShortChar"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["NumChar"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2NumChar"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Priorities"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Priorities"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Priority"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Priority"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArgumentIndicator"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ArgumentIndicator"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Associativity"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Associativity"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Import"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Import"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Imports"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Imports"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ImpSection"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ImpSection"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModuleName"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ModuleName"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sections"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Sections"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Section"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Section"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Module"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Module"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Definition"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Definition"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModuleId"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ModuleId"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModuleWord"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ModuleWord"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Renaming"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Renaming"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Renamings"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Renamings"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Productions"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Productions"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Production"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Production"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Attributes"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Attributes"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Attribute"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Attribute"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ATermAttribute"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ATermAttribute"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbols"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Symbols"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Annotation"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Annotation"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ATerm"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ATerm"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AFun"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2AFun"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["IdCon"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2IdCon"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrCon"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2StrCon"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrChar"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2StrChar"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RealCon"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2RealCon"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OptExp"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2OptExp"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["IntCon"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2IntCon"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["NatCon"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2NatCon"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Lookahead"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Lookahead"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Grammar"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Grammar"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Symbol"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Group"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Group"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharRanges"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2CharRanges"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharClass"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2CharClass"]
+  )
+
+
+is-subsort-of(|) =
+  is-subsort-of-inject(
+  | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Lookaheads"]
+  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Lookaheads"]
+  )
