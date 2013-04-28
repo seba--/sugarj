@@ -16,11 +16,6 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.IStrategoTuple;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.AbstractTermFactory;
-import org.spoofax.terms.StrategoAnnotation;
-import org.spoofax.terms.StrategoList;
-import org.spoofax.terms.StrategoString;
-import org.spoofax.terms.StrategoTerm;
-import org.spoofax.terms.StrategoWrapped;
 import org.spoofax.terms.TermFactory;
 import org.strategoxt.lang.StrategoException;
 import org.sugarj.common.ATermCommands;
@@ -106,44 +101,45 @@ public class TypesmartTermFactory extends AbstractTermFactory {
   @SuppressWarnings("deprecation")
   @Override
   public IStrategoTerm annotateTerm(IStrategoTerm term, IStrategoList annotations) {
-    IStrategoList currentAnnos = term.getAnnotations();
-    IStrategoTerm result;
-    if (currentAnnos == annotations || annotations.isEmpty() && currentAnnos.isEmpty()) { // cheap check
-      return term;
-    } else if (term.getStorageType() == IStrategoTerm.MAXIMALLY_SHARED) {
-      if (term == EMPTY_LIST) {
-        if (annotations == EMPTY_LIST || annotations.isEmpty()) {
-          result = EMPTY_LIST;
-        } else {
-          result = new StrategoList(null, null, annotations, defaultStorageType);
-        }
-      } else if (term.getTermType() == IStrategoTerm.STRING) {
-        String value = ((IStrategoString) term).stringValue();
-        if (annotations == EMPTY_LIST || annotations.isEmpty()) {
-          result = makeString(value);
-        } else {
-          result = new StrategoString(value, annotations, defaultStorageType);
-        }
-      } else if (currentAnnos == EMPTY_LIST) {
-        result = new StrategoAnnotation(this, term, annotations);
-      } else if (term instanceof StrategoAnnotation) {
-        term = ((StrategoAnnotation) term).getWrapped();
-        // int storageType = min(defaultStorageType, getStorageType(term));
-        result = new StrategoAnnotation(this, term, annotations);
-      } else {
-        throw new UnsupportedOperationException("Unable to annotate term of type " + term.getClass().getName());
-      }
-    } else if ((annotations == EMPTY_LIST || annotations.isEmpty()) && term.getTermType() == IStrategoTerm.STRING) {
-      result = makeString(((IStrategoString) term).stringValue());
-    } else if (term instanceof StrategoTerm) {
-      result = ((StrategoTerm) term).clone(false);
-      assert !(result instanceof StrategoWrapped) : "not yet supported";
-      ((StrategoTerm) result).internalSetAnnotations(annotations);
-      assert result.getStorageType() != IStrategoTerm.MAXIMALLY_SHARED;
-    } else {
-      throw new UnsupportedOperationException("Unable to annotate term of type " + term.getClass().getName() + " in " + getClass().getName());
-    }
+//    IStrategoList currentAnnos = term.getAnnotations();
+//    if (currentAnnos == annotations || annotations.isEmpty() && currentAnnos.isEmpty()) { // cheap check
+//      return term;
+//    } else if (term.getStorageType() == IStrategoTerm.MAXIMALLY_SHARED) {
+//      if (term == EMPTY_LIST) {
+//        if (annotations == EMPTY_LIST || annotations.isEmpty()) {
+//          result = EMPTY_LIST;
+//        } else {
+//          result = new StrategoList(null, null, annotations, defaultStorageType);
+//        }
+//      } else if (term.getTermType() == IStrategoTerm.STRING) {
+//        String value = ((IStrategoString) term).stringValue();
+//        if (annotations == EMPTY_LIST || annotations.isEmpty()) {
+//          result = makeString(value);
+//        } else {
+//          result = new StrategoString(value, annotations, defaultStorageType);
+//        }
+//      } else if (currentAnnos == EMPTY_LIST) {
+//        result = new StrategoAnnotation(this, term, annotations);
+//      } else if (term instanceof StrategoAnnotation) {
+//        term = ((StrategoAnnotation) term).getWrapped();
+//        // int storageType = min(defaultStorageType, getStorageType(term));
+//        result = new StrategoAnnotation(this, term, annotations);
+//      } else {
+//        throw new UnsupportedOperationException("Unable to annotate term of type " + term.getClass().getName());
+//      }
+//    } else if ((annotations == EMPTY_LIST || annotations.isEmpty()) && term.getTermType() == IStrategoTerm.STRING) {
+//      result = makeString(((IStrategoString) term).stringValue());
+//    } else if (term instanceof StrategoTerm) {
+//      result = ((StrategoTerm) term).clone(false);
+//      
+//      assert !(result instanceof StrategoWrapped) : "not yet supported";
+//      ((StrategoTerm) result).internalSetAnnotations(annotations);
+//      assert result.getStorageType() != IStrategoTerm.MAXIMALLY_SHARED;
+//    } else {
+//      throw new UnsupportedOperationException("Unable to annotate term of type " + term.getClass().getName() + " in " + getClass().getName());
+//    }
 
+    IStrategoTerm result = baseFactory.annotateTerm(term, annotations);
     TypesmartSortAttachment attach = TypesmartSortAttachment.get(term);
     if (attach != null)
       TypesmartSortAttachment.put(result, attach);

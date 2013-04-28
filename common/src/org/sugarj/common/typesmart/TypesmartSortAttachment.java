@@ -1,7 +1,5 @@
 package org.sugarj.common.typesmart;
 
-import java.util.WeakHashMap;
-
 import org.spoofax.interpreter.terms.ISimpleTerm;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
@@ -22,7 +20,7 @@ public class TypesmartSortAttachment extends AbstractTermAttachment {
 
         @Override
         protected TypesmartSortAttachment fromSubterms(IStrategoTerm[] subterms) {
-          return TypesmartSortAttachment.create(subterms[0]);
+          return new TypesmartSortAttachment(subterms[0]);
         }
 
         @Override
@@ -36,21 +34,9 @@ public class TypesmartSortAttachment extends AbstractTermAttachment {
     return TYPE;
   }
   
-  private static WeakHashMap<String, TypesmartSortAttachment> cache = new WeakHashMap<String, TypesmartSortAttachment>();
-  
   private static ITermFactory factory = new TermFactory();
 
-  public static TypesmartSortAttachment create(IStrategoTerm sort) {
-    String key = sort.toString();
-    TypesmartSortAttachment result = cache.get(key);
-    if (result == null) {
-      result = new TypesmartSortAttachment(sort);
-      cache.put(key, result);
-    }
-    return result;
-  }
-  
-  private TypesmartSortAttachment(IStrategoTerm sort) {
+  public TypesmartSortAttachment(IStrategoTerm sort) {
     this.sort = sort;
   }
   
@@ -68,7 +54,7 @@ public class TypesmartSortAttachment extends AbstractTermAttachment {
     String sort = ImploderAttachment.getSort(term);
     if (sort != null) {
       IStrategoTerm sortTerm = factory.makeAppl(factory.makeConstructor("SortNoArgs", 1), factory.makeString(sort));
-      return create(sortTerm);
+      return new TypesmartSortAttachment(sortTerm);
     }
     
     return null;
@@ -80,7 +66,7 @@ public class TypesmartSortAttachment extends AbstractTermAttachment {
   }
 
   public static void put(ISimpleTerm term, IStrategoTerm sort) {
-    term.putAttachment(TypesmartSortAttachment.create(sort));
+    term.putAttachment(new TypesmartSortAttachment(sort));
   }
 
   public static void put(ISimpleTerm term, TypesmartSortAttachment attach) {
