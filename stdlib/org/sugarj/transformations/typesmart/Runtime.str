@@ -10,7 +10,7 @@ rules
     prim("SUGARJ_get_typesmart_sort") 
 
 rules
-  has-sort = Swap; debug-analysis(!"has sort? "); fail
+  // has-sort = Swap; debug-analysis(!"has sort? "); fail
   has-sort = ?(xs, Sort("List", [xsort]))
            ; <map(!(<id>, xsort); has-sort)> xs
   has-sort = ?(""#(xs), Sort("Tuple", xsorts))
@@ -25,12 +25,12 @@ rules
   has-sort = ?(x, xsort)
            ; <is-string> x
            ; <is-lexical-sort> xsort
-  has-sort = (debug(!"has get syntax sort: ");get-syntax-sort, id); is-subsort-of
-  has-sort = Swap; debug-analysis(!"FAIL has sort: "); fail
+  has-sort = (get-syntax-sort, id); is-subsort-of
+  // has-sort = Swap; debug-analysis(!"FAIL has sort: "); fail
   
   is-lexical-sort = fail
   
-  is-subsort-of = debug-analysis(!"is-subsort-of: "); fail
+  // is-subsort-of = debug-analysis(!"is-subsort-of: "); fail
   is-subsort-of = is-subsort-of-refl <+ is-subsort-unrename <+ is-subsort-of-trans
   is-subsort-of-refl = structurally-equal
   is-subsort-unrename = (unrename-sort, try(unrename-sort)); is-subsort-of

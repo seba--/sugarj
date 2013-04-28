@@ -63,7 +63,7 @@ public class TypesmartTermFactory extends AbstractTermFactory {
       if (sdef == null)
         return baseFactory.makeAppl(ctr, terms, annotations);
 
-      System.out.println("Typesmart " + ctr);
+//      System.out.println("Typesmart " + ctr);
 
       // apply smart constructor to argument terms
       CallT smartCall = new CallT(smartCtrName, new Strategy[0], new IStrategoTerm[0]);
