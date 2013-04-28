@@ -46,6 +46,7 @@ import org.sugarj.common.FilteringIOAgent;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
+import org.sugarj.common.typesmart.WithoutTypesmartSyntax;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.transformations.extraction.extract_sdf_0_0;
@@ -429,7 +430,7 @@ public class SDFCommands {
    */
   public static String prettyPrintSDF(IStrategoTerm term, HybridInterpreter interp) throws IOException {
     Context ctx = interp.getCompiledContext();
-    IStrategoTerm boxTerm = pp_sdf_box_0_0.instance.invoke(ctx, term);
+    IStrategoTerm boxTerm = WithoutTypesmartSyntax.invoke(ctx, pp_sdf_box_0_0.instance, term);
     if (boxTerm != null) {
       IStrategoTerm textTerm = box2text_string_0_1.instance.invoke(ctx, boxTerm, ATermCommands.factory.makeInt(80));
       if (textTerm != null)
@@ -447,7 +448,8 @@ public class SDFCommands {
    * @throws IOException 
    */
   public static String prettyPrintSTR(IStrategoTerm term, HybridInterpreter interp) throws IOException {
-    IStrategoTerm string = pp_stratego_string_0_0.instance.invoke(interp.getCompiledContext(), term);
+    Context ctx = interp.getCompiledContext();
+    IStrategoTerm string = WithoutTypesmartSyntax.invoke(ctx, pp_stratego_string_0_0.instance, term);
     if (string != null)
       return Term.asJavaString(string);
     
