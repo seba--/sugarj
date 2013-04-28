@@ -56,7 +56,7 @@ import org.sugarj.common.StringCommands;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.common.typesmart.TypeSmartTermFactory;
+import org.sugarj.common.typesmart.TypesmartTermFactory;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.declprovider.SourceToplevelDeclarationProvider;
 import org.sugarj.driver.declprovider.TermToplevelDeclarationProvider;
@@ -145,7 +145,7 @@ public class Driver{
 //    stratego_aterm.registerInterop(langLib.getInterpreter().getContext(), langLib.getInterpreter().getCompiledContext());
 //    stratego_gpp.registerInterop(langLib.getInterpreter().getContext(), langLib.getInterpreter().getCompiledContext());
 
-    TypeSmartTermFactory.registerNewTypeSmartTermFactory(langLib.getInterpreter().getContext());
+    TypesmartTermFactory.registerNewTypeSmartTermFactory(langLib.getInterpreter().getContext());
     langLib.getInterpreter().addOperatorRegistry(new SugarJPrimitivesLibrary(this, environment, driverResult, monitor));
 
     

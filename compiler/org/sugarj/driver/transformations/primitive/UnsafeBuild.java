@@ -8,7 +8,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.StrategoList;
 import org.sugarj.common.ATermCommands;
-import org.sugarj.common.typesmart.TypeSmartTermFactory;
+import org.sugarj.common.typesmart.TypesmartTermFactory;
 
 /**
  * Builds an application term using the given term factory.
@@ -23,8 +23,8 @@ class UnsafeBuild extends AbstractPrimitive {
   
   public UnsafeBuild(ITermFactory factory) {
     super("SUGARJ_unsafe_build", 0, 1);
-    if (factory instanceof TypeSmartTermFactory)
-      this.factory = ((TypeSmartTermFactory) factory).getBaseFactory();
+    if (factory instanceof TypesmartTermFactory)
+      this.factory = ((TypesmartTermFactory) factory).getBaseFactory();
     else
       this.factory = factory;
   }

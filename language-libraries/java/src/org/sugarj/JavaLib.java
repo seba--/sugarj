@@ -28,7 +28,7 @@ import org.sugarj.common.JavaCommands;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.common.typesmart.TypeSmartTermFactory;
+import org.sugarj.common.typesmart.TypesmartTermFactory;
 import org.sugarj.java.JavaSourceFileContent;
 
 public class JavaLib extends LanguageLib implements Serializable {
@@ -210,8 +210,8 @@ public class JavaLib extends LanguageLib implements Serializable {
 
     ITermFactory oldFactory = ctx.getFactory();
     try {
-      if (oldFactory instanceof TypeSmartTermFactory) {
-        ctx.setFactory(((TypeSmartTermFactory) ctx.getFactory()).getBaseFactory());
+      if (oldFactory instanceof TypesmartTermFactory) {
+        ctx.setFactory(((TypesmartTermFactory) ctx.getFactory()).getBaseFactory());
       }
       IStrategoTerm string = pp_java_string_0_0.instance.invoke(ctx, term);
       if (string != null)
