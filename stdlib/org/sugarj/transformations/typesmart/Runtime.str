@@ -31,6 +31,7 @@ rules
            ; <is-string> x
            ; <is-lexical-sort> xsort
   has-sort = (debug(!"has get syntax sort: ");get-syntax-sort, id); is-subsort-of
+  has-sort = Swap; debug-analysis(!"FAIL has sort: "); fail
   
   is-lexical-sort = fail
   
@@ -41,7 +42,7 @@ rules
       ?(sub-sort,sup-sort)
     ; (structurally-equal
       <+  <structurally-equal> (sub-sort, arg-sort) 
-        ; ( <structurally-equal> (sup-sort, res-sort)
+        ; ( <structurally-equal> (res-sort, sup-sort)
             <+ <is-subsort-of> (res-sort, sup-sort)) )
 
 rules

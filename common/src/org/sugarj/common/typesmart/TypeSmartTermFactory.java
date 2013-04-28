@@ -17,6 +17,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.IStrategoTuple;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.AbstractTermFactory;
+import org.spoofax.terms.StrategoConstructor;
 import org.spoofax.terms.Term;
 import org.strategoxt.lang.StrategoException;
 import org.sugarj.common.ATermCommands;
@@ -90,7 +91,13 @@ public class TypeSmartTermFactory extends AbstractTermFactory {
       throw new StrategoException("Type-unsafe constructor application " + ctr, e);
     }
   }
-
+  
+  @Override
+  public StrategoConstructor makeConstructor(String name, int arity) {
+    System.out.println("MAKE CONS: " + name);
+    return super.makeConstructor(name, arity);
+  }
+  
   @Override
   public ITermFactory getFactoryWithStorageType(int arg0) {
     return baseFactory.getFactoryWithStorageType(arg0);
