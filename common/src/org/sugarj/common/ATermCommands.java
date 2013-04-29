@@ -39,6 +39,7 @@ import org.strategoxt.stratego_gpp.box2text_string_0_1;
 import org.strategoxt.stratego_gpp.parse_pptable_file_0_0;
 import org.strategoxt.tools.sdf_desugar_0_0;
 import org.sugarj.common.path.Path;
+import org.sugarj.common.typesmart.WithoutTypesmartSyntax;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -279,7 +280,7 @@ public class ATermCommands {
     
     IStrategoTerm result = null;
     try {
-      result = sdf_desugar_0_0.instance.invoke(interp.getCompiledContext(), term);
+      result = WithoutTypesmartSyntax.invoke(interp.getCompiledContext(), sdf_desugar_0_0.instance, term);
     }
     catch (StrategoExit e) {
       if (e.getValue() != 0 || result == null)
