@@ -80,7 +80,7 @@ rules
   debug-analysis(s) = where(nice-analysis-data-term; debug(s))
   
 rules
-  // desugar =
+  // sugarj-desugar =
   //   changed-tree(desugar-analyses)
   //   
   // desugar-analyses : 

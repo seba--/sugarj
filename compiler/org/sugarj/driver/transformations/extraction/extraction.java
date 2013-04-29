@@ -892,7 +892,7 @@ import java.lang.ref.WeakReference;
   { 
     constNil0 = (IStrategoTerm)termFactory.makeList();
     constempty_grammar0 = termFactory.makeAppl(extraction._consempty_grammar_0, NO_TERMS);
-    const0 = termFactory.makeString("desugar");
+    const0 = termFactory.makeString("sugarj-desugar");
     const1 = termFactory.makeString("changed-tree");
     constSVar0 = termFactory.makeAppl(extraction._consSVar_1, new IStrategoTerm[]{extraction.const1});
     constCallNoArgs0 = termFactory.makeAppl(extraction._consCallNoArgs_1, new IStrategoTerm[]{extraction.constSVar0});

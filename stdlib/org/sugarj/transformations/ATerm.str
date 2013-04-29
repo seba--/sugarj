@@ -26,7 +26,7 @@ signature constructors
 rules
   aterm-to-string = prim("SUGARJ_aterm_to_string")
   
-  desugar : ToModelTerm(t) -> <implode-aterm> t
+  sugarj-desugar : ToModelTerm(t) -> <implode-aterm> t
 
   explode-aterm =
        aterm-explode-annotated

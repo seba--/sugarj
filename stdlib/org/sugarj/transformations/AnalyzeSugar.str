@@ -3,4 +3,4 @@ imports
   org/sugarj/transformations/Analyze
   org/sugarj/stdlib/Common
 rules
-  desugar = changed-tree(desugar-analyze)
+  sugarj-desugar = changed-tree(desugar-analyze)

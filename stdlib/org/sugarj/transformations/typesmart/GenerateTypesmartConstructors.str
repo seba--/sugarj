@@ -29,7 +29,7 @@ rules
     bottomup(try( not(is-string)
                 ; not(is-list)
                 ; not(pp-stratego-string)
-                ; debug(!"cannot pp stratego: ")))
+                ; debug(!"cannot pp stratego: ")))  
 
 rules
   typesmart-options = 

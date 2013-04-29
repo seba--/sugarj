@@ -4,5 +4,5 @@ imports org/sugarj/transformations/GenerateSignatures
         org/sugarj/stdlib/Common
 
 strategies
-  desugar =
+  sugarj-desugar =
     changed-tree(gen-signature)

@@ -23,7 +23,7 @@ signature
 
 
 strategies
-  desugar =
+  sugarj-desugar =
     changed-tree(desugar-layout)
 
 

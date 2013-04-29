@@ -20,7 +20,7 @@ signature
 
 rules
   
-  desugar = changed-tree(checks-to-sugar)
+  sugarj-desugar = changed-tree(checks-to-sugar)
 
   checks-to-sugar : 
     ChecksDec(ChecksDecHead(mods, name), ChecksBody(rs)) -> SugarDec(SugarDecHead(mods, name), SugarBody(<map(checkingrule-to-sugar)> rs))
@@ -45,7 +45,7 @@ rules
 
 
 strategies
-  desugar =
+  sugarj-desugar =
     changed-tree(extract-sugar-from-service)
 
 

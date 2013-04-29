@@ -1,0 +1,20 @@
+module org/sugarj/transformations/GenerateTypesmartConstructorsSugar
+
+imports org/sugarj/transformations/typesmart/GenerateTypesmartConstructors
+        org/sugarj/stdlib/Common
+
+signature constructors
+  SugarBody : A -> B
+  grammar-elem : G -> G
+  transformation-elem : T -> T
+
+rules  
+  gen-typesmart-constructors :
+    SugarBody(elems) -> SugarBody(<conc> (locked, res))
+    where <filter(?grammar-elem(<id>))> elems => grammars
+        ; <gen-syntax-constructors; map(!transformation-elem(<id>))> grammars => res
+        ; <map(!Locked(<id>))> elems => locked
+
+strategies
+  sugarj-desugar =
+    changed-tree(gen-typesmart-constructors)

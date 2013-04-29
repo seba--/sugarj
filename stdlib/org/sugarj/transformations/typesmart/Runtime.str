@@ -11,7 +11,7 @@ rules
     prim("SUGARJ_get_typesmart_sort") 
 
 rules
-  has-sort = Swap; debug-analysis(!"has sort? "); fail
+  // has-sort = Swap; debug-analysis(!"has sort? "); fail
   has-sort = ?(xs, Sort("List", [xsort]))
            ; <map(!(<id>, xsort); has-sort)> xs
   has-sort = ?(""#(xs), Sort("Tuple", xsorts))
