@@ -56,15 +56,15 @@ rules
   infer-sort =
       is-list
     ; ?[]
-      < !Sort("List", [EmptyCollection()])
+      < <prim("SUGARJ_unsafe_build", "Sort")> ["List", [EmptyCollection()]]
       + ?[x|xs]
-      ; !Sort("List", [<get-syntax-sort> x]) => xsort
+      ; <prim("SUGARJ_unsafe_build", "Sort")> ["List", [<get-syntax-sort> x]] => xsort
       ; where(<has-sort> (xs, xsort))
   infer-sort =
       ?None()
-      < !Sort("Option", [EmptyCollection()])
+      < <prim("SUGARJ_unsafe_build", "Sort")> ["Option", [EmptyCollection()]]
       + ?Some(x)
-      ; !Sort("Option", [<get-syntax-sort> x])
+      ; <prim("SUGARJ_unsafe_build", "Sort")> ["Option", [<get-syntax-sort> x]]
 
 signature constructors
   EmptyCollection : Sdf2Sort
