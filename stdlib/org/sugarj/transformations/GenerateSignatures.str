@@ -14,16 +14,13 @@ rules
 
   gen-signature :
     SugarBody(elems) -> SugarBody(res)
-    where <(map(gen-signature-elem <+ ![<id>])
-            ; concat)> elems => res
-
+    where <(filter(gen-signature-elem))> elems => res
+        ; <not(contains-all)> (elems, res) 
 
 rules
 
   gen-signature-elem :
-    grammar-elem(grammar) -> [ Locked(grammar-elem(grammar))
-                             , transformation-elem(sig)
-                             ]
+    grammar-elem(grammar) -> transformation-elem(sig)
     where <gen-signature-from-grammar> grammar => sig
 
 

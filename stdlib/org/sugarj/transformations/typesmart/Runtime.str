@@ -31,9 +31,6 @@ rules
       ?(term, sort)
     ; <infer-sort> term => inferred
     ; <is-subsort-of> (inferred, sort)
-  // TODO: for SugarJ only ?
-  has-sort = ?(Locked(x), sort)
-           ; <has-sort> (x, sort)
   // has-sort = Swap; debug-analysis(!"FAIL has sort: "); fail
   
   is-lexical-sort = fail
@@ -69,9 +66,6 @@ rules
       < <prim("SUGARJ_unsafe_build", "Sort")> ["Option", [EmptyCollection()]]
       + ?Some(x)
       ; <prim("SUGARJ_unsafe_build", "Sort")> ["Option", [<get-syntax-sort> x]]
-  infer-sort =
-      ?Locked(<id>)
-    ; infer-sort
 
 signature constructors
   EmptyCollection : Sdf2Sort

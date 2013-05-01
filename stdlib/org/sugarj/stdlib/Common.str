@@ -6,3 +6,27 @@ signature
 
 rules
   changed-tree(s) = ?t; s; not(equal(|t))
+
+rules
+  intersect =
+      ?([],_)
+    ; ![]
+  intersect =
+      ?(_,[])
+    ; ![]
+  intersect =
+      ?([x|xs],ys)
+    ; <intersect> (xs, ys) => rest
+    ; if <elem> (x, ys)
+        then ![x|rest]
+        else !rest
+      end
+
+  /* (xs:List[a], ys:List[a]) -> true/false
+   * Checks if xs contains all elements of ys.
+   */
+  contains-all =
+      ?(xs, ys)
+    ; Swap
+    ; intersect
+    ; not(equal(|ys))

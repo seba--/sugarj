@@ -10,10 +10,10 @@ signature constructors
 
 rules  
   gen-typesmart-constructors :
-    SugarBody(elems) -> SugarBody(<conc> (locked, res))
+    SugarBody(elems) -> SugarBody(<conc> (elems, res))
     where <filter(?grammar-elem(<id>))> elems => grammars
         ; <gen-syntax-constructors; map(!transformation-elem(<id>))> grammars => res
-        ; <map(!Locked(<id>))> elems => locked
+        ; <not(contains-all)> (elems, res) 
 
 strategies
   sugarj-desugar =
