@@ -365,7 +365,7 @@ public class Driver{
         
         IStrategoTerm analyzed = currentAnalyze(lastSugaredToplevelDecl);
         analyzed = ATermCommands.copyTokens(lastSugaredToplevelDecl, analyzed);
-        lastSugaredToplevelDecl = analyzed;
+//        lastSugaredToplevelDecl = analyzed;
         
         stepped();
         
@@ -730,7 +730,7 @@ public class Driver{
   
   private void processImportDecs(IStrategoTerm toplevelDecl) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException {
     List<IStrategoTerm> pendingImports = new ArrayList<IStrategoTerm>();
-    pendingImports.add(toplevelDecl);
+    pendingImports.add(lastSugaredToplevelDecl);
     
     while (declProvider.hasNextToplevelDecl()) {
       IStrategoTerm term = null;
