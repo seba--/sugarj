@@ -1,0 +1,31 @@
+package pair;
+
+import org.sugarj.languages.Java;
+
+public sugar SugarAST {
+  context-free syntax
+    "(" JavaType "," JavaType ")" -> JavaType {cons("PType")}
+    "(" JavaExpr "," JavaExpr ")" -> JavaExpr {cons("PExpr")}
+
+
+  desugarings
+    desugar-pair-type
+    desugar-pair-expr
+
+  rules
+    desugar-pair-type :
+      PType(t1, t2) -> 
+      ClassOrInterfaceType(
+        TypeName(PackageOrTypeName(Id("pair")), Id("Pair")),
+        Some(TypeArgs([t1, t2])))
+
+    desugar-pair-expr : 
+      PExpr(e1, e2) ->
+      Invoke(
+        Method(MethodName(
+          AmbName(AmbName(Id("pair")), Id("Pair")),
+          Id("create"))),
+        [e1, e2])
+
+}
+
