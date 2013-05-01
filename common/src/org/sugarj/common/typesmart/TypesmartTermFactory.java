@@ -30,6 +30,8 @@ import org.sugarj.common.ATermCommands;
  */
 public class TypesmartTermFactory extends AbstractTermFactory {
 
+  private final static boolean DEBUG_TYPESMART = true;
+  
   private IContext context;
   private ITermFactory baseFactory;
 
@@ -61,6 +63,8 @@ public class TypesmartTermFactory extends AbstractTermFactory {
 //      System.out.println("Typesmart " + ctr);
 
       // apply smart constructor to argument terms
+      rebuildEmptyLists(terms);
+      
       CallT smartCall = new CallT(smartCtrName, new Strategy[0], new IStrategoTerm[0]);
       IStrategoTerm currentWas = context.current();
       IStrategoTerm t;
@@ -84,10 +88,25 @@ public class TypesmartTermFactory extends AbstractTermFactory {
       if (!appl.getConstructor().equals(ctr))
         throw new StrategoException("Smart constructor should have returned an application term with constructor " + ctr + ", but was: " + t);
 
+      if (DEBUG_TYPESMART && TypesmartSortAttachment.getSort(appl) == null)
+        throw new StrategoException("Typesmart constructor failed to install syntax-sort attachment: " + t);
+      
       return appl;
     } catch (InterpreterException e) {
       throw new StrategoException("Type-unsafe constructor application " + ctr, e);
     }
+  }
+
+  private void rebuildEmptyLists(IStrategoTerm[] terms) {
+    for (int i = 0; i < terms.length; i++)
+      if  (terms[i] instanceof IStrategoAppl && TypesmartSortAttachment.getSort(terms[i]) == null) {
+        IStrategoAppl appl = (IStrategoAppl) terms[i];
+        terms[i] = makeAppl(appl.getConstructor(), appl.getAllSubterms(), appl.getAnnotations());
+        if (!terms[i].toString().equals("Op(\"Nil\",[])"))
+          throw new RuntimeException("unexpected  rebuilding");
+      }
+      else
+        terms[i] = terms[i];
   }
 
   @Override
@@ -98,7 +117,6 @@ public class TypesmartTermFactory extends AbstractTermFactory {
   /**
    * Identical to {@link TermFactory.annotateTerm} except that it retains sort attachments.
    */
-  @SuppressWarnings("deprecation")
   @Override
   public IStrategoTerm annotateTerm(IStrategoTerm term, IStrategoList annotations) {
 //    IStrategoList currentAnnos = term.getAnnotations();
