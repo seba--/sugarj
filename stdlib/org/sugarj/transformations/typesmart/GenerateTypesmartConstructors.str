@@ -82,10 +82,10 @@ rules
     <conc> ([sig-list], lexical-sort-list, smart-cons-list)
 
   gen-syntax-constructors-prod :
-    prod(lhs, rhs, attrs(as)) ->
+    prod(lhs, rhs, attrs) ->
     strat
   where
-      <filter(get-cons-attribute)> as => [cons]
+      <find-cons-attribute> attrs => cons
     ; <conc-strings> ("smart-", cons) => smart-cons
    
     ; <filter(get-symbol-sort)> lhs => arg-sorts
@@ -106,8 +106,8 @@ rules
     prod ->
     strat
   where
-      <?prod(lhs, rhs, attrs(as)) + ?prod(lhs, rhs, no-attrs()); ![]=>as> prod 
-    ; <filter(get-cons-attribute)> as => []
+      <?prod(lhs, rhs, attrs)> prod 
+    ; <not(find-cons-attribute)> attrs
     ; <filter(get-symbol-sort)> lhs => [arg-sort]
     ; <get-symbol-sort> rhs => res-sort
     ; body := CallT(SVar("is-subsort-of-inject"), []
@@ -124,7 +124,7 @@ rules
     ; body := 
         Seq(
         Seq(
-          Assign(Var("renamed"), <nosmart-trm-explode> res-sort),
+          Where(Assign(Var("renamed"), <nosmart-trm-explode> res-sort)),
           Match(Var("renamed"))),
           <nosmart-trm-explode> arg-sort)
     ; !SDefT("unrename-sort", [], [], body) => strat
