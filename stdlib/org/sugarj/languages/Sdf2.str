@@ -1739,324 +1739,324 @@ rules
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2SDF"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2SDF"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SDF"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Aliases"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Aliases"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Aliases"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Alias"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Alias"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Alias"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Restrictions"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Restrictions"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Restrictions"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Restriction"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Restriction"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Restriction"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Label"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Label"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Label"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2FunctionName"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2FunctionName"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FunctionName"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2SingleQuotedStrCon"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2SingleQuotedStrCon"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SingleQuotedStrCon"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2SingleQuotedStrChar"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2SingleQuotedStrChar"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SingleQuotedStrChar"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Sort"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Sort"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sort"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2OptCharRanges"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2OptCharRanges"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OptCharRanges"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2CharRange"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2CharRange"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharRange"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Character"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Character"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Character"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ShortChar"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ShortChar"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ShortChar"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2NumChar"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2NumChar"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["NumChar"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Priorities"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Priorities"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Priorities"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Priority"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Priority"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Priority"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ArgumentIndicator"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ArgumentIndicator"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArgumentIndicator"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Associativity"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Associativity"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Associativity"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Import"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Import"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Import"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Imports"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Imports"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Imports"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ImpSection"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ImpSection"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ImpSection"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ModuleName"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ModuleName"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModuleName"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Sections"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Sections"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sections"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Section"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Section"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Section"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Module"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Module"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Module"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Definition"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Definition"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Definition"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ModuleId"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ModuleId"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModuleId"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ModuleWord"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ModuleWord"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModuleWord"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Renaming"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Renaming"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Renaming"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Renamings"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Renamings"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Renamings"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Productions"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Productions"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Productions"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Production"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Production"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Production"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Attributes"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Attributes"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Attributes"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Attribute"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Attribute"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Attribute"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ATermAttribute"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ATermAttribute"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ATermAttribute"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Symbols"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Symbols"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbols"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Annotation"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Annotation"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Annotation"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ATerm"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2ATerm"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ATerm"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2AFun"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2AFun"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AFun"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2IdCon"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2IdCon"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["IdCon"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2StrCon"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2StrCon"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrCon"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2StrChar"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2StrChar"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrChar"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2RealCon"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2RealCon"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RealCon"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2OptExp"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2OptExp"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OptExp"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2IntCon"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2IntCon"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["IntCon"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2NatCon"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2NatCon"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["NatCon"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Lookahead"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Lookahead"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Lookahead"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Grammar"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Grammar"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Grammar"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Symbol"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Symbol"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Group"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Group"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Group"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2CharRanges"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2CharRanges"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharRanges"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2CharClass"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2CharClass"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharClass"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Lookaheads"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Lookaheads"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Lookaheads"]

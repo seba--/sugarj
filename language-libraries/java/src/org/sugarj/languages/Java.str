@@ -4187,960 +4187,960 @@ rules
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaCompilationUnit"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaCompilationUnit"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompilationUnit"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTypeDec"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTypeDec"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TypeDec"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaImportDec"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaImportDec"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ImportDec"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaPackageDec"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaPackageDec"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PackageDec"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaElemVal"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaElemVal"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ElemVal"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaElemValPair"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaElemValPair"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ElemValPair"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaAnno"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaAnno"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Anno"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaLHS"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaLHS"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["LHS"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaCondMid"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaCondMid"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CondMid"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaArraySubscript"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaArraySubscript"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArraySubscript"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaDimExpr"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaDimExpr"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["DimExpr"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaArrayBaseType"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaArrayBaseType"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArrayBaseType"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaArrayCreationExpr"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaArrayCreationExpr"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArrayCreationExpr"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaClassMemberDec"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaClassMemberDec"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ClassMemberDec"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaClassBodyDec"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaClassBodyDec"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ClassBodyDec"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaInterfaces"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaInterfaces"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Interfaces"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaSuper"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaSuper"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Super"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaClassMod"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaClassMod"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ClassMod"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaClassDecHead"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaClassDecHead"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ClassDecHead"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaClassBody"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaClassBody"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ClassBody"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaClassDec"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaClassDec"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ClassDec"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaInterfaceMod"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaInterfaceMod"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["InterfaceMod"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaInterfaceMemberDec"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaInterfaceMemberDec"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["InterfaceMemberDec"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaExtendsInterfaces"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaExtendsInterfaces"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ExtendsInterfaces"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaInterfaceDecHead"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaInterfaceDecHead"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["InterfaceDecHead"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaInterfaceDec"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaInterfaceDec"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["InterfaceDec"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaDefaultVal"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaDefaultVal"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["DefaultVal"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaAnnoElemDec"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaAnnoElemDec"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AnnoElemDec"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaAnnoDecHead"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaAnnoDecHead"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AnnoDecHead"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaAnnoDec"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaAnnoDec"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AnnoDec"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaAbstractMethodMod"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaAbstractMethodMod"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AbstractMethodMod"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaAbstractMethodDec"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaAbstractMethodDec"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AbstractMethodDec"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaConstantMod"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaConstantMod"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ConstantMod"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaConstantDec"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaConstantDec"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ConstantDec"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEnumBodyDecs"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEnumBodyDecs"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EnumBodyDecs"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEnumConstArgs"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEnumConstArgs"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EnumConstArgs"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEnumConst"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEnumConst"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EnumConst"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEnumBody"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEnumBody"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EnumBody"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEnumDecHead"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEnumDecHead"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EnumDecHead"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEnumDec"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEnumDec"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EnumDec"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaConstrMod"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaConstrMod"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ConstrMod"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaConstrInv"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaConstrInv"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ConstrInv"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaConstrBody"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaConstrBody"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ConstrBody"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaConstrHead"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaConstrHead"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ConstrHead"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaConstrDec"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaConstrDec"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ConstrDec"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaStaticInit"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaStaticInit"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StaticInit"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaInstanceInit"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaInstanceInit"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["InstanceInit"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaMethodBody"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaMethodBody"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["MethodBody"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaExceptionType"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaExceptionType"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ExceptionType"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaThrows"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaThrows"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Throws"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaMethodMod"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaMethodMod"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["MethodMod"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaVarMod"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaVarMod"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["VarMod"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaFormalParam"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaFormalParam"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FormalParam"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaResultType"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaResultType"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ResultType"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaMethodDecHead"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaMethodDecHead"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["MethodDecHead"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaMethodDec"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaMethodDec"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["MethodDec"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaBlockStm"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaBlockStm"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["BlockStm"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaBlock"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaBlock"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Block"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaCatchClause"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaCatchClause"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CatchClause"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaSwitchLabel"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaSwitchLabel"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SwitchLabel"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaSwitchGroup"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaSwitchGroup"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SwitchGroup"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaSwitchBlock"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaSwitchBlock"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SwitchBlock"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaStm"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaStm"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Stm"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaLocalVarDec"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaLocalVarDec"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["LocalVarDec"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaLocalVarDecStm"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaLocalVarDecStm"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["LocalVarDecStm"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaFieldMod"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaFieldMod"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FieldMod"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaVarInit"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaVarInit"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["VarInit"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaDim"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaDim"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Dim"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaVarDecId"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaVarDecId"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["VarDecId"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaVarDec"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaVarDec"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["VarDec"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaFieldDec"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaFieldDec"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FieldDec"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaArrayInit"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaArrayInit"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArrayInit"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaClassLiteral"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaClassLiteral"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ClassLiteral"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaLiteral"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaLiteral"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Literal"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaType"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaType"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Type"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaArrayType"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaArrayType"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArrayType"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTypeVar"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTypeVar"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TypeVar"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTypeDecSpec"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTypeDecSpec"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TypeDecSpec"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaInterfaceType"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaInterfaceType"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["InterfaceType"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaClassType"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaClassType"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ClassType"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaClassOrInterfaceType"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaClassOrInterfaceType"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ClassOrInterfaceType"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaRefType"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaRefType"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RefType"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTypeVarId"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTypeVarId"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TypeVarId"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTypeParams"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTypeParams"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TypeParams"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTypeBound"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTypeBound"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TypeBound"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTypeParam"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTypeParam"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TypeParam"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaWildcardBound"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaWildcardBound"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["WildcardBound"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaActualTypeArg"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaActualTypeArg"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ActualTypeArg"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTypeArgs"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTypeArgs"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TypeArgs"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaPackageOrTypeName"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaPackageOrTypeName"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PackageOrTypeName"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaMethodName"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaMethodName"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["MethodName"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaExprName"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaExprName"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ExprName"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTypeName"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTypeName"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TypeName"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaAmbName"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaAmbName"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AmbName"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaPackageName"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaPackageName"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PackageName"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaFloatType"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaFloatType"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FloatType"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaIntType"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaIntType"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["IntType"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaNumType"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaNumType"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["NumType"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaPrimType"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaPrimType"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PrimType"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaNullLiteral"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaNullLiteral"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["NullLiteral"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaFooStringChars"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaFooStringChars"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FooStringChars"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaStringChars"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaStringChars"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StringChars"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaStringPart"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaStringPart"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StringPart"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaStringLiteral"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaStringLiteral"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StringLiteral"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaSingleChar"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaSingleChar"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SingleChar"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaCharContent"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaCharContent"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharContent"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaCharLiteral"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaCharLiteral"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharLiteral"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaLastOcta"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaLastOcta"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["LastOcta"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaOctaEscape"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaOctaEscape"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OctaEscape"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaNamedEscape"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaNamedEscape"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["NamedEscape"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEscapeSeq"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEscapeSeq"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EscapeSeq"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaBool"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaBool"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Bool"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaBoolLiteral"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaBoolLiteral"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["BoolLiteral"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaBinaryExponent"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaBinaryExponent"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["BinaryExponent"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaHexaSignificand"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaHexaSignificand"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["HexaSignificand"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaHexaFloatNumeral"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaHexaFloatNumeral"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["HexaFloatNumeral"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaSignedInteger"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaSignedInteger"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SignedInteger"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaDeciFloatExponentPart"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaDeciFloatExponentPart"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["DeciFloatExponentPart"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaDeciFloatDigits"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaDeciFloatDigits"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["DeciFloatDigits"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaDeciFloatNumeral"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaDeciFloatNumeral"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["DeciFloatNumeral"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaFloatLiteral"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaFloatLiteral"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FloatLiteral"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaHexaFloatLiteral"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaHexaFloatLiteral"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["HexaFloatLiteral"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaDeciFloatLiteral"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaDeciFloatLiteral"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["DeciFloatLiteral"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaIntLiteral"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaIntLiteral"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["IntLiteral"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaOctaNumeral"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaOctaNumeral"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OctaNumeral"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaHexaNumeral"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaHexaNumeral"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["HexaNumeral"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaDeciNumeral"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaDeciNumeral"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["DeciNumeral"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaOctaLiteral"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaOctaLiteral"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OctaLiteral"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaHexaLiteral"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaHexaLiteral"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["HexaLiteral"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaDeciLiteral"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaDeciLiteral"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["DeciLiteral"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaModifier"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaModifier"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Modifier"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaStrictFP"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaStrictFP"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrictFP"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaSynchronized"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaSynchronized"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Synchronized"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaVolatile"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaVolatile"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Volatile"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTransient"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaTransient"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Transient"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaNative"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaNative"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Native"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaStatic"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaStatic"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Static"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaFinal"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaFinal"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Final"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaAbstract"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaAbstract"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Abstract"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaProtected"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaProtected"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Protected"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaPrivate"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaPrivate"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Private"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaPublic"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaPublic"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Public"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaId"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaId"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Id"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaID"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaID"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ID"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaKeyword"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaKeyword"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Keyword"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEscChar"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEscChar"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EscChar"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEscEscChar"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEscEscChar"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EscEscChar"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaAsterisk"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaAsterisk"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Asterisk"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaBlockCommentChars"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaBlockCommentChars"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["BlockCommentChars"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaCommentPart"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaCommentPart"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CommentPart"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEOLCommentChars"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEOLCommentChars"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EOLCommentChars"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaComment"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaComment"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Comment"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEndOfFile"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaEndOfFile"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EndOfFile"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaCarriageReturn"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaCarriageReturn"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CarriageReturn"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaLineTerminator"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaLineTerminator"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["LineTerminator"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaUnicodeEscape"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaUnicodeEscape"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["UnicodeEscape"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaArrayAccess"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaArrayAccess"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArrayAccess"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaFieldAccess"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaFieldAccess"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FieldAccess"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaMethodSpec"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaMethodSpec"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["MethodSpec"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaExpr"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaExpr"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]

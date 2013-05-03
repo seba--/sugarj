@@ -1727,312 +1727,312 @@ rules
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceImport"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceImport"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Import"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceImports"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceImports"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Imports"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceModule"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceModule"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Module"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceFileName"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceFileName"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FileName"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceBuilderOption"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceBuilderOption"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["BuilderOption"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceCompletionAnno"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceCompletionAnno"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionAnno"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceCompletionPart"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceCompletionPart"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionPart"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServicePlaceholderChar"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServicePlaceholderChar"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PlaceholderChar"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServicePlaceholder"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServicePlaceholder"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Placeholder"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceAttributeId"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceAttributeId"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AttributeId"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceMaybeColor"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceMaybeColor"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["MaybeColor"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceNoColor"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceNoColor"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["NoColor"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceColor"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceColor"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Color"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceFont"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceFont"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Font"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceTokenKindName"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceTokenKindName"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TokenKindName"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceColorNode"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceColorNode"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ColorNode"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceAttribute"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceAttribute"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Attribute"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceColorRule"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceColorRule"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ColorRule"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceOutlineRule"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceOutlineRule"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OutlineRule"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceFoldingAnno"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceFoldingAnno"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FoldingAnno"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceFoldingRule"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceFoldingRule"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FoldingRule"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceIndentDef"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceIndentDef"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["IndentDef"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceFenceDef"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceFenceDef"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FenceDef"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceNoContinuation"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceNoContinuation"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["NoContinuation"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceBlockCommentDef"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceBlockCommentDef"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["BlockCommentDef"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceLanguageProperty"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceLanguageProperty"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["LanguageProperty"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServicePropertyValues"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServicePropertyValues"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PropertyValues"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceURL"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceURL"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["URL"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServicePropertyValue"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServicePropertyValue"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PropertyValue"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceReservedName"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceReservedName"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ReservedName"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceSection"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceSection"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Section"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceOnSaveAnno"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceOnSaveAnno"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OnSaveAnno"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceStrategoCall"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceStrategoCall"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoCall"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceRefactoringRule"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceRefactoringRule"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RefactoringRule"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceBuilderRule"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceBuilderRule"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["BuilderRule"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceCompletionRule"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceCompletionRule"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionRule"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceReferenceRule"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceReferenceRule"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ReferenceRule"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceSemanticNode"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceSemanticNode"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SemanticNode"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceStrategoId"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceStrategoId"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoId"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceModuleName"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceModuleName"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModuleName"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceNode"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceNode"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Node"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceConstructorId"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceConstructorId"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ConstructorId"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceConstructor"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceConstructor"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Constructor"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceString"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceString"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["String"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceSort"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceSort"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sort"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceSectionName"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceSectionName"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SectionName"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceBACKSLASH"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceBACKSLASH"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["BACKSLASH"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceStringChar"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceStringChar"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StringChar"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceSTRING"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceSTRING"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["STRING"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceInt"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceInt"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Int"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceIdStar"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceIdStar"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["IdStar"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceId"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServiceId"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Id"]

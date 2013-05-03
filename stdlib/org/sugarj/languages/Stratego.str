@@ -2611,306 +2611,306 @@ rules
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoRuleNames"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoRuleNames"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RuleNames"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoRuleDec"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoRuleDec"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RuleDec"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoDynRuleScopeId"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoDynRuleScopeId"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["DynRuleScopeId"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoDynRuleId"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoDynRuleId"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["DynRuleId"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoDynRuleDef"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoDynRuleDef"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["DynRuleDef"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoScopeLabels"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoScopeLabels"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ScopeLabels"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoRuleCond"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoRuleCond"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RuleCond"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoRule"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoRule"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Rule"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoRuleDef"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoRuleDef"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RuleDef"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoOverlay"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoOverlay"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Overlay"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoSwitchCase"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoSwitchCase"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SwitchCase"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoStrategyCurly"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoStrategyCurly"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategyCurly"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoStrategyAngle"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoStrategyAngle"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategyAngle"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoKind"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoKind"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Kind"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoLID"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoLID"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["LID"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoImportModName"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoImportModName"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ImportModName"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoDecl"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoDecl"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Decl"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoModule"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoModule"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Module"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoStrategyParen"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoStrategyParen"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategyParen"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoTypedid"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoTypedid"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Typedid"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoStrategyDef"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoStrategyDef"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategyDef"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoSVar"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoSVar"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SVar"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoDef"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoDef"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Def"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoType"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoType"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Type"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoRetType"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoRetType"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RetType"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoArgType"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoArgType"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArgType"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoFunType"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoFunType"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FunType"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoConstType"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoConstType"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ConstType"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoOpdecl"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoOpdecl"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Opdecl"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoSort"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoSort"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sort"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoSdecl"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoSdecl"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdecl"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoWld"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoWld"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Wld"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoID"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoID"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ID"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoVar"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoVar"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Var"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoCharChar"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoCharChar"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharChar"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoChar"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoChar"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Char"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoStrChar"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoStrChar"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrChar"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoString"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoString"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["String"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoReal"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoReal"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Real"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoInt"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoInt"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Int"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoKeyword"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoKeyword"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Keyword"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoUCID"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoUCID"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["UCID"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoLCID"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoLCID"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["LCID"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoLId"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoLId"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["LId"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoId"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoId"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Id"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoModNamePart"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoModNamePart"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModNamePart"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoModName"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoModName"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModName"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoPreTerm"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoPreTerm"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoTerm"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoTerm"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoStrategyMid"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoStrategyMid"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategyMid"]
 
 
 unrename-sort(|) =
-  (renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoStrategy"]
+  (where(renamed := <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoStrategy"])
    ; ?renamed)
   ; <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
