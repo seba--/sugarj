@@ -11,7 +11,7 @@ rules
     prim("SUGARJ_get_typesmart_sort") 
 
 rules
-  // has-sort = Swap; debug-analysis(!"has sort? "); fail
+  has-sort = Swap; debug-analysis(!"has sort? "); fail
   has-sort = ?(xs, Sort("List", [xsort]))
            ; <map(!(<id>, xsort); has-sort)> xs
   has-sort = ?(""#(xs), Sort("Tuple", xsorts))
@@ -26,27 +26,45 @@ rules
   has-sort = ?(x, xsort)
            ; <is-string> x
            ; <is-lexical-sort> xsort
-  has-sort = (get-syntax-sort, id); is-subsort-of
+  has-sort = (get-syntax-sort, id); init-subsort-stack; is-subsort-of
   has-sort =
       ?(term, sort)
     ; <infer-sort> term => inferred
+    ; <debug-analysis(!"inferred sort: ")> (inferred, term)
+    ; init-subsort-stack
     ; <is-subsort-of> (inferred, sort)
-  // has-sort = Swap; debug-analysis(!"FAIL has sort: "); fail
+  has-sort = Swap; debug-analysis(!"FAIL has sort: "); fail
   
   is-lexical-sort = fail
   
-  // is-subsort-of = debug-analysis(!"is-subsort-of: "); fail
-  is-subsort-of = is-subsort-of-refl <+ is-subsort-unrename <+ is-subsort-of-trans
+  is-subsort-of = debug-analysis(!"is-subsort-of: "); fail
+  is-subsort-of = 
+      push-subsort-stack
+    ; finally( is-subsort-of-refl <+ is-subsort-unrename <+ is-subsort-of-trans
+             , pop-subsort-stack)
+  is-subsort-of = debug-analysis(!"FAIL is-subsort-of: "); fail
+  
+  init-subsort-stack =
+    where(rules ( Subsort-Stack := [] ))
+  push-subsort-stack =
+      where(
+        strip-annos => pair
+      ; <not(elem)> (pair, <Subsort-Stack>)
+      ; rules( Subsort-Stack := [pair | <Subsort-Stack>] ))
+  pop-subsort-stack =
+    where(rules( Subsort-Stack := <Subsort-Stack; ?[_|<id>]> ))
+  
   is-subsort-of-refl = structurally-equal
-  is-subsort-unrename = (unrename-sort, try(unrename-sort)); is-subsort-of
-  is-subsort-unrename = (id, unrename-sort); is-subsort-of
+  is-subsort-unrename = (unrename-sort, try(unrename-sort)); debug-analysis(!"unrenamed: "); is-subsort-of
+  is-subsort-unrename = (id, unrename-sort); debug-analysis(!"unrenamed: "); is-subsort-of
   is-subsort-of-trans = fail
   unrename-sort = fail
   
   is-subsort-of-inject(|arg-sort,res-sort) =
       ?(sub-sort,sup-sort)
     ; (<sort-equal> (sub-sort,sup-sort)
-      <+  <sort-equal> (sub-sort, arg-sort) 
+      <+  <sort-equal> (sub-sort, arg-sort)
+        ; <debug-analysis(!"inject: ")> (arg-sort, res-sort) 
         ; ( <sort-equal> (res-sort, sup-sort)
             <+ <is-subsort-of> (res-sort, sup-sort)))
 
