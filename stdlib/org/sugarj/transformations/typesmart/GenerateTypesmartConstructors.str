@@ -165,7 +165,7 @@ rules
       ?[x|xs]
     ; <filter-split(!(x,<id>); merge-same-cons-prods)> xs => (merged, rest)
     ; <merge-same-cons-prods-list> rest => rest'
-    ; <conc> (merged, rest')
+    ; <conc> (<try(?[]; ![x])> merged, rest')
     
     
   filter-split(s) =
