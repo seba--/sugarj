@@ -11,7 +11,7 @@ rules
     prim("SUGARJ_get_typesmart_sort") 
 
 rules
-  has-sort = Swap; debug-analysis(!"has sort? "); fail
+  has-sort = Swap; debug(!"has sort? "); fail
   has-sort = ?(xs, Sort("List", [xsort]))
            ; <map(!(<id>, xsort); has-sort)> xs
   has-sort = ?(""#(xs), Sort("Tuple", xsorts))
@@ -33,7 +33,7 @@ rules
     ; <debug-analysis(!"inferred sort: ")> (inferred, term)
     ; init-subsort-stack
     ; <is-subsort-of> (inferred, sort)
-  has-sort = Swap; debug-analysis(!"FAIL has sort: "); fail
+  has-sort = Swap; debug(!"FAIL has sort: "); fail
   
   is-lexical-sort = fail
   
@@ -58,11 +58,14 @@ rules
     where(rules( Subsort-Stack := <Subsort-Stack; ?[_|<id>]> ))
   
   is-subsort-of-refl = structurally-equal
-  is-subsort-unrename = (unrename-sort, try(unrename-sort)); debug-analysis(!"unrenamed: "); is-subsort-of
-  is-subsort-unrename = (id, unrename-sort); debug-analysis(!"unrenamed: "); is-subsort-of
+  is-subsort-unrename = (unrename-sort, try(unrename-sort)); is-subsort-of
+  is-subsort-unrename = (id, unrename-sort); is-subsort-of
   is-subsort-of-trans = fail
   unrename-sort = fail
   
+  is-subsort-of-inject(|arg-sort,res-sort) =
+  	  where(<unrename-sort> arg-sort => unrenamed-arg-sort)
+  	; is-subsort-of-inject(|unrenamed-arg-sort,res-sort)
   is-subsort-of-inject(|arg-sort,res-sort) =
       ?(sub-sort,sup-sort)
     ; (<sort-equal> (sub-sort,sup-sort)
