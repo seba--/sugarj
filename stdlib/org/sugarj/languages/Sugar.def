@@ -8,38 +8,10 @@ exports
     Transformation -> SugarDefElem {cons("transformation-elem")}
 
   context-free syntax
-    "sorts" Sdf2Symbols -> Grammar {cons("sorts")}
-    "syntax" Sdf2Productions -> Grammar {cons("syntax")}
-    "lexical" "syntax" Sdf2Productions -> Grammar {cons("lexical-syntax")}
-    "context-free" "syntax" Sdf2Productions -> Grammar {cons("context-free-syntax")}
-    "variables" Sdf2Productions -> Grammar {cons("variables")}
-    "lexical" "variables" Sdf2Productions -> Grammar {cons("lexical-variables")}
-    "priorities" Sdf2Priorities -> Grammar {cons("priorities")}
-    "lexical" "priorities" Sdf2Priorities -> Grammar {cons("lexical-priorities")}
-    "context-free" "priorities" Sdf2Priorities -> Grammar {cons("context-free-priorities")}
-    "restrictions" Sdf2Restrictions -> Grammar {cons("restrictions")}
-    "lexical" "restrictions" Sdf2Restrictions -> Grammar {cons("lexical-restrictions")}
-    "context-free" "restrictions" Sdf2Restrictions -> Grammar {cons("context-free-restrictions")}
-    "aliases" Sdf2Aliases -> Grammar {cons("aliases")}
-
-  lexical syntax
-    "sorts" -> StrategoId {reject}
-    "lexical" -> StrategoId {reject}
-    "context-free" -> StrategoId {reject}
-    "variables" -> StrategoId {reject}
-    "priorities" -> StrategoId {reject}
-    "restrictions" -> StrategoId {reject}
-    "aliases" -> StrategoId {reject}
+    Sdf2Grammar -> Grammar
 
   context-free syntax
-    "strategies" StrategoDef* -> Transformation {cons("Strategies")}
-    "signature" StrategoSdecl* -> Transformation {cons("Signature")}
-    "rules" StrategoDef* -> Transformation {cons("Rules")}
-    "overlays" StrategoOverlay* -> Transformation {cons("Overlays")}
-
-  lexical syntax
-    "desugarings" -> StrategoKeyword
-    "analyses" -> StrategoKeyword
+    StrategoDecl -> Transformation
 
   context-free syntax
     "desugarings" Desugaring* -> Transformation {cons("Desugarings")}
@@ -50,7 +22,19 @@ exports
     StrategoStrategy ":" Sdf2Symbol "->" Sdf2Symbol Sdf2Attributes -> Desugaring {cons("InjectDesugaring")}
     StrategoStrategy -> Analysis {longest-match}
 
+  lexical syntax
+    "desugarings" -> StrategoKeyword
+    "analyses" -> StrategoKeyword
+
   lexical restrictions
     "desugarings" -/- [a-zA-Z0-9\'\-\_]
     "analyses" -/- [a-zA-Z0-9\'\-\_]
     
+  lexical syntax
+    "sorts" -> StrategoId {reject}
+    "lexical" -> StrategoId {reject}
+    "context-free" -> StrategoId {reject}
+    "variables" -> StrategoId {reject}
+    "priorities" -> StrategoId {reject}
+    "restrictions" -> StrategoId {reject}
+    "aliases" -> StrategoId {reject}

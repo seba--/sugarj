@@ -1299,8 +1299,7 @@ rules
   smart-Dim(|) =
     <prim("SUGARJ_unsafe_build", "Dim")> []
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Dim"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Dim"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Dim"]
       )
     ; id
 
@@ -1894,8 +1893,7 @@ rules
                                                                            ))
     ; <prim("SUGARJ_unsafe_build", "EnumBody")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EnumBody"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EnumBody"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EnumBody"]
       )
     ; id
 
@@ -2700,8 +2698,7 @@ rules
                                                                           ))
     ; <prim("SUGARJ_unsafe_build", "ArrayInit")> [arg1]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArrayInit"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArrayInit"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArrayInit"]
       )
     ; id
 
@@ -2774,8 +2771,7 @@ rules
                                                                                  ))
     ; <prim("SUGARJ_unsafe_build", "ElemValArrayInit")> [arg1]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ElemVal"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ElemVal"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ElemVal"]
       )
     ; id
 

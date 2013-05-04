@@ -21,10 +21,10 @@ signature
     CheckingRuleErrors    : List(CheckingRuleBody) -> CheckingRule
     CheckingRuleWarnings  : List(CheckingRuleBody) -> CheckingRule
     CheckingRuleNotes     : List(CheckingRuleBody) -> CheckingRule
-    RuleNoCond            : StrategoTerm * StrategoTerm -> CheckingRuleBody
-    Rule                  : StrategoTerm * StrategoTerm * StrategoStrategy -> CheckingRuleBody
-    Rule                  : StrategoTerm * StrategoTerm * List(StrategoRuleCond) -> CheckingRuleBody
-    Rules                 : List(StrategoDef) -> CheckingRule
+    CheckingRuleNoCond    : StrategoTerm * StrategoTerm -> CheckingRuleBody
+    CheckingRule          : StrategoTerm * StrategoTerm * StrategoStrategy -> CheckingRuleBody
+    CheckingRule          : StrategoTerm * StrategoTerm * List(StrategoRuleCond) -> CheckingRuleBody
+    CheckingRules         : List(StrategoDef) -> CheckingRule
     ModelDec              : ModelDecHead * ModelBody -> ToplevelDeclaration
     ModelDecHead          : List(AnnoOrSugarMod) * JavaId * JavaId -> ModelDecHead
     ModelBody             : ModelTerm -> ModelBody
@@ -203,8 +203,7 @@ rules
                                                                                 ))
     ; <prim("SUGARJ_unsafe_build", "ChecksDecHead")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ChecksDecHead"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ChecksDecHead"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ChecksDecHead"]
       )
     ; id
 
@@ -252,58 +251,58 @@ rules
       )
     ; id
 
-  smart-RuleNoCond(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"RuleNoCond") ; fail)> ( arg1
-                                                                           , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoTerm"]
-                                                                           ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"RuleNoCond") ; fail)> ( arg2
+  smart-CheckingRuleNoCond(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"CheckingRuleNoCond") ; fail)> ( arg1
+                                                                                   , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoTerm"]
+                                                                                   ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CheckingRuleNoCond") ; fail)> ( arg2
+                                                                                     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoTerm"]
+                                                                                     ))
+    ; <prim("SUGARJ_unsafe_build", "CheckingRuleNoCond")> [arg1, arg2]
+    ; put-syntax-sort(
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CheckingRuleBody"]
+      )
+    ; id
+
+  smart-CheckingRule(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"CheckingRule") ; fail)> ( arg1
                                                                              , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoTerm"]
                                                                              ))
-    ; <prim("SUGARJ_unsafe_build", "RuleNoCond")> [arg1, arg2]
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CheckingRule") ; fail)> ( arg2
+                                                                               , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoTerm"]
+                                                                               ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CheckingRule") ; fail)> ( arg3
+                                                                               , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoStrategy"]
+                                                                               ))
+    ; <prim("SUGARJ_unsafe_build", "CheckingRule")> [arg1, arg2, arg3]
     ; put-syntax-sort(
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CheckingRuleBody"]
       )
     ; id
 
-  smart-Rule(|arg1, arg2, arg3) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"Rule") ; fail)> ( arg1
-                                                                     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoTerm"]
-                                                                     ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"Rule") ; fail)> ( arg2
-                                                                       , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoTerm"]
-                                                                       ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"Rule") ; fail)> ( arg3
-                                                                       , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoStrategy"]
-                                                                       ))
-    ; <prim("SUGARJ_unsafe_build", "Rule")> [arg1, arg2, arg3]
+  smart-CheckingRule(|arg1, arg2, arg3) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"CheckingRule") ; fail)> ( arg1
+                                                                             , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoTerm"]
+                                                                             ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CheckingRule") ; fail)> ( arg2
+                                                                               , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoTerm"]
+                                                                               ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"CheckingRule") ; fail)> ( arg3
+                                                                               , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoRuleCond"]]
+                                                                                                                               ]]
+                                                                               ))
+    ; <prim("SUGARJ_unsafe_build", "CheckingRule")> [arg1, arg2, arg3]
     ; put-syntax-sort(
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CheckingRuleBody"]
       )
     ; id
 
-  smart-Rule(|arg1, arg2, arg3) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"Rule") ; fail)> ( arg1
-                                                                     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoTerm"]
-                                                                     ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"Rule") ; fail)> ( arg2
-                                                                       , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoTerm"]
-                                                                       ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"Rule") ; fail)> ( arg3
-                                                                       , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoRuleCond"]]
-                                                                                                                       ]]
-                                                                       ))
-    ; <prim("SUGARJ_unsafe_build", "Rule")> [arg1, arg2, arg3]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CheckingRuleBody"]
-      )
-    ; id
-
-  smart-Rules(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"Rules") ; fail)> ( arg1
-                                                                      , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoDef"]]
-                                                                                                                      ]]
-                                                                      ))
-    ; <prim("SUGARJ_unsafe_build", "Rules")> [arg1]
+  smart-CheckingRules(|arg1) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"CheckingRules") ; fail)> ( arg1
+                                                                              , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoDef"]]
+                                                                                                                              ]]
+                                                                              ))
+    ; <prim("SUGARJ_unsafe_build", "CheckingRules")> [arg1]
     ; put-syntax-sort(
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CheckingRule"]
       )

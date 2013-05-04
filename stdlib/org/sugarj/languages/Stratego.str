@@ -600,8 +600,7 @@ rules
                                                                                       ))
     ; <prim("SUGARJ_unsafe_build", "DynRuleIntersectFix")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
       )
     ; id
 
@@ -614,8 +613,7 @@ rules
                                                                                   ))
     ; <prim("SUGARJ_unsafe_build", "DynRuleUnionFix")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
       )
     ; id
 
@@ -631,8 +629,7 @@ rules
                                                                                            ))
     ; <prim("SUGARJ_unsafe_build", "DynRuleIntersectUnionFix")> [arg1, arg2, arg3]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
       )
     ; id
 
@@ -648,8 +645,7 @@ rules
                                                                                    ))
     ; <prim("SUGARJ_unsafe_build", "DynRuleIntersect")> [arg1, arg2, arg3]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
       )
     ; id
 
@@ -665,8 +661,7 @@ rules
                                                                                ))
     ; <prim("SUGARJ_unsafe_build", "DynRuleUnion")> [arg1, arg2, arg3]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
       )
     ; id
 
@@ -685,8 +680,7 @@ rules
                                                                                         ))
     ; <prim("SUGARJ_unsafe_build", "DynRuleIntersectUnion")> [arg1, arg2, arg3, arg4]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
       )
     ; id
 
@@ -699,8 +693,7 @@ rules
                                                                      ))
     ; <prim("SUGARJ_unsafe_build", "BA")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
       )
     ; id
 
@@ -713,8 +706,7 @@ rules
                                                                      ))
     ; <prim("SUGARJ_unsafe_build", "AM")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
       )
     ; id
 
@@ -727,8 +719,7 @@ rules
                                                                       ))
     ; <prim("SUGARJ_unsafe_build", "Seq")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
       )
     ; id
 
@@ -741,8 +732,7 @@ rules
                                                                       ))
     ; <prim("SUGARJ_unsafe_build", "Seq")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
       )
     ; id
 
@@ -1391,8 +1381,7 @@ rules
                                                                            ))
     ; <prim("SUGARJ_unsafe_build", "AnnoList")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
       )
     ; id
 
@@ -1476,8 +1465,7 @@ rules
                                                                           ))
     ; <prim("SUGARJ_unsafe_build", "Explode")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]
       )
     ; id
 
@@ -1490,8 +1478,7 @@ rules
                                                                           ))
     ; <prim("SUGARJ_unsafe_build", "Explode")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]
       )
     ; id
 
@@ -1504,8 +1491,7 @@ rules
                                                                      ))
     ; <prim("SUGARJ_unsafe_build", "As")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
       )
     ; id
 
@@ -1518,8 +1504,7 @@ rules
                                                                      ))
     ; <prim("SUGARJ_unsafe_build", "As")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
       )
     ; id
 
@@ -2061,8 +2046,7 @@ rules
                                                                       ))
     ; <prim("SUGARJ_unsafe_build", "Match")> [arg1]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
       )
     ; id
 
@@ -2072,8 +2056,7 @@ rules
                                                                       ))
     ; <prim("SUGARJ_unsafe_build", "Build")> [arg1]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
       )
     ; id
 
@@ -2103,8 +2086,7 @@ rules
                                                                                  ))
     ; <prim("SUGARJ_unsafe_build", "GuardedLChoice")> [arg1, arg2, arg3]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
       )
     ; id
 

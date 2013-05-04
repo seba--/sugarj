@@ -43,6 +43,13 @@ rules
                                    Rules(<map(!RDefNoArgs("constraint-note", <id>))> rs)
                                 )
 
+  checkingrules-to-stratego :
+    CheckingRules(xs) -> Rules(<map(checkingrule-to-stratego)> xs)
+  
+  checkingrule-to-stratego :
+    CheckingRuleNoCond(t1, t2) -> RuleNoCond(t1, t2)
+  checkingrule-to-stratego :
+    CheckingRule(t1, t2, ss) -> Rule(t1, t2, ss)
 
 strategies
   sugarj-desugar =

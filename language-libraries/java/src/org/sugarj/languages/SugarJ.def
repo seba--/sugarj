@@ -57,10 +57,10 @@ exports
     "errors" CheckingRuleBody*                          -> CheckingRule     {cons("CheckingRuleErrors")}
     "warnings" CheckingRuleBody*                        -> CheckingRule     {cons("CheckingRuleWarnings")}
     "notes" CheckingRuleBody*                           -> CheckingRule     {cons("CheckingRuleNotes")}
-    StrategoTerm "=" StrategoTerm                          -> CheckingRuleBody {cons("RuleNoCond")}
-    StrategoTerm "=" StrategoTerm "where" StrategoStrategy -> CheckingRuleBody {cons("Rule")}
-    StrategoTerm "=" StrategoTerm StrategoRuleCond+        -> CheckingRuleBody {cons("Rule"), avoid}
-    "rules" StrategoDef*        -> CheckingRule {cons("Rules")}
+    StrategoTerm "=" StrategoTerm                          -> CheckingRuleBody {cons("CheckingRuleNoCond")}
+    StrategoTerm "=" StrategoTerm "where" StrategoStrategy -> CheckingRuleBody {cons("CheckingRule")}
+    StrategoTerm "=" StrategoTerm StrategoRuleCond+        -> CheckingRuleBody {cons("CheckingRule"), avoid}
+    "rules" StrategoDef*        -> CheckingRule {cons("CheckingRules")}
 
   %% MDD declarations
   context-free syntax

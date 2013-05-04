@@ -290,8 +290,7 @@ rules
                                                                            ))
     ; <prim("SUGARJ_unsafe_build", "Builders")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Section"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Section"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Section"]
       )
     ; id
 
@@ -404,8 +403,7 @@ rules
                                                                                   ))
     ; <prim("SUGARJ_unsafe_build", "IdentifierLexical")> [arg1]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionRule"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionRule"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionRule"]
       )
     ; id
 
@@ -578,8 +576,7 @@ rules
   smart-Disable(|) =
     <prim("SUGARJ_unsafe_build", "Disable")> []
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionAnno"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionAnno"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionAnno"]
       )
     ; id
 
@@ -698,8 +695,7 @@ rules
                                                                                ))
     ; <prim("SUGARJ_unsafe_build", "ColorRuleAll")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ColorRule"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ColorRule"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ColorRule"]
       )
     ; id
 
@@ -728,8 +724,7 @@ rules
                                                                                     ))
     ; <prim("SUGARJ_unsafe_build", "ColorRuleAllNamed")> [arg1, arg2, arg3]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ColorRule"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ColorRule"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ColorRule"]
       )
     ; id
 
@@ -888,8 +883,7 @@ rules
   smart-BOLD_ITALIC(|) =
     <prim("SUGARJ_unsafe_build", "BOLD_ITALIC")> []
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Font"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Font"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Font"]
       )
     ; id
 
@@ -1049,8 +1043,7 @@ rules
                                                                                  ))
     ; <prim("SUGARJ_unsafe_build", "SemanticProvider")> [arg1]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RefactoringRule"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RefactoringRule"]]]
-                                                     ]]
+      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RefactoringRule"]
       )
     ; id
 
