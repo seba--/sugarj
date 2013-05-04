@@ -59,9 +59,6 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PlainExtension"]
     )
 
-
-rules
-
   smart-PlainBody(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"PlainBody") ; fail)> ( arg1
                                                                           , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PlainContent"]

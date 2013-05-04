@@ -70,9 +70,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-sorts(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"sorts") ; fail)> ( arg1
                                                                       , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdf2Symbols"]
@@ -203,9 +200,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-Strategies(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Strategies") ; fail)> ( arg1
                                                                            , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoDef"]]
@@ -250,9 +244,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-Desugarings(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Desugarings") ; fail)> ( arg1
                                                                             , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Desugaring"]]
@@ -274,9 +265,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Transformation"]
       )
     ; id
-
-
-rules
 
   smart-PureDesugaring(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"PureDesugaring") ; fail)> ( arg1

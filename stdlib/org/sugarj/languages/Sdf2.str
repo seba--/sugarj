@@ -257,16 +257,14 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Aliases"]
     )
 
-
-rules
-
   smart-char-class(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"char-class") ; fail)> ( arg1
                                                                            , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharClass"]
                                                                            ))
     ; <prim("SUGARJ_unsafe_build", "char-class")> [arg1]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Lookahead"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Lookahead"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]]]
+                                                     ]]
       )
     ; id
 
@@ -374,19 +372,14 @@ rules
       )
     ; id
 
-
-rules
-
-
-rules
-
   smart-quoted(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"quoted") ; fail)> ( arg1
                                                                        , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrCon"]
                                                                        ))
     ; <prim("SUGARJ_unsafe_build", "quoted")> [arg1]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Label"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Label"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AFun"]]]
+                                                     ]]
       )
     ; id
 
@@ -396,7 +389,8 @@ rules
                                                                          ))
     ; <prim("SUGARJ_unsafe_build", "unquoted")> [arg1]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Label"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Label"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AFun"]]]
+                                                     ]]
       )
     ; id
 
@@ -412,9 +406,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]
       )
     ; id
-
-
-rules
 
   smart-unquoted-fun(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"unquoted-fun") ; fail)> ( arg1
@@ -435,9 +426,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FunctionName"]
       )
     ; id
-
-
-rules
 
   smart-lit(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"lit") ; fail)> ( arg1
@@ -479,9 +467,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-kernel-start-symbols(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"kernel-start-symbols") ; fail)> ( arg1
                                                                                      , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbols"]
@@ -511,9 +496,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Grammar"]
       )
     ; id
-
-
-rules
 
   smart-sort(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"sort") ; fail)> ( arg1
@@ -548,9 +530,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Grammar"]
       )
     ; id
-
-
-rules
 
   smart-numeric(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"numeric") ; fail)> ( arg1
@@ -600,9 +579,6 @@ rules
       )
     ; id
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Character"]
@@ -650,7 +626,8 @@ rules
   smart-absent(|) =
     <prim("SUGARJ_unsafe_build", "absent")> []
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OptCharRanges"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OptCharRanges"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OptExp"]]]
+                                                     ]]
       )
     ; id
 
@@ -729,30 +706,11 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharClass"]
     )
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharClass"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharClass"]
     )
-
-
-rules
-
-  smart-char-class(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"char-class") ; fail)> ( arg1
-                                                                           , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharClass"]
-                                                                           ))
-    ; <prim("SUGARJ_unsafe_build", "char-class")> [arg1]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]
-      )
-    ; id
-
-
-rules
 
   smart-left(|) =
     <prim("SUGARJ_unsafe_build", "left")> []
@@ -910,9 +868,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-lifting(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"lifting") ; fail)> ( arg1
                                                                         , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]
@@ -922,9 +877,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]
       )
     ; id
-
-
-rules
 
   smart-empty(|) =
     <prim("SUGARJ_unsafe_build", "empty")> []
@@ -1056,9 +1008,6 @@ rules
       )
     ; id
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]
@@ -1076,9 +1025,6 @@ rules
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]
     )
-
-
-rules
 
   smart-renamings(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"renamings") ; fail)> ( arg1
@@ -1116,9 +1062,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Renaming"]
       )
     ; id
-
-
-rules
 
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
@@ -1260,9 +1203,6 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Import"]
     )
 
-
-rules
-
   smart-lexical-syntax(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"lexical-syntax") ; fail)> ( arg1
                                                                                , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Productions"]
@@ -1340,9 +1280,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-empty-grammar(|) =
     <prim("SUGARJ_unsafe_build", "empty-grammar")> []
     ; put-syntax-sort(
@@ -1369,9 +1306,6 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Grammar"]
     )
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]
@@ -1385,21 +1319,11 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbols"]
     )
 
-
-rules
-
   smart-present(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"present") ; fail)> ( arg1
                                                                         , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["IntCon"]
                                                                         ))
     ; <prim("SUGARJ_unsafe_build", "present")> [arg1]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OptExp"]
-      )
-    ; id
-
-  smart-absent(|) =
-    <prim("SUGARJ_unsafe_build", "absent")> []
     ; put-syntax-sort(
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OptExp"]
       )
@@ -1420,9 +1344,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RealCon"]
       )
     ; id
-
-
-rules
 
   smart-natural(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"natural") ; fail)> ( arg1
@@ -1453,32 +1374,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["IntCon"]
       )
     ; id
-
-
-rules
-
-  smart-quoted(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"quoted") ; fail)> ( arg1
-                                                                       , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrCon"]
-                                                                       ))
-    ; <prim("SUGARJ_unsafe_build", "quoted")> [arg1]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AFun"]
-      )
-    ; id
-
-  smart-unquoted(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"unquoted") ; fail)> ( arg1
-                                                                         , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["IdCon"]
-                                                                         ))
-    ; <prim("SUGARJ_unsafe_build", "unquoted")> [arg1]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AFun"]
-      )
-    ; id
-
-
-rules
 
   smart-int(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"int") ; fail)> ( arg1
@@ -1558,9 +1453,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-default(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"default") ; fail)> ( arg1
                                                                         , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ATerm"]]
@@ -1571,9 +1463,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Annotation"]
       )
     ; id
-
-
-rules
 
   smart-default(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"default") ; fail)> ( arg1
@@ -1646,9 +1535,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-start(|) =
     <prim("SUGARJ_unsafe_build", "start")> []
     ; put-syntax-sort(
@@ -1712,12 +1598,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SDF"]
       )
     ; id
-
-
-rules
-
-
-rules
 
   is-subsort-of-trans(|) =
     is-subsort-of-inject(

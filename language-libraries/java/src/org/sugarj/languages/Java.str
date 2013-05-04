@@ -410,27 +410,6 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
     )
 
-
-rules
-
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    )
-
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    )
-
-
-rules
-
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
@@ -455,8 +434,11 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
     )
 
-
-rules
+  is-subsort-of-trans(|) =
+    is-subsort-of-inject(
+    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
+    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
+    )
 
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
@@ -506,8 +488,11 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
     )
 
-
-rules
+  is-subsort-of-trans(|) =
+    is-subsort-of-inject(
+    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
+    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
+    )
 
   smart-Assign(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Assign") ; fail)> ( arg1
@@ -682,9 +667,6 @@ rules
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArrayAccess"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["LHS"]
     )
-
-
-rules
 
   smart-InstanceOf(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"InstanceOf") ; fail)> ( arg1
@@ -968,9 +950,6 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CondMid"]
     )
 
-
-rules
-
   smart-Plus(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Plus") ; fail)> ( arg1
                                                                      , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
@@ -1057,9 +1036,6 @@ rules
       )
     ; id
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ExprName"]
@@ -1085,9 +1061,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
       )
     ; id
-
-
-rules
 
   smart-Invoke(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Invoke") ; fail)> ( arg1
@@ -1177,17 +1150,11 @@ rules
       )
     ; id
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ExprName"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
     )
-
-
-rules
 
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
@@ -1214,17 +1181,11 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArraySubscript"]
     )
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FieldAccess"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
     )
-
-
-rules
 
   smart-Field(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Field") ; fail)> ( arg1
@@ -1261,9 +1222,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FieldAccess"]
       )
     ; id
-
-
-rules
 
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
@@ -1341,12 +1299,10 @@ rules
   smart-Dim(|) =
     <prim("SUGARJ_unsafe_build", "Dim")> []
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Dim"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Dim"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Dim"]]]
+                                                     ]]
       )
     ; id
-
-
-rules
 
   smart-NewInstance(|arg1, arg2, arg3, arg4) =
     where(<(has-sort <+ log-mismatching-sort-error(|"NewInstance") ; fail)> ( arg1
@@ -1399,9 +1355,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-Lit(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Lit") ; fail)> ( arg1
                                                                     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Literal"]
@@ -1448,9 +1401,6 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Literal"]
     )
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ClassLiteral"]
@@ -1474,9 +1424,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-This(|) =
     <prim("SUGARJ_unsafe_build", "This")> []
     ; put-syntax-sort(
@@ -1494,17 +1441,11 @@ rules
       )
     ; id
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
     )
-
-
-rules
 
   smart-PackageDec(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"PackageDec") ; fail)> ( arg1
@@ -1519,9 +1460,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PackageDec"]
       )
     ; id
-
-
-rules
 
   smart-TypeImportDec(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"TypeImportDec") ; fail)> ( arg1
@@ -1566,9 +1504,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-AnnoDec(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"AnnoDec") ; fail)> ( arg1
                                                                         , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AnnoDecHead"]
@@ -1598,9 +1533,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AnnoDecHead"]
       )
     ; id
-
-
-rules
 
   smart-AnnoMethodDec(|arg1, arg2, arg3, arg4) =
     where(<(has-sort <+ log-mismatching-sort-error(|"AnnoMethodDec") ; fail)> ( arg1
@@ -1656,7 +1588,24 @@ rules
   smart-Semicolon(|) =
     <prim("SUGARJ_unsafe_build", "Semicolon")> []
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AnnoElemDec"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AnnoElemDec"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["InterfaceMemberDec"]]]
+                                                     ]]
+      )
+    ; id
+
+  smart-Semicolon(|) =
+    <prim("SUGARJ_unsafe_build", "Semicolon")> []
+    ; put-syntax-sort(
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AnnoElemDec"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ClassMemberDec"]]]
+                                                     ]]
+      )
+    ; id
+
+  smart-Semicolon(|) =
+    <prim("SUGARJ_unsafe_build", "Semicolon")> []
+    ; put-syntax-sort(
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AnnoElemDec"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TypeDec"]]]
+                                                     ]]
       )
     ; id
 
@@ -1669,9 +1618,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["DefaultVal"]
       )
     ; id
-
-
-rules
 
   smart-AbstractMethodDec(|arg1, arg2, arg3, arg4, arg5, arg6) =
     where(<(has-sort <+ log-mismatching-sort-error(|"AbstractMethodDec") ; fail)> ( arg1
@@ -1751,9 +1697,6 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AbstractMethodMod"]
     )
 
-
-rules
-
   smart-ConstantDec(|arg1, arg2, arg3) =
     where(<(has-sort <+ log-mismatching-sort-error(|"ConstantDec") ; fail)> ( arg1
                                                                             , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [ <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Anno"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ConstantMod"]]]
@@ -1791,9 +1734,6 @@ rules
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Final"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ConstantMod"]
     )
-
-
-rules
 
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
@@ -1850,9 +1790,6 @@ rules
       )
     ; id
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ConstantDec"]
@@ -1876,16 +1813,6 @@ rules
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["InterfaceDec"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["InterfaceMemberDec"]
     )
-
-  smart-Semicolon(|) =
-    <prim("SUGARJ_unsafe_build", "Semicolon")> []
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["InterfaceMemberDec"]
-      )
-    ; id
-
-
-rules
 
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
@@ -1922,9 +1849,6 @@ rules
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrictFP"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["InterfaceMod"]
     )
-
-
-rules
 
   smart-EnumDec(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"EnumDec") ; fail)> ( arg1
@@ -1970,22 +1894,8 @@ rules
                                                                            ))
     ; <prim("SUGARJ_unsafe_build", "EnumBody")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EnumBody"]
-      )
-    ; id
-
-  smart-EnumBody(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"EnumBody") ; fail)> ( arg1
-                                                                         , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EnumConst"]]
-                                                                                                                         ]]
-                                                                         ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"EnumBody") ; fail)> ( arg2
-                                                                           , <prim("SUGARJ_unsafe_build", "Sort")> ["Option"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EnumBodyDecs"]]
-                                                                                                                             ]]
-                                                                           ))
-    ; <prim("SUGARJ_unsafe_build", "EnumBody")> [arg1, arg2]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EnumBody"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EnumBody"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EnumBody"]]]
+                                                     ]]
       )
     ; id
 
@@ -2024,9 +1934,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EnumBodyDecs"]
       )
     ; id
-
-
-rules
 
   smart-ConstrDec(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"ConstrDec") ; fail)> ( arg1
@@ -2132,9 +2039,6 @@ rules
       )
     ; id
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Public"]
@@ -2153,9 +2057,6 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ConstrMod"]
     )
 
-
-rules
-
   smart-StaticInit(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"StaticInit") ; fail)> ( arg1
                                                                            , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Block"]
@@ -2165,9 +2066,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StaticInit"]
       )
     ; id
-
-
-rules
 
   smart-InstanceInit(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"InstanceInit") ; fail)> ( arg1
@@ -2179,17 +2077,11 @@ rules
       )
     ; id
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Block"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Stm"]
     )
-
-
-rules
 
   smart-Empty(|) =
     <prim("SUGARJ_unsafe_build", "Empty")> []
@@ -2197,9 +2089,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Stm"]
       )
     ; id
-
-
-rules
 
   smart-Labeled(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Labeled") ; fail)> ( arg1
@@ -2214,9 +2103,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-ExprStm(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"ExprStm") ; fail)> ( arg1
                                                                         , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
@@ -2226,9 +2112,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Stm"]
       )
     ; id
-
-
-rules
 
   smart-If(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"If") ; fail)> ( arg1
@@ -2259,9 +2142,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-AssertStm(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"AssertStm") ; fail)> ( arg1
                                                                           , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
@@ -2284,9 +2164,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Stm"]
       )
     ; id
-
-
-rules
 
   smart-Switch(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Switch") ; fail)> ( arg1
@@ -2348,9 +2225,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-While(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"While") ; fail)> ( arg1
                                                                       , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
@@ -2364,9 +2238,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-DoWhile(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"DoWhile") ; fail)> ( arg1
                                                                         , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Stm"]
@@ -2379,9 +2250,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Stm"]
       )
     ; id
-
-
-rules
 
   smart-For(|arg1, arg2, arg3, arg4) =
     where(<(has-sort <+ log-mismatching-sort-error(|"For") ; fail)> ( arg1
@@ -2442,9 +2310,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-Break(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Break") ; fail)> ( arg1
                                                                       , <prim("SUGARJ_unsafe_build", "Sort")> ["Option"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Id"]]
@@ -2455,9 +2320,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Stm"]
       )
     ; id
-
-
-rules
 
   smart-Continue(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Continue") ; fail)> ( arg1
@@ -2470,9 +2332,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-Return(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Return") ; fail)> ( arg1
                                                                        , <prim("SUGARJ_unsafe_build", "Sort")> ["Option"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]]
@@ -2484,9 +2343,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-Throw(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Throw") ; fail)> ( arg1
                                                                       , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
@@ -2496,9 +2352,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Stm"]
       )
     ; id
-
-
-rules
 
   smart-Synchronized(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Synchronized") ; fail)> ( arg1
@@ -2512,9 +2365,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Stm"]
       )
     ; id
-
-
-rules
 
   smart-Try(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Try") ; fail)> ( arg1
@@ -2560,9 +2410,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-LocalVarDecStm(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"LocalVarDecStm") ; fail)> ( arg1
                                                                                , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["LocalVarDec"]
@@ -2592,9 +2439,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["LocalVarDec"]
       )
     ; id
-
-
-rules
 
   smart-Block(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Block") ; fail)> ( arg1
@@ -2628,9 +2472,6 @@ rules
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Stm"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["BlockStm"]
     )
-
-
-rules
 
   smart-MethodDec(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"MethodDec") ; fail)> ( arg1
@@ -2724,9 +2565,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-Param(|arg1, arg2, arg3) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Param") ; fail)> ( arg1
                                                                       , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [ <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Anno"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["VarMod"]]]
@@ -2765,17 +2603,11 @@ rules
       )
     ; id
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Final"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["VarMod"]
     )
-
-
-rules
 
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
@@ -2831,9 +2663,6 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["MethodMod"]
     )
 
-
-rules
-
   smart-ThrowsDec(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"ThrowsDec") ; fail)> ( arg1
                                                                           , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ExceptionType"]]
@@ -2851,9 +2680,6 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ExceptionType"]
     )
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Block"]
@@ -2867,9 +2693,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-ArrayInit(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"ArrayInit") ; fail)> ( arg1
                                                                           , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["VarInit"]]
@@ -2877,23 +2700,10 @@ rules
                                                                           ))
     ; <prim("SUGARJ_unsafe_build", "ArrayInit")> [arg1]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArrayInit"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArrayInit"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArrayInit"]]]
+                                                     ]]
       )
     ; id
-
-  smart-ArrayInit(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"ArrayInit") ; fail)> ( arg1
-                                                                          , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["VarInit"]]
-                                                                                                                          ]]
-                                                                          ))
-    ; <prim("SUGARJ_unsafe_build", "ArrayInit")> [arg1]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArrayInit"]
-      )
-    ; id
-
-
-rules
 
   smart-Anno(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Anno") ; fail)> ( arg1
@@ -2932,9 +2742,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-ElemValPair(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"ElemValPair") ; fail)> ( arg1
                                                                             , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Id"]
@@ -2967,23 +2774,10 @@ rules
                                                                                  ))
     ; <prim("SUGARJ_unsafe_build", "ElemValArrayInit")> [arg1]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ElemVal"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ElemVal"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ElemVal"]]]
+                                                     ]]
       )
     ; id
-
-  smart-ElemValArrayInit(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"ElemValArrayInit") ; fail)> ( arg1
-                                                                                 , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ElemVal"]]
-                                                                                                                                 ]]
-                                                                                 ))
-    ; <prim("SUGARJ_unsafe_build", "ElemValArrayInit")> [arg1]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ElemVal"]
-      )
-    ; id
-
-
-rules
 
   smart-FieldDec(|arg1, arg2, arg3) =
     where(<(has-sort <+ log-mismatching-sort-error(|"FieldDec") ; fail)> ( arg1
@@ -3048,13 +2842,6 @@ rules
       )
     ; id
 
-  smart-Dim(|) =
-    <prim("SUGARJ_unsafe_build", "Dim")> []
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Dim"]
-      )
-    ; id
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
@@ -3066,9 +2853,6 @@ rules
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArrayInit"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["VarInit"]
     )
-
-
-rules
 
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
@@ -3111,9 +2895,6 @@ rules
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Volatile"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FieldMod"]
     )
-
-
-rules
 
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
@@ -3173,9 +2954,6 @@ rules
       )
     ; id
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Abstract"]
@@ -3218,9 +2996,6 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ClassMod"]
     )
 
-
-rules
-
   smart-SuperDec(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"SuperDec") ; fail)> ( arg1
                                                                          , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ClassType"]
@@ -3230,9 +3005,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Super"]
       )
     ; id
-
-
-rules
 
   smart-ImplementsDec(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"ImplementsDec") ; fail)> ( arg1
@@ -3244,9 +3016,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Interfaces"]
       )
     ; id
-
-
-rules
 
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
@@ -3272,9 +3041,6 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ClassBodyDec"]
     )
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FieldDec"]
@@ -3299,16 +3065,6 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ClassMemberDec"]
     )
 
-  smart-Semicolon(|) =
-    <prim("SUGARJ_unsafe_build", "Semicolon")> []
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ClassMemberDec"]
-      )
-    ; id
-
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ClassDec"]
@@ -3320,16 +3076,6 @@ rules
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["InterfaceDec"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TypeDec"]
     )
-
-  smart-Semicolon(|) =
-    <prim("SUGARJ_unsafe_build", "Semicolon")> []
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TypeDec"]
-      )
-    ; id
-
-
-rules
 
   smart-CompilationUnit(|arg1, arg2, arg3) =
     where(<(has-sort <+ log-mismatching-sort-error(|"CompilationUnit") ; fail)> ( arg1
@@ -3350,9 +3096,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-PackageName(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"PackageName") ; fail)> ( arg1
                                                                             , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Id"]]
@@ -3363,9 +3106,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PackageName"]
       )
     ; id
-
-
-rules
 
   smart-AmbName(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"AmbName") ; fail)> ( arg1
@@ -3482,9 +3222,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-TypeArgs(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"TypeArgs") ; fail)> ( arg1
                                                                          , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ActualTypeArg"]]
@@ -3533,9 +3270,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-TypeParam(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"TypeParam") ; fail)> ( arg1
                                                                           , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TypeVarId"]
@@ -3578,9 +3312,6 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TypeVarId"]
     )
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ClassOrInterfaceType"]
@@ -3592,9 +3323,6 @@ rules
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArrayType"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RefType"]
     )
-
-
-rules
 
   smart-ClassOrInterfaceType(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"ClassOrInterfaceType") ; fail)> ( arg1
@@ -3660,9 +3388,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-TypeVar(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"TypeVar") ; fail)> ( arg1
                                                                         , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TypeVarId"]
@@ -3673,9 +3398,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-ArrayType(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"ArrayType") ; fail)> ( arg1
                                                                           , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Type"]
@@ -3685,9 +3407,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ArrayType"]
       )
     ; id
-
-
-rules
 
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
@@ -3763,9 +3482,6 @@ rules
       )
     ; id
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PrimType"]
@@ -3778,18 +3494,12 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Type"]
     )
 
-
-rules
-
   smart-Null(|) =
     <prim("SUGARJ_unsafe_build", "Null")> []
     ; put-syntax-sort(
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["NullLiteral"]
       )
     ; id
-
-
-rules
 
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
@@ -3835,9 +3545,6 @@ rules
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FooStringChars"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StringChars"]
     )
-
-
-rules
 
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
@@ -3892,9 +3599,6 @@ rules
       )
     ; id
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharLiteral"]
@@ -3933,9 +3637,6 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharContent"]
     )
 
-
-rules
-
   smart-Bool(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Bool") ; fail)> ( arg1
                                                                      , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Bool"]
@@ -3960,9 +3661,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-Float(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Float") ; fail)> ( arg1
                                                                       , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["DeciFloatLiteral"]
@@ -3982,9 +3680,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FloatLiteral"]
       )
     ; id
-
-
-rules
 
   smart-Deci(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Deci") ; fail)> ( arg1
@@ -4015,9 +3710,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["IntLiteral"]
       )
     ; id
-
-
-rules
 
   smart-Public(|) =
     <prim("SUGARJ_unsafe_build", "Public")> []
@@ -4162,9 +3854,6 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Modifier"]
     )
 
-
-rules
-
   smart-Id(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Id") ; fail)> ( arg1
                                                                    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ID"]
@@ -4174,9 +3863,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Id"]
       )
     ; id
-
-
-rules
 
   smart-UnicodeEscape(|) =
     <prim("SUGARJ_unsafe_build", "UnicodeEscape")> []

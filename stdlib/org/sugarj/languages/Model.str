@@ -28,9 +28,6 @@ rules
       )
     ; id
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModelTransformation"]]
@@ -102,9 +99,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModelTransformation"]
       )
     ; id
-
-
-rules
 
   is-subsort-of-trans(|) =
     is-subsort-of-inject(

@@ -65,9 +65,6 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ToplevelDeclaration"]
     )
 
-
-rules
-
   smart-CompilationUnit(|arg1, arg2, arg3) =
     where(<(has-sort <+ log-mismatching-sort-error(|"CompilationUnit") ; fail)> ( arg1
                                                                                 , <prim("SUGARJ_unsafe_build", "Sort")> ["Option"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaPackageDec"]]
@@ -88,9 +85,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompilationUnit"]
       )
     ; id
-
-
-rules
 
   smart-SugarDec(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"SugarDec") ; fail)> ( arg1
@@ -148,9 +142,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-EditorServicesDec(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"EditorServicesDec") ; fail)> ( arg1
                                                                                   , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EditorServicesDecHead"]
@@ -189,9 +180,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-ChecksDec(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"ChecksDec") ; fail)> ( arg1
                                                                           , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ChecksDecHead"]
@@ -215,21 +203,8 @@ rules
                                                                                 ))
     ; <prim("SUGARJ_unsafe_build", "ChecksDecHead")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ChecksDecHead"]
-      )
-    ; id
-
-  smart-ChecksDecHead(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"ChecksDecHead") ; fail)> ( arg1
-                                                                              , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AnnoOrSugarMod"]]
-                                                                                                                              ]]
-                                                                              ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"ChecksDecHead") ; fail)> ( arg2
-                                                                                , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["JavaId"]
-                                                                                ))
-    ; <prim("SUGARJ_unsafe_build", "ChecksDecHead")> [arg1, arg2]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ChecksDecHead"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ChecksDecHead"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ChecksDecHead"]]]
+                                                     ]]
       )
     ; id
 
@@ -333,9 +308,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CheckingRule"]
       )
     ; id
-
-
-rules
 
   smart-ModelDec(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"ModelDec") ; fail)> ( arg1

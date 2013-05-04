@@ -325,9 +325,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-DynRuleScope(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleScope") ; fail)> ( arg1
                                                                              , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ScopeLabels"]
@@ -357,9 +354,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ScopeLabels"]
       )
     ; id
-
-
-rules
 
   smart-GenDynRules(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"GenDynRules") ; fail)> ( arg1
@@ -538,9 +532,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-RDecNoArgs(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"RDecNoArgs") ; fail)> ( arg1
                                                                            , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Id"]
@@ -583,9 +574,6 @@ rules
       )
     ; id
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Id"]]
@@ -612,23 +600,8 @@ rules
                                                                                       ))
     ; <prim("SUGARJ_unsafe_build", "DynRuleIntersectFix")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-      )
-    ; id
-
-
-rules
-
-  smart-DynRuleUnionFix(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleUnionFix") ; fail)> ( arg1
-                                                                                , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RuleNames"]
-                                                                                ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleUnionFix") ; fail)> ( arg2
-                                                                                  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-                                                                                  ))
-    ; <prim("SUGARJ_unsafe_build", "DynRuleUnionFix")> [arg1, arg2]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
+                                                     ]]
       )
     ; id
 
@@ -641,7 +614,8 @@ rules
                                                                                   ))
     ; <prim("SUGARJ_unsafe_build", "DynRuleUnionFix")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
+                                                     ]]
       )
     ; id
 
@@ -657,28 +631,10 @@ rules
                                                                                            ))
     ; <prim("SUGARJ_unsafe_build", "DynRuleIntersectUnionFix")> [arg1, arg2, arg3]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
+                                                     ]]
       )
     ; id
-
-  smart-DynRuleIntersectUnionFix(|arg1, arg2, arg3) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectUnionFix") ; fail)> ( arg1
-                                                                                         , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RuleNames"]
-                                                                                         ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectUnionFix") ; fail)> ( arg2
-                                                                                           , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RuleNames"]
-                                                                                           ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectUnionFix") ; fail)> ( arg3
-                                                                                           , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-                                                                                           ))
-    ; <prim("SUGARJ_unsafe_build", "DynRuleIntersectUnionFix")> [arg1, arg2, arg3]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-      )
-    ; id
-
-
-rules
 
   smart-DynRuleIntersect(|arg1, arg2, arg3) =
     where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersect") ; fail)> ( arg1
@@ -692,7 +648,8 @@ rules
                                                                                    ))
     ; <prim("SUGARJ_unsafe_build", "DynRuleIntersect")> [arg1, arg2, arg3]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
+                                                     ]]
       )
     ; id
 
@@ -708,7 +665,8 @@ rules
                                                                                ))
     ; <prim("SUGARJ_unsafe_build", "DynRuleUnion")> [arg1, arg2, arg3]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
+                                                     ]]
       )
     ; id
 
@@ -727,12 +685,10 @@ rules
                                                                                         ))
     ; <prim("SUGARJ_unsafe_build", "DynRuleIntersectUnion")> [arg1, arg2, arg3, arg4]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
+                                                     ]]
       )
     ; id
-
-
-rules
 
   smart-BA(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"BA") ; fail)> ( arg1
@@ -743,20 +699,8 @@ rules
                                                                      ))
     ; <prim("SUGARJ_unsafe_build", "BA")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-      )
-    ; id
-
-  smart-DynRuleIntersectFix(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectFix") ; fail)> ( arg1
-                                                                                    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RuleNames"]
-                                                                                    ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectFix") ; fail)> ( arg2
-                                                                                      , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-                                                                                      ))
-    ; <prim("SUGARJ_unsafe_build", "DynRuleIntersectFix")> [arg1, arg2]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
+                                                     ]]
       )
     ; id
 
@@ -769,58 +713,8 @@ rules
                                                                      ))
     ; <prim("SUGARJ_unsafe_build", "AM")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-      )
-    ; id
-
-  smart-DynRuleIntersect(|arg1, arg2, arg3) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersect") ; fail)> ( arg1
-                                                                                 , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-                                                                                 ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersect") ; fail)> ( arg2
-                                                                                   , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RuleNames"]
-                                                                                   ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersect") ; fail)> ( arg3
-                                                                                   , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-                                                                                   ))
-    ; <prim("SUGARJ_unsafe_build", "DynRuleIntersect")> [arg1, arg2, arg3]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-      )
-    ; id
-
-  smart-DynRuleUnion(|arg1, arg2, arg3) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleUnion") ; fail)> ( arg1
-                                                                             , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-                                                                             ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleUnion") ; fail)> ( arg2
-                                                                               , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RuleNames"]
-                                                                               ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleUnion") ; fail)> ( arg3
-                                                                               , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-                                                                               ))
-    ; <prim("SUGARJ_unsafe_build", "DynRuleUnion")> [arg1, arg2, arg3]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-      )
-    ; id
-
-  smart-DynRuleIntersectUnion(|arg1, arg2, arg3, arg4) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectUnion") ; fail)> ( arg1
-                                                                                      , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-                                                                                      ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectUnion") ; fail)> ( arg2
-                                                                                        , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RuleNames"]
-                                                                                        ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectUnion") ; fail)> ( arg3
-                                                                                        , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RuleNames"]
-                                                                                        ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"DynRuleIntersectUnion") ; fail)> ( arg4
-                                                                                        , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-                                                                                        ))
-    ; <prim("SUGARJ_unsafe_build", "DynRuleIntersectUnion")> [arg1, arg2, arg3, arg4]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
+                                                     ]]
       )
     ; id
 
@@ -833,12 +727,24 @@ rules
                                                                       ))
     ; <prim("SUGARJ_unsafe_build", "Seq")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
+                                                     ]]
       )
     ; id
 
-
-rules
+  smart-Seq(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Seq") ; fail)> ( arg1
+                                                                    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
+                                                                    ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Seq") ; fail)> ( arg2
+                                                                      , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
+                                                                      ))
+    ; <prim("SUGARJ_unsafe_build", "Seq")> [arg1, arg2]
+    ; put-syntax-sort(
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
+                                                     ]]
+      )
+    ; id
 
   smart-RDefNoArgs(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"RDefNoArgs") ; fail)> ( arg1
@@ -890,9 +796,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RuleDef"]
       )
     ; id
-
-
-rules
 
   smart-RuleNoCond(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"RuleNoCond") ; fail)> ( arg1
@@ -960,9 +863,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-SDefNoArgs(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"SDefNoArgs") ; fail)> ( arg1
                                                                            , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Id"]
@@ -993,9 +893,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-DefaultVarDec(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"DefaultVarDec") ; fail)> ( arg1
                                                                               , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ID"]
@@ -1005,9 +902,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Typedid"]
       )
     ; id
-
-
-rules
 
   smart-Call(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Call") ; fail)> ( arg1
@@ -1028,19 +922,6 @@ rules
                                                                              , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
                                                                              ))
     ; <prim("SUGARJ_unsafe_build", "ScopeDefault")> [arg1]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-      )
-    ; id
-
-  smart-BA(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"BA") ; fail)> ( arg1
-                                                                   , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategyAngle"]
-                                                                   ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"BA") ; fail)> ( arg2
-                                                                     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
-                                                                     ))
-    ; <prim("SUGARJ_unsafe_build", "BA")> [arg1, arg2]
     ; put-syntax-sort(
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
       )
@@ -1284,9 +1165,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-CallNoArgs(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"CallNoArgs") ; fail)> ( arg1
                                                                            , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SVar"]
@@ -1416,19 +1294,6 @@ rules
       )
     ; id
 
-  smart-AM(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"AM") ; fail)> ( arg1
-                                                                   , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-                                                                   ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"AM") ; fail)> ( arg2
-                                                                     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
-                                                                     ))
-    ; <prim("SUGARJ_unsafe_build", "AM")> [arg1, arg2]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-      )
-    ; id
-
   smart-Assign(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Assign") ; fail)> ( arg1
                                                                        , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
@@ -1442,9 +1307,6 @@ rules
       )
     ; id
 
-
-rules
-
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
@@ -1456,21 +1318,12 @@ rules
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
     )
-
-
-rules
 
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategyMid"]
     )
-
-
-rules
-
-
-rules
 
   smart-ListVar(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"ListVar") ; fail)> ( arg1
@@ -1497,9 +1350,6 @@ rules
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["LID"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ID"]
     )
-
-
-rules
 
   smart-BuildDefaultPT(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"BuildDefaultPT") ; fail)> ( arg1
@@ -1541,7 +1391,8 @@ rules
                                                                            ))
     ; <prim("SUGARJ_unsafe_build", "AnnoList")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]]]
+                                                     ]]
       )
     ; id
 
@@ -1564,20 +1415,8 @@ rules
                                                                       ))
     ; <prim("SUGARJ_unsafe_build", "App")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]
-      )
-    ; id
-
-  smart-App(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"App") ; fail)> ( arg1
-                                                                    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-                                                                    ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"App") ; fail)> ( arg2
-                                                                      , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
-                                                                      ))
-    ; <prim("SUGARJ_unsafe_build", "App")> [arg1, arg2]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]]]
+                                                     ]]
       )
     ; id
 
@@ -1587,17 +1426,8 @@ rules
                                                                         ))
     ; <prim("SUGARJ_unsafe_build", "RootApp")> [arg1]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]
-      )
-    ; id
-
-  smart-RootApp(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"RootApp") ; fail)> ( arg1
-                                                                        , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategyAngle"]
-                                                                        ))
-    ; <prim("SUGARJ_unsafe_build", "RootApp")> [arg1]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]]]
+                                                     ]]
       )
     ; id
 
@@ -1637,8 +1467,19 @@ rules
       )
     ; id
 
-
-rules
+  smart-Explode(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"Explode") ; fail)> ( arg1
+                                                                        , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
+                                                                        ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"Explode") ; fail)> ( arg2
+                                                                          , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
+                                                                          ))
+    ; <prim("SUGARJ_unsafe_build", "Explode")> [arg1, arg2]
+    ; put-syntax-sort(
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]]]
+                                                     ]]
+      )
+    ; id
 
   smart-Explode(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Explode") ; fail)> ( arg1
@@ -1649,21 +1490,8 @@ rules
                                                                           ))
     ; <prim("SUGARJ_unsafe_build", "Explode")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]
-      )
-    ; id
-
-  smart-AnnoList(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"AnnoList") ; fail)> ( arg1
-                                                                         , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]
-                                                                         ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"AnnoList") ; fail)> ( arg2
-                                                                           , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]]
-                                                                                                                           ]]
-                                                                           ))
-    ; <prim("SUGARJ_unsafe_build", "AnnoList")> [arg1, arg2]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]]]
+                                                     ]]
       )
     ; id
 
@@ -1676,12 +1504,24 @@ rules
                                                                      ))
     ; <prim("SUGARJ_unsafe_build", "As")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]]]
+                                                     ]]
       )
     ; id
 
-
-rules
+  smart-As(|arg1, arg2) =
+    where(<(has-sort <+ log-mismatching-sort-error(|"As") ; fail)> ( arg1
+                                                                   , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Var"]
+                                                                   ))
+    ; where(<(has-sort <+ log-mismatching-sort-error(|"As") ; fail)> ( arg2
+                                                                     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
+                                                                     ))
+    ; <prim("SUGARJ_unsafe_build", "As")> [arg1, arg2]
+    ; put-syntax-sort(
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]]]
+                                                     ]]
+      )
+    ; id
 
   smart-SortList(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"SortList") ; fail)> ( arg1
@@ -1719,9 +1559,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-Star(|) =
     <prim("SUGARJ_unsafe_build", "Star")> []
     ; put-syntax-sort(
@@ -1735,9 +1572,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Kind"]
       )
     ; id
-
-
-rules
 
   smart-Sorts(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Sorts") ; fail)> ( arg1
@@ -1760,9 +1594,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sdecl"]
       )
     ; id
-
-
-rules
 
   smart-SortVar(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"SortVar") ; fail)> ( arg1
@@ -1797,9 +1628,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sort"]
       )
     ; id
-
-
-rules
 
   smart-OpDecl(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"OpDecl") ; fail)> ( arg1
@@ -1837,9 +1665,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-ExtOpDecl(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"ExtOpDecl") ; fail)> ( arg1
                                                                           , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Id"]
@@ -1875,9 +1700,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Opdecl"]
       )
     ; id
-
-
-rules
 
   smart-ConstType(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"ConstType") ; fail)> ( arg1
@@ -1939,9 +1761,6 @@ rules
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Type"]
     )
 
-
-rules
-
   smart-Var(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Var") ; fail)> ( arg1
                                                                     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Id"]
@@ -1957,9 +1776,6 @@ rules
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Id"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ID"]
     )
-
-
-rules
 
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
@@ -2050,19 +1866,6 @@ rules
       )
     ; id
 
-  smart-Explode(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"Explode") ; fail)> ( arg1
-                                                                        , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
-                                                                        ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"Explode") ; fail)> ( arg2
-                                                                          , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
-                                                                          ))
-    ; <prim("SUGARJ_unsafe_build", "Explode")> [arg1, arg2]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]
-      )
-    ; id
-
   smart-Anno(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Anno") ; fail)> ( arg1
                                                                      , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]
@@ -2081,19 +1884,6 @@ rules
                                                                    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Var"]
                                                                    ))
     ; where(<(has-sort <+ log-mismatching-sort-error(|"As") ; fail)> ( arg2
-                                                                     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
-                                                                     ))
-    ; <prim("SUGARJ_unsafe_build", "As")> [arg1, arg2]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
-      )
-    ; id
-
-  smart-As(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"As") ; fail)> ( arg1
-                                                                   , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Var"]
-                                                                   ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"As") ; fail)> ( arg2
                                                                      , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]
                                                                      ))
     ; <prim("SUGARJ_unsafe_build", "As")> [arg1, arg2]
@@ -2101,38 +1891,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]
       )
     ; id
-
-
-rules
-
-  smart-Explode(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"Explode") ; fail)> ( arg1
-                                                                        , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
-                                                                        ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"Explode") ; fail)> ( arg2
-                                                                          , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
-                                                                          ))
-    ; <prim("SUGARJ_unsafe_build", "Explode")> [arg1, arg2]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]
-      )
-    ; id
-
-  smart-As(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"As") ; fail)> ( arg1
-                                                                   , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Var"]
-                                                                   ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"As") ; fail)> ( arg2
-                                                                     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
-                                                                     ))
-    ; <prim("SUGARJ_unsafe_build", "As")> [arg1, arg2]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
-      )
-    ; id
-
-
-rules
 
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
@@ -2200,9 +1958,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-SDefT(|arg1, arg2, arg3, arg4) =
     where(<(has-sort <+ log-mismatching-sort-error(|"SDefT") ; fail)> ( arg1
                                                                       , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Id"]
@@ -2263,9 +2018,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-VarDec(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"VarDec") ; fail)> ( arg1
                                                                        , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ID"]
@@ -2278,9 +2030,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Typedid"]
       )
     ; id
-
-
-rules
 
   smart-ParenStrat(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"ParenStrat") ; fail)> ( arg1
@@ -2312,7 +2061,8 @@ rules
                                                                       ))
     ; <prim("SUGARJ_unsafe_build", "Match")> [arg1]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
+                                                     ]]
       )
     ; id
 
@@ -2322,7 +2072,8 @@ rules
                                                                       ))
     ; <prim("SUGARJ_unsafe_build", "Build")> [arg1]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
+                                                     ]]
       )
     ; id
 
@@ -2340,19 +2091,6 @@ rules
       )
     ; id
 
-  smart-Seq(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"Seq") ; fail)> ( arg1
-                                                                    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-                                                                    ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"Seq") ; fail)> ( arg2
-                                                                      , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-                                                                      ))
-    ; <prim("SUGARJ_unsafe_build", "Seq")> [arg1, arg2]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-      )
-    ; id
-
   smart-GuardedLChoice(|arg1, arg2, arg3) =
     where(<(has-sort <+ log-mismatching-sort-error(|"GuardedLChoice") ; fail)> ( arg1
                                                                                , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
@@ -2365,7 +2103,8 @@ rules
                                                                                  ))
     ; <prim("SUGARJ_unsafe_build", "GuardedLChoice")> [arg1, arg2, arg3]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]]]
+                                                     ]]
       )
     ; id
 
@@ -2423,61 +2162,6 @@ rules
       )
     ; id
 
-
-rules
-
-  smart-Build(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"Build") ; fail)> ( arg1
-                                                                      , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
-                                                                      ))
-    ; <prim("SUGARJ_unsafe_build", "Build")> [arg1]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-      )
-    ; id
-
-  smart-Match(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"Match") ; fail)> ( arg1
-                                                                      , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
-                                                                      ))
-    ; <prim("SUGARJ_unsafe_build", "Match")> [arg1]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-      )
-    ; id
-
-  smart-Seq(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"Seq") ; fail)> ( arg1
-                                                                    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-                                                                    ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"Seq") ; fail)> ( arg2
-                                                                      , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-                                                                      ))
-    ; <prim("SUGARJ_unsafe_build", "Seq")> [arg1, arg2]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-      )
-    ; id
-
-  smart-GuardedLChoice(|arg1, arg2, arg3) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"GuardedLChoice") ; fail)> ( arg1
-                                                                               , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-                                                                               ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"GuardedLChoice") ; fail)> ( arg2
-                                                                                 , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategyMid"]
-                                                                                 ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"GuardedLChoice") ; fail)> ( arg3
-                                                                                 , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-                                                                                 ))
-    ; <prim("SUGARJ_unsafe_build", "GuardedLChoice")> [arg1, arg2, arg3]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-      )
-    ; id
-
-
-rules
-
   smart-ImportTerm(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"ImportTerm") ; fail)> ( arg1
                                                                            , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModName"]
@@ -2487,9 +2171,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
       )
     ; id
-
-
-rules
 
   smart-Module(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Module") ; fail)> ( arg1
@@ -2515,9 +2196,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Module"]
       )
     ; id
-
-
-rules
 
   smart-Imports(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Imports") ; fail)> ( arg1
@@ -2552,9 +2230,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-Import(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Import") ; fail)> ( arg1
                                                                        , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModName"]
@@ -2565,9 +2240,6 @@ rules
       )
     ; id
 
-
-rules
-
   smart-ImportWildcard(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"ImportWildcard") ; fail)> ( arg1
                                                                                , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ModName"]
@@ -2577,9 +2249,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ImportModName"]
       )
     ; id
-
-
-rules
 
   smart-Rules(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Rules") ; fail)> ( arg1
