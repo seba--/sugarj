@@ -38,6 +38,9 @@ rules
   is-lexical-sort = fail
   
   is-subsort-of = debug-analysis(!"is-subsort-of: "); fail
+  is-subsort-of =
+      ?(Sort("Alt",[sort1, sort2]), sort)
+    ; (<is-subsort-of> (sort1, sort) + <is-subsort-of> (sort2, sort))
   is-subsort-of = 
       push-subsort-stack
     ; finally( is-subsort-of-refl <+ is-subsort-unrename <+ is-subsort-of-trans
