@@ -5,13 +5,20 @@ imports org/sugarj/transformations/Analyze
         org/sugarj/stdlib/Common
 
 rules
+  // redefined in Stratego
+  smart-Some(|arg) =
+      <get-syntax-sort> arg => xsort
+    ; <prim("SUGARJ_unsafe_build", "Some")> [arg] 
+    ; put-syntax-sort(|<prim("SUGARJ_unsafe_build", "Sort")> ["Option", [xsort]])
+
+rules
   put-syntax-sort(|sort) =
     prim("SUGARJ_put_typesmart_sort", sort)
   get-syntax-sort =
     prim("SUGARJ_get_typesmart_sort") 
 
 rules
-  has-sort = Swap; debug(!"has sort? "); fail
+  // has-sort = Swap; debug(!"has sort? "); fail
   has-sort = ?(xs, Sort("List", [xsort]))
            ; <map(!(<id>, xsort); has-sort)> xs
   has-sort = ?(""#(xs), Sort("Tuple", xsorts))
@@ -30,14 +37,14 @@ rules
   has-sort =
       ?(term, sort)
     ; <infer-sort> term => inferred
-    ; <debug-analysis(!"inferred sort: ")> (inferred, term)
+    // ; <debug-analysis(!"inferred sort: ")> (inferred, term)
     ; init-subsort-stack
     ; <is-subsort-of> (inferred, sort)
-  has-sort = Swap; debug(!"FAIL has sort: "); fail
+  // has-sort = Swap; debug(!"FAIL has sort: "); fail
   
   is-lexical-sort = fail
   
-  is-subsort-of = debug-analysis(!"is-subsort-of: "); fail
+  // is-subsort-of = debug-analysis(!"is-subsort-of: "); fail
   is-subsort-of =
       ?(Sort("Alt",[sort1, sort2]), sort)
     ; (<is-subsort-of> (sort1, sort) + <is-subsort-of> (sort2, sort))
@@ -45,7 +52,7 @@ rules
       push-subsort-stack
     ; finally( is-subsort-of-refl <+ is-subsort-unrename <+ is-subsort-of-trans
              , pop-subsort-stack)
-  is-subsort-of = debug-analysis(!"FAIL is-subsort-of: "); fail
+  // is-subsort-of = debug-analysis(!"FAIL is-subsort-of: "); fail
   
   init-subsort-stack =
     where(rules ( Subsort-Stack := [] ))
@@ -70,7 +77,7 @@ rules
       ?(sub-sort,sup-sort)
     ; (<sort-equal> (sub-sort,sup-sort)
       <+  <sort-equal> (sub-sort, arg-sort)
-        ; <debug-analysis(!"inject: ")> (arg-sort, res-sort) 
+        // ; <debug-analysis(!"inject: ")> (arg-sort, res-sort) 
         ; ( <sort-equal> (res-sort, sup-sort)
             <+ <is-subsort-of> (res-sort, sup-sort)))
 
@@ -98,7 +105,7 @@ rules
   log-mismatching-sort-error(|cons) =
     (not(get-syntax-sort), id);
     Swap;
-    debug-analysis(<conc-strings> ("Argument of constructor ", cons, " lacks sort annotation, expected: "))
+    debug(<conc-strings> ("Argument of constructor ", cons, " lacks sort annotation, expected: "))
   
   log-mismatching-sort-error(|cons) =
     (get-syntax-sort, id);
@@ -107,4 +114,4 @@ rules
             ("Mismatching argument sort for constructor '", cons, "'.",
              " Was ", <write-to-string> was, ",",
              " expected ", <write-to-string> exp) => s);
-    <debug-analysis(!s)> "."
+    <debug(!s)> "."
