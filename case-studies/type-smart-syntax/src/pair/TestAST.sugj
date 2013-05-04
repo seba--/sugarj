@@ -1,0 +1,8 @@
+package pair;
+
+import pair.SugarAST;
+
+public class TestAST {
+  private (String, Integer) p = ("12", 34);
+}
+
