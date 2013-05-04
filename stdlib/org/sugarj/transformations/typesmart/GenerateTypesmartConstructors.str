@@ -157,7 +157,10 @@ rules
       ?(prod(lhs1, rhs1, attrs1), prod(lhs2, rhs2, attrs2))
     ; <(find-cons-attribute,find-cons-attribute)> (attrs1, attrs2) => (cons,cons)
     ; <(filter(get-symbol-sort),filter(get-symbol-sort))> (lhs1,lhs2) => (arg-sorts,arg-sorts)
-    ; !prod(lhs1, alt(rhs1, rhs2), attrs1)
+    ; if <equal> (rhs1, rhs2)
+        then !prod(lhs1, rhs1, attrs1)
+        else !prod(lhs1, alt(rhs1, rhs2), attrs1)
+      end
  
   merge-same-cons-prods-list =
       ?[]
@@ -224,4 +227,4 @@ rules
 
     nosmart-TrmOp : 
       op#(ts) -> 
-      BA(Prim("\"SUGARJ_unsafe_build\"", [NoAnnoList(Str(op))]), <nosmart-trm-explode> ts)
+      App(Prim("\"SUGARJ_unsafe_build\"", [NoAnnoList(Str(op))]), <nosmart-trm-explode> ts)
