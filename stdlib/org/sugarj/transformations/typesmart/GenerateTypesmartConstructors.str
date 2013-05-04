@@ -72,14 +72,16 @@ rules
          ; !context-free-syntax(<id>)
          ; gen-signature-from-grammar
           => sig-list);
-    map(
-      filter(gen-syntax-constructors-prod + gen-subsort-of-inject);
-      !Rules(<id>)) => smart-cons-list;
+    concat;
+    merge-same-cons-prods-list;
+    filter(gen-syntax-constructors-prod + gen-subsort-of-inject);
+    !Rules(<id>) => smart-conses;
+    
     !grammar;
     filter( ?lexical-syntax(<id>)
           + ?lexical-priorities(<collect-all(?prod(_,_,_))>));
     map(filter(gen-lexical-sort-prod); nub; !Rules(<id>)) => lexical-sort-list;
-    <conc> ([sig-list], lexical-sort-list, smart-cons-list)
+    <conc> ([sig-list], lexical-sort-list, [smart-conses])
 
   gen-syntax-constructors-prod :
     prod(lhs, rhs, attrs) ->
@@ -151,6 +153,31 @@ rules
     [_|rest] -> [arg| <make-arg-list(|<inc> n)> rest]
     where <conc-strings> ("arg", <int-to-string> n) => arg
 
+  merge-same-cons-prods =
+      ?(prod(lhs1, rhs1, attrs1), prod(lhs2, rhs2, attrs2))
+    ; <(find-cons-attribute,find-cons-attribute)> (attrs1, attrs2) => (cons,cons)
+    ; <(filter(get-symbol-sort),filter(get-symbol-sort))> (lhs1,lhs2) => (arg-sorts,arg-sorts)
+    ; !prod(lhs1, alt(rhs1, rhs2), attrs1)
+ 
+  merge-same-cons-prods-list =
+      ?[]
+  merge-same-cons-prods-list =
+      ?[x|xs]
+    ; <filter-split(!(x,<id>); merge-same-cons-prods)> xs => (merged, rest)
+    ; <merge-same-cons-prods-list> rest => rest'
+    ; <conc> (merged, rest')
+    
+    
+  filter-split(s) =
+      ?[]
+    ; !([],[])
+  filter-split(s) =
+      ? [x|xs]
+    ; <filter-split(s)> xs => (ok,nok)
+    ; if <s> x => x'
+        then !([x'|ok],nok)
+        else !(ok,[x|nok])
+      end
 
 rules
   nosmart-trm-explode =
