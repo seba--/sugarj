@@ -1,5 +1,7 @@
 package org.sugarj.common.typesmart;
 
+import java.math.BigInteger;
+
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.stratego.CallT;
@@ -34,7 +36,10 @@ public class TypesmartTermFactory extends AbstractTermFactory {
   
   private IContext context;
   private ITermFactory baseFactory;
-
+  
+  public int smartCalls = 0;
+  public BigInteger totalTimeMillis = BigInteger.ZERO;
+  
   public static TypesmartTermFactory registerNewTypeSmartTermFactory(IContext context) {
     TypesmartTermFactory factory = new TypesmartTermFactory(context.getFactory(), context);
     context.setFactory(factory);
@@ -69,8 +74,14 @@ public class TypesmartTermFactory extends AbstractTermFactory {
       IStrategoTerm currentWas = context.current();
       IStrategoTerm t;
       try {
+        smartCalls++;
+        long start = System.currentTimeMillis();
         boolean smartOk = smartCall.evaluateWithArgs(context, new Strategy[0], terms);
-
+        long end = System.currentTimeMillis();
+        totalTimeMillis = totalTimeMillis.add(BigInteger.valueOf(end - start));
+        System.out.println(ctr.getName());
+        System.out.println(end - start);
+        
         if (!smartOk) {
           IStrategoTerm failedTerm = baseFactory.makeAppl(ctr, terms, annotations);
           throw new StrategoException("Smart constructor failed for: " + ATermCommands.stripAnnos(failedTerm));
