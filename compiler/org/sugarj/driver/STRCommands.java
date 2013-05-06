@@ -30,8 +30,10 @@ import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.FilteringIOAgent;
+import org.sugarj.common.JavaCommands;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
+import org.sugarj.common.path.RelativePath;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.transformations.extraction.extract_str_0_0;
@@ -46,7 +48,8 @@ import org.sugarj.stdlib.StdLib;
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
 public class STRCommands {
-  
+
+  private static final boolean STRATEGO_INTERPRET = true;
 
   private static IOAgent strjIOAgent = new FilteringIOAgent(Log.CORE | Log.TRANSFORM, 
                                                             Pattern.quote("[ strj | info ]") + ".*", 
@@ -81,13 +84,21 @@ public class STRCommands {
    */
   private static void strj(boolean normalize, Path str, Path out, String main, Collection<Path> paths, LanguageLib langLib) throws IOException {
     
+    Path outPath;
+    if (STRATEGO_INTERPRET)
+      outPath = out;
+    else
+      outPath = new RelativePath(
+          FileCommands.newTempDir(), 
+          "sugarj" + Environment.sep + FileCommands.fileName(str).replace("-", "_") + ".java");
+    
     /*
      * We can include as many paths as we want here, checking the
      * adequacy of the occurring imports is done elsewhere.
      */
     List<String> cmd = new ArrayList<String>(Arrays.asList(new String[] {
         "-i", toWindowsPath(str.getAbsolutePath()),
-        "-o", toWindowsPath(out.getAbsolutePath()),
+        "-o", toWindowsPath(outPath.getAbsolutePath()),
         "-m", main,
         "-p", "sugarj",
         "--library",
@@ -108,7 +119,11 @@ public class STRCommands {
         cmd.add("-I");
         cmd.add(path.getAbsolutePath());
       }
-    
+
+    for (String stdlib : StdLib.stdStrategoLibs()) {
+      cmd.add("-la");
+      cmd.add(stdlib);
+    }
     
     final ByteArrayOutputStream log = new ByteArrayOutputStream();
 
@@ -125,6 +140,11 @@ public class STRCommands {
       if (log.size() > 0 && !log.toString().contains("Abstract syntax in"))
         throw new StrategoException(log.toString());
     }
+    
+    if (!STRATEGO_INTERPRET)
+      JavaCommands.javac(outPath, ((RelativePath) outPath).getBasePath(), paths);
+      JavaCommands.jar(((RelativePath) outPath).getBasePath(), out);
+      FileCommands.delete(((RelativePath) outPath).getBasePath());
   }
   
   
@@ -173,9 +193,9 @@ public class STRCommands {
     boolean success = false;
     log.beginTask("Generating", "Generate the assimilator", Log.TRANSFORM);
     try {
-      Path prog = FileCommands.newTempFile("ctree");
+      Path prog = FileCommands.newTempFile(STRATEGO_INTERPRET ? "ctree" : "jar");
       log.log("calling STRJ", Log.TRANSFORM);
-      strj(true, str, prog, main, paths, langLib);
+      strj(STRATEGO_INTERPRET, str, prog, main, paths, langLib);
       success = FileCommands.exists(prog);
       return prog;
     } finally {
@@ -259,7 +279,11 @@ public class STRCommands {
   
   public static IStrategoTerm assimilate(String strategy, Path ctree, IStrategoTerm in, HybridInterpreter interp) throws IOException {
     try {
-      interp.load(ctree.getAbsolutePath());
+      if ("ctree".equals(FileCommands.getExtension(ctree)))
+        interp.load(ctree.getAbsolutePath());
+      else
+        interp.loadJars(ctree.getFile().toURI().toURL());
+      
       interp.setCurrent(in);
       
       if (interp.invoke(strategy)) {
@@ -287,7 +311,8 @@ public class STRCommands {
       throw new StrategoException("desugaring failed: " + (e.getCause() == null ? e : e.getCause()).getMessage(), e);
     }
     catch (Exception e) {
-      throw new StrategoException("desugaring failed", e);
+      e.printStackTrace();
+      throw new StrategoException(e.getMessage(), e);
     }
   }
   
