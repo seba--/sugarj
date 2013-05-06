@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.ref.SoftReference;
+import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -430,6 +431,12 @@ public class Driver{
       if (environment.doGenerateFiles())
         driverResult.writeDependencyFile(depOutFile);
 
+      int smartCalls = ((TypesmartTermFactory) langLib.getInterpreter().getFactory()).smartCalls;
+      BigInteger time = ((TypesmartTermFactory) langLib.getInterpreter().getFactory()).totalTimeMillis;
+      System.out.println("calls: " + smartCalls);
+      System.out.println("time:  " + time);
+      System.out.println("mean:  " + (time.divide(BigInteger.valueOf(smartCalls))));
+      
       success = true;
     } 
     finally {
