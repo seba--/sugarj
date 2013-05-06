@@ -36,6 +36,7 @@ rules
   has-sort = (get-syntax-sort, id); init-subsort-stack; is-subsort-of
   has-sort =
       ?(term, sort)
+    ; not(get-syntax-sort)
     ; <infer-sort> term => inferred
     // ; <debug-analysis(!"inferred sort: ")> (inferred, term)
     ; init-subsort-stack
@@ -76,10 +77,17 @@ rules
   is-subsort-of-inject(|arg-sort,res-sort) =
       ?(sub-sort,sup-sort)
     ; (<sort-equal> (sub-sort,sup-sort)
-      <+  <sort-equal> (sub-sort, arg-sort)
-        // ; <debug-analysis(!"inject: ")> (arg-sort, res-sort) 
-        ; ( <sort-equal> (res-sort, sup-sort)
-            <+ <is-subsort-of> (res-sort, sup-sort)))
+      // arg -> res
+      // <+  <sort-equal> (sub-sort, arg-sort)
+      //   // ; <debug-analysis(!"inject: ")> (arg-sort, res-sort) 
+      //   ; ( <sort-equal> (res-sort, sup-sort)
+      //       <+ <is-subsort-of> (res-sort, sup-sort)))
+      
+      // res <- arg
+      <+  <sort-equal> (sup-sort, res-sort)
+        ; <debug-analysis(!"inject: ")> (arg-sort, res-sort) 
+        ; ( <sort-equal> (sub-sort, arg-sort)
+            <+ <is-subsort-of> (sub-sort, arg-sort)))
 
   sort-equal = structurally-equal
   sort-equal = ?(Sort("List", [EmptyCollection()]), Sort("List", [_]))
