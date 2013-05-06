@@ -89,6 +89,10 @@ public class StdLib {
   public static List<File> stdGrammars() {
     return Arrays.asList(new File[]{sdfDef, strategoDef, editorServicesDef, plainDef, commonDef, sugarDef, modelDef});
   }
+  
+  public static List<String> stdStrategoLibs() {
+    return Arrays.asList(new String[] {"stratego-lib", "stratego-sdf", "strc"});
+  }
 
   public static void main(String args[]) {
     exists(stdLibDir);
