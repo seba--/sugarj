@@ -112,6 +112,7 @@ rules
     ; <not(find-cons-attribute)> attrs
     ; <filter(get-symbol-sort)> lhs => [arg-sort]
     ; <get-symbol-sort> rhs => res-sort
+    ; <not(equal)> (arg-sort, res-sort)
     ; body := CallT(SVar("is-subsort-of-inject"), []
                   , [ <nosmart-trm-explode> arg-sort, <nosmart-trm-explode> res-sort])
 
