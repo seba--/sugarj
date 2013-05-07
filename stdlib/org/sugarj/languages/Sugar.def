@@ -8,8 +8,21 @@ exports
     Transformation -> SugarDefElem {cons("transformation-elem")}
 
   context-free syntax
-    Sdf2Grammar -> Grammar
-
+    %% Sdf2Grammar -> Grammar
+    "sorts" Sdf2Symbols -> Grammar {cons("sorts")}
+    "syntax" Sdf2Productions -> Grammar {cons("syntax")}
+    "lexical" "syntax" Sdf2Productions -> Grammar {cons("lexical-syntax")}
+    "context-free" "syntax" Sdf2Productions -> Grammar {cons("context-free-syntax")}
+    "variables" Sdf2Productions -> Grammar {cons("variables")}
+    "lexical" "variables" Sdf2Productions -> Grammar {cons("lexical-variables")}
+    "priorities" Sdf2Priorities -> Grammar {cons("priorities")}
+    "lexical" "priorities" Sdf2Priorities -> Grammar {cons("lexical-priorities")}
+    "context-free" "priorities" Sdf2Priorities -> Grammar {cons("context-free-priorities")}
+    "restrictions" Sdf2Restrictions -> Grammar {cons("restrictions")}
+    "lexical" "restrictions" Sdf2Restrictions -> Grammar {cons("lexical-restrictions")}
+    "context-free" "restrictions" Sdf2Restrictions -> Grammar {cons("context-free-restrictions")}
+    "aliases" Sdf2Aliases -> Grammar {cons("aliases")}
+        
   context-free syntax
     StrategoDecl -> Transformation
 
