@@ -398,102 +398,6 @@ rules
 
 rules
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    )
-
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    )
-
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    )
-
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    )
-
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    )
-
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    )
-
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    )
-
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    )
-
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    )
-
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    )
-
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    )
-
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    )
-
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    )
-
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    )
-
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    )
-
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    )
-
   smart-Assign(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Assign") ; fail)> ( arg1
                                                                        , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["LHS"]
@@ -1439,12 +1343,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
       )
     ; id
-
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Expr"]
-    )
 
   smart-PackageDec(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"PackageDec") ; fail)> ( arg1
@@ -3497,12 +3395,6 @@ rules
       )
     ; id
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StringLiteral"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StringLiteral"]
-    )
-
   smart-String(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"String") ; fail)> ( arg1
                                                                        , <prim("SUGARJ_unsafe_build", "Sort")> ["List"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StringPart"]]
@@ -3594,12 +3486,6 @@ rules
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OctaEscape"]
       )
     ; id
-
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharLiteral"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CharLiteral"]
-    )
 
   smart-Char(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"Char") ; fail)> ( arg1

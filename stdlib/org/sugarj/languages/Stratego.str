@@ -1097,12 +1097,6 @@ rules
       )
     ; id
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-    )
-
   smart-TupleCong(|arg1, arg2) =
     where(<(has-sort <+ log-mismatching-sort-error(|"TupleCong") ; fail)> ( arg1
                                                                           , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]

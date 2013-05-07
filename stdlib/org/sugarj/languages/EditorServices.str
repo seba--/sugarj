@@ -1461,12 +1461,6 @@ rules
       )
     ; id
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sort"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Sort"]
-    )
-
   smart-ConstructorOnly(|arg1) =
     where(<(has-sort <+ log-mismatching-sort-error(|"ConstructorOnly") ; fail)> ( arg1
                                                                                 , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ConstructorId"]

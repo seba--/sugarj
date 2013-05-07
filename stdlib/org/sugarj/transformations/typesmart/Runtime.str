@@ -36,7 +36,7 @@ rules
   has-sort = (get-syntax-sort, id); init-subsort-stack; is-subsort-of
   has-sort =
       ?(term, sort)
-    ; <not(get-syntax-sort)> term
+    // ; <not(get-syntax-sort)> term     // there might be a misleading imploder attachment
     ; <infer-sort> term => inferred
     ; <debug-analysis(!"inferred sort: ")> (inferred, term)
     ; init-subsort-stack

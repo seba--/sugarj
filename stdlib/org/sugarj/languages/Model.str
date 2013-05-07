@@ -108,12 +108,6 @@ rules
 
   is-subsort-of-trans(|) =
     is-subsort-of-inject(
-    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TransformationExpr"]
-    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TransformationExpr"]
-    )
-
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TransformationAppExpr"]
     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TransformationExpr"]
     )
