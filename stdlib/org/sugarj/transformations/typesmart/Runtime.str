@@ -72,22 +72,12 @@ rules
   unrename-sort = fail
   
   is-subsort-of-inject(|arg-sort,res-sort) =
-  	  where(<unrename-sort> arg-sort => unrenamed-arg-sort)
-  	; is-subsort-of-inject(|unrenamed-arg-sort,res-sort)
-  is-subsort-of-inject(|arg-sort,res-sort) =
-      ?(sub-sort,sup-sort)
-    ; (<sort-equal> (sub-sort,sup-sort)
-      // arg -> res
-      // <+  <sort-equal> (sub-sort, arg-sort)
-      //   // ; <debug-analysis(!"inject: ")> (arg-sort, res-sort) 
-      //   ; ( <sort-equal> (res-sort, sup-sort)
-      //       <+ <is-subsort-of> (res-sort, sup-sort)))
-      
-      // res <- arg
-      <+  <sort-equal> (sup-sort, res-sort)
-        ; <debug-analysis(!"inject: ")> (arg-sort, res-sort) 
-        ; ( <sort-equal> (sub-sort, arg-sort)
-            <+ <is-subsort-of> (sub-sort, arg-sort)))
+  	  ?(sub-sort,sup-sort)
+      // result to argument
+      ; <sort-equal> (sup-sort, res-sort)
+      ; where(<try(unrename-sort)> arg-sort => unrenamed-arg-sort)
+      // ; <debug-analysis(!"inject: ")> (unrenamed-arg-sort, res-sort) 
+      ; <is-subsort-of> (sub-sort, unrenamed-arg-sort)
 
   sort-equal = structurally-equal
   sort-equal = ?(Sort("List", [EmptyCollection()]), Sort("List", [_]))
