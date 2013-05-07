@@ -36,9 +36,9 @@ rules
   has-sort = (get-syntax-sort, id); init-subsort-stack; is-subsort-of
   has-sort =
       ?(term, sort)
-    ; not(get-syntax-sort)
+    ; <not(get-syntax-sort)> term
     ; <infer-sort> term => inferred
-    // ; <debug-analysis(!"inferred sort: ")> (inferred, term)
+    ; <debug-analysis(!"inferred sort: ")> (inferred, term)
     ; init-subsort-stack
     ; <is-subsort-of> (inferred, sort)
   // has-sort = Swap; debug(!"FAIL has sort: "); fail
@@ -65,7 +65,7 @@ rules
   pop-subsort-stack =
     where(rules( Subsort-Stack := <Subsort-Stack; ?[_|<id>]> ))
   
-  is-subsort-of-refl = structurally-equal
+  is-subsort-of-refl = sort-equal
   is-subsort-unrename = (unrename-sort, try(unrename-sort)); is-subsort-of
   is-subsort-unrename = (id, unrename-sort); is-subsort-of
   is-subsort-of-trans = fail
@@ -95,6 +95,8 @@ rules
       < <prim("SUGARJ_unsafe_build", "Sort")> ["Option", [EmptyCollection()]]
       + ?Some(x)
       ; <prim("SUGARJ_unsafe_build", "Sort")> ["Option", [<get-syntax-sort> x]]
+  infer-sort =
+    debug(!"infer failed: "); fail
 
 signature constructors
   EmptyCollection : Sdf2Sort
