@@ -79,11 +79,14 @@ public class TypesmartTermFactory extends AbstractTermFactory {
         boolean smartOk = smartCall.evaluateWithArgs(context, new Strategy[0], terms);
         long end = System.currentTimeMillis();
         totalTimeMillis = totalTimeMillis.add(BigInteger.valueOf(end - start));
-        System.out.println(ctr.getName());
-        System.out.println(end - start);
+        if (end - start > 100) {
+          System.out.println(ctr.getName());
+          System.out.println(end - start);
+        }
         
         if (!smartOk) {
           IStrategoTerm failedTerm = baseFactory.makeAppl(ctr, terms, annotations);
+          System.err.println("*****FAIL " + failedTerm);
           throw new StrategoException("Smart constructor failed for: " + ATermCommands.stripAnnos(failedTerm));
         }
 
