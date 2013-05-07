@@ -141,10 +141,11 @@ public class STRCommands {
         throw new StrategoException(log.toString());
     }
     
-    if (!STRATEGO_INTERPRET)
+    if (!STRATEGO_INTERPRET) {
       JavaCommands.javac(outPath, ((RelativePath) outPath).getBasePath(), paths);
       JavaCommands.jar(((RelativePath) outPath).getBasePath(), out);
       FileCommands.delete(((RelativePath) outPath).getBasePath());
+    }
   }
   
   
