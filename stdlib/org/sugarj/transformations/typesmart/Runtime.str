@@ -38,7 +38,6 @@ rules
       ?(term, sort)
     // ; <not(get-syntax-sort)> term     // there might be a misleading imploder attachment
     ; <infer-sort> term => inferred
-    ; <debug-analysis(!"inferred sort: ")> (inferred, term)
     ; init-subsort-stack
     ; <is-subsort-of> (inferred, sort)
   // has-sort = Swap; debug(!"FAIL has sort: "); fail
@@ -95,8 +94,8 @@ rules
       < <prim("SUGARJ_unsafe_build", "Sort")> ["Option", [EmptyCollection()]]
       + ?Some(x)
       ; <prim("SUGARJ_unsafe_build", "Sort")> ["Option", [<get-syntax-sort> x]]
-  infer-sort =
-    debug(!"infer failed: "); fail
+  // infer-sort =
+  //   debug(!"infer failed: "); fail
 
 signature constructors
   EmptyCollection : Sdf2Sort
