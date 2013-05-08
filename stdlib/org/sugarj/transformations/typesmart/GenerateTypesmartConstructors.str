@@ -112,7 +112,7 @@ rules
     ; <not(find-cons-attribute)> attrs
     ; <filter(get-symbol-sort)> lhs => [arg-sort]
     ; <get-symbol-sort> rhs => res-sort
-    ; <not(equal)> (arg-sort, res-sort)
+    ; <not(structurally-equal)> (arg-sort, res-sort)
     ; body := CallT(SVar("is-subsort-of-inject"), []
                   , [ <nosmart-trm-explode> arg-sort, <nosmart-trm-explode> res-sort])
 
@@ -156,9 +156,9 @@ rules
 
   merge-same-cons-prods =
       ?(prod(lhs1, rhs1, attrs1), prod(lhs2, rhs2, attrs2))
-    ; <(find-cons-attribute,find-cons-attribute)> (attrs1, attrs2) => (cons,cons)
-    ; <(filter(get-symbol-sort),filter(get-symbol-sort))> (lhs1,lhs2) => (arg-sorts,arg-sorts)
-    ; if <equal> (rhs1, rhs2)
+    ; <(find-cons-attribute,find-cons-attribute); structurally-equal> (attrs1, attrs2)
+    ; <(filter(get-symbol-sort),filter(get-symbol-sort)); structurally-equal> (lhs1,lhs2)
+    ; if <structurally-equal> (rhs1, rhs2)
         then !prod(lhs1, rhs1, attrs1)
         else !prod(lhs1, alt(rhs1, rhs2), attrs1)
       end
@@ -167,9 +167,10 @@ rules
       ?[]
   merge-same-cons-prods-list =
       ?[x|xs]
-    ; <filter-split(!(x,<id>); merge-same-cons-prods)> xs => (merged, rest)
+    ; <filter-split(!(x,<id>); merge-same-cons-prods)> xs => (merge-list, rest)
     ; <merge-same-cons-prods-list> rest => rest'
-    ; <conc> (<try(?[]; ![x])> merged, rest')
+    ; <try(?[]; ![x]); debug(!"fold:  "); foldl1(merge-same-cons-prods); debug(!"xfold: ")> merge-list => merged
+    ; ![merged | rest']
     
     
   filter-split(s) =
@@ -182,6 +183,10 @@ rules
         then !([x'|ok],nok)
         else !(ok,[x|nok])
       end
+
+  foldl1(s) =
+  	  ?[x|xs]
+  	; <foldl(s)> (xs, x)
 
 rules
   nosmart-trm-explode =
