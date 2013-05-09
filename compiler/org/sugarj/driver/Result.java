@@ -235,6 +235,9 @@ public class Result implements IErrorLogger {
   }
 
   public boolean isUpToDateShallow(int inputHash, Environment env) throws IOException {
+     if (generationPending && env.doGenerateFiles())
+       return false;
+     
      if (hasPersistentVersionChanged())
       return false;
     
