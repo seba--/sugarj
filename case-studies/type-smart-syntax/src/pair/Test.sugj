@@ -1,8 +1,8 @@
 package pair;
 
 import pair.Sugar;
-import pair.TypeSmartPair;
 
 public class Test {
   private (String, Integer) p = ("12", 34);
 }
+
