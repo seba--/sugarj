@@ -253,8 +253,7 @@ public class Driver{
       
       if (result != null
           && result.getSugaredSyntaxTree() != null
-          && result.isUpToDate(declProvider.getSourceHashCode(), driver.environment)
-          && !result.isGenerationPending())
+          && result.isUpToDate(declProvider.getSourceHashCode(), driver.environment))
         return result;
     }
     
