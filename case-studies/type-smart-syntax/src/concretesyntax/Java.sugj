@@ -67,7 +67,7 @@ public sugar Java {
     "~"       StrategoTerm       -> JavaArrayInit  {cons("FromMetaExpr")}
     "~arrayinit:"  StrategoTerm  -> JavaArrayInit  {cons("FromMetaExpr")}
 
-
+/*
 %%%
  %% Statements
  %%%
@@ -178,6 +178,7 @@ context-free syntax
 
   lexical syntax
     "java_" "lhs" [0-9\']* -> JavaID {reject}
+*/
 
 %%%
  %% Types
@@ -234,7 +235,7 @@ context-free syntax
  %%%
 
 
-
+/*
 %%%
  %% Formal Parameters
  %%%
@@ -326,7 +327,8 @@ context-free syntax
     "java_method-dec"  "|[" JavaMethodDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
     "java"             "|[" JavaMethodDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
                        "|[" JavaMethodDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
-   
+  
+*/ 
   
   strategies
     java-char-expr = java-char-expr-meta <+ java-char-expr-plain
