@@ -147,6 +147,9 @@ public class Driver{
       if (environment.getCacheDir() != null)
         FileCommands.createDir(environment.getCacheDir());
       
+      if(environment.getGenDir() != null)
+        FileCommands.createDir(environment.getGenDir());
+      
       FileCommands.createDir(environment.getBin());
       
       initializeCaches(environment, false);
@@ -248,9 +251,10 @@ public class Driver{
           putResult(sourceFile, result);
       }
       
-      if (result != null &&
-          (driver.environment.doGenerateFiles() || result.getSugaredSyntaxTree() != null) &&
-          result.isUpToDate(declProvider.getSourceHashCode(), driver.environment))
+      if (result != null
+          && result.getSugaredSyntaxTree() != null
+          && result.isUpToDate(declProvider.getSourceHashCode(), driver.environment)
+          && !result.isGenerationPending())
         return result;
     }
     
@@ -338,8 +342,8 @@ public class Driver{
       if (sourceFile != null) {
         langLib.setupSourceFile(sourceFile, environment);
 
-        depOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".dep");
-        Path genLog = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".gen");
+        depOutFile = environment.createGenPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".dep");
+        Path genLog = environment.createGenPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".gen");
         driverResult.setGenerationLog(genLog);
 //        clearGeneratedStuff();
       }
@@ -413,8 +417,7 @@ public class Driver{
         driverResult.registerEditorDesugarings(currentTransProg);
       }
 
-      if (environment.doGenerateFiles())
-        driverResult.writeDependencyFile(depOutFile);
+     driverResult.writeDependencyFile(depOutFile);
 
       success = true;
     } 
@@ -431,7 +434,7 @@ public class Driver{
     log.beginTask("compilation", "COMPILE generated " + langLib.getFactoryForLanguage().getLanguageName() + " files", Log.CORE);
     try {
       try {
-        langLib.compile(
+        boolean allGenerated = langLib.compile(
             langLib.getOutFile(), 
             langLib.getSource(),
             environment.getBin(), 
@@ -440,7 +443,8 @@ public class Driver{
             driverResult.getAvailableGeneratedFiles(),
             driverResult.getDeferredSourceFiles(),
             driverResult.getGeneratedFileHashes(), 
-            driverResult.isGenerateFiles());
+            environment.doGenerateFiles());
+        driverResult.setGenerationPending(!allGenerated);
       } catch (ClassNotFoundException e) {
         setErrorMessage(lastSugaredToplevelDecl, "Could not resolve imported class " + e.getMessage());
         // throw new RuntimeException(e);
@@ -459,7 +463,7 @@ public class Driver{
       if (depOutFile == null) {
         // does this ever occur?
         assert false;
-        depOutFile = environment.createBinPath(langLib.getRelativeNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
+        depOutFile = environment.createGenPath(langLib.getRelativeNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       }
       try {
         if (langLib.isImportDec(toplevelDecl) || langLib.isTransformationApplication(toplevelDecl)) {
@@ -546,7 +550,7 @@ public class Driver{
       // XXX if (currentTransProg != null)
       editorServices = ATermCommands.registerSemanticProvider(editorServices, currentTransProg);
 
-      Path editorServicesFile = environment.createBinPath(langLib.getRelativeNamespaceSep() + extName + ".serv");
+      Path editorServicesFile = environment.createGenPath(langLib.getRelativeNamespaceSep() + extName + ".serv");
       
       log.log("writing editor services to " + editorServicesFile, Log.DETAIL);
       
@@ -595,7 +599,7 @@ public class Driver{
       String plainContent = Term.asJavaString(ATermCommands.getApplicationSubterm(body, "PlainBody", 0));
       
       String ext = extension == null ? "" : ("." + extension);
-      Path plainFile = environment.createBinPath(langLib.getRelativeNamespaceSep() + extName + ext);
+      Path plainFile = environment.createGenPath(langLib.getRelativeNamespaceSep() + extName + ext);
       FileCommands.createFile(plainFile);
 
       log.log("writing plain content to " + plainFile, Log.DETAIL);
@@ -688,7 +692,7 @@ public class Driver{
 
       langLib.processNamespaceDec(toplevelDecl, environment, driverResult, sourceFile, driverResult.getSourceFile());    
       if (depOutFile == null)
-        depOutFile = environment.createBinPath(langLib.getRelativeNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
+        depOutFile = environment.createGenPath(langLib.getRelativeNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       
     } finally {
       log.endTask();
@@ -822,20 +826,15 @@ public class Driver{
       boolean sourceFileAvailable = importSourceFile != null;
       boolean requiresUpdate = res == null || res.getSourceFile() == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment);
       
-      if (sourceFileAvailable && requiresUpdate && !environment.doGenerateFiles()) {
-        // This is a parser run. Required module needs to be compiled before.
-        log.log("Module outdated, compile first: " + modulePath + ".", Log.IMPORT);
-        setErrorMessage(toplevelDecl, "module outdated, compile first: " + modulePath);
-      }
-      else if (sourceFileAvailable && requiresUpdate && getCircularImportResult(importSourceFile) != null) {
+      if (sourceFileAvailable && requiresUpdate && getCircularImportResult(importSourceFile) != null) {
         // Circular import. Assume source file does not provide syntactic sugar.
         log.log("Circular import detected: " + modulePath + ".", Log.IMPORT);
         langLib.addImportedModule(toplevelDecl, false);
         isCircularImport = true;
         circularLinks.add(importSourceFile);
       }
-      else if (sourceFileAvailable && requiresUpdate && environment.doGenerateFiles()) {
-        // This is a compiler run. Required module needs recompilation.
+      else if (sourceFileAvailable && requiresUpdate) {
+        // Required module needs recompilation.
         log.log("Need to compile imported module " + modulePath + " first.", Log.IMPORT);
         
         res = subcompile(toplevelDecl, importSourceFile);
@@ -992,8 +991,8 @@ public class Driver{
       if (dependsOnModel)
         return;
       
-      Path sdfExtension = environment.createBinPath(langLib.getRelativeNamespaceSep() + extName + ".sdf");
-      Path strExtension = environment.createBinPath(langLib.getRelativeNamespaceSep() + extName + ".str");
+      Path sdfExtension = environment.createGenPath(langLib.getRelativeNamespaceSep() + extName + ".sdf");
+      Path strExtension = environment.createGenPath(langLib.getRelativeNamespaceSep() + extName + ".str");
       
       String sdfImports = " imports " + StringCommands.printListSeparated(availableSDFImports, " ") + "\n";
       String strImports = " imports " + StringCommands.printListSeparated(availableSTRImports, " ") + "\n";
@@ -1017,7 +1016,7 @@ public class Driver{
       driverResult.generateFile(sdfExtension, sdfSource);
       availableSDFImports.add(fullExtName);
       
-      if (CommandExecution.FULL_COMMAND_LINE && environment.doGenerateFiles())
+      if (CommandExecution.FULL_COMMAND_LINE)
         log.log("Wrote SDF file to '" + sdfExtension.getAbsolutePath() + "'.", Log.DETAIL);
       
       String strExtensionTerm = "Module(" + "\"" + fullExtName+ "\"" + ", " + strExtract + ")" + "\n";
@@ -1036,7 +1035,7 @@ public class Driver{
       driverResult.generateFile(strExtension, strExtensionContent);
       availableSTRImports.add(fullExtName);
       
-      if (CommandExecution.FULL_COMMAND_LINE && environment.doGenerateFiles())
+      if (CommandExecution.FULL_COMMAND_LINE)
         log.log("Wrote Stratego file to '" + strExtension.getAbsolutePath() + "'.", Log.DETAIL);
       
       /*
@@ -1069,7 +1068,7 @@ public class Driver{
       String fullExtName = getFullRenamedDeclarationName(extName);
       checkModuleName(extName);
       
-      Path strExtension = environment.createBinPath(langLib.getRelativeNamespaceSep() + extName + ".str");
+      Path strExtension = environment.createGenPath(langLib.getRelativeNamespaceSep() + extName + ".str");
       IStrategoTerm transBody = langLib.getTransformationBody(toplevelDecl);
       if (isApplication(transBody, "TransformationDef")) 
         transBody = ATermCommands.factory.makeListCons(ATermCommands.makeAppl("Rules", "Rules", 1, transBody.getSubterm(0)), (IStrategoList) transBody.getSubterm(1));
@@ -1100,8 +1099,7 @@ public class Driver{
       driverResult.generateFile(strExtension, strExtensionContent);
       availableSTRImports.add(fullExtName);
       
-      if (environment.doGenerateFiles())
-        log.log("Wrote Stratego file to '" + strExtension.getAbsolutePath() + "'.", Log.DETAIL);
+      log.log("Wrote Stratego file to '" + strExtension.getAbsolutePath() + "'.", Log.DETAIL);
       
       /*
        * adapt current transformation
@@ -1146,7 +1144,7 @@ public class Driver{
   private void generateModel(String fullModelName, IStrategoTerm body) throws IOException {
     log.beginTask("Generate model.", Log.DETAIL);
     try {
-      RelativePath modelOutFile = environment.createBinPath(fullModelName + ".model");
+      RelativePath modelOutFile = environment.createGenPath(fullModelName + ".model");
       
       IStrategoTerm modelTerm = makeDesugaredSyntaxTree(body);
       String string = ATermCommands.atermToString(modelTerm);
@@ -1407,7 +1405,7 @@ public class Driver{
   }
   
   private void clearGeneratedStuff() throws IOException {
-    if (environment.doGenerateFiles() && driverResult.getGenerationLog() != null && FileCommands.exists(driverResult.getGenerationLog())) {
+    if (driverResult.getGenerationLog() != null && FileCommands.exists(driverResult.getGenerationLog())) {
 
       ObjectInputStream ois = null;
       

@@ -96,8 +96,9 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
 		return rel + Environment.sep;
 	}
 	
-	
-	public void compile(
+	// Returns true is files were generated or if there were no files to generate
+	// Returns false if generation was skipped due to generateFiles being false
+	public boolean compile(
 	    Path outFile, 
 	    SourceFileContent source, 
 	    Path bin,
@@ -109,6 +110,7 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
 			boolean generateFiles
 			) throws IOException, ClassNotFoundException {
 	  Set<RelativePath> generatedFiles = new HashSet<RelativePath>(previouslyGeneratedFiles);
+	  boolean allGenerated = true;
 	  
 	  for (Set<RelativePath> files: availableGeneratedFilesForSourceFile.values())
       for (RelativePath file : files)
@@ -140,10 +142,15 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
       throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + outFile);
     }
     
-    if (!outFiles.isEmpty())
+    if (!outFiles.isEmpty()) {
       this.compile(outFiles, bin, path, generateFiles);
+      allGenerated = generateFiles;
+    }
+    
 		for (Path cl : generatedFiles)
 			generatedFileHashes.put(cl, FileCommands.fileHash(cl));
+		
+		return allGenerated;
 	}
 
 	private void checkRequiredPaths(List<String> requiredPaths, Set<RelativePath> generatedFiles) throws ClassNotFoundException {

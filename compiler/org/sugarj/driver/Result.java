@@ -26,6 +26,7 @@ import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.languagelib.SourceFileContent;
+import org.sugarj.languagelib.SourceFileContent.Generated;
 import org.sugarj.util.AppendableObjectOutputStream;
 import org.sugarj.util.Pair;
 
@@ -45,7 +46,11 @@ public class Result implements IErrorLogger {
   private Path persistentPath;
   private Integer persistentHash = null;
   
+  // Generate files is true for a build, false for a parse
   private boolean generateFiles;
+  
+  // Generation pending pending is true after a parse when file generation was skipped
+  private boolean generationPending;
   
   private Map<Path, Integer> dependencies = new HashMap<Path, Integer>();
   private Set<Path> circularDependencies = new HashSet<Path>();
@@ -174,7 +179,7 @@ public class Result implements IErrorLogger {
   }
   
   private void logGeneration(Object o) throws IOException {
-    if (generateFiles && generationLog != null) {
+    if (generationLog != null) {
       boolean exists = FileCommands.exists(generationLog);
       if (!exists)
         FileCommands.createFile(generationLog);
@@ -189,12 +194,10 @@ public class Result implements IErrorLogger {
   }
 
   public void generateFile(Path file, String content) throws IOException {
-    if (generateFiles) {
-      FileCommands.writeToFile(file, content);
-      generatedFileHashes.put(file, FileCommands.fileHash(file));
-      allDependentFiles.add(file);
-      logGeneration(file);
-    }
+    FileCommands.writeToFile(file, content);
+    generatedFileHashes.put(file, FileCommands.fileHash(file));
+    allDependentFiles.add(file);
+    logGeneration(file);
   }
 
   public void addEditorService(IStrategoTerm service) {
@@ -232,10 +235,7 @@ public class Result implements IErrorLogger {
   }
 
   public boolean isUpToDateShallow(int inputHash, Environment env) throws IOException {
-    if (env.doGenerateFiles() && !generateFiles)
-      return false;
-    
-    if (hasPersistentVersionChanged())
+     if (hasPersistentVersionChanged())
       return false;
     
     if (hasSourceFileChanged(inputHash))
@@ -391,6 +391,14 @@ public class Result implements IErrorLogger {
     return generateFiles;
   }
   
+  public boolean isGenerationPending() {
+    return generationPending;
+  }
+  
+  public void setGenerationPending(boolean generationPending) {
+    this.generationPending = generationPending;
+  }
+  
   public void rewriteDependencyFile() throws IOException {
     if (persistentPath == null)
       throw new IllegalStateException("Result not previously written to file.");
@@ -413,6 +421,7 @@ public class Result implements IErrorLogger {
       oos = new ObjectOutputStream(new FileOutputStream(dep.getFile()));
       
       oos.writeBoolean(generateFiles);
+      oos.writeBoolean(generationPending);
       
       oos.writeObject(sourceFile);
       oos.writeInt(sourceFileHash);
@@ -454,6 +463,7 @@ public class Result implements IErrorLogger {
       ois = new ObjectInputStream(new FileInputStream(dep.getFile()));
       
       result.generateFiles = ois.readBoolean();
+      result.generationPending = ois.readBoolean();
       
       result.sourceFile = (RelativePath) ois.readObject();
       result.sourceFileHash = ois.readInt();

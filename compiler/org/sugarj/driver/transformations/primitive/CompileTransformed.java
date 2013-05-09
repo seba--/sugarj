@@ -32,7 +32,6 @@ import org.sugarj.util.Renaming;
  */
 class CompileTransformed extends AbstractPrimitive {
 
-  private boolean generateFiles;
   private Driver driver;
   private Environment environment;
   
@@ -40,7 +39,6 @@ class CompileTransformed extends AbstractPrimitive {
     super("SUGARJ_compile", 0, 2);
     this.driver = driver;
     this.environment = environment;
-    this.generateFiles = environment.doGenerateFiles();
   }
 
   @Override
@@ -64,8 +62,7 @@ class CompileTransformed extends AbstractPrimitive {
         environment.getRenamings().add(0, ren);
 //        generatedModel = driver.currentRename(generatedModel);
         
-        if (generateFiles)
-          driver.getCurrentResult().generateFile(source, ATermCommands.atermToString(generatedModel));
+        driver.getCurrentResult().generateFile(source, ATermCommands.atermToString(generatedModel));
       } catch (IOException e) {
         driver.setErrorMessage(e.getLocalizedMessage());
       }

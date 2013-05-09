@@ -188,7 +188,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
       if (reqJavaProject != null) {
         Environment projEnv = makeProjectEnvironment(reqJavaProject);
 //        env.getSourcePath().addAll(projEnv.getSourcePath());
-        env.getIncludePath().add(projEnv.getBin());
+        env.getIncludePath().add(projEnv.getGenDir());
       }
     }
   
@@ -200,6 +200,9 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
   private static void setDefaultEnvironmentOptions(Environment environment) {
     if (environment.getCacheDir() == null)
       environment.setCacheDir(new RelativePath(environment.getRoot(), ".sugarjcache"));
+    
+    if (environment.getGenDir() == null)
+      environment.setGenDir(environment.createCachePath("gen"));
     
     environment.setAtomicImportParsing(true);
     

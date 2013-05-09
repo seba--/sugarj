@@ -36,6 +36,8 @@ public class Environment implements Serializable {
   
   private Path cacheDir = null;
   
+  private Path genDir;
+  
   private Path root = new AbsolutePath(".");
   
   private Path bin = new AbsolutePath(".");
@@ -102,6 +104,17 @@ public class Environment implements Serializable {
     this.cacheDir = cacheDir;
   }
 
+  public Path getGenDir() {
+    return genDir;
+  }
+
+  public void setGenDir(Path genDir) {
+    if (this.genDir!=null)
+      includePath.remove(this.genDir);
+    this.genDir = genDir;
+    includePath.add(genDir);
+  }
+
   public boolean isAtomicImportParsing() {
     return atomicImportParsing;
   }
@@ -140,6 +153,10 @@ public class Environment implements Serializable {
   
   public RelativePath createCachePath(String relativePath) {
     return new RelativePath(cacheDir, relativePath);
+  }
+  
+  public RelativePath createGenPath(String relativePath) {
+    return new RelativePath(genDir, relativePath);
   }
   
   public List<Renaming> getRenamings() {

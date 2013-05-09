@@ -183,11 +183,11 @@ public class ImportCommands {
     if (modelPath == null)
       return null;
     if (transformationPath == null)
-      return environment.createBinPath(modelPath + ".model");
+      return environment.createGenPath(modelPath + ".model");
     
     String transformationPathString = FileCommands.dropExtension(transformationPath.getRelativePath());
     String transformedModelPath = FileCommands.dropExtension(modelPath.getRelativePath()) + "__" + transformationPathString.replace('/', '_');
-    return environment.createBinPath(transformedModelPath + ".model");
+    return environment.createGenPath(transformedModelPath + ".model");
   }
   
   /**

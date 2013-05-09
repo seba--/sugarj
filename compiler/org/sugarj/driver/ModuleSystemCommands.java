@@ -130,7 +130,7 @@ public class ModuleSystemCommands {
   public static RelativePath locateSourceFileOrModel(String modulePath, Set<Path> sourcePath, LanguageLib langLib, Environment environment) {
     RelativePath result = locateSourceFile(modulePath, langLib.getFactoryForLanguage().getSugarFileExtension(), sourcePath);
     if (result == null)
-      result = searchBinFile(modulePath, "model", environment, null);
+      result = searchFile(modulePath, "model", environment, null);
     if (result == null && langLib.getFactoryForLanguage().getOriginalFileExtension() != null)
       result = locateSourceFile(modulePath, langLib.getFactoryForLanguage().getOriginalFileExtension(), sourcePath);
     return result;
@@ -153,23 +153,26 @@ public class ModuleSystemCommands {
    * @throws IOException 
    */
   public static RelativePath searchFile(String relativePath, String fileExtension, Environment environment, Result driverResult) {
-    RelativePath p = searchBinFile(relativePath, fileExtension, environment, driverResult);
-    if (p != null)
-      return p;
+    RelativePath p;
     
-    return searchFileInSearchPath(relativePath, fileExtension, environment.getIncludePath(), driverResult);
+    p = searchFile(environment.createGenPath(relativePath + "." + fileExtension), driverResult);
+    if (p == null) {
+      p = searchFile(environment.createBinPath(relativePath + "." + fileExtension), driverResult);
+      if (p == null)
+          p = searchFileInSearchPath(relativePath, fileExtension, environment.getIncludePath(), driverResult);
+    }
+    return p;
   }
 
-  private static RelativePath searchBinFile(String relativePath, String extension, Environment environment, Result driverResult) {
-    RelativePath result = environment.createBinPath(relativePath + "." + extension);
+  private static RelativePath searchFile(RelativePath file, Result driverResult) {
     if (driverResult != null)
-      driverResult.addFileDependency(result);
-    if (result.getFile().exists())
-      return result;
+      driverResult.addFileDependency(file);
+    if (file.getFile().exists())
+      return file;
     
     return null;
   }
-  
+	  
   private static RelativePath searchFileInSearchPath(String relativePath, String extension, Set<Path> searchPath, Result driverResult) {
     for (Path base : searchPath) {
       RelativePath p = searchFile(base, relativePath, extension, driverResult);

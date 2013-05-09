@@ -24,13 +24,11 @@ class WriteTransformed extends AbstractPrimitive {
 
   private Driver driver;
   private Environment environment;
-  private boolean generateFiles;
   
   public WriteTransformed(Driver driver, Environment environment) {
     super("SUGARJ_write", 0, 2);
     this.driver = driver;
     this.environment = environment;
-    this.generateFiles = environment.doGenerateFiles();
   }
 
   @Override
@@ -50,8 +48,7 @@ class WriteTransformed extends AbstractPrimitive {
       environment.getRenamings().add(0, ren);
 //      generatedModel = driver.currentRename(generatedModel);
       
-      if (generateFiles)
-        driver.getCurrentResult().generateFile(source, ATermCommands.atermToString(generatedModel));
+      driver.getCurrentResult().generateFile(source, ATermCommands.atermToString(generatedModel));
     } catch (IOException e) {
       driver.setErrorMessage(e.getLocalizedMessage());
     }

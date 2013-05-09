@@ -89,10 +89,14 @@ public class Builder extends IncrementalProjectBuilder {
   
   protected void clean(IProgressMonitor monitor) throws CoreException {
     File f = getProject().getLocation().append(JavaCore.create(getProject()).getOutputLocation().makeRelativeTo(getProject().getFullPath())).toFile();
+    Environment environment = SugarJParseController.makeProjectEnvironment(getProject());
     try {
       FileCommands.delete(new AbsolutePath(f.getPath()));
+      FileCommands.delete(environment.getGenDir());
+      FileCommands.delete(environment.getCacheDir());
     } catch (IOException e) {
     }
+    
   }
 
   private void incrementalBuild(IResourceDelta delta, IProgressMonitor monitor) {
@@ -135,7 +139,7 @@ public class Builder extends IncrementalProjectBuilder {
           Path root = new AbsolutePath(getProject().getLocation().makeAbsolute().toString());
           IPath relPath = resource.getFullPath().makeRelativeTo(getProject().getFullPath());
           if (!relPath.isEmpty() &&
-              (environment.getBin().equals(new RelativePath(root, relPath.toString())) ||
+              (environment.getGenDir().equals(new RelativePath(root, relPath.toString())) ||
                environment.getIncludePath().contains(new RelativePath(root, relPath.toString()))))
             return false;
           
@@ -190,9 +194,11 @@ public class Builder extends IncrementalProjectBuilder {
               
             monitor.beginTask("compile " + input.sourceFile.getRelativePath(), IProgressMonitor.UNKNOWN);
 
-            RelativePath depFile = new RelativePath(environment.getBin(), FileCommands.dropExtension(input.sourceFile.getRelativePath()) + ".dep");
+            RelativePath depFile = new RelativePath(environment.getGenDir(), FileCommands.dropExtension(input.sourceFile.getRelativePath()) + ".dep");
             Result res = Result.readDependencyFile(depFile);
-            if (res == null || !res.isUpToDate(input.sourceFile, environment))
+            if (res == null 
+                || !res.isUpToDate(input.sourceFile, environment)
+                || res.isGenerationPending())
               res = Driver.run(input.sourceFile, environment, monitor, input.langLibFactory);
             
             IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
