@@ -158,21 +158,30 @@ rules
       ?(prod(lhs1, rhs1, attrs1), prod(lhs2, rhs2, attrs2))
     ; <(find-cons-attribute,find-cons-attribute); structurally-equal> (attrs1, attrs2)
     ; <(filter(get-symbol-sort),filter(get-symbol-sort)); structurally-equal> (lhs1,lhs2)
-    ; if <structurally-equal> (rhs1, rhs2)
-        then !prod(lhs1, rhs1, attrs1)
-        else !prod(lhs1, alt(rhs1, rhs2), attrs1)
-      end
- 
+    ; !prod(lhs1, alt(rhs1, rhs2), attrs1)
+   
   merge-same-cons-prods-list =
       ?[]
   merge-same-cons-prods-list =
       ?[x|xs]
     ; <filter-split(!(x,<id>); merge-same-cons-prods)> xs => (merge-list, rest)
     ; <merge-same-cons-prods-list> rest => rest'
-    ; <try(?[]; ![x]); debug(!"fold:  "); foldl1(merge-same-cons-prods); debug(!"xfold: ")> merge-list => merged
+    ; <try(?[]; ![x]); foldl1(merge-same-cons-prods); mk-alt-rhs> merge-list => merged
     ; ![merged | rest']
-    
-    
+  
+  mk-alt-rhs =
+  	  ?prod(lhs, rhs, attrs)
+  	; <flatten-alt> rhs => rhs-list
+  	; <foldr(![], union(structurally-equal), ![<id>])> rhs-list => nubbed
+  	; <foldl1(\(x,y) -> alt(x,y)\)> nubbed => rhs-res
+  	; !prod(lhs, rhs-res, attrs)
+  
+  flatten-alt =
+  	  ?alt(xs,ys)
+  	; <conc> (<flatten-alt> xs, <flatten-alt> ys)
+  flatten-alt =
+  	  ![<id>]
+  
   filter-split(s) =
       ?[]
     ; !([],[])
