@@ -1,6 +1,5 @@
 package org.sugarj.editor;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -176,7 +175,10 @@ public class SugarJParser extends JSGLRI {
     try {
       return Driver.run(input, sourceFile, environment, monitor, factory);
     } catch (InterruptedException e) {
-      throw e;
+      Result old = getResult(sourceFile.getRelativePath());
+      if (old != null)
+        return old;
+      return parseFailureResult(sourceFile.getRelativePath());
     } catch (Exception e) {
       e.printStackTrace();
       throw new RuntimeException("parsing " + FileCommands.fileName(sourceFile) + " failed", e);
@@ -232,7 +234,7 @@ public class SugarJParser extends JSGLRI {
     }
   }
   
-  private Result parseFailureResult(String filename) throws FileNotFoundException, IOException {
+  private Result parseFailureResult(String filename) {
     ITermFactory f = ATermCommands.factory;
     IStrategoTerm tbl =
       f.makeAppl(f.makeConstructor("parse-table", 5), 
@@ -260,7 +262,11 @@ public class SugarJParser extends JSGLRI {
       public boolean isUpToDate(int h, Environment env) { return false; }
     };
     r.setSugaredSyntaxTree(term);
-    r.registerEditorDesugarings(new AbsolutePath(StdLib.failureTrans.getAbsolutePath()));
+    try {
+      r.registerEditorDesugarings(new AbsolutePath(StdLib.failureTrans.getAbsolutePath()));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
     return r;
   }
   
