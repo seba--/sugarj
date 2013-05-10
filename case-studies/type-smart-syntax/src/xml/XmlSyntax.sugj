@@ -1,6 +1,4 @@
-package typesmart.xml;
-
-import typesmart.GenSyntaxConstructors;
+package xml;
 
 /*
  * https://svn.strategoxt.org/repos/StrategoXT/strategoxt/trunk/xml-front/syn/xml/

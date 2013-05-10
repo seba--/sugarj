@@ -1,6 +1,6 @@
-package typesmart.xml;
+package xml;
 
-import typesmart.xml.JSON;
+import xml.JSON;
 
 public class Test {
   private String foo = {A: {B: }};

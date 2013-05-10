@@ -1,6 +1,6 @@
-package typesmart.xml;
+package xml;
 
-import typesmart.xml.XmlSyntax;
+import xml.XmlSyntax;
 
 public sugar JSON {
   signature constructors
