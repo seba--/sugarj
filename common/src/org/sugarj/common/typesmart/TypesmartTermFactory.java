@@ -117,7 +117,7 @@ public class TypesmartTermFactory extends AbstractTermFactory {
         IStrategoAppl appl = (IStrategoAppl) terms[i];
         terms[i] = makeAppl(appl.getConstructor(), appl.getAllSubterms(), appl.getAnnotations());
         if (!terms[i].toString().equals("Op(\"Nil\",[])"))
-          throw new RuntimeException("unexpected  rebuilding");
+          System.err.println("unexpected  rebuilding");
       }
       else
         terms[i] = terms[i];
