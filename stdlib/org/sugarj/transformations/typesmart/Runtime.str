@@ -50,20 +50,6 @@ rules
       push-subsort-stack
     ; finally( is-subsort-of-refl <+ is-subsort-unrename <+ is-subsort-of-trans
              , pop-subsort-stack)
-  is-subsort-of =
-      ?(Sort("List",[xsort1]), Sort("List",[xsort2]))
-    ; (<is-subsort-of> (xsort1, xsort2))
-  is-subsort-of =
-      ?(Sort("Tuple",xsorts1), Sort("Tuple",xsorts2))
-      ; <equal> (<length> xsorts1, <length> xsorts2)
-      ; <zip> (xsorts1, xsorts2)
-      ; map(is-subsort-of)
-  is-subsort-of =
-      ?(Sort("Option",[xsort1]), Sort("Option",[xsort2]))
-    ; (<is-subsort-of> (xsort1, xsort2))
-  is-subsort-of =
-      ?(Sort("Alt",[sort1, sort2]), sort)
-    ; (<is-subsort-of> (sort1, sort) + <is-subsort-of> (sort2, sort))
   // is-subsort-of = debug-analysis(!"FAIL is-subsort-of: "); fail
   
   init-subsort-stack =
@@ -76,7 +62,7 @@ rules
   pop-subsort-stack =
     where(rules( Subsort-Stack := <Subsort-Stack; ?[_|<id>]> ))
   
-  is-subsort-of-refl = sort-equal
+  is-subsort-of-refl = sort-match
   is-subsort-unrename = (unrename-sort, try(unrename-sort)); is-subsort-of
   is-subsort-unrename = (id, unrename-sort); is-subsort-of
   is-subsort-of-trans = fail
@@ -85,14 +71,29 @@ rules
   is-subsort-of-inject(|arg-sort,res-sort) =
   	  ?(sub-sort,sup-sort)
       // result to argument
-      ; <sort-equal> (sup-sort, res-sort)
+      ; <sort-match> (sup-sort, res-sort)
       ; where(<try(unrename-sort)> arg-sort => unrenamed-arg-sort)
       // ; <debug-analysis(!"inject: ")> (unrenamed-arg-sort, res-sort) 
       ; <is-subsort-of> (sub-sort, unrenamed-arg-sort)
 
-  sort-equal = structurally-equal
-  sort-equal = ?(Sort("List", [EmptyCollection()]), Sort("List", [_]))
-  sort-equal = ?(Sort("Option", [EmptyCollection()]), Sort("Option", [_]))
+  sort-match = structurally-equal
+  sort-match = ?(Sort("List", [EmptyCollection()]), Sort("List", [_]))
+  sort-match = ?(Sort("Option", [EmptyCollection()]), Sort("Option", [_]))
+  sort-match =
+      ?(Sort("List", [xsort]), Sort("List", [xsort2]))
+    ; <sort-match> (xsort, xsort2)
+  sort-match =
+      ?(Sort("Option",[xsort1]), Sort("Option",[xsort2]))
+    ; (<sort-match> (xsort1, xsort2))
+  sort-match =
+      ?(Sort("Tuple",xsorts1), Sort("Tuple",xsorts2))
+      ; <equal> (<length> xsorts1, <length> xsorts2)
+      ; <zip> (xsorts1, xsorts2)
+      ; map(sort-match)
+  sort-match =
+      ?(Sort("Alt",[sort1, sort2]), sort)
+    ; (<sort-match> (sort1, sort) + <sort-match> (sort2, sort))
+  
 
   infer-sort =
       is-list
