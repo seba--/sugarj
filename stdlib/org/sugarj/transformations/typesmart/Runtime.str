@@ -38,6 +38,7 @@ rules
       ?(term, sort)
     // ; <not(get-syntax-sort)> term     // there might be a misleading imploder attachment
     ; <infer-sort> term => inferred
+    // ; <debug-analysis(!"inferred sort: ")> (inferred, term)
     ; init-subsort-stack
     ; <is-subsort-of> (inferred, sort)
   // has-sort = Swap; debug(!"FAIL has sort: "); fail
@@ -45,13 +46,24 @@ rules
   is-lexical-sort = fail
   
   // is-subsort-of = debug-analysis(!"is-subsort-of: "); fail
-  is-subsort-of =
-      ?(Sort("Alt",[sort1, sort2]), sort)
-    ; (<is-subsort-of> (sort1, sort) + <is-subsort-of> (sort2, sort))
   is-subsort-of = 
       push-subsort-stack
     ; finally( is-subsort-of-refl <+ is-subsort-unrename <+ is-subsort-of-trans
              , pop-subsort-stack)
+  is-subsort-of =
+      ?(Sort("List",[xsort1]), Sort("List",[xsort2]))
+    ; (<is-subsort-of> (xsort1, xsort2))
+  is-subsort-of =
+      ?(Sort("Tuple",xsorts1), Sort("Tuple",xsorts2))
+      ; <equal> (<length> xsorts1, <length> xsorts2)
+      ; <zip> (xsorts1, xsorts2)
+      ; map(is-subsort-of)
+  is-subsort-of =
+      ?(Sort("Option",[xsort1]), Sort("Option",[xsort2]))
+    ; (<is-subsort-of> (xsort1, xsort2))
+  is-subsort-of =
+      ?(Sort("Alt",[sort1, sort2]), sort)
+    ; (<is-subsort-of> (sort1, sort) + <is-subsort-of> (sort2, sort))
   // is-subsort-of = debug-analysis(!"FAIL is-subsort-of: "); fail
   
   init-subsort-stack =
@@ -94,8 +106,8 @@ rules
       < <prim("SUGARJ_unsafe_build", "Sort")> ["Option", [EmptyCollection()]]
       + ?Some(x)
       ; <prim("SUGARJ_unsafe_build", "Sort")> ["Option", [<get-syntax-sort> x]]
-  // infer-sort =
-  //   debug(!"infer failed: "); fail
+  infer-sort =
+    debug(!"infer failed: "); fail
 
 signature constructors
   EmptyCollection : Sdf2Sort
