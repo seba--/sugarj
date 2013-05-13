@@ -435,7 +435,7 @@ public class Driver{
       BigInteger time = ((TypesmartTermFactory) langLib.getInterpreter().getFactory()).totalTimeMillis;
       System.out.println("calls: " + smartCalls);
       System.out.println("time:  " + time);
-      System.out.println("mean:  " + (time.divide(BigInteger.valueOf(smartCalls))));
+      System.out.println("mean:  " + (smartCalls == 0 ? 0 : time.divide(BigInteger.valueOf(smartCalls))));
       
       success = true;
     } 
