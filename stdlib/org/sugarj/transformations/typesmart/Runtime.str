@@ -23,7 +23,7 @@ rules
   
   is-lexical-sort = fail
   
-  // is-subsort-of = debug-analysis(!"is-subsort-of: "); fail
+  // is-subsort-of = (try(get-syntax-sort), id); debug-analysis(!"is-subsort-of: "); fail
   is-subsort-of = 
       push-subsort-stack
     ; finally( is-subsort-of-refl <+ is-subsort-unrename <+ is-subsort-of-trans
@@ -61,7 +61,7 @@ rules
     ; <is-string> x
     ; <is-lexical-sort> xsort
   is-subsort-of-refl =
-      (get-syntax-sort; repeat(unrename-sort),id)
+      (get-syntax-sort ,id)
     ; sort-match
   
   is-subsort-unrename = (id, unrename-sort); is-subsort-of
@@ -94,6 +94,9 @@ rules
   sort-match =
       ?(sort, Sort("Alt",[sort1, sort2]))
     ; (<sort-match> (sort, sort1) + <sort-match> (sort, sort2))
+  sort-match =
+      (repeat1(unrename-sort), id)
+    ; sort-match
   
 
 signature constructors
