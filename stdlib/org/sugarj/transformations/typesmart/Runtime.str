@@ -19,29 +19,7 @@ rules
 
 rules
   // has-sort = Swap; debug(!"has sort? "); fail
-  has-sort = ?(xs, Sort("List", [xsort]))
-           ; <map(!(<id>, xsort); has-sort)> xs
-  has-sort = ?(""#(xs), Sort("Tuple", xsorts))
-           ; <equal> (<length> xs, <length> xsorts)
-           ; <zip> (xs, xsorts)
-           ; map(has-sort)
-  has-sort = ?(None(), Sort("Option", _))
-  has-sort = ?(Some(x), Sort("Option", [xsort]))
-           ; <has-sort> (x, xsort)
-  has-sort = ?(x, Sort("Alt", [xsort1, xsort2]))
-           ; (<has-sort> (x, xsort1) + <has-sort> (x, xsort2))
-  has-sort = ?(x, xsort)
-           ; <is-string> x
-           ; <is-lexical-sort> xsort
-  has-sort = (get-syntax-sort, id); init-subsort-stack; is-subsort-of
-  has-sort =
-      ?(term, sort)
-    // ; <not(get-syntax-sort)> term     // there might be a misleading imploder attachment
-    ; <infer-sort> term => inferred
-    // ; <debug-analysis(!"inferred sort: ")> (inferred, term)
-    ; init-subsort-stack
-    ; <is-subsort-of> (inferred, sort)
-  // has-sort = Swap; debug(!"FAIL has sort: "); fail
+  has-sort = try-init-subsort-stack; is-subsort-of
   
   is-lexical-sort = fail
   
@@ -52,8 +30,8 @@ rules
              , pop-subsort-stack)
   // is-subsort-of = debug-analysis(!"FAIL is-subsort-of: "); fail
   
-  init-subsort-stack =
-    where(rules ( Subsort-Stack := [] ))
+  try-init-subsort-stack =
+    where(Subsort-Stack <+ rules ( Subsort-Stack := [] ))
   push-subsort-stack =
       where(
         strip-annos => pair
@@ -62,23 +40,43 @@ rules
   pop-subsort-stack =
     where(rules( Subsort-Stack := <Subsort-Stack; ?[_|<id>]> ))
   
-  is-subsort-of-refl = sort-match
-  is-subsort-unrename = (unrename-sort, try(unrename-sort)); is-subsort-of
+  is-subsort-of-refl =
+      ?(xs, Sort("List", [xsort]))
+    ; <map(!(<id>, xsort); is-subsort-of)> xs
+  is-subsort-of-refl =
+      ?(""#(xs), Sort("Tuple", xsorts))
+    ; <equal> (<length> xs, <length> xsorts)
+    ; <zip> (xs, xsorts)
+    ; map(is-subsort-of)
+  is-subsort-of-refl =
+      ?(None(), Sort("Option", [_]))
+  is-subsort-of-refl =
+      ?(Some(x), Sort("Option", [xsort]))
+    ; <is-subsort-of> (x, xsort)
+  is-subsort-of-refl =
+      ?(x, Sort("Alt", [xsort1, xsort2]))
+    ; (<is-subsort-of> (x, xsort1) + <is-subsort-of-refl> (x, xsort2))
+  is-subsort-of-refl =
+      ?(x, xsort)
+    ; <is-string> x
+    ; <is-lexical-sort> xsort
+  is-subsort-of-refl =
+      (get-syntax-sort; repeat(unrename-sort),id)
+    ; sort-match
+  
   is-subsort-unrename = (id, unrename-sort); is-subsort-of
   is-subsort-of-trans = fail
   unrename-sort = fail
   
   is-subsort-of-inject(|arg-sort,res-sort) =
-  	  ?(sub-sort,sup-sort)
+  	  ?(term,sup-sort)
       // result to argument
       ; <sort-match> (sup-sort, res-sort)
       ; where(<try(unrename-sort)> arg-sort => unrenamed-arg-sort)
       // ; <debug-analysis(!"inject: ")> (unrenamed-arg-sort, res-sort) 
-      ; <is-subsort-of> (sub-sort, unrenamed-arg-sort)
+      ; <is-subsort-of> (term, unrenamed-arg-sort)
 
   sort-match = structurally-equal
-  sort-match = ?(Sort("List", [EmptyCollection()]), Sort("List", [_]))
-  sort-match = ?(Sort("Option", [EmptyCollection()]), Sort("Option", [_]))
   sort-match =
       ?(Sort("List", [xsort]), Sort("List", [xsort2]))
     ; <sort-match> (xsort, xsort2)
@@ -93,22 +91,10 @@ rules
   sort-match =
       ?(Sort("Alt",[sort1, sort2]), sort)
     ; (<sort-match> (sort1, sort) + <sort-match> (sort2, sort))
+  sort-match =
+      ?(sort, Sort("Alt",[sort1, sort2]))
+    ; (<sort-match> (sort, sort1) + <sort-match> (sort, sort2))
   
-
-  infer-sort =
-      is-list
-    ; ?[]
-      < <prim("SUGARJ_unsafe_build", "Sort")> ["List", [EmptyCollection()]]
-      + ?[x|xs]
-      ; <prim("SUGARJ_unsafe_build", "Sort")> ["List", [<get-syntax-sort> x]] => xsort
-      ; where(<has-sort> (xs, xsort))
-  infer-sort =
-      ?None()
-      < <prim("SUGARJ_unsafe_build", "Sort")> ["Option", [EmptyCollection()]]
-      + ?Some(x)
-      ; <prim("SUGARJ_unsafe_build", "Sort")> ["Option", [<get-syntax-sort> x]]
-  infer-sort =
-    debug(!"infer failed: "); fail
 
 signature constructors
   EmptyCollection : Sdf2Sort
