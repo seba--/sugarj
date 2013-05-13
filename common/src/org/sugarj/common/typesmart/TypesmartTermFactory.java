@@ -74,6 +74,8 @@ public class TypesmartTermFactory extends AbstractTermFactory {
       IStrategoTerm currentWas = context.current();
       IStrategoTerm t;
       try {
+        context.setFactory(baseFactory);
+        
         smartCalls++;
         long start = System.currentTimeMillis();
         boolean smartOk = smartCall.evaluateWithArgs(context, new Strategy[0], terms);
@@ -92,6 +94,7 @@ public class TypesmartTermFactory extends AbstractTermFactory {
 
         t = context.current();
       } finally {
+        context.setFactory(this);
         context.setCurrent(currentWas);
       }
 
