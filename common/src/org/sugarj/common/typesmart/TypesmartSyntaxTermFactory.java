@@ -77,8 +77,11 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
     cache = CacheManager.getInstance().getEhcache("typesmart-syntax");
   }
   
-  public static int cacheHits = 0;
-  public static int cacheMisses = 0;
+  /*
+   * cache statistics are per instance
+   */
+  public int cacheHits = 0;
+  public int cacheMisses = 0;
   
   public static TypesmartSyntaxTermFactory registerNewTypeSmartTermFactory(IContext context) {
     TypesmartSyntaxTermFactory factory = new TypesmartSyntaxTermFactory(context.getFactory(), context);

@@ -437,6 +437,9 @@ public class Driver{
       System.out.println("calls: " + smartCalls);
       System.out.println("time:  " + time);
       System.out.println("mean:  " + (smartCalls == 0 ? 0 : time.divide(BigInteger.valueOf(smartCalls))));
+      System.out.println();
+      System.out.println("cache hits:    " + ((TypesmartSyntaxTermFactory) langLib.getInterpreter().getFactory()).cacheHits);
+      System.out.println("cache misses:  " + ((TypesmartSyntaxTermFactory) langLib.getInterpreter().getFactory()).cacheMisses);
       
       success = true;
     } 
