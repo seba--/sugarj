@@ -767,25 +767,4 @@ Here is an example of CacheManager level resource tuning, which will use up to 4
            timeToLiveSeconds="1200">
     </defaultCache>
     
-    <!--
-      Sample, for BigMemory and Enterprise Ehcache only, demonstrating a tiered cache with in-memory, off-heap and disk stores. 
-      In this example the in-memory (on-heap) store is limited to 10,000 items ... which for example for 1k items would use 10MB of memory, 
-      the off-heap store is limited to 4GB and the disk store is unlimited in size.
-    -->
-    <cache name="sampleBigMemory"
-        eternal="true"
-        maxBytesLocalHeap="100M"
-        maxBytesLocalOffHeap="2G"
-     </cache>
-     
-    <!--
-      Sample, for BigMemory and Enterprise Ehcache only, demonstrating a restartable cache with in-memory and off-heap stores.
-     -->
-    <cache name="restartableBigMemory"
-           maxEntriesLocalHeap="10000"
-           eternal="true"
-           overflowToOffHeap="true"
-           maxBytesLocalOffHeap="4g"
-         <persistence strategy="localRestartable"/>
-     </cache>
 </ehcache>
