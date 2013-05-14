@@ -44,6 +44,8 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
         return baseFactory.makeList(getSortList(term.getAllSubterms()));
       case IStrategoTerm.TUPLE:
         return baseFactory.makeTuple(getSortList(term.getAllSubterms()));
+      case IStrategoTerm.BLOB:
+        return baseFactory.makeString(term.getClass().getCanonicalName());
       default:
         System.err.println("no sort: " + term.toString());
         return null;
@@ -75,6 +77,9 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
     cache = CacheManager.getInstance().getEhcache("typesmart-syntax");
   }
   
+  public static int cacheHits = 0;
+  public static int cacheMisses = 0;
+  
   public static TypesmartSyntaxTermFactory registerNewTypeSmartTermFactory(IContext context) {
     TypesmartSyntaxTermFactory factory = new TypesmartSyntaxTermFactory(context.getFactory(), context);
     context.setFactory(factory);
@@ -90,11 +95,13 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
     Key key = new Key(ctr, terms);
     Element el = cache.get(key);
     if (el != null) {
+      cacheHits++;
       IStrategoAppl appl = baseFactory.makeAppl(ctr, terms, annotations);
       TypesmartSortAttachment.put(appl, (IStrategoTerm) el.getObjectValue());
       return appl;
     }
     
+    cacheMisses++;
     IStrategoAppl appl = super.makeAppl(ctr, terms, annotations);
     IStrategoTerm sort = TypesmartSortAttachment.getSort(appl);
     cache.put(new Element(key, sort));
