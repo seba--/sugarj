@@ -761,10 +761,8 @@ Here is an example of CacheManager level resource tuning, which will use up to 4
     The defaultCache has an implicit name "default" which is a reserved cache name.
     -->
     <defaultCache
-           maxEntriesLocalHeap="0"
-           eternal="false"
-           timeToIdleSeconds="1200"
-           timeToLiveSeconds="1200">
+           maxEntriesLocalHeap="10000"
+           eternal="false">
     </defaultCache>
     
 </ehcache>
