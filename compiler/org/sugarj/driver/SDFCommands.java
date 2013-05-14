@@ -432,7 +432,7 @@ public class SDFCommands {
     Context ctx = interp.getCompiledContext();
     IStrategoTerm boxTerm = WithoutTypesmartSyntax.invoke(ctx, pp_sdf_box_0_0.instance, term);
     if (boxTerm != null) {
-      IStrategoTerm textTerm = box2text_string_0_1.instance.invoke(ctx, boxTerm, ATermCommands.factory.makeInt(80));
+      IStrategoTerm textTerm = WithoutTypesmartSyntax.invoke(ctx, box2text_string_0_1.instance, boxTerm, ATermCommands.factory.makeInt(80));
       if (textTerm != null)
         return ATermCommands.getString(textTerm);
     }
