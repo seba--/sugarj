@@ -19,3 +19,6 @@ Export-Package: org.sugarj.common,
  org.sugarj.common.path,
  org.sugarj.common.typesmart,
  org.sugarj.util
+Bundle-ClassPath: ehcache-core-2.6.6.jar,
+ .,
+ slf4j-api-1.6.1.jar

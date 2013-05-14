@@ -34,8 +34,8 @@ public class TypesmartTermFactory extends AbstractTermFactory {
 
   private final static boolean DEBUG_TYPESMART = true;
   
-  private IContext context;
-  private ITermFactory baseFactory;
+  protected IContext context;
+  protected ITermFactory baseFactory;
   
   public int smartCalls = 0;
   public BigInteger totalTimeMillis = BigInteger.ZERO;
