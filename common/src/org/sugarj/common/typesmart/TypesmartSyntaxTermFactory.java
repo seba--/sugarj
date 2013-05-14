@@ -92,6 +92,7 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
 
   @Override
   public IStrategoAppl makeAppl(IStrategoConstructor ctr, IStrategoTerm[] terms, IStrategoList annotations) {
+    rebuildEmptyLists(terms);
     Key key = new Key(ctr, terms);
     Element el = cache.get(key);
     if (el != null) {

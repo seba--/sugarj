@@ -114,7 +114,7 @@ public class TypesmartTermFactory extends AbstractTermFactory {
     }
   }
 
-  private void rebuildEmptyLists(IStrategoTerm[] terms) {
+  protected void rebuildEmptyLists(IStrategoTerm[] terms) {
     for (int i = 0; i < terms.length; i++)
       if  (terms[i] instanceof IStrategoAppl && TypesmartSortAttachment.getSort(terms[i]) == null) {
         IStrategoAppl appl = (IStrategoAppl) terms[i];
