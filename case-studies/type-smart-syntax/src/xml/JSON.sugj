@@ -3,40 +3,37 @@ package xml;
 import xml.XmlSyntax;
 
 public sugar JSON {
-  signature constructors
-    XML : Document -> JavaExpr
+  context-free syntax
+    Document -> JavaExpr {cons("XML")}
   
   context-free syntax
     JSONElement -> JavaExpr {cons("JSON")}
   
     "{" NCName ":" JSONElement* "}" -> JSONElement {cons("JSONElement")}
     
-  rules
-    smart-JSON(|el) =
-      <prim("SUGARJ_unsafe_build", "JSON")> [el];
-      put-syntax-sort(|SortNoArgs("JSON"))
-    
-    smart-JSONElement(|name, kids) =
-      <prim("SUGARJ_unsafe_build", "JSONElement")> [name, kids];
-      where(<put-syntax-sort(|SortNoArgs("NCName"))> name);
-      put-syntax-sort(|SortNoArgs("JSONElement"))
-  
   desugarings
     desugar-json
     desugar-xml
   
   rules
-    desugar-json :
-      JSON(json) -> XML(<bottomup(try(json-to-xml))> json) 
+    desugar-json : 
+      JSON(json) ->
+      XML(
+      Document( Prologue(None,[],None)
+              , el
+              , Epilogue([])
+              ))
+    where <json-to-xml> json => el
 
     json-to-xml :
       JSONElement(name, kids) ->
-      Element(qname, [], kids, qname)
+      Element(qname, [], xml-kids, qname)
     where qname := ElemName(QName(None, name))
+        ; <map(json-to-xml)> kids => xml-kids
 
   rules
     desugar-xml : 
-      XML(xml) -> <bottomup(try(xml-to-foo))> xml
+      XML(Document(_,xml,_)) -> <xml-to-foo> xml
     
     xml-to-foo :
       Element(ElemName(QName(None, name)),_,_,_) -> Lit(String([Chars(name)]))
