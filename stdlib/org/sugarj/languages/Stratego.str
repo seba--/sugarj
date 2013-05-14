@@ -176,6 +176,12 @@ signature
 
 rules
 
+
+rules
+
+
+rules
+
   is-lexical-sort(|) =
     equal(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Int"]
@@ -705,19 +711,6 @@ rules
                                                                      , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
                                                                      ))
     ; <prim("SUGARJ_unsafe_build", "AM")> [arg1, arg2]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-      )
-    ; id
-
-  smart-Seq(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"Seq") ; fail)> ( arg1
-                                                                    , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-                                                                    ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"Seq") ; fail)> ( arg2
-                                                                      , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
-                                                                      ))
-    ; <prim("SUGARJ_unsafe_build", "Seq")> [arg1, arg2]
     ; put-syntax-sort(
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Strategy"]
       )
@@ -1398,7 +1391,7 @@ rules
                                                                       ))
     ; <prim("SUGARJ_unsafe_build", "App")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]]]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]]]
                                                      ]]
       )
     ; id
@@ -1409,7 +1402,7 @@ rules
                                                                         ))
     ; <prim("SUGARJ_unsafe_build", "RootApp")> [arg1]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]]]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]]]
                                                      ]]
       )
     ; id
@@ -1460,32 +1453,6 @@ rules
     ; <prim("SUGARJ_unsafe_build", "Explode")> [arg1, arg2]
     ; put-syntax-sort(
       | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]
-      )
-    ; id
-
-  smart-Explode(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"Explode") ; fail)> ( arg1
-                                                                        , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
-                                                                        ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"Explode") ; fail)> ( arg2
-                                                                          , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
-                                                                          ))
-    ; <prim("SUGARJ_unsafe_build", "Explode")> [arg1, arg2]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PreTerm"]
-      )
-    ; id
-
-  smart-As(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"As") ; fail)> ( arg1
-                                                                   , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Var"]
-                                                                   ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"As") ; fail)> ( arg2
-                                                                     , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
-                                                                     ))
-    ; <prim("SUGARJ_unsafe_build", "As")> [arg1, arg2]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Term"]
       )
     ; id
 

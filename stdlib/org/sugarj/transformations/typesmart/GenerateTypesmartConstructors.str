@@ -79,7 +79,8 @@ rules
     
     !grammar;
     filter( ?lexical-syntax(<id>)
-          + ?lexical-priorities(<collect-all(?prod(_,_,_))>));
+          + ?lexical-priorities(<collect-all(?prod(_,_,_))>)
+          + ?syntax(<filter(?prod(_,lex(_),_))>));
     map(filter(gen-lexical-sort-prod); nub; !Rules(<id>)) => lexical-sort-list;
     <conc> ([sig-list], lexical-sort-list, [smart-conses])
 

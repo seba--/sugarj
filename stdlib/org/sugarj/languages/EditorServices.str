@@ -135,6 +135,15 @@ signature
 
 rules
 
+
+rules
+
+
+rules
+
+
+rules
+
   is-lexical-sort(|) =
     equal(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Placeholder"]
@@ -148,6 +157,18 @@ rules
 
 rules
 
+
+rules
+
+
+rules
+
+
+rules
+
+
+rules
+
   is-lexical-sort(|) =
     equal(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoId"]
@@ -157,6 +178,9 @@ rules
     equal(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["SemanticNode"]
     )
+
+
+rules
 
 
 rules
@@ -403,16 +427,6 @@ rules
                                                                                   ))
     ; <prim("SUGARJ_unsafe_build", "IdentifierLexical")> [arg1]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionRule"]
-      )
-    ; id
-
-  smart-IdentifierLexical(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"IdentifierLexical") ; fail)> ( arg1
-                                                                                  , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PropertyValue"]
-                                                                                  ))
-    ; <prim("SUGARJ_unsafe_build", "IdentifierLexical")> [arg1]
-    ; put-syntax-sort(
       | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionRule"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["LanguageProperty"]]]
                                                      ]]
       )
@@ -560,30 +574,9 @@ rules
   smart-None(|) =
     <prim("SUGARJ_unsafe_build", "None")> []
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionAnno"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FoldingAnno"]]]
-                                                     ]]
-      )
-    ; id
-
-  smart-None(|) =
-    <prim("SUGARJ_unsafe_build", "None")> []
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionAnno"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OnSaveAnno"]]]
-                                                     ]]
-      )
-    ; id
-
-  smart-Disable(|) =
-    <prim("SUGARJ_unsafe_build", "Disable")> []
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionAnno"]
-      )
-    ; id
-
-  smart-Disable(|) =
-    <prim("SUGARJ_unsafe_build", "Disable")> []
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionAnno"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FoldingAnno"]]]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FoldingAnno"]|[ <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionAnno"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OnSaveAnno"]]]
+                                                                                                                                                                   ]]
+                                                                                                                    ]]
                                                      ]]
       )
     ; id
@@ -1043,72 +1036,11 @@ rules
                                                                                  ))
     ; <prim("SUGARJ_unsafe_build", "SemanticProvider")> [arg1]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RefactoringRule"]
-      )
-    ; id
-
-  smart-SemanticProvider(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"SemanticProvider") ; fail)> ( arg1
-                                                                                 , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PropertyValue"]
-                                                                                 ))
-    ; <prim("SUGARJ_unsafe_build", "SemanticProvider")> [arg1]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RefactoringRule"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["BuilderRule"]]]
-                                                     ]]
-      )
-    ; id
-
-  smart-SemanticProvider(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"SemanticProvider") ; fail)> ( arg1
-                                                                                 , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PropertyValue"]
-                                                                                 ))
-    ; <prim("SUGARJ_unsafe_build", "SemanticProvider")> [arg1]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RefactoringRule"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["BuilderRule"]]]
-                                                     ]]
-      )
-    ; id
-
-  smart-SemanticProvider(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"SemanticProvider") ; fail)> ( arg1
-                                                                                 , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PropertyValue"]
-                                                                                 ))
-    ; <prim("SUGARJ_unsafe_build", "SemanticProvider")> [arg1]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RefactoringRule"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionRule"]]]
-                                                     ]]
-      )
-    ; id
-
-  smart-SemanticProvider(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"SemanticProvider") ; fail)> ( arg1
-                                                                                 , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PropertyValue"]
-                                                                                 ))
-    ; <prim("SUGARJ_unsafe_build", "SemanticProvider")> [arg1]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RefactoringRule"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionRule"]]]
-                                                     ]]
-      )
-    ; id
-
-  smart-SemanticProvider(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"SemanticProvider") ; fail)> ( arg1
-                                                                                 , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PropertyValue"]
-                                                                                 ))
-    ; <prim("SUGARJ_unsafe_build", "SemanticProvider")> [arg1]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RefactoringRule"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ReferenceRule"]]]
-                                                     ]]
-      )
-    ; id
-
-  smart-SemanticProvider(|arg1) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"SemanticProvider") ; fail)> ( arg1
-                                                                                 , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["PropertyValue"]
-                                                                                 ))
-    ; <prim("SUGARJ_unsafe_build", "SemanticProvider")> [arg1]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RefactoringRule"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ReferenceRule"]]]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RefactoringRule"]|[ <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["BuilderRule"]|[ <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionRule"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ReferenceRule"]]]
+                                                                                                                                                                                                                                                                                     ]]
+                                                                                                                                                                                                                                      ]]
+                                                                                                                                                                       ]]
+                                                                                                                        ]]
                                                      ]]
       )
     ; id
@@ -1122,35 +1054,11 @@ rules
                                                                          ))
     ; <prim("SUGARJ_unsafe_build", "OnSave")> [arg1, arg2]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RefactoringRule"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["BuilderRule"]]]
-                                                     ]]
-      )
-    ; id
-
-  smart-OnSave(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"OnSave") ; fail)> ( arg1
-                                                                       , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoCall"]
-                                                                       ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"OnSave") ; fail)> ( arg2
-                                                                         , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OnSaveAnno"]
-                                                                         ))
-    ; <prim("SUGARJ_unsafe_build", "OnSave")> [arg1, arg2]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RefactoringRule"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionRule"]]]
-                                                     ]]
-      )
-    ; id
-
-  smart-OnSave(|arg1, arg2) =
-    where(<(has-sort <+ log-mismatching-sort-error(|"OnSave") ; fail)> ( arg1
-                                                                       , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["StrategoCall"]
-                                                                       ))
-    ; where(<(has-sort <+ log-mismatching-sort-error(|"OnSave") ; fail)> ( arg2
-                                                                         , <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OnSaveAnno"]
-                                                                         ))
-    ; <prim("SUGARJ_unsafe_build", "OnSave")> [arg1, arg2]
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RefactoringRule"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ReferenceRule"]]]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["BuilderRule"]|[ <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["RefactoringRule"]|[ <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["CompletionRule"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ReferenceRule"]]]
+                                                                                                                                                                                                                                                                                     ]]
+                                                                                                                                                                                                                                      ]]
+                                                                                                                                                                   ]]
+                                                                                                                    ]]
                                                      ]]
       )
     ; id

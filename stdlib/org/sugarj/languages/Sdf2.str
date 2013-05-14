@@ -263,7 +263,7 @@ rules
                                                                            ))
     ; <prim("SUGARJ_unsafe_build", "char-class")> [arg1]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Lookahead"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]]]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Symbol"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Lookahead"]]]
                                                      ]]
       )
     ; id
@@ -372,7 +372,7 @@ rules
                                                                        ))
     ; <prim("SUGARJ_unsafe_build", "quoted")> [arg1]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Label"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AFun"]]]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AFun"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Label"]]]
                                                      ]]
       )
     ; id
@@ -383,7 +383,7 @@ rules
                                                                          ))
     ; <prim("SUGARJ_unsafe_build", "unquoted")> [arg1]
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Label"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AFun"]]]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AFun"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["Label"]]]
                                                      ]]
       )
     ; id
@@ -614,7 +614,7 @@ rules
   smart-absent(|) =
     <prim("SUGARJ_unsafe_build", "absent")> []
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OptCharRanges"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OptExp"]]]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OptExp"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["OptCharRanges"]]]
                                                      ]]
       )
     ; id

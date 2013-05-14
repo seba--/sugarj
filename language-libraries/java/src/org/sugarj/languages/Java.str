@@ -230,6 +230,20 @@ rules
 
   is-lexical-sort(|) =
     equal(
+    | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["FooStringChars"]
+    )
+
+
+rules
+
+
+rules
+
+
+rules
+
+  is-lexical-sort(|) =
+    equal(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["HexaFloatLiteral"]
     )
 
@@ -394,6 +408,9 @@ rules
     equal(
     | <prim("SUGARJ_unsafe_build", "SortNoArgs")> ["EndOfFile"]
     )
+
+
+rules
 
 
 rules
@@ -1485,23 +1502,11 @@ rules
   smart-Semicolon(|) =
     <prim("SUGARJ_unsafe_build", "Semicolon")> []
     ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AnnoElemDec"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["InterfaceMemberDec"]]]
-                                                     ]]
-      )
-    ; id
-
-  smart-Semicolon(|) =
-    <prim("SUGARJ_unsafe_build", "Semicolon")> []
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AnnoElemDec"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ClassMemberDec"]]]
-                                                     ]]
-      )
-    ; id
-
-  smart-Semicolon(|) =
-    <prim("SUGARJ_unsafe_build", "Semicolon")> []
-    ; put-syntax-sort(
-      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AnnoElemDec"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TypeDec"]]]
+      | <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["InterfaceMemberDec"]|[ <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["AnnoElemDec"]|[ <prim("SUGARJ_unsafe_build", "Sort")> ["Alt"|[ [<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["ClassMemberDec"]|[<prim("SUGARJ_unsafe_build", "SortNoArgs")> ["TypeDec"]]]
+                                                                                                                                                                                                                                                                                        ]]
+                                                                                                                                                                                                                                         ]]
+                                                                                                                                                                          ]]
+                                                                                                                           ]]
                                                      ]]
       )
     ; id
