@@ -508,7 +508,6 @@ public class Result implements IErrorLogger {
     res.desugaringsFile = FileCommands.tryMoveFile(parseResultPath, targetDir, desugaringsFile);
     res.parseTableFile = FileCommands.tryMoveFile(parseResultPath, targetDir, parseTableFile);
     res.generationLog = FileCommands.tryMoveFile(parseResultPath, targetDir, generationLog);
-    res.desugaringsFile = FileCommands.tryMoveFile(parseResultPath, targetDir, desugaringsFile);
 
     res.generatedFileHashes = new HashMap<Path, Integer>(generatedFileHashes.size());
     for (Entry<Path, Integer> e : generatedFileHashes.entrySet()) {
