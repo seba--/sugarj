@@ -98,7 +98,7 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
 	
 	// Returns true is files were generated or if there were no files to generate
 	// Returns false if generation was skipped due to generateFiles being false
-	public boolean compile(
+	public void compile(
 	    Path outFile, 
 	    SourceFileContent source, 
 	    Path bin,
@@ -106,12 +106,9 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
 			Set<RelativePath> previouslyGeneratedFiles,
 			Map<Path, Set<RelativePath>> availableGeneratedFilesForSourceFile,
 			Map<Path, Pair<Path, SourceFileContent.Generated>> deferredSourceFilesForSourceFile,
-			Map<Path, Integer> generatedFileHashes,
-			boolean generateFiles
+			Map<Path, Integer> generatedFileHashes
 			) throws IOException, ClassNotFoundException {
 	  Set<RelativePath> generatedFiles = new HashSet<RelativePath>(previouslyGeneratedFiles);
-	  boolean allGenerated = true;
-	  
 	  for (Set<RelativePath> files: availableGeneratedFilesForSourceFile.values())
       for (RelativePath file : files)
         if (getFactoryForLanguage().getGeneratedFileExtension().equals(FileCommands.getExtension(file)))
@@ -123,7 +120,7 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
       try { 
         String code = deferredSource.b.code;
         checkRequiredPaths(deferredSource.b.requiredPaths, generatedFiles);
-        writeToFile(generateFiles, generatedFileHashes, deferredSource.a, code);
+        writeToFile(generatedFileHashes, deferredSource.a, code);
         outFiles.add(deferredSource.a);
       } catch (ClassNotFoundException e) {
         throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + outFile);
@@ -135,22 +132,18 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
       String code = generated.code;
       checkRequiredPaths(generated.requiredPaths, generatedFiles);
       if (!source.isEmpty()) {
-        writeToFile(generateFiles, generatedFileHashes, outFile, code);
+        writeToFile(generatedFileHashes, outFile, code);
         outFiles.add(outFile);
       }
     } catch (ClassNotFoundException e) {
       throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + outFile);
     }
     
-    if (!outFiles.isEmpty()) {
-      this.compile(outFiles, bin, path, generateFiles);
-      allGenerated = generateFiles;
-    }
+    if (!outFiles.isEmpty())
+      this.compile(outFiles, bin, path);
     
 		for (Path cl : generatedFiles)
 			generatedFileHashes.put(cl, FileCommands.fileHash(cl));
-		
-		return allGenerated;
 	}
 
 	private void checkRequiredPaths(List<String> requiredPaths, Set<RelativePath> generatedFiles) throws ClassNotFoundException {
@@ -170,11 +163,9 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
 	    throw new ClassNotFoundException(StringCommands.printListSeparated(failed, ", "));
   }
 
-  private void writeToFile(boolean generateFiles, Map<Path, Integer> generatedFileHashes, Path file, String content) throws IOException { 
-		if (generateFiles) {
-			FileCommands.writeToFile(file, content);
-			generatedFileHashes.put(file, FileCommands.fileHash(file));
-		}
+  private void writeToFile(Map<Path, Integer> generatedFileHashes, Path file, String content) throws IOException { 
+		FileCommands.writeToFile(file, content);
+		generatedFileHashes.put(file, FileCommands.fileHash(file));
 	}
 
   public          String getImportLocalName(IStrategoTerm decl) { return null; }

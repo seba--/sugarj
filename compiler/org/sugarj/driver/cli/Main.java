@@ -71,7 +71,6 @@ public class Main {
   private static Environment getConsoleEnvironment() {
     Environment environment = new Environment(true);
     environment.setCacheDir(new RelativePath(new AbsolutePath(FileCommands.TMP_DIR), ".sugarjcache"));
-    environment.setGenDir(environment.createCachePath("gen"));
     environment.getSourcePath().add(new AbsolutePath("."));
     environment.setAtomicImportParsing(true);
     environment.setNoChecking(true);

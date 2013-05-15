@@ -177,7 +177,7 @@ public class FomegaLib extends LanguageLib {
   
   @Override
   public void setupSourceFile(RelativePath sourceFile, Environment environment) {
-    outFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".pts-source");
+    outFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".pts-source");
     sourceContent = new FomegaSourceFileContent();
   }
 
@@ -190,7 +190,7 @@ public class FomegaLib extends LanguageLib {
     String declaredRelNamespaceName = FileCommands.dropFilename(qualifiedModulePath);
     relNamespaceName = FileCommands.dropFilename(sourceFile.getRelativePath());
     
-    RelativePath objectFile = environment.createBinPath(getRelativeNamespaceSep() + moduleName + "." + getFactoryForLanguage().getGeneratedFileExtension());
+    RelativePath objectFile = environment.createOutPath(getRelativeNamespaceSep() + moduleName + "." + getFactoryForLanguage().getGeneratedFileExtension());
     generatedModules.add(objectFile);
     
     sourceContent.setNamespaceDecl(prettyPrint(toplevelDecl));
@@ -251,13 +251,11 @@ public class FomegaLib extends LanguageLib {
   }
   
   @Override
-  public void compile(List<Path> outFiles, Path bin, List<Path> includePaths, boolean generateFiles) throws IOException {
-    if (generateFiles) {
-      for (Path out : outFiles) {
-        RelativePath relOut = (RelativePath) out;
-        Path compilePath = new RelativePath(bin, FileCommands.dropExtension(relOut.getRelativePath()) + ".pts");
-        FileCommands.copyFile(out, compilePath);
-      }
+  public void compile(List<Path> outFiles, Path bin, List<Path> includePaths) throws IOException {
+    for (Path out : outFiles) {
+      RelativePath relOut = (RelativePath) out;
+      Path compilePath = new RelativePath(bin, FileCommands.dropExtension(relOut.getRelativePath()) + ".pts");
+      FileCommands.copyFile(out, compilePath);
     }
   }
 

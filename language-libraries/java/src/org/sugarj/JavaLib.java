@@ -248,7 +248,7 @@ public class JavaLib extends LanguageLib implements Serializable {
     if (expectedDecName != null && !expectedDecName.equals(decName))
       setErrorMessage(toplevelDecl, "Declaration name '" + decName + "'" + " does not match the file name '" + expectedDecName + "'.", null);
 
-    RelativePath clazz = environment.createBinPath(getRelativeNamespaceSep() + decName + ".class");
+    RelativePath clazz = environment.createOutPath(getRelativeNamespaceSep() + decName + ".class");
 
     generatedJavaClasses.add(clazz);
     javaSource.addBodyDecl(prettyPrint(dec));
@@ -265,7 +265,7 @@ public class JavaLib extends LanguageLib implements Serializable {
     checkPackageName(toplevelDecl, sourceFile, errorLog);
 
     if (javaOutFile == null)
-      javaOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + JavaLibFactory.getInstance().getOriginalFileExtension()); // XXX:
+      javaOutFile = environment.createOutPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + JavaLibFactory.getInstance().getOriginalFileExtension()); // XXX:
                                               
     // moved here before depOutFile==null check
     javaSource.setNamespaceDecl(prettyPrint(toplevelDecl));
@@ -278,7 +278,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 
   @Override
   public void setupSourceFile(RelativePath sourceFile, Environment environment) {
-    javaOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + JavaLibFactory.getInstance().getOriginalFileExtension());
+    javaOutFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + JavaLibFactory.getInstance().getOriginalFileExtension());
     javaSource = new JavaSourceFileContent();
     
     for (Path dir : environment.getSourcePath())
@@ -292,9 +292,8 @@ public class JavaLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  public void compile(List<Path> javaOutFiles, Path bin, List<Path> path, boolean generateFiles) throws IOException {
-    if (generateFiles)
-      JavaCommands.javac(javaOutFiles, sourcePath, bin, path);
+  public void compile(List<Path> javaOutFiles, Path bin, List<Path> path) throws IOException {
+    JavaCommands.javac(javaOutFiles, sourcePath, bin, path);
   }
 
   @Override

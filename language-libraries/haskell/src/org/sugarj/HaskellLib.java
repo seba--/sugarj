@@ -183,7 +183,7 @@ public class HaskellLib extends LanguageLib {
   
   @Override
   public void setupSourceFile(RelativePath sourceFile, Environment environment) {
-    outFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + HaskellLibFactory.getInstance().getOriginalFileExtension());
+    outFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + HaskellLibFactory.getInstance().getOriginalFileExtension());
     sourceContent = new HaskellSourceFileContent();
   }
 
@@ -196,7 +196,7 @@ public class HaskellLib extends LanguageLib {
     String declaredRelNamespaceName = FileCommands.dropFilename(qualifiedModulePath);
     relNamespaceName = FileCommands.dropFilename(sourceFile.getRelativePath());
     
-    RelativePath objectFile = environment.createBinPath(getRelativeNamespaceSep() + moduleName + "." + HaskellLibFactory.getInstance().getGeneratedFileExtension());
+    RelativePath objectFile = environment.createOutPath(getRelativeNamespaceSep() + moduleName + "." + HaskellLibFactory.getInstance().getGeneratedFileExtension());
     generatedModules.add(objectFile);
     
     sourceContent.setNamespaceDecl(prettyPrint(toplevelDecl));
@@ -257,26 +257,24 @@ public class HaskellLib extends LanguageLib {
   }
   
   @Override
-  public void compile(List<Path> outFiles, Path bin, List<Path> includePaths, boolean generateFiles) throws IOException {
-    if (generateFiles) {
-      List<String> cmds = new LinkedList<String>();
-      cmds.add(GHC_COMMAND);
-      
-      for (Path outFile : outFiles)
-        cmds.add(outFile.getAbsolutePath());
-      
-      cmds.add("-i");
-      if (!includePaths.isEmpty()) {
-        StringBuilder searchPath = new StringBuilder("-i");
-        for (Path path : includePaths)
-          if (new File(path.getAbsolutePath()).isDirectory())
-            searchPath.append(path.getAbsolutePath()).append(":");
-        searchPath.deleteCharAt(searchPath.length() - 1);
-        cmds.add(searchPath.toString());
-      }
-      
-      new CommandExecution(false).execute(cmds.toArray(new String[cmds.size()]));
+  public void compile(List<Path> outFiles, Path bin, List<Path> includePaths) throws IOException {
+    List<String> cmds = new LinkedList<String>();
+    cmds.add(GHC_COMMAND);
+    
+    for (Path outFile : outFiles)
+      cmds.add(outFile.getAbsolutePath());
+    
+    cmds.add("-i");
+    if (!includePaths.isEmpty()) {
+      StringBuilder searchPath = new StringBuilder("-i");
+      for (Path path : includePaths)
+        if (new File(path.getAbsolutePath()).isDirectory())
+          searchPath.append(path.getAbsolutePath()).append(":");
+      searchPath.deleteCharAt(searchPath.length() - 1);
+      cmds.add(searchPath.toString());
     }
+    
+    new CommandExecution(false).execute(cmds.toArray(new String[cmds.size()]));
   }
 
   @Override

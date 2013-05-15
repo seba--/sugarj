@@ -92,7 +92,7 @@ public class Builder extends IncrementalProjectBuilder {
     Environment environment = SugarJParseController.makeProjectEnvironment(getProject());
     try {
       FileCommands.delete(new AbsolutePath(f.getPath()));
-      FileCommands.delete(environment.getGenDir());
+      FileCommands.delete(environment.getParseBin());
       FileCommands.delete(environment.getCacheDir());
     } catch (IOException e) {
     }
@@ -139,7 +139,7 @@ public class Builder extends IncrementalProjectBuilder {
           Path root = new AbsolutePath(getProject().getLocation().makeAbsolute().toString());
           IPath relPath = resource.getFullPath().makeRelativeTo(getProject().getFullPath());
           if (!relPath.isEmpty() &&
-              (environment.getGenDir().equals(new RelativePath(root, relPath.toString())) ||
+              (environment.getParseBin().equals(new RelativePath(root, relPath.toString())) ||
                environment.getIncludePath().contains(new RelativePath(root, relPath.toString()))))
             return false;
           
@@ -194,7 +194,7 @@ public class Builder extends IncrementalProjectBuilder {
               
             monitor.beginTask("compile " + input.sourceFile.getRelativePath(), IProgressMonitor.UNKNOWN);
 
-            RelativePath depFile = new RelativePath(environment.getGenDir(), FileCommands.dropExtension(input.sourceFile.getRelativePath()) + ".dep");
+            RelativePath depFile = new RelativePath(environment.getParseBin(), FileCommands.dropExtension(input.sourceFile.getRelativePath()) + ".dep");
             Result res = Result.readDependencyFile(depFile);
             if (res == null || !res.isUpToDate(input.sourceFile, environment))
               res = Driver.run(input.sourceFile, environment, monitor, input.langLibFactory);

@@ -155,9 +155,9 @@ public class ModuleSystemCommands {
   public static RelativePath searchFile(String relativePath, String fileExtension, Environment environment, Result driverResult) {
     RelativePath p;
     
-    p = searchFile(environment.createGenPath(relativePath + "." + fileExtension), driverResult);
+    p = searchFile(environment.createOutPath(relativePath + "." + fileExtension), driverResult);
     if (p == null) {
-      p = searchFile(environment.createBinPath(relativePath + "." + fileExtension), driverResult);
+      p = searchFile(environment.createOutPath(relativePath + "." + fileExtension), driverResult);
       if (p == null)
           p = searchFileInSearchPath(relativePath, fileExtension, environment.getIncludePath(), driverResult);
     }

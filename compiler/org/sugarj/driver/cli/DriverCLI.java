@@ -420,10 +420,8 @@ public class DriverCLI {
     if (line.hasOption("d"))
       environment.setBin(pathArgument(line.getOptionValue("d")));
     
-    if (line.hasOption("cache")) {
+    if (line.hasOption("cache"))
       environment.setCacheDir(pathArgument(line.getOptionValue("cache")));
-      environment.setGenDir(environment.createCachePath("gen"));
-    }
   
     if (line.hasOption("gen-files"))
       environment.setGenerateFiles(true);

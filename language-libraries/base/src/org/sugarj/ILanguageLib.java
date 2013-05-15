@@ -43,7 +43,7 @@ public interface ILanguageLib {
 
   public abstract void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativePath sourceFile, RelativePath sourceFileFromResult) throws IOException;
   public abstract void processLanguageSpecific(IStrategoTerm toplevelDecl, Environment environment) throws IOException;
-  public abstract void compile(List<Path> outFiles, Path bin, List<Path> path, boolean generateFiles) throws IOException;
+  public abstract void compile(List<Path> outFiles, Path bin, List<Path> path) throws IOException;
 
   public abstract void addImportedModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException;
   public abstract String getImportedModulePath(IStrategoTerm decl);

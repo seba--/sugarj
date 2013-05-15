@@ -2,6 +2,7 @@ package org.sugarj.common;
 
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -35,13 +36,15 @@ public class Environment implements Serializable {
   private boolean generateFiles;
   
   private Path cacheDir = null;
-  
-  private Path genDir;
-  
+
   private Path root = new AbsolutePath(".");
   
   private Path bin = new AbsolutePath(".");
-  
+
+  /**
+   * The directory in which to place files at parse time.
+   */
+  private final Path parseBin;
   
   /* 
    * parse all imports simultaneously, i.e., not one after the other
@@ -64,9 +67,15 @@ public class Environment implements Serializable {
   private List<Renaming> renamings = new LinkedList<Renaming>();
   
   public Environment(boolean generateFiles) {
-    includePath.add(bin);
-    includePath.add(new AbsolutePath(StdLib.stdLibDir.getAbsolutePath()));
+    this.includePath.add(bin);
+    this.includePath.add(new AbsolutePath(StdLib.stdLibDir.getAbsolutePath()));
     this.generateFiles = generateFiles;
+    try {
+      this.parseBin = FileCommands.newTempDir();
+      this.includePath.add(parseBin);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
   
   public Path getRoot() {
@@ -104,15 +113,8 @@ public class Environment implements Serializable {
     this.cacheDir = cacheDir;
   }
 
-  public Path getGenDir() {
-    return genDir;
-  }
-
-  public void setGenDir(Path genDir) {
-    if (this.genDir!=null)
-      includePath.remove(this.genDir);
-    this.genDir = genDir;
-    includePath.add(genDir);
+  public Path getParseBin() {
+    return parseBin;
   }
 
   public boolean isAtomicImportParsing() {
@@ -147,7 +149,7 @@ public class Environment implements Serializable {
     this.includePath = includePath;
   }
 
-  public RelativePath createBinPath(String relativePath) {
+  private RelativePath createCompileBinPath(String relativePath) {
     return new RelativePath(bin, relativePath);
   }
   
@@ -155,10 +157,17 @@ public class Environment implements Serializable {
     return new RelativePath(cacheDir, relativePath);
   }
   
-  public RelativePath createGenPath(String relativePath) {
-    return new RelativePath(genDir, relativePath);
+  private RelativePath createParseBinPath(String relativePath) {
+    return new RelativePath(parseBin, relativePath);
   }
-  
+
+  public RelativePath createOutPath(String relativePath) {
+    if (doGenerateFiles())
+      return createCompileBinPath(relativePath);
+    else
+      return createParseBinPath(relativePath);
+  }
+
   public List<Renaming> getRenamings() {
     return renamings;
   }

@@ -216,7 +216,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 
 	@Override
 	public void setupSourceFile(RelativePath sourceFile, Environment environment) {
-		prologOutFile = environment.createBinPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + PrologLibFactory.getInstance().getGeneratedFileExtension());
+		prologOutFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + PrologLibFactory.getInstance().getGeneratedFileExtension());
 		prologSource = new PrologSourceFileContent(this);
 	}
 
@@ -252,7 +252,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 		log.log("The SDF / Stratego package name is '" + relNamespaceName + "'.", Log.DETAIL);
 		
 		if (prologOutFile == null) 
-			prologOutFile = environment.createBinPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + PrologLibFactory.getInstance().getGeneratedFileExtension());
+			prologOutFile = environment.createOutPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + PrologLibFactory.getInstance().getGeneratedFileExtension());
 	}
 	
 
@@ -262,12 +262,10 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 
 	@Override
-	public void compile(List<Path> sourceFiles, Path bin, List<Path> path, boolean generateFiles) throws IOException {
-		if (generateFiles) {
-			for (Path file : sourceFiles) {
-				// XXX: do nothing here?
-				System.err.println("prolog;     no compilation neccessary, file: " + file);
-			}
+	public void compile(List<Path> sourceFiles, Path bin, List<Path> path) throws IOException {
+		for (Path file : sourceFiles) {
+			// XXX: do nothing here?
+			System.err.println("prolog;     no compilation neccessary for Prolog, file: " + file);
 		}
 	}
 	
