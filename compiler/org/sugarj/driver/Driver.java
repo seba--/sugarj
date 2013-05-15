@@ -138,7 +138,7 @@ public class Driver{
     this.environment = env;
     this.langLib = langLibFactory.createLanguageLibrary();
     this.currentlyProcessing = currentlyProcessing;
-    this.driverResult = new Result(!env.doGenerateFiles());
+    this.driverResult = new Result(env.doGenerateFiles() ? null : env.getParseBin());
     
     langLib.setInterpreter(new HybridInterpreter());
     langLib.getInterpreter().addOperatorRegistry(new SugarJPrimitivesLibrary(this, environment, driverResult, monitor));
@@ -288,7 +288,6 @@ public class Driver{
     } finally {
       pendingRuns.remove(sourceFile);
 
-    //if (env.doGenerateFiles())
       putResult(sourceFile, driver.driverResult != null && driver.driverResult.getSugaredSyntaxTree() != null ? driver.driverResult : null);
     }
 

@@ -396,4 +396,31 @@ public class FileCommands {
   public static String nativePath(String path){
       return path.replace('/', File.separatorChar);
   }
+  
+  public static RelativePath getRelativePath(Path base, Path fullPath) {
+    if (fullPath instanceof RelativePath && ((RelativePath) fullPath).getBasePath().equals(base))
+      return (RelativePath) fullPath;
+    
+    String baseS = base.getAbsolutePath();
+    String fullS = fullPath.getAbsolutePath();
+    
+    if (fullS.startsWith(baseS))
+      return new RelativePath(base, fullS.substring(baseS.length()));
+    
+    return null;
+  }
+  
+  public static Path tryMoveFile(Path from, Path to, Path file) throws IOException {
+    RelativePath p = getRelativePath(from, file);
+    Path target = file;
+    if (p != null) {
+      target = new RelativePath(to, p.getRelativePath());
+      boolean ok = p.getFile().renameTo(target.getFile());
+      if (!ok) {
+        copyFile(p, target);
+        delete(p);
+      }
+    }
+    return target;
+  }
 }
