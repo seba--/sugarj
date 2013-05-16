@@ -11,7 +11,8 @@ compiler="$sugarj/compiler/bin"
 stdlib="$sugarj/stdlib/bin"
 layout="$sugarj/layout-parsing/jsglr-layout/bin"
 cliroot="$sugarj/compiler"
-clijars="$cliroot/commons-cli-1.2.jar:$cliroot/strategoxt.jar:$cliroot/make_permissive.jar"
+strategojar=`echo $STRATEGO_JAR`
+clijars="$strategojar:$cliroot/make_permissive.jar"
 langroot="$sugarj/language-libraries"
 langlibs="$langroot/base/bin:$langroot/haskell/bin:$langroot/java/bin:$langroot/prolog/bin"
 
