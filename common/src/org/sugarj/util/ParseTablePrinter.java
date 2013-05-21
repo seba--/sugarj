@@ -36,7 +36,7 @@ public class ParseTablePrinter {
       write = new BufferedWriter(new FileWriter(labs));
       writePrios = new BufferedWriter(new FileWriter(prios));
       
-      ParseTable table = ATermCommands.parseTableManager.loadFromFile(file);
+      ParseTable table = ATermCommands.standard.parseTableManager.loadFromFile(file);
 
       List<Label> labels = table.getLabels();
       for (int i = 0; i < labels.size(); i++)

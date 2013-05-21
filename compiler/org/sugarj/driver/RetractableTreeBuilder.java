@@ -1,9 +1,9 @@
 package org.sugarj.driver;
 
 import org.spoofax.interpreter.terms.ISimpleTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.jsglr_layout.client.imploder.TermTreeFactory;
 import org.spoofax.jsglr_layout.client.imploder.TreeBuilder;
-import org.sugarj.common.ATermCommands;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -12,8 +12,8 @@ public class RetractableTreeBuilder extends TreeBuilder {
   
   private boolean isInitialized;
   
-  public RetractableTreeBuilder() {
-    super(new TermTreeFactory(ATermCommands.factory));
+  public RetractableTreeBuilder(ITermFactory factory) {
+    super(new TermTreeFactory(factory));
   }
   
   @Override

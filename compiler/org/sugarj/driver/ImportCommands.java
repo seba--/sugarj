@@ -148,17 +148,17 @@ public class ImportCommands {
    * @param transformationPath Path to the *.str transformation.
    */
   private static IStrategoTerm executeTransformation(RelativePath model, RelativePath transformationPath, IStrategoTerm toplevelDecl, Environment environment, STRCommands str, Driver driver) throws IOException, TokenExpectedException, BadTokenException, InvalidParseTableException, SGLRException {
-    IStrategoTerm modelTerm = ATermCommands.atermFromFile(model.getAbsolutePath());
+    IStrategoTerm modelTerm = driver.aterm.atermFromFile(model.getAbsolutePath());
     String strat = "main-" + FileCommands.dropExtension(transformationPath.getRelativePath()).replace('/', '_');
     Result transformationResult = ModuleSystemCommands.locateResult(FileCommands.dropExtension(transformationPath.getRelativePath()), environment);
     
     Path trans = str.compile(transformationPath, strat, transformationResult.getFileDependencies());
     
     IStrategoTerm transformationInput = 
-        ATermCommands.makeTuple(
+        driver.aterm.makeTuple(
             modelTerm, 
-            ATermCommands.makeString(FileCommands.dropExtension(model.getRelativePath()), null),
-            ATermCommands.makeString(FileCommands.dropExtension(transformationPath.getRelativePath()), null));
+            driver.aterm.makeString(FileCommands.dropExtension(model.getRelativePath()), null),
+            driver.aterm.makeString(FileCommands.dropExtension(transformationPath.getRelativePath()), null));
 
     IStrategoTerm transformedTerm = str.assimilate(strat, trans, transformationInput);
     

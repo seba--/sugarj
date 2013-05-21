@@ -93,11 +93,11 @@ public class DriverCLI {
     
     IToken tok = ImploderAttachment.getRightToken(res.getSugaredSyntaxTree());
     
-    IStrategoTerm tuple = ATermCommands.makeTuple(
+    IStrategoTerm tuple = ATermCommands.standard.makeTuple(
         tok,
         res.getSugaredSyntaxTree(), 
-        ATermCommands.makeString(file.getAbsolutePath(), tok), 
-        ATermCommands.makeString(project, tok));
+        ATermCommands.standard.makeString(file.getAbsolutePath(), tok), 
+        ATermCommands.standard.makeString(project, tok));
     
     List<Error> errors = gatherNonFatalErrors(res.getSugaredSyntaxTree());
     success &= errors.isEmpty();

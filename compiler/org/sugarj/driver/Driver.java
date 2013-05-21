@@ -43,12 +43,13 @@ import org.spoofax.jsglr_layout.shared.BadTokenException;
 import org.spoofax.jsglr_layout.shared.SGLRException;
 import org.spoofax.jsglr_layout.shared.TokenExpectedException;
 import org.spoofax.terms.Term;
+import org.spoofax.terms.TermFactory;
+import org.spoofax.terms.attachments.ParentTermFactory;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.lang.StrategoException;
 import org.sugarj.LanguageLib;
 import org.sugarj.LanguageLibFactory;
 import org.sugarj.common.ATermCommands;
-import org.sugarj.common.ATermCommands.PrettyPrintError;
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
@@ -89,6 +90,10 @@ public class Driver{
   private boolean dependsOnModel = false;
 
   private IProgressMonitor monitor;
+  
+  public final ATermCommands aterm;
+  private final SDFCommands sdf;
+  private final ModuleSystemCommands modulesystem;
   
   private Environment environment;
   
@@ -144,13 +149,13 @@ public class Driver{
     this.currentlyProcessing = currentlyProcessing;
     this.driverResult = new Result(environment.doGenerateFiles());
     
-    langLib.setInterpreter(new HybridInterpreter());
-//    stratego_aterm.registerInterop(langLib.getInterpreter().getContext(), langLib.getInterpreter().getCompiledContext());
-//    stratego_gpp.registerInterop(langLib.getInterpreter().getContext(), langLib.getInterpreter().getCompiledContext());
-
+    langLib.setInterpreter(new HybridInterpreter(new ParentTermFactory(new TermFactory().getFactoryWithStorageType(IStrategoTerm.MUTABLE))));
     typesmartFactory = TypesmartSyntaxTermFactory.registerNewTypeSmartTermFactory(langLib.getInterpreter().getCompiledContext());
     langLib.getInterpreter().addOperatorRegistry(new SugarJPrimitivesLibrary(this, environment, driverResult, monitor));
 
+    aterm = new ATermCommands(typesmartFactory);
+    sdf = new SDFCommands(aterm);
+    modulesystem = new ModuleSystemCommands(aterm);
     
     try {      
       if (environment.getCacheDir() != null)
@@ -321,9 +326,9 @@ public class Driver{
     availableSTRImports = new ArrayList<String>();
     availableSTRImports.add(langLib.getInitTransModule());
   
-    sdfParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.sdfTbl.getPath()));
-    strParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.strategoTbl.getPath()));
-    editorServicesParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.editorServicesTbl.getPath()));
+    sdfParser = new SGLR(new TreeBuilder(), aterm.parseTableManager.loadFromFile(StdLib.sdfTbl.getPath()));
+    strParser = new SGLR(new TreeBuilder(), aterm.parseTableManager.loadFromFile(StdLib.strategoTbl.getPath()));
+    editorServicesParser = new SGLR(new TreeBuilder(), aterm.parseTableManager.loadFromFile(StdLib.editorServicesTbl.getPath()));
   }
 
   /**
@@ -425,7 +430,7 @@ public class Driver{
       
       if (currentTransProg != null) {
         driverResult.addEditorService(
-            ATermCommands.atermFromString(
+            aterm.atermFromString(
               "Builders(\"sugarj checking\", [SemanticObserver(Strategy(\"sugarj-analyze\"))])"));
         driverResult.registerEditorDesugarings(currentTransProg);
       }
@@ -631,9 +636,9 @@ public class Driver{
   
   public Pair<IStrategoTerm, Integer> currentParse(String remainingInput, ITreeBuilder treeBuilder, boolean recovery) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
     
-    currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfCache, environment, langLib);
+    currentGrammarTBL = sdf.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfCache, environment, langLib);
 
-    ParseTable table = ATermCommands.parseTableManager.loadFromFile(currentGrammarTBL.getAbsolutePath());
+    ParseTable table = aterm.parseTableManager.loadFromFile(currentGrammarTBL.getAbsolutePath());
     
     Pair<SGLR, Pair<IStrategoTerm, Integer>> parseResult = null;
 
@@ -940,7 +945,7 @@ public class Driver{
   public Result subcompile(IStrategoTerm toplevelDecl, RelativePath importSourceFile) throws InterruptedException {
     try {
       if ("model".equals(FileCommands.getExtension(importSourceFile))) {
-        IStrategoTerm term = ATermCommands.atermFromFile(importSourceFile.getAbsolutePath());
+        IStrategoTerm term = aterm.atermFromFile(importSourceFile.getAbsolutePath());
         return run(term, importSourceFile, environment, monitor, langLib.getFactoryForLanguage(), currentlyProcessing);
       }
       else
@@ -982,7 +987,7 @@ public class Driver{
       buildCompoundStrModule();
     }
     
-    success |= ModuleSystemCommands.importEditorServices(modulePath, environment, driverResult);
+    success |= modulesystem.importEditorServices(modulePath, environment, driverResult);
     
     return success;
   }
@@ -1055,7 +1060,7 @@ public class Driver{
         + "exports " + "\n"
         + "  (/)" + "\n";
 
-      String sdfExtensionContent = SDFCommands.prettyPrintSDF(sdfExtract, langLib.getInterpreter());
+      String sdfExtensionContent = sdf.prettyPrintSDF(sdfExtract, langLib.getInterpreter());
 
       String sdfSource = SDFCommands.makePermissiveSdf(sdfExtensionHead + sdfExtensionContent);
       driverResult.generateFile(sdfExtension, sdfSource);
@@ -1065,7 +1070,7 @@ public class Driver{
         log.log("Wrote SDF file to '" + sdfExtension.getAbsolutePath() + "'.", Log.DETAIL);
       
       String strExtensionTerm = "Module(" + "\"" + fullExtName+ "\"" + ", " + strExtract + ")" + "\n";
-      String strExtensionContent = SDFCommands.prettyPrintSTR(ATermCommands.atermFromString(strExtensionTerm), langLib.getInterpreter());
+      String strExtensionContent = SDFCommands.prettyPrintSTR(aterm.atermFromString(strExtensionTerm), langLib.getInterpreter());
       
       int index = strExtensionContent.indexOf('\n');
       if (index >= 0)
@@ -1096,7 +1101,7 @@ public class Driver{
       if (FileCommands.exists(strExtension))
         buildCompoundStrModule();
 
-    } catch (PrettyPrintError e) {
+    } catch (ATermCommands.PrettyPrintError e) {
       setErrorMessage(e.getMsg());
     } finally {
       log.endTask();
@@ -1116,7 +1121,7 @@ public class Driver{
       Path strExtension = environment.createBinPath(langLib.getRelativeNamespaceSep() + extName + ".str");
       IStrategoTerm transBody = langLib.getTransformationBody(toplevelDecl);
       if (isApplication(transBody, "TransformationDef")) 
-        transBody = ATermCommands.factory.makeListCons(ATermCommands.makeAppl("Rules", "Rules", 1, transBody.getSubterm(0)), (IStrategoList) transBody.getSubterm(1));
+        transBody = aterm.factory.makeListCons(aterm.makeAppl("Rules", "Rules", 1, transBody.getSubterm(0)), (IStrategoList) transBody.getSubterm(1));
       
       log.log("The name of the transformation is '" + extName + "'.", Log.DETAIL);
       log.log("The full name of the transformation is '" + fullExtName + "'.", Log.DETAIL);
@@ -1130,7 +1135,7 @@ public class Driver{
       
       String strImports = " imports " + StringCommands.printListSeparated(availableSTRImports, " ") + "\n";
       String strExtensionTerm = "Module(" + "\"" + fullExtName+ "\"" + ", " + renamedTransBody + ")" + "\n";
-      String strExtensionContent = SDFCommands.prettyPrintSTR(ATermCommands.atermFromString(strExtensionTerm), langLib.getInterpreter());
+      String strExtensionContent = SDFCommands.prettyPrintSTR(aterm.atermFromString(strExtensionTerm), langLib.getInterpreter());
       
       int index = strExtensionContent.indexOf('\n');
       if (index >= 0)
@@ -1193,7 +1198,7 @@ public class Driver{
       RelativePath modelOutFile = environment.createBinPath(fullModelName + ".model");
       
       IStrategoTerm modelTerm = makeDesugaredSyntaxTree(body);
-      String string = ATermCommands.atermToString(ATermCommands.stripAnnos(modelTerm));
+      String string = ATermCommands.atermToString(aterm.stripAnnos(modelTerm));
       driverResult.generateFile(modelOutFile, string);
       
       if (modelOutFile.equals(sourceFile))
@@ -1233,7 +1238,7 @@ public class Driver{
     log.beginTask("checking grammar", "CHECK current grammar", Log.CORE);
     
     try {
-      SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfCache, environment, langLib);
+      sdf.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfCache, environment, langLib);
     } finally {
       log.endTask();
     }
@@ -1399,14 +1404,14 @@ public class Driver{
    */
   private IStrategoTerm makeSugaredSyntaxTree() {
     // XXX empty lists => no tokens
-    IStrategoTerm packageDecl = ATermCommands.makeSome(sugaredNamespaceDecl, declProvider.getStartToken());
+    IStrategoTerm packageDecl = aterm.makeSome(sugaredNamespaceDecl, declProvider.getStartToken());
     IStrategoTerm imports = 
-      ATermCommands.makeList("JavaImportDec*", ImploderAttachment.getRightToken(packageDecl), sugaredImportDecls);
+      aterm.makeList("JavaImportDec*", ImploderAttachment.getRightToken(packageDecl), sugaredImportDecls);
     IStrategoTerm body =
-      ATermCommands.makeList("TypeOrSugarDec*", ImploderAttachment.getRightToken(imports), sugaredTypeOrSugarDecls);
+      aterm.makeList("TypeOrSugarDec*", ImploderAttachment.getRightToken(imports), sugaredTypeOrSugarDecls);
     
     IStrategoTerm term =
-      ATermCommands.makeAppl("CompilationUnit", "CompilationUnit", 3,
+      aterm.makeAppl("CompilationUnit", "CompilationUnit", 3,
         packageDecl,
         imports,
         body);
@@ -1423,14 +1428,14 @@ public class Driver{
    * @return the desugared syntax tree of the complete file.
    */
   private IStrategoTerm makeDesugaredSyntaxTree(IStrategoTerm bodyTerm) {
-    IStrategoTerm packageDecl = ATermCommands.makeSome(desugaredNamespaceDecl, declProvider.getStartToken());
+    IStrategoTerm packageDecl = aterm.makeSome(desugaredNamespaceDecl, declProvider.getStartToken());
     IStrategoTerm imports =
-      ATermCommands.makeList("JavaImportDec*", ImploderAttachment.getRightToken(packageDecl), desugaredImportDecls);
+      aterm.makeList("JavaImportDec*", ImploderAttachment.getRightToken(packageDecl), desugaredImportDecls);
     IStrategoTerm body =
-      ATermCommands.makeList("TypeOrSugarDec*", ImploderAttachment.getRightToken(imports), bodyTerm);
+      aterm.makeList("TypeOrSugarDec*", ImploderAttachment.getRightToken(imports), bodyTerm);
     
     IStrategoTerm term =
-      ATermCommands.makeAppl("CompilationUnit", "CompilationUnit", 3,
+      aterm.makeAppl("CompilationUnit", "CompilationUnit", 3,
         packageDecl,
         imports,
         body);

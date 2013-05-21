@@ -15,15 +15,18 @@ import org.sugarj.common.ATermCommands;
  */
 class ATermToString extends AbstractPrimitive {
 
-  public ATermToString() {
+  private ATermCommands aterm;
+  
+  public ATermToString(ATermCommands aterm) {
     super("SUGARJ_aterm_to_string", 0, 0);
+    this.aterm = aterm;
   }
 
   @Override
   public boolean call(IContext context, Strategy[] svars, IStrategoTerm[] tvars) throws InterpreterException {
     IStrategoTerm term = context.current();
     String s = term.toString();
-    context.setCurrent(ATermCommands.makeString(s));
+    context.setCurrent(aterm.makeString(s));
     return true;
   }
   

@@ -23,6 +23,11 @@ import org.sugarj.common.path.RelativePath;
  */
 public class ModuleSystemCommands {
   
+  private ATermCommands aterm;
+  
+  public ModuleSystemCommands(ATermCommands aterm) {
+    this.aterm = aterm;
+  }
   
     /**
      * 
@@ -88,7 +93,7 @@ public class ModuleSystemCommands {
    * @return true iff a serv file existed.
    * @throws IOException
    */
-  public static boolean importEditorServices(String modulePath, Environment environment, Result driverResult) throws IOException {
+  public boolean importEditorServices(String modulePath, Environment environment, Result driverResult) throws IOException {
     RelativePath serv = searchFile(modulePath, "serv", environment, driverResult);
     
     if (serv == null)
@@ -102,7 +107,7 @@ public class ModuleSystemCommands {
       String line;
       
       while ((line = reader.readLine()) != null)
-        driverResult.addEditorService(ATermCommands.atermFromString(line));
+        driverResult.addEditorService(aterm.atermFromString(line));
       
       return true;
     } finally {

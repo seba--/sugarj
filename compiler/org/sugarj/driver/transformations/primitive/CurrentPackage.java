@@ -30,7 +30,7 @@ class CurrentPackage extends AbstractPrimitive {
     if (name == null)
       return false;
 
-    IStrategoTerm nameTerm = ATermCommands.makeString(name);
+    IStrategoTerm nameTerm = driver.aterm.makeString(name);
     context.setCurrent(nameTerm);
     return true;
   }

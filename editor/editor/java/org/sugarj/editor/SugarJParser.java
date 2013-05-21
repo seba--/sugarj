@@ -28,6 +28,7 @@ import org.spoofax.jsglr_layout.client.imploder.Token;
 import org.spoofax.jsglr_layout.client.imploder.Tokenizer;
 import org.spoofax.jsglr_layout.shared.BadTokenException;
 import org.spoofax.jsglr_layout.shared.SGLRException;
+import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.attachments.ParentAttachment;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.imp.runtime.services.ContentProposerSemantic;
@@ -235,7 +236,8 @@ public class SugarJParser extends JSGLRI {
   }
   
   private Result parseFailureResult(String filename) {
-    ITermFactory f = ATermCommands.factory;
+    ITermFactory f = new TermFactory();
+    ATermCommands aterm = new ATermCommands(f);
     IStrategoTerm tbl =
       f.makeAppl(f.makeConstructor("parse-table", 5), 
           f.makeInt(6),
@@ -255,7 +257,7 @@ public class SugarJParser extends JSGLRI {
 
     Tokenizer tokenizer = new Tokenizer(" ", " ", new KeywordRecognizer(pt) {});
     Token tok = tokenizer.makeToken(0, IToken.TK_UNKNOWN, true);
-    IStrategoTerm term = ATermCommands.makeList("CompilationUnit", tok);
+    IStrategoTerm term = aterm.makeList("CompilationUnit", tok);
     
     Result r = new Result(true) {
       public boolean isUpToDateShallow(int h, Environment env) { return false; }
@@ -272,10 +274,10 @@ public class SugarJParser extends JSGLRI {
   
   private IStrategoTerm parseCompletionTree(String input, String filename, Result result) throws IOException {
     //TODO fix: adapt to parsing with parseMax
-    RetractableTreeBuilder treeBuilder = new RetractableTreeBuilder();
+    RetractableTreeBuilder treeBuilder = new RetractableTreeBuilder(ATermCommands.standard.factory);
     ParseTable table;
     try {
-      table = ATermCommands.parseTableManager.loadFromFile(result.getParseTable().getAbsolutePath());
+      table = ATermCommands.standard.parseTableManager.loadFromFile(result.getParseTable().getAbsolutePath());
     } catch (InvalidParseTableException e) {
       return null;
     }
@@ -304,7 +306,7 @@ public class SugarJParser extends JSGLRI {
       IStrategoTerm nextDecl = ATermCommands.getApplicationSubterm(term, "NextToplevelDeclaration", 0);
       list.add(nextDecl);
       if (nextDecl.toString().contains(ContentProposerSemantic.COMPLETION_TOKEN)) {
-        IStrategoList termList = ATermCommands.makeList("NextToplevelDeclaration", list);
+        IStrategoList termList = ATermCommands.standard.makeList("NextToplevelDeclaration", list);
         
         IStrategoList listIt = termList;
         while (!listIt.isEmpty()) {

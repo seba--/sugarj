@@ -16,10 +16,12 @@ import org.sugarj.common.ATermCommands;
 public class PrettyPrint extends AbstractPrimitive {
 
   private IPrettyPrint pp;
+  private ATermCommands aterm;
   
-  public PrettyPrint(IPrettyPrint pp) {
+  public PrettyPrint(IPrettyPrint pp, ATermCommands aterm) {
     super("SUGARJ_pretty_print_base", 0, 0);
     this.pp = pp;
+    this.aterm = aterm;
   }
 
   @Override
@@ -29,7 +31,7 @@ public class PrettyPrint extends AbstractPrimitive {
     
     String s = pp.prettyPrint(context.current());
     if (s != null) {
-      context.setCurrent(ATermCommands.makeString(s));
+      context.setCurrent(aterm.makeString(s));
       return true;
     }
     

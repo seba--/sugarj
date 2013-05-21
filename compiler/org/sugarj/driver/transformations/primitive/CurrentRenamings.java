@@ -21,10 +21,12 @@ import org.sugarj.util.Renaming;
 class CurrentRenamings extends AbstractPrimitive {
 
   private Environment environment;
+  private ATermCommands aterm;
   
-  public CurrentRenamings(Environment environment) {
+  public CurrentRenamings(Environment environment, ATermCommands aterm) {
     super("SUGARJ_current_renamings", 0, 0);
     this.environment = environment;
+    this.aterm = aterm;
   }
 
   @Override
@@ -35,18 +37,18 @@ class CurrentRenamings extends AbstractPrimitive {
     for (Renaming r : renamings) {
       List<IStrategoTerm> qualTerms = new LinkedList<IStrategoTerm>();
       for (String qual : r.pkgs)
-        qualTerms.add(ATermCommands.makeString(qual));
-      IStrategoTerm quals = ATermCommands.makeList("Qualifiers", qualTerms);
-      IStrategoTerm from = ATermCommands.makeString(r.from);
-      IStrategoTerm to = ATermCommands.makeString(r.to);
+        qualTerms.add(aterm.makeString(qual));
+      IStrategoTerm quals = aterm.makeList("Qualifiers", qualTerms);
+      IStrategoTerm from = aterm.makeString(r.from);
+      IStrategoTerm to = aterm.makeString(r.to);
       
       if (!map.containsKey(from))
         map.put(from, to);
-      if (!map.containsKey(ATermCommands.makeTuple(quals, from)))
-      map.put(ATermCommands.makeTuple(quals, from), to);
+      if (!map.containsKey(aterm.makeTuple(quals, from)))
+      map.put(aterm.makeTuple(quals, from), to);
     }
     
-    context.setCurrent(ATermCommands.makeAppl("Hashtable", "", 1, map));
+    context.setCurrent(aterm.makeAppl("Hashtable", "", 1, map));
     return true;
   }
   

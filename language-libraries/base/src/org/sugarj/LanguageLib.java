@@ -37,14 +37,16 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
 
   protected HybridInterpreter interp;
 
+  protected ATermCommands aterm;
+  
   public void setInterpreter(HybridInterpreter interp) {
     this.interp = interp;
     interp.addOperatorRegistry(new AbstractStrategoOperatorRegistry() {
       {
         if (LanguageLib.this instanceof IPrettyPrint)
-          add(new PrettyPrint((IPrettyPrint) LanguageLib.this));
+          add(new PrettyPrint((IPrettyPrint) LanguageLib.this, aterm));
         else
-          add(new PrettyPrint(null));
+          add(new PrettyPrint(null, aterm));
       }
       
       @Override
@@ -56,6 +58,10 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
   
   public HybridInterpreter getInterpreter() {
     return interp;
+  }
+  
+  public void setAtermCommands(ATermCommands aterm) {
+    this.aterm = aterm;
   }
 
   public List<File> getDefaultGrammars() {

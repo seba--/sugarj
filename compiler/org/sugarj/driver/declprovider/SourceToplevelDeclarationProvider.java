@@ -35,7 +35,7 @@ public class SourceToplevelDeclarationProvider implements ToplevelDeclarationPro
   public SourceToplevelDeclarationProvider(Driver driver, String source) {
     this.driver = driver;
     this.remainingInput = source;
-    this.treeBuilder = new RetractableTreeBuilder();
+    this.treeBuilder = new RetractableTreeBuilder(driver.aterm.factory);
     hash = source.hashCode();
     // XXX need to load ANY parse table, preferably an empty one.
   }
@@ -113,7 +113,7 @@ public class SourceToplevelDeclarationProvider implements ToplevelDeclarationPro
       IToken right = treeBuilder.getTokenizer().makeToken(start + input.length() - 1, IToken.TK_STRING, true);
       IToken left = treeBuilder.getTokenizer().getTokenAtOffset(start);
       treeBuilder.getTokenizer().makeToken(treeBuilder.getTokenizer().getStartOffset() - 1, IToken.TK_EOF, true);
-      IStrategoTerm term = ATermCommands.factory.makeString(input);
+      IStrategoTerm term = driver.aterm.factory.makeString(input);
       ImploderAttachment.putImploderAttachment(term, false, "String", left, right);
       driver.setErrorMessage(term, msg);
       return new IncrementalParseResult(term, "");

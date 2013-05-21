@@ -95,12 +95,23 @@ public class ATermCommands {
       return msg;
     }
   }
+
+  public static ATermCommands standard = new ATermCommands();
   
   // TODO use origin factory
-  public static ITermFactory factory = new ParentTermFactory(new TermFactory().getFactoryWithStorageType(IStrategoTerm.MUTABLE));
-  public static ParseTableManager parseTableManager = new ParseTableManager(factory, false);
+  public final ITermFactory factory;
+  public final ParseTableManager parseTableManager;
 
-  public static IStrategoTerm atermFromFile(String filename) throws IOException {
+  public ATermCommands() {
+    this(new ParentTermFactory(new TermFactory().getFactoryWithStorageType(IStrategoTerm.MUTABLE)));
+  }
+  
+  public ATermCommands(ITermFactory factory) {
+    this.factory = factory;
+    parseTableManager = new ParseTableManager(factory, false);
+  }
+  
+  public IStrategoTerm atermFromFile(String filename) throws IOException {
     IStrategoTerm term = Environment.terms.get(filename);
     
     if (term != null)
@@ -109,7 +120,7 @@ public class ATermCommands {
     return new TAFTermReader(factory).parseFromFile(filename);
   }
   
-  public static IStrategoTerm atermFromString(String s) throws IOException {
+  public IStrategoTerm atermFromString(String s) throws IOException {
     return new TAFTermReader(factory).parseFromString(s);
   }
 
@@ -175,61 +186,61 @@ public class ATermCommands {
     throw new MatchError(term, "list");
   }
   
-  public static IStrategoTerm makeTuple(IStrategoTerm... ts) {
+  public IStrategoTerm makeTuple(IStrategoTerm... ts) {
     return makeTuple(null, ts);
   }
   
-  public static IStrategoTerm makeTuple(IToken tok, IStrategoTerm... ts) {
+  public IStrategoTerm makeTuple(IToken tok, IStrategoTerm... ts) {
     IStrategoTerm t = factory.makeTuple(ts);
     setAttachment(t, "Tuple", tok, ts);
     return t;
   }
   
-  public static IStrategoTerm makeSome(IStrategoTerm term, IToken noneToken) {
+  public IStrategoTerm makeSome(IStrategoTerm term, IToken noneToken) {
     if (term != null)
       return makeAppl("Some", "Some", 1, noneToken, term);
     
     return makeAppl("None", "Some", 0, noneToken);
   }
 
-  public static IStrategoTerm makeString(String s) {
+  public IStrategoTerm makeString(String s) {
     IStrategoTerm t = factory.makeString(s);
     setAttachment(t, "String", null);
     return t;
   }
 
-  public static IStrategoTerm makeString(String s, IToken token) {
+  public IStrategoTerm makeString(String s, IToken token) {
     IStrategoTerm t = factory.makeString(s);
     setAttachment(t, "String", token);
     return t;
   }
   
-  public static IStrategoList makeList(String sort, IStrategoTerm... ts) {
+  public IStrategoList makeList(String sort, IStrategoTerm... ts) {
     assert ts.length > 0;
     return makeList(sort, null, ts);
   }
   
-  public static IStrategoList makeList(String sort, IToken emptyListToken, IStrategoTerm... ts) {
+  public IStrategoList makeList(String sort, IToken emptyListToken, IStrategoTerm... ts) {
     IStrategoList term = factory.makeList(ts);
     
     setAttachment(term, sort, emptyListToken, ts);
     return term;
   }
 
-  public static IStrategoList makeList(String sort, Collection<IStrategoTerm> ts) {
+  public IStrategoList makeList(String sort, Collection<IStrategoTerm> ts) {
     return makeList(sort, ts.toArray(new IStrategoTerm[ts.size()]));
   }
   
-  public static IStrategoList makeList(String sort, IToken emptyListToken, Collection<IStrategoTerm> ts) {
+  public IStrategoList makeList(String sort, IToken emptyListToken, Collection<IStrategoTerm> ts) {
     return makeList(sort, emptyListToken, ts.toArray(new IStrategoTerm[ts.size()]));
   }
   
-  public static IStrategoTerm makeAppl(String cons, String sort, int arity, IStrategoTerm... args) {
+  public IStrategoTerm makeAppl(String cons, String sort, int arity, IStrategoTerm... args) {
     assert args.length > 0;
     return makeAppl(cons, sort, arity, null, args);
   }
   
-  public static IStrategoTerm makeAppl(String cons, String sort, int arity, IToken emptyArgsToken, IStrategoTerm... args) {
+  public IStrategoTerm makeAppl(String cons, String sort, int arity, IToken emptyArgsToken, IStrategoTerm... args) {
     assert emptyArgsToken != null || args.length > 0;
     
     IStrategoTerm appl =
@@ -289,7 +300,7 @@ public class ATermCommands {
     return result;
   }
   
-  public static List<IStrategoTerm> registerSemanticProvider(Collection<IStrategoTerm> editorServices, Path jarfile) throws IOException {
+  public List<IStrategoTerm> registerSemanticProvider(Collection<IStrategoTerm> editorServices, Path jarfile) throws IOException {
     String jarfilePath = jarfile.getAbsolutePath().replace("\\", "\\\\").replace("\"", "\\\"");
     IStrategoTerm semanticProvider = atermFromString("SemanticProvider(\"" + jarfilePath + "\")");
     
@@ -304,10 +315,10 @@ public class ATermCommands {
           List<IStrategoTerm> builderList = new ArrayList<IStrategoTerm>();
           builderList.add(semanticProvider);
           builderList.addAll(getList(builders));
-          builders = ATermCommands.makeList("SemanticRule*", builderList);
+          builders = makeList("SemanticRule*", builderList);
         }
         
-        service = ATermCommands.makeAppl("Builders", "Section", 2, name, builders);
+        service = makeAppl("Builders", "Section", 2, name, builders);
       }
       
       newServices.add(service);
@@ -340,7 +351,7 @@ public class ATermCommands {
     }
   }
 
-  public static IStrategoTerm makeMutable(IStrategoTerm term) {
+  public IStrategoTerm makeMutable(IStrategoTerm term) {
     if (term.getStorageType() == IStrategoTerm.MUTABLE)
       return term;
     
@@ -372,7 +383,7 @@ public class ATermCommands {
   }
 
 
-  public static IStrategoTerm pushAmbiguities(IStrategoTerm term) {
+  public IStrategoTerm pushAmbiguities(IStrategoTerm term) {
     if (isApplication(term, "amb") && term.getSubterm(0).isList() && term.getSubterm(0).getSubtermCount() == 2) {
       IStrategoTerm left = pushAmbiguities(term.getSubterm(0).getSubterm(0));
       IStrategoTerm right = pushAmbiguities(term.getSubterm(0).getSubterm(1));
@@ -449,12 +460,12 @@ public class ATermCommands {
     return term;
   }
   
-  public static IStrategoTerm readPrettyPrintTable(String p) {
-    IStrategoTerm ppTableFile = ATermCommands.makeString(p);
+  public IStrategoTerm readPrettyPrintTable(String p) {
+    IStrategoTerm ppTableFile = makeString(p);
     return parse_pptable_file_0_0.instance.invoke(org.strategoxt.stratego_gpp.stratego_gpp.init(), ppTableFile);
   }
 
-  public static String prettyPrint(IStrategoTerm ppTable, IStrategoTerm term, HybridInterpreter interp) {
+  public String prettyPrint(IStrategoTerm ppTable, IStrategoTerm term, HybridInterpreter interp) {
     Context ctx = interp.getCompiledContext();
     IStrategoTerm ppt_list = makeList("PPTable", ppTable);
     IStrategoTerm aboxTerm = ast2abox_0_1.instance.invoke(ctx, term, ppt_list);
@@ -505,14 +516,16 @@ public class ATermCommands {
     return result;
   }
   
-  private static TermTransformer idTransformer = new TermTransformer(factory, false) {
-      @Override
-      public IStrategoTerm preTransform(IStrategoTerm term) {
-        return factory.annotateTerm(term, factory.makeList());
-      }
-    };
+  private TermTransformer idTransformer = null;
   
-  public static IStrategoTerm stripAnnos(IStrategoTerm term) {
+  public IStrategoTerm stripAnnos(IStrategoTerm term) {
+    if (idTransformer == null) 
+      idTransformer = new TermTransformer(factory, false) {
+        @Override
+        public IStrategoTerm preTransform(IStrategoTerm term) {
+          return factory.annotateTerm(term, factory.makeList());
+        }
+      };
     return idTransformer.transform(term);
   }
 }

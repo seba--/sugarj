@@ -312,13 +312,13 @@ public class JavaLib extends LanguageLib implements Serializable {
     
     if (localName == null || isApplication(localName, "None"))
       return
-        ATermCommands.makeAppl("TypeImportDec", "TypeImportDec", 1, 
-          ATermCommands.makeAppl("Id", "Id", 1, ATermCommands.makeString(modulePath)));
+        aterm.makeAppl("TypeImportDec", "TypeImportDec", 1, 
+            aterm.makeAppl("Id", "Id", 1, aterm.makeString(modulePath)));
 
     return 
-      ATermCommands.makeAppl("TypeImportAsDec", "TypeImportAsDec", 2,
+        aterm.makeAppl("TypeImportAsDec", "TypeImportAsDec", 2,
         localName,
-        ATermCommands.makeAppl("Id", "Id", 1, ATermCommands.makeString(modulePath)));
+        aterm.makeAppl("Id", "Id", 1, aterm.makeString(modulePath)));
   }
   
   @Override

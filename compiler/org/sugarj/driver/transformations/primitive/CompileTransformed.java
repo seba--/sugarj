@@ -75,7 +75,7 @@ class CompileTransformed extends AbstractPrimitive {
         res = driver.subcompile(driver.getTreeForErrorMarking(), source);
         
         if (res != null) {
-          context.setCurrent(ATermCommands.atermFromFile(source.getAbsolutePath()));
+          context.setCurrent(driver.aterm.atermFromFile(source.getAbsolutePath()));
           
           Result modelResult = ModuleSystemCommands.locateResult(FileCommands.dropExtension(modelPath), environment);
           if (modelResult != null)

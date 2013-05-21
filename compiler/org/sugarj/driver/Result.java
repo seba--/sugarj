@@ -338,7 +338,7 @@ public class Result implements IErrorLogger {
   
   public void registerEditorDesugarings(Path jarfile) throws IOException {
     desugaringsFile = jarfile;
-    editorServices = new HashSet<IStrategoTerm>(ATermCommands.registerSemanticProvider(editorServices, jarfile));
+    editorServices = new HashSet<IStrategoTerm>(ATermCommands.standard.registerSemanticProvider(editorServices, jarfile));
   }
   
   public Path getDesugaringsFile() {

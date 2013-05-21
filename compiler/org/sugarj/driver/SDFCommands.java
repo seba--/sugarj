@@ -83,6 +83,12 @@ public class SDFCommands {
   private static IOAgent sdf2tableIOAgent = new FilteringIOAgent(Log.PARSE | Log.DETAIL, "Invoking native tool .*");
   private static IOAgent makePermissiveIOAgent = new FilteringIOAgent(Log.PARSE | Log.DETAIL, "[ make_permissive | info ].*");
   
+  private final ATermCommands aterm;
+  
+  public SDFCommands(ATermCommands aterm) {
+    this.aterm = aterm;
+  }
+  
   private static void packSdf(
       Path sdf, 
       Path def, 
@@ -138,11 +144,11 @@ public class SDFCommands {
       throw new RuntimeException("execution of pack-sdf failed");
   }
   
-  private static void sdf2Table(Path def, Path tbl, String module) throws IOException {
+  private void sdf2Table(Path def, Path tbl, String module) throws IOException {
     sdf2Table(def, tbl, module, false);
   }
   
-  private static void sdf2Table(Path def, Path tbl, String module, boolean normalize) throws IOException {
+  private void sdf2Table(Path def, Path tbl, String module, boolean normalize) throws IOException {
     String[] cmd; 
     
     if (!normalize)
@@ -161,7 +167,7 @@ public class SDFCommands {
     
     IStrategoTerm termArgs[] = new IStrategoTerm[cmd.length];
     for (int i = 0; i < termArgs.length; i++)
-      termArgs[i] = ATermCommands.makeString(cmd[i], null);
+      termArgs[i] = aterm.makeString(cmd[i], null);
     
     Context xtcContext = SugarJContexts.xtcContext();
     try {
@@ -176,13 +182,13 @@ public class SDFCommands {
       throw new RuntimeException("execution of sdf2table failed");
   }
 
-  private static void normalizeTable(Path def, String module) throws IOException {
+  private void normalizeTable(Path def, String module) throws IOException {
     Path tbl = FileCommands.newTempFile("tbl");
     sdf2Table(def, tbl, module, true);
     FileCommands.deleteTempFiles(tbl);
   }
   
-  public static void check(Path sdf, String module, Collection<Path> paths, ModuleKeyCache<Path> sdfCache, Environment environment, LanguageLib langLib) throws IOException {
+  public void check(Path sdf, String module, Collection<Path> paths, ModuleKeyCache<Path> sdfCache, Environment environment, LanguageLib langLib) throws IOException {
     Path def = FileCommands.newTempFile("def");
     packSdf(sdf, def, paths, sdfCache, environment, langLib);
     normalizeTable(def, module);
@@ -197,7 +203,7 @@ public class SDFCommands {
    * @throws SGLRException 
    * @throws TokenExpectedException 
    */
-  public static Path compile(Path sdf,
+  public Path compile(Path sdf,
                               String module, 
                               Collection<Path> dependentFiles, 
                               SGLR sdfParser, 
@@ -263,14 +269,14 @@ public class SDFCommands {
     }
   }
   
-  private static ModuleKey getModuleKeyForGrammar(Path sdf, String module, Collection<Path> dependentFiles, SGLR parser) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
+  private ModuleKey getModuleKeyForGrammar(Path sdf, String module, Collection<Path> dependentFiles, SGLR parser) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
     log.beginTask("Generating", "Generate module key for current grammar", Log.CACHING);
     try {
-      IStrategoTerm aterm = (IStrategoTerm) parser.parse(FileCommands.readFileAsString(sdf), sdf.getAbsolutePath(), "Sdf2Module");
+      IStrategoTerm aTerm = (IStrategoTerm) parser.parse(FileCommands.readFileAsString(sdf), sdf.getAbsolutePath(), "Sdf2Module");
 
-      IStrategoTerm imports = ATermCommands.getApplicationSubterm(aterm, "module", 1);
-      IStrategoTerm body = ATermCommands.getApplicationSubterm(aterm, "module", 2);
-      IStrategoTerm term = ATermCommands.makeTuple(imports, body);
+      IStrategoTerm imports = ATermCommands.getApplicationSubterm(aTerm, "module", 1);
+      IStrategoTerm body = ATermCommands.getApplicationSubterm(aTerm, "module", 2);
+      IStrategoTerm term = aterm.makeTuple(imports, body);
 
       LinkedList<Path> depList = new LinkedList<Path>();
       for (Path file : dependentFiles)
@@ -285,7 +291,7 @@ public class SDFCommands {
     }
   }
 
-  private static Path generateParseTable(ModuleKey key,
+  private Path generateParseTable(ModuleKey key,
                                          Path sdf,
                                          String module,
                                          Collection<Path> paths,
@@ -427,11 +433,11 @@ public class SDFCommands {
    * @return
    * @throws IOException 
    */
-  public static String prettyPrintSDF(IStrategoTerm term, HybridInterpreter interp) throws IOException {
+  public String prettyPrintSDF(IStrategoTerm term, HybridInterpreter interp) throws IOException {
     Context ctx = interp.getCompiledContext();
     IStrategoTerm boxTerm = WithoutTypesmartSyntax.invoke(ctx, pp_sdf_box_0_0.instance, term);
     if (boxTerm != null) {
-      IStrategoTerm textTerm = WithoutTypesmartSyntax.invoke(ctx, box2text_string_0_1.instance, boxTerm, ATermCommands.factory.makeInt(80));
+      IStrategoTerm textTerm = WithoutTypesmartSyntax.invoke(ctx, box2text_string_0_1.instance, boxTerm, aterm.factory.makeInt(80));
       if (textTerm != null)
         return ATermCommands.getString(textTerm);
     }

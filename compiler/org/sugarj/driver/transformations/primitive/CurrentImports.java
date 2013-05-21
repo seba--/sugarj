@@ -25,7 +25,7 @@ public class CurrentImports extends AbstractPrimitive {
     if (sugaredImportDecls == null)
       return false;
     
-    IStrategoTerm imports = ATermCommands.makeList("JavaImportDec*", sugaredImportDecls);
+    IStrategoTerm imports = driver.aterm.makeList("JavaImportDec*", sugaredImportDecls);
     context.setCurrent(imports);
     return true;
   }

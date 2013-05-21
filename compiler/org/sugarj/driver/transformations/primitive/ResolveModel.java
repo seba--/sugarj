@@ -23,11 +23,13 @@ class ResolveModel extends AbstractPrimitive {
 
   private Environment env;
   private Result driverResult;
+  private ATermCommands aterm;
   
-  public ResolveModel(Environment env, Result driverResult) {
+  public ResolveModel(Environment env, Result driverResult, ATermCommands aterm) {
     super("SUGARJ_resolve_model", 0, 0);
     this.env = env;
     this.driverResult = driverResult;
+    this.aterm = aterm;
   }
 
   @Override
@@ -37,7 +39,7 @@ class ResolveModel extends AbstractPrimitive {
       Path p = ModuleSystemCommands.importModel(modelPath, env, driverResult);
       if (p == null)
         return false;
-      IStrategoTerm model = ATermCommands.atermFromFile(p.getAbsolutePath());
+      IStrategoTerm model = aterm.atermFromFile(p.getAbsolutePath());
       if (model == null)
         return false;
       context.setCurrent(model);
