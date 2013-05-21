@@ -45,7 +45,6 @@ import org.spoofax.jsglr_layout.shared.TokenExpectedException;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.lang.StrategoException;
-import org.strategoxt.lang.typesmart.TypesmartTermFactory;
 import org.sugarj.LanguageLib;
 import org.sugarj.LanguageLibFactory;
 import org.sugarj.common.ATermCommands;
@@ -83,6 +82,8 @@ public class Driver{
   private static List<Path> pendingInputFiles = new ArrayList<Path>();
   private static List<ProcessingListener> processingListener = new LinkedList<ProcessingListener>();
 
+  private TypesmartSyntaxTermFactory typesmartFactory;
+  
   private List<Driver> currentlyProcessing;
   private Set<Path> circularLinks = new HashSet<Path>();
   private boolean dependsOnModel = false;
@@ -147,7 +148,7 @@ public class Driver{
 //    stratego_aterm.registerInterop(langLib.getInterpreter().getContext(), langLib.getInterpreter().getCompiledContext());
 //    stratego_gpp.registerInterop(langLib.getInterpreter().getContext(), langLib.getInterpreter().getCompiledContext());
 
-    TypesmartSyntaxTermFactory.registerNewTypeSmartTermFactory(langLib.getInterpreter().getCompiledContext());
+    typesmartFactory = TypesmartSyntaxTermFactory.registerNewTypeSmartTermFactory(langLib.getInterpreter().getCompiledContext());
     langLib.getInterpreter().addOperatorRegistry(new SugarJPrimitivesLibrary(this, environment, driverResult, monitor));
 
     
@@ -432,14 +433,14 @@ public class Driver{
       if (environment.doGenerateFiles())
         driverResult.writeDependencyFile(depOutFile);
 
-      int smartCalls = ((TypesmartTermFactory) langLib.getInterpreter().getFactory()).smartCalls;
-      BigInteger time = ((TypesmartTermFactory) langLib.getInterpreter().getFactory()).totalTimeMillis;
+      int smartCalls = typesmartFactory.smartCalls;
+      BigInteger time = typesmartFactory.totalTimeMillis;
       System.out.println("calls: " + smartCalls);
       System.out.println("time:  " + time);
       System.out.println("mean:  " + (smartCalls == 0 ? 0 : time.divide(BigInteger.valueOf(smartCalls))));
       System.out.println();
-      System.out.println("cache hits:    " + ((TypesmartSyntaxTermFactory) langLib.getInterpreter().getFactory()).cacheHits);
-      System.out.println("cache misses:  " + ((TypesmartSyntaxTermFactory) langLib.getInterpreter().getFactory()).cacheMisses);
+      System.out.println("cache hits:    " + typesmartFactory.cacheHits);
+      System.out.println("cache misses:  " + typesmartFactory.cacheMisses);
       
       success = true;
     } 
