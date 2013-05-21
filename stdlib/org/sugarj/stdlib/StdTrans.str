@@ -2,7 +2,8 @@ module org/sugarj/stdlib/StdTrans
 imports libstrategolib
 
 imports org/sugarj/stdlib/Common
-imports org/sugarj/transformations/AnalyzeSugar
+imports org/sugarj/transformations/Analyze
+        org/sugarj/transformations/AnalyzeSugar
 imports org/sugarj/transformations/ATerm
 imports org/sugarj/transformations/typesmart/GenerateTypesmartConstructorsSugar
 imports org/sugarj/transformations/LayoutSugar

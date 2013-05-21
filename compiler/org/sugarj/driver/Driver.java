@@ -45,6 +45,7 @@ import org.spoofax.jsglr_layout.shared.TokenExpectedException;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.lang.StrategoException;
+import org.strategoxt.lang.typesmart.TypesmartTermFactory;
 import org.sugarj.LanguageLib;
 import org.sugarj.LanguageLibFactory;
 import org.sugarj.common.ATermCommands;
@@ -58,7 +59,6 @@ import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.typesmart.TypesmartSyntaxTermFactory;
-import org.sugarj.common.typesmart.TypesmartTermFactory;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.declprovider.SourceToplevelDeclarationProvider;
 import org.sugarj.driver.declprovider.TermToplevelDeclarationProvider;
@@ -147,7 +147,7 @@ public class Driver{
 //    stratego_aterm.registerInterop(langLib.getInterpreter().getContext(), langLib.getInterpreter().getCompiledContext());
 //    stratego_gpp.registerInterop(langLib.getInterpreter().getContext(), langLib.getInterpreter().getCompiledContext());
 
-    TypesmartSyntaxTermFactory.registerNewTypeSmartTermFactory(langLib.getInterpreter().getContext());
+    TypesmartSyntaxTermFactory.registerNewTypeSmartTermFactory(langLib.getInterpreter().getCompiledContext());
     langLib.getInterpreter().addOperatorRegistry(new SugarJPrimitivesLibrary(this, environment, driverResult, monitor));
 
     

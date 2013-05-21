@@ -20,9 +20,9 @@ public class SugarJContexts {
     ctxCache.releaseContext(ctx);
   }
 
-  public static Context makePermissiveContext() {
-    return ctxCache.acquireContext(org.strategoxt.permissivegrammars.make_permissive.class);
-  }
+//  public static Context makePermissiveContext() {
+//    return ctxCache.acquireContext(org.strategoxt.permissivegrammars.make_permissive.class);
+//  }
 
   public static Context xtcContext() {
     return ctxCache.acquireContext(org.strategoxt.stratego_xtc.stratego_xtc.class);

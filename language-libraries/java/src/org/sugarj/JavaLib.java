@@ -18,6 +18,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.java_front.pp_java_string_0_0;
+import org.strategoxt.lang.typesmart.WithoutTypesmartSyntax;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
@@ -26,7 +27,6 @@ import org.sugarj.common.JavaCommands;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.common.typesmart.WithoutTypesmartSyntax;
 import org.sugarj.java.JavaSourceFileContent;
 
 public class JavaLib extends LanguageLib implements Serializable {

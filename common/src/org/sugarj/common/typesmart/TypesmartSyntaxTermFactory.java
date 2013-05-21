@@ -6,12 +6,14 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 
-import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
+import org.strategoxt.lang.Context;
+import org.strategoxt.lang.typesmart.TypesmartSortAttachment;
+import org.strategoxt.lang.typesmart.TypesmartTermFactory;
 
 /**
  * Adds caching caching to {@link TypesmartTermFactory} tailored to typesmart syntax.
@@ -39,13 +41,13 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
       
       switch (term.getTermType()) {
       case IStrategoTerm.STRING:
-        return baseFactory.makeString("");
+        return getBaseFactory().makeString("");
       case IStrategoTerm.LIST:
-        return baseFactory.makeList(getSortList(term.getAllSubterms()));
+        return getBaseFactory().makeList(getSortList(term.getAllSubterms()));
       case IStrategoTerm.TUPLE:
-        return baseFactory.makeTuple(getSortList(term.getAllSubterms()));
+        return getBaseFactory().makeTuple(getSortList(term.getAllSubterms()));
       case IStrategoTerm.BLOB:
-        return baseFactory.makeString(term.getClass().getCanonicalName());
+        return getBaseFactory().makeString(term.getClass().getCanonicalName());
       default:
         System.err.println("no sort: " + term.toString());
         return null;
@@ -83,13 +85,13 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
   public int cacheHits = 0;
   public int cacheMisses = 0;
   
-  public static TypesmartSyntaxTermFactory registerNewTypeSmartTermFactory(IContext context) {
+  public static TypesmartSyntaxTermFactory registerNewTypeSmartTermFactory(Context context) {
     TypesmartSyntaxTermFactory factory = new TypesmartSyntaxTermFactory(context.getFactory(), context);
     context.setFactory(factory);
     return factory;
   }
   
-  public TypesmartSyntaxTermFactory(ITermFactory baseFactory, IContext context) {
+  public TypesmartSyntaxTermFactory(ITermFactory baseFactory, Context context) {
     super(baseFactory, context);
   }
 
@@ -100,7 +102,7 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
     Element el = cache.get(key);
     if (el != null) {
       cacheHits++;
-      IStrategoAppl appl = baseFactory.makeAppl(ctr, terms, annotations);
+      IStrategoAppl appl = getBaseFactory().makeAppl(ctr, terms, annotations);
       TypesmartSortAttachment.put(appl, (IStrategoTerm) el.getObjectValue());
       return appl;
     }

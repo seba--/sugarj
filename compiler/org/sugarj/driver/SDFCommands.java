@@ -33,7 +33,7 @@ import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.nativebundle.SDFBundleCommand;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
-import org.strategoxt.permissivegrammars.make_permissive;
+import org.strategoxt.lang.typesmart.WithoutTypesmartSyntax;
 import org.strategoxt.stratego_gpp.box2text_string_0_1;
 import org.strategoxt.stratego_sdf.pp_sdf_box_0_0;
 import org.strategoxt.strc.pp_stratego_string_0_0;
@@ -46,7 +46,6 @@ import org.sugarj.common.FilteringIOAgent;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
-import org.sugarj.common.typesmart.WithoutTypesmartSyntax;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.transformations.extraction.extract_sdf_0_0;
@@ -330,10 +329,10 @@ public class SDFCommands {
     } 
       
     log.beginExecution("make permissive", Log.PARSE, "-i", def.getAbsolutePath(), "-o", permissiveDef.getAbsolutePath());
-    Context mpContext = SugarJContexts.makePermissiveContext();
-    mpContext.setIOAgent(makePermissiveIOAgent);
+//    Context mpContext = SugarJContexts.makePermissiveContext();
+//    mpContext.setIOAgent(makePermissiveIOAgent);
     try {
-      make_permissive.mainNoExit(mpContext, "-i", def.getAbsolutePath(), "-o", permissiveDef.getAbsolutePath());
+//      make_permissive.mainNoExit(mpContext, "-i", def.getAbsolutePath(), "-o", permissiveDef.getAbsolutePath());
     }
     catch (StrategoExit e) {
       if (e.getValue() != 0) {
@@ -342,7 +341,7 @@ public class SDFCommands {
       }
     }
     finally {
-      SugarJContexts.releaseContext(mpContext);
+//      SugarJContexts.releaseContext(mpContext);
       log.endTask();
     }
   }

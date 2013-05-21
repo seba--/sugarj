@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.omg.CosNaming.IstringHelper;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoInt;
@@ -34,12 +33,12 @@ import org.spoofax.terms.io.TAFTermReader;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
+import org.strategoxt.lang.typesmart.WithoutTypesmartSyntax;
 import org.strategoxt.stratego_gpp.ast2abox_0_1;
 import org.strategoxt.stratego_gpp.box2text_string_0_1;
 import org.strategoxt.stratego_gpp.parse_pptable_file_0_0;
 import org.strategoxt.tools.sdf_desugar_0_0;
 import org.sugarj.common.path.Path;
-import org.sugarj.common.typesmart.WithoutTypesmartSyntax;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
