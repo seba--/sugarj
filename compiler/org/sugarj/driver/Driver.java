@@ -149,13 +149,14 @@ public class Driver{
     this.currentlyProcessing = currentlyProcessing;
     this.driverResult = new Result(environment.doGenerateFiles());
     
-    langLib.setInterpreter(new HybridInterpreter(new ParentTermFactory(new TermFactory().getFactoryWithStorageType(IStrategoTerm.MUTABLE))));
-    typesmartFactory = TypesmartSyntaxTermFactory.registerNewTypeSmartTermFactory(langLib.getInterpreter().getCompiledContext());
-    langLib.getInterpreter().addOperatorRegistry(new SugarJPrimitivesLibrary(this, environment, driverResult, monitor));
-
     aterm = new ATermCommands(typesmartFactory);
     sdf = new SDFCommands(aterm);
     modulesystem = new ModuleSystemCommands(aterm);
+
+    langLib.setAtermCommands(aterm);
+    langLib.setInterpreter(new HybridInterpreter(new ParentTermFactory(new TermFactory().getFactoryWithStorageType(IStrategoTerm.MUTABLE))));
+    typesmartFactory = TypesmartSyntaxTermFactory.registerNewTypeSmartTermFactory(langLib.getInterpreter().getCompiledContext());
+    langLib.getInterpreter().addOperatorRegistry(new SugarJPrimitivesLibrary(this, environment, driverResult, monitor));
     
     try {      
       if (environment.getCacheDir() != null)

@@ -1,6 +1,5 @@
 package org.sugarj;
 
-import org.sugarj.common.ATermCommands;
 
 /**
  * Factory for language libraries. Configures some fixed options, such as file
