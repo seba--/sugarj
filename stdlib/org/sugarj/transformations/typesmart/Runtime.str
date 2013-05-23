@@ -97,7 +97,9 @@ rules
   sort-match =
       (repeat1(unrename-sort), id)
     ; sort-match
-  
+
+rules
+  build-alt-sort-or-fail = not(?[]); foldr1(\ (x,y) -> alt(x,y) \)
 
 signature constructors
   EmptyCollection : Sdf2Sort

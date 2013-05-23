@@ -73,22 +73,23 @@ rules
          ; gen-signature-from-grammar
           => sig-list);
     merge-same-cons-prods-list;
-    filter(gen-syntax-constructors-prod + gen-subsort-of-inject);
-    !Rules(<id>) => smart-conses;
+    where(filter(gen-syntax-constructors-prod); merge-same-cons-prods-list => smart-conses);
+    where(filter(gen-subsort-of-inject) => subsort-injects); 
+    
+    !Rules(<conc> (smart-conses, subsort-injects)) => rulez;
     
     !grammar;
     filter( ?lexical-syntax(<id>)
           + ?lexical-priorities(<collect-all(?prod(_,_,_))>)
           + ?syntax(<filter(?prod(_,lex(_),_))>));
     map(filter(gen-lexical-sort-prod); nub; !Rules(<id>)) => lexical-sort-list;
-    <conc> ([sig-list], lexical-sort-list, [smart-conses])
+    <conc> ([sig-list], lexical-sort-list, [rulez])
 
   gen-syntax-constructors-prod :
     prod(lhs, rhs, attrs) ->
-    strat
+    smart-data
   where
       <find-cons-attribute> attrs => cons
-    ; <conc-strings> ("smart-", cons) => smart-cons
    
     ; <filter(get-symbol-sort)> lhs => arg-sorts
     ; <get-symbol-sort> rhs => res-sort
@@ -97,12 +98,10 @@ rules
     ; <zip; map(gen-arg-check(|cons))> (args, arg-sorts) => arg-checks
     
     ; <map(!Var(<id>)); !NoAnnoList(List(<id>))> args => args-term
-    ; !BA(Prim("\"SUGARJ_unsafe_build\"", [NoAnnoList(Str(cons))]), args-term) => build
-    ; !CallT(SVar("put-syntax-sort"), [], [<nosmart-trm-explode> res-sort]) => put-res
-    ; <conc; foldr(!Id(), \ (x,y) -> Seq(x,y) \)> (arg-checks, [build, put-res]) => body
+    ; <conc; foldr1(\ (x,y) -> Seq(x,y) \)> arg-checks => cond
     
     ; <map(!DefaultVarDec(<id>))> args => var-decs
-    ; !SDefT(smart-cons, [], var-decs, body) => strat
+    ; !(cons, var-decs, cond, res-sort) => smart-data
   
   gen-subsort-of-inject :
     prod ->
@@ -147,7 +146,47 @@ rules
       , Seq(CallT(SVar("log-mismatching-sort-error"), [], [<nosmart-trm-explode> cons])
         , Fail()))
     , NoAnnoList(Tuple([Var(arg), <nosmart-trm-explode> arg-sort]))))
+
+rules
+  same-smart-constructor-data(|data) =
+  	  ?(cons, var-decs, _, _)
+  	; !data
+  	; ?(cons, var-decs, _, _)
   
+  make-merged-smart-constructor =
+  	  ?datas@[(cons, var-decs, _, _) | _]
+    ; <conc-strings> ("smart-", cons) => smart-cons
+
+    ; init := Build(NoAnnoList(List([])))
+
+    ; <map(\(_,_,cond,res-sort) ->
+            Seq(cond,
+                Build(NoAnnoList(ListTail([<nosmart-trm-explode> res], RootApp(Id())))))
+           \)> datas => conds
+    ; <foldr1(\(x,y) -> Seq(x,y)\)> conds => cond
+    
+    ; <map(?(_,_,_,<id>))> datas => res-sorts
+    ; <foldl1(\(x,y) -> alt(x,y)\)> res-sorts => res-sort
+
+    ; Match(NoAnnoList(Var("res-sort")))
+  	; !BA(Prim("\"SUGARJ_unsafe_build\"", [NoAnnoList(Str(cons))]), args-term) => build
+    ; !CallT(SVar("put-syntax-sort"), [], [App(SVar("build-alt-sort-or-fail"), NoAnnoList(Var("res-sort")))]) => put-res
+
+    ; body := Seq(cond, Seq(build, put-res))
+
+  	; !SDefT(smart-cons, [], var-decs, body)
+  
+  make-merged-smart-constructors =
+  	  ?[]
+  make-merged-smart-constructors =
+  	  ?[data|datas]
+  	; <filter-split(same-smart-constructor-data(|data))> datas => (merge-list, rest)
+  	; <try(?[]; ![data]); make-merged-smart-constructor> merge-list => merged
+    ; <make-merged-smart-constructors> rest => rest'
+    ; ![merged | rest']
+  	
+
+rules
   make-arg-list(|n) :
     [] -> []
   make-arg-list(|n) :
