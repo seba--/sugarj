@@ -72,8 +72,8 @@ rules
     where( !context-free-syntax(<id>)
          ; gen-signature-from-grammar
           => sig-list);
-    merge-same-cons-prods-list;
-    where(filter(gen-syntax-constructors-prod); merge-same-cons-prods-list => smart-conses);
+    // merge-same-cons-prods-list;
+    where(filter(gen-syntax-constructors-prod); debug; make-merged-smart-constructors => smart-conses);
     where(filter(gen-subsort-of-inject) => subsort-injects); 
     
     !Rules(<conc> (smart-conses, subsort-injects)) => rulez;
@@ -96,12 +96,9 @@ rules
     
     ; <make-arg-list(|1)> arg-sorts => args
     ; <zip; map(gen-arg-check(|cons))> (args, arg-sorts) => arg-checks
+    ; <foldr(!Id(), \ (x,y) -> Seq(x,y) \); debug(!"checks: ")> arg-checks => cond
     
-    ; <map(!Var(<id>)); !NoAnnoList(List(<id>))> args => args-term
-    ; <conc; foldr1(\ (x,y) -> Seq(x,y) \)> arg-checks => cond
-    
-    ; <map(!DefaultVarDec(<id>))> args => var-decs
-    ; !(cons, var-decs, cond, res-sort) => smart-data
+    ; !(cons, args, cond, res-sort) => smart-data
   
   gen-subsort-of-inject :
     prod ->
@@ -149,24 +146,27 @@ rules
 
 rules
   same-smart-constructor-data(|data) =
-  	  ?(cons, var-decs, _, _)
+  	  ?(cons, args, _, _)
   	; !data
-  	; ?(cons, var-decs, _, _)
+  	; ?(cons, args, _, _)
   
   make-merged-smart-constructor =
-  	  ?datas@[(cons, var-decs, _, _) | _]
+  	  ?datas@[(cons, args, _, _) | _]
     ; <conc-strings> ("smart-", cons) => smart-cons
 
     ; init := Build(NoAnnoList(List([])))
 
     ; <map(\(_,_,cond,res-sort) ->
             Seq(cond,
-                Build(NoAnnoList(ListTail([<nosmart-trm-explode> res], RootApp(Id())))))
+                Build(NoAnnoList(ListTail([<nosmart-trm-explode> res-sort], RootApp(Id())))))
            \)> datas => conds
     ; <foldr1(\(x,y) -> Seq(x,y)\)> conds => cond
     
     ; <map(?(_,_,_,<id>))> datas => res-sorts
     ; <foldl1(\(x,y) -> alt(x,y)\)> res-sorts => res-sort
+
+    ; <map(!Var(<id>)); !NoAnnoList(List(<id>))> args => args-term
+    ; <map(!DefaultVarDec(<id>))> args => var-decs
 
     ; Match(NoAnnoList(Var("res-sort")))
   	; !BA(Prim("\"SUGARJ_unsafe_build\"", [NoAnnoList(Str(cons))]), args-term) => build
