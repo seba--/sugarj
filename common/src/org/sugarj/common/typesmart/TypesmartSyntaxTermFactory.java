@@ -42,6 +42,8 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
       switch (term.getTermType()) {
       case IStrategoTerm.STRING:
         return getBaseFactory().makeString("");
+      case IStrategoTerm.INT:
+        return getBaseFactory().makeInt(0);
       case IStrategoTerm.LIST:
         return getBaseFactory().makeList(getSortList(term.getAllSubterms()));
       case IStrategoTerm.TUPLE:
@@ -49,8 +51,8 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
       case IStrategoTerm.BLOB:
         return getBaseFactory().makeString(term.getClass().getCanonicalName());
       default:
-        System.err.println("no sort: " + term.toString());
-        return null;
+//        System.err.println("no sort: " + term.toString());
+        return getBaseFactory().makeString("NoSort");
       }
     }
     
@@ -100,7 +102,7 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
     rebuildEmptyLists(terms);
     Key key = new Key(ctr, terms);
     Element el = cache.get(key);
-    if (el != null) {
+    if (el != null && !el.isExpired()) {
       cacheHits++;
       IStrategoAppl appl = getBaseFactory().makeAppl(ctr, terms, annotations);
       TypesmartSortAttachment.put(appl, (IStrategoTerm) el.getObjectValue());
@@ -110,7 +112,8 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
     cacheMisses++;
     IStrategoAppl appl = super.makeAppl(ctr, terms, annotations);
     IStrategoTerm sort = TypesmartSortAttachment.getSort(appl);
-    cache.put(new Element(key, sort));
+    if (sort != null)
+      cache.put(new Element(key, sort));
     
     return appl;
   }

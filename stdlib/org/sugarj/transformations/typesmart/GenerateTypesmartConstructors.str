@@ -68,11 +68,10 @@ rules
     filter( ?context-free-syntax(<id>)
           + ?context-free-priorities(<collect-all(?prod(_,_,_))>)
           + ?syntax(<id>));
-    where( concat
-         ; !context-free-syntax(<id>)
+    concat;
+    where( !context-free-syntax(<id>)
          ; gen-signature-from-grammar
           => sig-list);
-    concat;
     merge-same-cons-prods-list;
     filter(gen-syntax-constructors-prod + gen-subsort-of-inject);
     !Rules(<id>) => smart-conses;
