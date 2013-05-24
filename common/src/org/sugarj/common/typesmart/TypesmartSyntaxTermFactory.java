@@ -6,12 +6,14 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 
+import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.strategoxt.lang.Context;
+import org.strategoxt.lang.StrategoException;
 import org.strategoxt.lang.typesmart.TypesmartSortAttachment;
 import org.strategoxt.lang.typesmart.TypesmartTermFactory;
 
@@ -41,18 +43,17 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
       
       switch (term.getTermType()) {
       case IStrategoTerm.STRING:
-        return getBaseFactory().makeString("");
+        return getWrappedFactory().makeString("");
       case IStrategoTerm.INT:
-        return getBaseFactory().makeInt(0);
+        return getWrappedFactory().makeInt(0);
       case IStrategoTerm.LIST:
-        return getBaseFactory().makeList(getSortList(term.getAllSubterms()));
+        return getWrappedFactory().makeList(getSortList(term.getAllSubterms()));
       case IStrategoTerm.TUPLE:
-        return getBaseFactory().makeTuple(getSortList(term.getAllSubterms()));
+        return getWrappedFactory().makeTuple(getSortList(term.getAllSubterms()));
       case IStrategoTerm.BLOB:
-        return getBaseFactory().makeString(term.getClass().getCanonicalName());
+        return getWrappedFactory().makeString(term.getClass().getCanonicalName());
       default:
-//        System.err.println("no sort: " + term.toString());
-        return getBaseFactory().makeString("NoSort");
+        return getWrappedFactory().makeString("NoSort");
       }
     }
     
@@ -98,19 +99,26 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
   }
 
   @Override
-  public IStrategoAppl makeAppl(IStrategoConstructor ctr, IStrategoTerm[] terms, IStrategoList annotations) {
-    rebuildEmptyLists(terms);
-    Key key = new Key(ctr, terms);
+  public IStrategoAppl makeAppl(IStrategoConstructor ctr, IStrategoTerm[] kids, IStrategoList annotations) {
+    // if there is no typesmart constructor for `ctr`, simply call super.makeAppl(..)
+    try {
+      if (tryGetTypesmartConstructorCall(ctr, kids) == null)
+        return super.makeAppl(ctr, kids, annotations);
+    } catch (InterpreterException e) {
+      throw new StrategoException("Type-unsafe constructor application " + ctr, e);
+    }
+    
+    Key key = new Key(ctr, kids);
     Element el = cache.get(key);
     if (el != null && !el.isExpired()) {
       cacheHits++;
-      IStrategoAppl appl = getBaseFactory().makeAppl(ctr, terms, annotations);
+      IStrategoAppl appl = getWrappedFactory().makeAppl(ctr, kids, annotations);
       TypesmartSortAttachment.put(appl, (IStrategoTerm) el.getObjectValue());
       return appl;
     }
     
     cacheMisses++;
-    IStrategoAppl appl = super.makeAppl(ctr, terms, annotations);
+    IStrategoAppl appl = super.makeAppl(ctr, kids, annotations);
     IStrategoTerm sort = TypesmartSortAttachment.getSort(appl);
     if (sort != null)
       cache.put(new Element(key, sort));
