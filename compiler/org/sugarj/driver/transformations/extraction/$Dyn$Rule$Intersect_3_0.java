@@ -12,37 +12,37 @@ import java.lang.ref.WeakReference;
 { 
   public static $Dyn$Rule$Intersect_3_0 instance = new $Dyn$Rule$Intersect_3_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy w_19, Strategy x_19, Strategy y_19)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy i_341, Strategy j_341, Strategy k_341)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("DynRuleIntersect_3_0");
-    Fail73:
+    Fail877:
     { 
-      IStrategoTerm q_113 = null;
-      IStrategoTerm m_113 = null;
-      IStrategoTerm n_113 = null;
-      IStrategoTerm o_113 = null;
-      IStrategoTerm r_113 = null;
-      IStrategoTerm s_113 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consDynRuleIntersect_3 != ((IStrategoAppl)term).getConstructor())
-        break Fail73;
-      m_113 = term.getSubterm(0);
-      n_113 = term.getSubterm(1);
-      o_113 = term.getSubterm(2);
-      IStrategoList annos49 = term.getAnnotations();
-      q_113 = annos49;
-      term = w_19.invoke(context, m_113);
+      IStrategoTerm q_443 = null;
+      IStrategoTerm n_443 = null;
+      IStrategoTerm o_443 = null;
+      IStrategoTerm p_443 = null;
+      IStrategoTerm r_443 = null;
+      IStrategoTerm s_443 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consDynRuleIntersect_3 != ((IStrategoAppl)term).getConstructor())
+        break Fail877;
+      n_443 = term.getSubterm(0);
+      o_443 = term.getSubterm(1);
+      p_443 = term.getSubterm(2);
+      IStrategoList annos123 = term.getAnnotations();
+      q_443 = annos123;
+      term = i_341.invoke(context, n_443);
       if(term == null)
-        break Fail73;
-      r_113 = term;
-      term = x_19.invoke(context, n_113);
+        break Fail877;
+      r_443 = term;
+      term = j_341.invoke(context, o_443);
       if(term == null)
-        break Fail73;
-      s_113 = term;
-      term = y_19.invoke(context, o_113);
+        break Fail877;
+      s_443 = term;
+      term = k_341.invoke(context, p_443);
       if(term == null)
-        break Fail73;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consDynRuleIntersect_3, new IStrategoTerm[]{r_113, s_113, term}), checkListAnnos(termFactory, q_113));
+        break Fail877;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consDynRuleIntersect_3, new IStrategoTerm[]{r_443, s_443, term}), checkListAnnos(termFactory, q_443));
       context.popOnSuccess();
       if(true)
         return term;

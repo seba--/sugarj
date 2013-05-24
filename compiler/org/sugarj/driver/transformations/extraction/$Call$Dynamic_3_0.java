@@ -12,37 +12,37 @@ import java.lang.ref.WeakReference;
 { 
   public static $Call$Dynamic_3_0 instance = new $Call$Dynamic_3_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy y_22, Strategy z_22, Strategy a_23)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy w_346, Strategy x_346, Strategy y_346)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("CallDynamic_3_0");
-    Fail123:
+    Fail967:
     { 
-      IStrategoTerm l_122 = null;
-      IStrategoTerm i_122 = null;
-      IStrategoTerm j_122 = null;
-      IStrategoTerm k_122 = null;
-      IStrategoTerm o_122 = null;
-      IStrategoTerm p_122 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consCallDynamic_3 != ((IStrategoAppl)term).getConstructor())
-        break Fail123;
-      i_122 = term.getSubterm(0);
-      j_122 = term.getSubterm(1);
-      k_122 = term.getSubterm(2);
-      IStrategoList annos96 = term.getAnnotations();
-      l_122 = annos96;
-      term = y_22.invoke(context, i_122);
+      IStrategoTerm a_458 = null;
+      IStrategoTerm x_457 = null;
+      IStrategoTerm y_457 = null;
+      IStrategoTerm z_457 = null;
+      IStrategoTerm b_458 = null;
+      IStrategoTerm c_458 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consCallDynamic_3 != ((IStrategoAppl)term).getConstructor())
+        break Fail967;
+      x_457 = term.getSubterm(0);
+      y_457 = term.getSubterm(1);
+      z_457 = term.getSubterm(2);
+      IStrategoList annos209 = term.getAnnotations();
+      a_458 = annos209;
+      term = w_346.invoke(context, x_457);
       if(term == null)
-        break Fail123;
-      o_122 = term;
-      term = z_22.invoke(context, j_122);
+        break Fail967;
+      b_458 = term;
+      term = x_346.invoke(context, y_457);
       if(term == null)
-        break Fail123;
-      p_122 = term;
-      term = a_23.invoke(context, k_122);
+        break Fail967;
+      c_458 = term;
+      term = y_346.invoke(context, z_457);
       if(term == null)
-        break Fail123;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consCallDynamic_3, new IStrategoTerm[]{o_122, p_122, term}), checkListAnnos(termFactory, l_122));
+        break Fail967;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consCallDynamic_3, new IStrategoTerm[]{b_458, c_458, term}), checkListAnnos(termFactory, a_458));
       context.popOnSuccess();
       if(true)
         return term;

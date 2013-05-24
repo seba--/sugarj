@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Labeled$Dyn$Rule$Scope$Id_2_0 instance = new $Labeled$Dyn$Rule$Scope$Id_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy n_16, Strategy o_16)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy r_340, Strategy s_340)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("LabeledDynRuleScopeId_2_0");
-    Fail29:
+    Fail868:
     { 
-      IStrategoTerm j_104 = null;
-      IStrategoTerm h_104 = null;
-      IStrategoTerm i_104 = null;
-      IStrategoTerm k_104 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consLabeledDynRuleScopeId_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail29;
-      h_104 = term.getSubterm(0);
-      i_104 = term.getSubterm(1);
-      IStrategoList annos5 = term.getAnnotations();
-      j_104 = annos5;
-      term = n_16.invoke(context, h_104);
+      IStrategoTerm y_441 = null;
+      IStrategoTerm w_441 = null;
+      IStrategoTerm x_441 = null;
+      IStrategoTerm z_441 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consLabeledDynRuleScopeId_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail868;
+      w_441 = term.getSubterm(0);
+      x_441 = term.getSubterm(1);
+      IStrategoList annos114 = term.getAnnotations();
+      y_441 = annos114;
+      term = r_340.invoke(context, w_441);
       if(term == null)
-        break Fail29;
-      k_104 = term;
-      term = o_16.invoke(context, i_104);
+        break Fail868;
+      z_441 = term;
+      term = s_340.invoke(context, x_441);
       if(term == null)
-        break Fail29;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consLabeledDynRuleScopeId_2, new IStrategoTerm[]{k_104, term}), checkListAnnos(termFactory, j_104));
+        break Fail868;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consLabeledDynRuleScopeId_2, new IStrategoTerm[]{z_441, term}), checkListAnnos(termFactory, y_441));
       context.popOnSuccess();
       if(true)
         return term;

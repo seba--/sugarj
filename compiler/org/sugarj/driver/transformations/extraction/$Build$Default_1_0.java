@@ -12,23 +12,23 @@ import java.lang.ref.WeakReference;
 { 
   public static $Build$Default_1_0 instance = new $Build$Default_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy k_24)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy w_344)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("BuildDefault_1_0");
-    Fail148:
+    Fail929:
     { 
-      IStrategoTerm s_126 = null;
-      IStrategoTerm r_126 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consBuildDefault_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail148;
-      r_126 = term.getSubterm(0);
-      IStrategoList annos120 = term.getAnnotations();
-      s_126 = annos120;
-      term = k_24.invoke(context, r_126);
+      IStrategoTerm p_452 = null;
+      IStrategoTerm o_452 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consBuildDefault_1 != ((IStrategoAppl)term).getConstructor())
+        break Fail929;
+      o_452 = term.getSubterm(0);
+      IStrategoList annos174 = term.getAnnotations();
+      p_452 = annos174;
+      term = w_344.invoke(context, o_452);
       if(term == null)
-        break Fail148;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consBuildDefault_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, s_126));
+        break Fail929;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consBuildDefault_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, p_452));
       context.popOnSuccess();
       if(true)
         return term;

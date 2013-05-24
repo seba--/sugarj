@@ -12,23 +12,23 @@ import java.lang.ref.WeakReference;
 { 
   public static $Where$Clause_1_0 instance = new $Where$Clause_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy n_17)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy m_342)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("WhereClause_1_0");
-    Fail43:
+    Fail888:
     { 
-      IStrategoTerm z_106 = null;
-      IStrategoTerm y_106 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consWhereClause_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail43;
-      y_106 = term.getSubterm(0);
-      IStrategoList annos19 = term.getAnnotations();
-      z_106 = annos19;
-      term = n_17.invoke(context, y_106);
+      IStrategoTerm h_446 = null;
+      IStrategoTerm g_446 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consWhereClause_1 != ((IStrategoAppl)term).getConstructor())
+        break Fail888;
+      g_446 = term.getSubterm(0);
+      IStrategoList annos134 = term.getAnnotations();
+      h_446 = annos134;
+      term = m_342.invoke(context, g_446);
       if(term == null)
-        break Fail43;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consWhereClause_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, z_106));
+        break Fail888;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consWhereClause_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, h_446));
       context.popOnSuccess();
       if(true)
         return term;

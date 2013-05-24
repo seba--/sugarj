@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Add$Label$Dyn$Rule$Id_2_0 instance = new $Add$Label$Dyn$Rule$Id_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy q_16, Strategy r_16)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy o_340, Strategy p_340)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("AddLabelDynRuleId_2_0");
-    Fail31:
+    Fail866:
     { 
-      IStrategoTerm r_104 = null;
-      IStrategoTerm p_104 = null;
-      IStrategoTerm q_104 = null;
-      IStrategoTerm s_104 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consAddLabelDynRuleId_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail31;
-      p_104 = term.getSubterm(0);
-      q_104 = term.getSubterm(1);
-      IStrategoList annos7 = term.getAnnotations();
-      r_104 = annos7;
-      term = q_16.invoke(context, p_104);
+      IStrategoTerm q_441 = null;
+      IStrategoTerm o_441 = null;
+      IStrategoTerm p_441 = null;
+      IStrategoTerm r_441 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consAddLabelDynRuleId_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail866;
+      o_441 = term.getSubterm(0);
+      p_441 = term.getSubterm(1);
+      IStrategoList annos112 = term.getAnnotations();
+      q_441 = annos112;
+      term = o_340.invoke(context, o_441);
       if(term == null)
-        break Fail31;
-      s_104 = term;
-      term = r_16.invoke(context, q_104);
+        break Fail866;
+      r_441 = term;
+      term = p_340.invoke(context, p_441);
       if(term == null)
-        break Fail31;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consAddLabelDynRuleId_2, new IStrategoTerm[]{s_104, term}), checkListAnnos(termFactory, r_104));
+        break Fail866;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consAddLabelDynRuleId_2, new IStrategoTerm[]{r_441, term}), checkListAnnos(termFactory, q_441));
       context.popOnSuccess();
       if(true)
         return term;

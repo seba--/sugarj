@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Undefine$Dyn$Rule_2_0 instance = new $Undefine$Dyn$Rule_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy h_17, Strategy i_17)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy x_339, Strategy y_339)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("UndefineDynRule_2_0");
-    Fail39:
+    Fail858:
     { 
-      IStrategoTerm j_106 = null;
-      IStrategoTerm h_106 = null;
-      IStrategoTerm i_106 = null;
-      IStrategoTerm k_106 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consUndefineDynRule_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail39;
-      h_106 = term.getSubterm(0);
-      i_106 = term.getSubterm(1);
-      IStrategoList annos15 = term.getAnnotations();
-      j_106 = annos15;
-      term = h_17.invoke(context, h_106);
+      IStrategoTerm a_440 = null;
+      IStrategoTerm y_439 = null;
+      IStrategoTerm z_439 = null;
+      IStrategoTerm b_440 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consUndefineDynRule_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail858;
+      y_439 = term.getSubterm(0);
+      z_439 = term.getSubterm(1);
+      IStrategoList annos104 = term.getAnnotations();
+      a_440 = annos104;
+      term = x_339.invoke(context, y_439);
       if(term == null)
-        break Fail39;
-      k_106 = term;
-      term = i_17.invoke(context, i_106);
+        break Fail858;
+      b_440 = term;
+      term = y_339.invoke(context, z_439);
       if(term == null)
-        break Fail39;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consUndefineDynRule_2, new IStrategoTerm[]{k_106, term}), checkListAnnos(termFactory, j_106));
+        break Fail858;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consUndefineDynRule_2, new IStrategoTerm[]{b_440, term}), checkListAnnos(termFactory, a_440));
       context.popOnSuccess();
       if(true)
         return term;

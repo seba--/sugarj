@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Rule$No$Cond_2_0 instance = new $Rule$No$Cond_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy r_17, Strategy s_17)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy h_342, Strategy i_342)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("RuleNoCond_2_0");
-    Fail45:
+    Fail886:
     { 
-      IStrategoTerm p_107 = null;
-      IStrategoTerm k_107 = null;
-      IStrategoTerm o_107 = null;
-      IStrategoTerm q_107 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consRuleNoCond_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail45;
-      k_107 = term.getSubterm(0);
-      o_107 = term.getSubterm(1);
-      IStrategoList annos21 = term.getAnnotations();
-      p_107 = annos21;
-      term = r_17.invoke(context, k_107);
+      IStrategoTerm w_445 = null;
+      IStrategoTerm u_445 = null;
+      IStrategoTerm v_445 = null;
+      IStrategoTerm x_445 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consRuleNoCond_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail886;
+      u_445 = term.getSubterm(0);
+      v_445 = term.getSubterm(1);
+      IStrategoList annos132 = term.getAnnotations();
+      w_445 = annos132;
+      term = h_342.invoke(context, u_445);
       if(term == null)
-        break Fail45;
-      q_107 = term;
-      term = s_17.invoke(context, o_107);
+        break Fail886;
+      x_445 = term;
+      term = i_342.invoke(context, v_445);
       if(term == null)
-        break Fail45;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consRuleNoCond_2, new IStrategoTerm[]{q_107, term}), checkListAnnos(termFactory, p_107));
+        break Fail886;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consRuleNoCond_2, new IStrategoTerm[]{x_445, term}), checkListAnnos(termFactory, w_445));
       context.popOnSuccess();
       if(true)
         return term;

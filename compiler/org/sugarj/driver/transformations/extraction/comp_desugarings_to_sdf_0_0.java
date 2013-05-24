@@ -16,37 +16,37 @@ import java.lang.ref.WeakReference;
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("comp_desugarings_to_sdf_0_0");
-    Fail10:
+    Fail713:
     { 
-      IStrategoTerm m_15 = null;
-      IStrategoTerm n_15 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consDesugarings_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail10;
-      m_15 = term.getSubterm(0);
-      term = map_1_0.instance.invoke(context, m_15, comp_desugaring_to_sdf_0_0.instance);
+      IStrategoTerm w_332 = null;
+      IStrategoTerm x_332 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consDesugarings_1 != ((IStrategoAppl)term).getConstructor())
+        break Fail713;
+      w_332 = term.getSubterm(0);
+      term = map_1_0.instance.invoke(context, w_332, comp_desugaring_to_sdf_0_0.instance);
       if(term == null)
-        break Fail10;
+        break Fail713;
       term = concat_0_0.instance.invoke(context, term);
       if(term == null)
-        break Fail10;
-      n_15 = term;
-      IStrategoTerm term2 = term;
-      Success2:
+        break Fail713;
+      x_332 = term;
+      IStrategoTerm term914 = term;
+      Success292:
       { 
-        Fail11:
+        Fail714:
         { 
           if(term.getTermType() != IStrategoTerm.LIST || !((IStrategoList)term).isEmpty())
-            break Fail11;
+            break Fail714;
           { 
             if(true)
-              break Fail10;
+              break Fail713;
             if(true)
-              break Success2;
+              break Success292;
           }
         }
-        term = term2;
+        term = term914;
       }
-      term = termFactory.makeAppl(extraction._conscontext_free_syntax_1, new IStrategoTerm[]{n_15});
+      term = termFactory.makeAppl(ext._conscontext_free_syntax_1, new IStrategoTerm[]{x_332});
       context.popOnSuccess();
       if(true)
         return term;

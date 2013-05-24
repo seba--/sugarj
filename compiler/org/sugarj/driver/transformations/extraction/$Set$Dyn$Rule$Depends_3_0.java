@@ -12,37 +12,37 @@ import java.lang.ref.WeakReference;
 { 
   public static $Set$Dyn$Rule$Depends_3_0 instance = new $Set$Dyn$Rule$Depends_3_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy u_16, Strategy v_16, Strategy w_16)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy j_340, Strategy k_340, Strategy l_340)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("SetDynRuleDepends_3_0");
-    Fail33:
+    Fail864:
     { 
-      IStrategoTerm c_105 = null;
-      IStrategoTerm z_104 = null;
-      IStrategoTerm a_105 = null;
-      IStrategoTerm b_105 = null;
-      IStrategoTerm d_105 = null;
-      IStrategoTerm e_105 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consSetDynRuleDepends_3 != ((IStrategoAppl)term).getConstructor())
-        break Fail33;
-      z_104 = term.getSubterm(0);
-      a_105 = term.getSubterm(1);
-      b_105 = term.getSubterm(2);
-      IStrategoList annos9 = term.getAnnotations();
-      c_105 = annos9;
-      term = u_16.invoke(context, z_104);
+      IStrategoTerm f_441 = null;
+      IStrategoTerm c_441 = null;
+      IStrategoTerm d_441 = null;
+      IStrategoTerm e_441 = null;
+      IStrategoTerm g_441 = null;
+      IStrategoTerm h_441 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consSetDynRuleDepends_3 != ((IStrategoAppl)term).getConstructor())
+        break Fail864;
+      c_441 = term.getSubterm(0);
+      d_441 = term.getSubterm(1);
+      e_441 = term.getSubterm(2);
+      IStrategoList annos110 = term.getAnnotations();
+      f_441 = annos110;
+      term = j_340.invoke(context, c_441);
       if(term == null)
-        break Fail33;
-      d_105 = term;
-      term = v_16.invoke(context, a_105);
+        break Fail864;
+      g_441 = term;
+      term = k_340.invoke(context, d_441);
       if(term == null)
-        break Fail33;
-      e_105 = term;
-      term = w_16.invoke(context, b_105);
+        break Fail864;
+      h_441 = term;
+      term = l_340.invoke(context, e_441);
       if(term == null)
-        break Fail33;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consSetDynRuleDepends_3, new IStrategoTerm[]{d_105, e_105, term}), checkListAnnos(termFactory, c_105));
+        break Fail864;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consSetDynRuleDepends_3, new IStrategoTerm[]{g_441, h_441, term}), checkListAnnos(termFactory, f_441));
       context.popOnSuccess();
       if(true)
         return term;

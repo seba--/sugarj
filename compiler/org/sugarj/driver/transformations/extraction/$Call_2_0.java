@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Call_2_0 instance = new $Call_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy h_22, Strategy i_22)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy u_342, Strategy v_342)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("Call_2_0");
-    Fail111:
+    Fail893:
     { 
-      IStrategoTerm l_120 = null;
-      IStrategoTerm j_120 = null;
-      IStrategoTerm k_120 = null;
-      IStrategoTerm m_120 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consCall_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail111;
-      j_120 = term.getSubterm(0);
-      k_120 = term.getSubterm(1);
-      IStrategoList annos86 = term.getAnnotations();
-      l_120 = annos86;
-      term = h_22.invoke(context, j_120);
+      IStrategoTerm d_447 = null;
+      IStrategoTerm b_447 = null;
+      IStrategoTerm c_447 = null;
+      IStrategoTerm e_447 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consCall_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail893;
+      b_447 = term.getSubterm(0);
+      c_447 = term.getSubterm(1);
+      IStrategoList annos139 = term.getAnnotations();
+      d_447 = annos139;
+      term = u_342.invoke(context, b_447);
       if(term == null)
-        break Fail111;
-      m_120 = term;
-      term = i_22.invoke(context, k_120);
+        break Fail893;
+      e_447 = term;
+      term = v_342.invoke(context, c_447);
       if(term == null)
-        break Fail111;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consCall_2, new IStrategoTerm[]{m_120, term}), checkListAnnos(termFactory, l_120));
+        break Fail893;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consCall_2, new IStrategoTerm[]{e_447, term}), checkListAnnos(termFactory, d_447));
       context.popOnSuccess();
       if(true)
         return term;

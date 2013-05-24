@@ -16,16 +16,16 @@ import java.lang.ref.WeakReference;
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("comp_desugarings_to_str_0_0");
-    Fail19:
+    Fail722:
     { 
-      IStrategoTerm x_15 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consDesugarings_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail19;
-      x_15 = term.getSubterm(0);
-      term = map_1_0.instance.invoke(context, x_15, comp_desugaring_to_str_0_0.instance);
+      IStrategoTerm h_333 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consDesugarings_1 != ((IStrategoAppl)term).getConstructor())
+        break Fail722;
+      h_333 = term.getSubterm(0);
+      term = map_1_0.instance.invoke(context, h_333, comp_desugaring_to_str_0_0.instance);
       if(term == null)
-        break Fail19;
-      term = termFactory.makeAppl(extraction._consStrategies_1, new IStrategoTerm[]{term});
+        break Fail722;
+      term = termFactory.makeAppl(ext._consStrategies_1, new IStrategoTerm[]{term});
       context.popOnSuccess();
       if(true)
         return term;

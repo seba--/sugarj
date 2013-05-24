@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $R$Def$No$Args_2_0 instance = new $R$Def$No$Args_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy a_18, Strategy b_18)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy y_341, Strategy z_341)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("RDefNoArgs_2_0");
-    Fail48:
+    Fail883:
     { 
-      IStrategoTerm k_108 = null;
-      IStrategoTerm i_108 = null;
-      IStrategoTerm j_108 = null;
-      IStrategoTerm l_108 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consRDefNoArgs_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail48;
-      i_108 = term.getSubterm(0);
-      j_108 = term.getSubterm(1);
-      IStrategoList annos24 = term.getAnnotations();
-      k_108 = annos24;
-      term = a_18.invoke(context, i_108);
+      IStrategoTerm b_445 = null;
+      IStrategoTerm z_444 = null;
+      IStrategoTerm a_445 = null;
+      IStrategoTerm c_445 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consRDefNoArgs_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail883;
+      z_444 = term.getSubterm(0);
+      a_445 = term.getSubterm(1);
+      IStrategoList annos129 = term.getAnnotations();
+      b_445 = annos129;
+      term = y_341.invoke(context, z_444);
       if(term == null)
-        break Fail48;
-      l_108 = term;
-      term = b_18.invoke(context, j_108);
+        break Fail883;
+      c_445 = term;
+      term = z_341.invoke(context, a_445);
       if(term == null)
-        break Fail48;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consRDefNoArgs_2, new IStrategoTerm[]{l_108, term}), checkListAnnos(termFactory, k_108));
+        break Fail883;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consRDefNoArgs_2, new IStrategoTerm[]{c_445, term}), checkListAnnos(termFactory, b_445));
       context.popOnSuccess();
       if(true)
         return term;

@@ -15,35 +15,35 @@ import java.lang.ref.WeakReference;
   @Override public IStrategoTerm invoke(Context context, IStrategoTerm term)
   { 
     ITermFactory termFactory = context.getFactory();
-    Fail12:
+    Fail715:
     { 
-      IStrategoTerm term3 = term;
-      IStrategoConstructor cons3 = term.getTermType() == IStrategoTerm.APPL ? ((IStrategoAppl)term).getConstructor() : null;
-      Success3:
+      IStrategoTerm term915 = term;
+      IStrategoConstructor cons9 = term.getTermType() == IStrategoTerm.APPL ? ((IStrategoAppl)term).getConstructor() : null;
+      Success293:
       { 
-        if(cons3 == extraction._consPureDesugaring_1)
+        if(cons9 == ext._consPureDesugaring_1)
         { 
-          Fail13:
+          Fail716:
           { 
             term = extraction.constNil0;
             if(true)
-              break Success3;
+              break Success293;
           }
-          term = term3;
+          term = term915;
         }
-        if(cons3 == extraction._consInjectDesugaring_4)
+        if(cons9 == ext._consInjectDesugaring_4)
         { 
-          IStrategoTerm q_15 = null;
-          IStrategoTerm r_15 = null;
-          IStrategoTerm s_15 = null;
-          q_15 = term.getSubterm(1);
-          r_15 = term.getSubterm(2);
-          s_15 = term.getSubterm(3);
-          term = (IStrategoTerm)termFactory.makeListCons(termFactory.makeAppl(extraction._consprod_3, new IStrategoTerm[]{(IStrategoTerm)termFactory.makeListCons(q_15, (IStrategoList)extraction.constNil0), r_15, s_15}), (IStrategoList)extraction.constNil0);
+          IStrategoTerm a_333 = null;
+          IStrategoTerm b_333 = null;
+          IStrategoTerm c_333 = null;
+          a_333 = term.getSubterm(1);
+          b_333 = term.getSubterm(2);
+          c_333 = term.getSubterm(3);
+          term = (IStrategoTerm)termFactory.makeListCons(termFactory.makeAppl(ext._consprod_3, new IStrategoTerm[]{(IStrategoTerm)termFactory.makeListCons(a_333, (IStrategoList)extraction.constNil0), b_333, c_333}), (IStrategoList)extraction.constNil0);
         }
         else
         { 
-          break Fail12;
+          break Fail715;
         }
       }
       if(true)

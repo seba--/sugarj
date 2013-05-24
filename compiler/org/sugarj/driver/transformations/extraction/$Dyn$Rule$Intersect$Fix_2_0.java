@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Dyn$Rule$Intersect$Fix_2_0 instance = new $Dyn$Rule$Intersect$Fix_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy e_20, Strategy f_20)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy b_341, Strategy c_341)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("DynRuleIntersectFix_2_0");
-    Fail76:
+    Fail874:
     { 
-      IStrategoTerm i_114 = null;
-      IStrategoTerm g_114 = null;
-      IStrategoTerm h_114 = null;
-      IStrategoTerm j_114 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consDynRuleIntersectFix_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail76;
-      g_114 = term.getSubterm(0);
-      h_114 = term.getSubterm(1);
-      IStrategoList annos52 = term.getAnnotations();
-      i_114 = annos52;
-      term = e_20.invoke(context, g_114);
+      IStrategoTerm y_442 = null;
+      IStrategoTerm w_442 = null;
+      IStrategoTerm x_442 = null;
+      IStrategoTerm z_442 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consDynRuleIntersectFix_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail874;
+      w_442 = term.getSubterm(0);
+      x_442 = term.getSubterm(1);
+      IStrategoList annos120 = term.getAnnotations();
+      y_442 = annos120;
+      term = b_341.invoke(context, w_442);
       if(term == null)
-        break Fail76;
-      j_114 = term;
-      term = f_20.invoke(context, h_114);
+        break Fail874;
+      z_442 = term;
+      term = c_341.invoke(context, x_442);
       if(term == null)
-        break Fail76;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consDynRuleIntersectFix_2, new IStrategoTerm[]{j_114, term}), checkListAnnos(termFactory, i_114));
+        break Fail874;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consDynRuleIntersectFix_2, new IStrategoTerm[]{z_442, term}), checkListAnnos(termFactory, y_442));
       context.popOnSuccess();
       if(true)
         return term;

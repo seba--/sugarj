@@ -12,23 +12,23 @@ import java.lang.ref.WeakReference;
 { 
   public static $Dyn$Rule$Id_1_0 instance = new $Dyn$Rule$Id_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy p_16)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy q_340)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("DynRuleId_1_0");
-    Fail30:
+    Fail867:
     { 
-      IStrategoTerm n_104 = null;
-      IStrategoTerm m_104 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consDynRuleId_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail30;
-      m_104 = term.getSubterm(0);
-      IStrategoList annos6 = term.getAnnotations();
-      n_104 = annos6;
-      term = p_16.invoke(context, m_104);
+      IStrategoTerm u_441 = null;
+      IStrategoTerm t_441 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consDynRuleId_1 != ((IStrategoAppl)term).getConstructor())
+        break Fail867;
+      t_441 = term.getSubterm(0);
+      IStrategoList annos113 = term.getAnnotations();
+      u_441 = annos113;
+      term = q_340.invoke(context, t_441);
       if(term == null)
-        break Fail30;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consDynRuleId_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, n_104));
+        break Fail867;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consDynRuleId_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, u_441));
       context.popOnSuccess();
       if(true)
         return term;

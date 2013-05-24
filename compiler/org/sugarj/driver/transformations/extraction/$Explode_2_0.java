@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Explode_2_0 instance = new $Explode_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy t_24, Strategy u_24)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy i_345, Strategy j_345)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("Explode_2_0");
-    Fail155:
+    Fail938:
     { 
-      IStrategoTerm v_127 = null;
-      IStrategoTerm t_127 = null;
-      IStrategoTerm u_127 = null;
-      IStrategoTerm w_127 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consExplode_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail155;
-      t_127 = term.getSubterm(0);
-      u_127 = term.getSubterm(1);
-      IStrategoList annos127 = term.getAnnotations();
-      v_127 = annos127;
-      term = t_24.invoke(context, t_127);
+      IStrategoTerm x_453 = null;
+      IStrategoTerm v_453 = null;
+      IStrategoTerm w_453 = null;
+      IStrategoTerm y_453 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consExplode_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail938;
+      v_453 = term.getSubterm(0);
+      w_453 = term.getSubterm(1);
+      IStrategoList annos183 = term.getAnnotations();
+      x_453 = annos183;
+      term = i_345.invoke(context, v_453);
       if(term == null)
-        break Fail155;
-      w_127 = term;
-      term = u_24.invoke(context, u_127);
+        break Fail938;
+      y_453 = term;
+      term = j_345.invoke(context, w_453);
       if(term == null)
-        break Fail155;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consExplode_2, new IStrategoTerm[]{w_127, term}), checkListAnnos(termFactory, v_127));
+        break Fail938;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consExplode_2, new IStrategoTerm[]{y_453, term}), checkListAnnos(termFactory, x_453));
       context.popOnSuccess();
       if(true)
         return term;

@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static appl_2_0 instance = new appl_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy p_29, Strategy q_29)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy d_352, Strategy e_352)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("appl_2_0");
-    Fail263:
+    Fail1072:
     { 
-      IStrategoTerm u_148 = null;
-      IStrategoTerm s_148 = null;
-      IStrategoTerm t_148 = null;
-      IStrategoTerm v_148 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consappl_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail263;
-      s_148 = term.getSubterm(0);
-      t_148 = term.getSubterm(1);
-      IStrategoList annos217 = term.getAnnotations();
-      u_148 = annos217;
-      term = p_29.invoke(context, s_148);
+      IStrategoTerm x_471 = null;
+      IStrategoTerm v_471 = null;
+      IStrategoTerm w_471 = null;
+      IStrategoTerm y_471 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consappl_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail1072;
+      v_471 = term.getSubterm(0);
+      w_471 = term.getSubterm(1);
+      IStrategoList annos297 = term.getAnnotations();
+      x_471 = annos297;
+      term = d_352.invoke(context, v_471);
       if(term == null)
-        break Fail263;
-      v_148 = term;
-      term = q_29.invoke(context, t_148);
+        break Fail1072;
+      y_471 = term;
+      term = e_352.invoke(context, w_471);
       if(term == null)
-        break Fail263;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consappl_2, new IStrategoTerm[]{v_148, term}), checkListAnnos(termFactory, u_148));
+        break Fail1072;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consappl_2, new IStrategoTerm[]{y_471, term}), checkListAnnos(termFactory, x_471));
       context.popOnSuccess();
       if(true)
         return term;

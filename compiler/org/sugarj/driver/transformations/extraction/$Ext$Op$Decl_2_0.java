@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Ext$Op$Decl_2_0 instance = new $Ext$Op$Decl_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy n_23, Strategy o_23)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy b_346, Strategy c_346)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("ExtOpDecl_2_0");
-    Fail131:
+    Fail953:
     { 
-      IStrategoTerm y_123 = null;
-      IStrategoTerm w_123 = null;
-      IStrategoTerm x_123 = null;
-      IStrategoTerm z_123 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consExtOpDecl_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail131;
-      w_123 = term.getSubterm(0);
-      x_123 = term.getSubterm(1);
-      IStrategoList annos104 = term.getAnnotations();
-      y_123 = annos104;
-      term = n_23.invoke(context, w_123);
+      IStrategoTerm w_455 = null;
+      IStrategoTerm u_455 = null;
+      IStrategoTerm v_455 = null;
+      IStrategoTerm x_455 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consExtOpDecl_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail953;
+      u_455 = term.getSubterm(0);
+      v_455 = term.getSubterm(1);
+      IStrategoList annos196 = term.getAnnotations();
+      w_455 = annos196;
+      term = b_346.invoke(context, u_455);
       if(term == null)
-        break Fail131;
-      z_123 = term;
-      term = o_23.invoke(context, x_123);
+        break Fail953;
+      x_455 = term;
+      term = c_346.invoke(context, v_455);
       if(term == null)
-        break Fail131;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consExtOpDecl_2, new IStrategoTerm[]{z_123, term}), checkListAnnos(termFactory, y_123));
+        break Fail953;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consExtOpDecl_2, new IStrategoTerm[]{x_455, term}), checkListAnnos(termFactory, w_455));
       context.popOnSuccess();
       if(true)
         return term;

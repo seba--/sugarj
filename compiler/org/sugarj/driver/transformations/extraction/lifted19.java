@@ -10,43 +10,49 @@ import java.lang.ref.WeakReference;
 
 @SuppressWarnings("all") final class lifted19 extends Strategy 
 { 
-  public static final lifted19 instance = new lifted19();
+  TermReference d_357;
 
   @Override public IStrategoTerm invoke(Context context, IStrategoTerm term)
   { 
     ITermFactory termFactory = context.getFactory();
-    Fail291:
+    Fail2196:
     { 
-      IStrategoTerm term6 = term;
-      IStrategoConstructor cons5 = term.getTermType() == IStrategoTerm.APPL ? ((IStrategoAppl)term).getConstructor() : null;
-      Success7:
+      IStrategoTerm j_54 = null;
+      IStrategoTerm m_54 = null;
+      IStrategoTerm n_54 = null;
+      j_54 = term;
+      if(d_357.value == null)
+        break Fail2196;
+      term = termFactory.makeTuple(d_357.value, extraction.constSortNoArgs0);
+      IStrategoTerm term14 = term;
+      Success922:
       { 
-        if(cons5 == extraction._consgrammar_elem_1)
+        Fail2197:
         { 
-          Fail292:
-          { 
-            IStrategoTerm t_154 = null;
-            t_154 = term.getSubterm(0);
-            term = t_154;
-            if(true)
-              break Success7;
-          }
-          term = term6;
-        }
-        if(cons5 == extraction._constransformation_elem_1)
-        { 
-          IStrategoTerm y_154 = null;
-          y_154 = term.getSubterm(0);
-          term = comp_desugarings_to_sdf_0_0.instance.invoke(context, y_154);
+          term = has_sort_0_0.instance.invoke(context, term);
           if(term == null)
-            break Fail291;
+            break Fail2197;
+          if(true)
+            break Success922;
         }
-        else
-        { 
-          break Fail291;
-        }
+        term = term14;
+        IStrategoTerm l_54 = null;
+        l_54 = term;
+        term = log_mismatching_sort_error_0_1.instance.invoke(context, l_54, extraction.const4);
+        if(term == null)
+          break Fail2196;
+        if(true)
+          break Fail2196;
       }
-      term = (IStrategoTerm)termFactory.makeListCons(term, (IStrategoList)extraction.constNil0);
+      term = j_54;
+      n_54 = j_54;
+      m_54 = term;
+      term = n_54;
+      IStrategoList list2;
+      list2 = checkListTail(m_54);
+      if(list2 == null)
+        break Fail2196;
+      term = (IStrategoTerm)termFactory.makeListCons(extraction.constSortNoArgs0, list2);
       if(true)
         return term;
     }

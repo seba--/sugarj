@@ -15,7 +15,7 @@ import java.lang.ref.WeakReference;
   @Override public IStrategoTerm invoke(Context context, IStrategoTerm term)
   { 
     ITermFactory termFactory = context.getFactory();
-    Fail2:
+    Fail705:
     { 
       term = (IStrategoTerm)termFactory.makeListCons(term, (IStrategoList)extraction.constNil0);
       if(true)

@@ -16,56 +16,56 @@ import java.lang.ref.WeakReference;
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("fold_conc_grammars_0_0");
-    Fail14:
+    Fail717:
     { 
-      IStrategoTerm term4 = term;
-      Success4:
+      IStrategoTerm term916 = term;
+      Success294:
       { 
-        Fail15:
+        Fail718:
         { 
           if(term.getTermType() != IStrategoTerm.LIST || !((IStrategoList)term).isEmpty())
-            break Fail15;
+            break Fail718;
           term = extraction.constempty_grammar0;
           if(true)
-            break Success4;
+            break Success294;
         }
-        term = term4;
-        IStrategoTerm term5 = term;
-        Success5:
+        term = term916;
+        IStrategoTerm term917 = term;
+        Success295:
         { 
-          Fail16:
+          Fail719:
           { 
-            IStrategoTerm w_15 = null;
+            IStrategoTerm g_333 = null;
             if(term.getTermType() != IStrategoTerm.LIST || ((IStrategoList)term).isEmpty())
-              break Fail16;
-            w_15 = ((IStrategoList)term).head();
-            IStrategoTerm arg1 = ((IStrategoList)term).tail();
-            if(arg1.getTermType() != IStrategoTerm.LIST || !((IStrategoList)arg1).isEmpty())
-              break Fail16;
-            term = w_15;
+              break Fail719;
+            g_333 = ((IStrategoList)term).head();
+            IStrategoTerm arg73 = ((IStrategoList)term).tail();
+            if(arg73.getTermType() != IStrategoTerm.LIST || !((IStrategoList)arg73).isEmpty())
+              break Fail719;
+            term = g_333;
             if(true)
-              break Success5;
+              break Success295;
           }
-          term = term5;
-          IStrategoTerm t_15 = null;
-          IStrategoTerm u_15 = null;
-          IStrategoTerm v_15 = null;
+          term = term917;
+          IStrategoTerm d_333 = null;
+          IStrategoTerm e_333 = null;
+          IStrategoTerm f_333 = null;
           if(term.getTermType() != IStrategoTerm.LIST || ((IStrategoList)term).isEmpty())
-            break Fail14;
-          t_15 = ((IStrategoList)term).head();
-          IStrategoTerm arg2 = ((IStrategoList)term).tail();
-          if(arg2.getTermType() != IStrategoTerm.LIST || ((IStrategoList)arg2).isEmpty())
-            break Fail14;
-          u_15 = ((IStrategoList)arg2).head();
-          v_15 = ((IStrategoList)arg2).tail();
-          IStrategoList list0;
-          list0 = checkListTail(v_15);
-          if(list0 == null)
-            break Fail14;
-          term = (IStrategoTerm)termFactory.makeListCons(termFactory.makeAppl(extraction._consconc_grammars_2, new IStrategoTerm[]{t_15, u_15}), list0);
+            break Fail717;
+          d_333 = ((IStrategoList)term).head();
+          IStrategoTerm arg74 = ((IStrategoList)term).tail();
+          if(arg74.getTermType() != IStrategoTerm.LIST || ((IStrategoList)arg74).isEmpty())
+            break Fail717;
+          e_333 = ((IStrategoList)arg74).head();
+          f_333 = ((IStrategoList)arg74).tail();
+          IStrategoList list443;
+          list443 = checkListTail(f_333);
+          if(list443 == null)
+            break Fail717;
+          term = (IStrategoTerm)termFactory.makeListCons(termFactory.makeAppl(ext._consconc_grammars_2, new IStrategoTerm[]{d_333, e_333}), list443);
           term = this.invoke(context, term);
           if(term == null)
-            break Fail14;
+            break Fail717;
         }
       }
       context.popOnSuccess();

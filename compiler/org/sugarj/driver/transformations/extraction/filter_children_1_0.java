@@ -12,36 +12,36 @@ import java.lang.ref.WeakReference;
 { 
   public static filter_children_1_0 instance = new filter_children_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy g_15)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy q_332)
   { 
     context.push("filter_children_1_0");
-    Fail4:
+    Fail707:
     { 
-      IStrategoTerm e_15 = null;
-      IStrategoTerm f_15 = null;
-      IStrategoTerm h_15 = null;
-      IStrategoTerm i_15 = null;
-      IStrategoTerm cons1 = context.invokePrimitive("SSL_get_constructor", term, NO_STRATEGIES, new IStrategoTerm[]{term});
-      e_15 = cons1;
-      IStrategoTerm args1 = context.invokePrimitive("SSL_get_arguments", term, NO_STRATEGIES, new IStrategoTerm[]{term});
-      f_15 = args1;
-      i_15 = term;
-      term = f_15;
-      lifted6 lifted65 = new lifted6();
-      lifted65.g_15 = g_15;
-      term = map_1_0.instance.invoke(context, term, lifted65);
+      IStrategoTerm o_332 = null;
+      IStrategoTerm p_332 = null;
+      IStrategoTerm r_332 = null;
+      IStrategoTerm s_332 = null;
+      IStrategoTerm cons7 = context.invokePrimitive("SSL_get_constructor", term, NO_STRATEGIES, new IStrategoTerm[]{term});
+      o_332 = cons7;
+      IStrategoTerm args7 = context.invokePrimitive("SSL_get_arguments", term, NO_STRATEGIES, new IStrategoTerm[]{term});
+      p_332 = args7;
+      s_332 = term;
+      term = p_332;
+      lifted485 lifted4850 = new lifted485();
+      lifted4850.q_332 = q_332;
+      term = map_1_0.instance.invoke(context, term, lifted4850);
       if(term == null)
-        break Fail4;
+        break Fail707;
       term = concat_0_0.instance.invoke(context, term);
       if(term == null)
-        break Fail4;
-      h_15 = term;
-      term = i_15;
-      IStrategoTerm mkterm0;
-      mkterm0 = context.invokePrimitive("SSL_mkterm", term, NO_STRATEGIES, new IStrategoTerm[]{e_15, h_15});
-      if(mkterm0 == null)
-        break Fail4;
-      term = mkterm0;
+        break Fail707;
+      r_332 = term;
+      term = s_332;
+      IStrategoTerm mkterm1;
+      mkterm1 = context.invokePrimitive("SSL_mkterm", term, NO_STRATEGIES, new IStrategoTerm[]{o_332, r_332});
+      if(mkterm1 == null)
+        break Fail707;
+      term = mkterm1;
       context.popOnSuccess();
       if(true)
         return term;

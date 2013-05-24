@@ -12,23 +12,23 @@ import java.lang.ref.WeakReference;
 { 
   public static priorities_1_0 instance = new priorities_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy d_29)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy h_334)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("priorities_1_0");
-    Fail252:
+    Fail744:
     { 
-      IStrategoTerm c_147 = null;
-      IStrategoTerm b_147 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._conspriorities_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail252;
-      b_147 = term.getSubterm(0);
-      IStrategoList annos207 = term.getAnnotations();
-      c_147 = annos207;
-      term = d_29.invoke(context, b_147);
+      IStrategoTerm r_425 = null;
+      IStrategoTerm q_425 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._conspriorities_1 != ((IStrategoAppl)term).getConstructor())
+        break Fail744;
+      q_425 = term.getSubterm(0);
+      IStrategoList annos16 = term.getAnnotations();
+      r_425 = annos16;
+      term = h_334.invoke(context, q_425);
       if(term == null)
-        break Fail252;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._conspriorities_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, c_147));
+        break Fail744;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._conspriorities_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, r_425));
       context.popOnSuccess();
       if(true)
         return term;

@@ -1,0 +1,53 @@
+package org.sugarj.driver.transformations.extraction;
+
+import org.strategoxt.stratego_lib.*;
+import org.strategoxt.lang.*;
+import org.spoofax.interpreter.terms.*;
+import static org.strategoxt.lang.Term.*;
+import org.spoofax.interpreter.library.AbstractPrimitive;
+import java.util.ArrayList;
+import java.lang.ref.WeakReference;
+
+@SuppressWarnings("all") public class smart_$Sorts_0_1 extends Strategy 
+{ 
+  public static smart_$Sorts_0_1 instance = new smart_$Sorts_0_1();
+
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, IStrategoTerm ref_v_241)
+  { 
+    ITermFactory termFactory = context.getFactory();
+    TermReference v_241 = new TermReference(ref_v_241);
+    context.push("smart_Sorts_0_1");
+    Fail560:
+    { 
+      IStrategoTerm w_241 = null;
+      IStrategoTerm e_242 = null;
+      IStrategoTerm h_242 = null;
+      term = extraction.constNil0;
+      lifted328 lifted3280 = new lifted328();
+      lifted3280.v_241 = v_241;
+      term = try_1_0.instance.invoke(context, term, lifted3280);
+      if(term == null)
+        break Fail560;
+      w_241 = term;
+      if(v_241.value == null)
+        break Fail560;
+      term = (IStrategoTerm)termFactory.makeListCons(v_241.value, (IStrategoList)extraction.constNil0);
+      e_242 = term;
+      term = context.invokePrimitive("SUGARJ_unsafe_build", e_242, NO_STRATEGIES, new IStrategoTerm[]{extraction.const520});
+      if(term == null)
+        break Fail560;
+      h_242 = term;
+      term = build_alt_sort_or_fail_0_0.instance.invoke(context, w_241);
+      if(term == null)
+        break Fail560;
+      term = put_syntax_sort_0_1.instance.invoke(context, h_242, term);
+      if(term == null)
+        break Fail560;
+      context.popOnSuccess();
+      if(true)
+        return term;
+    }
+    context.popOnFailure();
+    return null;
+  }
+}

@@ -15,33 +15,33 @@ import java.lang.ref.WeakReference;
   @Override public IStrategoTerm invoke(Context context, IStrategoTerm term)
   { 
     ITermFactory termFactory = context.getFactory();
-    Fail20:
+    Fail723:
     { 
-      IStrategoTerm term7 = term;
-      IStrategoConstructor cons4 = term.getTermType() == IStrategoTerm.APPL ? ((IStrategoAppl)term).getConstructor() : null;
-      Success6:
+      IStrategoTerm term919 = term;
+      IStrategoConstructor cons10 = term.getTermType() == IStrategoTerm.APPL ? ((IStrategoAppl)term).getConstructor() : null;
+      Success296:
       { 
-        if(cons4 == extraction._consPureDesugaring_1)
+        if(cons10 == ext._consPureDesugaring_1)
         { 
-          Fail21:
+          Fail724:
           { 
-            IStrategoTerm e_16 = null;
-            e_16 = term.getSubterm(0);
-            term = termFactory.makeAppl(extraction._consSDefNoArgs_2, new IStrategoTerm[]{extraction.const0, termFactory.makeAppl(extraction._consCall_2, new IStrategoTerm[]{extraction.constCallNoArgs0, (IStrategoTerm)termFactory.makeListCons(e_16, (IStrategoList)extraction.constNil0)})});
+            IStrategoTerm o_333 = null;
+            o_333 = term.getSubterm(0);
+            term = termFactory.makeAppl(ext._consSDefNoArgs_2, new IStrategoTerm[]{extraction.const654, termFactory.makeAppl(ext._consCall_2, new IStrategoTerm[]{extraction.constSVar1, (IStrategoTerm)termFactory.makeListCons(o_333, (IStrategoList)extraction.constNil0)})});
             if(true)
-              break Success6;
+              break Success296;
           }
-          term = term7;
+          term = term919;
         }
-        if(cons4 == extraction._consInjectDesugaring_4)
+        if(cons10 == ext._consInjectDesugaring_4)
         { 
-          IStrategoTerm d_16 = null;
-          d_16 = term.getSubterm(0);
-          term = termFactory.makeAppl(extraction._consSDefNoArgs_2, new IStrategoTerm[]{extraction.const0, termFactory.makeAppl(extraction._consCall_2, new IStrategoTerm[]{extraction.constCallNoArgs0, (IStrategoTerm)termFactory.makeListCons(d_16, (IStrategoList)extraction.constNil0)})});
+          IStrategoTerm n_333 = null;
+          n_333 = term.getSubterm(0);
+          term = termFactory.makeAppl(ext._consSDefNoArgs_2, new IStrategoTerm[]{extraction.const654, termFactory.makeAppl(ext._consCall_2, new IStrategoTerm[]{extraction.constSVar1, (IStrategoTerm)termFactory.makeListCons(n_333, (IStrategoList)extraction.constNil0)})});
         }
         else
         { 
-          break Fail20;
+          break Fail723;
         }
       }
       if(true)

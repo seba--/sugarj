@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Op$Q_2_0 instance = new $Op$Q_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy v_24, Strategy w_24)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy o_346, Strategy p_346)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("OpQ_2_0");
-    Fail156:
+    Fail963:
     { 
-      IStrategoTerm a_128 = null;
-      IStrategoTerm y_127 = null;
-      IStrategoTerm z_127 = null;
-      IStrategoTerm b_128 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consOpQ_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail156;
-      y_127 = term.getSubterm(0);
-      z_127 = term.getSubterm(1);
-      IStrategoList annos128 = term.getAnnotations();
-      a_128 = annos128;
-      term = v_24.invoke(context, y_127);
+      IStrategoTerm f_457 = null;
+      IStrategoTerm d_457 = null;
+      IStrategoTerm e_457 = null;
+      IStrategoTerm g_457 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consOpQ_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail963;
+      d_457 = term.getSubterm(0);
+      e_457 = term.getSubterm(1);
+      IStrategoList annos205 = term.getAnnotations();
+      f_457 = annos205;
+      term = o_346.invoke(context, d_457);
       if(term == null)
-        break Fail156;
-      b_128 = term;
-      term = w_24.invoke(context, z_127);
+        break Fail963;
+      g_457 = term;
+      term = p_346.invoke(context, e_457);
       if(term == null)
-        break Fail156;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consOpQ_2, new IStrategoTerm[]{b_128, term}), checkListAnnos(termFactory, a_128));
+        break Fail963;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consOpQ_2, new IStrategoTerm[]{g_457, term}), checkListAnnos(termFactory, f_457));
       context.popOnSuccess();
       if(true)
         return term;

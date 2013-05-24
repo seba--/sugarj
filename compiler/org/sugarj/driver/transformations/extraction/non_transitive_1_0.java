@@ -12,23 +12,23 @@ import java.lang.ref.WeakReference;
 { 
   public static non_transitive_1_0 instance = new non_transitive_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy p_26)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy z_349)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("non_transitive_1_0");
-    Fail193:
+    Fail1031:
     { 
-      IStrategoTerm n_136 = null;
-      IStrategoTerm m_136 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consnon_transitive_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail193;
-      m_136 = term.getSubterm(0);
-      IStrategoList annos160 = term.getAnnotations();
-      n_136 = annos160;
-      term = p_26.invoke(context, m_136);
+      IStrategoTerm b_466 = null;
+      IStrategoTerm a_466 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consnon_transitive_1 != ((IStrategoAppl)term).getConstructor())
+        break Fail1031;
+      a_466 = term.getSubterm(0);
+      IStrategoList annos258 = term.getAnnotations();
+      b_466 = annos258;
+      term = z_349.invoke(context, a_466);
       if(term == null)
-        break Fail193;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consnon_transitive_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, n_136));
+        break Fail1031;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consnon_transitive_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, b_466));
       context.popOnSuccess();
       if(true)
         return term;

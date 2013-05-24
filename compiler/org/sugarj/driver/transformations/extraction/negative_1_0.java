@@ -12,23 +12,23 @@ import java.lang.ref.WeakReference;
 { 
   public static negative_1_0 instance = new negative_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy x_29)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy z_351)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("negative_1_0");
-    Fail268:
+    Fail1068:
     { 
-      IStrategoTerm o_149 = null;
-      IStrategoTerm n_149 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consnegative_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail268;
-      n_149 = term.getSubterm(0);
-      IStrategoList annos222 = term.getAnnotations();
-      o_149 = annos222;
-      term = x_29.invoke(context, n_149);
+      IStrategoTerm k_471 = null;
+      IStrategoTerm j_471 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consnegative_1 != ((IStrategoAppl)term).getConstructor())
+        break Fail1068;
+      j_471 = term.getSubterm(0);
+      IStrategoList annos293 = term.getAnnotations();
+      k_471 = annos293;
+      term = z_351.invoke(context, j_471);
       if(term == null)
-        break Fail268;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consnegative_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, o_149));
+        break Fail1068;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consnegative_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, k_471));
       context.popOnSuccess();
       if(true)
         return term;

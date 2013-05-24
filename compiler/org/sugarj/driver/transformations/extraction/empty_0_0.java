@@ -14,7 +14,7 @@ import java.lang.ref.WeakReference;
 
   @Override public IStrategoTerm invoke(Context context, IStrategoTerm term)
   { 
-    Fail5:
+    Fail708:
     { 
       term = extraction.constNil0;
       if(true)

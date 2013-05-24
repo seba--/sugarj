@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Dyn$Rule$Assign$Add_2_0 instance = new $Dyn$Rule$Assign$Add_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy x_16, Strategy y_16)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy h_340, Strategy i_340)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("DynRuleAssignAdd_2_0");
-    Fail34:
+    Fail863:
     { 
-      IStrategoTerm i_105 = null;
-      IStrategoTerm g_105 = null;
-      IStrategoTerm h_105 = null;
-      IStrategoTerm j_105 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consDynRuleAssignAdd_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail34;
-      g_105 = term.getSubterm(0);
-      h_105 = term.getSubterm(1);
-      IStrategoList annos10 = term.getAnnotations();
-      i_105 = annos10;
-      term = x_16.invoke(context, g_105);
+      IStrategoTerm z_440 = null;
+      IStrategoTerm x_440 = null;
+      IStrategoTerm y_440 = null;
+      IStrategoTerm a_441 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consDynRuleAssignAdd_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail863;
+      x_440 = term.getSubterm(0);
+      y_440 = term.getSubterm(1);
+      IStrategoList annos109 = term.getAnnotations();
+      z_440 = annos109;
+      term = h_340.invoke(context, x_440);
       if(term == null)
-        break Fail34;
-      j_105 = term;
-      term = y_16.invoke(context, h_105);
+        break Fail863;
+      a_441 = term;
+      term = i_340.invoke(context, y_440);
       if(term == null)
-        break Fail34;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consDynRuleAssignAdd_2, new IStrategoTerm[]{j_105, term}), checkListAnnos(termFactory, i_105));
+        break Fail863;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consDynRuleAssignAdd_2, new IStrategoTerm[]{a_441, term}), checkListAnnos(termFactory, z_440));
       context.popOnSuccess();
       if(true)
         return term;

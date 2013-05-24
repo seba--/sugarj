@@ -76,11 +76,11 @@ rules
 
   comp-desugaring-to-str :
     PureDesugaring(term) ->
-    SDefNoArgs("sugarj-desugar",Call(CallNoArgs(SVar("changed-tree")),[term]))
+    SDefNoArgs("sugarj-desugar",Call(SVar("changed-tree"),[term]))
 
   comp-desugaring-to-str :
     InjectDesugaring(term,from,to,attrs) ->
-    SDefNoArgs("sugarj-desugar",Call(CallNoArgs(SVar("changed-tree")),[term]))
+    SDefNoArgs("sugarj-desugar",Call(SVar("changed-tree"),[term]))
 
 strategies
   mainSTR = io-wrap(extract-str)

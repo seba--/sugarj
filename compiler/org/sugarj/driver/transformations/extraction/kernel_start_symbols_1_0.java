@@ -12,23 +12,23 @@ import java.lang.ref.WeakReference;
 { 
   public static kernel_start_symbols_1_0 instance = new kernel_start_symbols_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy b_29)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy a_349)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("kernel_start_symbols_1_0");
-    Fail250:
+    Fail1003:
     { 
-      IStrategoTerm r_146 = null;
-      IStrategoTerm q_146 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._conskernel_start_symbols_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail250;
-      q_146 = term.getSubterm(0);
-      IStrategoList annos205 = term.getAnnotations();
-      r_146 = annos205;
-      term = b_29.invoke(context, q_146);
+      IStrategoTerm l_463 = null;
+      IStrategoTerm k_463 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._conskernel_start_symbols_1 != ((IStrategoAppl)term).getConstructor())
+        break Fail1003;
+      k_463 = term.getSubterm(0);
+      IStrategoList annos240 = term.getAnnotations();
+      l_463 = annos240;
+      term = a_349.invoke(context, k_463);
       if(term == null)
-        break Fail250;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._conskernel_start_symbols_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, r_146));
+        break Fail1003;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._conskernel_start_symbols_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, l_463));
       context.popOnSuccess();
       if(true)
         return term;

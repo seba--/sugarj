@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Dyn$Rule$Union$Fix_2_0 instance = new $Dyn$Rule$Union$Fix_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy c_20, Strategy d_20)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy d_341, Strategy e_341)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("DynRuleUnionFix_2_0");
-    Fail75:
+    Fail875:
     { 
-      IStrategoTerm d_114 = null;
-      IStrategoTerm b_114 = null;
-      IStrategoTerm c_114 = null;
-      IStrategoTerm e_114 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consDynRuleUnionFix_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail75;
-      b_114 = term.getSubterm(0);
-      c_114 = term.getSubterm(1);
-      IStrategoList annos51 = term.getAnnotations();
-      d_114 = annos51;
-      term = c_20.invoke(context, b_114);
+      IStrategoTerm d_443 = null;
+      IStrategoTerm b_443 = null;
+      IStrategoTerm c_443 = null;
+      IStrategoTerm e_443 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consDynRuleUnionFix_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail875;
+      b_443 = term.getSubterm(0);
+      c_443 = term.getSubterm(1);
+      IStrategoList annos121 = term.getAnnotations();
+      d_443 = annos121;
+      term = d_341.invoke(context, b_443);
       if(term == null)
-        break Fail75;
-      e_114 = term;
-      term = d_20.invoke(context, c_114);
+        break Fail875;
+      e_443 = term;
+      term = e_341.invoke(context, c_443);
       if(term == null)
-        break Fail75;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consDynRuleUnionFix_2, new IStrategoTerm[]{e_114, term}), checkListAnnos(termFactory, d_114));
+        break Fail875;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consDynRuleUnionFix_2, new IStrategoTerm[]{e_443, term}), checkListAnnos(termFactory, d_443));
       context.popOnSuccess();
       if(true)
         return term;

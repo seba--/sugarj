@@ -12,33 +12,33 @@ import java.lang.ref.WeakReference;
 { 
   public static extract_1_0 instance = new extract_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy j_15)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy t_332)
   { 
     context.push("extract_1_0");
-    Fail6:
+    Fail709:
     { 
-      IStrategoTerm term0 = term;
-      Success0:
+      IStrategoTerm term912 = term;
+      Success290:
       { 
-        Fail7:
+        Fail710:
         { 
-          term = j_15.invoke(context, term);
+          term = t_332.invoke(context, term);
           if(term == null)
-            break Fail7;
+            break Fail710;
           if(true)
-            break Success0;
+            break Success290;
         }
-        term = term0;
-        IStrategoTerm args2 = context.invokePrimitive("SSL_get_arguments", term, NO_STRATEGIES, new IStrategoTerm[]{term});
-        term = args2;
-        lifted9 lifted94 = new lifted9();
-        lifted94.j_15 = j_15;
-        term = map_1_0.instance.invoke(context, term, lifted94);
+        term = term912;
+        IStrategoTerm args8 = context.invokePrimitive("SSL_get_arguments", term, NO_STRATEGIES, new IStrategoTerm[]{term});
+        term = args8;
+        lifted486 lifted4860 = new lifted486();
+        lifted4860.t_332 = t_332;
+        term = map_1_0.instance.invoke(context, term, lifted4860);
         if(term == null)
-          break Fail6;
+          break Fail709;
         term = concat_0_0.instance.invoke(context, term);
         if(term == null)
-          break Fail6;
+          break Fail709;
       }
       context.popOnSuccess();
       if(true)

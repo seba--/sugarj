@@ -15,14 +15,14 @@ import java.lang.ref.WeakReference;
   @Override public IStrategoTerm invoke(Context context, IStrategoTerm term)
   { 
     context.push("extract_str_0_0");
-    Fail23:
+    Fail726:
     { 
-      term = map_1_0.instance.invoke(context, term, lifted22.instance);
+      term = map_1_0.instance.invoke(context, term, lifted493.instance);
       if(term == null)
-        break Fail23;
+        break Fail726;
       term = concat_0_0.instance.invoke(context, term);
       if(term == null)
-        break Fail23;
+        break Fail726;
       context.popOnSuccess();
       if(true)
         return term;

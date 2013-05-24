@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static annotated_2_0 instance = new annotated_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy m_29, Strategy n_29)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy g_352, Strategy h_352)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("annotated_2_0");
-    Fail261:
+    Fail1074:
     { 
-      IStrategoTerm m_148 = null;
-      IStrategoTerm k_148 = null;
-      IStrategoTerm l_148 = null;
-      IStrategoTerm n_148 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consannotated_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail261;
-      k_148 = term.getSubterm(0);
-      l_148 = term.getSubterm(1);
-      IStrategoList annos215 = term.getAnnotations();
-      m_148 = annos215;
-      term = m_29.invoke(context, k_148);
+      IStrategoTerm f_472 = null;
+      IStrategoTerm d_472 = null;
+      IStrategoTerm e_472 = null;
+      IStrategoTerm g_472 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || ext._consannotated_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail1074;
+      d_472 = term.getSubterm(0);
+      e_472 = term.getSubterm(1);
+      IStrategoList annos299 = term.getAnnotations();
+      f_472 = annos299;
+      term = g_352.invoke(context, d_472);
       if(term == null)
-        break Fail261;
-      n_148 = term;
-      term = n_29.invoke(context, l_148);
+        break Fail1074;
+      g_472 = term;
+      term = h_352.invoke(context, e_472);
       if(term == null)
-        break Fail261;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consannotated_2, new IStrategoTerm[]{n_148, term}), checkListAnnos(termFactory, m_148));
+        break Fail1074;
+      term = termFactory.annotateTerm(termFactory.makeAppl(ext._consannotated_2, new IStrategoTerm[]{g_472, term}), checkListAnnos(termFactory, f_472));
       context.popOnSuccess();
       if(true)
         return term;
