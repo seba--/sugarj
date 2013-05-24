@@ -3925,799 +3925,799 @@ rules
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaCompilationUnit")) ; ?renamed)
-  ; SortNoArgs("CompilationUnit")
+  ; !SortNoArgs("CompilationUnit")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaTypeDec")) ; ?renamed)
-  ; SortNoArgs("TypeDec")
+  ; !SortNoArgs("TypeDec")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaImportDec")) ; ?renamed)
-  ; SortNoArgs("ImportDec")
+  ; !SortNoArgs("ImportDec")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaPackageDec")) ; ?renamed)
-  ; SortNoArgs("PackageDec")
+  ; !SortNoArgs("PackageDec")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaElemVal")) ; ?renamed)
-  ; SortNoArgs("ElemVal")
+  ; !SortNoArgs("ElemVal")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaElemValPair")) ; ?renamed)
-  ; SortNoArgs("ElemValPair")
+  ; !SortNoArgs("ElemValPair")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaAnno")) ; ?renamed)
-  ; SortNoArgs("Anno")
+  ; !SortNoArgs("Anno")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaLHS")) ; ?renamed)
-  ; SortNoArgs("LHS")
+  ; !SortNoArgs("LHS")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaCondMid")) ; ?renamed)
-  ; SortNoArgs("CondMid")
+  ; !SortNoArgs("CondMid")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaArraySubscript")) ; ?renamed)
-  ; SortNoArgs("ArraySubscript")
+  ; !SortNoArgs("ArraySubscript")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaDimExpr")) ; ?renamed)
-  ; SortNoArgs("DimExpr")
+  ; !SortNoArgs("DimExpr")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaArrayBaseType")) ; ?renamed)
-  ; SortNoArgs("ArrayBaseType")
+  ; !SortNoArgs("ArrayBaseType")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaArrayCreationExpr")) ; ?renamed)
-  ; SortNoArgs("ArrayCreationExpr")
+  ; !SortNoArgs("ArrayCreationExpr")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaClassMemberDec")) ; ?renamed)
-  ; SortNoArgs("ClassMemberDec")
+  ; !SortNoArgs("ClassMemberDec")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaClassBodyDec")) ; ?renamed)
-  ; SortNoArgs("ClassBodyDec")
+  ; !SortNoArgs("ClassBodyDec")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaInterfaces")) ; ?renamed)
-  ; SortNoArgs("Interfaces")
+  ; !SortNoArgs("Interfaces")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaSuper")) ; ?renamed)
-  ; SortNoArgs("Super")
+  ; !SortNoArgs("Super")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaClassMod")) ; ?renamed)
-  ; SortNoArgs("ClassMod")
+  ; !SortNoArgs("ClassMod")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaClassDecHead")) ; ?renamed)
-  ; SortNoArgs("ClassDecHead")
+  ; !SortNoArgs("ClassDecHead")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaClassBody")) ; ?renamed)
-  ; SortNoArgs("ClassBody")
+  ; !SortNoArgs("ClassBody")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaClassDec")) ; ?renamed)
-  ; SortNoArgs("ClassDec")
+  ; !SortNoArgs("ClassDec")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaInterfaceMod")) ; ?renamed)
-  ; SortNoArgs("InterfaceMod")
+  ; !SortNoArgs("InterfaceMod")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaInterfaceMemberDec")) ; ?renamed)
-  ; SortNoArgs("InterfaceMemberDec")
+  ; !SortNoArgs("InterfaceMemberDec")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaExtendsInterfaces")) ; ?renamed)
-  ; SortNoArgs("ExtendsInterfaces")
+  ; !SortNoArgs("ExtendsInterfaces")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaInterfaceDecHead")) ; ?renamed)
-  ; SortNoArgs("InterfaceDecHead")
+  ; !SortNoArgs("InterfaceDecHead")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaInterfaceDec")) ; ?renamed)
-  ; SortNoArgs("InterfaceDec")
+  ; !SortNoArgs("InterfaceDec")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaDefaultVal")) ; ?renamed)
-  ; SortNoArgs("DefaultVal")
+  ; !SortNoArgs("DefaultVal")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaAnnoElemDec")) ; ?renamed)
-  ; SortNoArgs("AnnoElemDec")
+  ; !SortNoArgs("AnnoElemDec")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaAnnoDecHead")) ; ?renamed)
-  ; SortNoArgs("AnnoDecHead")
+  ; !SortNoArgs("AnnoDecHead")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaAnnoDec")) ; ?renamed)
-  ; SortNoArgs("AnnoDec")
+  ; !SortNoArgs("AnnoDec")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaAbstractMethodMod")) ; ?renamed)
-  ; SortNoArgs("AbstractMethodMod")
+  ; !SortNoArgs("AbstractMethodMod")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaAbstractMethodDec")) ; ?renamed)
-  ; SortNoArgs("AbstractMethodDec")
+  ; !SortNoArgs("AbstractMethodDec")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaConstantMod")) ; ?renamed)
-  ; SortNoArgs("ConstantMod")
+  ; !SortNoArgs("ConstantMod")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaConstantDec")) ; ?renamed)
-  ; SortNoArgs("ConstantDec")
+  ; !SortNoArgs("ConstantDec")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaEnumBodyDecs")) ; ?renamed)
-  ; SortNoArgs("EnumBodyDecs")
+  ; !SortNoArgs("EnumBodyDecs")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaEnumConstArgs")) ; ?renamed)
-  ; SortNoArgs("EnumConstArgs")
+  ; !SortNoArgs("EnumConstArgs")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaEnumConst")) ; ?renamed)
-  ; SortNoArgs("EnumConst")
+  ; !SortNoArgs("EnumConst")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaEnumBody")) ; ?renamed)
-  ; SortNoArgs("EnumBody")
+  ; !SortNoArgs("EnumBody")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaEnumDecHead")) ; ?renamed)
-  ; SortNoArgs("EnumDecHead")
+  ; !SortNoArgs("EnumDecHead")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaEnumDec")) ; ?renamed)
-  ; SortNoArgs("EnumDec")
+  ; !SortNoArgs("EnumDec")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaConstrMod")) ; ?renamed)
-  ; SortNoArgs("ConstrMod")
+  ; !SortNoArgs("ConstrMod")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaConstrInv")) ; ?renamed)
-  ; SortNoArgs("ConstrInv")
+  ; !SortNoArgs("ConstrInv")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaConstrBody")) ; ?renamed)
-  ; SortNoArgs("ConstrBody")
+  ; !SortNoArgs("ConstrBody")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaConstrHead")) ; ?renamed)
-  ; SortNoArgs("ConstrHead")
+  ; !SortNoArgs("ConstrHead")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaConstrDec")) ; ?renamed)
-  ; SortNoArgs("ConstrDec")
+  ; !SortNoArgs("ConstrDec")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaStaticInit")) ; ?renamed)
-  ; SortNoArgs("StaticInit")
+  ; !SortNoArgs("StaticInit")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaInstanceInit")) ; ?renamed)
-  ; SortNoArgs("InstanceInit")
+  ; !SortNoArgs("InstanceInit")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaMethodBody")) ; ?renamed)
-  ; SortNoArgs("MethodBody")
+  ; !SortNoArgs("MethodBody")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaExceptionType")) ; ?renamed)
-  ; SortNoArgs("ExceptionType")
+  ; !SortNoArgs("ExceptionType")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaThrows")) ; ?renamed)
-  ; SortNoArgs("Throws")
+  ; !SortNoArgs("Throws")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaMethodMod")) ; ?renamed)
-  ; SortNoArgs("MethodMod")
+  ; !SortNoArgs("MethodMod")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaVarMod")) ; ?renamed)
-  ; SortNoArgs("VarMod")
+  ; !SortNoArgs("VarMod")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaFormalParam")) ; ?renamed)
-  ; SortNoArgs("FormalParam")
+  ; !SortNoArgs("FormalParam")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaResultType")) ; ?renamed)
-  ; SortNoArgs("ResultType")
+  ; !SortNoArgs("ResultType")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaMethodDecHead")) ; ?renamed)
-  ; SortNoArgs("MethodDecHead")
+  ; !SortNoArgs("MethodDecHead")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaMethodDec")) ; ?renamed)
-  ; SortNoArgs("MethodDec")
+  ; !SortNoArgs("MethodDec")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaBlockStm")) ; ?renamed)
-  ; SortNoArgs("BlockStm")
+  ; !SortNoArgs("BlockStm")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaBlock")) ; ?renamed)
-  ; SortNoArgs("Block")
+  ; !SortNoArgs("Block")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaCatchClause")) ; ?renamed)
-  ; SortNoArgs("CatchClause")
+  ; !SortNoArgs("CatchClause")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaSwitchLabel")) ; ?renamed)
-  ; SortNoArgs("SwitchLabel")
+  ; !SortNoArgs("SwitchLabel")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaSwitchGroup")) ; ?renamed)
-  ; SortNoArgs("SwitchGroup")
+  ; !SortNoArgs("SwitchGroup")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaSwitchBlock")) ; ?renamed)
-  ; SortNoArgs("SwitchBlock")
+  ; !SortNoArgs("SwitchBlock")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaStm")) ; ?renamed)
-  ; SortNoArgs("Stm")
+  ; !SortNoArgs("Stm")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaLocalVarDec")) ; ?renamed)
-  ; SortNoArgs("LocalVarDec")
+  ; !SortNoArgs("LocalVarDec")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaLocalVarDecStm")) ; ?renamed)
-  ; SortNoArgs("LocalVarDecStm")
+  ; !SortNoArgs("LocalVarDecStm")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaFieldMod")) ; ?renamed)
-  ; SortNoArgs("FieldMod")
+  ; !SortNoArgs("FieldMod")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaVarInit")) ; ?renamed)
-  ; SortNoArgs("VarInit")
+  ; !SortNoArgs("VarInit")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaDim")) ; ?renamed)
-  ; SortNoArgs("Dim")
+  ; !SortNoArgs("Dim")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaVarDecId")) ; ?renamed)
-  ; SortNoArgs("VarDecId")
+  ; !SortNoArgs("VarDecId")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaVarDec")) ; ?renamed)
-  ; SortNoArgs("VarDec")
+  ; !SortNoArgs("VarDec")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaFieldDec")) ; ?renamed)
-  ; SortNoArgs("FieldDec")
+  ; !SortNoArgs("FieldDec")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaArrayInit")) ; ?renamed)
-  ; SortNoArgs("ArrayInit")
+  ; !SortNoArgs("ArrayInit")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaClassLiteral")) ; ?renamed)
-  ; SortNoArgs("ClassLiteral")
+  ; !SortNoArgs("ClassLiteral")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaLiteral")) ; ?renamed)
-  ; SortNoArgs("Literal")
+  ; !SortNoArgs("Literal")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaType")) ; ?renamed)
-  ; SortNoArgs("Type")
+  ; !SortNoArgs("Type")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaArrayType")) ; ?renamed)
-  ; SortNoArgs("ArrayType")
+  ; !SortNoArgs("ArrayType")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaTypeVar")) ; ?renamed)
-  ; SortNoArgs("TypeVar")
+  ; !SortNoArgs("TypeVar")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaTypeDecSpec")) ; ?renamed)
-  ; SortNoArgs("TypeDecSpec")
+  ; !SortNoArgs("TypeDecSpec")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaInterfaceType")) ; ?renamed)
-  ; SortNoArgs("InterfaceType")
+  ; !SortNoArgs("InterfaceType")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaClassType")) ; ?renamed)
-  ; SortNoArgs("ClassType")
+  ; !SortNoArgs("ClassType")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaClassOrInterfaceType")) ; ?renamed)
-  ; SortNoArgs("ClassOrInterfaceType")
+  ; !SortNoArgs("ClassOrInterfaceType")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaRefType")) ; ?renamed)
-  ; SortNoArgs("RefType")
+  ; !SortNoArgs("RefType")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaTypeVarId")) ; ?renamed)
-  ; SortNoArgs("TypeVarId")
+  ; !SortNoArgs("TypeVarId")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaTypeParams")) ; ?renamed)
-  ; SortNoArgs("TypeParams")
+  ; !SortNoArgs("TypeParams")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaTypeBound")) ; ?renamed)
-  ; SortNoArgs("TypeBound")
+  ; !SortNoArgs("TypeBound")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaTypeParam")) ; ?renamed)
-  ; SortNoArgs("TypeParam")
+  ; !SortNoArgs("TypeParam")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaWildcardBound")) ; ?renamed)
-  ; SortNoArgs("WildcardBound")
+  ; !SortNoArgs("WildcardBound")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaActualTypeArg")) ; ?renamed)
-  ; SortNoArgs("ActualTypeArg")
+  ; !SortNoArgs("ActualTypeArg")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaTypeArgs")) ; ?renamed)
-  ; SortNoArgs("TypeArgs")
+  ; !SortNoArgs("TypeArgs")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaPackageOrTypeName")) ; ?renamed)
-  ; SortNoArgs("PackageOrTypeName")
+  ; !SortNoArgs("PackageOrTypeName")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaMethodName")) ; ?renamed)
-  ; SortNoArgs("MethodName")
+  ; !SortNoArgs("MethodName")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaExprName")) ; ?renamed)
-  ; SortNoArgs("ExprName")
+  ; !SortNoArgs("ExprName")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaTypeName")) ; ?renamed)
-  ; SortNoArgs("TypeName")
+  ; !SortNoArgs("TypeName")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaAmbName")) ; ?renamed)
-  ; SortNoArgs("AmbName")
+  ; !SortNoArgs("AmbName")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaPackageName")) ; ?renamed)
-  ; SortNoArgs("PackageName")
+  ; !SortNoArgs("PackageName")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaFloatType")) ; ?renamed)
-  ; SortNoArgs("FloatType")
+  ; !SortNoArgs("FloatType")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaIntType")) ; ?renamed)
-  ; SortNoArgs("IntType")
+  ; !SortNoArgs("IntType")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaNumType")) ; ?renamed)
-  ; SortNoArgs("NumType")
+  ; !SortNoArgs("NumType")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaPrimType")) ; ?renamed)
-  ; SortNoArgs("PrimType")
+  ; !SortNoArgs("PrimType")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaNullLiteral")) ; ?renamed)
-  ; SortNoArgs("NullLiteral")
+  ; !SortNoArgs("NullLiteral")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaFooStringChars")) ; ?renamed)
-  ; SortNoArgs("FooStringChars")
+  ; !SortNoArgs("FooStringChars")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaStringChars")) ; ?renamed)
-  ; SortNoArgs("StringChars")
+  ; !SortNoArgs("StringChars")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaStringPart")) ; ?renamed)
-  ; SortNoArgs("StringPart")
+  ; !SortNoArgs("StringPart")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaStringLiteral")) ; ?renamed)
-  ; SortNoArgs("StringLiteral")
+  ; !SortNoArgs("StringLiteral")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaSingleChar")) ; ?renamed)
-  ; SortNoArgs("SingleChar")
+  ; !SortNoArgs("SingleChar")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaCharContent")) ; ?renamed)
-  ; SortNoArgs("CharContent")
+  ; !SortNoArgs("CharContent")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaCharLiteral")) ; ?renamed)
-  ; SortNoArgs("CharLiteral")
+  ; !SortNoArgs("CharLiteral")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaLastOcta")) ; ?renamed)
-  ; SortNoArgs("LastOcta")
+  ; !SortNoArgs("LastOcta")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaOctaEscape")) ; ?renamed)
-  ; SortNoArgs("OctaEscape")
+  ; !SortNoArgs("OctaEscape")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaNamedEscape")) ; ?renamed)
-  ; SortNoArgs("NamedEscape")
+  ; !SortNoArgs("NamedEscape")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaEscapeSeq")) ; ?renamed)
-  ; SortNoArgs("EscapeSeq")
+  ; !SortNoArgs("EscapeSeq")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaBool")) ; ?renamed)
-  ; SortNoArgs("Bool")
+  ; !SortNoArgs("Bool")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaBoolLiteral")) ; ?renamed)
-  ; SortNoArgs("BoolLiteral")
+  ; !SortNoArgs("BoolLiteral")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaBinaryExponent")) ; ?renamed)
-  ; SortNoArgs("BinaryExponent")
+  ; !SortNoArgs("BinaryExponent")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaHexaSignificand")) ; ?renamed)
-  ; SortNoArgs("HexaSignificand")
+  ; !SortNoArgs("HexaSignificand")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaHexaFloatNumeral")) ; ?renamed)
-  ; SortNoArgs("HexaFloatNumeral")
+  ; !SortNoArgs("HexaFloatNumeral")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaSignedInteger")) ; ?renamed)
-  ; SortNoArgs("SignedInteger")
+  ; !SortNoArgs("SignedInteger")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaDeciFloatExponentPart")) ; ?renamed)
-  ; SortNoArgs("DeciFloatExponentPart")
+  ; !SortNoArgs("DeciFloatExponentPart")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaDeciFloatDigits")) ; ?renamed)
-  ; SortNoArgs("DeciFloatDigits")
+  ; !SortNoArgs("DeciFloatDigits")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaDeciFloatNumeral")) ; ?renamed)
-  ; SortNoArgs("DeciFloatNumeral")
+  ; !SortNoArgs("DeciFloatNumeral")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaFloatLiteral")) ; ?renamed)
-  ; SortNoArgs("FloatLiteral")
+  ; !SortNoArgs("FloatLiteral")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaHexaFloatLiteral")) ; ?renamed)
-  ; SortNoArgs("HexaFloatLiteral")
+  ; !SortNoArgs("HexaFloatLiteral")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaDeciFloatLiteral")) ; ?renamed)
-  ; SortNoArgs("DeciFloatLiteral")
+  ; !SortNoArgs("DeciFloatLiteral")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaIntLiteral")) ; ?renamed)
-  ; SortNoArgs("IntLiteral")
+  ; !SortNoArgs("IntLiteral")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaOctaNumeral")) ; ?renamed)
-  ; SortNoArgs("OctaNumeral")
+  ; !SortNoArgs("OctaNumeral")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaHexaNumeral")) ; ?renamed)
-  ; SortNoArgs("HexaNumeral")
+  ; !SortNoArgs("HexaNumeral")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaDeciNumeral")) ; ?renamed)
-  ; SortNoArgs("DeciNumeral")
+  ; !SortNoArgs("DeciNumeral")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaOctaLiteral")) ; ?renamed)
-  ; SortNoArgs("OctaLiteral")
+  ; !SortNoArgs("OctaLiteral")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaHexaLiteral")) ; ?renamed)
-  ; SortNoArgs("HexaLiteral")
+  ; !SortNoArgs("HexaLiteral")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaDeciLiteral")) ; ?renamed)
-  ; SortNoArgs("DeciLiteral")
+  ; !SortNoArgs("DeciLiteral")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaModifier")) ; ?renamed)
-  ; SortNoArgs("Modifier")
+  ; !SortNoArgs("Modifier")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaStrictFP")) ; ?renamed)
-  ; SortNoArgs("StrictFP")
+  ; !SortNoArgs("StrictFP")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaSynchronized")) ; ?renamed)
-  ; SortNoArgs("Synchronized")
+  ; !SortNoArgs("Synchronized")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaVolatile")) ; ?renamed)
-  ; SortNoArgs("Volatile")
+  ; !SortNoArgs("Volatile")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaTransient")) ; ?renamed)
-  ; SortNoArgs("Transient")
+  ; !SortNoArgs("Transient")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaNative")) ; ?renamed)
-  ; SortNoArgs("Native")
+  ; !SortNoArgs("Native")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaStatic")) ; ?renamed)
-  ; SortNoArgs("Static")
+  ; !SortNoArgs("Static")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaFinal")) ; ?renamed)
-  ; SortNoArgs("Final")
+  ; !SortNoArgs("Final")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaAbstract")) ; ?renamed)
-  ; SortNoArgs("Abstract")
+  ; !SortNoArgs("Abstract")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaProtected")) ; ?renamed)
-  ; SortNoArgs("Protected")
+  ; !SortNoArgs("Protected")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaPrivate")) ; ?renamed)
-  ; SortNoArgs("Private")
+  ; !SortNoArgs("Private")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaPublic")) ; ?renamed)
-  ; SortNoArgs("Public")
+  ; !SortNoArgs("Public")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaId")) ; ?renamed)
-  ; SortNoArgs("Id")
+  ; !SortNoArgs("Id")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaID")) ; ?renamed)
-  ; SortNoArgs("ID")
+  ; !SortNoArgs("ID")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaKeyword")) ; ?renamed)
-  ; SortNoArgs("Keyword")
+  ; !SortNoArgs("Keyword")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaEscChar")) ; ?renamed)
-  ; SortNoArgs("EscChar")
+  ; !SortNoArgs("EscChar")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaEscEscChar")) ; ?renamed)
-  ; SortNoArgs("EscEscChar")
+  ; !SortNoArgs("EscEscChar")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaAsterisk")) ; ?renamed)
-  ; SortNoArgs("Asterisk")
+  ; !SortNoArgs("Asterisk")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaBlockCommentChars")) ; ?renamed)
-  ; SortNoArgs("BlockCommentChars")
+  ; !SortNoArgs("BlockCommentChars")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaCommentPart")) ; ?renamed)
-  ; SortNoArgs("CommentPart")
+  ; !SortNoArgs("CommentPart")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaEOLCommentChars")) ; ?renamed)
-  ; SortNoArgs("EOLCommentChars")
+  ; !SortNoArgs("EOLCommentChars")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaComment")) ; ?renamed)
-  ; SortNoArgs("Comment")
+  ; !SortNoArgs("Comment")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaEndOfFile")) ; ?renamed)
-  ; SortNoArgs("EndOfFile")
+  ; !SortNoArgs("EndOfFile")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaCarriageReturn")) ; ?renamed)
-  ; SortNoArgs("CarriageReturn")
+  ; !SortNoArgs("CarriageReturn")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaLineTerminator")) ; ?renamed)
-  ; SortNoArgs("LineTerminator")
+  ; !SortNoArgs("LineTerminator")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaUnicodeEscape")) ; ?renamed)
-  ; SortNoArgs("UnicodeEscape")
+  ; !SortNoArgs("UnicodeEscape")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaArrayAccess")) ; ?renamed)
-  ; SortNoArgs("ArrayAccess")
+  ; !SortNoArgs("ArrayAccess")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaFieldAccess")) ; ?renamed)
-  ; SortNoArgs("FieldAccess")
+  ; !SortNoArgs("FieldAccess")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaMethodSpec")) ; ?renamed)
-  ; SortNoArgs("MethodSpec")
+  ; !SortNoArgs("MethodSpec")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("JavaExpr")) ; ?renamed)
-  ; SortNoArgs("Expr")
+  ; !SortNoArgs("Expr")

@@ -35,7 +35,7 @@ rules
   push-subsort-stack =
       where(
         strip-annos => pair
-      ; <not(elem)> (pair, <Subsort-Stack>)
+      ; (<not(elem)> (pair, <Subsort-Stack>) <+ debug(!"detected loop: "); fail)
       ; rules( Subsort-Stack := [pair | <Subsort-Stack>] ))
   pop-subsort-stack =
     where(rules( Subsort-Stack := <Subsort-Stack; ?[_|<id>]> ))
@@ -55,7 +55,7 @@ rules
     ; <has-subsort-of> (x, xsort)
   has-subsort-of-refl =
       ?(x, Sort("Alt", [xsort1, xsort2]))
-    ; (<has-subsort-of> (x, xsort1) + <has-subsort-of-refl> (x, xsort2))
+    ; (<has-subsort-of> (x, xsort1) + <has-subsort-of> (x, xsort2))
   has-subsort-of-refl =
       ?(x, xsort)
     ; <is-string> x
@@ -72,7 +72,7 @@ rules
   	  ?(term,sup-sort)
       // result to argument
       ; <sort-match> (sup-sort, res-sort)
-      ; where(<try(unrename-sort)> arg-sort => unrenamed-arg-sort)
+      ; where(<repeat(unrename-sort)> arg-sort => unrenamed-arg-sort)
       // ; <debug-analysis(!"inject: ")> (unrenamed-arg-sort, res-sort) 
       ; <has-subsort-of> (term, unrenamed-arg-sort)
 

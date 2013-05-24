@@ -125,7 +125,7 @@ rules
         Seq(
           Where(Assign(Var("renamed"), <trm-explode> res-sort)),
           Match(Var("renamed"))),
-          <trm-explode> arg-sort)
+          Build(<trm-explode> arg-sort))
     ; !SDefT("unrename-sort", [], [], body) => strat
 
   gen-lexical-sort-prod :

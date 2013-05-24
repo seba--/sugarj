@@ -5669,784 +5669,784 @@ rules
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceImport")) ; ?renamed)
-  ; SortNoArgs("Import")
+  ; !SortNoArgs("Import")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceImports")) ; ?renamed)
-  ; SortNoArgs("Imports")
+  ; !SortNoArgs("Imports")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceModule")) ; ?renamed)
-  ; SortNoArgs("Module")
+  ; !SortNoArgs("Module")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceFileName")) ; ?renamed)
-  ; SortNoArgs("FileName")
+  ; !SortNoArgs("FileName")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceBuilderOption")) ; ?renamed)
-  ; SortNoArgs("BuilderOption")
+  ; !SortNoArgs("BuilderOption")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceCompletionAnno")) ; ?renamed)
-  ; SortNoArgs("CompletionAnno")
+  ; !SortNoArgs("CompletionAnno")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceCompletionPart")) ; ?renamed)
-  ; SortNoArgs("CompletionPart")
+  ; !SortNoArgs("CompletionPart")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServicePlaceholderChar")) ; ?renamed)
-  ; SortNoArgs("PlaceholderChar")
+  ; !SortNoArgs("PlaceholderChar")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServicePlaceholder")) ; ?renamed)
-  ; SortNoArgs("Placeholder")
+  ; !SortNoArgs("Placeholder")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceAttributeId")) ; ?renamed)
-  ; SortNoArgs("AttributeId")
+  ; !SortNoArgs("AttributeId")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceMaybeColor")) ; ?renamed)
-  ; SortNoArgs("MaybeColor")
+  ; !SortNoArgs("MaybeColor")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceNoColor")) ; ?renamed)
-  ; SortNoArgs("NoColor")
+  ; !SortNoArgs("NoColor")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceColor")) ; ?renamed)
-  ; SortNoArgs("Color")
+  ; !SortNoArgs("Color")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceFont")) ; ?renamed)
-  ; SortNoArgs("Font")
+  ; !SortNoArgs("Font")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceTokenKindName")) ; ?renamed)
-  ; SortNoArgs("TokenKindName")
+  ; !SortNoArgs("TokenKindName")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceColorNode")) ; ?renamed)
-  ; SortNoArgs("ColorNode")
+  ; !SortNoArgs("ColorNode")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceAttribute")) ; ?renamed)
-  ; SortNoArgs("Attribute")
+  ; !SortNoArgs("Attribute")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceColorRule")) ; ?renamed)
-  ; SortNoArgs("ColorRule")
+  ; !SortNoArgs("ColorRule")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceOutlineRule")) ; ?renamed)
-  ; SortNoArgs("OutlineRule")
+  ; !SortNoArgs("OutlineRule")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceFoldingAnno")) ; ?renamed)
-  ; SortNoArgs("FoldingAnno")
+  ; !SortNoArgs("FoldingAnno")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceFoldingRule")) ; ?renamed)
-  ; SortNoArgs("FoldingRule")
+  ; !SortNoArgs("FoldingRule")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceIndentDef")) ; ?renamed)
-  ; SortNoArgs("IndentDef")
+  ; !SortNoArgs("IndentDef")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceFenceDef")) ; ?renamed)
-  ; SortNoArgs("FenceDef")
+  ; !SortNoArgs("FenceDef")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceNoContinuation")) ; ?renamed)
-  ; SortNoArgs("NoContinuation")
+  ; !SortNoArgs("NoContinuation")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceBlockCommentDef")) ; ?renamed)
-  ; SortNoArgs("BlockCommentDef")
+  ; !SortNoArgs("BlockCommentDef")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceLanguageProperty")) ; ?renamed)
-  ; SortNoArgs("LanguageProperty")
+  ; !SortNoArgs("LanguageProperty")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServicePropertyValues")) ; ?renamed)
-  ; SortNoArgs("PropertyValues")
+  ; !SortNoArgs("PropertyValues")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceURL")) ; ?renamed)
-  ; SortNoArgs("URL")
+  ; !SortNoArgs("URL")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServicePropertyValue")) ; ?renamed)
-  ; SortNoArgs("PropertyValue")
+  ; !SortNoArgs("PropertyValue")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceReservedName")) ; ?renamed)
-  ; SortNoArgs("ReservedName")
+  ; !SortNoArgs("ReservedName")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceSection")) ; ?renamed)
-  ; SortNoArgs("Section")
+  ; !SortNoArgs("Section")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceOnSaveAnno")) ; ?renamed)
-  ; SortNoArgs("OnSaveAnno")
+  ; !SortNoArgs("OnSaveAnno")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceStrategoCall")) ; ?renamed)
-  ; SortNoArgs("StrategoCall")
+  ; !SortNoArgs("StrategoCall")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceRefactoringRule")) ; ?renamed)
-  ; SortNoArgs("RefactoringRule")
+  ; !SortNoArgs("RefactoringRule")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceBuilderRule")) ; ?renamed)
-  ; SortNoArgs("BuilderRule")
+  ; !SortNoArgs("BuilderRule")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceCompletionRule")) ; ?renamed)
-  ; SortNoArgs("CompletionRule")
+  ; !SortNoArgs("CompletionRule")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceReferenceRule")) ; ?renamed)
-  ; SortNoArgs("ReferenceRule")
+  ; !SortNoArgs("ReferenceRule")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceSemanticNode")) ; ?renamed)
-  ; SortNoArgs("SemanticNode")
+  ; !SortNoArgs("SemanticNode")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceStrategoId")) ; ?renamed)
-  ; SortNoArgs("StrategoId")
+  ; !SortNoArgs("StrategoId")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceModuleName")) ; ?renamed)
-  ; SortNoArgs("ModuleName")
+  ; !SortNoArgs("ModuleName")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceNode")) ; ?renamed)
-  ; SortNoArgs("Node")
+  ; !SortNoArgs("Node")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceConstructorId")) ; ?renamed)
-  ; SortNoArgs("ConstructorId")
+  ; !SortNoArgs("ConstructorId")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceConstructor")) ; ?renamed)
-  ; SortNoArgs("Constructor")
+  ; !SortNoArgs("Constructor")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceString")) ; ?renamed)
-  ; SortNoArgs("String")
+  ; !SortNoArgs("String")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceSort")) ; ?renamed)
-  ; SortNoArgs("Sort")
+  ; !SortNoArgs("Sort")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceSectionName")) ; ?renamed)
-  ; SortNoArgs("SectionName")
+  ; !SortNoArgs("SectionName")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceBACKSLASH")) ; ?renamed)
-  ; SortNoArgs("BACKSLASH")
+  ; !SortNoArgs("BACKSLASH")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceStringChar")) ; ?renamed)
-  ; SortNoArgs("StringChar")
+  ; !SortNoArgs("StringChar")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceSTRING")) ; ?renamed)
-  ; SortNoArgs("STRING")
+  ; !SortNoArgs("STRING")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceInt")) ; ?renamed)
-  ; SortNoArgs("Int")
+  ; !SortNoArgs("Int")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceIdStar")) ; ?renamed)
-  ; SortNoArgs("IdStar")
+  ; !SortNoArgs("IdStar")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("EditorServiceId")) ; ?renamed)
-  ; SortNoArgs("Id")
+  ; !SortNoArgs("Id")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoRuleNames")) ; ?renamed)
-  ; SortNoArgs("RuleNames")
+  ; !SortNoArgs("RuleNames")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoRuleDec")) ; ?renamed)
-  ; SortNoArgs("RuleDec")
+  ; !SortNoArgs("RuleDec")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoDynRuleScopeId")) ; ?renamed)
-  ; SortNoArgs("DynRuleScopeId")
+  ; !SortNoArgs("DynRuleScopeId")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoDynRuleId")) ; ?renamed)
-  ; SortNoArgs("DynRuleId")
+  ; !SortNoArgs("DynRuleId")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoDynRuleDef")) ; ?renamed)
-  ; SortNoArgs("DynRuleDef")
+  ; !SortNoArgs("DynRuleDef")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoScopeLabels")) ; ?renamed)
-  ; SortNoArgs("ScopeLabels")
+  ; !SortNoArgs("ScopeLabels")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoRuleCond")) ; ?renamed)
-  ; SortNoArgs("RuleCond")
+  ; !SortNoArgs("RuleCond")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoRule")) ; ?renamed)
-  ; SortNoArgs("Rule")
+  ; !SortNoArgs("Rule")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoRuleDef")) ; ?renamed)
-  ; SortNoArgs("RuleDef")
+  ; !SortNoArgs("RuleDef")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoOverlay")) ; ?renamed)
-  ; SortNoArgs("Overlay")
+  ; !SortNoArgs("Overlay")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoSwitchCase")) ; ?renamed)
-  ; SortNoArgs("SwitchCase")
+  ; !SortNoArgs("SwitchCase")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoStrategyCurly")) ; ?renamed)
-  ; SortNoArgs("StrategyCurly")
+  ; !SortNoArgs("StrategyCurly")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoStrategyAngle")) ; ?renamed)
-  ; SortNoArgs("StrategyAngle")
+  ; !SortNoArgs("StrategyAngle")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoKind")) ; ?renamed)
-  ; SortNoArgs("Kind")
+  ; !SortNoArgs("Kind")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoLID")) ; ?renamed)
-  ; SortNoArgs("LID")
+  ; !SortNoArgs("LID")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoImportModName")) ; ?renamed)
-  ; SortNoArgs("ImportModName")
+  ; !SortNoArgs("ImportModName")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoDecl")) ; ?renamed)
-  ; SortNoArgs("Decl")
+  ; !SortNoArgs("Decl")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoModule")) ; ?renamed)
-  ; SortNoArgs("Module")
+  ; !SortNoArgs("Module")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoStrategyParen")) ; ?renamed)
-  ; SortNoArgs("StrategyParen")
+  ; !SortNoArgs("StrategyParen")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoTypedid")) ; ?renamed)
-  ; SortNoArgs("Typedid")
+  ; !SortNoArgs("Typedid")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoStrategyDef")) ; ?renamed)
-  ; SortNoArgs("StrategyDef")
+  ; !SortNoArgs("StrategyDef")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoSVar")) ; ?renamed)
-  ; SortNoArgs("SVar")
+  ; !SortNoArgs("SVar")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoDef")) ; ?renamed)
-  ; SortNoArgs("Def")
+  ; !SortNoArgs("Def")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoType")) ; ?renamed)
-  ; SortNoArgs("Type")
+  ; !SortNoArgs("Type")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoRetType")) ; ?renamed)
-  ; SortNoArgs("RetType")
+  ; !SortNoArgs("RetType")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoArgType")) ; ?renamed)
-  ; SortNoArgs("ArgType")
+  ; !SortNoArgs("ArgType")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoFunType")) ; ?renamed)
-  ; SortNoArgs("FunType")
+  ; !SortNoArgs("FunType")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoConstType")) ; ?renamed)
-  ; SortNoArgs("ConstType")
+  ; !SortNoArgs("ConstType")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoOpdecl")) ; ?renamed)
-  ; SortNoArgs("Opdecl")
+  ; !SortNoArgs("Opdecl")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoSort")) ; ?renamed)
-  ; SortNoArgs("Sort")
+  ; !SortNoArgs("Sort")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoSdecl")) ; ?renamed)
-  ; SortNoArgs("Sdecl")
+  ; !SortNoArgs("Sdecl")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoWld")) ; ?renamed)
-  ; SortNoArgs("Wld")
+  ; !SortNoArgs("Wld")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoID")) ; ?renamed)
-  ; SortNoArgs("ID")
+  ; !SortNoArgs("ID")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoVar")) ; ?renamed)
-  ; SortNoArgs("Var")
+  ; !SortNoArgs("Var")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoCharChar")) ; ?renamed)
-  ; SortNoArgs("CharChar")
+  ; !SortNoArgs("CharChar")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoChar")) ; ?renamed)
-  ; SortNoArgs("Char")
+  ; !SortNoArgs("Char")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoStrChar")) ; ?renamed)
-  ; SortNoArgs("StrChar")
+  ; !SortNoArgs("StrChar")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoString")) ; ?renamed)
-  ; SortNoArgs("String")
+  ; !SortNoArgs("String")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoReal")) ; ?renamed)
-  ; SortNoArgs("Real")
+  ; !SortNoArgs("Real")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoInt")) ; ?renamed)
-  ; SortNoArgs("Int")
+  ; !SortNoArgs("Int")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoKeyword")) ; ?renamed)
-  ; SortNoArgs("Keyword")
+  ; !SortNoArgs("Keyword")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoUCID")) ; ?renamed)
-  ; SortNoArgs("UCID")
+  ; !SortNoArgs("UCID")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoLCID")) ; ?renamed)
-  ; SortNoArgs("LCID")
+  ; !SortNoArgs("LCID")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoLId")) ; ?renamed)
-  ; SortNoArgs("LId")
+  ; !SortNoArgs("LId")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoId")) ; ?renamed)
-  ; SortNoArgs("Id")
+  ; !SortNoArgs("Id")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoModNamePart")) ; ?renamed)
-  ; SortNoArgs("ModNamePart")
+  ; !SortNoArgs("ModNamePart")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoModName")) ; ?renamed)
-  ; SortNoArgs("ModName")
+  ; !SortNoArgs("ModName")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoPreTerm")) ; ?renamed)
-  ; SortNoArgs("PreTerm")
+  ; !SortNoArgs("PreTerm")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoTerm")) ; ?renamed)
-  ; SortNoArgs("Term")
+  ; !SortNoArgs("Term")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoStrategyMid")) ; ?renamed)
-  ; SortNoArgs("StrategyMid")
+  ; !SortNoArgs("StrategyMid")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("StrategoStrategy")) ; ?renamed)
-  ; SortNoArgs("Strategy")
+  ; !SortNoArgs("Strategy")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2SDF")) ; ?renamed)
-  ; SortNoArgs("SDF")
+  ; !SortNoArgs("SDF")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Aliases")) ; ?renamed)
-  ; SortNoArgs("Aliases")
+  ; !SortNoArgs("Aliases")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Alias")) ; ?renamed)
-  ; SortNoArgs("Alias")
+  ; !SortNoArgs("Alias")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Restrictions")) ; ?renamed)
-  ; SortNoArgs("Restrictions")
+  ; !SortNoArgs("Restrictions")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Restriction")) ; ?renamed)
-  ; SortNoArgs("Restriction")
+  ; !SortNoArgs("Restriction")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Label")) ; ?renamed)
-  ; SortNoArgs("Label")
+  ; !SortNoArgs("Label")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2FunctionName")) ; ?renamed)
-  ; SortNoArgs("FunctionName")
+  ; !SortNoArgs("FunctionName")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2SingleQuotedStrCon")) ; ?renamed)
-  ; SortNoArgs("SingleQuotedStrCon")
+  ; !SortNoArgs("SingleQuotedStrCon")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2SingleQuotedStrChar")) ; ?renamed)
-  ; SortNoArgs("SingleQuotedStrChar")
+  ; !SortNoArgs("SingleQuotedStrChar")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Sort")) ; ?renamed)
-  ; SortNoArgs("Sort")
+  ; !SortNoArgs("Sort")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2OptCharRanges")) ; ?renamed)
-  ; SortNoArgs("OptCharRanges")
+  ; !SortNoArgs("OptCharRanges")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2CharRange")) ; ?renamed)
-  ; SortNoArgs("CharRange")
+  ; !SortNoArgs("CharRange")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Character")) ; ?renamed)
-  ; SortNoArgs("Character")
+  ; !SortNoArgs("Character")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2ShortChar")) ; ?renamed)
-  ; SortNoArgs("ShortChar")
+  ; !SortNoArgs("ShortChar")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2NumChar")) ; ?renamed)
-  ; SortNoArgs("NumChar")
+  ; !SortNoArgs("NumChar")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Priorities")) ; ?renamed)
-  ; SortNoArgs("Priorities")
+  ; !SortNoArgs("Priorities")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Priority")) ; ?renamed)
-  ; SortNoArgs("Priority")
+  ; !SortNoArgs("Priority")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2ArgumentIndicator")) ; ?renamed)
-  ; SortNoArgs("ArgumentIndicator")
+  ; !SortNoArgs("ArgumentIndicator")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Associativity")) ; ?renamed)
-  ; SortNoArgs("Associativity")
+  ; !SortNoArgs("Associativity")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Import")) ; ?renamed)
-  ; SortNoArgs("Import")
+  ; !SortNoArgs("Import")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Imports")) ; ?renamed)
-  ; SortNoArgs("Imports")
+  ; !SortNoArgs("Imports")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2ImpSection")) ; ?renamed)
-  ; SortNoArgs("ImpSection")
+  ; !SortNoArgs("ImpSection")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2ModuleName")) ; ?renamed)
-  ; SortNoArgs("ModuleName")
+  ; !SortNoArgs("ModuleName")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Sections")) ; ?renamed)
-  ; SortNoArgs("Sections")
+  ; !SortNoArgs("Sections")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Section")) ; ?renamed)
-  ; SortNoArgs("Section")
+  ; !SortNoArgs("Section")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Module")) ; ?renamed)
-  ; SortNoArgs("Module")
+  ; !SortNoArgs("Module")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Definition")) ; ?renamed)
-  ; SortNoArgs("Definition")
+  ; !SortNoArgs("Definition")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2ModuleId")) ; ?renamed)
-  ; SortNoArgs("ModuleId")
+  ; !SortNoArgs("ModuleId")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2ModuleWord")) ; ?renamed)
-  ; SortNoArgs("ModuleWord")
+  ; !SortNoArgs("ModuleWord")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Renaming")) ; ?renamed)
-  ; SortNoArgs("Renaming")
+  ; !SortNoArgs("Renaming")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Renamings")) ; ?renamed)
-  ; SortNoArgs("Renamings")
+  ; !SortNoArgs("Renamings")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Productions")) ; ?renamed)
-  ; SortNoArgs("Productions")
+  ; !SortNoArgs("Productions")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Production")) ; ?renamed)
-  ; SortNoArgs("Production")
+  ; !SortNoArgs("Production")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Attributes")) ; ?renamed)
-  ; SortNoArgs("Attributes")
+  ; !SortNoArgs("Attributes")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Attribute")) ; ?renamed)
-  ; SortNoArgs("Attribute")
+  ; !SortNoArgs("Attribute")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2ATermAttribute")) ; ?renamed)
-  ; SortNoArgs("ATermAttribute")
+  ; !SortNoArgs("ATermAttribute")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Symbols")) ; ?renamed)
-  ; SortNoArgs("Symbols")
+  ; !SortNoArgs("Symbols")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Annotation")) ; ?renamed)
-  ; SortNoArgs("Annotation")
+  ; !SortNoArgs("Annotation")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2ATerm")) ; ?renamed)
-  ; SortNoArgs("ATerm")
+  ; !SortNoArgs("ATerm")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2AFun")) ; ?renamed)
-  ; SortNoArgs("AFun")
+  ; !SortNoArgs("AFun")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2IdCon")) ; ?renamed)
-  ; SortNoArgs("IdCon")
+  ; !SortNoArgs("IdCon")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2StrCon")) ; ?renamed)
-  ; SortNoArgs("StrCon")
+  ; !SortNoArgs("StrCon")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2StrChar")) ; ?renamed)
-  ; SortNoArgs("StrChar")
+  ; !SortNoArgs("StrChar")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2RealCon")) ; ?renamed)
-  ; SortNoArgs("RealCon")
+  ; !SortNoArgs("RealCon")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2OptExp")) ; ?renamed)
-  ; SortNoArgs("OptExp")
+  ; !SortNoArgs("OptExp")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2IntCon")) ; ?renamed)
-  ; SortNoArgs("IntCon")
+  ; !SortNoArgs("IntCon")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2NatCon")) ; ?renamed)
-  ; SortNoArgs("NatCon")
+  ; !SortNoArgs("NatCon")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Lookahead")) ; ?renamed)
-  ; SortNoArgs("Lookahead")
+  ; !SortNoArgs("Lookahead")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Grammar")) ; ?renamed)
-  ; SortNoArgs("Grammar")
+  ; !SortNoArgs("Grammar")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Symbol")) ; ?renamed)
-  ; SortNoArgs("Symbol")
+  ; !SortNoArgs("Symbol")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Group")) ; ?renamed)
-  ; SortNoArgs("Group")
+  ; !SortNoArgs("Group")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2CharRanges")) ; ?renamed)
-  ; SortNoArgs("CharRanges")
+  ; !SortNoArgs("CharRanges")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2CharClass")) ; ?renamed)
-  ; SortNoArgs("CharClass")
+  ; !SortNoArgs("CharClass")
 
 
 unrename-sort(|) =
   (where(renamed := SortNoArgs("Sdf2Lookaheads")) ; ?renamed)
-  ; SortNoArgs("Lookaheads")
+  ; !SortNoArgs("Lookaheads")
