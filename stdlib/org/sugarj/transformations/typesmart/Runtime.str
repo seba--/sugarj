@@ -23,7 +23,7 @@ rules
   
   is-lexical-sort = fail
   
-  has-subsort-of = (try(get-syntax-sort), id); debug-analysis(!"has-subsort-of: "); fail
+  // has-subsort-of = (try(get-syntax-sort), id); debug-analysis(!"has-subsort-of: "); fail
   has-subsort-of = 
       push-subsort-stack
     ; finally( has-subsort-of-refl <+ has-subsort-unrename <+ has-subsort-of-trans
@@ -100,7 +100,7 @@ rules
 
 rules
   build-alt-sort-or-fail = 
-  	debug(!"build: ");
+  	// debug(!"build: ");
   	not(?[]); nub; foldl1(\ (x,y) -> Sort("Alt", [x,y]) \)
 
 signature constructors
