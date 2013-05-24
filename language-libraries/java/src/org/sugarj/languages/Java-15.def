@@ -770,8 +770,8 @@ imports languages/java-15/packages/PackageDeclarations
 exports
   sorts CompilationUnit
 
-  context-free syntax
-    PackageDec? ImportDec* TypeDec+ -> CompilationUnit {cons("CompilationUnit")}
+  %% context-free syntax
+  %%   PackageDec? ImportDec* TypeDec+ -> CompilationUnit {cons("CompilationUnit")}
 
 module languages/java-15/packages/Main
 imports languages/java-15/packages/CompilationUnits

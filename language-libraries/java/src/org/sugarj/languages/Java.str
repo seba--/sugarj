@@ -160,7 +160,6 @@ signature
     ImplementsDec           : List(InterfaceType) -> Interfaces
     Semicolon               : ClassMemberDec
     Semicolon               : TypeDec
-    CompilationUnit         : Option(PackageDec) * List(ImportDec) * List(TypeDec) -> CompilationUnit
     PackageName             : List(Id) -> PackageName
     AmbName                 : Id -> AmbName
     AmbName                 : AmbName * Id -> AmbName
@@ -2523,33 +2522,6 @@ rules
       )
     ; ?res-sorts
     ; <prim("SUGARJ_unsafe_build", "ImplementsDec")> [arg1]
-    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
-
-  smart-CompilationUnit(|arg1, arg2, arg3) =
-    ![]
-    ; try(
-        (where(<(has-sort <+ log-mismatching-sort-error(|"CompilationUnit") ; fail)> ( arg1
-                                                                                     , Sort(
-                                                                                         "Option"
-                                                                                       , [SortNoArgs("PackageDec")]
-                                                                                       )
-                                                                                     ))
-         ; where(<(has-sort <+ log-mismatching-sort-error(|"CompilationUnit") ; fail)> ( arg2
-                                                                                       , Sort(
-                                                                                           "List"
-                                                                                         , [SortNoArgs("ImportDec")]
-                                                                                         )
-                                                                                       ))
-         ; where(<(has-sort <+ log-mismatching-sort-error(|"CompilationUnit") ; fail)> ( arg3
-                                                                                       , Sort(
-                                                                                           "List"
-                                                                                         , [SortNoArgs("TypeDec")]
-                                                                                         )
-                                                                                       )))
-        ; ![SortNoArgs("CompilationUnit")|<id>]
-      )
-    ; ?res-sorts
-    ; <prim("SUGARJ_unsafe_build", "CompilationUnit")> [arg1, arg2, arg3]
     ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
 
   smart-PackageName(|arg1) =
