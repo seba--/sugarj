@@ -169,16 +169,26 @@ rules
 
   smart-ChecksDecHead(|arg1, arg2) =
     ![]
-    ; try(
-        (where(<(has-sort <+ log-mismatching-sort-error(|"ChecksDecHead") ; fail)> ( arg1
-                                                                                   , Sort(
-                                                                                       "List"
-                                                                                     , [SortNoArgs("AnnoOrSugarMod")]
-                                                                                     )
-                                                                                   ))
-         ; where(<(has-sort <+ log-mismatching-sort-error(|"ChecksDecHead") ; fail)> (arg2, SortNoArgs("JavaId"))))
-        ; ![SortNoArgs("ChecksDecHead")|<id>]
-      )
+    ; (try(
+         (where(<(has-sort <+ log-mismatching-sort-error(|"ChecksDecHead") ; fail)> ( arg1
+                                                                                    , Sort(
+                                                                                        "List"
+                                                                                      , [SortNoArgs("AnnoOrSugarMod")]
+                                                                                      )
+                                                                                    ))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"ChecksDecHead") ; fail)> (arg2, SortNoArgs("JavaId"))))
+         ; ![SortNoArgs("ChecksDecHead")|<id>]
+       )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"ChecksDecHead") ; fail)> ( arg1
+                                                                                      , Sort(
+                                                                                          "List"
+                                                                                        , [SortNoArgs("AnnoOrSugarMod")]
+                                                                                        )
+                                                                                      ))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"ChecksDecHead") ; fail)> (arg2, SortNoArgs("JavaId"))))
+           ; ![SortNoArgs("ChecksDecHead")|<id>]
+         ))
     ; ?res-sorts
     ; <prim("SUGARJ_unsafe_build", "ChecksDecHead")> [arg1, arg2]
     ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
@@ -256,12 +266,23 @@ rules
 
   smart-CheckingRule(|arg1, arg2, arg3) =
     ![]
-    ; try(
-        (where(<(has-sort <+ log-mismatching-sort-error(|"CheckingRule") ; fail)> (arg1, SortNoArgs("StrategoTerm")))
-         ; where(<(has-sort <+ log-mismatching-sort-error(|"CheckingRule") ; fail)> (arg2, SortNoArgs("StrategoTerm")))
-         ; where(<(has-sort <+ log-mismatching-sort-error(|"CheckingRule") ; fail)> (arg3, SortNoArgs("StrategoStrategy"))))
-        ; ![SortNoArgs("CheckingRuleBody")|<id>]
-      )
+    ; (try(
+         (where(<(has-sort <+ log-mismatching-sort-error(|"CheckingRule") ; fail)> (arg1, SortNoArgs("StrategoTerm")))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"CheckingRule") ; fail)> (arg2, SortNoArgs("StrategoTerm")))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"CheckingRule") ; fail)> (arg3, SortNoArgs("StrategoStrategy"))))
+         ; ![SortNoArgs("CheckingRuleBody")|<id>]
+       )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"CheckingRule") ; fail)> (arg1, SortNoArgs("StrategoTerm")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"CheckingRule") ; fail)> (arg2, SortNoArgs("StrategoTerm")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"CheckingRule") ; fail)> ( arg3
+                                                                                       , Sort(
+                                                                                           "List"
+                                                                                         , [SortNoArgs("StrategoRuleCond")]
+                                                                                         )
+                                                                                       )))
+           ; ![SortNoArgs("CheckingRuleBody")|<id>]
+         ))
     ; ?res-sorts
     ; <prim("SUGARJ_unsafe_build", "CheckingRule")> [arg1, arg2, arg3]
     ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
@@ -393,50 +414,50 @@ rules
     ; <prim("SUGARJ_unsafe_build", "TypeImportAsDec")> [arg1, arg2]
     ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("JavaPackageDec")
     , SortNoArgs("ToplevelDeclaration")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("JavaImportDec")
     , SortNoArgs("ToplevelDeclaration")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("JavaTypeDec")
     , SortNoArgs("ToplevelDeclaration")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("SugarDec")
     , SortNoArgs("ToplevelDeclaration")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("JavaAnno")
     , SortNoArgs("AnnoOrSugarMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("SugarMod")
     , SortNoArgs("AnnoOrSugarMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("JavaPublic")
     , SortNoArgs("SugarMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("JavaTypeName")
     , SortNoArgs("ModuleName")
     )

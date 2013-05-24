@@ -956,22 +956,33 @@ rules
 
   smart-NewArray(|arg1, arg2, arg3) =
     ![]
-    ; try(
-        (where(<(has-sort <+ log-mismatching-sort-error(|"NewArray") ; fail)> (arg1, SortNoArgs("ArrayBaseType")))
-         ; where(<(has-sort <+ log-mismatching-sort-error(|"NewArray") ; fail)> ( arg2
-                                                                                , Sort(
-                                                                                    "List"
-                                                                                  , [SortNoArgs("DimExpr")]
-                                                                                  )
-                                                                                ))
-         ; where(<(has-sort <+ log-mismatching-sort-error(|"NewArray") ; fail)> ( arg3
-                                                                                , Sort(
-                                                                                    "List"
-                                                                                  , [SortNoArgs("Dim")]
-                                                                                  )
-                                                                                )))
-        ; ![SortNoArgs("ArrayCreationExpr")|<id>]
-      )
+    ; (try(
+         (where(<(has-sort <+ log-mismatching-sort-error(|"NewArray") ; fail)> (arg1, SortNoArgs("ArrayBaseType")))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"NewArray") ; fail)> ( arg2
+                                                                                 , Sort(
+                                                                                     "List"
+                                                                                   , [SortNoArgs("DimExpr")]
+                                                                                   )
+                                                                                 ))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"NewArray") ; fail)> ( arg3
+                                                                                 , Sort(
+                                                                                     "List"
+                                                                                   , [SortNoArgs("Dim")]
+                                                                                   )
+                                                                                 )))
+         ; ![SortNoArgs("ArrayCreationExpr")|<id>]
+       )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"NewArray") ; fail)> (arg1, SortNoArgs("ArrayBaseType")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"NewArray") ; fail)> ( arg2
+                                                                                   , Sort(
+                                                                                       "List"
+                                                                                     , [SortNoArgs("Dim")]
+                                                                                     )
+                                                                                   ))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"NewArray") ; fail)> (arg3, SortNoArgs("ArrayInit"))))
+           ; ![SortNoArgs("ArrayCreationExpr")|<id>]
+         ))
     ; ?res-sorts
     ; <prim("SUGARJ_unsafe_build", "NewArray")> [arg1, arg2, arg3]
     ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
@@ -998,9 +1009,12 @@ rules
 
   smart-Dim(|) =
     ![]
-    ; try(
-        id ; ![SortNoArgs("Dim")|<id>]
-      )
+    ; (try(
+         id ; ![SortNoArgs("Dim")|<id>]
+       )
+       ; try(
+           id ; ![SortNoArgs("Dim")|<id>]
+         ))
     ; ?res-sorts
     ; <prim("SUGARJ_unsafe_build", "Dim")> []
     ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
@@ -1238,10 +1252,13 @@ rules
          id ; ![SortNoArgs("AnnoElemDec")|<id>]
        )
        ; try(
-           id ; ![SortNoArgs("AnnoElemDec")|<id>]
+           id ; ![SortNoArgs("InterfaceMemberDec")|<id>]
          )
        ; try(
-           id ; ![SortNoArgs("AnnoElemDec")|<id>]
+           id ; ![SortNoArgs("ClassMemberDec")|<id>]
+         )
+       ; try(
+           id ; ![SortNoArgs("TypeDec")|<id>]
          ))
     ; ?res-sorts
     ; <prim("SUGARJ_unsafe_build", "Semicolon")> []
@@ -1469,21 +1486,36 @@ rules
 
   smart-EnumBody(|arg1, arg2) =
     ![]
-    ; try(
-        (where(<(has-sort <+ log-mismatching-sort-error(|"EnumBody") ; fail)> ( arg1
-                                                                              , Sort(
-                                                                                  "List"
-                                                                                , [SortNoArgs("EnumConst")]
-                                                                                )
-                                                                              ))
-         ; where(<(has-sort <+ log-mismatching-sort-error(|"EnumBody") ; fail)> ( arg2
-                                                                                , Sort(
-                                                                                    "Option"
-                                                                                  , [SortNoArgs("EnumBodyDecs")]
-                                                                                  )
-                                                                                )))
-        ; ![SortNoArgs("EnumBody")|<id>]
-      )
+    ; (try(
+         (where(<(has-sort <+ log-mismatching-sort-error(|"EnumBody") ; fail)> ( arg1
+                                                                               , Sort(
+                                                                                   "List"
+                                                                                 , [SortNoArgs("EnumConst")]
+                                                                                 )
+                                                                               ))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"EnumBody") ; fail)> ( arg2
+                                                                                 , Sort(
+                                                                                     "Option"
+                                                                                   , [SortNoArgs("EnumBodyDecs")]
+                                                                                   )
+                                                                                 )))
+         ; ![SortNoArgs("EnumBody")|<id>]
+       )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"EnumBody") ; fail)> ( arg1
+                                                                                 , Sort(
+                                                                                     "List"
+                                                                                   , [SortNoArgs("EnumConst")]
+                                                                                   )
+                                                                                 ))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"EnumBody") ; fail)> ( arg2
+                                                                                   , Sort(
+                                                                                       "Option"
+                                                                                     , [SortNoArgs("EnumBodyDecs")]
+                                                                                     )
+                                                                                   )))
+           ; ![SortNoArgs("EnumBody")|<id>]
+         ))
     ; ?res-sorts
     ; <prim("SUGARJ_unsafe_build", "EnumBody")> [arg1, arg2]
     ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
@@ -1849,23 +1881,45 @@ rules
 
   smart-For(|arg1, arg2, arg3, arg4) =
     ![]
-    ; try(
-        (where(<(has-sort <+ log-mismatching-sort-error(|"For") ; fail)> (arg1, SortNoArgs("LocalVarDec")))
-         ; where(<(has-sort <+ log-mismatching-sort-error(|"For") ; fail)> ( arg2
-                                                                           , Sort(
-                                                                               "Option"
-                                                                             , [SortNoArgs("Expr")]
-                                                                             )
-                                                                           ))
-         ; where(<(has-sort <+ log-mismatching-sort-error(|"For") ; fail)> ( arg3
-                                                                           , Sort(
-                                                                               "List"
-                                                                             , [SortNoArgs("Expr")]
-                                                                             )
-                                                                           ))
-         ; where(<(has-sort <+ log-mismatching-sort-error(|"For") ; fail)> (arg4, SortNoArgs("Stm"))))
-        ; ![SortNoArgs("Stm")|<id>]
-      )
+    ; (try(
+         (where(<(has-sort <+ log-mismatching-sort-error(|"For") ; fail)> (arg1, SortNoArgs("LocalVarDec")))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"For") ; fail)> ( arg2
+                                                                            , Sort(
+                                                                                "Option"
+                                                                              , [SortNoArgs("Expr")]
+                                                                              )
+                                                                            ))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"For") ; fail)> ( arg3
+                                                                            , Sort(
+                                                                                "List"
+                                                                              , [SortNoArgs("Expr")]
+                                                                              )
+                                                                            ))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"For") ; fail)> (arg4, SortNoArgs("Stm"))))
+         ; ![SortNoArgs("Stm")|<id>]
+       )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"For") ; fail)> ( arg1
+                                                                            , Sort(
+                                                                                "List"
+                                                                              , [SortNoArgs("Expr")]
+                                                                              )
+                                                                            ))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"For") ; fail)> ( arg2
+                                                                              , Sort(
+                                                                                  "Option"
+                                                                                , [SortNoArgs("Expr")]
+                                                                                )
+                                                                              ))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"For") ; fail)> ( arg3
+                                                                              , Sort(
+                                                                                  "List"
+                                                                                , [SortNoArgs("Expr")]
+                                                                                )
+                                                                              ))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"For") ; fail)> (arg4, SortNoArgs("Stm"))))
+           ; ![SortNoArgs("Stm")|<id>]
+         ))
     ; ?res-sorts
     ; <prim("SUGARJ_unsafe_build", "For")> [arg1, arg2, arg3, arg4]
     ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
@@ -2225,15 +2279,24 @@ rules
 
   smart-ArrayInit(|arg1) =
     ![]
-    ; try(
-        where(<(has-sort <+ log-mismatching-sort-error(|"ArrayInit") ; fail)> ( arg1
-                                                                              , Sort(
-                                                                                  "List"
-                                                                                , [SortNoArgs("VarInit")]
-                                                                                )
-                                                                              ))
-        ; ![SortNoArgs("ArrayInit")|<id>]
-      )
+    ; (try(
+         where(<(has-sort <+ log-mismatching-sort-error(|"ArrayInit") ; fail)> ( arg1
+                                                                               , Sort(
+                                                                                   "List"
+                                                                                 , [SortNoArgs("VarInit")]
+                                                                                 )
+                                                                               ))
+         ; ![SortNoArgs("ArrayInit")|<id>]
+       )
+       ; try(
+           where(<(has-sort <+ log-mismatching-sort-error(|"ArrayInit") ; fail)> ( arg1
+                                                                                 , Sort(
+                                                                                     "List"
+                                                                                   , [SortNoArgs("VarInit")]
+                                                                                   )
+                                                                                 ))
+           ; ![SortNoArgs("ArrayInit")|<id>]
+         ))
     ; ?res-sorts
     ; <prim("SUGARJ_unsafe_build", "ArrayInit")> [arg1]
     ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
@@ -2288,15 +2351,24 @@ rules
 
   smart-ElemValArrayInit(|arg1) =
     ![]
-    ; try(
-        where(<(has-sort <+ log-mismatching-sort-error(|"ElemValArrayInit") ; fail)> ( arg1
-                                                                                     , Sort(
-                                                                                         "List"
-                                                                                       , [SortNoArgs("ElemVal")]
-                                                                                       )
-                                                                                     ))
-        ; ![SortNoArgs("ElemVal")|<id>]
-      )
+    ; (try(
+         where(<(has-sort <+ log-mismatching-sort-error(|"ElemValArrayInit") ; fail)> ( arg1
+                                                                                      , Sort(
+                                                                                          "List"
+                                                                                        , [SortNoArgs("ElemVal")]
+                                                                                        )
+                                                                                      ))
+         ; ![SortNoArgs("ElemVal")|<id>]
+       )
+       ; try(
+           where(<(has-sort <+ log-mismatching-sort-error(|"ElemValArrayInit") ; fail)> ( arg1
+                                                                                        , Sort(
+                                                                                            "List"
+                                                                                          , [SortNoArgs("ElemVal")]
+                                                                                          )
+                                                                                        ))
+           ; ![SortNoArgs("ElemVal")|<id>]
+         ))
     ; ?res-sorts
     ; <prim("SUGARJ_unsafe_build", "ElemValArrayInit")> [arg1]
     ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
@@ -2979,10 +3051,14 @@ rules
 
   smart-Float(|arg1) =
     ![]
-    ; try(
-        where(<(has-sort <+ log-mismatching-sort-error(|"Float") ; fail)> (arg1, SortNoArgs("DeciFloatLiteral")))
-        ; ![SortNoArgs("FloatLiteral")|<id>]
-      )
+    ; (try(
+         where(<(has-sort <+ log-mismatching-sort-error(|"Float") ; fail)> (arg1, SortNoArgs("DeciFloatLiteral")))
+         ; ![SortNoArgs("FloatLiteral")|<id>]
+       )
+       ; try(
+           where(<(has-sort <+ log-mismatching-sort-error(|"Float") ; fail)> (arg1, SortNoArgs("HexaFloatLiteral")))
+           ; ![SortNoArgs("FloatLiteral")|<id>]
+         ))
     ; ?res-sorts
     ; <prim("SUGARJ_unsafe_build", "Float")> [arg1]
     ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
@@ -3135,248 +3211,248 @@ rules
     ; <prim("SUGARJ_unsafe_build", "UnicodeEscape")> []
     ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ExprName")
     , SortNoArgs("LHS")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("FieldAccess")
     , SortNoArgs("LHS")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ArrayAccess")
     , SortNoArgs("LHS")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Expr")
     , SortNoArgs("CondMid")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ExprName")
     , SortNoArgs("Expr")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ExprName")
     , SortNoArgs("Expr")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ArrayAccess")
     , SortNoArgs("Expr")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Expr")
     , SortNoArgs("ArraySubscript")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("FieldAccess")
     , SortNoArgs("Expr")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ArrayCreationExpr")
     , SortNoArgs("Expr")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("PrimType")
     , SortNoArgs("ArrayBaseType")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("TypeName")
     , SortNoArgs("ArrayBaseType")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("IntLiteral")
     , SortNoArgs("Literal")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("FloatLiteral")
     , SortNoArgs("Literal")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("BoolLiteral")
     , SortNoArgs("Literal")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("CharLiteral")
     , SortNoArgs("Literal")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("StringLiteral")
     , SortNoArgs("Literal")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("NullLiteral")
     , SortNoArgs("Literal")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ClassLiteral")
     , SortNoArgs("Literal")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ConstantDec")
     , SortNoArgs("AnnoElemDec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ClassDec")
     , SortNoArgs("AnnoElemDec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("InterfaceDec")
     , SortNoArgs("AnnoElemDec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("EnumDec")
     , SortNoArgs("AnnoElemDec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("AnnoDec")
     , SortNoArgs("AnnoElemDec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Public")
     , SortNoArgs("AbstractMethodMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Abstract")
     , SortNoArgs("AbstractMethodMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Public")
     , SortNoArgs("ConstantMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Static")
     , SortNoArgs("ConstantMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Final")
     , SortNoArgs("ConstantMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("AnnoDec")
     , SortNoArgs("InterfaceDec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ConstantDec")
     , SortNoArgs("InterfaceMemberDec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("AbstractMethodDec")
     , SortNoArgs("InterfaceMemberDec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ClassDec")
     , SortNoArgs("InterfaceMemberDec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("InterfaceDec")
     , SortNoArgs("InterfaceMemberDec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Public")
     , SortNoArgs("InterfaceMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Protected")
     , SortNoArgs("InterfaceMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Private")
     , SortNoArgs("InterfaceMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Abstract")
     , SortNoArgs("InterfaceMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Static")
     , SortNoArgs("InterfaceMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("StrictFP")
     , SortNoArgs("InterfaceMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | Sort(
         "List"
       , [SortNoArgs("Expr")]
@@ -3384,464 +3460,464 @@ rules
     , SortNoArgs("EnumConstArgs")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Public")
     , SortNoArgs("ConstrMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Protected")
     , SortNoArgs("ConstrMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Private")
     , SortNoArgs("ConstrMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Block")
     , SortNoArgs("Stm")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("LocalVarDecStm")
     , SortNoArgs("BlockStm")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Stm")
     , SortNoArgs("BlockStm")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Type")
     , SortNoArgs("ResultType")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Final")
     , SortNoArgs("VarMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Public")
     , SortNoArgs("MethodMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Protected")
     , SortNoArgs("MethodMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Private")
     , SortNoArgs("MethodMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Abstract")
     , SortNoArgs("MethodMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Static")
     , SortNoArgs("MethodMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Final")
     , SortNoArgs("MethodMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Synchronized")
     , SortNoArgs("MethodMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Native")
     , SortNoArgs("MethodMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("StrictFP")
     , SortNoArgs("MethodMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ClassType")
     , SortNoArgs("ExceptionType")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Block")
     , SortNoArgs("MethodBody")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Expr")
     , SortNoArgs("ElemVal")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Anno")
     , SortNoArgs("ElemVal")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Id")
     , SortNoArgs("VarDecId")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Expr")
     , SortNoArgs("VarInit")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ArrayInit")
     , SortNoArgs("VarInit")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Public")
     , SortNoArgs("FieldMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Protected")
     , SortNoArgs("FieldMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Private")
     , SortNoArgs("FieldMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Static")
     , SortNoArgs("FieldMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Final")
     , SortNoArgs("FieldMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Transient")
     , SortNoArgs("FieldMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Volatile")
     , SortNoArgs("FieldMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("EnumDec")
     , SortNoArgs("ClassDec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Abstract")
     , SortNoArgs("ClassMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Public")
     , SortNoArgs("ClassMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Protected")
     , SortNoArgs("ClassMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Private")
     , SortNoArgs("ClassMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Static")
     , SortNoArgs("ClassMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Final")
     , SortNoArgs("ClassMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("StrictFP")
     , SortNoArgs("ClassMod")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ClassMemberDec")
     , SortNoArgs("ClassBodyDec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("InstanceInit")
     , SortNoArgs("ClassBodyDec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("StaticInit")
     , SortNoArgs("ClassBodyDec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ConstrDec")
     , SortNoArgs("ClassBodyDec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("FieldDec")
     , SortNoArgs("ClassMemberDec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("MethodDec")
     , SortNoArgs("ClassMemberDec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ClassDec")
     , SortNoArgs("ClassMemberDec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("InterfaceDec")
     , SortNoArgs("ClassMemberDec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ClassDec")
     , SortNoArgs("TypeDec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("InterfaceDec")
     , SortNoArgs("TypeDec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Type")
     , SortNoArgs("ActualTypeArg")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Id")
     , SortNoArgs("TypeVarId")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ClassOrInterfaceType")
     , SortNoArgs("RefType")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ArrayType")
     , SortNoArgs("RefType")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("TypeName")
     , SortNoArgs("TypeDecSpec")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("NumType")
     , SortNoArgs("PrimType")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("IntType")
     , SortNoArgs("NumType")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("FloatType")
     , SortNoArgs("NumType")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("PrimType")
     , SortNoArgs("Type")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("RefType")
     , SortNoArgs("Type")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("UnicodeEscape")
     , SortNoArgs("StringPart")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("EscapeSeq")
     , SortNoArgs("StringPart")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("FooStringChars")
     , SortNoArgs("StringChars")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("OctaEscape")
     , SortNoArgs("EscapeSeq")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("NamedEscape")
     , SortNoArgs("EscapeSeq")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("UnicodeEscape")
     , SortNoArgs("CharContent")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("EscapeSeq")
     , SortNoArgs("CharContent")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Public")
     , SortNoArgs("Modifier")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Private")
     , SortNoArgs("Modifier")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Protected")
     , SortNoArgs("Modifier")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Abstract")
     , SortNoArgs("Modifier")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Final")
     , SortNoArgs("Modifier")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Static")
     , SortNoArgs("Modifier")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Native")
     , SortNoArgs("Modifier")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Transient")
     , SortNoArgs("Modifier")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Volatile")
     , SortNoArgs("Modifier")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Synchronized")
     , SortNoArgs("Modifier")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("StrictFP")
     , SortNoArgs("Modifier")
     )

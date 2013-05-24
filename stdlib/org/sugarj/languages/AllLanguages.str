@@ -5300,8 +5300,8 @@ rules
     ; <prim("SUGARJ_unsafe_build", "PlainBody")> [arg1]
     ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | Sort(
         "List"
       , [SortNoArgs("ModelTransformation")]
@@ -5309,8 +5309,8 @@ rules
     , SortNoArgs("TransformationDef")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | Sort(
         "List"
       , [SortNoArgs("StrategoDef")]
@@ -5318,116 +5318,116 @@ rules
     , SortNoArgs("DirectTransformation")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ModuleName")
     , SortNoArgs("TransformationExpr")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("TransformationAppExpr")
     , SortNoArgs("TransformationExpr")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("StrategoDecl")
     , SortNoArgs("Transformation")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("StrategoStrategy")
     , SortNoArgs("Analysis")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ReservedName")
     , SortNoArgs("StrategoCall")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("String")
     , SortNoArgs("CompletionPart")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Node")
     , SortNoArgs("ColorNode")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Color")
     , SortNoArgs("MaybeColor")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("NoColor")
     , SortNoArgs("MaybeColor")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Id")
     , SortNoArgs("AttributeId")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("String")
     , SortNoArgs("AttributeId")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Font")
     , SortNoArgs("AttributeId")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Node")
     , SortNoArgs("SemanticNode")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("String")
     , SortNoArgs("PropertyValue")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Sort")
     , SortNoArgs("Node")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Constructor")
     , SortNoArgs("Node")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ReservedName")
     , SortNoArgs("Node")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ReservedName")
     , SortNoArgs("ModuleName")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | Sort(
         "List"
       , [SortNoArgs("DynRuleScopeId")]
@@ -5435,8 +5435,8 @@ rules
     , SortNoArgs("ScopeLabels")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | Sort(
         "List"
       , [SortNoArgs("Id")]
@@ -5444,122 +5444,122 @@ rules
     , SortNoArgs("RuleNames")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Strategy")
     , SortNoArgs("StrategyAngle")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Term")
     , SortNoArgs("Strategy")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Term")
     , SortNoArgs("Strategy")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Strategy")
     , SortNoArgs("StrategyMid")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("LID")
     , SortNoArgs("ID")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Type")
     , SortNoArgs("ArgType")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ConstType")
     , SortNoArgs("ArgType")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Type")
     , SortNoArgs("RetType")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("FunType")
     , SortNoArgs("RetType")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("FunType")
     , SortNoArgs("Type")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ConstType")
     , SortNoArgs("Type")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Id")
     , SortNoArgs("ID")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Var")
     , SortNoArgs("PreTerm")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Var")
     , SortNoArgs("Term")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Wld")
     , SortNoArgs("PreTerm")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Wld")
     , SortNoArgs("Term")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("StrategyDef")
     , SortNoArgs("Def")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Strategy")
     , SortNoArgs("StrategyMid")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("RuleDef")
     , SortNoArgs("Def")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | Sort(
         "List"
       , [SortNoArgs("Alias")]
@@ -5567,8 +5567,8 @@ rules
     , SortNoArgs("Aliases")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | Sort(
         "List"
       , [SortNoArgs("Restriction")]
@@ -5576,20 +5576,20 @@ rules
     , SortNoArgs("Restrictions")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Character")
     , SortNoArgs("CharRange")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("CharRange")
     , SortNoArgs("CharRanges")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | Sort(
         "List"
       , [SortNoArgs("Priority")]
@@ -5597,8 +5597,8 @@ rules
     , SortNoArgs("Priorities")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | Sort(
         "List"
       , [SortNoArgs("Module")]
@@ -5606,8 +5606,8 @@ rules
     , SortNoArgs("Definition")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | Sort(
         "List"
       , [SortNoArgs("Section")]
@@ -5615,8 +5615,8 @@ rules
     , SortNoArgs("Sections")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | Sort(
         "List"
       , [SortNoArgs("Import")]
@@ -5624,8 +5624,8 @@ rules
     , SortNoArgs("Imports")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | Sort(
         "List"
       , [SortNoArgs("Symbol")]
@@ -5633,8 +5633,8 @@ rules
     , SortNoArgs("Symbols")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | Sort(
         "List"
       , [SortNoArgs("Production")]
@@ -5642,26 +5642,26 @@ rules
     , SortNoArgs("Productions")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Associativity")
     , SortNoArgs("Label")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("Associativity")
     , SortNoArgs("ATermAttribute")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("ModuleName")
     , SortNoArgs("ATermAttribute")
     )
 
-  is-subsort-of-trans(|) =
-    is-subsort-of-inject(
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
     | SortNoArgs("JavaID")
     , SortNoArgs("PlainExtension")
     )
