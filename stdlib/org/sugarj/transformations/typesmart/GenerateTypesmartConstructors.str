@@ -1,8 +1,8 @@
 module org/sugarj/transformations/typesmart/GenerateTypesmartConstructors
 
-imports org/sugarj/transformations/Analyze
-        org/sugarj/languages/Sdf2
-        org/sugarj/languages/Stratego
+imports org/sugarj/stdlib/Common
+	    org/sugarj/transformations/Analyze
+        org/sugarj/languages/AllLanguages
         org/sugarj/transformations/GenerateSignatures
 
 imports libstratego-lib
@@ -232,18 +232,6 @@ rules
         then !([x'|ok],nok)
         else !(ok,[x|nok])
       end
-
-  foldl1(s) =
-  	  ?[x|xs]
-  	; <foldl(s)> (xs, x)
-  
-  myfoldr1(one1, cons) = myfoldr1(fail, one1, cons)
-  myfoldr1(nil, one1, cons) =
-  	  ?[] 
-  	  < nil
-  	  + ?[<id>]
-  	    < one1
-  	    + ?[x|xs]; <cons> (x, <myfoldr1(nil, one1, cons)> xs)
 
 rules
   nosmart-trm-explode =

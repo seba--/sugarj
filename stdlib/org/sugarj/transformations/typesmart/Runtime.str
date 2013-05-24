@@ -1,7 +1,7 @@
 module org/sugarj/transformations/typesmart/Runtime
 
 imports org/sugarj/transformations/Analyze
-        org/sugarj/languages/Stratego
+        org/sugarj/languages/AllLanguages
         org/sugarj/stdlib/Common
 
 rules
@@ -100,7 +100,8 @@ rules
 
 rules
   build-alt-sort-or-fail = 
-  	not(?[]); nub; foldr1(\ (x,y) -> alt(x,y) \)
+  	debug(!"build: ");
+  	not(?[]); nub; foldl1(\ (x,y) -> Sort("Alt", [x,y]) \)
 
 signature constructors
   EmptyCollection : Sdf2Sort
