@@ -3,6 +3,7 @@ module org/sugarj/languages/Plain
 exports
   context-free syntax
     PlainDecHead PlainBody   -> ToplevelDeclaration              {cons("PlainDec")}
+    JavaID JavaID   -> ToplevelDeclaration              {cons("PlainDec")}
     AnnoOrSugarMod* "plain" JavaId PlainExtension? -> PlainDecHead {cons("PlainDecHead")}
     "." JavaID -> PlainExtension
   

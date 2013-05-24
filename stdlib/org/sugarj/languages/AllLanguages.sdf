@@ -1,0 +1,8 @@
+module org/sugarj/languages/AllLanguages
+imports
+  org/sugarj/languages/Plain
+  org/sugarj/languages/Sdf2
+  org/sugarj/languages/Stratego
+  org/sugarj/languages/EditorServices
+  org/sugarj/languages/Sugar
+  org/sugarj/languages/Model
