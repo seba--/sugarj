@@ -99,7 +99,8 @@ rules
     ; sort-match
 
 rules
-  build-alt-sort-or-fail = not(?[]); foldr1(\ (x,y) -> alt(x,y) \)
+  build-alt-sort-or-fail = 
+  	not(?[]); nub; foldr1(\ (x,y) -> alt(x,y) \)
 
 signature constructors
   EmptyCollection : Sdf2Sort

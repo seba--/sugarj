@@ -73,7 +73,7 @@ rules
          ; gen-signature-from-grammar
           => sig-list);
     // merge-same-cons-prods-list;
-    where(filter(gen-syntax-constructors-prod); debug; make-merged-smart-constructors => smart-conses);
+    where(filter(gen-syntax-constructors-prod); make-merged-smart-constructors => smart-conses);
     where(filter(gen-subsort-of-inject) => subsort-injects); 
     
     !Rules(<conc> (smart-conses, subsort-injects)) => rulez;
@@ -96,7 +96,7 @@ rules
     
     ; <make-arg-list(|1)> arg-sorts => args
     ; <zip; map(gen-arg-check(|cons))> (args, arg-sorts) => arg-checks
-    ; <foldr(!Id(), \ (x,y) -> Seq(x,y) \); debug(!"checks: ")> arg-checks => cond
+    ; <myfoldr1(!Id(), id, \ (x,y) -> Seq(x,y) \)> arg-checks => cond
     
     ; !(cons, args, cond, res-sort) => smart-data
   
@@ -110,7 +110,7 @@ rules
     ; <get-symbol-sort> rhs => res-sort
     ; <not(structurally-equal)> (arg-sort, res-sort)
     ; body := CallT(SVar("is-subsort-of-inject"), []
-                  , [ <nosmart-trm-explode> arg-sort, <nosmart-trm-explode> res-sort])
+                  , [ <trm-explode> arg-sort, <trm-explode> res-sort])
 
     ; !SDefT("is-subsort-of-trans", [], [], body) => strat
 
@@ -123,9 +123,9 @@ rules
     ; body := 
         Seq(
         Seq(
-          Where(Assign(Var("renamed"), <nosmart-trm-explode> res-sort)),
+          Where(Assign(Var("renamed"), <trm-explode> res-sort)),
           Match(Var("renamed"))),
-          <nosmart-trm-explode> arg-sort)
+          <trm-explode> arg-sort)
     ; !SDefT("unrename-sort", [], [], body) => strat
 
   gen-lexical-sort-prod :
@@ -133,22 +133,21 @@ rules
     strat
   where
       <get-symbol-sort> rhs => res-sort
-    ; body := CallT(SVar("equal"), [], [<nosmart-trm-explode> res-sort])
+    ; body := CallT(SVar("equal"), [], [<trm-explode> res-sort])
     ; !SDefT("is-lexical-sort", [], [], body) => strat
 
   gen-arg-check(|cons) :
     (arg, arg-sort) -> 
     Where(BA(LChoice(
         CallNoArgs(SVar("has-sort"))
-      , Seq(CallT(SVar("log-mismatching-sort-error"), [], [<nosmart-trm-explode> cons])
+      , Seq(CallT(SVar("log-mismatching-sort-error"), [], [<trm-explode> cons])
         , Fail()))
-    , NoAnnoList(Tuple([Var(arg), <nosmart-trm-explode> arg-sort]))))
+    , NoAnnoList(Tuple([Var(arg), <trm-explode> arg-sort]))))
 
 rules
   same-smart-constructor-data(|data) =
   	  ?(cons, args, _, _)
-  	; !data
-  	; ?(cons, args, _, _)
+  	; where(!data; ?(cons, args, _, _))
   
   make-merged-smart-constructor =
   	  ?datas@[(cons, args, _, _) | _]
@@ -156,11 +155,13 @@ rules
 
     ; init := Build(NoAnnoList(List([])))
 
-    ; <map(\(_,_,cond,res-sort) ->
-            Seq(cond,
-                Build(NoAnnoList(ListTail([<nosmart-trm-explode> res-sort], RootApp(Id())))))
+    ; <map(\(_,_,con,res-sort) ->
+            Call(
+             SVar("try"),
+             [Seq(con,
+                  Build(NoAnnoList(ListTail([<trm-explode> res-sort], RootApp(Id())))))])
            \)> datas => conds
-    ; <foldr1(\(x,y) -> Seq(x,y)\)> conds => cond
+    ; <myfoldr1(id, \(x,y) -> Seq(x,y)\)> conds => cond
     
     ; <map(?(_,_,_,<id>))> datas => res-sorts
     ; <foldl1(\(x,y) -> alt(x,y)\)> res-sorts => res-sort
@@ -168,11 +169,11 @@ rules
     ; <map(!Var(<id>)); !NoAnnoList(List(<id>))> args => args-term
     ; <map(!DefaultVarDec(<id>))> args => var-decs
 
-    ; Match(NoAnnoList(Var("res-sort")))
+    ; !Match(NoAnnoList(Var("res-sorts"))) => match
   	; !BA(Prim("\"SUGARJ_unsafe_build\"", [NoAnnoList(Str(cons))]), args-term) => build
-    ; !CallT(SVar("put-syntax-sort"), [], [App(SVar("build-alt-sort-or-fail"), NoAnnoList(Var("res-sort")))]) => put-res
+    ; !CallT(SVar("put-syntax-sort"), [], [App(SVar("build-alt-sort-or-fail"), NoAnnoList(Var("res-sorts")))]) => put-res
 
-    ; body := Seq(cond, Seq(build, put-res))
+    ; body := Seq(init, Seq(cond, Seq(match, Seq(build, put-res))))
 
   	; !SDefT(smart-cons, [], var-decs, body)
   
@@ -181,7 +182,7 @@ rules
   make-merged-smart-constructors =
   	  ?[data|datas]
   	; <filter-split(same-smart-constructor-data(|data))> datas => (merge-list, rest)
-  	; <try(?[]; ![data]); make-merged-smart-constructor> merge-list => merged
+  	; <![data|<id>]; make-merged-smart-constructor> merge-list => merged
     ; <make-merged-smart-constructors> rest => rest'
     ; ![merged | rest']
   	
@@ -235,6 +236,14 @@ rules
   foldl1(s) =
   	  ?[x|xs]
   	; <foldl(s)> (xs, x)
+  
+  myfoldr1(one1, cons) = myfoldr1(fail, one1, cons)
+  myfoldr1(nil, one1, cons) =
+  	  ?[] 
+  	  < nil
+  	  + ?[<id>]
+  	    < one1
+  	    + ?[x|xs]; <cons> (x, <myfoldr1(nil, one1, cons)> xs)
 
 rules
   nosmart-trm-explode =
