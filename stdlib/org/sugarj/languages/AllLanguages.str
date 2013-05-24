@@ -1,4 +1,4 @@
-module org/sugarj/languages/AllLanguages
+module org/sugarj/langauges/AllLanguages
 
 imports
   org/sugarj/transformations/typesmart/Runtime

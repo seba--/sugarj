@@ -109,10 +109,10 @@ rules
     ; <filter(get-symbol-sort)> lhs => [arg-sort]
     ; <get-symbol-sort> rhs => res-sort
     ; <not(structurally-equal)> (arg-sort, res-sort)
-    ; body := CallT(SVar("is-subsort-of-inject"), []
+    ; body := CallT(SVar("has-subsort-of-inject"), []
                   , [ <trm-explode> arg-sort, <trm-explode> res-sort])
 
-    ; !SDefT("is-subsort-of-trans", [], [], body) => strat
+    ; !SDefT("has-subsort-of-trans", [], [], body) => strat
 
   gen-renaming-inject :
     (from,to) ->

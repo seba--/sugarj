@@ -19,16 +19,16 @@ rules
 
 rules
   // has-sort = Swap; debug(!"has sort? "); fail
-  has-sort = try-init-subsort-stack; is-subsort-of
+  has-sort = try-init-subsort-stack; has-subsort-of
   
   is-lexical-sort = fail
   
-  // is-subsort-of = (try(get-syntax-sort), id); debug-analysis(!"is-subsort-of: "); fail
-  is-subsort-of = 
+  has-subsort-of = (try(get-syntax-sort), id); debug-analysis(!"has-subsort-of: "); fail
+  has-subsort-of = 
       push-subsort-stack
-    ; finally( is-subsort-of-refl <+ is-subsort-unrename <+ is-subsort-of-trans
+    ; finally( has-subsort-of-refl <+ has-subsort-unrename <+ has-subsort-of-trans
              , pop-subsort-stack)
-  // is-subsort-of = debug-analysis(!"FAIL is-subsort-of: "); fail
+  // has-subsort-of = debug-analysis(!"FAIL has-subsort-of: "); fail
   
   try-init-subsort-stack =
     where(Subsort-Stack <+ rules ( Subsort-Stack := [] ))
@@ -40,41 +40,41 @@ rules
   pop-subsort-stack =
     where(rules( Subsort-Stack := <Subsort-Stack; ?[_|<id>]> ))
   
-  is-subsort-of-refl =
+  has-subsort-of-refl =
       ?(xs, Sort("List", [xsort]))
-    ; <map(!(<id>, xsort); is-subsort-of)> xs
-  is-subsort-of-refl =
+    ; <map(!(<id>, xsort); has-subsort-of)> xs
+  has-subsort-of-refl =
       ?(""#(xs), Sort("Tuple", xsorts))
     ; <equal> (<length> xs, <length> xsorts)
     ; <zip> (xs, xsorts)
-    ; map(is-subsort-of)
-  is-subsort-of-refl =
+    ; map(has-subsort-of)
+  has-subsort-of-refl =
       ?(None(), Sort("Option", [_]))
-  is-subsort-of-refl =
+  has-subsort-of-refl =
       ?(Some(x), Sort("Option", [xsort]))
-    ; <is-subsort-of> (x, xsort)
-  is-subsort-of-refl =
+    ; <has-subsort-of> (x, xsort)
+  has-subsort-of-refl =
       ?(x, Sort("Alt", [xsort1, xsort2]))
-    ; (<is-subsort-of> (x, xsort1) + <is-subsort-of-refl> (x, xsort2))
-  is-subsort-of-refl =
+    ; (<has-subsort-of> (x, xsort1) + <has-subsort-of-refl> (x, xsort2))
+  has-subsort-of-refl =
       ?(x, xsort)
     ; <is-string> x
     ; <is-lexical-sort> xsort
-  is-subsort-of-refl =
+  has-subsort-of-refl =
       (get-syntax-sort ,id)
     ; sort-match
   
-  is-subsort-unrename = (id, unrename-sort); is-subsort-of
-  is-subsort-of-trans = fail
+  has-subsort-unrename = (id, unrename-sort); has-subsort-of
+  has-subsort-of-trans = fail
   unrename-sort = fail
   
-  is-subsort-of-inject(|arg-sort,res-sort) =
+  has-subsort-of-inject(|arg-sort,res-sort) =
   	  ?(term,sup-sort)
       // result to argument
       ; <sort-match> (sup-sort, res-sort)
       ; where(<try(unrename-sort)> arg-sort => unrenamed-arg-sort)
       // ; <debug-analysis(!"inject: ")> (unrenamed-arg-sort, res-sort) 
-      ; <is-subsort-of> (term, unrenamed-arg-sort)
+      ; <has-subsort-of> (term, unrenamed-arg-sort)
 
   sort-match = structurally-equal
   sort-match =
