@@ -105,7 +105,7 @@ public class SugarJParser extends JSGLRI {
 
     if (input.contains(ContentProposerSemantic.COMPLETION_TOKEN) && result != null && result.getParseTable() != null) {
       this.result = result;
-      return ATermCommands.fixTokenizer(parseCompletionTree(input, filename, result));
+      return new ATermCommands().fixTokenizer(parseCompletionTree(input, filename, result));
     }
 
     if (result.getSugaredSyntaxTree() != null && result.isUpToDateShallow(input.hashCode(), environment)) {
@@ -263,7 +263,7 @@ public class SugarJParser extends JSGLRI {
       public boolean isUpToDateShallow(int h, Environment env) { return false; }
       public boolean isUpToDate(int h, Environment env) { return false; }
     };
-    r.setSugaredSyntaxTree(term);
+    r.setSugaredSyntaxTree(aterm.fixTokenizer(term));
     try {
       r.registerEditorDesugarings(new AbsolutePath(StdLib.failureTrans.getAbsolutePath()));
     } catch (IOException e) {

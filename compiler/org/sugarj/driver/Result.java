@@ -301,8 +301,7 @@ public class Result implements IErrorLogger {
   }
   
   public void setSugaredSyntaxTree(IStrategoTerm sugaredSyntaxTree) {
-    // TODO remove fixing after merging layout-sensitive parser into Spoofax
-    this.sugaredSyntaxTree = ATermCommands.fixTokenizer(sugaredSyntaxTree);
+    this.sugaredSyntaxTree = sugaredSyntaxTree;
   }
   
   public IStrategoTerm getSugaredSyntaxTree() {

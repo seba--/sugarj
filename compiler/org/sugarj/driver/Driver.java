@@ -425,8 +425,9 @@ public class Driver{
         else if (!dependsOnModel)
           throw new IllegalStateException("Could not delegate compilation of circular dependency to other compiler instance.");
       }
-        
-      driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
+       
+      // TODO remove fixing after merging layout-sensitive parser into Spoofax
+      driverResult.setSugaredSyntaxTree(aterm.fixTokenizer(makeSugaredSyntaxTree()));
       
       if (currentGrammarTBL != null)
         driverResult.registerParseTable(currentGrammarTBL);

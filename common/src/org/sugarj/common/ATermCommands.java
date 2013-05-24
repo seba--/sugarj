@@ -33,6 +33,7 @@ import org.spoofax.terms.io.TAFTermReader;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoExit;
+import org.strategoxt.lang.typesmart.TypesmartTermFactory;
 import org.strategoxt.lang.typesmart.WithoutTypesmartSyntax;
 import org.strategoxt.stratego_gpp.ast2abox_0_1;
 import org.strategoxt.stratego_gpp.box2text_string_0_1;
@@ -415,7 +416,7 @@ public class ATermCommands {
     return term;
   }
   
-  public static IStrategoTerm fixTokenizer(IStrategoTerm term) {
+  public IStrategoTerm fixTokenizer(IStrategoTerm term) {
     if (term == null)
       return null;
     
@@ -423,7 +424,7 @@ public class ATermCommands {
     if (tokenizer == null)
       return term;
     
-    org.spoofax.jsglr.client.imploder.Tokenizer oTokenizer = tokenizer.makeStdTokenizer();
+    org.spoofax.jsglr.client.imploder.Tokenizer oTokenizer = tokenizer.makeStdTokenizer(TypesmartTermFactory.getStandardFactory(factory));
     Map<Token, org.spoofax.jsglr.client.imploder.Token> map = tokenizer.reassignTokens(oTokenizer);
     
     IStrategoTerm oTerm = fixTokens(term, map);
