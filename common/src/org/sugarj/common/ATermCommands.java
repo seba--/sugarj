@@ -99,7 +99,6 @@ public class ATermCommands {
 
   public static ATermCommands standard = new ATermCommands();
   
-  // TODO use origin factory
   public final ITermFactory factory;
   public final ParseTableManager parseTableManager;
 
@@ -109,7 +108,7 @@ public class ATermCommands {
   
   public ATermCommands(ITermFactory factory) {
     this.factory = factory;
-    parseTableManager = new ParseTableManager(factory, false);
+    this.parseTableManager = new ParseTableManager(factory, false);
   }
   
   public IStrategoTerm atermFromFile(String filename) throws IOException {

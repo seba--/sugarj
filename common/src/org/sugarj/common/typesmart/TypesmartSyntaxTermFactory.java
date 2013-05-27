@@ -90,7 +90,7 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
   public int cacheMisses = 0;
 
   /**
-   * FIXME Clone of {@link TypesmartTermFactory#registerTypesmartFactory(Context, ITermFactory)}. Needed because of class extension.
+   * Clone of {@link TypesmartTermFactory#registerTypesmartFactory(Context, ITermFactory)}. Needed because of class extension.
    * @param context
    * @param factory
    * @return
@@ -99,9 +99,18 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
     if (isTypesmartSyntax(factory)) {
       return factory;
     }
+    if (factory instanceof TypesmartTermFactory) {
+      return new TypesmartSyntaxTermFactory(context, ((TypesmartTermFactory) factory).getWrappedFactory());
+    }
     if (factory instanceof AbstractWrappedTermFactory) {
-      ITermFactory oldBaseFactory = getStandardFactory(((AbstractWrappedTermFactory) factory).getWrappedFactory(true));
-      ((AbstractWrappedTermFactory) factory).replaceBaseFactory(new TypesmartSyntaxTermFactory(context, oldBaseFactory), true);
+      ITermFactory oldBaseFactory = ((AbstractWrappedTermFactory) factory).getWrappedFactory();
+      
+      if (oldBaseFactory instanceof TypesmartTermFactory) {
+        ITermFactory newBaseFactory = new TypesmartSyntaxTermFactory(context, ((TypesmartTermFactory) oldBaseFactory).getWrappedFactory());
+        ((AbstractWrappedTermFactory) factory).replaceBaseFactory(newBaseFactory);
+      }
+      ((AbstractWrappedTermFactory) factory).replaceBaseFactory(registerTypesmartFactory(context, oldBaseFactory));
+      
       return factory;
     }
     return new TypesmartSyntaxTermFactory(context, factory);
@@ -140,11 +149,8 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
   }
   
   public static boolean isTypesmartSyntax(ITermFactory factory) {
-    if (factory instanceof TypesmartSyntaxTermFactory) {
-      return true;
-    }
     if (factory instanceof AbstractWrappedTermFactory) {
-      return isTypesmartSyntax(((AbstractWrappedTermFactory) factory).getWrappedFactory());
+      return ((AbstractWrappedTermFactory) factory).hasBaseFactory(TypesmartSyntaxTermFactory.class);
     }
     return false;
   }

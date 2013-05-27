@@ -152,6 +152,8 @@ public class Driver{
     
     HybridInterpreter interp = new HybridInterpreter(new ParentTermFactory(new TermFactory().getFactoryWithStorageType(IStrategoTerm.MUTABLE)));
     termFactory = TypesmartSyntaxTermFactory.registerTypesmartFactory(interp.getCompiledContext(), interp.getCompiledContext().getFactory());
+    interp.getCompiledContext().setFactory(termFactory);
+    interp.getContext().setFactory(termFactory);
 
     aterm = new ATermCommands(termFactory);
     sdf = new SDFCommands(aterm);
