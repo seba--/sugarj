@@ -12,6 +12,7 @@ import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.terms.attachments.AbstractWrappedTermFactory;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoException;
 import org.strategoxt.lang.typesmart.TypesmartSortAttachment;
@@ -87,15 +88,27 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
    */
   public int cacheHits = 0;
   public int cacheMisses = 0;
-  
-  public static TypesmartSyntaxTermFactory registerNewTypeSmartTermFactory(Context context) {
-    TypesmartSyntaxTermFactory factory = new TypesmartSyntaxTermFactory(context.getFactory(), context);
-    context.setFactory(factory);
-    return factory;
+
+  /**
+   * FIXME Clone of {@link TypesmartTermFactory#registerTypesmartFactory(Context, ITermFactory)}. Needed because of class extension.
+   * @param context
+   * @param factory
+   * @return
+   */
+  public static ITermFactory registerTypesmartFactory(Context context, ITermFactory factory) {
+    if (isTypeSmart(factory)) {
+      return factory;
+    }
+    if (factory instanceof AbstractWrappedTermFactory) {
+      ITermFactory oldBaseFactory = ((AbstractWrappedTermFactory) factory).getWrappedFactory(true);
+      ((AbstractWrappedTermFactory) factory).replaceBaseFactory(new TypesmartTermFactory(context, oldBaseFactory), true);
+      return factory;
+    }
+    return new TypesmartSyntaxTermFactory(context, factory);
   }
-  
-  public TypesmartSyntaxTermFactory(ITermFactory baseFactory, Context context) {
-    super(baseFactory, context);
+
+  public TypesmartSyntaxTermFactory(Context context, ITermFactory baseFactory) {
+    super(context, baseFactory);
   }
 
   @Override
@@ -112,7 +125,7 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
     Element el = cache.get(key);
     if (el != null && !el.isExpired()) {
       cacheHits++;
-      IStrategoAppl appl = getWrappedFactory().makeAppl(ctr, kids, annotations);
+      IStrategoAppl appl = makeUnsafeAppl(ctr, kids, annotations);
       TypesmartSortAttachment.put(appl, (IStrategoTerm) el.getObjectValue());
       return appl;
     }

@@ -33,6 +33,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.jsglr_layout.client.ITreeBuilder;
 import org.spoofax.jsglr_layout.client.InvalidParseTableException;
 import org.spoofax.jsglr_layout.client.ParseTable;
@@ -83,7 +84,7 @@ public class Driver{
   private static List<Path> pendingInputFiles = new ArrayList<Path>();
   private static List<ProcessingListener> processingListener = new LinkedList<ProcessingListener>();
 
-  private TypesmartSyntaxTermFactory typesmartFactory;
+  private ITermFactory termFactory;
   
   private List<Driver> currentlyProcessing;
   private Set<Path> circularLinks = new HashSet<Path>();
@@ -150,9 +151,9 @@ public class Driver{
     this.driverResult = new Result(environment.doGenerateFiles());
     
     HybridInterpreter interp = new HybridInterpreter(new ParentTermFactory(new TermFactory().getFactoryWithStorageType(IStrategoTerm.MUTABLE)));
-    typesmartFactory = TypesmartSyntaxTermFactory.registerNewTypeSmartTermFactory(interp.getCompiledContext());
+    termFactory = TypesmartSyntaxTermFactory.registerTypesmartFactory(interp.getCompiledContext(), interp.getCompiledContext().getFactory());
 
-    aterm = new ATermCommands(typesmartFactory);
+    aterm = new ATermCommands(termFactory);
     sdf = new SDFCommands(aterm);
     modulesystem = new ModuleSystemCommands(aterm);
 
@@ -442,14 +443,16 @@ public class Driver{
       if (environment.doGenerateFiles())
         driverResult.writeDependencyFile(depOutFile);
 
-      int smartCalls = typesmartFactory.smartCalls;
-      BigInteger time = typesmartFactory.totalTimeMillis;
+      TypesmartSyntaxTermFactory smartFactory = (TypesmartSyntaxTermFactory) TypesmartSyntaxTermFactory.getTypesmartInstance(termFactory);
+      
+      int smartCalls = smartFactory.smartCalls;
+      BigInteger time = smartFactory.totalTimeMillis;
       System.out.println("calls: " + smartCalls);
       System.out.println("time:  " + time);
       System.out.println("mean:  " + (smartCalls == 0 ? 0 : time.divide(BigInteger.valueOf(smartCalls))));
       System.out.println();
-      System.out.println("cache hits:    " + typesmartFactory.cacheHits);
-      System.out.println("cache misses:  " + typesmartFactory.cacheMisses);
+      System.out.println("cache hits:    " + smartFactory.cacheHits);
+      System.out.println("cache misses:  " + smartFactory.cacheMisses);
       
       success = true;
     } 
