@@ -96,12 +96,12 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
    * @return
    */
   public static ITermFactory registerTypesmartFactory(Context context, ITermFactory factory) {
-    if (isTypeSmart(factory)) {
+    if (isTypesmartSyntax(factory)) {
       return factory;
     }
     if (factory instanceof AbstractWrappedTermFactory) {
-      ITermFactory oldBaseFactory = ((AbstractWrappedTermFactory) factory).getWrappedFactory(true);
-      ((AbstractWrappedTermFactory) factory).replaceBaseFactory(new TypesmartTermFactory(context, oldBaseFactory), true);
+      ITermFactory oldBaseFactory = getStandardFactory(((AbstractWrappedTermFactory) factory).getWrappedFactory(true));
+      ((AbstractWrappedTermFactory) factory).replaceBaseFactory(new TypesmartSyntaxTermFactory(context, oldBaseFactory), true);
       return factory;
     }
     return new TypesmartSyntaxTermFactory(context, factory);
@@ -137,5 +137,15 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
       cache.put(new Element(key, sort));
     
     return appl;
+  }
+  
+  public static boolean isTypesmartSyntax(ITermFactory factory) {
+    if (factory instanceof TypesmartSyntaxTermFactory) {
+      return true;
+    }
+    if (factory instanceof AbstractWrappedTermFactory) {
+      return isTypesmartSyntax(((AbstractWrappedTermFactory) factory).getWrappedFactory());
+    }
+    return false;
   }
 }
