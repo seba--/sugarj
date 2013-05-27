@@ -12,6 +12,7 @@ import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.terms.StrategoTerm;
 import org.spoofax.terms.attachments.AbstractWrappedTermFactory;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoException;
@@ -40,7 +41,10 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
       IStrategoTerm sort;
       
       if ((sort = TypesmartSortAttachment.getSort(term)) != null)
-        return sort;
+        if (sort instanceof StrategoTerm)
+          return ((StrategoTerm) sort).clone(true);
+        else
+          return sort;
       
       switch (term.getTermType()) {
       case IStrategoTerm.STRING:
@@ -130,6 +134,8 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
       throw new StrategoException("Type-unsafe constructor application " + ctr, e);
     }
     
+//    System.out.println("Cache size: " + cache.getSize());
+    
     Key key = new Key(ctr, kids);
     Element el = cache.get(key);
     if (el != null && !el.isExpired()) {
@@ -142,8 +148,12 @@ public class TypesmartSyntaxTermFactory extends TypesmartTermFactory {
     cacheMisses++;
     IStrategoAppl appl = super.makeAppl(ctr, kids, annotations);
     IStrategoTerm sort = TypesmartSortAttachment.getSort(appl);
-    if (sort != null)
+    if (sort != null) {
+      if (sort instanceof StrategoTerm)
+        sort = ((StrategoTerm) sort).clone(true);
+
       cache.put(new Element(key, sort));
+    }
     
     return appl;
   }
