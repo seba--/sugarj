@@ -168,7 +168,7 @@ rules
 
     ; !Match(NoAnnoList(Var("res-sorts"))) => match
   	; !BA(Prim("\"SUGARJ_unsafe_build\"", [NoAnnoList(Str(cons))]), args-term) => build
-    ; !CallT(SVar("put-syntax-sort"), [], [App(SVar("build-alt-sort-or-fail"), NoAnnoList(Var("res-sorts")))]) => put-res
+    ; !CallT(SVar("put-syntax-sort"), [], [App(CallT(SVar("build-alt-sort-or-fail"), [], []), NoAnnoList(Var("res-sorts")))]) => put-res
 
     ; body := Seq(init, Seq(cond, Seq(match, Seq(build, put-res))))
 
