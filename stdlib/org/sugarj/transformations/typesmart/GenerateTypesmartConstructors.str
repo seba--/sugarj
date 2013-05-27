@@ -163,9 +163,6 @@ rules
            \)> datas => conds
     ; <myfoldr1(id, \(x,y) -> Seq(x,y)\)> conds => cond
     
-    ; <map(?(_,_,_,<id>))> datas => res-sorts
-    ; <foldl1(\(x,y) -> alt(x,y)\)> res-sorts => res-sort
-
     ; <map(!Var(<id>)); !NoAnnoList(List(<id>))> args => args-term
     ; <map(!DefaultVarDec(<id>))> args => var-decs
 
