@@ -277,7 +277,7 @@ public class SugarJParser extends JSGLRI {
     RetractableTreeBuilder treeBuilder = new RetractableTreeBuilder(ATermCommands.standard.factory);
     ParseTable table;
     try {
-      table = ATermCommands.standard.parseTableManager.loadFromFile(result.getParseTable().getAbsolutePath());
+      table = ATermCommands.standard.loadParseTable(result.getParseTable().getAbsolutePath());
     } catch (InvalidParseTableException e) {
       return null;
     }

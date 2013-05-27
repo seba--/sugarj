@@ -332,9 +332,9 @@ public class Driver{
     availableSTRImports = new ArrayList<String>();
     availableSTRImports.add(langLib.getInitTransModule());
   
-    sdfParser = new SGLR(new TreeBuilder(), aterm.parseTableManager.loadFromFile(StdLib.sdfTbl.getPath()));
-    strParser = new SGLR(new TreeBuilder(), aterm.parseTableManager.loadFromFile(StdLib.strategoTbl.getPath()));
-    editorServicesParser = new SGLR(new TreeBuilder(), aterm.parseTableManager.loadFromFile(StdLib.editorServicesTbl.getPath()));
+    sdfParser = new SGLR(new TreeBuilder(), aterm.loadParseTable(StdLib.sdfTbl.getPath()));
+    strParser = new SGLR(new TreeBuilder(), aterm.loadParseTable(StdLib.strategoTbl.getPath()));
+    editorServicesParser = new SGLR(new TreeBuilder(), aterm.loadParseTable(StdLib.editorServicesTbl.getPath()));
   }
 
   /**
@@ -647,7 +647,7 @@ public class Driver{
     
     currentGrammarTBL = sdf.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfCache, environment, langLib);
 
-    ParseTable table = aterm.parseTableManager.loadFromFile(currentGrammarTBL.getAbsolutePath());
+    ParseTable table = aterm.loadParseTable(currentGrammarTBL.getAbsolutePath());
     
     Pair<SGLR, Pair<IStrategoTerm, Integer>> parseResult = null;
 

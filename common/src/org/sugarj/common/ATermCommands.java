@@ -1,5 +1,6 @@
 package org.sugarj.common;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,6 +19,7 @@ import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.jsglr_layout.client.InvalidParseTableException;
+import org.spoofax.jsglr_layout.client.ParseTable;
 import org.spoofax.jsglr_layout.client.imploder.IToken;
 import org.spoofax.jsglr_layout.client.imploder.ImploderAttachment;
 import org.spoofax.jsglr_layout.client.imploder.Token;
@@ -100,7 +102,7 @@ public class ATermCommands {
   public static ATermCommands standard = new ATermCommands();
   
   public final ITermFactory factory;
-  public final ParseTableManager parseTableManager;
+  private final ParseTableManager parseTableManager;
 
   public ATermCommands() {
     this(new ParentTermFactory(new TermFactory().getFactoryWithStorageType(IStrategoTerm.MUTABLE)));
@@ -108,7 +110,18 @@ public class ATermCommands {
   
   public ATermCommands(ITermFactory factory) {
     this.factory = factory;
-    this.parseTableManager = new ParseTableManager(factory, false);
+    this.parseTableManager = new ParseTableManager(TypesmartTermFactory.getStandardFactory(factory), false);
+  }
+  
+  /**
+   * Wrapper for internal parse table management.
+   * @param path Path to parse table file on disk.
+   * @return loaded parse table object.
+   */
+  public ParseTable loadParseTable(String path) throws FileNotFoundException, IOException, InvalidParseTableException {
+    ParseTable table = parseTableManager.loadFromFile(path);
+    table.initTransientData(factory);
+    return table;
   }
   
   public IStrategoTerm atermFromFile(String filename) throws IOException {
