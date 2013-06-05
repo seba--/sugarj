@@ -8,14 +8,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.runtime.FileLocator;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.lang.Context;
 import org.strategoxt.stratego_gpp.parse_pptable_file_0_0;
@@ -32,8 +30,7 @@ import org.sugarj.prolog.PrologSourceFileContent.PrologModuleImport;
 
 public class PrologLib extends LanguageLib implements Serializable {
 	private static final long serialVersionUID = 6271882490466636509L;
-	private transient File libDir;
-	
+
 	private Set<RelativePath> generatedFiles = new HashSet<RelativePath>();
 
 	private Path prologOutFile;
@@ -67,7 +64,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 
 	@Override
-	public String getInitGrammarModule() {
+	public String getInitGrammarModuleName() {
 		return "org/sugarj/prolog/init/initGrammar";
 	}
 
@@ -77,7 +74,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 
 	@Override
-	public String getInitTransModule() {
+	public String getInitTransModuleName() {
 		return "org/sugarj/prolog/init/InitTrans";
 	}
 
@@ -87,34 +84,10 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 
 	@Override
-	public String getInitEditorModule() {
+	public String getInitEditorModuleName() {
 		return "org/sugarj/prolog/init/initEditor";
 	}
 
-	@Override
-	public File getLibraryDirectory() {
-		if (libDir == null) {	// set up directories first
-			String thisClassPath = "org/sugarj/PrologLib.class";
-			URL thisClassURL = PrologLib.class.getClassLoader().getResource(thisClassPath);
-			
-			System.out.println(thisClassURL);
-			
-			if (thisClassURL.getProtocol().equals("bundleresource"))
-			  try {
-			    thisClassURL = FileLocator.resolve(thisClassURL);
-			  } catch (IOException e) {
-			    e.printStackTrace();
-			  }
-			
-			String classPath = thisClassURL.getPath();
-			String binPath = classPath.substring(0, classPath.length() - thisClassPath.length());
-			
-			libDir = new File(binPath);
-		}
-		
-		return libDir;
-	}
-	
 	  public static void main(String args[]) throws URISyntaxException {
 		PrologLib pl = new PrologLib();
 		
@@ -125,7 +98,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 	    exists(pl.getInitGrammar());
 	    exists(pl.getInitTrans());
 	    exists(pl.getInitEditor());
-	    exists(pl.libDir);
+	    exists(pl.getLibraryDirectory());
 	  }
 	  
 	  private static void exists(File file) {
@@ -307,7 +280,7 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 	
 	@Override
-	public boolean isModuleResolvable(String relModulePath) {
+	public boolean isModuleExternallyResolvable(String relModulePath) {
 		// TODO: look for pre-installed SWI libraries?
 		return false;
 	}

@@ -5,7 +5,6 @@ import static org.sugarj.common.ATermCommands.isApplication;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -13,7 +12,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.runtime.FileLocator;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.CommandExecution;
@@ -37,8 +35,6 @@ public class HaskellLib extends LanguageLib {
   
   private final String GHC_COMMAND = "ghc";
 
-  private transient File libDir;
-  
   private HaskellSourceFileContent sourceContent;
   private Path outFile;
   private Set<RelativePath> generatedModules = new HashSet<RelativePath>();
@@ -62,7 +58,7 @@ public class HaskellLib extends LanguageLib {
   }
 
   @Override
-  public String getInitGrammarModule() {
+  public String getInitGrammarModuleName() {
     return "org/sugarj/haskell/initGrammar";
   }
 
@@ -72,7 +68,7 @@ public class HaskellLib extends LanguageLib {
   }
 
   @Override
-  public String getInitTransModule() {
+  public String getInitTransModuleName() {
     return "org/sugarj/haskell/initTrans";
   }
 
@@ -82,30 +78,8 @@ public class HaskellLib extends LanguageLib {
   }
 
   @Override
-  public String getInitEditorModule() {
+  public String getInitEditorModuleName() {
     return "org/sugarj/haskell/initEditor";
-  }
-
-  @Override
-  public File getLibraryDirectory() {
-    if (libDir == null) { // set up directories first
-      String thisClassPath = "org/sugarj/HaskellLib.class";
-      URL thisClassURL = HaskellLib.class.getClassLoader().getResource(thisClassPath);
-      
-      if (thisClassURL.getProtocol().equals("bundleresource"))
-        try {
-          thisClassURL = FileLocator.resolve(thisClassURL);
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      
-      String classPath = thisClassURL.getPath();
-      String binPath = classPath.substring(0, classPath.length() - thisClassPath.length());
-      
-      libDir = new File(binPath);
-    }
-    
-    return libDir;
   }
 
   @Override
@@ -278,7 +252,7 @@ public class HaskellLib extends LanguageLib {
   }
 
   @Override
-  public boolean isModuleResolvable(String relModulePath) {
+  public boolean isModuleExternallyResolvable(String relModulePath) {
     boolean oldSilent = CommandExecution.SILENT_EXECUTION;
     CommandExecution.SILENT_EXECUTION = true;
     String[] cmds = new String[]{

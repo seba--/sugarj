@@ -304,18 +304,18 @@ public class Driver{
     this.declProvider = declProvider;
     
     currentGrammarSDF = new AbsolutePath(langLib.getInitGrammar().getPath());
-    currentGrammarModule = langLib.getInitGrammarModule();
+    currentGrammarModule = langLib.getInitGrammarModuleName();
     
     currentTransSTR = new AbsolutePath(langLib.getInitTrans().getPath());
-    currentTransModule = langLib.getInitTransModule();
+    currentTransModule = langLib.getInitTransModuleName();
     
     // list of imports that contain SDF extensions
     availableSDFImports = new ArrayList<String>();    
-    availableSDFImports.add(langLib.getInitGrammarModule());
+    availableSDFImports.add(langLib.getInitGrammarModuleName());
   
     // list of imports that contain Stratego extensions
     availableSTRImports = new ArrayList<String>();
-    availableSTRImports.add(langLib.getInitTransModule());
+    availableSTRImports.add(langLib.getInitTransModuleName());
   
     sdfParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.sdfTbl.getPath()));
     strParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.strategoTbl.getPath()));
@@ -914,7 +914,7 @@ public class Driver{
     boolean success = false;
     
     Path clazz = ModuleSystemCommands.importBinFile(modulePath, environment, langLib, driverResult);
-    if (clazz != null || langLib.isModuleResolvable(modulePath)) {
+    if (clazz != null || langLib.isModuleExternallyResolvable(modulePath)) {
       success = true;
       langLib.addImportedModule(importTerm, true);
     }

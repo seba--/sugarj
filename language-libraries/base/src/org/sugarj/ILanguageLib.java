@@ -20,11 +20,11 @@ public interface ILanguageLib {
   public abstract LanguageLibFactory getFactoryForLanguage();
 
   public abstract File getInitGrammar();
-  public abstract String getInitGrammarModule();
+  public abstract String getInitGrammarModuleName();
   public abstract File getInitTrans();
-  public abstract String getInitTransModule();
+  public abstract String getInitTransModuleName();
   public abstract File getInitEditor();
-  public abstract String getInitEditorModule();
+  public abstract String getInitEditorModuleName();
 
   public abstract File getLibraryDirectory();
 
@@ -47,6 +47,7 @@ public interface ILanguageLib {
 
   public abstract void addImportedModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException;
   public abstract String getImportedModulePath(IStrategoTerm decl);
+  public abstract boolean isModuleExternallyResolvable(String relModulePath);
 
   public abstract String getSugarName(IStrategoTerm decl) throws IOException;
   public abstract IStrategoTerm getSugarBody(IStrategoTerm decl);

@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.HybridInterpreter;
 import org.sugarj.common.ATermCommands;
@@ -30,6 +32,8 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
 
   private static final long serialVersionUID = -6712835686318143995L;
 
+  private transient File libDir;
+  
   protected HybridInterpreter interp;
 
   public void setInterpreter(HybridInterpreter interp) {
@@ -44,6 +48,27 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
     return StdLib.stdGrammars();
   }
   
+  public final File getLibraryDirectory() {
+    if (libDir == null) { // set up directories first
+      String thisClassPath = this.getClass().getName().replace(".", "/") + ".class";
+      URL thisClassURL = this.getClass().getClassLoader().getResource(thisClassPath);
+      
+      if (thisClassURL.getProtocol().equals("bundleresource"))
+        try {
+          thisClassURL = FileLocator.resolve(thisClassURL);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      
+      String classPath = thisClassURL.getPath();
+      String binPath = classPath.substring(0, classPath.length() - thisClassPath.length());
+      
+      libDir = new File(binPath);
+    }
+    
+    return libDir;
+  }
+
   private transient File libTmpDir;
   protected File ensureFile(String resource) {
     File f = new File(getLibraryDirectory().getPath() + File.separator + resource);
@@ -183,8 +208,6 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
 	    errorLog.logError(msg);
 	  ATermCommands.setErrorMessage(toplevelDecl, msg);
   }
-
-	public abstract boolean isModuleResolvable(String relModulePath);
 
   /**
    * Computes the path of the given transformation application term.
