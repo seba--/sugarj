@@ -8,42 +8,42 @@ import org.spoofax.interpreter.library.AbstractPrimitive;
 import java.util.ArrayList;
 import java.lang.ref.WeakReference;
 
-@SuppressWarnings("all") final class lifted19 extends Strategy 
+@SuppressWarnings("all") final class lifted5 extends Strategy 
 { 
-  public static final lifted19 instance = new lifted19();
+  public static final lifted5 instance = new lifted5();
 
   @Override public IStrategoTerm invoke(Context context, IStrategoTerm term)
   { 
     ITermFactory termFactory = context.getFactory();
-    Fail291:
+    Fail287:
     { 
       IStrategoTerm term6 = term;
       IStrategoConstructor cons5 = term.getTermType() == IStrategoTerm.APPL ? ((IStrategoAppl)term).getConstructor() : null;
       Success7:
       { 
-        if(cons5 == extraction._consgrammar_elem_1)
+        if(cons5 == outt._consgrammar_elem_1)
         { 
-          Fail292:
+          Fail288:
           { 
-            IStrategoTerm t_154 = null;
-            t_154 = term.getSubterm(0);
-            term = t_154;
+            IStrategoTerm c_150 = null;
+            c_150 = term.getSubterm(0);
+            term = c_150;
             if(true)
               break Success7;
           }
           term = term6;
         }
-        if(cons5 == extraction._constransformation_elem_1)
+        if(cons5 == outt._constransformation_elem_1)
         { 
-          IStrategoTerm y_154 = null;
-          y_154 = term.getSubterm(0);
-          term = comp_desugarings_to_sdf_0_0.instance.invoke(context, y_154);
+          IStrategoTerm d_150 = null;
+          d_150 = term.getSubterm(0);
+          term = comp_desugarings_to_sdf_0_0.instance.invoke(context, d_150);
           if(term == null)
-            break Fail291;
+            break Fail287;
         }
         else
         { 
-          break Fail291;
+          break Fail287;
         }
       }
       term = (IStrategoTerm)termFactory.makeListCons(term, (IStrategoList)extraction.constNil0);

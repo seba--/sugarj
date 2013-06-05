@@ -16,11 +16,11 @@ import java.lang.ref.WeakReference;
   { 
     Fail1:
     { 
-      IStrategoTerm a_15 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._constransformation_elem_1 != ((IStrategoAppl)term).getConstructor())
+      IStrategoTerm l_14 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || outt._constransformation_elem_1 != ((IStrategoAppl)term).getConstructor())
         break Fail1;
-      a_15 = term.getSubterm(0);
-      term = a_15;
+      l_14 = term.getSubterm(0);
+      term = l_14;
       if(true)
         return term;
     }

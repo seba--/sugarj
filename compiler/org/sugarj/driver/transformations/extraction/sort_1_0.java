@@ -12,23 +12,23 @@ import java.lang.ref.WeakReference;
 { 
   public static sort_1_0 instance = new sort_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy q_27)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy p_27)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("sort_1_0");
-    Fail217:
+    Fail228:
     { 
-      IStrategoTerm j_140 = null;
-      IStrategoTerm i_140 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._conssort_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail217;
-      i_140 = term.getSubterm(0);
-      IStrategoList annos178 = term.getAnnotations();
-      j_140 = annos178;
-      term = q_27.invoke(context, i_140);
+      IStrategoTerm m_140 = null;
+      IStrategoTerm l_140 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || outt._conssort_1 != ((IStrategoAppl)term).getConstructor())
+        break Fail228;
+      l_140 = term.getSubterm(0);
+      IStrategoList annos186 = term.getAnnotations();
+      m_140 = annos186;
+      term = p_27.invoke(context, l_140);
       if(term == null)
-        break Fail217;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._conssort_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, j_140));
+        break Fail228;
+      term = termFactory.annotateTerm(termFactory.makeAppl(outt._conssort_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, m_140));
       context.popOnSuccess();
       if(true)
         return term;

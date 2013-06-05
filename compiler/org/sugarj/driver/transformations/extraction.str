@@ -1,14 +1,15 @@
 module extraction
 imports
   libstratego-lib
-//  org/sugarj/languages/SugarJ
   org/sugarj/languages/Sdf2
   org/sugarj/languages/Stratego
+  org/sugarj/languages/Sugar
 
 //Accept Rules
 rules 
   accept-sdf : grammar-elem(x) -> x
   accept-str : transformation-elem(x) -> x
+  accept-editor : editor-elem(x) -> x
 
 rules
   // singleton :: a -> [a]
@@ -89,4 +90,8 @@ strategies
                             singleton));
                     concat
 
-  
+strategies
+  mainEDITOR = io-wrap(extract-editor)
+  extract-editor = map(extract(accept-editor;
+                               singleton));
+                   concat

@@ -1,7 +1,6 @@
 module org/sugarj/transformations/EditorServiceExtension
 
 imports
-  org/sugarj/languages/EditorServices
   org/sugarj/languages/Stratego 
   org/sugarj/languages/SugarJ 
 
@@ -14,16 +13,13 @@ signature
     RuleNoCond           : StrategoTerm() * StrategoTerm() -> CheckingRuleBody()
     Rule                 : StrategoTerm() * StrategoTerm() * StrategoStrategy() -> CheckingRuleBody()
     Rule                 : StrategoTerm() * StrategoTerm() * iter() -> CheckingRuleBody()
-    // hacky!
-    SugarDec             : workaroundA * workaroundB -> workaroundC
-    SugarDecHead         : workaroundA * workaroundB -> workaroundC
 
 rules
   
   desugar = changed-tree(checks-to-sugar)
 
   checks-to-sugar : 
-    ChecksDec(ChecksDecHead(mods, name), ChecksBody(rs)) -> SugarDec(SugarDecHead(mods, name), SugarBody(<map(checkingrule-to-sugar)> rs))
+    ChecksDec(ChecksDecHead(mods, name), ChecksBody(rs)) -> ExtensionDec(ExtensionDecHead(mods, name), ExtensionBody(<map(checkingrule-to-sugar)> rs))
 
   checkingrule-to-sugar :
     Rules(rs) -> transformation-elem(Rules(rs))
@@ -42,42 +38,3 @@ rules
     CheckingRuleNotes(rs) -> transformation-elem(
                                    Rules(<map(!RDefNoArgs("constraint-note", <id>))> rs)
                                 )
-
-
-strategies
-  desugar =
-    changed-tree(extract-sugar-from-service)
-
-
-rules
-	
-	service-to-sugar = fail
-
-  extract-sugar-from-service :
-    EditorServicesDec(
-      EditorServicesDecHead(mods, n)
-    , EditorServicesBody(sections)
-    ) -> [ EditorServicesDec(
-             EditorServicesDecHead(mods, n)
-           , EditorServicesBody(newsections)
-           )
-         , SugarDec(
-             SugarDecHead(mods, n)
-           , SugarBody(elems)
-           )
-         ]
-    where <(extract-sugar-from-service-sections; not(?(_, [])))> sections => (newsections, elems)
-
-  extract-sugar-from-service-sections :
-    [] -> ([], [])
-
-  extract-sugar-from-service-sections :
-    [x|xs] -> ( <conc> (ys, ys2)
-              , <conc> (zs, zs2)
-              )
-    where <service-to-sugar> x => (ys, zs)
-          ; <extract-sugar-from-service-sections> xs => (ys2, zs2)
-
-  extract-sugar-from-service-sections :
-    [x|xs] -> ([x|ys], zs)
-    where <extract-sugar-from-service-sections> xs => (ys, zs)

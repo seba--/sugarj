@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Set$Dyn$Rule$Match_2_0 instance = new $Set$Dyn$Rule$Match_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy b_17, Strategy c_17)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy a_17, Strategy b_17)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("SetDynRuleMatch_2_0");
-    Fail36:
+    Fail47:
     { 
-      IStrategoTerm t_105 = null;
-      IStrategoTerm r_105 = null;
-      IStrategoTerm s_105 = null;
+      IStrategoTerm w_105 = null;
       IStrategoTerm u_105 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consSetDynRuleMatch_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail36;
-      r_105 = term.getSubterm(0);
-      s_105 = term.getSubterm(1);
-      IStrategoList annos12 = term.getAnnotations();
-      t_105 = annos12;
-      term = b_17.invoke(context, r_105);
+      IStrategoTerm v_105 = null;
+      IStrategoTerm x_105 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || outt._consSetDynRuleMatch_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail47;
+      u_105 = term.getSubterm(0);
+      v_105 = term.getSubterm(1);
+      IStrategoList annos20 = term.getAnnotations();
+      w_105 = annos20;
+      term = a_17.invoke(context, u_105);
       if(term == null)
-        break Fail36;
-      u_105 = term;
-      term = c_17.invoke(context, s_105);
+        break Fail47;
+      x_105 = term;
+      term = b_17.invoke(context, v_105);
       if(term == null)
-        break Fail36;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consSetDynRuleMatch_2, new IStrategoTerm[]{u_105, term}), checkListAnnos(termFactory, t_105));
+        break Fail47;
+      term = termFactory.annotateTerm(termFactory.makeAppl(outt._consSetDynRuleMatch_2, new IStrategoTerm[]{x_105, term}), checkListAnnos(termFactory, w_105));
       context.popOnSuccess();
       if(true)
         return term;

@@ -8,17 +8,17 @@ import org.spoofax.interpreter.library.AbstractPrimitive;
 import java.util.ArrayList;
 import java.lang.ref.WeakReference;
 
-@SuppressWarnings("all") final class lifted6 extends Strategy 
+@SuppressWarnings("all") final class lifted1 extends Strategy 
 { 
-  Strategy g_15;
+  Strategy v_14;
 
   @Override public IStrategoTerm invoke(Context context, IStrategoTerm term)
   { 
-    Fail295:
+    Fail290:
     { 
-      term = filter_tree_1_0.instance.invoke(context, term, g_15);
+      term = extract_1_0.instance.invoke(context, term, v_14);
       if(term == null)
-        break Fail295;
+        break Fail290;
       if(true)
         return term;
     }

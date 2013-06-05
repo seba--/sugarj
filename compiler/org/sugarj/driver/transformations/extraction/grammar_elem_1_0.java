@@ -12,23 +12,23 @@ import java.lang.ref.WeakReference;
 { 
   public static grammar_elem_1_0 instance = new grammar_elem_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy v_30)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy w_15)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("grammar_elem_1_0");
-    Fail283:
+    Fail30:
     { 
-      IStrategoTerm u_152 = null;
-      IStrategoTerm p_152 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consgrammar_elem_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail283;
-      p_152 = term.getSubterm(0);
-      IStrategoList annos237 = term.getAnnotations();
-      u_152 = annos237;
-      term = v_30.invoke(context, p_152);
+      IStrategoTerm s_102 = null;
+      IStrategoTerm r_102 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || outt._consgrammar_elem_1 != ((IStrategoAppl)term).getConstructor())
+        break Fail30;
+      r_102 = term.getSubterm(0);
+      IStrategoList annos3 = term.getAnnotations();
+      s_102 = annos3;
+      term = w_15.invoke(context, r_102);
       if(term == null)
-        break Fail283;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consgrammar_elem_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, u_152));
+        break Fail30;
+      term = termFactory.annotateTerm(termFactory.makeAppl(outt._consgrammar_elem_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, s_102));
       context.popOnSuccess();
       if(true)
         return term;

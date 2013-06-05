@@ -12,23 +12,23 @@ import java.lang.ref.WeakReference;
 { 
   public static $Pure$Desugaring_1_0 instance = new $Pure$Desugaring_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy s_30)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy d_16)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("PureDesugaring_1_0");
-    Fail280:
+    Fail34:
     { 
-      IStrategoTerm y_151 = null;
-      IStrategoTerm x_151 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consPureDesugaring_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail280;
-      x_151 = term.getSubterm(0);
-      IStrategoList annos234 = term.getAnnotations();
-      y_151 = annos234;
-      term = s_30.invoke(context, x_151);
+      IStrategoTerm k_103 = null;
+      IStrategoTerm j_103 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || outt._consPureDesugaring_1 != ((IStrategoAppl)term).getConstructor())
+        break Fail34;
+      j_103 = term.getSubterm(0);
+      IStrategoList annos7 = term.getAnnotations();
+      k_103 = annos7;
+      term = d_16.invoke(context, j_103);
       if(term == null)
-        break Fail280;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consPureDesugaring_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, y_151));
+        break Fail34;
+      term = termFactory.annotateTerm(termFactory.makeAppl(outt._consPureDesugaring_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, k_103));
       context.popOnSuccess();
       if(true)
         return term;

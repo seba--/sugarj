@@ -12,23 +12,23 @@ import java.lang.ref.WeakReference;
 { 
   public static lexical_syntax_1_0 instance = new lexical_syntax_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy i_29)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy h_29)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("lexical_syntax_1_0");
-    Fail257:
+    Fail268:
     { 
-      IStrategoTerm a_148 = null;
-      IStrategoTerm z_147 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._conslexical_syntax_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail257;
-      z_147 = term.getSubterm(0);
-      IStrategoList annos212 = term.getAnnotations();
-      a_148 = annos212;
-      term = i_29.invoke(context, z_147);
+      IStrategoTerm d_148 = null;
+      IStrategoTerm c_148 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || outt._conslexical_syntax_1 != ((IStrategoAppl)term).getConstructor())
+        break Fail268;
+      c_148 = term.getSubterm(0);
+      IStrategoList annos220 = term.getAnnotations();
+      d_148 = annos220;
+      term = h_29.invoke(context, c_148);
       if(term == null)
-        break Fail257;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._conslexical_syntax_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, a_148));
+        break Fail268;
+      term = termFactory.annotateTerm(termFactory.makeAppl(outt._conslexical_syntax_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, d_148));
       context.popOnSuccess();
       if(true)
         return term;

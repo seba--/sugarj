@@ -107,17 +107,8 @@ public class FomegaLib extends LanguageLib {
   }
 
   @Override
-  public boolean isSugarDec(IStrategoTerm decl) {
-    if (isApplication(decl, "SugarBody")) {
-      sourceContent.setHasNonfomegaDecl(true);
-      return true;
-    }
-    return false;
-  }
-
-  @Override
-  public boolean isEditorServiceDec(IStrategoTerm decl) {
-    if (isApplication(decl, "EditorBody")) {   
+  public boolean isExtensionDec(IStrategoTerm decl) {
+    if (isApplication(decl, "ExtensionBody")) {
       sourceContent.setHasNonfomegaDecl(true);
       return true;
     }
@@ -208,13 +199,13 @@ public class FomegaLib extends LanguageLib {
   }
   
   @Override
-  public String getSugarName(IStrategoTerm decl) throws IOException {
+  public String getExtensionName(IStrategoTerm decl) throws IOException {
     return moduleName;
   }
 
   @Override
-  public IStrategoTerm getSugarBody(IStrategoTerm decl) {
-    return getApplicationSubterm(decl, "SugarBody", 0);
+  public IStrategoTerm getExtensionBody(IStrategoTerm decl) {
+    return getApplicationSubterm(decl, "ExtensionBody", 0);
   }
 
   public String prettyPrint(IStrategoTerm term) {
@@ -236,15 +227,5 @@ public class FomegaLib extends LanguageLib {
   @Override
   public boolean isModuleExternallyResolvable(String relModulePath) {
     return false;
-  }
-
-  @Override
-  public String getEditorName(IStrategoTerm decl) throws IOException {
-    return moduleName;
-  }
-
-  @Override
-  public IStrategoTerm getEditorServices(IStrategoTerm decl) {
-    return getApplicationSubterm(decl, "EditorBody", 0);
   }
 }

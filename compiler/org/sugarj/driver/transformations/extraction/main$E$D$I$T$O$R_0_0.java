@@ -8,20 +8,23 @@ import org.spoofax.interpreter.library.AbstractPrimitive;
 import java.util.ArrayList;
 import java.lang.ref.WeakReference;
 
-@SuppressWarnings("all") final class lifted15 extends Strategy 
+@SuppressWarnings("all") public class main$E$D$I$T$O$R_0_0 extends Strategy 
 { 
-  public static final lifted15 instance = new lifted15();
+  public static main$E$D$I$T$O$R_0_0 instance = new main$E$D$I$T$O$R_0_0();
 
   @Override public IStrategoTerm invoke(Context context, IStrategoTerm term)
   { 
-    Fail290:
+    context.push("mainEDITOR_0_0");
+    Fail25:
     { 
-      term = extract_1_0.instance.invoke(context, term, lifted19.instance);
+      term = io_wrap_1_0.instance.invoke(context, term, extract_editor_0_0.instance);
       if(term == null)
-        break Fail290;
+        break Fail25;
+      context.popOnSuccess();
       if(true)
         return term;
     }
+    context.popOnFailure();
     return null;
   }
 }

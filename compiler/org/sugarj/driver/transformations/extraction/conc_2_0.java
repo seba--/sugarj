@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static conc_2_0 instance = new conc_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy b_26, Strategy c_26)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy a_26, Strategy b_26)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("conc_2_0");
-    Fail180:
+    Fail191:
     { 
-      IStrategoTerm a_133 = null;
-      IStrategoTerm u_132 = null;
-      IStrategoTerm x_132 = null;
-      IStrategoTerm d_133 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consconc_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail180;
-      u_132 = term.getSubterm(0);
-      x_132 = term.getSubterm(1);
-      IStrategoList annos151 = term.getAnnotations();
-      a_133 = annos151;
-      term = b_26.invoke(context, u_132);
+      IStrategoTerm f_133 = null;
+      IStrategoTerm z_132 = null;
+      IStrategoTerm c_133 = null;
+      IStrategoTerm j_133 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || outt._consconc_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail191;
+      z_132 = term.getSubterm(0);
+      c_133 = term.getSubterm(1);
+      IStrategoList annos159 = term.getAnnotations();
+      f_133 = annos159;
+      term = a_26.invoke(context, z_132);
       if(term == null)
-        break Fail180;
-      d_133 = term;
-      term = c_26.invoke(context, x_132);
+        break Fail191;
+      j_133 = term;
+      term = b_26.invoke(context, c_133);
       if(term == null)
-        break Fail180;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consconc_2, new IStrategoTerm[]{d_133, term}), checkListAnnos(termFactory, a_133));
+        break Fail191;
+      term = termFactory.annotateTerm(termFactory.makeAppl(outt._consconc_2, new IStrategoTerm[]{j_133, term}), checkListAnnos(termFactory, f_133));
       context.popOnSuccess();
       if(true)
         return term;

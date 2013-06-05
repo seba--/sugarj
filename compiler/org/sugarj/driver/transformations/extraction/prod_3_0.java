@@ -12,37 +12,37 @@ import java.lang.ref.WeakReference;
 { 
   public static prod_3_0 instance = new prod_3_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy m_28, Strategy n_28, Strategy o_28)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy l_28, Strategy m_28, Strategy n_28)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("prod_3_0");
-    Fail232:
+    Fail243:
     { 
+      IStrategoTerm i_144 = null;
       IStrategoTerm e_144 = null;
-      IStrategoTerm b_144 = null;
-      IStrategoTerm c_144 = null;
-      IStrategoTerm d_144 = null;
+      IStrategoTerm f_144 = null;
       IStrategoTerm g_144 = null;
-      IStrategoTerm h_144 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consprod_3 != ((IStrategoAppl)term).getConstructor())
-        break Fail232;
-      b_144 = term.getSubterm(0);
-      c_144 = term.getSubterm(1);
-      d_144 = term.getSubterm(2);
-      IStrategoList annos192 = term.getAnnotations();
-      e_144 = annos192;
-      term = m_28.invoke(context, b_144);
+      IStrategoTerm j_144 = null;
+      IStrategoTerm k_144 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || outt._consprod_3 != ((IStrategoAppl)term).getConstructor())
+        break Fail243;
+      e_144 = term.getSubterm(0);
+      f_144 = term.getSubterm(1);
+      g_144 = term.getSubterm(2);
+      IStrategoList annos200 = term.getAnnotations();
+      i_144 = annos200;
+      term = l_28.invoke(context, e_144);
       if(term == null)
-        break Fail232;
-      g_144 = term;
-      term = n_28.invoke(context, c_144);
+        break Fail243;
+      j_144 = term;
+      term = m_28.invoke(context, f_144);
       if(term == null)
-        break Fail232;
-      h_144 = term;
-      term = o_28.invoke(context, d_144);
+        break Fail243;
+      k_144 = term;
+      term = n_28.invoke(context, g_144);
       if(term == null)
-        break Fail232;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consprod_3, new IStrategoTerm[]{g_144, h_144, term}), checkListAnnos(termFactory, e_144));
+        break Fail243;
+      term = termFactory.annotateTerm(termFactory.makeAppl(outt._consprod_3, new IStrategoTerm[]{j_144, k_144, term}), checkListAnnos(termFactory, i_144));
       context.popOnSuccess();
       if(true)
         return term;

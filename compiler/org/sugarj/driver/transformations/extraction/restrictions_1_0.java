@@ -12,23 +12,23 @@ import java.lang.ref.WeakReference;
 { 
   public static restrictions_1_0 instance = new restrictions_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy y_28)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy x_28)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("restrictions_1_0");
-    Fail247:
+    Fail258:
     { 
-      IStrategoTerm f_146 = null;
-      IStrategoTerm e_146 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consrestrictions_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail247;
-      e_146 = term.getSubterm(0);
-      IStrategoList annos202 = term.getAnnotations();
-      f_146 = annos202;
-      term = y_28.invoke(context, e_146);
+      IStrategoTerm i_146 = null;
+      IStrategoTerm h_146 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || outt._consrestrictions_1 != ((IStrategoAppl)term).getConstructor())
+        break Fail258;
+      h_146 = term.getSubterm(0);
+      IStrategoList annos210 = term.getAnnotations();
+      i_146 = annos210;
+      term = x_28.invoke(context, h_146);
       if(term == null)
-        break Fail247;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consrestrictions_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, f_146));
+        break Fail258;
+      term = termFactory.annotateTerm(termFactory.makeAppl(outt._consrestrictions_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, i_146));
       context.popOnSuccess();
       if(true)
         return term;

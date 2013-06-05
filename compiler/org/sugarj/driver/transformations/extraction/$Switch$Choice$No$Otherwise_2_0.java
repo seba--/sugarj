@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Switch$Choice$No$Otherwise_2_0 instance = new $Switch$Choice$No$Otherwise_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy q_20, Strategy r_20)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy p_20, Strategy q_20)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("SwitchChoiceNoOtherwise_2_0");
-    Fail82:
+    Fail93:
     { 
-      IStrategoTerm s_115 = null;
-      IStrategoTerm q_115 = null;
-      IStrategoTerm r_115 = null;
+      IStrategoTerm v_115 = null;
       IStrategoTerm t_115 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consSwitchChoiceNoOtherwise_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail82;
-      q_115 = term.getSubterm(0);
-      r_115 = term.getSubterm(1);
-      IStrategoList annos58 = term.getAnnotations();
-      s_115 = annos58;
-      term = q_20.invoke(context, q_115);
+      IStrategoTerm u_115 = null;
+      IStrategoTerm w_115 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || outt._consSwitchChoiceNoOtherwise_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail93;
+      t_115 = term.getSubterm(0);
+      u_115 = term.getSubterm(1);
+      IStrategoList annos66 = term.getAnnotations();
+      v_115 = annos66;
+      term = p_20.invoke(context, t_115);
       if(term == null)
-        break Fail82;
-      t_115 = term;
-      term = r_20.invoke(context, r_115);
+        break Fail93;
+      w_115 = term;
+      term = q_20.invoke(context, u_115);
       if(term == null)
-        break Fail82;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consSwitchChoiceNoOtherwise_2, new IStrategoTerm[]{t_115, term}), checkListAnnos(termFactory, s_115));
+        break Fail93;
+      term = termFactory.annotateTerm(termFactory.makeAppl(outt._consSwitchChoiceNoOtherwise_2, new IStrategoTerm[]{w_115, term}), checkListAnnos(termFactory, v_115));
       context.popOnSuccess();
       if(true)
         return term;

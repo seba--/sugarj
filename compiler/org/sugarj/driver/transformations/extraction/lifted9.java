@@ -10,15 +10,21 @@ import java.lang.ref.WeakReference;
 
 @SuppressWarnings("all") final class lifted9 extends Strategy 
 { 
-  Strategy j_15;
+  public static final lifted9 instance = new lifted9();
 
   @Override public IStrategoTerm invoke(Context context, IStrategoTerm term)
   { 
-    Fail294:
+    ITermFactory termFactory = context.getFactory();
+    Fail285:
     { 
-      term = extract_1_0.instance.invoke(context, term, j_15);
+      IStrategoTerm f_150 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || outt._constransformation_elem_1 != ((IStrategoAppl)term).getConstructor())
+        break Fail285;
+      f_150 = term.getSubterm(0);
+      term = try_1_0.instance.invoke(context, f_150, comp_desugarings_to_str_0_0.instance);
       if(term == null)
-        break Fail294;
+        break Fail285;
+      term = (IStrategoTerm)termFactory.makeListCons(term, (IStrategoList)extraction.constNil0);
       if(true)
         return term;
     }

@@ -5,3 +5,4 @@ signature constructors
   CompilationUnit : FomegaModuleDec * List(FomegaImport) * List(FomegaOrSugarDec) -> SugarCompilationUnit
   ModuleDec : FomegaMID -> FomegaModuleDec
   FomegaBody : List(FomegaDef) -> FomegaOrSugarDec
+  ExtensionBody : List(ExtensionElem) -> FomegaOrSugarDec

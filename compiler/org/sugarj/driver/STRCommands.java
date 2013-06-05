@@ -34,6 +34,7 @@ import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
+import org.sugarj.driver.transformations.extraction.extract_editor_0_0;
 import org.sugarj.driver.transformations.extraction.extract_str_0_0;
 import org.sugarj.driver.transformations.renaming.rename_rules_0_2;
 import org.sugarj.stdlib.StdLib;
@@ -293,7 +294,7 @@ public class STRCommands {
   
   /**
    * Filters Stratego statements from the given term
-   * and compiles assimilation statements to Stratego.
+   * and compiles desugaring statements to Stratego.
    * 
    * @param term a file containing a list of SDF 
    *             and Stratego statements.
@@ -309,6 +310,26 @@ public class STRCommands {
     catch (StrategoExit e) {
       if (e.getValue() != 0 || result == null)
         throw new RuntimeException("Stratego extraction failed", e);
+    } finally {
+      SugarJContexts.releaseContext(extractionContext);
+    }
+    return result;
+  }
+  
+  /**
+   * Filters Spoofax editor-service declarations.
+   * 
+   * @param term a SugarJ extension declaration.
+   */
+  public static IStrategoTerm extractEditor(IStrategoTerm term) throws IOException {
+    IStrategoTerm result = null;
+    Context extractionContext = SugarJContexts.extractionContext();
+    try {
+      result = extract_editor_0_0.instance.invoke(extractionContext, term);
+    }
+    catch (StrategoExit e) {
+      if (e.getValue() != 0 || result == null)
+        throw new RuntimeException("Editor service extraction failed", e);
     } finally {
       SugarJContexts.releaseContext(extractionContext);
     }

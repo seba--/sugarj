@@ -15,15 +15,15 @@ import java.lang.ref.WeakReference;
   @Override public IStrategoTerm invoke(Context context, IStrategoTerm term)
   { 
     ITermFactory termFactory = context.getFactory();
-    Fail12:
+    Fail13:
     { 
       IStrategoTerm term3 = term;
       IStrategoConstructor cons3 = term.getTermType() == IStrategoTerm.APPL ? ((IStrategoAppl)term).getConstructor() : null;
       Success3:
       { 
-        if(cons3 == extraction._consPureDesugaring_1)
+        if(cons3 == outt._consPureDesugaring_1)
         { 
-          Fail13:
+          Fail14:
           { 
             term = extraction.constNil0;
             if(true)
@@ -31,19 +31,19 @@ import java.lang.ref.WeakReference;
           }
           term = term3;
         }
-        if(cons3 == extraction._consInjectDesugaring_4)
+        if(cons3 == outt._consInjectDesugaring_4)
         { 
-          IStrategoTerm q_15 = null;
-          IStrategoTerm r_15 = null;
-          IStrategoTerm s_15 = null;
-          q_15 = term.getSubterm(1);
-          r_15 = term.getSubterm(2);
-          s_15 = term.getSubterm(3);
-          term = (IStrategoTerm)termFactory.makeListCons(termFactory.makeAppl(extraction._consprod_3, new IStrategoTerm[]{(IStrategoTerm)termFactory.makeListCons(q_15, (IStrategoList)extraction.constNil0), r_15, s_15}), (IStrategoList)extraction.constNil0);
+          IStrategoTerm c_15 = null;
+          IStrategoTerm d_15 = null;
+          IStrategoTerm e_15 = null;
+          c_15 = term.getSubterm(1);
+          d_15 = term.getSubterm(2);
+          e_15 = term.getSubterm(3);
+          term = (IStrategoTerm)termFactory.makeListCons(termFactory.makeAppl(outt._consprod_3, new IStrategoTerm[]{(IStrategoTerm)termFactory.makeListCons(c_15, (IStrategoList)extraction.constNil0), d_15, e_15}), (IStrategoList)extraction.constNil0);
         }
         else
         { 
-          break Fail12;
+          break Fail13;
         }
       }
       if(true)

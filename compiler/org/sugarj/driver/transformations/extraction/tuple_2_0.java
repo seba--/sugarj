@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static tuple_2_0 instance = new tuple_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy w_27, Strategy x_27)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy v_27, Strategy w_27)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("tuple_2_0");
-    Fail221:
+    Fail232:
     { 
-      IStrategoTerm w_141 = null;
-      IStrategoTerm t_141 = null;
-      IStrategoTerm v_141 = null;
-      IStrategoTerm i_142 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._constuple_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail221;
-      t_141 = term.getSubterm(0);
-      v_141 = term.getSubterm(1);
-      IStrategoList annos182 = term.getAnnotations();
-      w_141 = annos182;
-      term = w_27.invoke(context, t_141);
+      IStrategoTerm k_142 = null;
+      IStrategoTerm x_141 = null;
+      IStrategoTerm y_141 = null;
+      IStrategoTerm m_142 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || outt._constuple_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail232;
+      x_141 = term.getSubterm(0);
+      y_141 = term.getSubterm(1);
+      IStrategoList annos190 = term.getAnnotations();
+      k_142 = annos190;
+      term = v_27.invoke(context, x_141);
       if(term == null)
-        break Fail221;
-      i_142 = term;
-      term = x_27.invoke(context, v_141);
+        break Fail232;
+      m_142 = term;
+      term = w_27.invoke(context, y_141);
       if(term == null)
-        break Fail221;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._constuple_2, new IStrategoTerm[]{i_142, term}), checkListAnnos(termFactory, w_141));
+        break Fail232;
+      term = termFactory.annotateTerm(termFactory.makeAppl(outt._constuple_2, new IStrategoTerm[]{m_142, term}), checkListAnnos(termFactory, k_142));
       context.popOnSuccess();
       if(true)
         return term;

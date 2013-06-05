@@ -113,17 +113,8 @@ public class HaskellLib extends LanguageLib {
   }
 
   @Override
-  public boolean isSugarDec(IStrategoTerm decl) {
-    if (isApplication(decl, "SugarBody")) {
-      sourceContent.setHasNonhaskellDecl(true);
-      return true;
-    }
-    return false;
-  }
-
-  @Override
-  public boolean isEditorServiceDec(IStrategoTerm decl) {
-    if (isApplication(decl, "EditorBody")) {   
+  public boolean isExtensionDec(IStrategoTerm decl) {
+    if (isApplication(decl, "ExtensionBody")) {
       sourceContent.setHasNonhaskellDecl(true);
       return true;
     }
@@ -214,13 +205,13 @@ public class HaskellLib extends LanguageLib {
   }
   
   @Override
-  public String getSugarName(IStrategoTerm decl) throws IOException {
+  public String getExtensionName(IStrategoTerm decl) throws IOException {
     return moduleName;
   }
 
   @Override
-  public IStrategoTerm getSugarBody(IStrategoTerm decl) {
-    return getApplicationSubterm(decl, "SugarBody", 0);
+  public IStrategoTerm getExtensionBody(IStrategoTerm decl) {
+    return getApplicationSubterm(decl, "ExtensionBody", 0);
   }
 
   private String prettyPrint(IStrategoTerm term) {
@@ -272,15 +263,5 @@ public class HaskellLib extends LanguageLib {
     }
     
     return msg.length > 0 && msg[0].length > 0;
-  }
-
-  @Override
-  public String getEditorName(IStrategoTerm decl) throws IOException {
-    return moduleName;
-  }
-
-  @Override
-  public IStrategoTerm getEditorServices(IStrategoTerm decl) {
-    return getApplicationSubterm(decl, "EditorBody", 0);
   }
 }

@@ -7,21 +7,18 @@ imports
 rules
   
   rename-decl(|renamings) = 
-    rename-sugardec(|renamings) <+ 
+    rename-extensiondec(|renamings) <+ 
     rename-transdec(|renamings) <+ 
     rename-modeldec(|renamings) <+
-    rename-editordec(|renamings) <+
     rename-languagedec(|renamings) <+
     id
     
-  rename-sugardec(|renamings) = oncetd( \ SugarDecHead(mods, Id(from)) -> SugarDecHead(mods, Id(to))  
+  rename-extensiondec(|renamings) = oncetd( \ ExtensionDecHead(mods, Id(from)) -> ExtensionDecHead(mods, Id(to))  
                                           where <hashtable-get(|from)> renamings => to \)
   rename-transdec(|renamings) = oncetd( \ TransDecHead(mods, Id(from)) -> TransDecHead(mods, Id(to))  
                                           where <hashtable-get(|from)> renamings => to \)
   rename-modeldec(|renamings) = oncetd( \ ModelDecHead(mods, Id(from), meta) -> ModelDecHead(mods, Id(to), meta)  
                                           where <hashtable-get(|from)> renamings => to \)
-  rename-editordec(|renamings) = oncetd( \ EditorServicesDecHead(mods, Id(from)) -> EditorServicesDecHead(mods, Id(to))  
-                                           where <hashtable-get(|from)> renamings => to \)
 
   rename-languagedec(|renamings) = topdown(try(rename-java(|renamings)))
   

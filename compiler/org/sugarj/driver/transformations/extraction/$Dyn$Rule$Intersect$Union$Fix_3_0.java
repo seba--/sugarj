@@ -12,37 +12,37 @@ import java.lang.ref.WeakReference;
 { 
   public static $Dyn$Rule$Intersect$Union$Fix_3_0 instance = new $Dyn$Rule$Intersect$Union$Fix_3_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy z_19, Strategy a_20, Strategy b_20)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy y_19, Strategy z_19, Strategy a_20)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("DynRuleIntersectUnionFix_3_0");
-    Fail74:
+    Fail85:
     { 
+      IStrategoTerm a_114 = null;
       IStrategoTerm x_113 = null;
-      IStrategoTerm u_113 = null;
-      IStrategoTerm v_113 = null;
-      IStrategoTerm w_113 = null;
       IStrategoTerm y_113 = null;
       IStrategoTerm z_113 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consDynRuleIntersectUnionFix_3 != ((IStrategoAppl)term).getConstructor())
-        break Fail74;
-      u_113 = term.getSubterm(0);
-      v_113 = term.getSubterm(1);
-      w_113 = term.getSubterm(2);
-      IStrategoList annos50 = term.getAnnotations();
-      x_113 = annos50;
-      term = z_19.invoke(context, u_113);
+      IStrategoTerm b_114 = null;
+      IStrategoTerm c_114 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || outt._consDynRuleIntersectUnionFix_3 != ((IStrategoAppl)term).getConstructor())
+        break Fail85;
+      x_113 = term.getSubterm(0);
+      y_113 = term.getSubterm(1);
+      z_113 = term.getSubterm(2);
+      IStrategoList annos58 = term.getAnnotations();
+      a_114 = annos58;
+      term = y_19.invoke(context, x_113);
       if(term == null)
-        break Fail74;
-      y_113 = term;
-      term = a_20.invoke(context, v_113);
+        break Fail85;
+      b_114 = term;
+      term = z_19.invoke(context, y_113);
       if(term == null)
-        break Fail74;
-      z_113 = term;
-      term = b_20.invoke(context, w_113);
+        break Fail85;
+      c_114 = term;
+      term = a_20.invoke(context, z_113);
       if(term == null)
-        break Fail74;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consDynRuleIntersectUnionFix_3, new IStrategoTerm[]{y_113, z_113, term}), checkListAnnos(termFactory, x_113));
+        break Fail85;
+      term = termFactory.annotateTerm(termFactory.makeAppl(outt._consDynRuleIntersectUnionFix_3, new IStrategoTerm[]{b_114, c_114, term}), checkListAnnos(termFactory, a_114));
       context.popOnSuccess();
       if(true)
         return term;

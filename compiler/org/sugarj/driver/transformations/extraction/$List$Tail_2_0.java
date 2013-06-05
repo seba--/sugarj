@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $List$Tail_2_0 instance = new $List$Tail_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy n_24, Strategy o_24)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy m_24, Strategy n_24)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("ListTail_2_0");
-    Fail150:
+    Fail161:
     { 
-      IStrategoTerm c_127 = null;
-      IStrategoTerm z_126 = null;
-      IStrategoTerm b_127 = null;
+      IStrategoTerm g_127 = null;
+      IStrategoTerm d_127 = null;
       IStrategoTerm e_127 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consListTail_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail150;
-      z_126 = term.getSubterm(0);
-      b_127 = term.getSubterm(1);
-      IStrategoList annos122 = term.getAnnotations();
-      c_127 = annos122;
-      term = n_24.invoke(context, z_126);
+      IStrategoTerm i_127 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || outt._consListTail_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail161;
+      d_127 = term.getSubterm(0);
+      e_127 = term.getSubterm(1);
+      IStrategoList annos130 = term.getAnnotations();
+      g_127 = annos130;
+      term = m_24.invoke(context, d_127);
       if(term == null)
-        break Fail150;
-      e_127 = term;
-      term = o_24.invoke(context, b_127);
+        break Fail161;
+      i_127 = term;
+      term = n_24.invoke(context, e_127);
       if(term == null)
-        break Fail150;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consListTail_2, new IStrategoTerm[]{e_127, term}), checkListAnnos(termFactory, c_127));
+        break Fail161;
+      term = termFactory.annotateTerm(termFactory.makeAppl(outt._consListTail_2, new IStrategoTerm[]{i_127, term}), checkListAnnos(termFactory, g_127));
       context.popOnSuccess();
       if(true)
         return term;

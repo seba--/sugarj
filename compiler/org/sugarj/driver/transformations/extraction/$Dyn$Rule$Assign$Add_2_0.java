@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Dyn$Rule$Assign$Add_2_0 instance = new $Dyn$Rule$Assign$Add_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy x_16, Strategy y_16)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy w_16, Strategy x_16)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("DynRuleAssignAdd_2_0");
-    Fail34:
+    Fail45:
     { 
-      IStrategoTerm i_105 = null;
-      IStrategoTerm g_105 = null;
-      IStrategoTerm h_105 = null;
+      IStrategoTerm l_105 = null;
       IStrategoTerm j_105 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consDynRuleAssignAdd_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail34;
-      g_105 = term.getSubterm(0);
-      h_105 = term.getSubterm(1);
-      IStrategoList annos10 = term.getAnnotations();
-      i_105 = annos10;
-      term = x_16.invoke(context, g_105);
+      IStrategoTerm k_105 = null;
+      IStrategoTerm m_105 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || outt._consDynRuleAssignAdd_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail45;
+      j_105 = term.getSubterm(0);
+      k_105 = term.getSubterm(1);
+      IStrategoList annos18 = term.getAnnotations();
+      l_105 = annos18;
+      term = w_16.invoke(context, j_105);
       if(term == null)
-        break Fail34;
-      j_105 = term;
-      term = y_16.invoke(context, h_105);
+        break Fail45;
+      m_105 = term;
+      term = x_16.invoke(context, k_105);
       if(term == null)
-        break Fail34;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consDynRuleAssignAdd_2, new IStrategoTerm[]{j_105, term}), checkListAnnos(termFactory, i_105));
+        break Fail45;
+      term = termFactory.annotateTerm(termFactory.makeAppl(outt._consDynRuleAssignAdd_2, new IStrategoTerm[]{m_105, term}), checkListAnnos(termFactory, l_105));
       context.popOnSuccess();
       if(true)
         return term;

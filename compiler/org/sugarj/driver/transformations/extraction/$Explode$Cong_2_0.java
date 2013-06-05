@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Explode$Cong_2_0 instance = new $Explode$Cong_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy e_21, Strategy f_21)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy d_21, Strategy e_21)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("ExplodeCong_2_0");
-    Fail90:
+    Fail101:
     { 
-      IStrategoTerm c_117 = null;
-      IStrategoTerm a_117 = null;
-      IStrategoTerm b_117 = null;
+      IStrategoTerm f_117 = null;
       IStrategoTerm d_117 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consExplodeCong_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail90;
-      a_117 = term.getSubterm(0);
-      b_117 = term.getSubterm(1);
-      IStrategoList annos66 = term.getAnnotations();
-      c_117 = annos66;
-      term = e_21.invoke(context, a_117);
+      IStrategoTerm e_117 = null;
+      IStrategoTerm g_117 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || outt._consExplodeCong_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail101;
+      d_117 = term.getSubterm(0);
+      e_117 = term.getSubterm(1);
+      IStrategoList annos74 = term.getAnnotations();
+      f_117 = annos74;
+      term = d_21.invoke(context, d_117);
       if(term == null)
-        break Fail90;
-      d_117 = term;
-      term = f_21.invoke(context, b_117);
+        break Fail101;
+      g_117 = term;
+      term = e_21.invoke(context, e_117);
       if(term == null)
-        break Fail90;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consExplodeCong_2, new IStrategoTerm[]{d_117, term}), checkListAnnos(termFactory, c_117));
+        break Fail101;
+      term = termFactory.annotateTerm(termFactory.makeAppl(outt._consExplodeCong_2, new IStrategoTerm[]{g_117, term}), checkListAnnos(termFactory, f_117));
       context.popOnSuccess();
       if(true)
         return term;

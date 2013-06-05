@@ -40,10 +40,8 @@ exports
 
     FomegaDefinitions -> FomegaOrSugarDec
     SugarDefElements -> FomegaOrSugarDec
-    EditorServiceSections -> FomegaOrSugarDec
 
-    SugarDefElem+ -> SugarDefElements {cons("SugarBody")}
-    EditorServiceSection+ -> EditorServiceSections {cons("EditorBody")}
+    ExtensionElem+ -> SugarDefElements {cons("ExtensionBody")}
 
   context-free syntax
     FomegaModuleDec -> ToplevelDeclaration

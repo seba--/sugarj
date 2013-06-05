@@ -12,35 +12,35 @@ import java.lang.ref.WeakReference;
 { 
   public static filter_children_1_0 instance = new filter_children_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy g_15)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy s_14)
   { 
     context.push("filter_children_1_0");
-    Fail4:
+    Fail5:
     { 
-      IStrategoTerm e_15 = null;
-      IStrategoTerm f_15 = null;
-      IStrategoTerm h_15 = null;
-      IStrategoTerm i_15 = null;
+      IStrategoTerm q_14 = null;
+      IStrategoTerm r_14 = null;
+      IStrategoTerm t_14 = null;
+      IStrategoTerm u_14 = null;
       IStrategoTerm cons1 = context.invokePrimitive("SSL_get_constructor", term, NO_STRATEGIES, new IStrategoTerm[]{term});
-      e_15 = cons1;
+      q_14 = cons1;
       IStrategoTerm args1 = context.invokePrimitive("SSL_get_arguments", term, NO_STRATEGIES, new IStrategoTerm[]{term});
-      f_15 = args1;
-      i_15 = term;
-      term = f_15;
-      lifted6 lifted65 = new lifted6();
-      lifted65.g_15 = g_15;
-      term = map_1_0.instance.invoke(context, term, lifted65);
+      r_14 = args1;
+      u_14 = term;
+      term = r_14;
+      lifted0 lifted00 = new lifted0();
+      lifted00.s_14 = s_14;
+      term = map_1_0.instance.invoke(context, term, lifted00);
       if(term == null)
-        break Fail4;
+        break Fail5;
       term = concat_0_0.instance.invoke(context, term);
       if(term == null)
-        break Fail4;
-      h_15 = term;
-      term = i_15;
+        break Fail5;
+      t_14 = term;
+      term = u_14;
       IStrategoTerm mkterm0;
-      mkterm0 = context.invokePrimitive("SSL_mkterm", term, NO_STRATEGIES, new IStrategoTerm[]{e_15, h_15});
+      mkterm0 = context.invokePrimitive("SSL_mkterm", term, NO_STRATEGIES, new IStrategoTerm[]{q_14, t_14});
       if(mkterm0 == null)
-        break Fail4;
+        break Fail5;
       term = mkterm0;
       context.popOnSuccess();
       if(true)

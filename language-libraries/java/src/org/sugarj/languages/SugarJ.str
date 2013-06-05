@@ -4,22 +4,18 @@ signature constructors
     CompilationUnit            : Option(JavaPackageDec) * List(JavaImportDec) * List(TypeOrSugarDec) -> CompilationUnit
     CompileError               : String * Any -> CompileError
 
-    SugarBody              : SugarDef -> SugarBody
-    SugarDec               : SugarDecHead * SugarBody -> SugarDec
-    SugarDecHead           : List(AnnoOrSugarMod) * JavaId -> SugarDecHead
+    ExtensionDec               : ExtensionDecHead * ExtensionBody -> ExtensionDec
+    ExtensionBody              : SugarDef -> ExtensionBody
+    ExtensionDecHead           : List(AnnoOrSugarMod) * JavaId -> ExtensionDecHead
     
-    EditorServicesDec          : EditorServicesDecHead * EditorServicesDecBody -> SugarDec
-    EditorServicesDecHead      : List(Annos) * JavaId -> EditorServicesDecHead
-    EditorServicesBody         : List(EditorServicesSection) -> EditorServiceBody
-
-    ChecksDec          : EditorServicesDecHead * EditorServicesDecBody -> SugarDec
-    ChecksDecHead      : List(Annos) * JavaId -> EditorServicesDecHead
-    ChecksBody         : List(EditorServicesSection) -> EditorServiceBody
+    ChecksDec          : Head * Body -> SugarDec
+    ChecksDecHead      : List(Annos) * JavaId -> Head
+    ChecksBody         : List(Section) -> Body
     
     // MDD
-    ModelDec          : EditorServicesDecHead * EditorServicesDecBody -> SugarDec
-    ModelDecHead      : List(Annos) * JavaId * String -> EditorServicesDecHead
-    ModelBody         : Term -> EditorServiceBody
+    ModelDec          : Head * Body -> SugarDec
+    ModelDecHead      : List(Annos) * JavaId * String -> Head
+    ModelBody         : Term -> Body
 
     TransDec : TransformationDecHead * TransformationBody -> ToplevelDeclaration
     TransDecHead : List(AnnoOrSugarMod) * JavaId -> TransformationDecHead

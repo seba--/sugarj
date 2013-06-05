@@ -12,23 +12,23 @@ import java.lang.ref.WeakReference;
 { 
   public static $Gen$Dyn$Rules_1_0 instance = new $Gen$Dyn$Rules_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy g_20)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy f_20)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("GenDynRules_1_0");
-    Fail77:
+    Fail88:
     { 
-      IStrategoTerm m_114 = null;
-      IStrategoTerm l_114 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consGenDynRules_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail77;
-      l_114 = term.getSubterm(0);
-      IStrategoList annos53 = term.getAnnotations();
-      m_114 = annos53;
-      term = g_20.invoke(context, l_114);
+      IStrategoTerm p_114 = null;
+      IStrategoTerm o_114 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || outt._consGenDynRules_1 != ((IStrategoAppl)term).getConstructor())
+        break Fail88;
+      o_114 = term.getSubterm(0);
+      IStrategoList annos61 = term.getAnnotations();
+      p_114 = annos61;
+      term = f_20.invoke(context, o_114);
       if(term == null)
-        break Fail77;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consGenDynRules_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, m_114));
+        break Fail88;
+      term = termFactory.annotateTerm(termFactory.makeAppl(outt._consGenDynRules_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, p_114));
       context.popOnSuccess();
       if(true)
         return term;

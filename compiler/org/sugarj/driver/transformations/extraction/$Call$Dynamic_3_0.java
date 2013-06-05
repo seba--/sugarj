@@ -12,37 +12,37 @@ import java.lang.ref.WeakReference;
 { 
   public static $Call$Dynamic_3_0 instance = new $Call$Dynamic_3_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy y_22, Strategy z_22, Strategy a_23)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy x_22, Strategy y_22, Strategy z_22)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("CallDynamic_3_0");
-    Fail123:
+    Fail134:
     { 
+      IStrategoTerm q_122 = null;
       IStrategoTerm l_122 = null;
-      IStrategoTerm i_122 = null;
-      IStrategoTerm j_122 = null;
-      IStrategoTerm k_122 = null;
       IStrategoTerm o_122 = null;
       IStrategoTerm p_122 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consCallDynamic_3 != ((IStrategoAppl)term).getConstructor())
-        break Fail123;
-      i_122 = term.getSubterm(0);
-      j_122 = term.getSubterm(1);
-      k_122 = term.getSubterm(2);
-      IStrategoList annos96 = term.getAnnotations();
-      l_122 = annos96;
-      term = y_22.invoke(context, i_122);
+      IStrategoTerm r_122 = null;
+      IStrategoTerm s_122 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || outt._consCallDynamic_3 != ((IStrategoAppl)term).getConstructor())
+        break Fail134;
+      l_122 = term.getSubterm(0);
+      o_122 = term.getSubterm(1);
+      p_122 = term.getSubterm(2);
+      IStrategoList annos104 = term.getAnnotations();
+      q_122 = annos104;
+      term = x_22.invoke(context, l_122);
       if(term == null)
-        break Fail123;
-      o_122 = term;
-      term = z_22.invoke(context, j_122);
+        break Fail134;
+      r_122 = term;
+      term = y_22.invoke(context, o_122);
       if(term == null)
-        break Fail123;
-      p_122 = term;
-      term = a_23.invoke(context, k_122);
+        break Fail134;
+      s_122 = term;
+      term = z_22.invoke(context, p_122);
       if(term == null)
-        break Fail123;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consCallDynamic_3, new IStrategoTerm[]{o_122, p_122, term}), checkListAnnos(termFactory, l_122));
+        break Fail134;
+      term = termFactory.annotateTerm(termFactory.makeAppl(outt._consCallDynamic_3, new IStrategoTerm[]{r_122, s_122, term}), checkListAnnos(termFactory, q_122));
       context.popOnSuccess();
       if(true)
         return term;

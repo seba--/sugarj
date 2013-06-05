@@ -36,8 +36,7 @@ public interface ILanguageLib {
 
   public abstract boolean isNamespaceDec(IStrategoTerm decl);
   public abstract boolean isLanguageSpecificDec(IStrategoTerm decl);
-  public abstract boolean isSugarDec(IStrategoTerm decl);
-  public abstract boolean isEditorServiceDec(IStrategoTerm decl);
+  public abstract boolean isExtensionDec(IStrategoTerm decl);
   public abstract boolean isImportDec(IStrategoTerm decl);
   public abstract boolean isPlainDec(IStrategoTerm decl);
 
@@ -49,9 +48,6 @@ public interface ILanguageLib {
   public abstract String getImportedModulePath(IStrategoTerm decl);
   public abstract boolean isModuleExternallyResolvable(String relModulePath);
 
-  public abstract String getSugarName(IStrategoTerm decl) throws IOException;
-  public abstract IStrategoTerm getSugarBody(IStrategoTerm decl);
-
-  public abstract String getEditorName(IStrategoTerm decl) throws IOException;
-  public abstract IStrategoTerm getEditorServices(IStrategoTerm decl);
+  public abstract String getExtensionName(IStrategoTerm decl) throws IOException;
+  public abstract IStrategoTerm getExtensionBody(IStrategoTerm decl);
 }

@@ -119,8 +119,8 @@ public class PrologLib extends LanguageLib implements Serializable {
 	  }
 
 	  @Override
-	  public boolean isSugarDec(IStrategoTerm decl) {
-	    return isApplication(decl, "SugarBody");           
+	  public boolean isExtensionDec(IStrategoTerm decl) {
+	    return isApplication(decl, "ExtensionBody");           
 	  }
 	  
 	  @Override
@@ -129,11 +129,6 @@ public class PrologLib extends LanguageLib implements Serializable {
 				  isApplication(decl, "SugarModuleDec");
 	  }
 	  
-	  @Override
-	  public boolean isEditorServiceDec(IStrategoTerm decl) {
-	    return isApplication(decl, "EditorServicesDec");   
-	  }
-
 	  @Override
 	  public boolean isImportDec(IStrategoTerm decl) {
 	    return isApplication(decl, "ModuleImport");
@@ -266,14 +261,14 @@ public class PrologLib extends LanguageLib implements Serializable {
 	}
 
 	@Override
-	public String getSugarName(IStrategoTerm decl) throws IOException {
+	public String getExtensionName(IStrategoTerm decl) throws IOException {
         return decName;
 	}
 
 
 	@Override
-	public IStrategoTerm getSugarBody(IStrategoTerm decl) {
-		IStrategoTerm sugarBody = getApplicationSubterm(decl, "SugarBody", 0);
+	public IStrategoTerm getExtensionBody(IStrategoTerm decl) {
+		IStrategoTerm sugarBody = getApplicationSubterm(decl, "ExtensionBody", 0);
 		
 		return sugarBody;
 
@@ -283,15 +278,5 @@ public class PrologLib extends LanguageLib implements Serializable {
 	public boolean isModuleExternallyResolvable(String relModulePath) {
 		// TODO: look for pre-installed SWI libraries?
 		return false;
-	}
-
-	@Override
-	public String getEditorName(IStrategoTerm decl) throws IOException {
-		throw new UnsupportedOperationException("SugarProlog does currently not support editor libraries.");
-	}
-
-	@Override
-	public IStrategoTerm getEditorServices(IStrategoTerm decl) {
-		throw new UnsupportedOperationException("SugarProlog does currently not support editor libraries.");
 	}
 }

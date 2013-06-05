@@ -6,6 +6,7 @@ import static org.sugarj.common.ATermCommands.isApplication;
 import static org.sugarj.common.Log.log;
 import static org.sugarj.driver.SDFCommands.extractSDF;
 import static org.sugarj.driver.STRCommands.extractSTR;
+import static org.sugarj.driver.STRCommands.extractEditor;
 
 import java.io.EOFException;
 import java.io.File;
@@ -470,10 +471,8 @@ public class Driver{
         }
         else if (langLib.isLanguageSpecificDec(toplevelDecl))
           processLanguageDec(toplevelDecl);
-        else if (langLib.isSugarDec(toplevelDecl))
-          processSugarDec(toplevelDecl);
-        else if (langLib.isEditorServiceDec(toplevelDecl)) 
-          processEditorServicesDec(toplevelDecl);
+        else if (langLib.isExtensionDec(toplevelDecl))
+          processExtensionDec(toplevelDecl);
         else if (langLib.isPlainDec(toplevelDecl))   // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
           processPlainDec(toplevelDecl);
         else if (langLib.isTransformationDec(toplevelDecl))
@@ -517,53 +516,31 @@ public class Driver{
     }
   }
 
-
-  
-  private void processEditorServicesDec(IStrategoTerm toplevelDecl) throws IOException {
-    log.beginTask("processing", "PROCESS editor services.", Log.CORE);
-    try {
-      if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
-        sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
-      
-      String extName = langLib.getEditorName(toplevelDecl);
-      String fullExtName = getFullRenamedDeclarationName(extName);
-      checkModuleName(extName);
-
-      log.log("The name of the editor services is '" + extName + "'.", Log.DETAIL);
-      log.log("The full name of the editor services is '" + fullExtName + "'.", Log.DETAIL);
+  private void processEditorServices(String extName, IStrategoTerm services) throws IOException {
+    if (!ATermCommands.isList(services))
+      throw new IllegalStateException("editor services are not a list: " + services);
     
-      generateModel(fullExtName, toplevelDecl);
-      if (dependsOnModel)
-        return;
-      
-      IStrategoTerm services = langLib.getEditorServices(toplevelDecl);
-      
-      if (!ATermCommands.isList(services))
-        throw new IllegalStateException("editor services are not a list: " + services);
-      
-      List<IStrategoTerm> editorServices = ATermCommands.getList(services);
-      
-      // XXX if (currentTransProg != null)
-      editorServices = ATermCommands.registerSemanticProvider(editorServices, currentTransProg);
+    List<IStrategoTerm> editorServices = ATermCommands.getList(services);
+    
+    // XXX if (currentTransProg != null)
+    editorServices = ATermCommands.registerSemanticProvider(editorServices, currentTransProg);
 
-      Path editorServicesFile = environment.createOutPath(langLib.getRelativeNamespaceSep() + extName + ".serv");
-      
-      log.log("writing editor services to " + editorServicesFile, Log.DETAIL);
-      
-      StringBuffer buf = new StringBuffer();
-      
-      for (IStrategoTerm service : driverResult.getEditorServices())
-        buf.append(service).append('\n');
-      
-      for (IStrategoTerm service : editorServices) {
-        driverResult.addEditorService(service);
-        buf.append(service).append('\n');
-      }
-      
-      driverResult.generateFile(editorServicesFile, buf.toString());
-    } finally {
-      log.endTask();
+    Path editorServicesFile = environment.createOutPath(langLib.getRelativeNamespaceSep() + extName + ".serv");
+    
+    log.log("writing editor services to " + editorServicesFile, Log.DETAIL);
+    
+    StringBuffer buf = new StringBuffer();
+    
+    for (IStrategoTerm service : driverResult.getEditorServices())
+      buf.append(service).append('\n');
+    
+    for (IStrategoTerm service : editorServices) {
+      driverResult.addEditorService(service);
+      buf.append(service).append('\n');
     }
+    
+    driverResult.generateFile(editorServicesFile, buf.toString());
+
   }
   
   private void processPlainDec(IStrategoTerm toplevelDecl) throws IOException {
@@ -970,13 +947,13 @@ public class Driver{
     }
   }
 
-  private void processSugarDec(IStrategoTerm toplevelDecl) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
+  private void processExtensionDec(IStrategoTerm toplevelDecl) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
     log.beginTask("processing", "PROCESS sugar declaration.", Log.CORE);
     try {
       if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
         sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
 
-      String extName = langLib.getSugarName(toplevelDecl);
+      String extName = langLib.getExtensionName(toplevelDecl);
       String fullExtName = getFullRenamedDeclarationName(extName);
       checkModuleName(extName);
 
@@ -995,10 +972,11 @@ public class Driver{
       
       // this is a list of SDF and Stratego statements
       
-      IStrategoTerm sugarBody = langLib.getSugarBody(toplevelDecl);
+      IStrategoTerm extensionBody = langLib.getExtensionBody(toplevelDecl);
 
-      IStrategoTerm sdfExtract = fixSDF(extractSDF(sugarBody), langLib.getInterpreter());
-      IStrategoTerm strExtract = extractSTR(sugarBody);
+      IStrategoTerm sdfExtract = fixSDF(extractSDF(extensionBody), langLib.getInterpreter());
+      IStrategoTerm strExtract = extractSTR(extensionBody);
+      IStrategoTerm editorExtract = extractEditor(extensionBody);
       
       String sdfExtensionHead =
         "module " + fullExtName + "\n" 
@@ -1033,6 +1011,8 @@ public class Driver{
       
       if (CommandExecution.FULL_COMMAND_LINE)
         log.log("Wrote Stratego file to '" + strExtension.getAbsolutePath() + "'.", Log.DETAIL);
+      
+      processEditorServices(extName, editorExtract);
       
       /*
        * adapt current grammar

@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static $Add$Scope$Label_2_0 instance = new $Add$Scope$Label_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy j_17, Strategy k_17)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy i_17, Strategy j_17)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("AddScopeLabel_2_0");
-    Fail40:
+    Fail51:
     { 
-      IStrategoTerm o_106 = null;
-      IStrategoTerm m_106 = null;
-      IStrategoTerm n_106 = null;
+      IStrategoTerm r_106 = null;
       IStrategoTerm p_106 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consAddScopeLabel_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail40;
-      m_106 = term.getSubterm(0);
-      n_106 = term.getSubterm(1);
-      IStrategoList annos16 = term.getAnnotations();
-      o_106 = annos16;
-      term = j_17.invoke(context, m_106);
+      IStrategoTerm q_106 = null;
+      IStrategoTerm s_106 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || outt._consAddScopeLabel_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail51;
+      p_106 = term.getSubterm(0);
+      q_106 = term.getSubterm(1);
+      IStrategoList annos24 = term.getAnnotations();
+      r_106 = annos24;
+      term = i_17.invoke(context, p_106);
       if(term == null)
-        break Fail40;
-      p_106 = term;
-      term = k_17.invoke(context, n_106);
+        break Fail51;
+      s_106 = term;
+      term = j_17.invoke(context, q_106);
       if(term == null)
-        break Fail40;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consAddScopeLabel_2, new IStrategoTerm[]{p_106, term}), checkListAnnos(termFactory, o_106));
+        break Fail51;
+      term = termFactory.annotateTerm(termFactory.makeAppl(outt._consAddScopeLabel_2, new IStrategoTerm[]{s_106, term}), checkListAnnos(termFactory, r_106));
       context.popOnSuccess();
       if(true)
         return term;

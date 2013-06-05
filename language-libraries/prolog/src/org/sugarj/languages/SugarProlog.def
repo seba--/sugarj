@@ -21,7 +21,7 @@ exports
     "sugar" -/- [a-zA-Z0-9\'\-\_]
 
   context-free syntax
-    ":-" SugarDefElem+ "."   -> SugarBody       {cons("SugarBody")}
+    ":-" ExtensionElem+ "."   -> SugarBody       {cons("ExtensionBody")}
 
   context-free syntax %% ToplevelDeclaration
     PrologModuleDec -> ToplevelDeclaration
@@ -29,6 +29,6 @@ exports
     PrologModuleReexport -> ToplevelDeclaration       %% needed?
     PrologSentence -> ToplevelDeclaration
     SugarModuleDec -> ToplevelDeclaration
-    SugarBody   -> ToplevelDeclaration
+    ExtensionBody   -> ToplevelDeclaration
   
   

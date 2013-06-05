@@ -5,5 +5,4 @@ signature constructors
   CompilationUnit : HaskellModuleDec * List(HaskellImportdecl) * List(SugarHaskellTopdecl) -> SugarCompilationUnit
   ModuleDec : HaskellModid * Option(HaskellExports) -> HaskellModuleDec
   HaskellBody : HaskellOffsideTopdeclList -> SugarHaskellBody
-  SugarBody : List(SugarDefElem) -> SugarHaskellBody
-  EditorBody : List(EditorServiceSection) -> SugarHaskellBody
+  ExtensionBody : List(SugarDefElem) -> SugarHaskellBody

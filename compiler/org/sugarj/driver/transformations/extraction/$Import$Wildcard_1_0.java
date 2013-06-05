@@ -12,23 +12,23 @@ import java.lang.ref.WeakReference;
 { 
   public static $Import$Wildcard_1_0 instance = new $Import$Wildcard_1_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy l_18)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy k_18)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("ImportWildcard_1_0");
-    Fail54:
+    Fail65:
     { 
-      IStrategoTerm m_109 = null;
-      IStrategoTerm l_109 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consImportWildcard_1 != ((IStrategoAppl)term).getConstructor())
-        break Fail54;
-      l_109 = term.getSubterm(0);
-      IStrategoList annos30 = term.getAnnotations();
-      m_109 = annos30;
-      term = l_18.invoke(context, l_109);
+      IStrategoTerm r_109 = null;
+      IStrategoTerm o_109 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || outt._consImportWildcard_1 != ((IStrategoAppl)term).getConstructor())
+        break Fail65;
+      o_109 = term.getSubterm(0);
+      IStrategoList annos38 = term.getAnnotations();
+      r_109 = annos38;
+      term = k_18.invoke(context, o_109);
       if(term == null)
-        break Fail54;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consImportWildcard_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, m_109));
+        break Fail65;
+      term = termFactory.annotateTerm(termFactory.makeAppl(outt._consImportWildcard_1, new IStrategoTerm[]{term}), checkListAnnos(termFactory, r_109));
       context.popOnSuccess();
       if(true)
         return term;

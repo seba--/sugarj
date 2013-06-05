@@ -12,30 +12,30 @@ import java.lang.ref.WeakReference;
 { 
   public static iter_star_sep_2_0 instance = new iter_star_sep_2_0();
 
-  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy y_27, Strategy z_27)
+  @Override public IStrategoTerm invoke(Context context, IStrategoTerm term, Strategy x_27, Strategy y_27)
   { 
     ITermFactory termFactory = context.getFactory();
     context.push("iter_star_sep_2_0");
-    Fail222:
+    Fail233:
     { 
-      IStrategoTerm n_142 = null;
-      IStrategoTerm l_142 = null;
-      IStrategoTerm m_142 = null;
+      IStrategoTerm q_142 = null;
       IStrategoTerm o_142 = null;
-      if(term.getTermType() != IStrategoTerm.APPL || extraction._consiter_star_sep_2 != ((IStrategoAppl)term).getConstructor())
-        break Fail222;
-      l_142 = term.getSubterm(0);
-      m_142 = term.getSubterm(1);
-      IStrategoList annos183 = term.getAnnotations();
-      n_142 = annos183;
-      term = y_27.invoke(context, l_142);
+      IStrategoTerm p_142 = null;
+      IStrategoTerm r_142 = null;
+      if(term.getTermType() != IStrategoTerm.APPL || outt._consiter_star_sep_2 != ((IStrategoAppl)term).getConstructor())
+        break Fail233;
+      o_142 = term.getSubterm(0);
+      p_142 = term.getSubterm(1);
+      IStrategoList annos191 = term.getAnnotations();
+      q_142 = annos191;
+      term = x_27.invoke(context, o_142);
       if(term == null)
-        break Fail222;
-      o_142 = term;
-      term = z_27.invoke(context, m_142);
+        break Fail233;
+      r_142 = term;
+      term = y_27.invoke(context, p_142);
       if(term == null)
-        break Fail222;
-      term = termFactory.annotateTerm(termFactory.makeAppl(extraction._consiter_star_sep_2, new IStrategoTerm[]{o_142, term}), checkListAnnos(termFactory, n_142));
+        break Fail233;
+      term = termFactory.annotateTerm(termFactory.makeAppl(outt._consiter_star_sep_2, new IStrategoTerm[]{r_142, term}), checkListAnnos(termFactory, q_142));
       context.popOnSuccess();
       if(true)
         return term;

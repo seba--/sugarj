@@ -4,4 +4,4 @@ signature constructors
     CompilationUnit            : SugarModuleDec * List(PrologModuleImport) * SugarBody -> CompilationUnit
     CompilationUnit            : PrologProgram -> SugarCompilationUnit
     SugarModuleDec : String -> SugarModuleDec
-    SugarBody              : SugarDef -> SugarBody
+    ExtensionBody              : SugarDef -> SugarBody

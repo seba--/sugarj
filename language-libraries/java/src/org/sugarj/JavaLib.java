@@ -157,11 +157,6 @@ public class JavaLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  public boolean isEditorServiceDec(IStrategoTerm decl) {
-    return isApplication(decl, "EditorServicesDec");
-  }
-
-  @Override
   public boolean isImportDec(IStrategoTerm decl) {
     return 
         isApplication(decl, "TypeImportDec") || 
@@ -180,8 +175,8 @@ public class JavaLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  public boolean isSugarDec(IStrategoTerm decl) {
-    return isApplication(decl, "SugarDec");
+  public boolean isExtensionDec(IStrategoTerm decl) {
+    return isApplication(decl, "ExtensionDec");
   }
 
   @Override
@@ -342,16 +337,16 @@ public class JavaLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  public String getSugarName(IStrategoTerm decl) throws IOException {
-    IStrategoTerm head = getApplicationSubterm(decl, "SugarDec", 0);
-    String extName = prettyPrint(getApplicationSubterm(head, "SugarDecHead", 1));
+  public String getExtensionName(IStrategoTerm decl) throws IOException {
+    IStrategoTerm head = getApplicationSubterm(decl, "ExtensionDec", 0);
+    String extName = prettyPrint(getApplicationSubterm(head, "ExtensionDecHead", 1));
     return extName;
   }
 
   @Override
-  public IStrategoTerm getSugarBody(IStrategoTerm decl) {
-    IStrategoTerm body = getApplicationSubterm(decl, "SugarDec", 1);
-    IStrategoTerm sugarBody = getApplicationSubterm(body, "SugarBody", 0);
+  public IStrategoTerm getExtensionBody(IStrategoTerm decl) {
+    IStrategoTerm body = getApplicationSubterm(decl, "ExtensionDec", 1);
+    IStrategoTerm sugarBody = getApplicationSubterm(body, "ExtensionBody", 0);
     return sugarBody;
   }
   
@@ -385,17 +380,5 @@ public class JavaLib extends LanguageLib implements Serializable {
     } catch (ClassNotFoundException e) {
       return false;
     }
-  }
-
-  @Override
-  public String getEditorName(IStrategoTerm decl) throws IOException {
-    IStrategoTerm head = getApplicationSubterm(decl, "EditorServicesDec", 0);
-    return prettyPrint(getApplicationSubterm(head, "EditorServicesDecHead", 1));
-  }
-
-  @Override
-  public IStrategoTerm getEditorServices(IStrategoTerm decl) {
-    IStrategoTerm body = getApplicationSubterm(decl, "EditorServicesDec", 1);
-    return ATermCommands.getApplicationSubterm(body, "EditorServicesBody", 0);
   }
 }

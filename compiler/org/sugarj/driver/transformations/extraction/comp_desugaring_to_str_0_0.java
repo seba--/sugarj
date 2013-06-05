@@ -15,33 +15,33 @@ import java.lang.ref.WeakReference;
   @Override public IStrategoTerm invoke(Context context, IStrategoTerm term)
   { 
     ITermFactory termFactory = context.getFactory();
-    Fail20:
+    Fail21:
     { 
       IStrategoTerm term7 = term;
       IStrategoConstructor cons4 = term.getTermType() == IStrategoTerm.APPL ? ((IStrategoAppl)term).getConstructor() : null;
       Success6:
       { 
-        if(cons4 == extraction._consPureDesugaring_1)
+        if(cons4 == outt._consPureDesugaring_1)
         { 
-          Fail21:
+          Fail22:
           { 
-            IStrategoTerm e_16 = null;
-            e_16 = term.getSubterm(0);
-            term = termFactory.makeAppl(extraction._consSDefNoArgs_2, new IStrategoTerm[]{extraction.const0, termFactory.makeAppl(extraction._consCall_2, new IStrategoTerm[]{extraction.constCallNoArgs0, (IStrategoTerm)termFactory.makeListCons(e_16, (IStrategoList)extraction.constNil0)})});
+            IStrategoTerm q_15 = null;
+            q_15 = term.getSubterm(0);
+            term = termFactory.makeAppl(outt._consSDefNoArgs_2, new IStrategoTerm[]{extraction.const0, termFactory.makeAppl(outt._consCall_2, new IStrategoTerm[]{extraction.constCallNoArgs0, (IStrategoTerm)termFactory.makeListCons(q_15, (IStrategoList)extraction.constNil0)})});
             if(true)
               break Success6;
           }
           term = term7;
         }
-        if(cons4 == extraction._consInjectDesugaring_4)
+        if(cons4 == outt._consInjectDesugaring_4)
         { 
-          IStrategoTerm d_16 = null;
-          d_16 = term.getSubterm(0);
-          term = termFactory.makeAppl(extraction._consSDefNoArgs_2, new IStrategoTerm[]{extraction.const0, termFactory.makeAppl(extraction._consCall_2, new IStrategoTerm[]{extraction.constCallNoArgs0, (IStrategoTerm)termFactory.makeListCons(d_16, (IStrategoList)extraction.constNil0)})});
+          IStrategoTerm p_15 = null;
+          p_15 = term.getSubterm(0);
+          term = termFactory.makeAppl(outt._consSDefNoArgs_2, new IStrategoTerm[]{extraction.const0, termFactory.makeAppl(outt._consCall_2, new IStrategoTerm[]{extraction.constCallNoArgs0, (IStrategoTerm)termFactory.makeListCons(p_15, (IStrategoList)extraction.constNil0)})});
         }
         else
         { 
-          break Fail20;
+          break Fail21;
         }
       }
       if(true)
