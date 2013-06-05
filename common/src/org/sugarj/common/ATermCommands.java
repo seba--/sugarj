@@ -410,7 +410,7 @@ public class ATermCommands {
     if (tokenizer == null)
       return term;
     
-    org.spoofax.jsglr.client.imploder.Tokenizer oTokenizer = tokenizer.makeStdTokenizer();
+    org.spoofax.jsglr.client.imploder.Tokenizer oTokenizer = tokenizer.makeStdTokenizer(ATermCommands.factory);
     Map<Token, org.spoofax.jsglr.client.imploder.Token> map = tokenizer.reassignTokens(oTokenizer);
     
     IStrategoTerm oTerm = fixTokens(term, map);
