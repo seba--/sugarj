@@ -9,7 +9,7 @@ imports org/sugarj/languages/Prolog
 
 exports
   context-free syntax
-    SugarModuleDec PrologModuleImport* SugarBody   -> CompilationUnit {cons("CompilationUnit")}     
+    SugarModuleDec PrologModuleImport* ExtensionBody   -> CompilationUnit {cons("CompilationUnit")}     
     PrologProgram                                -> CompilationUnit {cons("CompilationUnit")}
 
   context-free syntax
@@ -21,7 +21,7 @@ exports
     "sugar" -/- [a-zA-Z0-9\'\-\_]
 
   context-free syntax
-    ":-" ExtensionElem+ "."   -> SugarBody       {cons("ExtensionBody")}
+    ":-" ExtensionElem+ "."   -> ExtensionBody       {cons("ExtensionBody")}
 
   context-free syntax %% ToplevelDeclaration
     PrologModuleDec -> ToplevelDeclaration

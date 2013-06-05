@@ -2,6 +2,7 @@ module org/sugarj/transformations/GenerateSignatures
 
 imports org/sugarj/languages/Sdf2
         org/sugarj/languages/Stratego
+        org/sugarj/languages/Sugar
         org/sugarj/stdlib/StdTrans
 
 strategies
@@ -9,17 +10,12 @@ strategies
     changed-tree(gen-signature)
 
 
-signature constructors
-  SugarBody : A -> B
-  grammar-elem : G -> G
-  transformation-elem : T -> T
-  
-
 rules
 
   gen-signature :
-    SugarBody(elems) -> SugarBody(res)
-    where <(map(gen-signature-elem <+ ![<id>])
+    elems -> res
+    where <?[<id>|_]; (?grammar-elem(_) + ?transformation-elem(_) + ?editor-elem(_))> elems;
+    	   <(map(gen-signature-elem <+ ![<id>])
             ; concat)> elems => res
 
 
