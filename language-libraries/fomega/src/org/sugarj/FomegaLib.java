@@ -4,6 +4,7 @@ import static org.sugarj.common.ATermCommands.getApplicationSubterm;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -35,7 +36,7 @@ public class FomegaLib extends LanguageLib {
   private IStrategoTerm ppTable;
   
   @Override
-  public SourceFileContent getSource() {
+  public SourceFileContent getGeneratedSource() {
     return sourceContent;
   }
 
@@ -66,7 +67,7 @@ public class FomegaLib extends LanguageLib {
    */
   
   @Override
-  public void setupSourceFile(RelativePath sourceFile, Environment environment) {
+  public void init(RelativePath sourceFile, Environment environment) {
     outFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".pts-source");
     sourceContent = new FomegaSourceFileContent();
   }
@@ -110,13 +111,13 @@ public class FomegaLib extends LanguageLib {
   }
 
   @Override
-  public String getImportedModulePath(IStrategoTerm toplevelDecl) {
+  public String getModulePathOfImport(IStrategoTerm toplevelDecl) {
     return prettyPrint(getApplicationSubterm(toplevelDecl, "Import", 1)).replace('.', '/');
   }
   
   @Override
-  public void addImportedModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
-    SourceImport imp = new SourceImport(getImportedModulePath(toplevelDecl), prettyPrint(toplevelDecl));
+  public void addModuleImport(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
+    SourceImport imp = new SourceImport(getModulePathOfImport(toplevelDecl), prettyPrint(toplevelDecl));
     if (checked)
       sourceContent.addCheckedImport(imp);
     else
@@ -131,12 +132,15 @@ public class FomegaLib extends LanguageLib {
   }
   
   @Override
-  public void compile(List<Path> outFiles, Path bin, List<Path> includePaths) throws IOException {
+  public List<Path> compile(List<Path> outFiles, Path bin, List<Path> includePaths) throws IOException {
+    List<Path> generatedFiles = new LinkedList<Path>();
     for (Path out : outFiles) {
       RelativePath relOut = (RelativePath) out;
       Path compilePath = new RelativePath(bin, FileCommands.dropExtension(relOut.getRelativePath()) + ".pts");
       FileCommands.copyFile(out, compilePath);
+      generatedFiles.add(compilePath);
     }
+    return generatedFiles;
   }
 
   @Override

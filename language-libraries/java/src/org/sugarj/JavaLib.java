@@ -89,7 +89,7 @@ public class JavaLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  public JavaSourceFileContent getSource() {
+  public JavaSourceFileContent getGeneratedSource() {
     return javaSource;
   }
 
@@ -131,7 +131,7 @@ public class JavaLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  public void setupSourceFile(RelativePath sourceFile, Environment environment) {
+  public void init(RelativePath sourceFile, Environment environment) {
     javaOutFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + JavaLibFactory.getInstance().getOriginalFileExtension());
     javaSource = new JavaSourceFileContent();
     
@@ -146,12 +146,12 @@ public class JavaLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  public void compile(List<Path> javaOutFiles, Path bin, List<Path> path) throws IOException {
-    JavaCommands.javac(javaOutFiles, sourcePath, bin, path);
+  public List<Path> compile(List<Path> javaOutFiles, Path bin, List<Path> path) throws IOException {
+    return JavaCommands.javac(javaOutFiles, sourcePath, bin, path);
   }
 
   @Override
-  public String getImportedModulePath(IStrategoTerm toplevelDecl) {
+  public String getModulePathOfImport(IStrategoTerm toplevelDecl) {
     String importModule = extractImportedModuleName(toplevelDecl);
     String modulePath = getRelativeModulePath(importModule);
 
@@ -203,7 +203,7 @@ public class JavaLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  public void addImportedModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
+  public void addModuleImport(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
     String imp = extractImportedModuleName(toplevelDecl).replace('/', '.');
     if (checked)
       javaSource.addCheckedImport(imp);

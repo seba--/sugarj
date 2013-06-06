@@ -85,8 +85,11 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
       throw new ClassNotFoundException("Unresolved import " + e.getMessage() + " in " + outFile);
     }
     
-    if (!outFiles.isEmpty())
-      this.compile(outFiles, bin, path);
+    if (!outFiles.isEmpty()) {
+      List<Path> generatedByCompiler = this.compile(outFiles, bin, path);
+      for (Path p : generatedByCompiler)
+        generatedFileHashes.put(p, FileCommands.fileHash(p));
+    }
     
 		for (Path cl : generatedFiles)
 			generatedFileHashes.put(cl, FileCommands.fileHash(cl));

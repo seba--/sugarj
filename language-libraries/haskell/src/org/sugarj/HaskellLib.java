@@ -18,6 +18,7 @@ import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.Log;
+import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.haskell.HaskellSourceFileContent;
@@ -43,7 +44,7 @@ public class HaskellLib extends LanguageLib {
   private IStrategoTerm ppTable;
 
   @Override
-  public SourceFileContent getSource() {
+  public SourceFileContent getGeneratedSource() {
     return sourceContent;
   }
 
@@ -74,7 +75,7 @@ public class HaskellLib extends LanguageLib {
    */
   
   @Override
-  public void setupSourceFile(RelativePath sourceFile, Environment environment) {
+  public void init(RelativePath sourceFile, Environment environment) {
     outFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + HaskellLibFactory.getInstance().getOriginalFileExtension());
     sourceContent = new HaskellSourceFileContent();
   }
@@ -118,13 +119,13 @@ public class HaskellLib extends LanguageLib {
   }
 
   @Override
-  public String getImportedModulePath(IStrategoTerm toplevelDecl) {
+  public String getModulePathOfImport(IStrategoTerm toplevelDecl) {
     return prettyPrint(getApplicationSubterm(toplevelDecl, "Import", 2)).replace('.', '/');
   }
   
   @Override
-  public void addImportedModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
-    SourceImport imp = new SourceImport(getImportedModulePath(toplevelDecl), prettyPrint(toplevelDecl));
+  public void addModuleImport(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
+    SourceImport imp = new SourceImport(getModulePathOfImport(toplevelDecl), prettyPrint(toplevelDecl));
     if (checked)
       sourceContent.addCheckedImport(imp);
     else
@@ -144,12 +145,19 @@ public class HaskellLib extends LanguageLib {
   }
   
   @Override
-  public void compile(List<Path> outFiles, Path bin, List<Path> includePaths) throws IOException {
+  public List<Path> compile(List<Path> outFiles, Path bin, List<Path> includePaths) throws IOException {
     List<String> cmds = new LinkedList<String>();
     cmds.add(GHC_COMMAND);
     
-    for (Path outFile : outFiles)
+    List<Path> generatedFiles = new LinkedList<Path>();
+    for (Path outFile : outFiles) {
       cmds.add(outFile.getAbsolutePath());
+      String noExtPath = FileCommands.dropExtension(outFile.getAbsolutePath());
+      generatedFiles.add(new AbsolutePath(noExtPath));
+      generatedFiles.add(new AbsolutePath(noExtPath + ".exe"));
+      generatedFiles.add(new AbsolutePath(noExtPath + ".hi"));
+      generatedFiles.add(new AbsolutePath(noExtPath + ".o"));
+    }
     
     cmds.add("-i");
     if (!includePaths.isEmpty()) {
@@ -162,6 +170,8 @@ public class HaskellLib extends LanguageLib {
     }
     
     new CommandExecution(false).execute(cmds.toArray(new String[cmds.size()]));
+    
+    return generatedFiles;
   }
 
   @Override

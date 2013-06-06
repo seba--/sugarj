@@ -347,7 +347,7 @@ public class Driver{
       driverResult.setSourceFile(this.sourceFile, declProvider.getSourceHashCode());
       
       if (sourceFile != null) {
-        langLib.setupSourceFile(sourceFile, environment);
+        langLib.init(sourceFile, environment);
 
         depOutFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".dep");
         Path genLog = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".gen");
@@ -407,7 +407,7 @@ public class Driver{
             break;
           }
         if (delegate != null)
-          driverResult.delegateCompilation(delegate, langLib.getOutFile(), langLib.getSource(), definesNonBaseDec, langLib.getGeneratedFiles());
+          driverResult.delegateCompilation(delegate, langLib.getOutFile(), langLib.getGeneratedSource(), definesNonBaseDec, langLib.getGeneratedFiles());
         else if (!dependsOnModel)
           throw new IllegalStateException("Could not delegate compilation of circular dependency to other compiler instance.");
       }
@@ -443,7 +443,7 @@ public class Driver{
       try {
         langLib.compile(
             langLib.getOutFile(), 
-            langLib.getSource(),
+            langLib.getGeneratedSource(),
             environment.getBin(), 
             new ArrayList<Path>(environment.getIncludePath()), 
             langLib.getGeneratedFiles(),
@@ -721,7 +721,7 @@ public class Driver{
       String modulePath;
       boolean isCircularImport;
       if (!langLibFactory.isTransformationApplication(toplevelDecl)) {
-        modulePath = langLib.getImportedModulePath(toplevelDecl);
+        modulePath = langLib.getModulePathOfImport(toplevelDecl);
         
         isCircularImport = prepareImport(toplevelDecl, modulePath);
         
@@ -807,7 +807,7 @@ public class Driver{
       if (sourceFileAvailable && requiresUpdate && getCircularImportResult(importSourceFile) != null) {
         // Circular import. Assume source file does not provide syntactic sugar.
         log.log("Circular import detected: " + modulePath + ".", Log.IMPORT);
-        langLib.addImportedModule(toplevelDecl, false);
+        langLib.addModuleImport(toplevelDecl, false);
         isCircularImport = true;
         circularLinks.add(importSourceFile);
       }
@@ -836,7 +836,7 @@ public class Driver{
         // if importSourceFile is delegated to something currently being processed
         for (Driver dr : currentlyProcessing)
           if (dr.driverResult.isDelegateOf(importSourceFile)) {
-            langLib.addImportedModule(toplevelDecl, false);
+            langLib.addModuleImport(toplevelDecl, false);
             isCircularImport = true;
             
             if (dr != this)
@@ -898,7 +898,7 @@ public class Driver{
     Path clazz = ModuleSystemCommands.importBinFile(modulePath, environment, langLib, driverResult);
     if (clazz != null || langLib.isModuleExternallyResolvable(modulePath)) {
       success = true;
-      langLib.addImportedModule(importTerm, true);
+      langLib.addModuleImport(importTerm, true);
     }
 
     Path sdf = ModuleSystemCommands.importSdf(modulePath, environment, driverResult);

@@ -7,6 +7,7 @@ import static org.sugarj.common.Log.log;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -48,7 +49,7 @@ public class PrologLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  public SourceFileContent getSource() {
+  public SourceFileContent getGeneratedSource() {
     return prologSource;
   }
 
@@ -90,7 +91,7 @@ public class PrologLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  public void setupSourceFile(RelativePath sourceFile, Environment environment) {
+  public void init(RelativePath sourceFile, Environment environment) {
     prologOutFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + PrologLibFactory.getInstance().getGeneratedFileExtension());
     prologSource = new PrologSourceFileContent(this);
   }
@@ -132,15 +133,13 @@ public class PrologLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  public void compile(List<Path> sourceFiles, Path bin, List<Path> path) throws IOException {
-    for (Path file : sourceFiles) {
-      // XXX: do nothing here?
-      System.err.println("prolog;     no compilation neccessary for Prolog, file: " + file);
-    }
+  public List<Path> compile(List<Path> sourceFiles, Path bin, List<Path> path) throws IOException {
+    // no compilation neccessary for Prolog
+    return Collections.emptyList();
   }
 
   @Override
-  public String getImportedModulePath(IStrategoTerm toplevelDecl) {
+  public String getModulePathOfImport(IStrategoTerm toplevelDecl) {
     String modulePath = prettyPrint(toplevelDecl.getSubterm(0).getSubterm(0));
 
     return modulePath;
@@ -151,7 +150,7 @@ public class PrologLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  public void addImportedModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
+  public void addModuleImport(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
 
     String importedModuleName = prettyPrint(toplevelDecl.getSubterm(0).getSubterm(0));
     PrologModuleImport imp = prologSource.getImport(importedModuleName, toplevelDecl);
