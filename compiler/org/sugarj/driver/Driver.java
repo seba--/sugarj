@@ -805,7 +805,7 @@ public class Driver{
       if (sourceFileAvailable && requiresUpdate && getCircularImportResult(importSourceFile) != null) {
         // Circular import. Assume source file does not provide syntactic sugar.
         log.log("Circular import detected: " + modulePath + ".", Log.IMPORT);
-        langLib.addModuleImport(toplevelDecl, false);
+        langLib.addModuleImport(toplevelDecl);
         isCircularImport = true;
         circularLinks.add(importSourceFile);
       }
@@ -834,7 +834,7 @@ public class Driver{
         // if importSourceFile is delegated to something currently being processed
         for (Driver dr : currentlyProcessing)
           if (dr.driverResult.isDelegateOf(importSourceFile)) {
-            langLib.addModuleImport(toplevelDecl, false);
+            langLib.addModuleImport(toplevelDecl);
             isCircularImport = true;
             
             if (dr != this)
@@ -896,7 +896,7 @@ public class Driver{
     Path clazz = ModuleSystemCommands.importBinFile(modulePath, environment, langLib, driverResult);
     if (clazz != null || langLib.isModuleExternallyResolvable(modulePath)) {
       success = true;
-      langLib.addModuleImport(importTerm, true);
+      langLib.addModuleImport(importTerm);
     }
 
     Path sdf = ModuleSystemCommands.importSdf(modulePath, environment, driverResult);

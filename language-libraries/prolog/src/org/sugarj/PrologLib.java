@@ -155,7 +155,7 @@ public class PrologLib extends LanguageLib implements Serializable {
   }
   
   @Override
-  public void addModuleImport(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
+  public void addModuleImport(IStrategoTerm toplevelDecl) throws IOException {
     imports.add(getImportedModuleString(toplevelDecl));
   }
 

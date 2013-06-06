@@ -113,7 +113,7 @@ public class FomegaLib extends LanguageLib {
   }
   
   @Override
-  public void addModuleImport(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
+  public void addModuleImport(IStrategoTerm toplevelDecl) throws IOException {
     imports.add(prettyPrint(toplevelDecl));
   }
   

@@ -25,7 +25,7 @@ public interface ILanguageLib {
   public abstract void processLanguageSpecific(IStrategoTerm toplevelDecl, Environment environment) throws IOException;
   public abstract List<Path> compile(List<Path> generatedSourceFiles, Path targetDir, List<Path> classpath) throws IOException;
 
-  public abstract void addModuleImport(IStrategoTerm toplevelDecl, boolean checked) throws IOException;
+  public abstract void addModuleImport(IStrategoTerm toplevelDecl) throws IOException;
   public abstract String getModulePathOfImport(IStrategoTerm decl);
 
   public abstract boolean isModuleExternallyResolvable(String relModulePath);

@@ -99,8 +99,6 @@ public class JavaLib extends LanguageLib implements Serializable {
     if (expectedDecName != null && !expectedDecName.equals(decName))
       setErrorMessage(toplevelDecl, "Declaration name '" + decName + "'" + " does not match the file name '" + expectedDecName + "'.", null);
 
-    RelativePath clazz = environment.createOutPath(getRelativeNamespaceSep() + decName + ".class");
-
     body.add(prettyPrint(dec));
   }
 
@@ -198,7 +196,7 @@ public class JavaLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  public void addModuleImport(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
+  public void addModuleImport(IStrategoTerm toplevelDecl) throws IOException {
     imports.add(prettyPrint(toplevelDecl));
   }
 
