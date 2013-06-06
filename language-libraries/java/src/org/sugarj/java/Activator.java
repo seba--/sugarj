@@ -2,8 +2,8 @@ package org.sugarj.java;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
-import org.sugarj.JavaLibFactory;
-import org.sugarj.LanguageLibRegistry;
+import org.sugarj.JavaLanguage;
+import org.sugarj.BaseLanguageRegistry;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -20,7 +20,7 @@ public class Activator extends AbstractUIPlugin {
    * The constructor
    */
   public Activator() {
-    LanguageLibRegistry.getInstance().registerLanguageLib(JavaLibFactory.getInstance());
+    BaseLanguageRegistry.getInstance().registerBaseLanguage(JavaLanguage.getInstance());
   }
 
   /*

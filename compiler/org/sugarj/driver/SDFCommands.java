@@ -38,7 +38,7 @@ import org.strategoxt.stratego_gpp.box2text_string_0_1;
 import org.strategoxt.stratego_sdf.pp_sdf_box_0_0;
 import org.strategoxt.strc.pp_stratego_string_0_0;
 import org.strategoxt.tools.main_pack_sdf_0_0;
-import org.sugarj.LanguageLibFactory;
+import org.sugarj.AbstractBaseLanguage;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
@@ -89,7 +89,7 @@ public class SDFCommands {
       Collection<Path> paths, 
       ModuleKeyCache<Path> sdfCache, 
       Environment environment, 
-      LanguageLibFactory langLibFactory) throws IOException {
+      AbstractBaseLanguage baseLang) throws IOException {
     /*
      * We can include as many paths as we want here, checking the
      * adequacy of the occurring imports is done elsewhere.
@@ -99,7 +99,7 @@ public class SDFCommands {
         "-o", FileCommands.nativePath(def.getAbsolutePath())
     }));
     
-    for (File grammarFile : langLibFactory.getDefaultGrammars()) {
+    for (File grammarFile : baseLang.getDefaultGrammars()) {
       ModuleKey key = new ModuleKey(Collections.<Path, Integer>emptyMap(), grammarFile.getAbsolutePath()); 
       Path permissiveGrammar = lookupGrammarInCache(sdfCache, key);
       if (permissiveGrammar == null) {
@@ -113,7 +113,7 @@ public class SDFCommands {
     }
     
     cmd.add("-I");
-    cmd.add(FileCommands.nativePath(langLibFactory.getLibraryDirectory().getPath()));
+    cmd.add(FileCommands.nativePath(baseLang.getPluginDirectory().getPath()));
     cmd.add("-I");
     cmd.add(FileCommands.nativePath(StdLib.stdLibDir.getPath()));
     
@@ -182,9 +182,9 @@ public class SDFCommands {
     FileCommands.deleteTempFiles(tbl);
   }
   
-  public static void check(Path sdf, String module, Collection<Path> paths, ModuleKeyCache<Path> sdfCache, Environment environment, LanguageLibFactory langLibFactory) throws IOException {
+  public static void check(Path sdf, String module, Collection<Path> paths, ModuleKeyCache<Path> sdfCache, Environment environment, AbstractBaseLanguage baseLang) throws IOException {
     Path def = FileCommands.newTempFile("def");
-    packSdf(sdf, def, paths, sdfCache, environment, langLibFactory);
+    packSdf(sdf, def, paths, sdfCache, environment, baseLang);
     normalizeTable(def, module);
     FileCommands.deleteTempFiles(def);
   }
@@ -203,14 +203,14 @@ public class SDFCommands {
                               SGLR sdfParser, 
                               ModuleKeyCache<Path> sdfCache, 
                               Environment environment,
-                              LanguageLibFactory langLibFactory) throws IOException,
+                              AbstractBaseLanguage baseLang) throws IOException,
                                                           InvalidParseTableException, 
                                                           TokenExpectedException, 
                                                           SGLRException {
     ModuleKey key = getModuleKeyForGrammar(sdf, module, dependentFiles, sdfParser);
     Path tbl = lookupGrammarInCache(sdfCache, key);
     if (tbl == null) {
-      tbl = generateParseTable(key, sdf, module, environment.getIncludePath(), sdfCache, environment, langLibFactory);
+      tbl = generateParseTable(key, sdf, module, environment.getIncludePath(), sdfCache, environment, baseLang);
       tbl = cacheParseTable(sdfCache, key, tbl, environment);
     }
     
@@ -291,7 +291,7 @@ public class SDFCommands {
                                          Collection<Path> paths,
                                          ModuleKeyCache<Path> sdfCache,
                                          Environment environment,
-                                         LanguageLibFactory langLibFactory)
+                                         AbstractBaseLanguage baseLang)
       throws IOException, InvalidParseTableException {
     log.beginTask("Generating", "Generate the parse table", Log.PARSE);
     try {
@@ -300,7 +300,7 @@ public class SDFCommands {
       tblFile = FileCommands.newTempFile("tbl");
 
       Path def = FileCommands.newTempFile("def");
-      packSdf(sdf, def, paths, sdfCache, environment, langLibFactory);
+      packSdf(sdf, def, paths, sdfCache, environment, baseLang);
       sdf2Table(def, tblFile, module);
       FileCommands.deleteTempFiles(def);
       return tblFile;

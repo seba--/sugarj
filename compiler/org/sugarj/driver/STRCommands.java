@@ -25,7 +25,7 @@ import org.strategoxt.lang.Context;
 import org.strategoxt.lang.StrategoException;
 import org.strategoxt.lang.StrategoExit;
 import org.strategoxt.strj.main_strj_0_0;
-import org.sugarj.LanguageLib;
+import org.sugarj.AbstractBaseProcessor;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
@@ -68,19 +68,19 @@ public class STRCommands {
   private SGLR strParser;
   private ModuleKeyCache<Path> strCache;
   private Environment environment;
-  private LanguageLib langLib;
+  private AbstractBaseProcessor baseProcessor;
   
-  public STRCommands(SGLR strParser, ModuleKeyCache<Path> strCache, Environment environment, LanguageLib langLib) {
+  public STRCommands(SGLR strParser, ModuleKeyCache<Path> strCache, Environment environment, AbstractBaseProcessor baseProcessor) {
     this.strParser = strParser;
     this.strCache = strCache;
     this.environment = environment;
-    this.langLib = langLib;
+    this.baseProcessor = baseProcessor;
   }
 
   /**
    *  Compiles a {@code *.str} file to a single {@code *.java} file. 
    */
-  private static void strj(boolean normalize, Path str, Path out, String main, Collection<Path> paths, LanguageLib langLib) throws IOException {
+  private static void strj(boolean normalize, Path str, Path out, String main, Collection<Path> paths, AbstractBaseProcessor baseProcessor) throws IOException {
     
     /*
      * We can include as many paths as we want here, checking the
@@ -101,7 +101,7 @@ public class STRCommands {
     cmd.add("-I");
     cmd.add(StdLib.stdLibDir.getPath());
     cmd.add("-I");
-    cmd.add(langLib.getFactoryForLanguage().getLibraryDirectory().getPath());
+    cmd.add(baseProcessor.getLanguage().getPluginDirectory().getPath());
 
     
     for (Path path : paths)
@@ -130,7 +130,7 @@ public class STRCommands {
   
   
   public Path compile(Path str, String main, Collection<Path> dependentFiles) throws TokenExpectedException, BadTokenException, IOException, InvalidParseTableException, SGLRException {
-    return STRCommands.compile(str, main, dependentFiles, strParser, strCache, environment, langLib);
+    return STRCommands.compile(str, main, dependentFiles, strParser, strCache, environment, baseProcessor);
   }
   
   public static Path compile(Path str,
@@ -139,7 +139,7 @@ public class STRCommands {
                               SGLR strParser,
                               ModuleKeyCache<Path> strCache,
                               Environment environment,
-                              LanguageLib langLib) throws IOException,
+                              AbstractBaseProcessor baseProcessor) throws IOException,
                                                           InvalidParseTableException,
                                                           TokenExpectedException,
                                                           BadTokenException,
@@ -150,7 +150,7 @@ public class STRCommands {
     
     if (prog == null) {
       try {
-        prog = generateAssimilator(key, str, main, environment.getIncludePath(), langLib);
+        prog = generateAssimilator(key, str, main, environment.getIncludePath(), baseProcessor);
       } catch (StrategoException e) {
         prog = FAILED_COMPILATION_PATH;
         error = e;
@@ -170,13 +170,13 @@ public class STRCommands {
                                           Path str,
                                           String main,
                                           Collection<Path> paths,
-                                          LanguageLib langLib) throws IOException {
+                                          AbstractBaseProcessor baseProcessor) throws IOException {
     boolean success = false;
     log.beginTask("Generating", "Generate the assimilator", Log.TRANSFORM);
     try {
       Path prog = FileCommands.newTempFile("ctree");
       log.log("calling STRJ", Log.TRANSFORM);
-      strj(true, str, prog, main, paths, langLib);
+      strj(true, str, prog, main, paths, baseProcessor);
       success = FileCommands.exists(prog);
       return prog;
     } finally {
@@ -251,7 +251,7 @@ public class STRCommands {
   }
   
   public IStrategoTerm assimilate(String strategy, Path ctree, IStrategoTerm in) throws IOException {
-    return STRCommands.assimilate(strategy, ctree, in, langLib.getInterpreter());
+    return STRCommands.assimilate(strategy, ctree, in, baseProcessor.getInterpreter());
   }
 
   public static IStrategoTerm assimilate(Path ctree, IStrategoTerm in, HybridInterpreter interp) throws IOException {

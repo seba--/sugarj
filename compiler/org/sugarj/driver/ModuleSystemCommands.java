@@ -10,7 +10,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Set;
 
-import org.sugarj.LanguageLib;
+import org.sugarj.AbstractBaseProcessor;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
@@ -34,8 +34,8 @@ public class ModuleSystemCommands {
      * @return true iff a class file existed.
      * @throws IOException
      */
-    public static RelativePath importBinFile(String modulePath, Environment environment, LanguageLib langLib, Result driverResult) throws IOException {
-      RelativePath clazz = searchFile(modulePath, langLib.getFactoryForLanguage().getGeneratedFileExtension(), environment, driverResult);
+    public static RelativePath importBinFile(String modulePath, Environment environment, AbstractBaseProcessor baseProcessor, Result driverResult) throws IOException {
+      RelativePath clazz = searchFile(modulePath, baseProcessor.getLanguage().getGeneratedFileExtension(), environment, driverResult);
       if (clazz == null)
         return null;
       
@@ -127,12 +127,12 @@ public class ModuleSystemCommands {
     return locateSourceFile (FileCommands.dropExtension(path), FileCommands.getExtension(path), sourcePath);
   }
 
-  public static RelativePath locateSourceFileOrModel(String modulePath, Set<Path> sourcePath, LanguageLib langLib, Environment environment) {
-    RelativePath result = locateSourceFile(modulePath, langLib.getFactoryForLanguage().getSugarFileExtension(), sourcePath);
+  public static RelativePath locateSourceFileOrModel(String modulePath, Set<Path> sourcePath, AbstractBaseProcessor baseProcessor, Environment environment) {
+    RelativePath result = locateSourceFile(modulePath, baseProcessor.getLanguage().getSugarFileExtension(), sourcePath);
     if (result == null)
       result = searchFile(modulePath, "model", environment, null);
-    if (result == null && langLib.getFactoryForLanguage().getOriginalFileExtension() != null)
-      result = locateSourceFile(modulePath, langLib.getFactoryForLanguage().getOriginalFileExtension(), sourcePath);
+    if (result == null && baseProcessor.getLanguage().getOriginalFileExtension() != null)
+      result = locateSourceFile(modulePath, baseProcessor.getLanguage().getOriginalFileExtension(), sourcePath);
     return result;
   }
 

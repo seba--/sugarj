@@ -27,8 +27,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
-import org.sugarj.LanguageLibFactory;
-import org.sugarj.LanguageLibRegistry;
+import org.sugarj.AbstractBaseLanguage;
+import org.sugarj.BaseLanguageRegistry;
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
@@ -53,11 +53,11 @@ public class Builder extends IncrementalProjectBuilder {
   private class BuildInput {
     public final IResource resource;
     public final RelativePath sourceFile;
-    public final LanguageLibFactory langLibFactory;
-    public BuildInput(IResource resource, RelativePath path, LanguageLibFactory langLibFactory) {
+    public final AbstractBaseLanguage baseLang;
+    public BuildInput(IResource resource, RelativePath path, AbstractBaseLanguage baseLang) {
       this.resource = resource; 
       this.sourceFile = path;
-      this.langLibFactory = langLibFactory;
+      this.baseLang = baseLang;
     }
   }
 
@@ -102,32 +102,12 @@ public class Builder extends IncrementalProjectBuilder {
   private void incrementalBuild(IResourceDelta delta, IProgressMonitor monitor) {
     boolean rebuild = true;
 
-//    final LanguageLibRegistry libReg = LanguageLibRegistry.getInstance();
-//    try {
-//      class ShouldRebuildResourceDeltaVisitor implements IResourceDeltaVisitor {
-//        boolean rebuild = false;
-//        public boolean visit(IResourceDelta delta) {
-//          if (libReg.isRegistered(delta.getFullPath().getFileExtension()))
-//            rebuild = true;
-//          
-//          // continue rebuild has not been required so far
-//          return !rebuild;
-//        }
-//      };
-//      
-//      ShouldRebuildResourceDeltaVisitor visitor = new ShouldRebuildResourceDeltaVisitor();
-//      delta.accept(visitor);
-//      rebuild = visitor.rebuild;
-//    } catch (CoreException e) {
-//      e.printStackTrace();
-//    }
-    
     if (rebuild)
       fullBuild(monitor);
   }
 
   private void fullBuild(IProgressMonitor monitor) {
-    final LanguageLibRegistry libReg = LanguageLibRegistry.getInstance();
+    final BaseLanguageRegistry languageReg = BaseLanguageRegistry.getInstance();
     final LinkedList<BuildInput> resources = new LinkedList<BuildInput>();
 
     try {
@@ -143,7 +123,7 @@ public class Builder extends IncrementalProjectBuilder {
                environment.getIncludePath().contains(new RelativePath(root, relPath.toString()))))
             return false;
           
-          if (libReg.isRegistered(resource.getFileExtension())) {
+          if (languageReg.isRegistered(resource.getFileExtension())) {
             String path = getProject().getLocation().makeAbsolute() + "/" + relPath;
             final RelativePath sourceFile = ModuleSystemCommands.locateSourceFile(
                     path.toString(),
@@ -154,7 +134,7 @@ public class Builder extends IncrementalProjectBuilder {
               return false;
             }
               
-            resources.addFirst(new BuildInput(resource, sourceFile, libReg.getLanguageLib(resource.getFileExtension())));
+            resources.addFirst(new BuildInput(resource, sourceFile, languageReg.getBaseLanguage(resource.getFileExtension())));
           }
           return true;
         }
@@ -197,7 +177,7 @@ public class Builder extends IncrementalProjectBuilder {
             RelativePath depFile = new RelativePath(environment.getParseBin(), FileCommands.dropExtension(input.sourceFile.getRelativePath()) + ".dep");
             Result res = Result.readDependencyFile(depFile);
             if (res == null || !res.isUpToDate(input.sourceFile, environment))
-              res = Driver.run(input.sourceFile, environment, monitor, input.langLibFactory);
+              res = Driver.run(input.sourceFile, environment, monitor, input.baseLang);
             
             IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
             for (IWorkbenchWindow workbenchWindow : workbenchWindows)

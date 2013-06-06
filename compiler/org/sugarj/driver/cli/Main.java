@@ -6,8 +6,8 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.sugarj.LanguageLibFactory;
-import org.sugarj.LanguageLibRegistry;
+import org.sugarj.AbstractBaseLanguage;
+import org.sugarj.BaseLanguageRegistry;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.Log;
@@ -45,7 +45,7 @@ public class Main {
       IProgressMonitor monitor = new NullProgressMonitor();
       
       for (final RelativePath sourceFile : allInputFiles) {
-        LanguageLibFactory lang = LanguageLibRegistry.getInstance().getLanguageLib(FileCommands.getExtension(sourceFile));
+        AbstractBaseLanguage lang = BaseLanguageRegistry.getInstance().getBaseLanguage(FileCommands.getExtension(sourceFile));
         if (null == lang)
           throw new RuntimeException("Unknown file extension \"" + FileCommands.getExtension(sourceFile) + "\".");
         

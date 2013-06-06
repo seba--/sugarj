@@ -22,7 +22,7 @@ import org.strategoxt.imp.runtime.dynamicloading.Descriptor;
 import org.strategoxt.imp.runtime.dynamicloading.DescriptorFactory;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.imp.runtime.parser.SGLRParseController;
-import org.sugarj.LanguageLibRegistry;
+import org.sugarj.BaseLanguageRegistry;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.StringCommands;
@@ -213,7 +213,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
     } catch (IOException e) {
       return descriptorStream;
     }
-    List<String> exts = LanguageLibRegistry.getInstance().getRegisteredFileExtensions();
+    List<String> exts = BaseLanguageRegistry.getInstance().getRegisteredFileExtensions();
     for (int i = 0; i < exts.size(); i++)
       exts.set(i, "\"" + exts.get(i) + "\"");
     String extsString = StringCommands.printListSeparated(exts, ",");

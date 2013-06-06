@@ -9,7 +9,7 @@ import org.spoofax.jsglr_layout.shared.BadTokenException;
 import org.spoofax.jsglr_layout.shared.SGLRException;
 import org.spoofax.jsglr_layout.shared.TokenExpectedException;
 import org.strategoxt.lang.StrategoException;
-import org.sugarj.LanguageLib;
+import org.sugarj.AbstractBaseProcessor;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
@@ -23,14 +23,14 @@ import org.sugarj.util.Pair;
  */
 public class ImportCommands {
   
-  private LanguageLib langLib;
+  private AbstractBaseProcessor baseProcessor;
   private Environment environment;
   private Driver driver;
   private Result driverResult;
   private STRCommands str; 
   
-  public ImportCommands(LanguageLib langLib, Environment environment, Driver driver, Result driverResult, STRCommands str) {
-    this.langLib = langLib;
+  public ImportCommands(AbstractBaseProcessor baseProcessor, Environment environment, Driver driver, Result driverResult, STRCommands str) {
+    this.baseProcessor = baseProcessor;
     this.environment = environment;
     this.driver = driver;
     this.driverResult = driverResult;
@@ -59,7 +59,7 @@ public class ImportCommands {
       return null;
     }
     
-    String path = langLib.getModulePath(term);
+    String path = baseProcessor.getModulePath(term);
     if (path.contains("/")) {
       boolean isCircularImport = driver.prepareImport(toplevelDecl, path);
       if (isCircularImport)
@@ -95,7 +95,7 @@ public class ImportCommands {
       // something's wrong
       String name;
       try {
-        name = langLib.getModulePath(model);
+        name = baseProcessor.getModulePath(model);
       } catch (Exception e) {
         name = model.toString();
       }
@@ -106,7 +106,7 @@ public class ImportCommands {
       // something's wrong
       String name;
       try {
-        name = langLib.getModulePath(transformation);
+        name = baseProcessor.getModulePath(transformation);
       } catch (Exception e) {
         name = transformation.toString();
       }
@@ -194,13 +194,13 @@ public class ImportCommands {
    * Retrieves the right-most model in the given transformation application and returns the model's name.
    * 
    * @param appl
-   * @param langLib
+   * @param base processor
    * @return
    */
-  public static String getTransformationApplicationModelPath(IStrategoTerm appl, LanguageLib langLib) {
+  public static String getTransformationApplicationModelPath(IStrategoTerm appl, AbstractBaseProcessor baseProcessor) {
     if (ATermCommands.isApplication(appl, "TransApp"))
-      return getTransformationApplicationModelPath(appl.getSubterm(1), langLib);
-    return langLib.getModulePath(appl);
+      return getTransformationApplicationModelPath(appl.getSubterm(1), baseProcessor);
+    return baseProcessor.getModulePath(appl);
   }
 
   /**

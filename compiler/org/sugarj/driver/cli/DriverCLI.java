@@ -381,8 +381,8 @@ public class DriverCLI {
           level |= Log.TRANSFORM;
         else if ("IMPORT".equals(option))
           level |= Log.IMPORT;
-        else if ("LANGLIB".equals(option))
-          level |= Log.LANGLIB;
+        else if ("BASELANG".equals(option))
+          level |= Log.BASELANG;
         else if ("CACHING".equals(option))
           level |= Log.CACHING;
         else if ("DETAIL".equals(option))
@@ -433,8 +433,8 @@ public class DriverCLI {
       environment.setNoChecking(true);
     
     if (line.hasOption("language")) {
-      String[] libNames = line.getOptionValues("language");
-      activateLanguageLibs(libNames);
+      String[] langNames = line.getOptionValues("language");
+      activateBaseLanguage(langNames);
     }
   
     String[] sources = line.getArgs();
@@ -444,14 +444,14 @@ public class DriverCLI {
     return sources;
   }
 
-  private static void activateLanguageLibs(String[] libNames) {
-    for (String libName : libNames) {
-      String clName = "org.sugarj." + libName.toLowerCase() + ".Activator";
+  private static void activateBaseLanguage(String[] langNames) {
+    for (String langName : langNames) {
+      String clName = "org.sugarj." + langName.toLowerCase() + ".Activator";
       try {
         Class<?> cl = DriverCLI.class.getClassLoader().loadClass(clName);
         cl.newInstance();
       } catch (Exception e) {
-        Log.log.logErr("Could not load language plugin " + libName + ": " + e.getMessage(), Log.ALWAYS);
+        Log.log.logErr("Could not load base language " + langName + ": " + e.getMessage(), Log.ALWAYS);
       }
     }
   }
@@ -468,7 +468,7 @@ public class DriverCLI {
         "v", 
         "verbose", 
         true, 
-        "Verbosity. Values are SILENT, CORE, PARSE, TRANSFORM, IMPORT, LANGLIB, CACHING, DETAIL, and DEBUG. Use multiple times to activate verbosity for multiple features.");
+        "Verbosity. Values are SILENT, CORE, PARSE, TRANSFORM, IMPORT, BASELANG, CACHING, DETAIL, and DEBUG. Use multiple times to activate verbosity for multiple features.");
   
     options.addOption(
         null, 
@@ -558,7 +558,7 @@ public class DriverCLI {
         "l",
         "language",
         true,
-        "Specify a language library to activate.");
+        "Specify a base language to activate.");
     
     return options;
   }

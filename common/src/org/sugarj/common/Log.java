@@ -19,10 +19,10 @@ public class Log {
   public static final int PARSE = 1 << 1;
   public static final int TRANSFORM = 1 << 2;
   public static final int IMPORT = 1 << 3;
-  public static final int LANGLIB = 1 << 4;
+  public static final int BASELANG = 1 << 4;
   public static final int CACHING = 1 << 5;
   public static final int DETAIL = 1 << 6;
-  public static final int ALWAYS = CORE | PARSE | TRANSFORM | IMPORT | LANGLIB | CACHING | DETAIL;
+  public static final int ALWAYS = CORE | PARSE | TRANSFORM | IMPORT | BASELANG | CACHING | DETAIL;
   
   public static final Log log = new Log();
   

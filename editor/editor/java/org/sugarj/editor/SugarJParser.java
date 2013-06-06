@@ -32,8 +32,8 @@ import org.spoofax.jsglr_layout.shared.SGLRException;
 import org.spoofax.terms.attachments.ParentAttachment;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.imp.runtime.services.ContentProposerSemantic;
-import org.sugarj.LanguageLibFactory;
-import org.sugarj.LanguageLibRegistry;
+import org.sugarj.AbstractBaseLanguage;
+import org.sugarj.BaseLanguageRegistry;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.Environment;
@@ -92,7 +92,7 @@ public class SugarJParser extends JSGLRI {
       environment = SugarJParseController.makeProjectEnvironment(getController().getProject().getRawProject());
     assert environment != null;
     
-    if (!LanguageLibRegistry.getInstance().isRegistered(FileCommands.getExtension(filename))) {
+    if (!BaseLanguageRegistry.getInstance().isRegistered(FileCommands.getExtension(filename))) {
       Log.log.logErr("Unknown source-file extension " + FileCommands.getExtension(filename), Log.ALWAYS);
       return parseFailureResult(filename).getSugaredSyntaxTree();
     }
@@ -131,7 +131,7 @@ public class SugarJParser extends JSGLRI {
     final RelativePath sourceFile = ModuleSystemCommands.locateSourceFile(filename, environment.getSourcePath());
     assert sourceFile != null;
     
-    final LanguageLibFactory factory = LanguageLibRegistry.getInstance().getLanguageLib(FileCommands.getExtension(filename));
+    final AbstractBaseLanguage factory = BaseLanguageRegistry.getInstance().getBaseLanguage(FileCommands.getExtension(filename));
 
     SugarJParser.setPending(filename, true);
     
@@ -164,7 +164,7 @@ public class SugarJParser extends JSGLRI {
     parseJob.schedule();
   }
   
-  private Result runParser(String input, RelativePath sourceFile, LanguageLibFactory factory, IProgressMonitor monitor) throws InterruptedException {
+  private Result runParser(String input, RelativePath sourceFile, AbstractBaseLanguage factory, IProgressMonitor monitor) throws InterruptedException {
     CommandExecution.SILENT_EXECUTION = false;
     CommandExecution.SUB_SILENT_EXECUTION = false;
     CommandExecution.FULL_COMMAND_LINE = true;
