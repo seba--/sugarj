@@ -47,7 +47,7 @@ public class HaskellLib extends LanguageLib {
   @Override
   public String getGeneratedSource() {
     return moduleHeader + "\n"
-         + StringCommands.printListSeparated(imports, "\n")
+         + StringCommands.printListSeparated(imports, "\n") + "\n"
          + StringCommands.printListSeparated(body, "\n");
   }
 
@@ -156,7 +156,6 @@ public class HaskellLib extends LanguageLib {
         generatedFiles.add(new AbsolutePath(noExtPath + ".o"));
     }
     
-    cmds.add("-i");
     if (!includePaths.isEmpty()) {
       StringBuilder searchPath = new StringBuilder("-i");
       for (Path path : includePaths)
@@ -166,6 +165,7 @@ public class HaskellLib extends LanguageLib {
       cmds.add(searchPath.toString());
     }
     
+    String s = StringCommands.printListSeparated(cmds, " ");
     new CommandExecution(false).execute(cmds.toArray(new String[cmds.size()]));
     
     return generatedFiles;

@@ -39,7 +39,7 @@ public class FomegaLib extends LanguageLib {
   @Override
   public String getGeneratedSource() {
     return moduleHeader + "\n"
-         + StringCommands.printListSeparated(imports, "\n")
+         + StringCommands.printListSeparated(imports, "\n") + "\n"
          + StringCommands.printListSeparated(body, "\n");
   }
 
