@@ -11,7 +11,7 @@ desugarings
 
 rules
   lift-to-top = 
-    (?HaskellBody(_) + ?SugarBody(_) + ?EditorBody(_));
+    (?HaskellBody(_) + ?ExtensionBody(_));
     rules( CollectedLiftToTop := [] );
     bottomup(try(lift-to-top')) => code;
     CollectedLiftToTop => lifted;
@@ -47,19 +47,19 @@ rules
     end
 
   concat-sugar-body =
-    partition(?SugarBody(<id>)) => (xs, ys);
+    partition(?ExtensionBody(<id>)) => (xs, ys);
     if <?[]> xs
       then !ys
       else <concat> xs => xs';
-           ![SugarBody(xs')|ys]
+           ![ExtensionBody(xs')|ys]
     end
 
   concat-editor-body =
-    partition(?EditorBody(<id>)) => (xs, ys);
+    partition(?ExtensionBody(<id>)) => (xs, ys);
     if <?[]> xs
       then !ys
       else <concat> xs => xs';
-           ![EditorBody(xs')|ys]
+           ![ExtensionBody(xs')|ys]
     end
 
 

@@ -12,7 +12,7 @@ desugarings
 rules
   ebnf-metasyntax :
     EBNFDecl(name, rulez) ->
-    SugarBody([grammar-elem(context-free-syntax(<concat> [starts, prods])), grammar-elem(prios)])
+    ExtensionBody([grammar-elem(context-free-syntax(<concat> [starts, prods])), grammar-elem(prios)])
   where <ebnf-metasyntax-name> name => nt;
         <map(ebnf-to-sdf(|nt))> rulez => prods;
         ebnf-start-prods(|name, nt) => starts;

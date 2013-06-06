@@ -20,8 +20,8 @@ context-free syntax
   HaskellString -> EBNFTerminal
   HaskellConid -> EBNFNonterminal
 
-
 desugarings
+
   desugar-ebnf
 
 rules

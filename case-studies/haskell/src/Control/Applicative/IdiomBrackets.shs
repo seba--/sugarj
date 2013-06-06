@@ -5,6 +5,7 @@ import org.sugarj.languages.Haskell
 import Meta.Concrete.Haskell
 import Meta.LiftToTop
 
+
 context-free syntax
   "(|" PurePart EffectfulPart* "|)" -> HaskellExp {cons("IdiomBrackets")}
   "(|" HaskellExp HaskellQop HaskellExp "|)" -> HaskellExp {cons("InfixIdiomBrackets")}
