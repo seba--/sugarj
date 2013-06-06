@@ -14,15 +14,9 @@ public class FomegaSourceFileContent extends SourceFileContent {
   private List<SourceImport> checkedImports = new LinkedList<SourceImport>();
   private List<String> bodyDecls = new LinkedList<String>();
  
-  private boolean hasNonhaskellDecl;
-  
   @Override
   public boolean isEmpty() {
-    return bodyDecls.isEmpty() && hasNonhaskellDecl;
-  }
-  
-  public void setHasNonfomegaDecl(boolean hasNonhaskellDecl) {
-    this.hasNonhaskellDecl = hasNonhaskellDecl;
+    return bodyDecls.isEmpty();
   }
   
   public FomegaSourceFileContent() {

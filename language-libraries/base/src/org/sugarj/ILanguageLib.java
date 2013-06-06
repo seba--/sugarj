@@ -1,6 +1,5 @@
 package org.sugarj;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
@@ -19,26 +18,11 @@ public interface ILanguageLib {
 
   public abstract LanguageLibFactory getFactoryForLanguage();
 
-  public abstract File getInitGrammar();
-  public abstract String getInitGrammarModuleName();
-  public abstract File getInitTrans();
-  public abstract String getInitTransModuleName();
-  public abstract File getInitEditor();
-  public abstract String getInitEditorModuleName();
-
-  public abstract File getLibraryDirectory();
-
   public abstract void setupSourceFile(RelativePath sourceFile, Environment environment);
   public abstract SourceFileContent getSource();
   public abstract Path getOutFile();
   public abstract Set<RelativePath> getGeneratedFiles();
   public abstract String getRelativeNamespace();
-
-  public abstract boolean isNamespaceDec(IStrategoTerm decl);
-  public abstract boolean isLanguageSpecificDec(IStrategoTerm decl);
-  public abstract boolean isExtensionDec(IStrategoTerm decl);
-  public abstract boolean isImportDec(IStrategoTerm decl);
-  public abstract boolean isPlainDec(IStrategoTerm decl);
 
   public abstract void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativePath sourceFile, RelativePath sourceFileFromResult) throws IOException;
   public abstract void processLanguageSpecific(IStrategoTerm toplevelDecl, Environment environment) throws IOException;
@@ -46,8 +30,8 @@ public interface ILanguageLib {
 
   public abstract void addImportedModule(IStrategoTerm toplevelDecl, boolean checked) throws IOException;
   public abstract String getImportedModulePath(IStrategoTerm decl);
+
   public abstract boolean isModuleExternallyResolvable(String relModulePath);
 
   public abstract String getExtensionName(IStrategoTerm decl) throws IOException;
-  public abstract IStrategoTerm getExtensionBody(IStrategoTerm decl);
 }

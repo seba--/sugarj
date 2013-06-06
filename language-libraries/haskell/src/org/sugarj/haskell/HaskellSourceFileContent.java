@@ -13,15 +13,9 @@ public class HaskellSourceFileContent extends SourceFileContent {
   private List<SourceImport> checkedImports = new LinkedList<SourceImport>();
   private List<String> bodyDecls = new LinkedList<String>();
  
-  private boolean hasNonhaskellDecl;
-  
   @Override
   public boolean isEmpty() {
-    return bodyDecls.isEmpty() && hasNonhaskellDecl;
-  }
-  
-  public void setHasNonhaskellDecl(boolean hasNonhaskellDecl) {
-    this.hasNonhaskellDecl = hasNonhaskellDecl;
+    return bodyDecls.isEmpty();
   }
   
   public HaskellSourceFileContent() {

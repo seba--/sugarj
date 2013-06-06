@@ -1,11 +1,7 @@
 package org.sugarj;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -13,27 +9,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.runtime.FileLocator;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.HybridInterpreter;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
-import org.sugarj.common.Log;
 import org.sugarj.common.StringCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.languagelib.SourceFileContent;
-import org.sugarj.stdlib.StdLib;
 import org.sugarj.util.Pair;
 
 public abstract class LanguageLib implements ILanguageLib, Serializable {
 
   private static final long serialVersionUID = -6712835686318143995L;
 
-  private transient File libDir;
-  
   protected HybridInterpreter interp;
 
   public void setInterpreter(HybridInterpreter interp) {
@@ -44,77 +35,7 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
     return interp;
   }
 
-  public List<File> getDefaultGrammars() {
-    return StdLib.stdGrammars();
-  }
-  
-  public final File getLibraryDirectory() {
-    if (libDir == null) { // set up directories first
-      String thisClassPath = this.getClass().getName().replace(".", "/") + ".class";
-      URL thisClassURL = this.getClass().getClassLoader().getResource(thisClassPath);
-      
-      if (thisClassURL.getProtocol().equals("bundleresource"))
-        try {
-          thisClassURL = FileLocator.resolve(thisClassURL);
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      
-      String classPath = thisClassURL.getPath();
-      String binPath = classPath.substring(0, classPath.length() - thisClassPath.length());
-      
-      libDir = new File(binPath);
-    }
-    
-    return libDir;
-  }
-
-  private transient File libTmpDir;
-  protected File ensureFile(String resource) {
-    File f = new File(getLibraryDirectory().getPath() + File.separator + resource);
-
-    if (f.exists())
-      return f;
-
-    if (libTmpDir == null) {
-      try {
-        libTmpDir = File.createTempFile(FileCommands.fileName(getLibraryDirectory().getAbsolutePath()), "");
-        libTmpDir.delete();
-        libTmpDir.mkdir();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
-
-    f = new File(libTmpDir.getPath() + "/" + resource);
-    f.getParentFile().mkdirs();
-
-    try {
-      InputStream in = this.getClass().getClassLoader().getResourceAsStream(resource);
-      if (in == null) {
-        Log.log.logErr("Could not load resource " + resource, Log.ALWAYS);
-        return new File(getLibraryDirectory().getPath() + File.separator + resource);
-      }
-
-      FileOutputStream fos = new FileOutputStream(f);
-      int len = -1;
-      byte[] bs = new byte[256];
-      while ((len = in.read(bs)) >= 0)
-        fos.write(bs, 0, len);
-      fos.close();
-      in.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-
-    return f;
-  }
-  
-  public          boolean isModelDec(IStrategoTerm decl) { return false; }
-	public          boolean isTransformationDec(IStrategoTerm decl) { return false; }
-	public          boolean isTransformationImportDec(IStrategoTerm decl) { return false; }
-	
-	public String getRelativeNamespaceSep() {
+  public String getRelativeNamespaceSep() {
 		String rel = getRelativeNamespace();
 		if (rel == null || rel.isEmpty())
 			return "";
@@ -194,15 +115,9 @@ public abstract class LanguageLib implements ILanguageLib, Serializable {
 	}
 
   public          String getImportLocalName(IStrategoTerm decl) { return null; }
-  public          boolean isTransformationApplication(IStrategoTerm decl) { return false; }
-  public          IStrategoTerm getTransformationApplication(IStrategoTerm decl) { return null; }
   public          String getModulePath(IStrategoTerm decl) { return null; }
   public          IStrategoTerm reconstructImport(String modulePath, IStrategoTerm original) { return null; }
 	
-	public          String getModelName(IStrategoTerm decl) throws IOException { return null; }
-	public          String getTransformationName(IStrategoTerm decl) throws IOException { return null; }
-  public          IStrategoTerm getTransformationBody(IStrategoTerm decl) { return null; }
-  
 	protected void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IErrorLogger errorLog) {
 	  if (errorLog != null)
 	    errorLog.logError(msg);

@@ -310,13 +310,13 @@ public class Result implements IErrorLogger {
     return sugaredSyntaxTree;
   }
   
-  void delegateCompilation(Result delegate, Path compileFile, SourceFileContent fileContent, Set<RelativePath> generatedFiles) {
+  void delegateCompilation(Result delegate, Path compileFile, SourceFileContent fileContent, boolean hasNonBaseDec, Set<RelativePath> generatedFiles) {
     delegate.availableGeneratedFiles.putAll(availableGeneratedFiles);
     if (!generatedFiles.isEmpty())
       delegate.availableGeneratedFiles.put(sourceFile, generatedFiles);
     
     delegate.deferredSourceFiles.putAll(deferredSourceFiles);
-    if (!fileContent.isEmpty())
+    if (!fileContent.isEmpty() || hasNonBaseDec)
       delegate.deferredSourceFiles.put(sourceFile, Pair.create(compileFile, fileContent.getCode(compileFile)));
   }
   

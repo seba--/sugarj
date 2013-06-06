@@ -101,7 +101,7 @@ public class STRCommands {
     cmd.add("-I");
     cmd.add(StdLib.stdLibDir.getPath());
     cmd.add("-I");
-    cmd.add(langLib.getLibraryDirectory().getPath());
+    cmd.add(langLib.getFactoryForLanguage().getLibraryDirectory().getPath());
 
     
     for (Path path : paths)

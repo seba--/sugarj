@@ -5,8 +5,8 @@ import static org.sugarj.common.ATermCommands.getApplicationSubterm;
 import static org.sugarj.common.ATermCommands.isApplication;
 import static org.sugarj.common.Log.log;
 import static org.sugarj.driver.SDFCommands.extractSDF;
-import static org.sugarj.driver.STRCommands.extractSTR;
 import static org.sugarj.driver.STRCommands.extractEditor;
+import static org.sugarj.driver.STRCommands.extractSTR;
 
 import java.io.EOFException;
 import java.io.File;
@@ -132,11 +132,14 @@ public class Driver{
   
   private boolean inDesugaredDeclList;
   
+  private LanguageLibFactory langLibFactory;
   private LanguageLib langLib;
+  private boolean definesNonBaseDec = false;
   
   
   public Driver(Environment env, LanguageLibFactory langLibFactory, List<Driver> currentlyProcessing) {
     this.environment = env;
+    this.langLibFactory = langLibFactory;
     this.langLib = langLibFactory.createLanguageLibrary();
     this.currentlyProcessing = currentlyProcessing;
     this.driverResult = new Result(env.doGenerateFiles() ? null : env.getParseBin());
@@ -297,26 +300,26 @@ public class Driver{
   
   private void init(ToplevelDeclarationProvider declProvider, RelativePath sourceFile, IProgressMonitor monitor) throws FileNotFoundException, IOException, InvalidParseTableException {
     this.monitor = monitor;
-    environment.getIncludePath().add(new AbsolutePath(langLib.getLibraryDirectory().getAbsolutePath()));
+    environment.getIncludePath().add(new AbsolutePath(langLibFactory.getLibraryDirectory().getAbsolutePath()));
   
     depOutFile = null;
   
     this.sourceFile = sourceFile;
     this.declProvider = declProvider;
     
-    currentGrammarSDF = new AbsolutePath(langLib.getInitGrammar().getPath());
-    currentGrammarModule = langLib.getInitGrammarModuleName();
+    currentGrammarSDF = new AbsolutePath(langLibFactory.getInitGrammar().getPath());
+    currentGrammarModule = langLibFactory.getInitGrammarModuleName();
     
-    currentTransSTR = new AbsolutePath(langLib.getInitTrans().getPath());
-    currentTransModule = langLib.getInitTransModuleName();
+    currentTransSTR = new AbsolutePath(langLibFactory.getInitTrans().getPath());
+    currentTransModule = langLibFactory.getInitTransModuleName();
     
     // list of imports that contain SDF extensions
     availableSDFImports = new ArrayList<String>();    
-    availableSDFImports.add(langLib.getInitGrammarModuleName());
+    availableSDFImports.add(langLibFactory.getInitGrammarModuleName());
   
     // list of imports that contain Stratego extensions
     availableSTRImports = new ArrayList<String>();
-    availableSTRImports.add(langLib.getInitTransModuleName());
+    availableSTRImports.add(langLibFactory.getInitTransModuleName());
   
     sdfParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.sdfTbl.getPath()));
     strParser = new SGLR(new TreeBuilder(), ATermCommands.parseTableManager.loadFromFile(StdLib.strategoTbl.getPath()));
@@ -404,7 +407,7 @@ public class Driver{
             break;
           }
         if (delegate != null)
-          driverResult.delegateCompilation(delegate, langLib.getOutFile(), langLib.getSource(), langLib.getGeneratedFiles());
+          driverResult.delegateCompilation(delegate, langLib.getOutFile(), langLib.getSource(), definesNonBaseDec, langLib.getGeneratedFiles());
         else if (!dependsOnModel)
           throw new IllegalStateException("Could not delegate compilation of circular dependency to other compiler instance.");
       }
@@ -459,25 +462,25 @@ public class Driver{
 
   private void processToplevelDeclaration(IStrategoTerm toplevelDecl)
       throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException {
-    if (langLib.isNamespaceDec(toplevelDecl))
+    if (langLibFactory.isNamespaceDec(toplevelDecl))
       processNamespaceDec(toplevelDecl);
     else {
       try {
-        if (langLib.isImportDec(toplevelDecl) || langLib.isTransformationApplication(toplevelDecl)) {
+        if (langLibFactory.isImportDec(toplevelDecl) || langLibFactory.isTransformationApplication(toplevelDecl)) {
           if (inDesugaredDeclList || !environment.isAtomicImportParsing())
             processImportDec(toplevelDecl);
           else 
             processImportDecs(toplevelDecl);
         }
-        else if (langLib.isLanguageSpecificDec(toplevelDecl))
+        else if (langLibFactory.isLanguageSpecificDec(toplevelDecl))
           processLanguageDec(toplevelDecl);
-        else if (langLib.isExtensionDec(toplevelDecl))
+        else if (langLibFactory.isExtensionDec(toplevelDecl))
           processExtensionDec(toplevelDecl);
-        else if (langLib.isPlainDec(toplevelDecl))   // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
+        else if (langLibFactory.isPlainDec(toplevelDecl))   // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
           processPlainDec(toplevelDecl);
-        else if (langLib.isTransformationDec(toplevelDecl))
+        else if (langLibFactory.isTransformationDec(toplevelDecl))
           processTransformationDec(toplevelDecl);
-        else if (langLib.isModelDec(toplevelDecl))
+        else if (langLibFactory.isModelDec(toplevelDecl))
           processModelDec(toplevelDecl);
         else if (ATermCommands.isList(toplevelDecl)) {
           /* 
@@ -546,6 +549,8 @@ public class Driver{
   private void processPlainDec(IStrategoTerm toplevelDecl) throws IOException {
     log.beginTask("processing", "PROCESS plain declaration.", Log.CORE);
     try {
+      definesNonBaseDec = true;
+      
       if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
         sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
 
@@ -585,7 +590,7 @@ public class Driver{
   
   public Pair<IStrategoTerm, Integer> currentParse(String remainingInput, ITreeBuilder treeBuilder, boolean recovery) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
     
-    currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfCache, environment, langLib);
+    currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfCache, environment, langLibFactory);
 
     ParseTable table = ATermCommands.parseTableManager.loadFromFile(currentGrammarTBL.getAbsolutePath());
     
@@ -691,7 +696,7 @@ public class Driver{
         log.endSilent(); 
       }
     
-      if (term != null && (langLib.isImportDec(term) || langLib.isTransformationApplication(term)))
+      if (term != null && (langLibFactory.isImportDec(term) || langLibFactory.isTransformationApplication(term)))
         pendingImports.add(term);
       else {
         declProvider.retract(term);
@@ -715,7 +720,7 @@ public class Driver{
     try {
       String modulePath;
       boolean isCircularImport;
-      if (!langLib.isTransformationApplication(toplevelDecl)) {
+      if (!langLibFactory.isTransformationApplication(toplevelDecl)) {
         modulePath = langLib.getImportedModulePath(toplevelDecl);
         
         isCircularImport = prepareImport(toplevelDecl, modulePath);
@@ -725,7 +730,7 @@ public class Driver{
         if (localModelName != null)
           environment.getRenamings().add(0, new Renaming(Collections.<String>emptyList(), localModelName, FileCommands.fileName(modulePath)));
       } else {
-        IStrategoTerm appl = langLib.getTransformationApplication(toplevelDecl);
+        IStrategoTerm appl = langLibFactory.getTransformationApplication(toplevelDecl);
         IStrategoTerm model = getApplicationSubterm(appl, "TransApp", 1);
         IStrategoTerm transformation = getApplicationSubterm(appl, "TransApp", 0);
         
@@ -950,6 +955,8 @@ public class Driver{
   private void processExtensionDec(IStrategoTerm toplevelDecl) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
     log.beginTask("processing", "PROCESS sugar declaration.", Log.CORE);
     try {
+      definesNonBaseDec = true;
+      
       if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
         sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
 
@@ -972,7 +979,7 @@ public class Driver{
       
       // this is a list of SDF and Stratego statements
       
-      IStrategoTerm extensionBody = langLib.getExtensionBody(toplevelDecl);
+      IStrategoTerm extensionBody = langLibFactory.getExtensionBody(toplevelDecl);
 
       IStrategoTerm sdfExtract = fixSDF(extractSDF(extensionBody), langLib.getInterpreter());
       IStrategoTerm strExtract = extractSTR(extensionBody);
@@ -1037,15 +1044,17 @@ public class Driver{
   private void processTransformationDec(IStrategoTerm toplevelDecl) throws IOException {
     log.beginTask("processing", "PROCESS transformation declaration.", Log.CORE);
     try {
+      definesNonBaseDec = true;
+      
       if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
         sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
 
-      String extName = langLib.getTransformationName(toplevelDecl);
+      String extName = langLibFactory.getTransformationName(toplevelDecl);
       String fullExtName = getFullRenamedDeclarationName(extName);
       checkModuleName(extName);
       
       Path strExtension = environment.createOutPath(langLib.getRelativeNamespaceSep() + extName + ".str");
-      IStrategoTerm transBody = langLib.getTransformationBody(toplevelDecl);
+      IStrategoTerm transBody = langLibFactory.getTransformationBody(toplevelDecl);
       if (isApplication(transBody, "TransformationDef")) 
         transBody = ATermCommands.factory.makeListCons(ATermCommands.makeAppl("Rules", "Rules", 1, transBody.getSubterm(0)), (IStrategoList) transBody.getSubterm(1));
       
@@ -1101,10 +1110,12 @@ public class Driver{
   private void processModelDec(IStrategoTerm toplevelDecl) throws IOException {
     log.beginTask("processing", "PROCESS model declaration.", Log.CORE);
     try {
+      definesNonBaseDec = true;
+      
       if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
         sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
   
-      String modelName = langLib.getModelName(toplevelDecl);
+      String modelName = langLibFactory.getModelName(toplevelDecl);
       String fullModelName = getFullRenamedDeclarationName(modelName);
       checkModuleName(modelName);
   
@@ -1163,7 +1174,7 @@ public class Driver{
     log.beginTask("checking grammar", "CHECK current grammar", Log.CORE);
     
     try {
-      SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfCache, environment, langLib);
+      SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfCache, environment, langLibFactory);
     } finally {
       log.endTask();
     }
@@ -1190,7 +1201,8 @@ public class Driver{
   }
 
   private void initEditorServices() throws IOException, TokenExpectedException, SGLRException, InterruptedException {
-    IStrategoTerm initEditor = (IStrategoTerm) editorServicesParser.parse(FileCommands.readFileAsString(langLib.getInitEditor()), langLib.getInitEditor().getPath(), "Module");
+    File editorFile = langLibFactory.getInitEditor();
+    IStrategoTerm initEditor = (IStrategoTerm) editorServicesParser.parse(FileCommands.readFileAsString(editorFile), editorFile.getPath(), "Module");
 
     IStrategoTerm services = ATermCommands.getApplicationSubterm(initEditor, "Module", 2);
     
@@ -1418,8 +1430,8 @@ public class Driver{
     Collections.sort(list, new Comparator<IStrategoTerm>() {
       @Override
       public int compare(IStrategoTerm o1, IStrategoTerm o2) {
-        boolean imp1 = langLib.isImportDec(o1);
-        boolean imp2 = langLib.isImportDec(o2);
+        boolean imp1 = langLibFactory.isImportDec(o1);
+        boolean imp2 = langLibFactory.isImportDec(o2);
         if (imp1 && imp2 || !imp1 && !imp2)
           return 0;
         return imp1 ? -1 : 1;
