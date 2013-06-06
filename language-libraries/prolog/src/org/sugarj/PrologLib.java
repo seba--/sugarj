@@ -8,9 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.lang.Context;
@@ -20,20 +19,18 @@ import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.Log;
+import org.sugarj.common.StringCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.languagelib.SourceFileContent;
-import org.sugarj.prolog.PrologSourceFileContent;
-import org.sugarj.prolog.PrologSourceFileContent.PrologModuleImport;
 
 public class PrologLib extends LanguageLib implements Serializable {
   private static final long serialVersionUID = 6271882490466636509L;
 
-  private Set<RelativePath> generatedFiles = new HashSet<RelativePath>();
+  private String moduleHeader;
+  private List<String> imports = new LinkedList<String>();
+  private List<String> body = new LinkedList<String>();
 
   private Path prologOutFile;
-
-  private PrologSourceFileContent prologSource;
 
   private String decName;
   private String relNamespaceName;
@@ -49,18 +46,14 @@ public class PrologLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  public SourceFileContent getGeneratedSource() {
-    return prologSource;
+  public String getGeneratedSource() {
+    return moduleHeader + "\n"
+         + StringCommands.printListSeparated(imports, "\n")
+         + StringCommands.printListSeparated(body, "\n");
   }
-
   @Override
   public Path getOutFile() {
     return prologOutFile;
-  }
-
-  @Override
-  public Set<RelativePath> getGeneratedFiles() {
-    return generatedFiles;
   }
 
   @Override
@@ -71,9 +64,9 @@ public class PrologLib extends LanguageLib implements Serializable {
     // TODO: Implement reexport handling in a more sensible way
 
     if (isApplication(dec, "ModuleReexport"))
-      prologSource.addReexport(prettyPrint(dec));
+      imports.add(prettyPrint(dec));
     else
-      prologSource.addBodyDecl(prettyPrint(dec));
+      body.add(prettyPrint(dec));
   }
 
   private IStrategoTerm initializePrettyPrinter(Context ctx) {
@@ -93,7 +86,6 @@ public class PrologLib extends LanguageLib implements Serializable {
   @Override
   public void init(RelativePath sourceFile, Environment environment) {
     prologOutFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + PrologLibFactory.getInstance().getGeneratedFileExtension());
-    prologSource = new PrologSourceFileContent(this);
   }
 
   @Override
@@ -113,10 +105,10 @@ public class PrologLib extends LanguageLib implements Serializable {
     String moduleName = null;
     if (isApplication(toplevelDecl, "ModuleDec")) {
       moduleName = prettyPrint(getApplicationSubterm(toplevelDecl, "ModuleDec", 0));
-      prologSource.setModuleDecl(prettyPrint(toplevelDecl));
+      moduleHeader = prettyPrint(toplevelDecl);
     } else if (isApplication(toplevelDecl, "SugarModuleDec")) {
       moduleName = prettyPrint(getApplicationSubterm(toplevelDecl, "SugarModuleDec", 0));
-      prologSource.setModuleDecl(":-module(" + moduleName + ", []).");
+      moduleHeader = ":-module(" + moduleName + ", []).";
     }
 
     relNamespaceName = FileCommands.dropFilename(sourceFile.getRelativePath());
@@ -148,17 +140,23 @@ public class PrologLib extends LanguageLib implements Serializable {
   private String getRelativeModulePath(String moduleName) {
     return moduleName.replace("/", Environment.sep);
   }
-
+  
+  private String getImportedModuleString(IStrategoTerm moduleDecl) {
+    String importedModuleName = prettyPrint(moduleDecl.getSubterm(0).getSubterm(0));
+    // XXX: hacky, remove first directory. Should be replaced by a more robust implementation.
+    String importName = importedModuleName.substring(importedModuleName.indexOf("/") + 1);
+    String importString = ":- use_module(";
+    importString += importName;
+    if (moduleDecl.getSubtermCount() > 1) {  // :- use_module(foo, bar/1).
+      importString += ", " + prettyPrint(moduleDecl.getSubterm(1));
+    }
+    importString += importString + ").";
+    return importString;
+  }
+  
   @Override
   public void addModuleImport(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
-
-    String importedModuleName = prettyPrint(toplevelDecl.getSubterm(0).getSubterm(0));
-    PrologModuleImport imp = prologSource.getImport(importedModuleName, toplevelDecl);
-
-    if (checked)
-      prologSource.addCheckedImport(imp);
-    else
-      prologSource.addImport(imp);
+    imports.add(getImportedModuleString(toplevelDecl));
   }
 
   @Override

@@ -6,9 +6,8 @@ import static org.sugarj.common.Log.log;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.Term;
@@ -19,19 +18,19 @@ import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.JavaCommands;
 import org.sugarj.common.Log;
+import org.sugarj.common.StringCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.java.JavaSourceFileContent;
 
 public class JavaLib extends LanguageLib implements Serializable {
 
   private static final long serialVersionUID = 1817193221140795776L;
 
-  private Set<RelativePath> generatedJavaClasses = new HashSet<RelativePath>();
+  private String moduleHeader;
+  private List<String> imports = new LinkedList<String>();
+  private List<String> body = new LinkedList<String>();
 
-  private Path javaOutFile;
-
-  private JavaSourceFileContent javaSource;
+    private Path javaOutFile;
 
   private String relPackageName;
 
@@ -63,10 +62,6 @@ public class JavaLib extends LanguageLib implements Serializable {
     return name;
   }
 
-  public Set<RelativePath> getGeneratedFiles() {
-    return generatedJavaClasses;
-  }
-
   // was: getRelPackageName
   public String getNamespace() {
     return relPackageName;
@@ -89,8 +84,10 @@ public class JavaLib extends LanguageLib implements Serializable {
   }
 
   @Override
-  public JavaSourceFileContent getGeneratedSource() {
-    return javaSource;
+  public String getGeneratedSource() {
+    return moduleHeader + "\n"
+         + StringCommands.printListSeparated(imports, "\n")
+         + StringCommands.printListSeparated(body, "\n");
   }
 
   @Override
@@ -104,8 +101,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 
     RelativePath clazz = environment.createOutPath(getRelativeNamespaceSep() + decName + ".class");
 
-    generatedJavaClasses.add(clazz);
-    javaSource.addBodyDecl(prettyPrint(dec));
+    body.add(prettyPrint(dec));
   }
 
   @Override
@@ -122,7 +118,7 @@ public class JavaLib extends LanguageLib implements Serializable {
       javaOutFile = environment.createOutPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + JavaLibFactory.getInstance().getOriginalFileExtension()); // XXX:
                                               
     // moved here before depOutFile==null check
-    javaSource.setNamespaceDecl(prettyPrint(toplevelDecl));
+    moduleHeader = prettyPrint(toplevelDecl);
     checkPackageName(toplevelDecl, sourceFileFromResult, errorLog);
   }
 
@@ -133,7 +129,6 @@ public class JavaLib extends LanguageLib implements Serializable {
   @Override
   public void init(RelativePath sourceFile, Environment environment) {
     javaOutFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + JavaLibFactory.getInstance().getOriginalFileExtension());
-    javaSource = new JavaSourceFileContent();
     
     for (Path dir : environment.getSourcePath())
       if (sourceFile.getBasePath().equals(dir))
@@ -204,11 +199,7 @@ public class JavaLib extends LanguageLib implements Serializable {
 
   @Override
   public void addModuleImport(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
-    String imp = extractImportedModuleName(toplevelDecl).replace('/', '.');
-    if (checked)
-      javaSource.addCheckedImport(imp);
-    else
-      javaSource.addImport(imp);
+    imports.add(prettyPrint(toplevelDecl));
   }
 
   @Override

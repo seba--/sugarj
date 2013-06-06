@@ -407,7 +407,7 @@ public class Driver{
             break;
           }
         if (delegate != null)
-          driverResult.delegateCompilation(delegate, langLib.getOutFile(), langLib.getGeneratedSource(), definesNonBaseDec, langLib.getGeneratedFiles());
+          driverResult.delegateCompilation(delegate, langLib.getOutFile(), langLib.getGeneratedSource(), definesNonBaseDec);
         else if (!dependsOnModel)
           throw new IllegalStateException("Could not delegate compilation of circular dependency to other compiler instance.");
       }
@@ -446,8 +446,6 @@ public class Driver{
             langLib.getGeneratedSource(),
             environment.getBin(), 
             new ArrayList<Path>(environment.getIncludePath()), 
-            langLib.getGeneratedFiles(),
-            driverResult.getAvailableGeneratedFiles(),
             driverResult.getDeferredSourceFiles(),
             driverResult.getGeneratedFileHashes());
       } catch (ClassNotFoundException e) {

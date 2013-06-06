@@ -18,12 +18,10 @@ import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.Log;
+import org.sugarj.common.StringCommands;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.haskell.HaskellSourceFileContent;
-import org.sugarj.languagelib.SourceFileContent;
-import org.sugarj.languagelib.SourceImport;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -34,7 +32,10 @@ public class HaskellLib extends LanguageLib {
   
   private final String GHC_COMMAND = "ghc";
 
-  private HaskellSourceFileContent sourceContent;
+  private String moduleHeader;
+  private List<String> imports = new LinkedList<String>();
+  private List<String> body = new LinkedList<String>();
+
   private Path outFile;
   private Set<RelativePath> generatedModules = new HashSet<RelativePath>();
   
@@ -44,8 +45,10 @@ public class HaskellLib extends LanguageLib {
   private IStrategoTerm ppTable;
 
   @Override
-  public SourceFileContent getGeneratedSource() {
-    return sourceContent;
+  public String getGeneratedSource() {
+    return moduleHeader + "\n"
+         + StringCommands.printListSeparated(imports, "\n")
+         + StringCommands.printListSeparated(body, "\n");
   }
 
   @Override
@@ -53,11 +56,6 @@ public class HaskellLib extends LanguageLib {
     return outFile;
   }
 
-  @Override
-  public Set<RelativePath> getGeneratedFiles() {
-    return generatedModules;
-  }
-  
   @Override
   public String getRelativeNamespace() {
     return relNamespaceName;
@@ -77,7 +75,6 @@ public class HaskellLib extends LanguageLib {
   @Override
   public void init(RelativePath sourceFile, Environment environment) {
     outFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + HaskellLibFactory.getInstance().getOriginalFileExtension());
-    sourceContent = new HaskellSourceFileContent();
   }
 
   @Override
@@ -92,7 +89,7 @@ public class HaskellLib extends LanguageLib {
     RelativePath objectFile = environment.createOutPath(getRelativeNamespaceSep() + moduleName + "." + HaskellLibFactory.getInstance().getGeneratedFileExtension());
     generatedModules.add(objectFile);
     
-    sourceContent.setNamespaceDecl(prettyPrint(toplevelDecl));
+    moduleHeader = prettyPrint(toplevelDecl);
     
     if (!declaredRelNamespaceName.equals(relNamespaceName))
       setErrorMessage(toplevelDecl,
@@ -115,7 +112,7 @@ public class HaskellLib extends LanguageLib {
       ATermCommands.setErrorMessage(toplevelDecl, "pretty printing Haskell failed");
     }
     if (text != null)
-      sourceContent.addBodyDecl(text);
+      body.add(text);
   }
 
   @Override
@@ -125,11 +122,7 @@ public class HaskellLib extends LanguageLib {
   
   @Override
   public void addModuleImport(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
-    SourceImport imp = new SourceImport(getModulePathOfImport(toplevelDecl), prettyPrint(toplevelDecl));
-    if (checked)
-      sourceContent.addCheckedImport(imp);
-    else
-      sourceContent.addImport(imp);
+    imports.add(prettyPrint(toplevelDecl));
   }
   
   @Override

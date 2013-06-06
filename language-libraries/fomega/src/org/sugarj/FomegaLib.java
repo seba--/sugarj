@@ -13,11 +13,9 @@ import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
+import org.sugarj.common.StringCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.fomega.FomegaSourceFileContent;
-import org.sugarj.languagelib.SourceFileContent;
-import org.sugarj.languagelib.SourceImport;
 
 /**
  * @author Florian Lorenzen <florian.lorenzen at tu-berlin de>
@@ -26,7 +24,10 @@ public class FomegaLib extends LanguageLib {
 
   private static final long serialVersionUID = 6325786656556068937L;
 
-  private FomegaSourceFileContent sourceContent;
+  private String moduleHeader;
+  private List<String> imports = new LinkedList<String>();
+  private List<String> body = new LinkedList<String>();
+  
   private Set<RelativePath> generatedModules = new HashSet<RelativePath>();
   
   private String relNamespaceName;
@@ -36,8 +37,10 @@ public class FomegaLib extends LanguageLib {
   private IStrategoTerm ppTable;
   
   @Override
-  public SourceFileContent getGeneratedSource() {
-    return sourceContent;
+  public String getGeneratedSource() {
+    return moduleHeader + "\n"
+         + StringCommands.printListSeparated(imports, "\n")
+         + StringCommands.printListSeparated(body, "\n");
   }
 
   @Override
@@ -45,11 +48,6 @@ public class FomegaLib extends LanguageLib {
     return outFile;
   }
 
-  @Override
-  public Set<RelativePath> getGeneratedFiles() {
-    return generatedModules;
-  }
-  
   @Override
   public String getRelativeNamespace() {
     return relNamespaceName;
@@ -69,7 +67,6 @@ public class FomegaLib extends LanguageLib {
   @Override
   public void init(RelativePath sourceFile, Environment environment) {
     outFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".pts-source");
-    sourceContent = new FomegaSourceFileContent();
   }
 
   @Override
@@ -84,7 +81,7 @@ public class FomegaLib extends LanguageLib {
     RelativePath objectFile = environment.createOutPath(getRelativeNamespaceSep() + moduleName + "." + getFactoryForLanguage().getGeneratedFileExtension());
     generatedModules.add(objectFile);
     
-    sourceContent.setNamespaceDecl(prettyPrint(toplevelDecl));
+    moduleHeader = prettyPrint(toplevelDecl);
     
     if (!declaredRelNamespaceName.equals(relNamespaceName))
       setErrorMessage(toplevelDecl,
@@ -107,7 +104,7 @@ public class FomegaLib extends LanguageLib {
       ATermCommands.setErrorMessage(toplevelDecl, "pretty printing Fomega failed");
     }
     if (text != null)
-      sourceContent.addBodyDecl(text);
+      body.add(text);
   }
 
   @Override
@@ -117,11 +114,7 @@ public class FomegaLib extends LanguageLib {
   
   @Override
   public void addModuleImport(IStrategoTerm toplevelDecl, boolean checked) throws IOException {
-    SourceImport imp = new SourceImport(getModulePathOfImport(toplevelDecl), prettyPrint(toplevelDecl));
-    if (checked)
-      sourceContent.addCheckedImport(imp);
-    else
-      sourceContent.addImport(imp);
+    imports.add(prettyPrint(toplevelDecl));
   }
   
   public String prettyPrint(IStrategoTerm term) {

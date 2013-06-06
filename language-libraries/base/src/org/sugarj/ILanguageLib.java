@@ -2,14 +2,12 @@ package org.sugarj;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.sugarj.common.Environment;
 import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.languagelib.SourceFileContent;
 
 /**
  * @author seba
@@ -19,9 +17,8 @@ public interface ILanguageLib {
   public abstract LanguageLibFactory getFactoryForLanguage();
 
   public abstract void init(RelativePath sourceFile, Environment environment);
-  public abstract SourceFileContent getGeneratedSource();
+  public abstract String getGeneratedSource();
   public abstract Path getOutFile();
-  public abstract Set<RelativePath> getGeneratedFiles();
   public abstract String getRelativeNamespace();
 
   public abstract void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativePath sourceFile, RelativePath sourceFileFromResult) throws IOException;

@@ -25,7 +25,6 @@ import org.sugarj.common.FileCommands;
 import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.languagelib.SourceFileContent;
 import org.sugarj.util.AppendableObjectOutputStream;
 import org.sugarj.util.Pair;
 
@@ -68,15 +67,9 @@ public class Result implements IErrorLogger {
   
   /**
    * deferred source files (*.sugj) -> 
-   * to-be-generated files (e.g., *.class) 
-   */
-  private Map<Path, Set<RelativePath>> availableGeneratedFiles = new HashMap<Path, Set<RelativePath>>();
-  
-  /**
-   * deferred source files (*.sugj) -> 
    * to-be-compiled source files (e.g., *.java + generated SourceFileContent) 
    */
-  private Map<Path, Pair<Path, SourceFileContent.Generated>> deferredSourceFiles = new HashMap<Path, Pair<Path, SourceFileContent.Generated>>();
+  private Map<Path, Pair<Path, String>> deferredSourceFiles = new HashMap<Path, Pair<Path, String>>();
   
   public Result() {
   }
@@ -310,14 +303,10 @@ public class Result implements IErrorLogger {
     return sugaredSyntaxTree;
   }
   
-  void delegateCompilation(Result delegate, Path compileFile, SourceFileContent fileContent, boolean hasNonBaseDec, Set<RelativePath> generatedFiles) {
-    delegate.availableGeneratedFiles.putAll(availableGeneratedFiles);
-    if (!generatedFiles.isEmpty())
-      delegate.availableGeneratedFiles.put(sourceFile, generatedFiles);
-    
+  void delegateCompilation(Result delegate, Path compileFile, String source, boolean hasNonBaseDec) {
     delegate.deferredSourceFiles.putAll(deferredSourceFiles);
-    if (!fileContent.isEmpty() || hasNonBaseDec)
-      delegate.deferredSourceFiles.put(sourceFile, Pair.create(compileFile, fileContent.getCode(compileFile)));
+    if (!source.isEmpty() || hasNonBaseDec)
+      delegate.deferredSourceFiles.put(sourceFile, Pair.create(compileFile, source));
   }
   
   boolean isDelegateOf(Path compileFile) {
@@ -325,7 +314,6 @@ public class Result implements IErrorLogger {
   }
   
   void resetDelegation() {
-    availableGeneratedFiles.clear();
     deferredSourceFiles.clear();
   }
   
@@ -376,11 +364,7 @@ public class Result implements IErrorLogger {
     return sourceFile != null && "model".equals(FileCommands.getExtension(sourceFile));
   }
 
-  public Map<Path, Set<RelativePath>> getAvailableGeneratedFiles() {
-    return availableGeneratedFiles;
-  }
-
-  public Map<Path, Pair<Path, SourceFileContent.Generated>> getDeferredSourceFiles() {
+  public Map<Path, Pair<Path, String>> getDeferredSourceFiles() {
     return deferredSourceFiles;
   }
 
@@ -423,7 +407,6 @@ public class Result implements IErrorLogger {
       oos.writeObject(generatedFileHashes);
       oos.writeObject(dependingFileHashes);
       
-      oos.writeObject(availableGeneratedFiles);
       oos.writeObject(deferredSourceFiles);
       
       cacheInMemory(dep);
@@ -464,8 +447,7 @@ public class Result implements IErrorLogger {
       result.generatedFileHashes = (Map<Path, Integer>) ois.readObject();
       result.dependingFileHashes = (Map<Path, Integer>) ois.readObject();
 
-      result.availableGeneratedFiles = (Map<Path, Set<RelativePath>>) ois.readObject();
-      result.deferredSourceFiles = (Map<Path, Pair<Path, SourceFileContent.Generated>>) ois.readObject();
+      result.deferredSourceFiles = (Map<Path, Pair<Path, String>>) ois.readObject();
       
       result.cacheInMemory(dep);
     } catch (FileNotFoundException e) {
@@ -501,7 +483,6 @@ public class Result implements IErrorLogger {
     res.sourceFileHash = sourceFileHash;
     res.allDependentFiles = allDependentFiles;
     res.failed = failed;
-    res.availableGeneratedFiles = availableGeneratedFiles;
     res.deferredSourceFiles = deferredSourceFiles;
     res.editorServices = editorServices;
     
