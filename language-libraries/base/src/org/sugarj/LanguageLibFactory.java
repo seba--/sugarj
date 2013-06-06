@@ -54,7 +54,7 @@ public abstract class LanguageLibFactory implements ILanguageLibFactory {
     return libDir;
   }
 
-  protected File ensureFile(String resource) {
+  public File ensureFile(String resource) {
     File f = new File(getLibraryDirectory().getPath() + File.separator + resource);
   
     if (f.exists())

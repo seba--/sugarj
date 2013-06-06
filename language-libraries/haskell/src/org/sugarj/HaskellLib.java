@@ -146,10 +146,14 @@ public class HaskellLib extends LanguageLib {
     for (Path outFile : outFiles) {
       cmds.add(outFile.getAbsolutePath());
       String noExtPath = FileCommands.dropExtension(outFile.getAbsolutePath());
-      generatedFiles.add(new AbsolutePath(noExtPath));
-      generatedFiles.add(new AbsolutePath(noExtPath + ".exe"));
-      generatedFiles.add(new AbsolutePath(noExtPath + ".hi"));
-      generatedFiles.add(new AbsolutePath(noExtPath + ".o"));
+      if (FileCommands.exists(new AbsolutePath(noExtPath)))
+        generatedFiles.add(new AbsolutePath(noExtPath));
+      if (FileCommands.exists(new AbsolutePath(noExtPath + ".exe")))
+        generatedFiles.add(new AbsolutePath(noExtPath + ".exe"));
+      if (FileCommands.exists(new AbsolutePath(noExtPath + ".hi")))
+        generatedFiles.add(new AbsolutePath(noExtPath + ".hi"));
+      if (FileCommands.exists(new AbsolutePath(noExtPath + ".o")))
+        generatedFiles.add(new AbsolutePath(noExtPath + ".o"));
     }
     
     cmds.add("-i");
