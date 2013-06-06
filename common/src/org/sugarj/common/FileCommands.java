@@ -319,6 +319,10 @@ public class FileCommands {
     return f1.getFile().lastModified() > f2.getFile().lastModified();
   }
 
+  public static boolean fileExists(Path file) {
+    return file != null && file.getFile().exists() && file.getFile().isFile();
+  }
+
   public static boolean exists(Path file) {
     return file != null && file.getFile().exists();
   }
