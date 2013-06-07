@@ -1,6 +1,5 @@
 package org.sugarj;
 
-import static org.sugarj.common.ATermCommands.getApplicationSubterm;
 import static org.sugarj.common.ATermCommands.isApplication;
 
 import java.io.File;
@@ -120,11 +119,6 @@ public class FomegaLanguage extends AbstractBaseLanguage {
     if (isApplication(decl, "PlainDec"))
       return true;
     return false;
-  }
-
-  @Override
-  public IStrategoTerm getExtensionBody(IStrategoTerm decl) {
-    return getApplicationSubterm(decl, "ExtensionBody", 0);
   }
 
 

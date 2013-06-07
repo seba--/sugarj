@@ -178,13 +178,6 @@ public class JavaLanguage extends AbstractBaseLanguage {
     return extName;
   }
 
-  @Override
-  public IStrategoTerm getExtensionBody(IStrategoTerm decl) {
-    IStrategoTerm body = getApplicationSubterm(decl, "ExtensionDec", 1);
-    IStrategoTerm sugarBody = getApplicationSubterm(body, "ExtensionBody", 0);
-    return sugarBody;
-  }
-
   private static void exists(File file) {
     if (file.exists())
       System.out.println(file.getPath() + " exists.");

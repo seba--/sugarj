@@ -30,4 +30,5 @@ public interface IBaseProcessor {
   public abstract boolean isModuleExternallyResolvable(String relModulePath);
 
   public abstract String getExtensionName(IStrategoTerm decl) throws IOException;
+  public abstract IStrategoTerm getExtensionBody(IStrategoTerm decl);
 }

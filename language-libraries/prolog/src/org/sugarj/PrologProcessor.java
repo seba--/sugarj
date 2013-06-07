@@ -170,4 +170,12 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
     // TODO: look for pre-installed SWI libraries?
     return false;
   }
+
+  @Override
+  public IStrategoTerm getExtensionBody(IStrategoTerm decl) {
+    IStrategoTerm sugarBody = getApplicationSubterm(decl, "ExtensionBody", 0);
+  
+    return sugarBody;
+  
+  }
 }

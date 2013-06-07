@@ -192,4 +192,9 @@ public class HaskellProcessor extends AbstractBaseProcessor {
     
     return msg.length > 0 && msg[0].length > 0;
   }
+
+  @Override
+  public IStrategoTerm getExtensionBody(IStrategoTerm decl) {
+    return getApplicationSubterm(decl, "ExtensionBody", 0);
+  }
 }

@@ -146,4 +146,9 @@ public class FomegaProcessor extends AbstractBaseProcessor {
   public String getExtensionName(IStrategoTerm decl) throws IOException {
     return moduleName;
   }
+
+  @Override
+  public IStrategoTerm getExtensionBody(IStrategoTerm decl) {
+    return getApplicationSubterm(decl, "ExtensionBody", 0);
+  }
 }

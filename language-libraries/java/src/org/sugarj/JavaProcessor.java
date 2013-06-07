@@ -221,4 +221,11 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
       return false;
     }
   }
+
+  @Override
+  public IStrategoTerm getExtensionBody(IStrategoTerm decl) {
+    IStrategoTerm body = getApplicationSubterm(decl, "ExtensionDec", 1);
+    IStrategoTerm sugarBody = getApplicationSubterm(body, "ExtensionBody", 0);
+    return sugarBody;
+  }
 }

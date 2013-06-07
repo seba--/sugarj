@@ -1,6 +1,5 @@
 package org.sugarj;
 
-import static org.sugarj.common.ATermCommands.getApplicationSubterm;
 import static org.sugarj.common.ATermCommands.isApplication;
 
 import java.io.File;
@@ -106,13 +105,5 @@ public class PrologLanguage extends AbstractBaseLanguage {
   @Override
   public boolean isPlainDec(IStrategoTerm decl) {
     return isApplication(decl, "PlainDec");
-  }
-
-  @Override
-  public IStrategoTerm getExtensionBody(IStrategoTerm decl) {
-    IStrategoTerm sugarBody = getApplicationSubterm(decl, "ExtensionBody", 0);
-  
-    return sugarBody;
-  
   }
 }

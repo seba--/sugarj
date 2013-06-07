@@ -978,7 +978,7 @@ public class Driver{
       
       // this is a list of SDF and Stratego statements
       
-      IStrategoTerm extensionBody = baseLanguage.getExtensionBody(toplevelDecl);
+      IStrategoTerm extensionBody = baseProcessor.getExtensionBody(toplevelDecl);
 
       IStrategoTerm sdfExtract = fixSDF(extractSDF(extensionBody), baseProcessor.getInterpreter());
       IStrategoTerm strExtract = extractSTR(extensionBody);

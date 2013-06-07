@@ -67,6 +67,4 @@ public interface IBaseLanguage {
 
   public abstract boolean isPlainDec(IStrategoTerm decl);
 
-  public abstract IStrategoTerm getExtensionBody(IStrategoTerm decl);
-
 }
