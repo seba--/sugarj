@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.sugarj.common.Log;
+import org.sugarj.common.path.Path;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -75,7 +76,7 @@ public class FomegaLanguage extends AbstractBaseLanguage {
   }
 
   @Override
-  public File getInitEditor() {
+  public Path getInitEditor() {
     return ensureFile("org/sugarj/fomega/initEditor.serv");
   }
 

@@ -45,12 +45,12 @@ public class FomegaProcessor extends AbstractBaseProcessor {
   }
 
   @Override
-  public Path getGeneratedSourcePath() {
+  public Path getGeneratedSourceFile() {
     return outFile;
   }
 
   @Override
-  public String getNamespacePath() {
+  public String getNamespace() {
     return relNamespaceName;
   }
 
@@ -73,7 +73,7 @@ public class FomegaProcessor extends AbstractBaseProcessor {
   }
 
   @Override
-  public void processNamespaceDec(IStrategoTerm toplevelDecl) throws IOException {
+  public void processNamespaceDecl(IStrategoTerm toplevelDecl) throws IOException {
     String qualifiedModuleName = prettyPrint(getApplicationSubterm(toplevelDecl, "ModuleDec", 0));
     String qualifiedModulePath = qualifiedModuleName.replace('.', '/');
     String declaredModuleName = FileCommands.fileName(qualifiedModulePath);
@@ -98,7 +98,7 @@ public class FomegaProcessor extends AbstractBaseProcessor {
   }
 
   @Override
-  public void processLanguageSpecific(IStrategoTerm toplevelDecl) throws IOException {
+  public void processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException {
 //    IStrategoTerm term = getApplicationSubterm(toplevelDecl, "FomegaBody", 0);
     String text = null;
     try {
@@ -111,12 +111,12 @@ public class FomegaProcessor extends AbstractBaseProcessor {
   }
 
   @Override
-  public String getModulePathOfImport(IStrategoTerm toplevelDecl) {
+  public String getModuleNameOfImport(IStrategoTerm toplevelDecl) {
     return prettyPrint(getApplicationSubterm(toplevelDecl, "Import", 1)).replace('.', '/');
   }
   
   @Override
-  public void addModuleImport(IStrategoTerm toplevelDecl) throws IOException {
+  public void processModuleImport(IStrategoTerm toplevelDecl) throws IOException {
     imports.add(prettyPrint(toplevelDecl));
   }
   

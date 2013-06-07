@@ -307,10 +307,10 @@ public class Driver{
     this.sourceFile = sourceFile;
     this.declProvider = declProvider;
     
-    currentGrammarSDF = new AbsolutePath(baseLanguage.getInitGrammar().getPath());
+    currentGrammarSDF = baseLanguage.getInitGrammar();
     currentGrammarModule = baseLanguage.getInitGrammarModuleName();
     
-    currentTransSTR = new AbsolutePath(baseLanguage.getInitTrans().getPath());
+    currentTransSTR = baseLanguage.getInitTrans();
     currentTransModule = baseLanguage.getInitTransModuleName();
     
     // list of imports that contain SDF extensions
@@ -408,7 +408,7 @@ public class Driver{
             break;
           }
         if (delegate != null)
-          driverResult.delegateCompilation(delegate, baseProcessor.getGeneratedSourcePath(), baseProcessor.getGeneratedSource(), definesNonBaseDec);
+          driverResult.delegateCompilation(delegate, baseProcessor.getGeneratedSourceFile(), baseProcessor.getGeneratedSource(), definesNonBaseDec);
         else if (!dependsOnModel)
           throw new IllegalStateException("Could not delegate compilation of circular dependency to other compiler instance.");
       }
@@ -443,7 +443,7 @@ public class Driver{
     try {
       try {
         baseProcessor.compile(
-            baseProcessor.getGeneratedSourcePath(), 
+            baseProcessor.getGeneratedSourceFile(), 
             baseProcessor.getGeneratedSource(),
             environment.getBin(), 
             new ArrayList<Path>(environment.getIncludePath()), 
@@ -667,7 +667,7 @@ public class Driver{
       sugaredNamespaceDecl = lastSugaredToplevelDecl;
       desugaredNamespaceDecl = toplevelDecl;
 
-      baseProcessor.processNamespaceDec(toplevelDecl);    
+      baseProcessor.processNamespaceDecl(toplevelDecl);    
       if (depOutFile == null)
         depOutFile = environment.createOutPath(baseProcessor.getRelativeNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       
@@ -720,7 +720,7 @@ public class Driver{
       String modulePath;
       boolean isCircularImport;
       if (!baseLanguage.isTransformationApplication(toplevelDecl)) {
-        modulePath = baseProcessor.getModulePathOfImport(toplevelDecl);
+        modulePath = baseProcessor.getModuleNameOfImport(toplevelDecl);
         
         isCircularImport = prepareImport(toplevelDecl, modulePath);
         
@@ -806,7 +806,7 @@ public class Driver{
       if (sourceFileAvailable && requiresUpdate && getCircularImportResult(importSourceFile) != null) {
         // Circular import. Assume source file does not provide syntactic sugar.
         log.log("Circular import detected: " + modulePath + ".", Log.IMPORT);
-        baseProcessor.addModuleImport(toplevelDecl);
+        baseProcessor.processModuleImport(toplevelDecl);
         isCircularImport = true;
         circularLinks.add(importSourceFile);
       }
@@ -835,7 +835,7 @@ public class Driver{
         // if importSourceFile is delegated to something currently being processed
         for (Driver dr : currentlyProcessing)
           if (dr.driverResult.isDelegateOf(importSourceFile)) {
-            baseProcessor.addModuleImport(toplevelDecl);
+            baseProcessor.processModuleImport(toplevelDecl);
             isCircularImport = true;
             
             if (dr != this)
@@ -897,7 +897,7 @@ public class Driver{
     Path clazz = ModuleSystemCommands.importBinFile(modulePath, environment, baseProcessor, driverResult);
     if (clazz != null || baseProcessor.isModuleExternallyResolvable(modulePath)) {
       success = true;
-      baseProcessor.addModuleImport(importTerm);
+      baseProcessor.processModuleImport(importTerm);
     }
 
     Path sdf = ModuleSystemCommands.importSdf(modulePath, environment, driverResult);
@@ -942,7 +942,7 @@ public class Driver{
       
       log.beginTask("Generate " + baseProcessor.getLanguage().getLanguageName() + " code.", Log.BASELANG);
       try {
-        baseProcessor.processLanguageSpecific(toplevelDecl);
+        baseProcessor.processLanguageSpecificDecl(toplevelDecl);
       } finally {
         log.endTask();
       }
@@ -1194,14 +1194,14 @@ public class Driver{
   }
     
   private void checkModuleName(String decName) {
-    String expectedDecName = FileCommands.fileName(baseProcessor.getGeneratedSourcePath());
+    String expectedDecName = FileCommands.fileName(baseProcessor.getGeneratedSourceFile());
     if (expectedDecName != null && !expectedDecName.equals(decName))
       setErrorMessage(sugaredNamespaceDecl, "Declaration name " + decName + " does not match file name " + expectedDecName);
   }
 
   private void initEditorServices() throws IOException, TokenExpectedException, SGLRException, InterruptedException {
-    File editorFile = baseLanguage.getInitEditor();
-    IStrategoTerm initEditor = (IStrategoTerm) editorServicesParser.parse(FileCommands.readFileAsString(editorFile), editorFile.getPath(), "Module");
+    Path editorFile = baseLanguage.getInitEditor();
+    IStrategoTerm initEditor = (IStrategoTerm) editorServicesParser.parse(FileCommands.readFileAsString(editorFile), editorFile.getAbsolutePath(), "Module");
 
     IStrategoTerm services = ATermCommands.getApplicationSubterm(initEditor, "Module", 2);
     

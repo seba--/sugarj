@@ -1,8 +1,7 @@
 package org.sugarj;
 
-import java.io.File;
-
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.sugarj.common.path.Path;
 
 /**
  * @author seba
@@ -45,16 +44,11 @@ public interface IBaseLanguage {
    */
   public abstract String getOriginalFileExtension();
 
-  public abstract File getInitGrammar();
-
+  public abstract Path getInitGrammar();
   public abstract String getInitGrammarModuleName();
-
-  public abstract File getInitTrans();
-
+  public abstract Path getInitTrans();
   public abstract String getInitTransModuleName();
-
-  public abstract File getInitEditor();
-
+  public abstract Path getInitEditor();
   public abstract String getInitEditorModuleName();
 
   public abstract boolean isNamespaceDec(IStrategoTerm decl);

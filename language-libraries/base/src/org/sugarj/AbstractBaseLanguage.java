@@ -11,6 +11,9 @@ import org.eclipse.core.runtime.FileLocator;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.Log;
+import org.sugarj.common.path.AbsolutePath;
+import org.sugarj.common.path.Path;
+import org.sugarj.common.path.RelativePath;
 import org.sugarj.stdlib.StdLib;
 
 /**
@@ -21,19 +24,19 @@ import org.sugarj.stdlib.StdLib;
  * 
  */
 public abstract class AbstractBaseLanguage implements IBaseLanguage {
-  private transient File libDir;
-  private transient File libTmpDir;
+  private transient Path libDir;
+  private transient Path libTmpDir;
 
   @Override
   public String getOriginalFileExtension() {
     return null;
   }
   
-  public List<File> getDefaultGrammars() {
+  public List<Path> getDefaultGrammars() {
     return StdLib.stdGrammars();
   }
 
-  public final File getPluginDirectory() {
+  public final Path getPluginDirectory() {
     if (libDir == null) { // set up directories first
       String thisClassPath = this.getClass().getName().replace(".", "/") + ".class";
       URL thisClassURL = this.getClass().getClassLoader().getResource(thisClassPath);
@@ -48,39 +51,37 @@ public abstract class AbstractBaseLanguage implements IBaseLanguage {
       String classPath = thisClassURL.getPath();
       String binPath = classPath.substring(0, classPath.length() - thisClassPath.length());
       
-      libDir = new File(binPath);
+      libDir = new AbsolutePath(binPath);
     }
     
     return libDir;
   }
 
-  public File ensureFile(String resource) {
-    File f = new File(getPluginDirectory().getPath() + File.separator + resource);
+  public Path ensureFile(String resource) {
+    Path f = new RelativePath(getPluginDirectory(), resource);
   
-    if (f.exists())
+    if (FileCommands.exists(f))
       return f;
   
     if (libTmpDir == null) {
       try {
-        libTmpDir = File.createTempFile(FileCommands.fileName(getPluginDirectory().getAbsolutePath()), "");
-        libTmpDir.delete();
-        libTmpDir.mkdir();
+        libTmpDir = FileCommands.newTempDir();
       } catch (IOException e) {
         e.printStackTrace();
       }
     }
   
-    f = new File(libTmpDir.getPath() + "/" + resource);
-    f.getParentFile().mkdirs();
+    f = new RelativePath(libTmpDir, resource);
+    f.getFile().getParentFile().mkdirs();
   
     try {
       InputStream in = this.getClass().getClassLoader().getResourceAsStream(resource);
       if (in == null) {
         Log.log.logErr("Could not load resource " + resource, Log.ALWAYS);
-        return new File(getPluginDirectory().getPath() + File.separator + resource);
+        return new RelativePath(getPluginDirectory(), resource);
       }
   
-      FileOutputStream fos = new FileOutputStream(f);
+      FileOutputStream fos = new FileOutputStream(f.getFile());
       int len = -1;
       byte[] bs = new byte[256];
       while ((len = in.read(bs)) >= 0)

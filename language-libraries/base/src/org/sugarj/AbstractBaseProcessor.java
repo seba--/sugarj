@@ -29,7 +29,7 @@ public abstract class AbstractBaseProcessor implements IBaseProcessor, Serializa
   }
 
   public String getRelativeNamespaceSep() {
-		String rel = getNamespacePath();
+		String rel = getNamespace();
 		if (rel == null || rel.isEmpty())
 			return "";
 		return rel + Environment.sep;

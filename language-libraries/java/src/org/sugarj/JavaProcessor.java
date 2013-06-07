@@ -63,11 +63,6 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
     return name;
   }
 
-  // was: getRelPackageName
-  public String getNamespace() {
-    return relPackageName;
-  }
-
   public String extractNamespaceName(IStrategoTerm toplevelDecl, HybridInterpreter interp) throws IOException {
     String packageName = prettyPrint(getApplicationSubterm(toplevelDecl, "PackageDec", 1));
 
@@ -75,12 +70,12 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
   }
 
   @Override
-  public Path getGeneratedSourcePath() {
+  public Path getGeneratedSourceFile() {
     return javaOutFile;
   }
 
   @Override
-  public String getNamespacePath() {
+  public String getNamespace() {
     return relPackageName;
   }
 
@@ -92,7 +87,7 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
   }
 
   @Override
-  public void processLanguageSpecific(IStrategoTerm toplevelDecl) throws IOException {
+  public void processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException {
     IStrategoTerm dec = isApplication(toplevelDecl, "JavaTypeDec") ? getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0) : toplevelDecl;
 
     String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
@@ -104,7 +99,7 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
   }
 
   @Override
-  public void processNamespaceDec(IStrategoTerm toplevelDecl) throws IOException {
+  public void processNamespaceDecl(IStrategoTerm toplevelDecl) throws IOException {
     String packageName = extractNamespaceName(toplevelDecl, interp);
 
     relPackageName = getRelativeModulePath(packageName);
@@ -146,7 +141,7 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
   }
 
   @Override
-  public String getModulePathOfImport(IStrategoTerm toplevelDecl) {
+  public String getModuleNameOfImport(IStrategoTerm toplevelDecl) {
     String importModule = extractImportedModuleName(toplevelDecl);
     String modulePath = getRelativeModulePath(importModule);
 
@@ -198,7 +193,7 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
   }
 
   @Override
-  public void addModuleImport(IStrategoTerm toplevelDecl) throws IOException {
+  public void processModuleImport(IStrategoTerm toplevelDecl) throws IOException {
     imports.add(prettyPrint(toplevelDecl));
   }
 

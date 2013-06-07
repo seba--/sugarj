@@ -1,6 +1,5 @@
 package org.sugarj.stdlib;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +8,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.FileLocator;
+import org.sugarj.common.FileCommands;
+import org.sugarj.common.path.AbsolutePath;
+import org.sugarj.common.path.Path;
+import org.sugarj.common.path.RelativePath;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -17,8 +20,8 @@ public class StdLib {
 
   public static final String VERSION = "stdlib-0.2a";
   
-  public static File stdLibDir;
-  private static String stdLibTmpDir;
+  public static Path stdLibDir;
+  private static Path stdLibTmpDir;
   static {
 
     String thisClassPath = "org/sugarj/stdlib/StdLib.class";
@@ -35,31 +38,27 @@ public class StdLib {
     String binPath = classPath.substring(0, classPath.length() - thisClassPath.length());
     
     try {
-      stdLibDir = new File(binPath);
-      
-      File f = File.createTempFile("org.sugarj.stdlib", "");
-      f.delete();
-      f.mkdir();
-      stdLibTmpDir = f.getPath();
+      stdLibDir = new AbsolutePath(binPath);
+      stdLibTmpDir = FileCommands.newTempDir();
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
-  public static File ensureFile(String resource) {
-    File f = new File(stdLibDir.getPath() + File.separator + resource);
-    if (f.exists())
+  public static Path ensureFile(String resource) {
+    Path f = new RelativePath(stdLibDir, resource);
+    if (FileCommands.exists(f))
       return f;
     
-    f = new File(stdLibTmpDir + "/" + resource);
-    f.getParentFile().mkdirs();
+    f = new RelativePath(stdLibTmpDir, resource);
+    f.getFile().getParentFile().mkdirs();
     
     try {
       InputStream in = StdLib.class.getClassLoader().getResourceAsStream(resource);
       if (in == null)
-        return  new File(stdLibDir.getPath() + File.separator + resource);
+        return new RelativePath(stdLibDir, resource);
       
-      FileOutputStream fos = new FileOutputStream(f);
+      FileOutputStream fos = new FileOutputStream(f.getFile());
       int len = -1;
       byte[] bs = new byte[256];
       while ((len = in.read(bs)) >= 0)
@@ -73,20 +72,20 @@ public class StdLib {
     return f;
   }
   
-  public static File sdfDef = ensureFile("org/sugarj/languages/Sdf2.def");
-  public static File sdfTbl = ensureFile("org/sugarj/languages/Sdf2.tbl");
-  public static File strategoDef = ensureFile("org/sugarj/languages/Stratego.def");
-  public static File strategoTbl = ensureFile("org/sugarj/languages/Stratego.tbl");
-  public static File editorServicesDef = ensureFile("org/sugarj/languages/EditorServices.def");
-  public static File editorServicesTbl = ensureFile("org/sugarj/languages/EditorServices.tbl");
-  public static File plainDef = ensureFile("org/sugarj/languages/Plain.def");
-  public static File commonDef = ensureFile("org/sugarj/stdlib/Common.def");
-  public static File sugarDef = ensureFile("org/sugarj/languages/Sugar.def");
-  public static File modelDef = ensureFile("org/sugarj/languages/Model.def");
-  public static File failureTrans = ensureFile("failure-trans.jar");
+  public static Path sdfDef = ensureFile("org/sugarj/languages/Sdf2.def");
+  public static Path sdfTbl = ensureFile("org/sugarj/languages/Sdf2.tbl");
+  public static Path strategoDef = ensureFile("org/sugarj/languages/Stratego.def");
+  public static Path strategoTbl = ensureFile("org/sugarj/languages/Stratego.tbl");
+  public static Path editorServicesDef = ensureFile("org/sugarj/languages/EditorServices.def");
+  public static Path editorServicesTbl = ensureFile("org/sugarj/languages/EditorServices.tbl");
+  public static Path plainDef = ensureFile("org/sugarj/languages/Plain.def");
+  public static Path commonDef = ensureFile("org/sugarj/stdlib/Common.def");
+  public static Path sugarDef = ensureFile("org/sugarj/languages/Sugar.def");
+  public static Path modelDef = ensureFile("org/sugarj/languages/Model.def");
+  public static Path failureTrans = ensureFile("failure-trans.jar");
 
-  public static List<File> stdGrammars() {
-    return Arrays.asList(new File[]{sdfDef, strategoDef, editorServicesDef, plainDef, commonDef, sugarDef, modelDef});
+  public static List<Path> stdGrammars() {
+    return Arrays.asList(new Path[]{sdfDef, strategoDef, editorServicesDef, plainDef, commonDef, sugarDef, modelDef});
   }
 
   public static void main(String args[]) {
@@ -103,10 +102,10 @@ public class StdLib {
     exists(failureTrans);
   }
   
-  private static void exists(File file) {
-    if (file.exists())
-      System.out.println(file.getPath() + " exists.");
+  private static void exists(Path file) {
+    if (FileCommands.exists(file))
+      System.out.println(file + " exists.");
     else
-      System.err.println(file.getPath() + " does not exist.");
+      System.err.println(file + " does not exist.");
   }
 }

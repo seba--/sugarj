@@ -365,6 +365,10 @@ public class FileCommands {
     return file;
   }
 
+  public static RelativePath dropFilename(RelativePath file) {
+    return new RelativePath(file.getBasePath(), dropFilename(file.getRelativePath()));
+  }
+  
   public static String dropFilename(String file) {
 	  int i = file.lastIndexOf(Environment.sep);
 	  if (i > 0) 

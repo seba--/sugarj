@@ -53,12 +53,12 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
          + StringCommands.printListSeparated(body, "\n");
   }
   @Override
-  public Path getGeneratedSourcePath() {
+  public Path getGeneratedSourceFile() {
     return prologOutFile;
   }
 
   @Override
-  public void processLanguageSpecific(IStrategoTerm toplevelDecl) throws IOException {
+  public void processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException {
     // Nothing to do here for prolog
     IStrategoTerm dec = toplevelDecl;
 
@@ -92,7 +92,7 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
   }
 
   @Override
-  public String getNamespacePath() {
+  public String getNamespace() {
     // XXX: Is there a namespace separator in prolog? Or even any notion of
     // compound namespaces?
     // XXX: From swi prolog doc: Modules are organised in a single and flat
@@ -103,7 +103,7 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
   }
 
   @Override
-  public void processNamespaceDec(IStrategoTerm toplevelDecl) throws IOException {
+  public void processNamespaceDecl(IStrategoTerm toplevelDecl) throws IOException {
 
     String moduleName = null;
     if (isApplication(toplevelDecl, "ModuleDec")) {
@@ -134,7 +134,7 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
   }
 
   @Override
-  public String getModulePathOfImport(IStrategoTerm toplevelDecl) {
+  public String getModuleNameOfImport(IStrategoTerm toplevelDecl) {
     String modulePath = prettyPrint(toplevelDecl.getSubterm(0).getSubterm(0));
 
     return modulePath;
@@ -158,7 +158,7 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
   }
   
   @Override
-  public void addModuleImport(IStrategoTerm toplevelDecl) throws IOException {
+  public void processModuleImport(IStrategoTerm toplevelDecl) throws IOException {
     imports.add(getImportedModuleString(toplevelDecl));
   }
 
