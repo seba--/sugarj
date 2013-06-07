@@ -55,15 +55,15 @@ public class JavaCommands {
     cpBuilder.append(dir);
     
 
-    int argNum = 6 + (sourcePath == null ? 0 : 2);
+    int argNum = 8 + (sourcePath == null ? 0 : 2);
     int next = 0;
     String[] cmd = new String[argNum + sourceFiles.size()];
     cmd[next++] = "-cp";
     cmd[next++] = cpBuilder.toString();
     cmd[next++] = "-d";
     cmd[next++] = FileCommands.toWindowsPath(dir.getAbsolutePath());
-//    cmd[next++] = "-source";
-//    cmd[next++] = "1.5";
+    cmd[next++] = "-source";
+    cmd[next++] = "1.5";
     cmd[next++] = "-nowarn";
     cmd[next++] = "-verbose";
     if (sourcePath != null) {
