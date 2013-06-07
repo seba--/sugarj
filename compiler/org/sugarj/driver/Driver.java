@@ -337,6 +337,9 @@ public class Driver{
    * @throws InterruptedException 
    */
   private void process(ToplevelDeclarationProvider declProvider, RelativePath sourceFile, IProgressMonitor monitor) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
+    if (sourceFile == null)
+      throw new IllegalArgumentException("Required source file argument was null.");
+    
     List<Renaming> originalRenamings = new LinkedList<Renaming>(environment.getRenamings());
     currentlyProcessing.add(this);
     
@@ -346,14 +349,12 @@ public class Driver{
       init(declProvider, sourceFile, monitor);
       driverResult.setSourceFile(this.sourceFile, declProvider.getSourceHashCode());
       
-      if (sourceFile != null) {
-        baseProcessor.init(sourceFile, environment);
+      baseProcessor.init(sourceFile, environment);
 
-        depOutFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".dep");
-        Path genLog = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".gen");
-        driverResult.setGenerationLog(genLog);
-//        clearGeneratedStuff();
-      }
+      depOutFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".dep");
+      Path genLog = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".gen");
+      driverResult.setGenerationLog(genLog);
+      // clearGeneratedStuff();
 
       initEditorServices();
 
@@ -666,7 +667,7 @@ public class Driver{
       sugaredNamespaceDecl = lastSugaredToplevelDecl;
       desugaredNamespaceDecl = toplevelDecl;
 
-      baseProcessor.processNamespaceDec(toplevelDecl, environment, sourceFile, driverResult.getSourceFile());    
+      baseProcessor.processNamespaceDec(toplevelDecl, environment);    
       if (depOutFile == null)
         depOutFile = environment.createOutPath(baseProcessor.getRelativeNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       

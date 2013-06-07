@@ -29,7 +29,8 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
   private List<String> imports = new LinkedList<String>();
   private List<String> body = new LinkedList<String>();
 
-    private Path javaOutFile;
+  private RelativePath sourceFile;
+  private Path javaOutFile;
 
   private String relPackageName;
 
@@ -102,7 +103,7 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
   }
 
   @Override
-  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, RelativePath sourceFile, RelativePath sourceFileFromResult) throws IOException {
+  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment) throws IOException {
     String packageName = extractNamespaceName(toplevelDecl, interp);
 
     relPackageName = getRelativeModulePath(packageName);
@@ -112,11 +113,10 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
     checkPackageName(toplevelDecl, sourceFile);
 
     if (javaOutFile == null)
-      javaOutFile = environment.createOutPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + JavaLanguage.getInstance().getOriginalFileExtension()); // XXX:
+      javaOutFile = environment.createOutPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFile) + "." + JavaLanguage.getInstance().getOriginalFileExtension()); // XXX:
                                               
     // moved here before depOutFile==null check
     moduleHeader = prettyPrint(toplevelDecl);
-    checkPackageName(toplevelDecl, sourceFileFromResult);
   }
 
   public void setJavaOutFile(Path javaOutFile) {
@@ -125,6 +125,7 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
 
   @Override
   public void init(RelativePath sourceFile, Environment environment) {
+    this.sourceFile = sourceFile;
     javaOutFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + JavaLanguage.getInstance().getOriginalFileExtension());
     
     for (Path dir : environment.getSourcePath())

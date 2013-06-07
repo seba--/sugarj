@@ -20,7 +20,7 @@ public interface IBaseProcessor {
   public abstract Path getOutFile();
   public abstract String getNamespacePath();
 
-  public abstract void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, RelativePath sourceFile, RelativePath sourceFileFromResult) throws IOException;
+  public abstract void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment) throws IOException;
   public abstract void processLanguageSpecific(IStrategoTerm toplevelDecl, Environment environment) throws IOException;
   public abstract List<Path> compile(List<Path> generatedSourceFiles, Path targetDir, List<Path> classpath) throws IOException;
 

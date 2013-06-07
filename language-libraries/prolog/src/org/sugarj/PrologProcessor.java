@@ -29,6 +29,7 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
   private List<String> imports = new LinkedList<String>();
   private List<String> body = new LinkedList<String>();
 
+  private RelativePath sourceFile;
   private Path prologOutFile;
 
   private String decName;
@@ -84,6 +85,7 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
 
   @Override
   public void init(RelativePath sourceFile, Environment environment) {
+    this.sourceFile = sourceFile;
     prologOutFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + PrologLanguage.getInstance().getGeneratedFileExtension());
   }
 
@@ -99,7 +101,7 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
   }
 
   @Override
-  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, RelativePath sourceFile, RelativePath sourceFileFromResult) throws IOException {
+  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment) throws IOException {
 
     String moduleName = null;
     if (isApplication(toplevelDecl, "ModuleDec")) {
@@ -115,7 +117,7 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
     log.log("The SDF / Stratego package name is '" + relNamespaceName + "'.", Log.DETAIL);
 
     if (prologOutFile == null)
-      prologOutFile = environment.createOutPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + PrologLanguage.getInstance().getGeneratedFileExtension());
+      prologOutFile = environment.createOutPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFile) + "." + PrologLanguage.getInstance().getGeneratedFileExtension());
   }
 
   @Override

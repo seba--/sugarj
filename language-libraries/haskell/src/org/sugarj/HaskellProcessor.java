@@ -35,6 +35,7 @@ public class HaskellProcessor extends AbstractBaseProcessor {
   private List<String> imports = new LinkedList<String>();
   private List<String> body = new LinkedList<String>();
 
+  private RelativePath sourceFile;
   private Path outFile;
   private Set<RelativePath> generatedModules = new HashSet<RelativePath>();
   
@@ -70,14 +71,14 @@ public class HaskellProcessor extends AbstractBaseProcessor {
   /*
    * processing stuff follows here
    */
-  
   @Override
   public void init(RelativePath sourceFile, Environment environment) {
+    this.sourceFile = sourceFile;
     outFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + HaskellLanguage.getInstance().getOriginalFileExtension());
   }
 
   @Override
-  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, RelativePath sourceFile, RelativePath sourceFileFromResult) throws IOException {
+  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment) throws IOException {
     String qualifiedModuleName = prettyPrint(getApplicationSubterm(toplevelDecl, "ModuleDec", 0));
     String qualifiedModulePath = qualifiedModuleName.replace('.', '/');
     String declaredModuleName = FileCommands.fileName(qualifiedModulePath);
