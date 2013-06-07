@@ -22,7 +22,6 @@ import org.spoofax.jsglr_layout.shared.BadTokenException;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
-import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.util.AppendableObjectOutputStream;
@@ -31,7 +30,7 @@ import org.sugarj.util.Pair;
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
  */
-public class Result implements IErrorLogger {
+public class Result {
   /**
    * Caching for results
    */

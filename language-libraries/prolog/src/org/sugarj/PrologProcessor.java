@@ -17,7 +17,6 @@ import org.strategoxt.stratego_gpp.parse_pptable_file_0_0;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
-import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.Log;
 import org.sugarj.common.StringCommands;
 import org.sugarj.common.path.Path;
@@ -89,7 +88,7 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
   }
 
   @Override
-  public String getRelativeNamespace() {
+  public String getNamespacePath() {
     // XXX: Is there a namespace separator in prolog? Or even any notion of
     // compound namespaces?
     // XXX: From swi prolog doc: Modules are organised in a single and flat
@@ -100,7 +99,7 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
   }
 
   @Override
-  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativePath sourceFile, RelativePath sourceFileFromResult) throws IOException {
+  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, RelativePath sourceFile, RelativePath sourceFileFromResult) throws IOException {
 
     String moduleName = null;
     if (isApplication(toplevelDecl, "ModuleDec")) {

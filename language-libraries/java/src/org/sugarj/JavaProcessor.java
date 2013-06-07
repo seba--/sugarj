@@ -15,7 +15,6 @@ import org.strategoxt.HybridInterpreter;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
-import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.JavaCommands;
 import org.sugarj.common.Log;
 import org.sugarj.common.StringCommands;
@@ -36,7 +35,7 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
 
   private Path sourcePath;
 
-  private void checkPackageName(IStrategoTerm toplevelDecl, RelativePath sourceFile, IErrorLogger errorLog) {
+  private void checkPackageName(IStrategoTerm toplevelDecl, RelativePath sourceFile) {
     if (sourceFile != null) {
       String packageName = relPackageName == null ? "" : relPackageName.replace('/', '.');
 
@@ -45,7 +44,7 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
       String expectedPackage = i >= 0 ? rel.substring(0, i) : rel;
       expectedPackage = expectedPackage.replace('/', '.');
       if (!packageName.equals(expectedPackage))
-        setErrorMessage(toplevelDecl, "The declared package '" + packageName + "'" + " does not match the expected package '" + expectedPackage + "'.", errorLog);
+        throw new RuntimeException("The declared package '" + packageName + "'" + " does not match the expected package '" + expectedPackage + "'.");
     }
   }
 
@@ -79,7 +78,7 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
   }
 
   @Override
-  public String getRelativeNamespace() {
+  public String getNamespacePath() {
     return relPackageName;
   }
 
@@ -97,27 +96,27 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
     String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
     String expectedDecName = FileCommands.fileName(javaOutFile);
     if (expectedDecName != null && !expectedDecName.equals(decName))
-      setErrorMessage(toplevelDecl, "Declaration name '" + decName + "'" + " does not match the file name '" + expectedDecName + "'.", null);
+      throw new RuntimeException("Declaration name '" + decName + "'" + " does not match the file name '" + expectedDecName + "'.");
 
     body.add(prettyPrint(dec));
   }
 
   @Override
-  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativePath sourceFile, RelativePath sourceFileFromResult) throws IOException {
+  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, RelativePath sourceFile, RelativePath sourceFileFromResult) throws IOException {
     String packageName = extractNamespaceName(toplevelDecl, interp);
 
     relPackageName = getRelativeModulePath(packageName);
 
     log.log("The SDF / Stratego package name is '" + relPackageName + "'.", Log.DETAIL);
 
-    checkPackageName(toplevelDecl, sourceFile, errorLog);
+    checkPackageName(toplevelDecl, sourceFile);
 
     if (javaOutFile == null)
       javaOutFile = environment.createOutPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFileFromResult) + "." + JavaLanguage.getInstance().getOriginalFileExtension()); // XXX:
                                               
     // moved here before depOutFile==null check
     moduleHeader = prettyPrint(toplevelDecl);
-    checkPackageName(toplevelDecl, sourceFileFromResult, errorLog);
+    checkPackageName(toplevelDecl, sourceFileFromResult);
   }
 
   public void setJavaOutFile(Path javaOutFile) {

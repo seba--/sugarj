@@ -458,62 +458,62 @@ public class Driver{
     }
   }
 
-  private void processToplevelDeclaration(IStrategoTerm toplevelDecl)
-      throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException {
-    if (baseLanguage.isNamespaceDec(toplevelDecl))
-      processNamespaceDec(toplevelDecl);
-    else {
-      try {
-        if (baseLanguage.isImportDec(toplevelDecl) || baseLanguage.isTransformationApplication(toplevelDecl)) {
-          if (inDesugaredDeclList || !environment.isAtomicImportParsing())
-            processImportDec(toplevelDecl);
-          else 
-            processImportDecs(toplevelDecl);
-        }
-        else if (baseLanguage.isLanguageSpecificDec(toplevelDecl))
-          processLanguageDec(toplevelDecl);
-        else if (baseLanguage.isExtensionDec(toplevelDecl))
-          processExtensionDec(toplevelDecl);
-        else if (baseLanguage.isPlainDec(toplevelDecl))   // XXX: Decide what to do with "Plain"--leave in the language or create a new "Plain" language
-          processPlainDec(toplevelDecl);
-        else if (baseLanguage.isTransformationDec(toplevelDecl))
-          processTransformationDec(toplevelDecl);
-        else if (baseLanguage.isModelDec(toplevelDecl))
-          processModelDec(toplevelDecl);
-        else if (ATermCommands.isList(toplevelDecl)) {
-          /* 
-           * Desugarings may generate lists of toplevel declarations.
-           */
-          List<IStrategoTerm> list = ATermCommands.getList(toplevelDecl);
-//          sortForImports(list);
-
-          boolean old = inDesugaredDeclList;
-          inDesugaredDeclList = true;
-          
-          try {
-            for (IStrategoTerm term : list)
-              processToplevelDeclaration(term);
-          } finally {
-            inDesugaredDeclList = old;
-          }
-        }
-        else if (ATermCommands.isString(toplevelDecl)) {
-          if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
-            sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
-        }
+  private void processToplevelDeclaration(IStrategoTerm toplevelDecl) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException {
+    try {
+      if (baseLanguage.isNamespaceDec(toplevelDecl))
+        processNamespaceDec(toplevelDecl);
+      else if (baseLanguage.isImportDec(toplevelDecl) || baseLanguage.isTransformationApplication(toplevelDecl)) {
+        if (inDesugaredDeclList || !environment.isAtomicImportParsing())
+          processImportDec(toplevelDecl);
         else
-          throw new IllegalArgumentException("unexpected toplevel declaration, desugaring probably failed: " + toplevelDecl.toString(20));
-      } catch (Exception e) {
-        String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
-        
-        if (!(e instanceof StrategoException))
-          e.printStackTrace();
+          processImportDecs(toplevelDecl);
+      } 
+      else if (baseLanguage.isLanguageSpecificDec(toplevelDecl))
+        processLanguageDec(toplevelDecl);
+      else if (baseLanguage.isExtensionDec(toplevelDecl))
+        processExtensionDec(toplevelDecl);
+      else if (baseLanguage.isPlainDec(toplevelDecl)) // XXX: Decide what to do
+                                                      // with "Plain"--leave in
+                                                      // the language or create
+                                                      // a new "Plain" language
+        processPlainDec(toplevelDecl);
+      else if (baseLanguage.isTransformationDec(toplevelDecl))
+        processTransformationDec(toplevelDecl);
+      else if (baseLanguage.isModelDec(toplevelDecl))
+        processModelDec(toplevelDecl);
+      else if (ATermCommands.isList(toplevelDecl)) {
+        /*
+         * Desugarings may generate lists of toplevel declarations.
+         */
+        List<IStrategoTerm> list = ATermCommands.getList(toplevelDecl);
+        // sortForImports(list);
 
-        setErrorMessage(toplevelDecl, msg);
+        boolean old = inDesugaredDeclList;
+        inDesugaredDeclList = true;
+
+        try {
+          for (IStrategoTerm term : list)
+            processToplevelDeclaration(term);
+        } finally {
+          inDesugaredDeclList = old;
+        }
+      } 
+      else if (ATermCommands.isString(toplevelDecl)) {
         if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
           sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      } 
+      else
+        throw new IllegalArgumentException("unexpected toplevel declaration, desugaring probably failed: " + toplevelDecl.toString(20));
+    } catch (Exception e) {
+      String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
 
-      }
+      if (!(e instanceof StrategoException))
+        e.printStackTrace();
+
+      setErrorMessage(toplevelDecl, msg);
+      if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
+        sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+
     }
   }
 
@@ -666,7 +666,7 @@ public class Driver{
       sugaredNamespaceDecl = lastSugaredToplevelDecl;
       desugaredNamespaceDecl = toplevelDecl;
 
-      baseProcessor.processNamespaceDec(toplevelDecl, environment, driverResult, sourceFile, driverResult.getSourceFile());    
+      baseProcessor.processNamespaceDec(toplevelDecl, environment, sourceFile, driverResult.getSourceFile());    
       if (depOutFile == null)
         depOutFile = environment.createOutPath(baseProcessor.getRelativeNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       

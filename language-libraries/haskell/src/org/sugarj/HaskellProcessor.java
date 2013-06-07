@@ -16,7 +16,6 @@ import org.sugarj.common.CommandExecution;
 import org.sugarj.common.CommandExecution.ExecutionError;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
-import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.Log;
 import org.sugarj.common.StringCommands;
 import org.sugarj.common.path.AbsolutePath;
@@ -57,7 +56,7 @@ public class HaskellProcessor extends AbstractBaseProcessor {
   }
 
   @Override
-  public String getRelativeNamespace() {
+  public String getNamespacePath() {
     return relNamespaceName;
   }
 
@@ -78,7 +77,7 @@ public class HaskellProcessor extends AbstractBaseProcessor {
   }
 
   @Override
-  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativePath sourceFile, RelativePath sourceFileFromResult) throws IOException {
+  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, RelativePath sourceFile, RelativePath sourceFileFromResult) throws IOException {
     String qualifiedModuleName = prettyPrint(getApplicationSubterm(toplevelDecl, "ModuleDec", 0));
     String qualifiedModulePath = qualifiedModuleName.replace('.', '/');
     String declaredModuleName = FileCommands.fileName(qualifiedModulePath);
@@ -92,14 +91,14 @@ public class HaskellProcessor extends AbstractBaseProcessor {
     moduleHeader = prettyPrint(toplevelDecl);
     
     if (!declaredRelNamespaceName.equals(relNamespaceName))
-      setErrorMessage(toplevelDecl,
+      throw new RuntimeException(
                       "The declared namespace '" + declaredRelNamespaceName + "'" +
-                      " does not match the expected namespace '" + relNamespaceName + "'.", errorLog);
+                      " does not match the expected namespace '" + relNamespaceName + "'.");
     
     if (!declaredModuleName.equals(moduleName))
-      setErrorMessage(toplevelDecl,
+      throw new RuntimeException(
                       "The declared module name '" + declaredModuleName + "'" +
-                      " does not match the expected module name '" + moduleName + "'.", errorLog);
+                      " does not match the expected module name '" + moduleName + "'.");
   }
 
   @Override
@@ -165,7 +164,6 @@ public class HaskellProcessor extends AbstractBaseProcessor {
       cmds.add(searchPath.toString());
     }
     
-    String s = StringCommands.printListSeparated(cmds, " ");
     new CommandExecution(false).execute(cmds.toArray(new String[cmds.size()]));
     
     return generatedFiles;

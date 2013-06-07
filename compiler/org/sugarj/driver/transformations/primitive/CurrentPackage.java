@@ -25,7 +25,7 @@ class CurrentPackage extends AbstractPrimitive {
 
   @Override
   public boolean call(IContext context, Strategy[] svars, IStrategoTerm[] tvars) throws InterpreterException {
-    String name = driver.getBaseLanguage().getRelativeNamespace();
+    String name = driver.getBaseLanguage().getNamespacePath();
     
     if (name == null)
       return false;

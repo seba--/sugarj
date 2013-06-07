@@ -11,7 +11,6 @@ import org.strategoxt.HybridInterpreter;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
-import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.path.Path;
 import org.sugarj.util.Pair;
 
@@ -30,7 +29,7 @@ public abstract class AbstractBaseProcessor implements IBaseProcessor, Serializa
   }
 
   public String getRelativeNamespaceSep() {
-		String rel = getRelativeNamespace();
+		String rel = getNamespacePath();
 		if (rel == null || rel.isEmpty())
 			return "";
 		return rel + Environment.sep;
@@ -77,12 +76,6 @@ public abstract class AbstractBaseProcessor implements IBaseProcessor, Serializa
   public          String getModulePath(IStrategoTerm decl) { return null; }
   public          IStrategoTerm reconstructImport(String modulePath, IStrategoTerm original) { return null; }
 	
-	protected void setErrorMessage(IStrategoTerm toplevelDecl, String msg, IErrorLogger errorLog) {
-	  if (errorLog != null)
-	    errorLog.logError(msg);
-	  ATermCommands.setErrorMessage(toplevelDecl, msg);
-  }
-
   /**
    * Computes the path of the given transformation application term.
    */

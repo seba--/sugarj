@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.sugarj.common.Environment;
-import org.sugarj.common.IErrorLogger;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 
@@ -19,9 +18,9 @@ public interface IBaseProcessor {
   public abstract void init(RelativePath sourceFile, Environment environment);
   public abstract String getGeneratedSource();
   public abstract Path getOutFile();
-  public abstract String getRelativeNamespace();
+  public abstract String getNamespacePath();
 
-  public abstract void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, IErrorLogger errorLog, RelativePath sourceFile, RelativePath sourceFileFromResult) throws IOException;
+  public abstract void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment, RelativePath sourceFile, RelativePath sourceFileFromResult) throws IOException;
   public abstract void processLanguageSpecific(IStrategoTerm toplevelDecl, Environment environment) throws IOException;
   public abstract List<Path> compile(List<Path> generatedSourceFiles, Path targetDir, List<Path> classpath) throws IOException;
 
