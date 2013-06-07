@@ -45,7 +45,7 @@ public class FomegaProcessor extends AbstractBaseProcessor {
   }
 
   @Override
-  public Path getOutFile() {
+  public Path getGeneratedSourcePath() {
     return outFile;
   }
 

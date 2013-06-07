@@ -53,7 +53,7 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
          + StringCommands.printListSeparated(body, "\n");
   }
   @Override
-  public Path getOutFile() {
+  public Path getGeneratedSourcePath() {
     return prologOutFile;
   }
 

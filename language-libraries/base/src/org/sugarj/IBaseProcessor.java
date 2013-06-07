@@ -17,7 +17,7 @@ public interface IBaseProcessor {
 
   public abstract void init(RelativePath sourceFile, Environment environment);
   public abstract String getGeneratedSource();
-  public abstract Path getOutFile();
+  public abstract Path getGeneratedSourcePath();
   public abstract String getNamespacePath();
 
   public abstract void processNamespaceDec(IStrategoTerm toplevelDecl) throws IOException;

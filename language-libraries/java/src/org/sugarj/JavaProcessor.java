@@ -75,7 +75,7 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
   }
 
   @Override
-  public Path getOutFile() {
+  public Path getGeneratedSourcePath() {
     return javaOutFile;
   }
 

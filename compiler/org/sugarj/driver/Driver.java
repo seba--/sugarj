@@ -408,7 +408,7 @@ public class Driver{
             break;
           }
         if (delegate != null)
-          driverResult.delegateCompilation(delegate, baseProcessor.getOutFile(), baseProcessor.getGeneratedSource(), definesNonBaseDec);
+          driverResult.delegateCompilation(delegate, baseProcessor.getGeneratedSourcePath(), baseProcessor.getGeneratedSource(), definesNonBaseDec);
         else if (!dependsOnModel)
           throw new IllegalStateException("Could not delegate compilation of circular dependency to other compiler instance.");
       }
@@ -443,7 +443,7 @@ public class Driver{
     try {
       try {
         baseProcessor.compile(
-            baseProcessor.getOutFile(), 
+            baseProcessor.getGeneratedSourcePath(), 
             baseProcessor.getGeneratedSource(),
             environment.getBin(), 
             new ArrayList<Path>(environment.getIncludePath()), 
@@ -1194,7 +1194,7 @@ public class Driver{
   }
     
   private void checkModuleName(String decName) {
-    String expectedDecName = FileCommands.fileName(baseProcessor.getOutFile());
+    String expectedDecName = FileCommands.fileName(baseProcessor.getGeneratedSourcePath());
     if (expectedDecName != null && !expectedDecName.equals(decName))
       setErrorMessage(sugaredNamespaceDecl, "Declaration name " + decName + " does not match file name " + expectedDecName);
   }
