@@ -667,7 +667,7 @@ public class Driver{
       sugaredNamespaceDecl = lastSugaredToplevelDecl;
       desugaredNamespaceDecl = toplevelDecl;
 
-      baseProcessor.processNamespaceDec(toplevelDecl, environment);    
+      baseProcessor.processNamespaceDec(toplevelDecl);    
       if (depOutFile == null)
         depOutFile = environment.createOutPath(baseProcessor.getRelativeNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       
@@ -942,7 +942,7 @@ public class Driver{
       
       log.beginTask("Generate " + baseProcessor.getLanguage().getLanguageName() + " code.", Log.BASELANG);
       try {
-        baseProcessor.processLanguageSpecific(toplevelDecl, environment);
+        baseProcessor.processLanguageSpecific(toplevelDecl);
       } finally {
         log.endTask();
       }

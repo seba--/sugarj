@@ -29,6 +29,7 @@ public class FomegaProcessor extends AbstractBaseProcessor {
 
   private Set<RelativePath> generatedModules = new HashSet<RelativePath>();
   
+  private Environment environment;
   private String relNamespaceName;
   private RelativePath sourceFile;
   private Path outFile;
@@ -66,12 +67,13 @@ public class FomegaProcessor extends AbstractBaseProcessor {
   
   @Override
   public void init(RelativePath sourceFile, Environment environment) {
+    this.init(sourceFile, environment);
     this.sourceFile = sourceFile;
     outFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".pts-source");
   }
 
   @Override
-  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment) throws IOException {
+  public void processNamespaceDec(IStrategoTerm toplevelDecl) throws IOException {
     String qualifiedModuleName = prettyPrint(getApplicationSubterm(toplevelDecl, "ModuleDec", 0));
     String qualifiedModulePath = qualifiedModuleName.replace('.', '/');
     String declaredModuleName = FileCommands.fileName(qualifiedModulePath);
@@ -96,7 +98,7 @@ public class FomegaProcessor extends AbstractBaseProcessor {
   }
 
   @Override
-  public void processLanguageSpecific(IStrategoTerm toplevelDecl, Environment environment) throws IOException {
+  public void processLanguageSpecific(IStrategoTerm toplevelDecl) throws IOException {
 //    IStrategoTerm term = getApplicationSubterm(toplevelDecl, "FomegaBody", 0);
     String text = null;
     try {

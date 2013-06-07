@@ -29,6 +29,7 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
   private List<String> imports = new LinkedList<String>();
   private List<String> body = new LinkedList<String>();
 
+  private Environment environment;
   private RelativePath sourceFile;
   private Path prologOutFile;
 
@@ -57,7 +58,7 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
   }
 
   @Override
-  public void processLanguageSpecific(IStrategoTerm toplevelDecl, Environment environment) throws IOException {
+  public void processLanguageSpecific(IStrategoTerm toplevelDecl) throws IOException {
     // Nothing to do here for prolog
     IStrategoTerm dec = toplevelDecl;
 
@@ -85,6 +86,7 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
 
   @Override
   public void init(RelativePath sourceFile, Environment environment) {
+    this.environment = environment;
     this.sourceFile = sourceFile;
     prologOutFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + PrologLanguage.getInstance().getGeneratedFileExtension());
   }
@@ -101,7 +103,7 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
   }
 
   @Override
-  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment) throws IOException {
+  public void processNamespaceDec(IStrategoTerm toplevelDecl) throws IOException {
 
     String moduleName = null;
     if (isApplication(toplevelDecl, "ModuleDec")) {

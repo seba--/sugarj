@@ -29,6 +29,7 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
   private List<String> imports = new LinkedList<String>();
   private List<String> body = new LinkedList<String>();
 
+  private Environment environment;
   private RelativePath sourceFile;
   private Path javaOutFile;
 
@@ -91,7 +92,7 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
   }
 
   @Override
-  public void processLanguageSpecific(IStrategoTerm toplevelDecl, Environment environment) throws IOException {
+  public void processLanguageSpecific(IStrategoTerm toplevelDecl) throws IOException {
     IStrategoTerm dec = isApplication(toplevelDecl, "JavaTypeDec") ? getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0) : toplevelDecl;
 
     String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
@@ -103,7 +104,7 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
   }
 
   @Override
-  public void processNamespaceDec(IStrategoTerm toplevelDecl, Environment environment) throws IOException {
+  public void processNamespaceDec(IStrategoTerm toplevelDecl) throws IOException {
     String packageName = extractNamespaceName(toplevelDecl, interp);
 
     relPackageName = getRelativeModulePath(packageName);
@@ -125,6 +126,7 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
 
   @Override
   public void init(RelativePath sourceFile, Environment environment) {
+    this.environment = environment;
     this.sourceFile = sourceFile;
     javaOutFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + JavaLanguage.getInstance().getOriginalFileExtension());
     
