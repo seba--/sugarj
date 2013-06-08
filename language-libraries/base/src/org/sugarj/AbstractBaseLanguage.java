@@ -1,6 +1,5 @@
 package org.sugarj;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,11 +26,6 @@ public abstract class AbstractBaseLanguage implements IBaseLanguage {
   private transient Path libDir;
   private transient Path libTmpDir;
 
-  @Override
-  public String getOriginalFileExtension() {
-    return null;
-  }
-  
   public List<Path> getDefaultGrammars() {
     return StdLib.stdGrammars();
   }

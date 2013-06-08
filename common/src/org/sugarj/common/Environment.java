@@ -15,7 +15,6 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-import org.sugarj.stdlib.StdLib;
 import org.sugarj.util.Renaming;
 
 
@@ -66,9 +65,9 @@ public class Environment implements Serializable {
    */
   private List<Renaming> renamings = new LinkedList<Renaming>();
   
-  public Environment(boolean generateFiles) {
+  public Environment(boolean generateFiles, Path stdlibDirPath) {
     this.includePath.add(bin);
-    this.includePath.add(new AbsolutePath(StdLib.stdLibDir.getAbsolutePath()));
+    this.includePath.add(stdlibDirPath);
     this.generateFiles = generateFiles;
     try {
       this.parseBin = FileCommands.newTempDir();

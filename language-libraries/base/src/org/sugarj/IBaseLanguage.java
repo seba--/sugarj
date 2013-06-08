@@ -24,25 +24,27 @@ public interface IBaseLanguage {
   public abstract String getSugarFileExtension();
 
   /**
+   * Optional. The file extensions for binaries if the language is compiled; otherwise null. 
+   * 
    * Examples:
    *   Java -> "class"
    *   Haskell -> "o"
    * 
-   * @return extension of generate files.
+   * @return null or file extension of binary files.
    */
-  public abstract String getGeneratedFileExtension();
+  public abstract String getBinaryFileExtension();
 
   /**
-   * Optional. Can be used to provide extension for source files of original language.
-   * Will be used to resolve imports if no sugared source file is available.
+   * Used to provide extension for source files of original language.
+   * This will be used to resolve imports if no sugared source file is available.
    * 
    * Examples:
    *   Java -> "java"
    *   Haskell -> "hs"
    * 
-   * @return null or file extension of original non-sugared language.
+   * @return file extension of base non-sugared language.
    */
-  public abstract String getOriginalFileExtension();
+  public abstract String getBaseFileExtension();
 
   public abstract Path getInitGrammar();
   public abstract String getInitGrammarModuleName();

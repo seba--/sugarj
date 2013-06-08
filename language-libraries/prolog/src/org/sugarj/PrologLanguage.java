@@ -2,12 +2,12 @@ package org.sugarj;
 
 import static org.sugarj.common.ATermCommands.isApplication;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.sugarj.common.path.Path;
 
 public class PrologLanguage extends AbstractBaseLanguage {
 
@@ -35,7 +35,12 @@ public class PrologLanguage extends AbstractBaseLanguage {
 	}
 
   @Override
-  public String getGeneratedFileExtension() {
+  public String getBinaryFileExtension() {
+    return null;
+  }
+  
+  @Override
+  public String getBaseFileExtension() {
     return "pro";
   }
 
@@ -45,15 +50,15 @@ public class PrologLanguage extends AbstractBaseLanguage {
   }
 
   @Override
-  public List<File> getDefaultGrammars() {
-  	List<File> grammars = new LinkedList<File>(super.getDefaultGrammars());
+  public List<Path> getDefaultGrammars() {
+  	List<Path> grammars = new LinkedList<Path>(super.getDefaultGrammars());
   	grammars.add(ensureFile("org/sugarj/languages/SugarProlog.def"));
   	grammars.add(ensureFile("org/sugarj/languages/Prolog.def"));
   	return Collections.unmodifiableList(grammars);
   }
 
   @Override
-  public File getInitEditor() {
+  public Path getInitEditor() {
   	return ensureFile("org/sugarj/prolog/init/initEditor.serv");
   }
 
@@ -63,7 +68,7 @@ public class PrologLanguage extends AbstractBaseLanguage {
   }
 
   @Override
-  public File getInitGrammar() {
+  public Path getInitGrammar() {
   	return ensureFile("org/sugarj/prolog/init/initGrammar.sdf");
   }
 
@@ -73,7 +78,7 @@ public class PrologLanguage extends AbstractBaseLanguage {
   }
 
   @Override
-  public File getInitTrans() {
+  public Path getInitTrans() {
   	return ensureFile("org/sugarj/prolog/init/InitTrans.str");
   }
 

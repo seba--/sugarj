@@ -109,7 +109,7 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
     checkPackageName(toplevelDecl, sourceFile);
 
     if (javaOutFile == null)
-      javaOutFile = environment.createOutPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFile) + "." + JavaLanguage.getInstance().getOriginalFileExtension()); // XXX:
+      javaOutFile = environment.createOutPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFile) + "." + JavaLanguage.getInstance().getBaseFileExtension()); // XXX:
                                               
     // moved here before depOutFile==null check
     moduleHeader = prettyPrint(toplevelDecl);
@@ -123,7 +123,7 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
   public void init(RelativePath sourceFile, Environment environment) {
     this.environment = environment;
     this.sourceFile = sourceFile;
-    javaOutFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + JavaLanguage.getInstance().getOriginalFileExtension());
+    javaOutFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + JavaLanguage.getInstance().getBaseFileExtension());
     
     for (Path dir : environment.getSourcePath())
       if (sourceFile.getBasePath().equals(dir))

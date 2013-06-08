@@ -4,7 +4,6 @@ import static org.sugarj.common.ATermCommands.getApplicationSubterm;
 import static org.sugarj.common.ATermCommands.isApplication;
 import static org.sugarj.common.Log.log;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collections;
@@ -37,9 +36,9 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
   private String relNamespaceName;
 
   private IStrategoTerm pptable = null;
-  private File prettyPrint = null;
+  private Path prettyPrint = null;
 
-  private File getPrettyPrint() {
+  private Path getPrettyPrint() {
     if (prettyPrint == null)
       prettyPrint = getLanguage().ensureFile("org/sugarj/languages/Prolog.pp");
 
@@ -88,7 +87,7 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
   public void init(RelativePath sourceFile, Environment environment) {
     this.environment = environment;
     this.sourceFile = sourceFile;
-    prologOutFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + PrologLanguage.getInstance().getGeneratedFileExtension());
+    prologOutFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + PrologLanguage.getInstance().getBinaryFileExtension());
   }
 
   @Override
@@ -119,7 +118,7 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
     log.log("The SDF / Stratego package name is '" + relNamespaceName + "'.", Log.DETAIL);
 
     if (prologOutFile == null)
-      prologOutFile = environment.createOutPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFile) + "." + PrologLanguage.getInstance().getGeneratedFileExtension());
+      prologOutFile = environment.createOutPath(getRelativeNamespaceSep() + FileCommands.fileName(sourceFile) + "." + PrologLanguage.getInstance().getBinaryFileExtension());
   }
 
   @Override

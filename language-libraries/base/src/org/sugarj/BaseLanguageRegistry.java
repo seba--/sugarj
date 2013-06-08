@@ -38,8 +38,8 @@ public class BaseLanguageRegistry {
 
   public synchronized void registerBaseLanguage(AbstractBaseLanguage baseLang) {
     baseLanguages.put(baseLang.getSugarFileExtension(), baseLang);
-    if (baseLang.getOriginalFileExtension() != null)
-      baseLanguages.put(baseLang.getOriginalFileExtension(), baseLang);
+    if (baseLang.getBaseFileExtension() != null)
+      baseLanguages.put(baseLang.getBaseFileExtension(), baseLang);
   }
 
   public synchronized void unregisterBaseLanguage(AbstractBaseLanguage baseLang) {
@@ -47,10 +47,10 @@ public class BaseLanguageRegistry {
     if (reg != null && reg.equals(baseLang))
       baseLanguages.remove(baseLang.getSugarFileExtension());
     
-    if (baseLang.getOriginalFileExtension() != null) {
-      reg = baseLanguages.get(baseLang.getOriginalFileExtension());
+    if (baseLang.getBaseFileExtension() != null) {
+      reg = baseLanguages.get(baseLang.getBaseFileExtension());
       if (reg != null && reg.equals(baseLang))
-        baseLanguages.remove(baseLang.getOriginalFileExtension());
+        baseLanguages.remove(baseLang.getBaseFileExtension());
     }
   }
   

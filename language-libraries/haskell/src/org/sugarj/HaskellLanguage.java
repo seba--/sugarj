@@ -2,12 +2,12 @@ package org.sugarj;
 
 import static org.sugarj.common.ATermCommands.isApplication;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.sugarj.common.path.Path;
 
 /**
  * @author Sebastian Erdweg <seba at informatik uni-marburg de>
@@ -42,7 +42,7 @@ public class HaskellLanguage extends AbstractBaseLanguage {
   }
 
   @Override
-  public String getGeneratedFileExtension() {
+  public String getBinaryFileExtension() {
     return "o";
   }
 
@@ -52,20 +52,20 @@ public class HaskellLanguage extends AbstractBaseLanguage {
   }
   
   @Override
-  public String getOriginalFileExtension() {
+  public String getBaseFileExtension() {
     return "hs";
   }
 
   @Override
-  public List<File> getDefaultGrammars() {
-    List<File> grammars = new LinkedList<File>(super.getDefaultGrammars());
+  public List<Path> getDefaultGrammars() {
+    List<Path> grammars = new LinkedList<Path>(super.getDefaultGrammars());
     grammars.add(ensureFile("org/sugarj/languages/SugarHaskell.def"));
     grammars.add(ensureFile("org/sugarj/languages/Haskell.def"));
     return Collections.unmodifiableList(grammars);
   }
 
   @Override
-  public File getInitEditor() {
+  public Path getInitEditor() {
     return ensureFile("org/sugarj/haskell/initEditor.serv");
   }
 
@@ -75,7 +75,7 @@ public class HaskellLanguage extends AbstractBaseLanguage {
   }
 
   @Override
-  public File getInitGrammar() {
+  public Path getInitGrammar() {
     return ensureFile("org/sugarj/haskell/initGrammar.sdf");
   }
 
@@ -85,7 +85,7 @@ public class HaskellLanguage extends AbstractBaseLanguage {
   }
 
   @Override
-  public File getInitTrans() {
+  public Path getInitTrans() {
     return ensureFile("org/sugarj/haskell/initTrans.str");
   }
 

@@ -3,7 +3,6 @@ package org.sugarj.driver;
 import static org.sugarj.common.FileCommands.toCygwinPath;
 import static org.sugarj.common.Log.log;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -99,7 +98,7 @@ public class SDFCommands {
         "-o", FileCommands.nativePath(def.getAbsolutePath())
     }));
     
-    for (File grammarFile : baseLang.getDefaultGrammars()) {
+    for (Path grammarFile : baseLang.getDefaultGrammars()) {
       ModuleKey key = new ModuleKey(Collections.<Path, Integer>emptyMap(), grammarFile.getAbsolutePath()); 
       Path permissiveGrammar = lookupGrammarInCache(sdfCache, key);
       if (permissiveGrammar == null) {
@@ -113,9 +112,9 @@ public class SDFCommands {
     }
     
     cmd.add("-I");
-    cmd.add(FileCommands.nativePath(baseLang.getPluginDirectory().getPath()));
+    cmd.add(FileCommands.nativePath(baseLang.getPluginDirectory().getAbsolutePath()));
     cmd.add("-I");
-    cmd.add(FileCommands.nativePath(StdLib.stdLibDir.getPath()));
+    cmd.add(FileCommands.nativePath(StdLib.stdLibDir.getAbsolutePath()));
     
     for (Path path : paths) 
       if (path.getFile().isDirectory()) {

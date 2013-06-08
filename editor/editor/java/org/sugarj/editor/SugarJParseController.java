@@ -29,6 +29,7 @@ import org.sugarj.common.StringCommands;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
+import org.sugarj.stdlib.StdLib;
 
 public class SugarJParseController extends SugarJParseControllerGenerated {
   
@@ -156,7 +157,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
   }
   
   private static Environment makeProjectEnvironment(IJavaProject project) throws JavaModelException {
-    Environment env = new Environment(false);
+    Environment env = new Environment(false, StdLib.stdLibDir);
     
     IPath fullPath = project.getProject().getFullPath();
     Path root = new AbsolutePath(project.getProject().getLocation().makeAbsolute().toString());

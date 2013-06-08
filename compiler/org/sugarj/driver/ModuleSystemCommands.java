@@ -35,7 +35,11 @@ public class ModuleSystemCommands {
      * @throws IOException
      */
     public static RelativePath importBinFile(String modulePath, Environment environment, AbstractBaseProcessor baseProcessor, Result driverResult) throws IOException {
-      RelativePath clazz = searchFile(modulePath, baseProcessor.getLanguage().getGeneratedFileExtension(), environment, driverResult);
+      String ext = baseProcessor.getLanguage().getBinaryFileExtension();
+      if (ext != null)
+        // language is interpreted
+        ext = baseProcessor.getLanguage().getBaseFileExtension();
+      RelativePath clazz = searchFile(modulePath, ext, environment, driverResult);
       if (clazz == null)
         return null;
       
@@ -131,8 +135,8 @@ public class ModuleSystemCommands {
     RelativePath result = locateSourceFile(modulePath, baseProcessor.getLanguage().getSugarFileExtension(), sourcePath);
     if (result == null)
       result = searchFile(modulePath, "model", environment, null);
-    if (result == null && baseProcessor.getLanguage().getOriginalFileExtension() != null)
-      result = locateSourceFile(modulePath, baseProcessor.getLanguage().getOriginalFileExtension(), sourcePath);
+    if (result == null && baseProcessor.getLanguage().getBaseFileExtension() != null)
+      result = locateSourceFile(modulePath, baseProcessor.getLanguage().getBaseFileExtension(), sourcePath);
     return result;
   }
 

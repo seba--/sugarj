@@ -81,7 +81,7 @@ public class FomegaProcessor extends AbstractBaseProcessor {
     String declaredRelNamespaceName = FileCommands.dropFilename(qualifiedModulePath);
     relNamespaceName = FileCommands.dropFilename(sourceFile.getRelativePath());
     
-    RelativePath objectFile = environment.createOutPath(getRelativeNamespaceSep() + moduleName + "." + getLanguage().getGeneratedFileExtension());
+    RelativePath objectFile = environment.createOutPath(getRelativeNamespaceSep() + moduleName + "." + getLanguage().getBinaryFileExtension());
     generatedModules.add(objectFile);
     
     moduleHeader = prettyPrint(toplevelDecl);

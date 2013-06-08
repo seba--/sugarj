@@ -3,7 +3,6 @@ package org.sugarj;
 import static org.sugarj.common.ATermCommands.getApplicationSubterm;
 import static org.sugarj.common.ATermCommands.isApplication;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -15,6 +14,8 @@ import org.spoofax.terms.Term;
 import org.strategoxt.java_front.java_front;
 import org.strategoxt.java_front.pp_java_string_0_0;
 import org.strategoxt.lang.Context;
+import org.sugarj.common.FileCommands;
+import org.sugarj.common.path.Path;
 
 public class JavaLanguage extends AbstractBaseLanguage {
 
@@ -44,7 +45,7 @@ public class JavaLanguage extends AbstractBaseLanguage {
   }
 
   @Override
-  public String getGeneratedFileExtension() {
+  public String getBinaryFileExtension() {
     return "class";
   }
 
@@ -54,20 +55,20 @@ public class JavaLanguage extends AbstractBaseLanguage {
   }
   
   @Override
-  public String getOriginalFileExtension() {
+  public String getBaseFileExtension() {
     return "java";
   }
 
   @Override
-  public List<File> getDefaultGrammars() {
-    List<File> grammars = new LinkedList<File>(super.getDefaultGrammars());
+  public List<Path> getDefaultGrammars() {
+    List<Path> grammars = new LinkedList<Path>(super.getDefaultGrammars());
     grammars.add(ensureFile("org/sugarj/languages/SugarJ.def"));
     grammars.add(ensureFile("org/sugarj/languages/Java-15.def"));
     return Collections.unmodifiableList(grammars);
   }
 
   @Override
-  public File getInitEditor() {
+  public Path getInitEditor() {
     return ensureFile("org/sugarj/java/init/initEditor.serv");
   }
 
@@ -77,7 +78,7 @@ public class JavaLanguage extends AbstractBaseLanguage {
   }
 
   @Override
-  public File getInitGrammar() {
+  public Path getInitGrammar() {
     return ensureFile("org/sugarj/java/init/initGrammar.sdf");
   }
 
@@ -87,7 +88,7 @@ public class JavaLanguage extends AbstractBaseLanguage {
   }
 
   @Override
-  public File getInitTrans() {
+  public Path getInitTrans() {
     return ensureFile("org/sugarj/java/init/InitTrans.str");
   }
 
@@ -178,17 +179,17 @@ public class JavaLanguage extends AbstractBaseLanguage {
     return extName;
   }
 
-  private static void exists(File file) {
-    if (file.exists())
-      System.out.println(file.getPath() + " exists.");
+  private static void exists(Path file) {
+    if (FileCommands.exists(file))
+      System.out.println(file + " exists.");
     else
-      System.err.println(file.getPath() + " does not exist.");
+      System.err.println(file + " does not exist.");
   }
 
   public static void main(String args[]) throws URISyntaxException {
     JavaLanguage jl = new JavaLanguage();
   
-    for (File file : jl.getDefaultGrammars())
+    for (Path file : jl.getDefaultGrammars())
       exists(file);
   
     exists(jl.getInitGrammar());

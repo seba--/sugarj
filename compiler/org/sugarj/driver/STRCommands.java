@@ -99,9 +99,9 @@ public class STRCommands {
       cmd.add("-F");
     
     cmd.add("-I");
-    cmd.add(StdLib.stdLibDir.getPath());
+    cmd.add(StdLib.stdLibDir.getAbsolutePath());
     cmd.add("-I");
-    cmd.add(baseProcessor.getLanguage().getPluginDirectory().getPath());
+    cmd.add(baseProcessor.getLanguage().getPluginDirectory().getAbsolutePath());
 
     
     for (Path path : paths)

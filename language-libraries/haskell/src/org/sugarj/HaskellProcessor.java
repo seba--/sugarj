@@ -76,7 +76,7 @@ public class HaskellProcessor extends AbstractBaseProcessor {
   public void init(RelativePath sourceFile, Environment environment) {
     this.environment = environment;
     this.sourceFile = sourceFile;
-    outFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + HaskellLanguage.getInstance().getOriginalFileExtension());
+    outFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + "." + HaskellLanguage.getInstance().getBaseFileExtension());
   }
 
   @Override
@@ -88,7 +88,7 @@ public class HaskellProcessor extends AbstractBaseProcessor {
     String declaredRelNamespaceName = FileCommands.dropFilename(qualifiedModulePath);
     relNamespaceName = FileCommands.dropFilename(sourceFile.getRelativePath());
     
-    RelativePath objectFile = environment.createOutPath(getRelativeNamespaceSep() + moduleName + "." + HaskellLanguage.getInstance().getGeneratedFileExtension());
+    RelativePath objectFile = environment.createOutPath(getRelativeNamespaceSep() + moduleName + "." + HaskellLanguage.getInstance().getBinaryFileExtension());
     generatedModules.add(objectFile);
     
     moduleHeader = prettyPrint(toplevelDecl);
