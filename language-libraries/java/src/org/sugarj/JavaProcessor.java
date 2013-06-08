@@ -148,7 +148,7 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
   }
 
   @Override
-  public String getModuleNameOfImport(IStrategoTerm toplevelDecl) {
+  public String getModulePathOfImport(IStrategoTerm toplevelDecl) {
     String importModule = extractImportedModuleName(toplevelDecl);
     String modulePath = getRelativeModulePath(importModule);
 

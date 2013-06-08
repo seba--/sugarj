@@ -122,7 +122,7 @@ public class HaskellProcessor extends AbstractBaseProcessor {
   }
 
   @Override
-  public String getModuleNameOfImport(IStrategoTerm toplevelDecl) {
+  public String getModulePathOfImport(IStrategoTerm toplevelDecl) {
     return prettyPrint(getApplicationSubterm(toplevelDecl, "Import", 2)).replace('.', '/');
   }
   

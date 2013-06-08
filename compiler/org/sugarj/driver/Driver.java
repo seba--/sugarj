@@ -708,7 +708,7 @@ public class Driver{
       String modulePath;
       boolean isCircularImport;
       if (!baseLanguage.isTransformationApplication(toplevelDecl)) {
-        modulePath = baseProcessor.getModuleNameOfImport(toplevelDecl);
+        modulePath = baseProcessor.getModulePathOfImport(toplevelDecl);
         
         isCircularImport = prepareImport(toplevelDecl, modulePath);
         

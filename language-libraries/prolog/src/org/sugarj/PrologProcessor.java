@@ -135,7 +135,7 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
   }
 
   @Override
-  public String getModuleNameOfImport(IStrategoTerm toplevelDecl) {
+  public String getModulePathOfImport(IStrategoTerm toplevelDecl) {
     String modulePath = prettyPrint(toplevelDecl.getSubterm(0).getSubterm(0));
 
     return modulePath;

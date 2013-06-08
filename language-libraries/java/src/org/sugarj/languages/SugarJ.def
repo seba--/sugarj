@@ -21,12 +21,6 @@ exports
     JavaTypeDec -> ToplevelDeclaration
     ExtensionDec -> ToplevelDeclaration
 
-  context-free start-symbols
-  	CompilationUnit
-
-  context-free syntax
-    JavaPackageDec? JavaImportDec* (JavaTypeDec | ExtensionDec)* -> CompilationUnit {cons("CompilationUnit")}
-
   %% sugar declaration
   context-free syntax
     ExtensionDecHead ExtensionBody                 -> ExtensionDec {cons("ExtensionDec")}

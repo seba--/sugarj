@@ -16,18 +16,18 @@ public interface IBaseProcessor {
   public abstract AbstractBaseLanguage getLanguage();
 
   public abstract void init(RelativePath sourceFile, Environment environment);
-  public abstract String getGeneratedSource();
-  public abstract Path getGeneratedSourceFile();
-  public abstract String getNamespace();
-
+  
   public abstract void processModuleImport(IStrategoTerm toplevelDecl) throws IOException;
   public abstract void processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException;
-  public abstract List<Path> compile(List<Path> generatedSourceFiles, Path targetDir, List<Path> classpath) throws IOException;
 
-  public abstract String getModuleNameOfImport(IStrategoTerm decl);
-
+  public abstract String getNamespace();
+  public abstract String getModulePathOfImport(IStrategoTerm decl);
   public abstract boolean isModuleExternallyResolvable(String relModulePath);
 
   public abstract String getExtensionName(IStrategoTerm decl) throws IOException;
   public abstract IStrategoTerm getExtensionBody(IStrategoTerm decl);
+
+  public abstract String getGeneratedSource();
+  public abstract Path getGeneratedSourceFile();
+  public abstract List<Path> compile(List<Path> generatedSourceFiles, Path targetDir, List<Path> classpath) throws IOException;
 }
