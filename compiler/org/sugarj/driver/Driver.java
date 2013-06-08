@@ -45,6 +45,7 @@ import org.spoofax.jsglr_layout.shared.TokenExpectedException;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.lang.StrategoException;
+import org.strategoxt.stratego_lib.output_1_0;
 import org.sugarj.AbstractBaseLanguage;
 import org.sugarj.AbstractBaseProcessor;
 import org.sugarj.common.ATermCommands;
@@ -103,11 +104,8 @@ public class Driver{
   private List<String> availableSDFImports;
   private List<String> availableSTRImports;
   
-  private IStrategoTerm sugaredNamespaceDecl;
-  private IStrategoTerm desugaredNamespaceDecl;
-  private List<IStrategoTerm> sugaredImportDecls = new ArrayList<IStrategoTerm>();
-  private List<IStrategoTerm> desugaredImportDecls = new ArrayList<IStrategoTerm>();
-  private List<IStrategoTerm> sugaredTypeOrSugarDecls = new ArrayList<IStrategoTerm>();
+  private List<IStrategoTerm> sugaredBodyDecls = new ArrayList<IStrategoTerm>();
+  private List<IStrategoTerm> desugaredBodyDecls = new ArrayList<IStrategoTerm>();
   
   private IStrategoTerm lastSugaredToplevelDecl;
   
@@ -397,6 +395,9 @@ public class Driver{
       
       stepped();
       
+      // GENERATE model
+      generateModel();
+      
       // COMPILE the generated java file
       if (circularLinks.isEmpty())
         compileGeneratedFiles();
@@ -500,8 +501,11 @@ public class Driver{
         }
       } 
       else if (ATermCommands.isString(toplevelDecl)) {
-        if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
-          sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+        if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
+          sugaredBodyDecls.add(lastSugaredToplevelDecl);
+        if (!desugaredBodyDecls.contains(toplevelDecl))
+          desugaredBodyDecls.add(toplevelDecl);
+
       } 
       else
         throw new IllegalArgumentException("unexpected toplevel declaration, desugaring probably failed: " + toplevelDecl.toString(20));
@@ -512,8 +516,8 @@ public class Driver{
         e.printStackTrace();
 
       setErrorMessage(toplevelDecl, msg);
-      if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
-        sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
+        sugaredBodyDecls.add(lastSugaredToplevelDecl);
 
     }
   }
@@ -550,14 +554,17 @@ public class Driver{
     try {
       definesNonBaseDec = true;
       
-      if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
-        sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
+        sugaredBodyDecls.add(lastSugaredToplevelDecl);
+      if (!desugaredBodyDecls.contains(toplevelDecl))
+        desugaredBodyDecls.add(toplevelDecl);
+
 
       IStrategoTerm head = getApplicationSubterm(toplevelDecl, "PlainDec", 0);
       IStrategoTerm body= getApplicationSubterm(toplevelDecl, "PlainDec", 1);
       
       String extName = ATermCommands.getString(getApplicationSubterm(head, "PlainDecHead", 1));
-      checkModuleName(extName);
+      checkModuleName(extName, toplevelDecl);
 
       String extension = null;
       if (head.getSubtermCount() >= 3 && isApplication(getApplicationSubterm(head, "PlainDecHead", 2), "Some"))
@@ -569,7 +576,6 @@ public class Driver{
       log.log("The name is '" + extName + "'.", Log.DETAIL);
       log.log("The full name is '" + fullExtName + "'.", Log.DETAIL);
 
-      generateModel(fullExtName, toplevelDecl);
       if (dependsOnModel)
         return;
       
@@ -664,12 +670,12 @@ public class Driver{
   private void processNamespaceDec(IStrategoTerm toplevelDecl) throws IOException {
     log.beginTask("processing", "PROCESS namespace declaration.", Log.CORE);
     try {
-      sugaredNamespaceDecl = lastSugaredToplevelDecl;
-      desugaredNamespaceDecl = toplevelDecl;
+      if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
+        sugaredBodyDecls.add(lastSugaredToplevelDecl);
+      if (!desugaredBodyDecls.contains(lastSugaredToplevelDecl))
+        desugaredBodyDecls.add(lastSugaredToplevelDecl);
 
       baseProcessor.processNamespaceDecl(toplevelDecl);    
-      if (depOutFile == null)
-        depOutFile = environment.createOutPath(baseProcessor.getRelativeNamespaceSep() + FileCommands.fileName(driverResult.getSourceFile()) + ".dep");
       
     } finally {
       log.endTask();
@@ -711,9 +717,10 @@ public class Driver{
 
   private void processImportDec(IStrategoTerm toplevelDecl) {
     
-    if (!sugaredImportDecls.contains(lastSugaredToplevelDecl))
-      sugaredImportDecls.add(lastSugaredToplevelDecl);
-    desugaredImportDecls.add(toplevelDecl);
+    if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
+      sugaredBodyDecls.add(lastSugaredToplevelDecl);
+    if (!desugaredBodyDecls.contains(toplevelDecl))
+      desugaredBodyDecls.add(toplevelDecl);
     
     log.beginTask("processing", "PROCESS import declaration.", Log.CORE);
     try {
@@ -749,8 +756,8 @@ public class Driver{
           environment.getRenamings().add(0, new Renaming(ImportCommands.getTransformationApplicationModelPath(appl, baseProcessor), modulePath));
         
         IStrategoTerm reconstructedImport = baseProcessor.reconstructImport(modulePath, toplevelDecl);
-        desugaredImportDecls.remove(toplevelDecl);
-        desugaredImportDecls.add(reconstructedImport);
+        desugaredBodyDecls.remove(toplevelDecl);
+        desugaredBodyDecls.add(reconstructedImport);
         toplevelDecl = reconstructedImport;
       }
       
@@ -930,13 +937,12 @@ public class Driver{
   }
 
   private void processLanguageDec(IStrategoTerm toplevelDecl) throws IOException {
-    log.beginTask("processing", "PROCESS " + baseProcessor.getLanguage().getLanguageName() + " declaration.", Log.CORE);
+    log.beginTask("processing", "PROCESS " + baseProcessor.getLanguage().getLanguageName() + " declaration: " + toplevelDecl.toString(0), Log.CORE);
     try {
       
-      if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
-        sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
+        sugaredBodyDecls.add(lastSugaredToplevelDecl);
       
-      generateModel(FileCommands.dropExtension(sourceFile.getRelativePath()), toplevelDecl);
       if (dependsOnModel)
         return;
       
@@ -956,17 +962,18 @@ public class Driver{
     try {
       definesNonBaseDec = true;
       
-      if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
-        sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
+        sugaredBodyDecls.add(lastSugaredToplevelDecl);
+      if (!desugaredBodyDecls.contains(toplevelDecl))
+        desugaredBodyDecls.add(toplevelDecl);
 
       String extName = baseProcessor.getExtensionName(toplevelDecl);
       String fullExtName = getFullRenamedDeclarationName(extName);
-      checkModuleName(extName);
+      checkModuleName(extName, toplevelDecl);
 
       log.log("The name of the sugar is '" + extName + "'.", Log.DETAIL);
       log.log("The full name of the sugar is '" + fullExtName + "'.", Log.DETAIL);
       
-      generateModel(fullExtName, toplevelDecl);
       if (dependsOnModel)
         return;
       
@@ -1045,12 +1052,14 @@ public class Driver{
     try {
       definesNonBaseDec = true;
       
-      if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
-        sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
+        sugaredBodyDecls.add(lastSugaredToplevelDecl);
+      if (!desugaredBodyDecls.contains(toplevelDecl))
+        desugaredBodyDecls.add(toplevelDecl);
 
       String extName = baseLanguage.getTransformationName(toplevelDecl);
       String fullExtName = getFullRenamedDeclarationName(extName);
-      checkModuleName(extName);
+      checkModuleName(extName, toplevelDecl);
       
       Path strExtension = environment.createOutPath(baseProcessor.getRelativeNamespaceSep() + extName + ".str");
       IStrategoTerm transBody = baseLanguage.getTransformationBody(toplevelDecl);
@@ -1060,7 +1069,6 @@ public class Driver{
       log.log("The name of the transformation is '" + extName + "'.", Log.DETAIL);
       log.log("The full name of the transformation is '" + fullExtName + "'.", Log.DETAIL);
       
-      generateModel(fullExtName, toplevelDecl);
       if (dependsOnModel)
         return;
       
@@ -1111,28 +1119,29 @@ public class Driver{
     try {
       definesNonBaseDec = true;
       
-      if (!sugaredTypeOrSugarDecls.contains(lastSugaredToplevelDecl))
-        sugaredTypeOrSugarDecls.add(lastSugaredToplevelDecl);
+      if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
+        sugaredBodyDecls.add(lastSugaredToplevelDecl);
+      if (!desugaredBodyDecls.contains(toplevelDecl))
+        desugaredBodyDecls.add(toplevelDecl);
   
       String modelName = baseLanguage.getModelName(toplevelDecl);
-      String fullModelName = getFullRenamedDeclarationName(modelName);
-      checkModuleName(modelName);
+//      String fullModelName = getFullRenamedDeclarationName(modelName);
+      checkModuleName(modelName, toplevelDecl);
   
       log.log("The name of the model is '" + modelName + "'.", Log.DETAIL);
 //      checkToplevelDeclarationName(modelName.replace("-", "$"), "model", toplevelDecl);
-      
-      generateModel(fullModelName, toplevelDecl);
     } finally {
       log.endTask();
     }
   }
   
-  private void generateModel(String fullModelName, IStrategoTerm body) throws IOException {
+  private void generateModel() throws IOException {
     log.beginTask("Generate model.", Log.DETAIL);
     try {
-      RelativePath modelOutFile = environment.createOutPath(fullModelName + ".model");
+      String moduleName = FileCommands.dropExtension(sourceFile.getRelativePath());
+      RelativePath modelOutFile = environment.createOutPath(moduleName + ".model");
       
-      IStrategoTerm modelTerm = makeDesugaredSyntaxTree(body);
+      IStrategoTerm modelTerm = makeDesugaredSyntaxTree();
       String string = ATermCommands.atermToString(modelTerm);
       driverResult.generateFile(modelOutFile, string);
       
@@ -1193,10 +1202,10 @@ public class Driver{
     }
   }
     
-  private void checkModuleName(String decName) {
+  private void checkModuleName(String decName, IStrategoTerm toplevelDecl) {
     String expectedDecName = FileCommands.fileName(baseProcessor.getGeneratedSourceFile());
     if (expectedDecName != null && !expectedDecName.equals(decName))
-      setErrorMessage(sugaredNamespaceDecl, "Declaration name " + decName + " does not match file name " + expectedDecName);
+      setErrorMessage(toplevelDecl, "Declaration name " + decName + " does not match file name " + expectedDecName);
   }
 
   private void initEditorServices() throws IOException, TokenExpectedException, SGLRException, InterruptedException {
@@ -1333,18 +1342,8 @@ public class Driver{
    * @return the non-desugared syntax tree of the complete file.
    */
   private IStrategoTerm makeSugaredSyntaxTree() {
-    // XXX empty lists => no tokens
-    IStrategoTerm packageDecl = ATermCommands.makeSome(sugaredNamespaceDecl, declProvider.getStartToken());
-    IStrategoTerm imports = 
-      ATermCommands.makeList("JavaImportDec*", ImploderAttachment.getRightToken(packageDecl), sugaredImportDecls);
-    IStrategoTerm body =
-      ATermCommands.makeList("TypeOrSugarDec*", ImploderAttachment.getRightToken(imports), sugaredTypeOrSugarDecls);
-    
-    IStrategoTerm term =
-      ATermCommands.makeAppl("CompilationUnit", "CompilationUnit", 3,
-        packageDecl,
-        imports,
-        body);
+    IStrategoTerm decls = ATermCommands.makeList("Decl*", declProvider.getStartToken(), sugaredBodyDecls);
+    IStrategoTerm term = ATermCommands.makeAppl("CompilationUnit", "CompilationUnit", 1, decls);
     
     if (ImploderAttachment.getTokenizer(term) != null) {
       ImploderAttachment.getTokenizer(term).setAst(term);
@@ -1357,18 +1356,14 @@ public class Driver{
   /**
    * @return the desugared syntax tree of the complete file.
    */
-  private IStrategoTerm makeDesugaredSyntaxTree(IStrategoTerm bodyTerm) {
-    IStrategoTerm packageDecl = ATermCommands.makeSome(desugaredNamespaceDecl, declProvider.getStartToken());
-    IStrategoTerm imports =
-      ATermCommands.makeList("JavaImportDec*", ImploderAttachment.getRightToken(packageDecl), desugaredImportDecls);
-    IStrategoTerm body =
-      ATermCommands.makeList("TypeOrSugarDec*", ImploderAttachment.getRightToken(imports), bodyTerm);
+  private IStrategoTerm makeDesugaredSyntaxTree() {
+    IStrategoTerm decls = ATermCommands.makeList("Decl*", declProvider.getStartToken(), desugaredBodyDecls);
+    IStrategoTerm term = ATermCommands.makeAppl("CompilationUnit", "CompilationUnit", 1, decls);
     
-    IStrategoTerm term =
-      ATermCommands.makeAppl("CompilationUnit", "CompilationUnit", 3,
-        packageDecl,
-        imports,
-        body);
+    if (ImploderAttachment.getTokenizer(term) != null) {
+      ImploderAttachment.getTokenizer(term).setAst(term);
+      ImploderAttachment.getTokenizer(term).initAstNodeBinding();
+    }
     
     return term;
   }
@@ -1438,10 +1433,6 @@ public class Driver{
     });
   }
   
-  public IStrategoTerm getNamespaceDec() {
-    return sugaredNamespaceDecl;
-  }
-  
   public AbstractBaseProcessor getBaseLanguage() {
     return baseProcessor;
   }
@@ -1450,10 +1441,6 @@ public class Driver{
     return FileCommands.fileName(sourceFile);
   }
   
-  public List<IStrategoTerm> getSugaredImportDecls() {
-    return sugaredImportDecls;
-  }
-
   public SGLR getParser() {
     return parser;
   }

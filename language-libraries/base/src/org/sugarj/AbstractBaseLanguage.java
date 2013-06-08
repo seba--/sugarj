@@ -26,7 +26,7 @@ public abstract class AbstractBaseLanguage implements IBaseLanguage {
   private transient Path libDir;
   private transient Path libTmpDir;
 
-  public List<Path> getDefaultGrammars() {
+  public List<Path> getPackagedGrammars() {
     return StdLib.stdGrammars();
   }
 

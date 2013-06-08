@@ -7,7 +7,7 @@ imports org/sugarj/transformations/LayoutSugar
 imports org/sugarj/transformations/Renaming
 
 signature constructors
-  CompilationUnit : NameSpaceDec * List(ImportDec) * List(BodyDec) -> CompilationUnit
+  CompilationUnit : List(Decl) -> CompilationUnit
 
 strategies
   compile-error = ?CompileError(_,_)

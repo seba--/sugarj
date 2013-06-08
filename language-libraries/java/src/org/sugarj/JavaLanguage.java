@@ -60,8 +60,8 @@ public class JavaLanguage extends AbstractBaseLanguage {
   }
 
   @Override
-  public List<Path> getDefaultGrammars() {
-    List<Path> grammars = new LinkedList<Path>(super.getDefaultGrammars());
+  public List<Path> getPackagedGrammars() {
+    List<Path> grammars = new LinkedList<Path>(super.getPackagedGrammars());
     grammars.add(ensureFile("org/sugarj/languages/SugarJ.def"));
     grammars.add(ensureFile("org/sugarj/languages/Java-15.def"));
     return Collections.unmodifiableList(grammars);
@@ -189,7 +189,7 @@ public class JavaLanguage extends AbstractBaseLanguage {
   public static void main(String args[]) throws URISyntaxException {
     JavaLanguage jl = new JavaLanguage();
   
-    for (Path file : jl.getDefaultGrammars())
+    for (Path file : jl.getPackagedGrammars())
       exists(file);
   
     exists(jl.getInitGrammar());

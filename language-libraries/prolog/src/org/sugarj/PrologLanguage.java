@@ -50,8 +50,8 @@ public class PrologLanguage extends AbstractBaseLanguage {
   }
 
   @Override
-  public List<Path> getDefaultGrammars() {
-  	List<Path> grammars = new LinkedList<Path>(super.getDefaultGrammars());
+  public List<Path> getPackagedGrammars() {
+  	List<Path> grammars = new LinkedList<Path>(super.getPackagedGrammars());
   	grammars.add(ensureFile("org/sugarj/languages/SugarProlog.def"));
   	grammars.add(ensureFile("org/sugarj/languages/Prolog.def"));
   	return Collections.unmodifiableList(grammars);

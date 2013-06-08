@@ -1,5 +1,7 @@
 package org.sugarj;
 
+import java.util.List;
+
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.sugarj.common.path.Path;
 
@@ -47,6 +49,7 @@ public interface IBaseLanguage {
   public abstract String getBaseFileExtension();
 
   public abstract Path getInitGrammar();
+  public List<Path> getPackagedGrammars();
   public abstract String getInitGrammarModuleName();
   public abstract Path getInitTrans();
   public abstract String getInitTransModuleName();

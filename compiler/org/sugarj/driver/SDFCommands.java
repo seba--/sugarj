@@ -98,7 +98,7 @@ public class SDFCommands {
         "-o", FileCommands.nativePath(def.getAbsolutePath())
     }));
     
-    for (Path grammarFile : baseLang.getDefaultGrammars()) {
+    for (Path grammarFile : baseLang.getPackagedGrammars()) {
       ModuleKey key = new ModuleKey(Collections.<Path, Integer>emptyMap(), grammarFile.getAbsolutePath()); 
       Path permissiveGrammar = lookupGrammarInCache(sdfCache, key);
       if (permissiveGrammar == null) {

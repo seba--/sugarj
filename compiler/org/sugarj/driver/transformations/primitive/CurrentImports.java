@@ -20,7 +20,7 @@ public class CurrentImports extends AbstractPrimitive {
 
   @Override
   public boolean call(IContext context, Strategy[] svars, IStrategoTerm[] tvars) throws InterpreterException {
-    List<IStrategoTerm> sugaredImportDecls = driver.getSugaredImportDecls();
+    List<IStrategoTerm> sugaredImportDecls = null; // XXX
 
     if (sugaredImportDecls == null)
       return false;
