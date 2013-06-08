@@ -105,8 +105,10 @@ public class HaskellProcessor extends AbstractBaseProcessor {
 
   @Override
   public void processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException {
-    if (getLanguage().isNamespaceDec(toplevelDecl))
+    if (getLanguage().isNamespaceDec(toplevelDecl)) {
       processNamespaceDecl(toplevelDecl);
+      return;
+    }
     
     IStrategoTerm term = getApplicationSubterm(toplevelDecl, "HaskellBody", 0);
     String text = null;

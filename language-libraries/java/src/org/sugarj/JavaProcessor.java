@@ -81,6 +81,9 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
 
   @Override
   public String getGeneratedSource() {
+    if (body.isEmpty())
+      return "";
+    
     return moduleHeader + "\n"
          + StringCommands.printListSeparated(imports, "\n") + "\n"
          + StringCommands.printListSeparated(body, "\n");
@@ -88,8 +91,10 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
 
   @Override
   public void processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException {
-    if (getLanguage().isNamespaceDec(toplevelDecl))
+    if (getLanguage().isNamespaceDec(toplevelDecl)) {
       processNamespaceDecl(toplevelDecl);
+      return;
+    }
 
     IStrategoTerm dec = isApplication(toplevelDecl, "JavaTypeDec") ? getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0) : toplevelDecl;
 

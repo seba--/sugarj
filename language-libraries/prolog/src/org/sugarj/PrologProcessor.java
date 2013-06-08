@@ -58,8 +58,10 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
 
   @Override
   public void processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException {
-    if (getLanguage().isNamespaceDec(toplevelDecl))
+    if (getLanguage().isNamespaceDec(toplevelDecl)) {
       processNamespaceDecl(toplevelDecl);
+      return;
+    }
 
     // Nothing to do here for prolog
     IStrategoTerm dec = toplevelDecl;
