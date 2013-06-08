@@ -88,6 +88,9 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
 
   @Override
   public void processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException {
+    if (getLanguage().isNamespaceDec(toplevelDecl))
+      processNamespaceDecl(toplevelDecl);
+
     IStrategoTerm dec = isApplication(toplevelDecl, "JavaTypeDec") ? getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0) : toplevelDecl;
 
     String decName = Term.asJavaString(dec.getSubterm(0).getSubterm(1).getSubterm(0));
@@ -98,8 +101,7 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
     body.add(prettyPrint(dec));
   }
 
-  @Override
-  public void processNamespaceDecl(IStrategoTerm toplevelDecl) throws IOException {
+  private void processNamespaceDecl(IStrategoTerm toplevelDecl) throws IOException {
     String packageName = extractNamespaceName(toplevelDecl, interp);
 
     relPackageName = getRelativeModulePath(packageName);

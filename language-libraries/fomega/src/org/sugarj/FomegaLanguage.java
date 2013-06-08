@@ -111,12 +111,7 @@ public class FomegaLanguage extends AbstractBaseLanguage {
 
   @Override
   public boolean isLanguageSpecificDec(IStrategoTerm decl) {
-    return isApplication(decl, "FomegaBody");
-  }
-
-  @Override
-  public boolean isNamespaceDec(IStrategoTerm decl) {
-    return isApplication(decl, "ModuleDec");
+    return isApplication(decl, "FomegaBody") || isNamespaceDec(decl);
   }
 
   @Override
@@ -126,5 +121,7 @@ public class FomegaLanguage extends AbstractBaseLanguage {
     return false;
   }
 
-
+  public boolean isNamespaceDec(IStrategoTerm decl) {
+    return isApplication(decl, "ModuleDec");
+  }
 }

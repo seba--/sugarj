@@ -131,7 +131,11 @@ public class JavaLanguage extends AbstractBaseLanguage {
 
   @Override
   public boolean isLanguageSpecificDec(IStrategoTerm decl) {
-    return isApplication(decl, "ClassDec") || isApplication(decl, "InterfaceDec") || isApplication(decl, "EnumDec") || isApplication(decl, "AnnoDec");
+    return isApplication(decl, "ClassDec") 
+        || isApplication(decl, "InterfaceDec") 
+        || isApplication(decl, "EnumDec") 
+        || isApplication(decl, "AnnoDec")
+        || isNamespaceDec(decl);
   }
 
   @Override
@@ -139,7 +143,6 @@ public class JavaLanguage extends AbstractBaseLanguage {
     return isApplication(decl, "ModelDec");
   }
 
-  @Override
   public boolean isNamespaceDec(IStrategoTerm decl) {
     return isApplication(decl, "PackageDec");
   }

@@ -55,7 +55,7 @@ public class FomegaProcessor extends AbstractBaseProcessor {
   }
 
   @Override
-  public AbstractBaseLanguage getLanguage() {
+  public FomegaLanguage getLanguage() {
     return FomegaLanguage.getInstance();
   }
 
@@ -72,8 +72,7 @@ public class FomegaProcessor extends AbstractBaseProcessor {
     outFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".pts-source");
   }
 
-  @Override
-  public void processNamespaceDecl(IStrategoTerm toplevelDecl) throws IOException {
+  private void processNamespaceDecl(IStrategoTerm toplevelDecl) throws IOException {
     String qualifiedModuleName = prettyPrint(getApplicationSubterm(toplevelDecl, "ModuleDec", 0));
     String qualifiedModulePath = qualifiedModuleName.replace('.', '/');
     String declaredModuleName = FileCommands.fileName(qualifiedModulePath);
@@ -99,7 +98,10 @@ public class FomegaProcessor extends AbstractBaseProcessor {
 
   @Override
   public void processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException {
-//    IStrategoTerm term = getApplicationSubterm(toplevelDecl, "FomegaBody", 0);
+    if (getLanguage().isNamespaceDec(toplevelDecl))
+      processNamespaceDecl(toplevelDecl);
+
+    //    IStrategoTerm term = getApplicationSubterm(toplevelDecl, "FomegaBody", 0);
     String text = null;
     try {
       text = prettyPrint(toplevelDecl);

@@ -56,12 +56,8 @@ public interface IBaseLanguage {
   public abstract Path getInitEditor();
   public abstract String getInitEditorModuleName();
 
-  public abstract boolean isNamespaceDec(IStrategoTerm decl);
-
   public abstract boolean isExtensionDec(IStrategoTerm decl);
-
   public abstract boolean isImportDec(IStrategoTerm decl);
-
   public abstract boolean isLanguageSpecificDec(IStrategoTerm decl);
 
   public abstract boolean isPlainDec(IStrategoTerm decl);

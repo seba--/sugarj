@@ -99,10 +99,14 @@ public class PrologLanguage extends AbstractBaseLanguage {
 
   @Override
   public boolean isLanguageSpecificDec(IStrategoTerm decl) {
-    return isApplication(decl, "NonUnitClause") || isApplication(decl, "UnitClause") || isApplication(decl, "Query") || isApplication(decl, "Command") || isApplication(decl, "ModuleReexport");
+    return isApplication(decl, "NonUnitClause")
+        || isApplication(decl, "UnitClause") 
+        || isApplication(decl, "Query") 
+        || isApplication(decl, "Command") 
+        || isApplication(decl, "ModuleReexport")
+        || isNamespaceDec(decl);
   }
 
-  @Override
   public boolean isNamespaceDec(IStrategoTerm decl) {
     return isApplication(decl, "ModuleDec") || isApplication(decl, "SugarModuleDec");
   }

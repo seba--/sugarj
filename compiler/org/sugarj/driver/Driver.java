@@ -45,7 +45,6 @@ import org.spoofax.jsglr_layout.shared.TokenExpectedException;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.lang.StrategoException;
-import org.strategoxt.stratego_lib.output_1_0;
 import org.sugarj.AbstractBaseLanguage;
 import org.sugarj.AbstractBaseProcessor;
 import org.sugarj.common.ATermCommands;
@@ -462,9 +461,7 @@ public class Driver{
 
   private void processToplevelDeclaration(IStrategoTerm toplevelDecl) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException {
     try {
-      if (baseLanguage.isNamespaceDec(toplevelDecl))
-        processNamespaceDec(toplevelDecl);
-      else if (baseLanguage.isImportDec(toplevelDecl) || baseLanguage.isTransformationApplication(toplevelDecl)) {
+      if (baseLanguage.isImportDec(toplevelDecl) || baseLanguage.isTransformationApplication(toplevelDecl)) {
         if (inDesugaredDeclList || !environment.isAtomicImportParsing())
           processImportDec(toplevelDecl);
         else
@@ -663,22 +660,6 @@ public class Driver{
       log.logErr(msg, Log.DETAIL);
       setErrorMessage(term, msg);
       return term;
-    }
-  }
-
-  
-  private void processNamespaceDec(IStrategoTerm toplevelDecl) throws IOException {
-    log.beginTask("processing", "PROCESS namespace declaration.", Log.CORE);
-    try {
-      if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
-        sugaredBodyDecls.add(lastSugaredToplevelDecl);
-      if (!desugaredBodyDecls.contains(lastSugaredToplevelDecl))
-        desugaredBodyDecls.add(lastSugaredToplevelDecl);
-
-      baseProcessor.processNamespaceDecl(toplevelDecl);    
-      
-    } finally {
-      log.endTask();
     }
   }
 

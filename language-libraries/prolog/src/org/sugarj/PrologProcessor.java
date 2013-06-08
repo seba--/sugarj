@@ -58,11 +58,13 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
 
   @Override
   public void processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException {
+    if (getLanguage().isNamespaceDec(toplevelDecl))
+      processNamespaceDecl(toplevelDecl);
+
     // Nothing to do here for prolog
     IStrategoTerm dec = toplevelDecl;
 
     // TODO: Implement reexport handling in a more sensible way
-
     if (isApplication(dec, "ModuleReexport"))
       imports.add(prettyPrint(dec));
     else
@@ -101,9 +103,7 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
     return relNamespaceName;
   }
 
-  @Override
-  public void processNamespaceDecl(IStrategoTerm toplevelDecl) throws IOException {
-
+  private void processNamespaceDecl(IStrategoTerm toplevelDecl) throws IOException {
     String moduleName = null;
     if (isApplication(toplevelDecl, "ModuleDec")) {
       moduleName = prettyPrint(getApplicationSubterm(toplevelDecl, "ModuleDec", 0));
@@ -122,7 +122,7 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
   }
 
   @Override
-  public AbstractBaseLanguage getLanguage() {
+  public PrologLanguage getLanguage() {
     return PrologLanguage.getInstance();
   }
 

@@ -21,7 +21,6 @@ public interface IBaseProcessor {
   public abstract String getNamespace();
 
   public abstract void processModuleImport(IStrategoTerm toplevelDecl) throws IOException;
-  public abstract void processNamespaceDecl(IStrategoTerm toplevelDecl) throws IOException;
   public abstract void processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException;
   public abstract List<Path> compile(List<Path> generatedSourceFiles, Path targetDir, List<Path> classpath) throws IOException;
 
