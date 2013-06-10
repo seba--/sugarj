@@ -471,6 +471,9 @@ public class Driver{
         List<String> additionalModules = processLanguageDec(toplevelDecl);
         for (String module : additionalModules) {
           prepareImport(toplevelDecl, module);
+          Path clazz = ModuleSystemCommands.importBinFile(module, environment, baseProcessor, driverResult);
+          if (clazz == null)
+            setErrorMessage(toplevelDecl, "Could not resolve required module " + module);
         }
       }
       else if (baseLanguage.isExtensionDecl(toplevelDecl))
