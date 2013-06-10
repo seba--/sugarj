@@ -130,7 +130,7 @@ public class JavaLanguage extends AbstractBaseLanguage {
   }
 
   @Override
-  public boolean isLanguageSpecificDecl(IStrategoTerm decl) {
+  public boolean isBaseDecl(IStrategoTerm decl) {
     return isApplication(decl, "ClassDec") 
         || isApplication(decl, "InterfaceDec") 
         || isApplication(decl, "EnumDec") 

@@ -58,7 +58,7 @@ public interface IBaseLanguage {
 
   public abstract boolean isExtensionDecl(IStrategoTerm decl);
   public abstract boolean isImportDecl(IStrategoTerm decl);
-  public abstract boolean isLanguageSpecificDecl(IStrategoTerm decl);
+  public abstract boolean isBaseDecl(IStrategoTerm decl);
 
   public abstract boolean isPlainDecl(IStrategoTerm decl);
 

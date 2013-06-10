@@ -107,7 +107,7 @@ public class HaskellLanguage extends AbstractBaseLanguage {
   }
 
   @Override
-  public boolean isLanguageSpecificDecl(IStrategoTerm decl) {
+  public boolean isBaseDecl(IStrategoTerm decl) {
     return isApplication(decl, "HaskellBody") || isNamespaceDec(decl);
   }
 

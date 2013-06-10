@@ -98,7 +98,7 @@ public class PrologLanguage extends AbstractBaseLanguage {
   }
 
   @Override
-  public boolean isLanguageSpecificDecl(IStrategoTerm decl) {
+  public boolean isBaseDecl(IStrategoTerm decl) {
     return isApplication(decl, "NonUnitClause")
         || isApplication(decl, "UnitClause") 
         || isApplication(decl, "Query") 
