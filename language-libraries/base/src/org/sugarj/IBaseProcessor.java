@@ -18,7 +18,7 @@ public interface IBaseProcessor {
   public abstract void init(RelativePath sourceFile, Environment environment);
   
   public abstract void processModuleImport(IStrategoTerm toplevelDecl) throws IOException;
-  public abstract void processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException;
+  public abstract List<String> processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException;
 
   public abstract String getNamespace();
   public abstract String getModulePathOfImport(IStrategoTerm decl);

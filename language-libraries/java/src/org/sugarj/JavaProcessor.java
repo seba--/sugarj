@@ -6,6 +6,7 @@ import static org.sugarj.common.Log.log;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -90,10 +91,10 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
   }
 
   @Override
-  public void processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException {
+  public List<String> processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException {
     if (getLanguage().isNamespaceDec(toplevelDecl)) {
       processNamespaceDecl(toplevelDecl);
-      return;
+      return Collections.emptyList();
     }
 
     IStrategoTerm dec = isApplication(toplevelDecl, "JavaTypeDec") ? getApplicationSubterm(toplevelDecl, "JavaTypeDec", 0) : toplevelDecl;
@@ -104,6 +105,9 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
       throw new RuntimeException("Declaration name '" + decName + "'" + " does not match the file name '" + expectedDecName + "'.");
 
     body.add(prettyPrint(dec));
+    
+    // TODO return list of qualified types that occur in the decl, e.g., java.util.String
+    return Collections.emptyList();
   }
 
   private void processNamespaceDecl(IStrategoTerm toplevelDecl) throws IOException {

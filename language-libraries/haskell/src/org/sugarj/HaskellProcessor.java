@@ -5,6 +5,7 @@ import static org.sugarj.common.ATermCommands.getApplicationSubterm;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -104,10 +105,10 @@ public class HaskellProcessor extends AbstractBaseProcessor {
   }
 
   @Override
-  public void processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException {
+  public List<String> processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException {
     if (getLanguage().isNamespaceDec(toplevelDecl)) {
       processNamespaceDecl(toplevelDecl);
-      return;
+      return Collections.emptyList();
     }
     
     IStrategoTerm term = getApplicationSubterm(toplevelDecl, "HaskellBody", 0);
@@ -119,6 +120,7 @@ public class HaskellProcessor extends AbstractBaseProcessor {
     }
     if (text != null)
       body.add(text);
+    return Collections.emptyList();
   }
 
   @Override

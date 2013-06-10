@@ -3,6 +3,7 @@ package org.sugarj;
 import static org.sugarj.common.ATermCommands.getApplicationSubterm;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -97,10 +98,10 @@ public class FomegaProcessor extends AbstractBaseProcessor {
   }
 
   @Override
-  public void processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException {
+  public  List<String> processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException {
     if (getLanguage().isNamespaceDec(toplevelDecl)) {
       processNamespaceDecl(toplevelDecl);
-      return;
+      return Collections.emptyList();
     }
 
     //    IStrategoTerm term = getApplicationSubterm(toplevelDecl, "FomegaBody", 0);
@@ -112,6 +113,7 @@ public class FomegaProcessor extends AbstractBaseProcessor {
     }
     if (text != null)
       body.add(text);
+    return Collections.emptyList();
   }
 
   @Override

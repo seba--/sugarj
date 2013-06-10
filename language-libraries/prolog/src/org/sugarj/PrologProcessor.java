@@ -57,10 +57,10 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
   }
 
   @Override
-  public void processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException {
+  public List<String> processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException {
     if (getLanguage().isNamespaceDec(toplevelDecl)) {
       processNamespaceDecl(toplevelDecl);
-      return;
+      return Collections.emptyList();
     }
 
     // Nothing to do here for prolog
@@ -71,6 +71,8 @@ public class PrologProcessor extends AbstractBaseProcessor implements Serializab
       imports.add(prettyPrint(dec));
     else
       body.add(prettyPrint(dec));
+    
+    return Collections.emptyList();
   }
 
   private IStrategoTerm initializePrettyPrinter(Context ctx) {
