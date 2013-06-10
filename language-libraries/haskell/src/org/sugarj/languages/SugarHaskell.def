@@ -1,24 +1,11 @@
 definition
 module org/sugarj/languages/SugarHaskell
 imports org/sugarj/languages/Haskell
-        org/sugarj/languages/Sdf2
-        org/sugarj/languages/Stratego
-        org/sugarj/languages/EditorServices
         org/sugarj/languages/Sugar
 
 exports
-  context-free start-symbols
-  	SugarCompilationUnit
-
   context-free syntax
-    HaskellModuleDec HaskellImportdecl* SugarHaskellBody -> SugarCompilationUnit {cons("CompilationUnit")}
-
-    "module" HaskellModid HaskellExports? "where" -> HaskellModuleDec {cons("ModuleDec")}
-
-    HaskellOffsideTopdeclList  -> SugarHaskellBody {cons("HaskellBody")}
-    ExtensionElem+             -> SugarHaskellBody {cons("ExtensionBody")}
-
-  context-free syntax
-    HaskellModuleDec LAYOUT?    -> ToplevelDeclaration
-    HaskellImportdecl LAYOUT?   -> ToplevelDeclaration {enforce-newline, layout(gt(col(left(1)), col(first(1))))}
-    SugarHaskellBody LAYOUT?    -> ToplevelDeclaration
+    HaskellModuleDec                  -> ToplevelDeclaration
+    HaskellOffsideImportdecl          -> ToplevelDeclaration
+    HaskellOffsideTopdeclList         -> ToplevelDeclaration {cons("HaskellBody")}
+    ExtensionElem+                    -> ToplevelDeclaration {cons("ExtensionBody")}

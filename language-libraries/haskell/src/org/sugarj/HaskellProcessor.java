@@ -48,6 +48,9 @@ public class HaskellProcessor extends AbstractBaseProcessor {
 
   @Override
   public String getGeneratedSource() {
+    if (moduleHeader == null)
+      return "";
+    
     return moduleHeader + "\n"
          + StringCommands.printListSeparated(imports, "\n") + "\n"
          + StringCommands.printListSeparated(body, "\n");
@@ -150,9 +153,13 @@ public class HaskellProcessor extends AbstractBaseProcessor {
     List<String> cmds = new LinkedList<String>();
     cmds.add(GHC_COMMAND);
     
+    cmds.add("-outputdir");
+    cmds.add(bin.getAbsolutePath());
+    
     List<Path> generatedFiles = new LinkedList<Path>();
     for (Path outFile : outFiles) {
       cmds.add(outFile.getAbsolutePath());
+      
       String noExtPath = FileCommands.dropExtension(outFile.getAbsolutePath());
       if (FileCommands.fileExists(new AbsolutePath(noExtPath)))
         generatedFiles.add(new AbsolutePath(noExtPath));

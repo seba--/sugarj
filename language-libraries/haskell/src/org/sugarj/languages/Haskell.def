@@ -497,8 +497,8 @@ exports
 module Haskell-Modules
 exports
   context-free syntax
-    "module" Modid Exports?
-            "where" Body 	-> Module 	{cons("Module")}
+    "module" Modid Exports? "where" -> ModuleDec {cons("ModuleDec")}
+    ModuleDec Body 	-> Module 	{cons("Module")}
     Body 			-> Module 	{cons("Program")}
     Decl 		   	-> Topdecl
 
@@ -1062,6 +1062,7 @@ imports
             Empty                        => HaskellEmpty
             Body                         => HaskellBody
             Topdecl                      => HaskellTopdecl
+            ModuleDec                    => HaskellModuleDec
             Module                       => HaskellModule
             Literal                      => HaskellLiteral
             ASCII-SO                     => HaskellASCII-SO
