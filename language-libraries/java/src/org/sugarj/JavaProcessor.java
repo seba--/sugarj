@@ -91,7 +91,7 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
   }
 
   @Override
-  public List<String> processLanguageSpecificDecl(IStrategoTerm toplevelDecl) throws IOException {
+  public List<String> processBaseDecl(IStrategoTerm toplevelDecl) throws IOException {
     if (getLanguage().isNamespaceDec(toplevelDecl)) {
       processNamespaceDecl(toplevelDecl);
       return Collections.emptyList();

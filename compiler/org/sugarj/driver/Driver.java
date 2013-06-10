@@ -929,7 +929,7 @@ public class Driver{
       
       log.beginTask("Generate " + baseProcessor.getLanguage().getLanguageName() + " code.", Log.BASELANG);
       try {
-        baseProcessor.processLanguageSpecificDecl(toplevelDecl);
+        baseProcessor.processBaseDecl(toplevelDecl);
       } finally {
         log.endTask();
       }
