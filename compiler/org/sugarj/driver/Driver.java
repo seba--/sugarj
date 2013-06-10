@@ -467,8 +467,12 @@ public class Driver{
         else
           processImportDecs(toplevelDecl);
       } 
-      else if (baseLanguage.isLanguageSpecificDecl(toplevelDecl))
-        processLanguageDec(toplevelDecl);
+      else if (baseLanguage.isBaseDecl(toplevelDecl)) {
+        List<String> additionalModules = processLanguageDec(toplevelDecl);
+        for (String module : additionalModules) {
+          prepareImport(toplevelDecl, module);
+        }
+      }
       else if (baseLanguage.isExtensionDecl(toplevelDecl))
         processExtensionDec(toplevelDecl);
       else if (baseLanguage.isPlainDecl(toplevelDecl)) // XXX: Decide what to do
@@ -917,7 +921,7 @@ public class Driver{
     return false;
   }
 
-  private void processLanguageDec(IStrategoTerm toplevelDecl) throws IOException {
+  private List<String> processLanguageDec(IStrategoTerm toplevelDecl) throws IOException {
     log.beginTask("processing", "PROCESS " + baseProcessor.getLanguage().getLanguageName() + " declaration: " + toplevelDecl.toString(0), Log.CORE);
     try {
       
@@ -925,14 +929,9 @@ public class Driver{
         sugaredBodyDecls.add(lastSugaredToplevelDecl);
       
       if (dependsOnModel)
-        return;
+        return Collections.emptyList();
       
-      log.beginTask("Generate " + baseProcessor.getLanguage().getLanguageName() + " code.", Log.BASELANG);
-      try {
-        baseProcessor.processBaseDecl(toplevelDecl);
-      } finally {
-        log.endTask();
-      }
+      return baseProcessor.processBaseDecl(toplevelDecl);
     } finally {
       log.endTask();
     }
