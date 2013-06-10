@@ -461,17 +461,17 @@ public class Driver{
 
   private void processToplevelDeclaration(IStrategoTerm toplevelDecl) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException {
     try {
-      if (baseLanguage.isImportDec(toplevelDecl) || baseLanguage.isTransformationApplication(toplevelDecl)) {
+      if (baseLanguage.isImportDecl(toplevelDecl) || baseLanguage.isTransformationApplication(toplevelDecl)) {
         if (inDesugaredDeclList || !environment.isAtomicImportParsing())
           processImportDec(toplevelDecl);
         else
           processImportDecs(toplevelDecl);
       } 
-      else if (baseLanguage.isLanguageSpecificDec(toplevelDecl))
+      else if (baseLanguage.isLanguageSpecificDecl(toplevelDecl))
         processLanguageDec(toplevelDecl);
-      else if (baseLanguage.isExtensionDec(toplevelDecl))
+      else if (baseLanguage.isExtensionDecl(toplevelDecl))
         processExtensionDec(toplevelDecl);
-      else if (baseLanguage.isPlainDec(toplevelDecl)) // XXX: Decide what to do
+      else if (baseLanguage.isPlainDecl(toplevelDecl)) // XXX: Decide what to do
                                                       // with "Plain"--leave in
                                                       // the language or create
                                                       // a new "Plain" language
@@ -682,7 +682,7 @@ public class Driver{
         log.endSilent(); 
       }
     
-      if (term != null && (baseLanguage.isImportDec(term) || baseLanguage.isTransformationApplication(term)))
+      if (term != null && (baseLanguage.isImportDecl(term) || baseLanguage.isTransformationApplication(term)))
         pendingImports.add(term);
       else {
         declProvider.retract(term);
@@ -1405,8 +1405,8 @@ public class Driver{
     Collections.sort(list, new Comparator<IStrategoTerm>() {
       @Override
       public int compare(IStrategoTerm o1, IStrategoTerm o2) {
-        boolean imp1 = baseLanguage.isImportDec(o1);
-        boolean imp2 = baseLanguage.isImportDec(o2);
+        boolean imp1 = baseLanguage.isImportDecl(o1);
+        boolean imp2 = baseLanguage.isImportDecl(o2);
         if (imp1 && imp2 || !imp1 && !imp2)
           return 0;
         return imp1 ? -1 : 1;

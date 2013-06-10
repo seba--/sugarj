@@ -98,24 +98,24 @@ public class FomegaLanguage extends AbstractBaseLanguage {
   }
 
   @Override
-  public boolean isExtensionDec(IStrategoTerm decl) {
+  public boolean isExtensionDecl(IStrategoTerm decl) {
     if (isApplication(decl, "ExtensionBody"))
       return true;
     return false;
   }
 
   @Override
-  public boolean isImportDec(IStrategoTerm decl) {
+  public boolean isImportDecl(IStrategoTerm decl) {
     return isApplication(decl, "Import");   
   }
 
   @Override
-  public boolean isLanguageSpecificDec(IStrategoTerm decl) {
+  public boolean isLanguageSpecificDecl(IStrategoTerm decl) {
     return isApplication(decl, "FomegaBody") || isNamespaceDec(decl);
   }
 
   @Override
-  public boolean isPlainDec(IStrategoTerm decl) {
+  public boolean isPlainDecl(IStrategoTerm decl) {
     if (isApplication(decl, "PlainDec"))
       return true;
     return false;

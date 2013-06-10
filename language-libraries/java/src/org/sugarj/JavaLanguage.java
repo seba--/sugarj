@@ -117,12 +117,12 @@ public class JavaLanguage extends AbstractBaseLanguage {
   }
 
   @Override
-  public boolean isExtensionDec(IStrategoTerm decl) {
+  public boolean isExtensionDecl(IStrategoTerm decl) {
     return isApplication(decl, "ExtensionDec");
   }
 
   @Override
-  public boolean isImportDec(IStrategoTerm decl) {
+  public boolean isImportDecl(IStrategoTerm decl) {
     return 
         isApplication(decl, "TypeImportDec") || 
         isApplication(decl, "TypeImportOnDemandDec") ||
@@ -130,7 +130,7 @@ public class JavaLanguage extends AbstractBaseLanguage {
   }
 
   @Override
-  public boolean isLanguageSpecificDec(IStrategoTerm decl) {
+  public boolean isLanguageSpecificDecl(IStrategoTerm decl) {
     return isApplication(decl, "ClassDec") 
         || isApplication(decl, "InterfaceDec") 
         || isApplication(decl, "EnumDec") 
@@ -148,7 +148,7 @@ public class JavaLanguage extends AbstractBaseLanguage {
   }
 
   @Override
-  public boolean isPlainDec(IStrategoTerm decl) {
+  public boolean isPlainDecl(IStrategoTerm decl) {
     return isApplication(decl, "PlainDec"); 
   }
 

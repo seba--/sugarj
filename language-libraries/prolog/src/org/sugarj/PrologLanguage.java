@@ -88,17 +88,17 @@ public class PrologLanguage extends AbstractBaseLanguage {
   }
 
   @Override
-  public boolean isExtensionDec(IStrategoTerm decl) {
+  public boolean isExtensionDecl(IStrategoTerm decl) {
     return isApplication(decl, "ExtensionBody");
   }
 
   @Override
-  public boolean isImportDec(IStrategoTerm decl) {
+  public boolean isImportDecl(IStrategoTerm decl) {
     return isApplication(decl, "ModuleImport");
   }
 
   @Override
-  public boolean isLanguageSpecificDec(IStrategoTerm decl) {
+  public boolean isLanguageSpecificDecl(IStrategoTerm decl) {
     return isApplication(decl, "NonUnitClause")
         || isApplication(decl, "UnitClause") 
         || isApplication(decl, "Query") 
@@ -112,7 +112,7 @@ public class PrologLanguage extends AbstractBaseLanguage {
   }
 
   @Override
-  public boolean isPlainDec(IStrategoTerm decl) {
+  public boolean isPlainDecl(IStrategoTerm decl) {
     return isApplication(decl, "PlainDec");
   }
 }
