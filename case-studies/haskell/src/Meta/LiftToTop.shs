@@ -45,7 +45,7 @@ rules
     partition(?HaskellBody(<id>)) => (xs, ys);
     if <?[]> xs
       then !ys
-      else <foldr(id,\(x,y) -> TopdeclSeq(x,y)\)> xs => xs';
+      else <foldr1(\[x] -> x\,\(x,y) -> TopdeclSeq(x,y)\)> xs => xs';
            ![HaskellBody(xs')|ys]
     end
 
@@ -69,5 +69,5 @@ rules
   ensure-import(|imp) : e -> LiftToTop(<qualified-import> imp, e)
 
   qualified-import =
-    foldr1(?[<id>], \(x,y) -> QModId(x,y)\);
+    foldr1(\[x] -> x\, \(x,y) -> QModId(x,y)\);
     !Import(None(), Some(Qualified()), <id>, None(), None())
