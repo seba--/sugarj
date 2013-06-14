@@ -14,8 +14,8 @@ rules
       ?(inp,out)
       ; if OutputModule => mainmod then
           <parse-sdf-definition-stream> inp
-        ; where( collect-one(?"module"#([unparameterized(mainmod), _, _]))
-               ; ?"module"#([_, <collect-all(?unparameterized(<id>) + ?parameterized(<id>,_))>, _]) => imps)
+        ; where((try( collect-one(?"module"#([unparameterized(mainmod), _, _]))
+                    ; ?"module"#([_, <collect-all(?unparameterized(<id>) + ?parameterized(<id>,_))>, _])) + ![]) => imps)
         ; gen-syntax-constructors-from-module
         ; !Module(mainmod,
                   [Imports([ Import("org/sugarj/transformations/typesmart/Runtime")

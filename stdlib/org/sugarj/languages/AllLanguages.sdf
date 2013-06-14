@@ -6,3 +6,4 @@ imports
   org/sugarj/languages/EditorServices
   org/sugarj/languages/Sugar
   org/sugarj/languages/Model
+  org/sugarj/stdlib/Common
