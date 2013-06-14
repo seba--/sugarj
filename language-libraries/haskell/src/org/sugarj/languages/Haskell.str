@@ -3,8 +3,6 @@ module org/sugarj/languages/Haskell
 imports
   org/sugarj/transformations/typesmart/Runtime
   org/sugarj/languages/Stratego
-  Haskell
-
 
 signature
   constructors
