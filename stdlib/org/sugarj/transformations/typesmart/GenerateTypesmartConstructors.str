@@ -12,12 +12,15 @@ imports libstratego-lib
 rules
   main = io-stream-wrap(typesmart-options,
       ?(inp,out)
-      ; if OutputModule then
+      ; if OutputModule => mainmod then
           <parse-sdf-definition-stream> inp
+        ; where( collect-one(?"module"#([unparameterized(mainmod), _, _]))
+               ; ?"module"#([_, <collect-all(?unparameterized(<id>) + ?parameterized(<id>,_))>, _]) => imps)
         ; gen-syntax-constructors-from-module
-        ; !Module(<OutputModule>,
+        ; !Module(mainmod,
                   [Imports([ Import("org/sugarj/transformations/typesmart/Runtime")
-                           , Import("org/sugarj/languages/Stratego")]) | <id>])
+                           , Import("org/sugarj/languages/Stratego")
+                           | <map(!Import(<id>))> imps]) | <id>])
         ; pp-stratego-stream(|out)
         else
           !""
