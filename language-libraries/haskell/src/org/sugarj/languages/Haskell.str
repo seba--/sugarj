@@ -665,6 +665,15 @@ rules
                                                                             ))
            ; ![SortNoArgs("APat")|<id>]
          ))
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"List") ; fail)> ( arg1
+                                                                         , Sort(
+                                                                             "List"
+                                                                           , [SortNoArgs("Term")]
+                                                                           )
+                                                                         ))
+        ; ![SortNoArgs("PreTerm")|<id>]
+      )
     ; ?res-sorts
     ; <prim("SUGARJ_unsafe_build", "List")> [arg1]
     ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
