@@ -225,9 +225,9 @@ public class HaskellLib extends LanguageLib {
 
   private String prettyPrint(IStrategoTerm term) {
     if (ppTable == null) 
-      ppTable = ATermCommands.readPrettyPrintTable(ensureFile("org/sugarj/languages/Haskell.pp").getAbsolutePath());
+      ppTable = aterm.readPrettyPrintTable(ensureFile("org/sugarj/languages/Haskell.pp").getAbsolutePath());
     
-    return ATermCommands.prettyPrint(ppTable, term, interp);
+    return aterm.prettyPrint(ppTable, term, interp);
   }
   
   @Override
