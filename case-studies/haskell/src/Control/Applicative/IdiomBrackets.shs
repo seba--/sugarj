@@ -7,7 +7,8 @@ import Meta.LiftToTop
 
 context-free syntax
   "(|" PurePart EffectfulPart* "|)" -> HaskellExp {cons("IdiomBrackets")}
-  "(|" HaskellExp HaskellQop HaskellExp "|)" -> HaskellExp {cons("InfixIdiomBrackets")}
+  "(|" HaskellExp HaskellQvarsym HaskellExp "|)" -> HaskellExp {cons("VarInfixIdiomBrackets")}
+  "(|" HaskellExp HaskellQconsym HaskellExp "|)" -> HaskellExp {cons("ConInfixIdiomBrackets")}
 
   HaskellExp -> PurePart
   HaskellExp -> EffectfulPart
@@ -25,9 +26,14 @@ rules
     IdiomBrackets(f, args) ->
     <apply-effectful; ensure-import(|["Control","Applicative"])>
       (|[ Control.Applicative.pure $f ]|, args)
+
   desugar-idiom-brackets :
-    InfixIdiomBrackets(e1, op, e2) ->
-    IdiomBrackets(BinCon(op), [e1, e2])
+    VarInfixIdiomBrackets(e1, var, e2) ->
+    IdiomBrackets(BinOp(var), [e1, e2])
+
+  desugar-idiom-brackets :
+    ConInfixIdiomBrackets(e1, con, e2) ->
+    IdiomBrackets(BinCon(con), [e1, e2])
 
   apply-effectful :
     (f,[]) -> f
