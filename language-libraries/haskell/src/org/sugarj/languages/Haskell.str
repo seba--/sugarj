@@ -657,7 +657,7 @@ rules
                                                                           ))
          ; ![SortNoArgs("List")|<id>]
        )
-       ; try(
+       ; (try(
            where(<(has-sort <+ log-mismatching-sort-error(|"List") ; fail)> ( arg1
                                                                             , Sort(
                                                                                 "List"
@@ -665,8 +665,17 @@ rules
                                                                               )
                                                                             ))
            ; ![SortNoArgs("APat")|<id>]
-         ))
-    ; ?res-sorts
+         )
+      ; try(
+        where(<debug(!"list: "); (has-sort <+ log-mismatching-sort-error(|"List") ; fail)> ( arg1
+                                                                         , Sort(
+                                                                             "List"
+                                                                           , [SortNoArgs("Term")]
+                                                                           )
+                                                                         ))
+        ; ![SortNoArgs("PreTerm")|<id>]
+      )))
+  ; ?res-sorts
     ; <prim("SUGARJ_unsafe_build", "List")> [arg1]
     ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
 
