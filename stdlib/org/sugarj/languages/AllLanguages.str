@@ -7,6 +7,17 @@ imports
 
 signature
   constructors
+    LayoutConstraint           : LayoutConstraint -> Sdf2ATermAttribute
+    LayoutInt                  : Sdf2IntCon -> LayoutConstraint
+    LayoutSelect               : LayoutConstraint * Sdf2AFun -> LayoutConstraint
+    LayoutNot                  : LayoutConstraint -> LayoutConstraint
+    LayoutGT                   : LayoutConstraint * LayoutConstraint -> LayoutConstraint
+    LayoutGE                   : LayoutConstraint * LayoutConstraint -> LayoutConstraint
+    LayoutEQ                   : LayoutConstraint * LayoutConstraint -> LayoutConstraint
+    LayoutLE                   : LayoutConstraint * LayoutConstraint -> LayoutConstraint
+    LayoutLT                   : LayoutConstraint * LayoutConstraint -> LayoutConstraint
+    LayoutAnd                  : LayoutConstraint * LayoutConstraint -> LayoutConstraint
+    LayoutOr                   : LayoutConstraint * LayoutConstraint -> LayoutConstraint
     ToModelTerm                : ATerm -> ModelTerm
     TransformationDef          : DirectTransformation * List(ModelTransformation) -> TransformationDef
     Strategies                 : List(StrategoDef) -> ModelTransformation
@@ -451,6 +462,9 @@ signature
 
 rules
 
+
+rules
+
   is-lexical-sort(|) =
     equal(|SortNoArgs("StrategoKeyword"))
 
@@ -708,6 +722,124 @@ rules
 
 
 rules
+
+  smart-LayoutConstraint(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"LayoutConstraint") ; fail)> (arg1, SortNoArgs("LayoutConstraint")))
+        ; ![SortNoArgs("Sdf2ATermAttribute")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "LayoutConstraint")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-LayoutInt(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"LayoutInt") ; fail)> (arg1, SortNoArgs("Sdf2IntCon")))
+        ; ![SortNoArgs("LayoutConstraint")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "LayoutInt")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-LayoutSelect(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"LayoutSelect") ; fail)> (arg1, SortNoArgs("LayoutConstraint")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"LayoutSelect") ; fail)> (arg2, SortNoArgs("Sdf2AFun"))))
+        ; ![SortNoArgs("LayoutConstraint")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "LayoutSelect")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-LayoutNot(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"LayoutNot") ; fail)> (arg1, SortNoArgs("LayoutConstraint")))
+        ; ![SortNoArgs("LayoutConstraint")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "LayoutNot")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-LayoutGT(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"LayoutGT") ; fail)> (arg1, SortNoArgs("LayoutConstraint")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"LayoutGT") ; fail)> (arg2, SortNoArgs("LayoutConstraint"))))
+        ; ![SortNoArgs("LayoutConstraint")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "LayoutGT")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-LayoutGE(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"LayoutGE") ; fail)> (arg1, SortNoArgs("LayoutConstraint")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"LayoutGE") ; fail)> (arg2, SortNoArgs("LayoutConstraint"))))
+        ; ![SortNoArgs("LayoutConstraint")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "LayoutGE")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-LayoutEQ(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"LayoutEQ") ; fail)> (arg1, SortNoArgs("LayoutConstraint")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"LayoutEQ") ; fail)> (arg2, SortNoArgs("LayoutConstraint"))))
+        ; ![SortNoArgs("LayoutConstraint")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "LayoutEQ")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-LayoutLE(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"LayoutLE") ; fail)> (arg1, SortNoArgs("LayoutConstraint")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"LayoutLE") ; fail)> (arg2, SortNoArgs("LayoutConstraint"))))
+        ; ![SortNoArgs("LayoutConstraint")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "LayoutLE")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-LayoutLT(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"LayoutLT") ; fail)> (arg1, SortNoArgs("LayoutConstraint")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"LayoutLT") ; fail)> (arg2, SortNoArgs("LayoutConstraint"))))
+        ; ![SortNoArgs("LayoutConstraint")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "LayoutLT")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-LayoutAnd(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"LayoutAnd") ; fail)> (arg1, SortNoArgs("LayoutConstraint")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"LayoutAnd") ; fail)> (arg2, SortNoArgs("LayoutConstraint"))))
+        ; ![SortNoArgs("LayoutConstraint")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "LayoutAnd")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-LayoutOr(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"LayoutOr") ; fail)> (arg1, SortNoArgs("LayoutConstraint")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"LayoutOr") ; fail)> (arg2, SortNoArgs("LayoutConstraint"))))
+        ; ![SortNoArgs("LayoutConstraint")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "LayoutOr")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
 
   smart-ToModelTerm(|arg1) =
     ![]
