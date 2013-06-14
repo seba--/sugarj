@@ -7,12 +7,7 @@ imports org/sugarj/languages/Haskell
         org/sugarj/languages/Sugar
 
 exports
-  context-free start-symbols
-  	SugarCompilationUnit
-
   context-free syntax
-    HaskellModuleDec HaskellImportdecl* SugarHaskellBody -> SugarCompilationUnit {cons("CompilationUnit")}
-
     "module" HaskellModid HaskellExports? "where" -> HaskellModuleDec {cons("ModuleDec")}
 
     HaskellOffsideTopdeclList  -> SugarHaskellBody {cons("HaskellBody")}

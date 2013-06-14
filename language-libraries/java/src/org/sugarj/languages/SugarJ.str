@@ -3,11 +3,16 @@ module org/sugarj/languages/SugarJ
 imports
   org/sugarj/transformations/typesmart/Runtime
   org/sugarj/languages/Stratego
+  org/sugarj/languages/Java
+  org/sugarj/languages/Sdf2
+  org/sugarj/languages/Stratego
+  org/sugarj/languages/EditorServices
+  org/sugarj/languages/Sugar
+  org/sugarj/languages/Model
 
 
 signature
   constructors
-    CompilationUnit       : Option(JavaPackageDec) * List(JavaImportDec) * List(Alt(JavaTypeDec, SugarDec)) -> CompilationUnit
     SugarDec              : SugarDecHead * SugarBody -> SugarDec
     SugarDecHead          : List(AnnoOrSugarMod) * JavaId -> SugarDecHead
     SugarBody             : List(SugarDefElem) -> SugarBody
@@ -40,37 +45,6 @@ rules
 
 
 rules
-
-  smart-CompilationUnit(|arg1, arg2, arg3) =
-    ![]
-    ; try(
-        (where(<(has-sort <+ log-mismatching-sort-error(|"CompilationUnit") ; fail)> ( arg1
-                                                                                     , Sort(
-                                                                                         "Option"
-                                                                                       , [SortNoArgs("JavaPackageDec")]
-                                                                                       )
-                                                                                     ))
-         ; where(<(has-sort <+ log-mismatching-sort-error(|"CompilationUnit") ; fail)> ( arg2
-                                                                                       , Sort(
-                                                                                           "List"
-                                                                                         , [SortNoArgs("JavaImportDec")]
-                                                                                         )
-                                                                                       ))
-         ; where(<(has-sort <+ log-mismatching-sort-error(|"CompilationUnit") ; fail)> ( arg3
-                                                                                       , Sort(
-                                                                                           "List"
-                                                                                         , [ Sort(
-                                                                                               "Alt"
-                                                                                             , [SortNoArgs("JavaTypeDec")|[SortNoArgs("SugarDec")]]
-                                                                                             )
-                                                                                           ]
-                                                                                         )
-                                                                                       )))
-        ; ![SortNoArgs("CompilationUnit")|<id>]
-      )
-    ; ?res-sorts
-    ; <prim("SUGARJ_unsafe_build", "CompilationUnit")> [arg1, arg2, arg3]
-    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
 
   smart-SugarDec(|arg1, arg2) =
     ![]

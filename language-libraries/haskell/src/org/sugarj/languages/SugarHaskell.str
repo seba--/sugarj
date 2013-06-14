@@ -12,31 +12,13 @@ imports
 
 signature
   constructors
-    CompilationUnit : HaskellModuleDec * List(HaskellImportdecl) * SugarHaskellBody -> SugarCompilationUnit
-    ModuleDec       : HaskellModid * Option(HaskellExports) -> HaskellModuleDec
-    HaskellBody     : HaskellOffsideTopdeclList -> SugarHaskellBody
-    SugarBody       : List(SugarDefElem) -> SugarHaskellBody
-    EditorBody      : List(EditorServiceSection) -> SugarHaskellBody
+    ModuleDec   : HaskellModid * Option(HaskellExports) -> HaskellModuleDec
+    HaskellBody : HaskellOffsideTopdeclList -> SugarHaskellBody
+    SugarBody   : List(SugarDefElem) -> SugarHaskellBody
+    EditorBody  : List(EditorServiceSection) -> SugarHaskellBody
 
 
 rules
-
-  smart-CompilationUnit(|arg1, arg2, arg3) =
-    ![]
-    ; try(
-        (where(<(has-sort <+ log-mismatching-sort-error(|"CompilationUnit") ; fail)> (arg1, SortNoArgs("HaskellModuleDec")))
-         ; where(<(has-sort <+ log-mismatching-sort-error(|"CompilationUnit") ; fail)> ( arg2
-                                                                                       , Sort(
-                                                                                           "List"
-                                                                                         , [SortNoArgs("HaskellImportdecl")]
-                                                                                         )
-                                                                                       ))
-         ; where(<(has-sort <+ log-mismatching-sort-error(|"CompilationUnit") ; fail)> (arg3, SortNoArgs("SugarHaskellBody"))))
-        ; ![SortNoArgs("SugarCompilationUnit")|<id>]
-      )
-    ; ?res-sorts
-    ; <prim("SUGARJ_unsafe_build", "CompilationUnit")> [arg1, arg2, arg3]
-    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
 
   smart-ModuleDec(|arg1, arg2) =
     ![]
