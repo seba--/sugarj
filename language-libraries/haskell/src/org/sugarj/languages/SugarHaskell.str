@@ -1,9 +1,113 @@
 module org/sugarj/languages/SugarHaskell
-imports org/sugarj/languages/Sugar
 
-signature constructors
-  CompilationUnit : HaskellModuleDec * List(HaskellImportdecl) * List(SugarHaskellTopdecl) -> SugarCompilationUnit
-  ModuleDec : HaskellModid * Option(HaskellExports) -> HaskellModuleDec
-  HaskellBody : HaskellOffsideTopdeclList -> SugarHaskellBody
-  SugarBody : List(SugarDefElem) -> SugarHaskellBody
-  EditorBody : List(EditorServiceSection) -> SugarHaskellBody
+imports
+  org/sugarj/transformations/typesmart/Runtime
+  org/sugarj/languages/Stratego
+  org/sugarj/languages/Haskell
+  org/sugarj/languages/Sdf2
+  org/sugarj/languages/Stratego
+  org/sugarj/languages/EditorServices
+  org/sugarj/languages/Sugar
+
+
+signature
+  constructors
+    CompilationUnit : HaskellModuleDec * List(HaskellImportdecl) * SugarHaskellBody -> SugarCompilationUnit
+    ModuleDec       : HaskellModid * Option(HaskellExports) -> HaskellModuleDec
+    HaskellBody     : HaskellOffsideTopdeclList -> SugarHaskellBody
+    SugarBody       : List(SugarDefElem) -> SugarHaskellBody
+    EditorBody      : List(EditorServiceSection) -> SugarHaskellBody
+
+
+rules
+
+  smart-CompilationUnit(|arg1, arg2, arg3) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"CompilationUnit") ; fail)> (arg1, SortNoArgs("HaskellModuleDec")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"CompilationUnit") ; fail)> ( arg2
+                                                                                       , Sort(
+                                                                                           "List"
+                                                                                         , [SortNoArgs("HaskellImportdecl")]
+                                                                                         )
+                                                                                       ))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"CompilationUnit") ; fail)> (arg3, SortNoArgs("SugarHaskellBody"))))
+        ; ![SortNoArgs("SugarCompilationUnit")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "CompilationUnit")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-ModuleDec(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"ModuleDec") ; fail)> (arg1, SortNoArgs("HaskellModid")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"ModuleDec") ; fail)> ( arg2
+                                                                                 , Sort(
+                                                                                     "Option"
+                                                                                   , [SortNoArgs("HaskellExports")]
+                                                                                   )
+                                                                                 )))
+        ; ![SortNoArgs("HaskellModuleDec")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "ModuleDec")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-HaskellBody(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"HaskellBody") ; fail)> (arg1, SortNoArgs("HaskellOffsideTopdeclList")))
+        ; ![SortNoArgs("SugarHaskellBody")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "HaskellBody")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-SugarBody(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"SugarBody") ; fail)> ( arg1
+                                                                              , Sort(
+                                                                                  "List"
+                                                                                , [SortNoArgs("SugarDefElem")]
+                                                                                )
+                                                                              ))
+        ; ![SortNoArgs("SugarHaskellBody")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "SugarBody")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-EditorBody(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"EditorBody") ; fail)> ( arg1
+                                                                               , Sort(
+                                                                                   "List"
+                                                                                 , [SortNoArgs("EditorServiceSection")]
+                                                                                 )
+                                                                               ))
+        ; ![SortNoArgs("SugarHaskellBody")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "EditorBody")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("HaskellModuleDec")
+    , SortNoArgs("ToplevelDeclaration")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("HaskellImportdecl")
+    , SortNoArgs("ToplevelDeclaration")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("SugarHaskellBody")
+    , SortNoArgs("ToplevelDeclaration")
+    )

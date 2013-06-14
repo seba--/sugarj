@@ -1,302 +1,4138 @@
-module Haskell
+module org/sugarj/languages/Haskell
+
+imports
+  org/sugarj/transformations/typesmart/Runtime
+  org/sugarj/languages/Stratego
+
 
 signature
   constructors
-                     : Empty -> NoOffsideDeclListSem_Empty0
-                     : NoOffsideDeclListSem -> NoOffsideDeclListSem_Empty0
-                     : Empty -> OffsideDeclList_Empty0
-                     : OffsideDeclList -> OffsideDeclList_Empty0
-    None             : OptExports0
-    Conc             : ListStarOfCharClass0 * ListPlusOfCharClass0 -> ListPlusOfCharClass0
-    Conc             : ListPlusOfCharClass0 * ListStarOfCharClass0 -> ListPlusOfCharClass0
-    Conc             : ListPlusOfCharClass0 * ListPlusOfCharClass0 -> ListPlusOfCharClass0
-    Cons             : Int * ListStarOfCharClass0 -> ListPlusOfCharClass0
-    StmtSeq          : OffsideStmt * OffsideStmt -> OffsideStmt
-                     : Stmt -> OffsideStmt
-    DeclSeq          : OffsideDecl * Decl -> OffsideDecl
-                     : Decl -> OffsideDecl
-    AltSeq           : OffsideAlt * Alt -> OffsideAlt
-                     : Alt -> OffsideAlt
-    TopdeclSeq       : Topdecl * OffsideTopdecl -> OffsideTopdecl
-                     : Topdecl -> OffsideTopdecl
-    ImportdeclSeq    : Importdecl * OffsideImportdecl -> OffsideImportdecl
-                     : Importdecl -> OffsideImportdecl
-    FloatHash        : String -> Float-HASH
-    IntegerHash      : String -> Integer-HASH
-    StringHash       : List(StringChar) -> String-HASH
+    NewTypeDecl      : Option(Context) * Type * Newconstr * GeneralizedDeriving -> Topdecl
     CharHash         : CharChar -> Char-HASH
-    FlexibleContext  : List(FlexibleClass) -> FlexibleContext
-    FlexibleContext  : FlexibleClass -> FlexibleContext
-    SimpleClass      : Qtycls * Tyvar -> FlexibleClass
-    Class            : Qtycls * Gtycon -> FlexibleClass
+    StringHash       : List(StringChar) -> String-HASH
+    IntegerHash      : INTEGER-HASH -> Integer-HASH
+    FloatHash        : FLOAT-HASH -> Float-HASH
+    FloatHash        : RATIONAL-HASH -> Float-HASH
     Class            : Qtycls * Type -> FlexibleClass
-                     : OffsideStmt -> OffsideStmtList
-                     : Stmt -> NoOffsideStmt
-                     : NoOffsideStmtList -> NoOffsideStmtListSem
-    StmtSeq          : NoOffsideStmt * NoOffsideStmtList -> NoOffsideStmtList
-                     : NoOffsideStmt -> NoOffsideStmtList
-                     : NoOffsideStmtListSem -> NoOffsideStmtBlock
-    StmtList         : OffsideStmtList -> StmtList
-    StmtList         : NoOffsideStmtBlock -> StmtList
-    FBind            : Qvar * Exp -> Fbind
-    LetStmt          : Declbinds -> Stmt
-    ExpStmt          : Exp -> Stmt
+    Class            : Qtycls * Gtycon -> FlexibleClass
+    SimpleClass      : Qtycls * Tyvar -> FlexibleClass
+    FlexibleContext  : FlexibleClass -> FlexibleContext
+    FlexibleContext  : List(FlexibleClass) -> FlexibleContext
+    FlexibleInstance : Option(SContext) * Qtycls * List(AType) * MaybeWhere -> Topdecl
     BindStmt         : Pat * Exp -> Stmt
-                     : Exp -> List
-    PatBind          : Qvar * Pat -> FPat
-    LabeledPats      : List(FPat) -> LabeledPat
-    Irrefutable      : APat -> APat
-    List             : List(Pat) -> APat
-    Tuple            : Pat * List(Pat) -> APat
-                     : Pat -> APat
-    Wildcard         : APat
-                     : Literal -> APat
-    Labeled          : Qcon * LabeledPat -> APat
-    Constr           : Gcon -> APat
-    Named            : Var * APat -> APat
-                     : Var -> APat
-    ConstrApp        : Gcon * List(APat) -> LPat
-    Negation         : Literal -> LPat
-                     : APat -> LPat
+    ExpStmt          : Exp -> Stmt
+    LetStmt          : Declbinds -> Stmt
+    FBind            : Qvar * Exp -> Fbind
+    StmtList         : NoOffsideStmtBlock -> StmtList
+    StmtList         : OffsideStmtList -> StmtList
+    StmtSeq          : NoOffsideStmt * NoOffsideStmtList -> NoOffsideStmtList
+    StmtSeq          : OffsideStmt * OffsideStmt -> OffsideStmt
+    StmtSeq          : OffsideStmtNEWLINE * OffsideStmtList -> OffsideStmtList
+    List             : List(Exp) -> List
+    ListFrom         : Exp -> List
+    ListFirstFrom    : Exp * Exp -> List
+    ListFromTo       : Exp * Exp -> List
+    ListFirstFromTo  : Exp * Exp * Exp -> List
+    ListCompr        : Exp * List(Qual) -> List
+    QualBind         : Pat * Exp -> Qual
+    QualLet          : Declbinds -> Qual
     BinOpApp         : Pat * Qconop * LPat -> Pat
-                     : LPat -> Pat
-                     : OffsideDecl -> OffsideDeclList
-                     : Decl -> NoOffsideDecl
-                     : NoOffsideDeclList -> NoOffsideDeclListSem
-    DeclSeq          : NoOffsideDecl * NoOffsideDeclList -> NoOffsideDeclList
-                     : NoOffsideDecl -> NoOffsideDeclList
-                     : NoOffsideDeclListSem_Empty0 -> NoOffsideDeclBlock
-    DeclList         : OffsideDeclList_Empty0 -> DeclList
-    DeclList         : NoOffsideDeclBlock -> DeclList
-                     : DeclList -> Declbinds
-                     : Where -> MaybeWhere
-    Where            : DeclList -> Where
-    NestedFunLHS     : FunLHS * List(APat) -> FunLHS
-    OpFunLHS         : Pat * Varop * Pat -> FunLHS
-    VarFunLHS        : Var * List(APat) -> FunLHS
-                     : Pat -> FunLHS
-    Guarded          : Exp * Exp -> Gdrh
-    GdValdef         : FunLHS * List(Gdrh) * MaybeWhere -> Valdef
+    Negation         : Literal -> LPat
+    ConstrApp        : Gcon * List(APat) -> LPat
+    Named            : Var * APat -> APat
+    Constr           : Gcon -> APat
+    Labeled          : Qcon * LabeledPat -> APat
+    LabeledPats      : List(FPat) -> LabeledPat
+    Wildcard         : APat
+    Tuple            : Pat * List(Pat) -> APat
+    List             : List(Pat) -> APat
+    Irrefutable      : APat -> APat
+    PatBind          : Qvar * Pat -> FPat
     Valdef           : FunLHS * Exp * MaybeWhere -> Valdef
-                     : OffsideAlt -> OffsideAltList
-                     : Alt -> NoOffsideAlt
-    AltSeq           : NoOffsideAlt * NoOffsideAltList -> NoOffsideAltList
-                     : NoOffsideAlt -> NoOffsideAltList
-                     : NoOffsideAltList -> NoOffsideAltBlock
-    AltList          : OffsideAltList -> AltList
-    AltList          : NoOffsideAltBlock -> AltList
-    GdPat            : Exp * Exp -> Gdpat
-    GdAlt            : Pat * List(Gdpat) * MaybeWhere -> Alt
+    GdValdef         : FunLHS * List(Gdrh) * MaybeWhere -> Valdef
+    Guarded          : Exp * Exp -> Gdrh
+    VarFunLHS        : Var * List(APat) -> FunLHS
+    OpFunLHS         : Pat * Varop * Pat -> FunLHS
+    NestedFunLHS     : FunLHS * List(APat) -> FunLHS
+    Where            : DeclList -> Where
+    DeclList         : NoOffsideDeclBlock -> DeclList
+    DeclList         : Alt(OffsideDeclList, Empty) -> DeclList
+    DeclSeq          : NoOffsideDecl * NoOffsideDeclList -> NoOffsideDeclList
+    DeclSeq          : OffsideDecl * Decl -> OffsideDecl
+    DeclSeq          : OffsideDeclNEWLINE * OffsideDeclList -> OffsideDeclList
     Alt              : Pat * Exp * MaybeWhere -> Alt
-    LabelBinds       : List(Fbind) -> LabelBinds
-                     : Qop -> QopNoNeg
-    FixDecl          : Infix * Prec * Ops -> Fixdecl
-                     : List(Op) -> Ops
-                     : Option(INTEGER) -> Prec
-    InfixR           : Infix
-    InfixL           : Infix
-    Infix            : Infix
-                     : List(APat) -> Fargs
-    ECons            : Exp * List(Exp) -> Exps2
-    Typed            : Exp * Option(Context) * Type -> Exp
-    OpApp            : Exp * Qop * Exp -> Exp
-    Negation         : Exp -> Exp
-    AppBin           : Exp * Exp -> Exp
-    Labeled          : Exp * LabelBinds -> Exp
-    Named            : Qvar * Exp -> Exp
-    List             : List -> Exp
-    Case             : AnyExp * AltList -> Exp
-    Do               : StmtList -> Exp
-    If               : AnyExp * AnyExp * Exp -> Exp
-    Let              : Declbinds * Exp -> Exp
-    Abs              : Fargs * Exp -> Exp
-    RSection         : QopNoNeg * Exp -> Exp
-    LSection         : Exp * Qop -> Exp
-    Product          : Exps2 -> Exp
-    Lit              : Literal -> Exp
-    Constr           : Gcon -> Exp
+    GdAlt            : Pat * List(Gdpat) * MaybeWhere -> Alt
+    GdPat            : Exp * Exp -> Gdpat
+    AltList          : NoOffsideAltBlock -> AltList
+    AltList          : OffsideAltList -> AltList
+    AltSeq           : NoOffsideAlt * NoOffsideAltList -> NoOffsideAltList
+    AltSeq           : OffsideAlt * Alt -> OffsideAlt
+    AltSeq           : OffsideAltNEWLINE * OffsideAltList -> OffsideAltList
     Var              : Qvar -> Exp
-                     : Exp -> AnyExp
+    Constr           : Gcon -> Exp
+    Lit              : Literal -> Exp
+    Product          : Exps2 -> Exp
+    ECons            : Exp * List(Exp) -> Exps2
+    Infix            : Infix
+    InfixL           : Infix
+    InfixR           : Infix
+    FixDecl          : Infix * Prec * Ops -> Fixdecl
+    LSection         : Exp * Qop -> Exp
+    RSection         : QopNoNeg * Exp -> Exp
+    LabelBinds       : List(Fbind) -> LabelBinds
+    Named            : Qvar * Exp -> Exp
+    Labeled          : Exp * LabelBinds -> Exp
+    AppBin           : Exp * Exp -> Exp
+    Negation         : Exp -> Exp
+    OpApp            : Exp * Qop * Exp -> Exp
+    Typed            : Exp * Option(Context) * Type -> Exp
+    Abs              : Fargs * Exp -> Exp
+    Let              : Declbinds * Exp -> Exp
+    If               : AnyExp * AnyExp * Exp -> Exp
+    Do               : StmtList -> Exp
+    Case             : AnyExp * AltList -> Exp
+    AppBin           : Exp * Exp -> Exp
     SignDecl         : Vars * Option(Context) * Type -> Signdecl
-                     : Valdef -> Decl
-                     : Fixdecl -> Decl
-                     : Signdecl -> Decl
-    Class            : Qtycls * Tyvar * List(AType) -> Class
-                     : SimpleClass -> Class
-    SimpleClass      : Qtycls * Tyvar -> SimpleClass
-                     : FlexibleContext -> SContext
-    SContext         : List(SimpleClass) -> SContext
-    SContext         : SimpleClass -> SContext
-                     : FlexibleContext -> Context
-    Context          : List(Class) -> Context
-    Context          : Class -> Context
-    InstArrow        : Tyvar * Tyvar -> Inst
-    InstList         : Tyvar -> Inst
-    InstTuple        : Tyvar * List(Tyvar) -> Inst
-    InstApp          : Gtycon * List(Tyvar) -> Inst
+    Class            : Option(SContext) * Tycls * Tyvar * MaybeWhere -> Topdecl
+    Instance         : Option(SContext) * Qtycls * List(Inst) * MaybeWhere -> Topdecl
+    Instance         : Option(SContext) * Qtycls * List(Inst) * MaybeWhere -> Topdecl
+    Default          : List(Type) -> Topdecl
     InstCons         : Gtycon -> Inst
-                     : Type -> Sbtype
-                     : AType -> Satype
-    InfixConstr      : Sbtype * Conop * Sbtype -> Constr
-    ConstrDecl       : Conid * List(Satype) -> Constr
-    ConstrDecls      : List(Constr) -> Constrs
-    NoConstrDecls    : Constrs
+    InstApp          : Gtycon * List(Tyvar) -> Inst
+    InstTuple        : Tyvar * List(Tyvar) -> Inst
+    InstList         : Tyvar -> Inst
+    InstArrow        : Tyvar * Tyvar -> Inst
+    Context          : Class -> Context
+    Context          : List(Class) -> Context
+    SContext         : SimpleClass -> SContext
+    SContext         : List(SimpleClass) -> SContext
+    SimpleClass      : Qtycls * Tyvar -> SimpleClass
+    Class            : Qtycls * Tyvar * List(AType) -> Class
+    TypeDecl         : Tycon * List(Tyvar) * Type -> Topdecl
+    Data             : Option(Context) * Type * Constrs * Deriving -> Topdecl
+    NewTypeDecl      : Option(Context) * Type * Newconstr * Deriving -> Topdecl
+    Derive           : Qtycls -> Deriving
+    NoDeriving       : Deriving
     Derive           : List(Qtycls) -> Deriving
     NoDeriving       : Deriving
-    Derive           : Qtycls -> Deriving
-    TFunBin          : Type * Type -> Type
-    TAppBin          : Type * Type -> Type
-                     : AType -> Type
-    TProd            : Types2 -> AType
-    TList            : Type -> AType
-                     : Type -> AType
-    TVar             : Tyvar -> AType
-    TCon             : Gtycon -> AType
-    TCons            : Type * List(Type) -> Types2
-    TList            : Gtycon
-    TUnit            : Gtycon
+    NoConstrDecls    : Constrs
+    ConstrDecls      : List(Constr) -> Constrs
+    ConstrDecl       : Conid * List(Satype) -> Constr
+    InfixConstr      : Sbtype * Conop * Sbtype -> Constr
+    LabeledConstr    : Var * Type -> LabeledConstr
+    RecordConstr     : Option(Context) * Con * RecordFields -> Constr
     TArrow           : Gtycon
-                     : Qtycon -> Gtycon
-    Hiding           : Exportlist -> Impspec
-    As               : Modid -> As
-    Qualified        : Qualified
-    SOURCE           : Src
-    Import           : Option(Src) * Option(Qualified) * Modid * Option(As) * Option(Impspec) -> Importdecl
-                     : Gtycon -> Export
-                     : Qvar -> Export
+    TCons            : Type * List(Type) -> Types2
+    TCon             : Gtycon -> AType
+    TVar             : Tyvar -> AType
+    TList            : Type -> AType
+    TProd            : Types2 -> AType
+    TAppBin          : Type * Type -> Type
+    TFunBin          : Type * Type -> Type
+    TUnit            : Gtycon
+    TList            : Gtycon
+    TProduct         : Gtycon
     Exportlist       : List(Export) -> Exportlist
-                     : OffsideTopdecl -> OffsideTopdeclList
-                     : OffsideImportdecl -> OffsideImportdeclList
-                     : Topdecl -> NoOffsideTopdecl
-                     : NoOffsideTopdeclList -> NoOffsideTopdeclListSem
-    TopdeclSeq       : NoOffsideTopdecl * NoOffsideTopdeclList -> NoOffsideTopdeclList
-                     : NoOffsideTopdecl -> NoOffsideTopdeclList
-                     : Importdecl -> NoOffsideImportdecl
-                     : NoOffsideImportdeclList -> NoOffsideImportdeclListSem
-    ImportdeclSeq    : NoOffsideImportdecl * NoOffsideImportdeclList -> NoOffsideImportdeclList
-                     : NoOffsideImportdecl -> NoOffsideImportdeclList
-    Body             : OffsideImportdeclList * Empty -> OffsideBody
-    Body             : Empty * OffsideTopdeclList -> OffsideBody
-    Body             : Empty * Empty -> OffsideBody
-    Body             : NoOffsideImportdeclListSem * NoOffsideTopdeclList -> NoOffsideBody
-    Body             : NoOffsideImportdeclListSem * Empty -> NoOffsideBody
-    Body             : Empty * NoOffsideTopdeclListSem -> NoOffsideBody
-    Body             : Empty * Empty -> NoOffsideBody
-    Empty            : Empty
-                     : OffsideBody -> Body
-                     : NoOffsideBody -> Body
-    FlexibleInstance : Option(SContext) * Qtycls * List(AType) * MaybeWhere -> Topdecl
-    Default          : List(Type) -> Topdecl
-    Instance         : Option(SContext) * Qtycls * List(Inst) * MaybeWhere -> Topdecl
-    Class            : Option(SContext) * Tycls * Tyvar * MaybeWhere -> Topdecl
-    Data             : Option(Context) * Type * Constrs * Deriving -> Topdecl
-    TypeDecl         : Tycon * List(Tyvar) * Type -> Topdecl
-                     : Decl -> Topdecl
+    Exports          : Exportlist -> Exports
+    Import           : Option(Src) * Option(Qualified) * Modid * Option(As) * Option(Impspec) -> Importdecl
+    SOURCE           : Src
+    Qualified        : Qualified
+    As               : Modid -> As
+    Impspec          : Exportlist -> Impspec
+    Hiding           : Exportlist -> Impspec
+    Module           : Modid * Option(Exports) * Body -> Module
     Program          : Body -> Module
-    Module           : Modid * OptExports0 * Body -> Module
-                     : Float-HASH -> Literal
-                     : Integer-HASH -> Literal
-                     : String-HASH -> Literal
-                     : Char-HASH -> Literal
-    CLitLit          : CLITLIT -> Literal
-    PrimDouble       : PRIMDOUBLE -> Literal
-    PrimFloat        : PRIMFLOAT -> Literal
-    PrimString       : PRIMSTRING -> Literal
-    PrimChar         : PRIMCHAR -> Literal
-    PrimInt          : PRIMINTEGER -> Literal
-                     : String -> Literal
-    Float            : RATIONAL -> Literal
-    Float            : FLOAT -> Literal
-                     : Char -> Literal
+    Empty            : Empty
+    Body             : Empty * Empty -> NoOffsideBody
+    Body             : Empty * NoOffsideTopdeclListSem -> NoOffsideBody
+    Body             : NoOffsideImportdeclListSem * Empty -> NoOffsideBody
+    Body             : NoOffsideImportdeclListSem * NoOffsideTopdeclList -> NoOffsideBody
+    Body             : Empty * Empty -> OffsideBody
+    Body             : Empty * OffsideTopdeclList -> OffsideBody
+    Body             : OffsideImportdeclList * Empty -> OffsideBody
+    Body             : OffsideImportdeclListNEWLINE * OffsideTopdeclList -> OffsideBody
+    ImportdeclSeq    : NoOffsideImportdecl * NoOffsideImportdeclList -> NoOffsideImportdeclList
+    TopdeclSeq       : NoOffsideTopdecl * NoOffsideTopdeclList -> NoOffsideTopdeclList
+    ImportdeclSeq    : Importdecl * OffsideImportdecl -> OffsideImportdecl
+    ImportdeclSeq    : OffsideImportdeclNEWLINE * OffsideImportdeclList -> OffsideImportdeclList
+    TopdeclSeq       : Topdecl * OffsideTopdecl -> OffsideTopdecl
+    TopdeclSeq       : OffsideTopdeclNEWLINE * OffsideTopdeclList -> OffsideTopdeclList
     Int              : INTEGER -> Literal
-    HexadecimalEsc   : String -> Escape
-    OctalEsc         : String -> Escape
-    DecimalEsc       : String -> Escape
-    ASCIIEsc         : String -> Escape
-    CharEsc          : String -> Escape
-    Gap              : ListPlusOfCharClass0 -> StringChar
-    Escape           : Escape -> StringChar
-                     : String -> StringChar
-    Escape           : Escape -> CharChar
-                     : String -> CharChar
-    String           : List(StringChar) -> String
+    Float            : FLOAT -> Literal
+    Float            : RATIONAL -> Literal
+    PrimInt          : PRIMINTEGER -> Literal
+    PrimChar         : PRIMCHAR -> Literal
+    PrimString       : PRIMSTRING -> Literal
+    PrimFloat        : PRIMFLOAT -> Literal
+    PrimDouble       : PRIMDOUBLE -> Literal
+    CLitLit          : CLITLIT -> Literal
     Char             : CharChar -> Char
-                     : String -> CLITLIT
-                     : String -> PRIMDOUBLE
-                     : String -> PRIMFLOAT
-                     : String -> PRIMINTEGER
-                     : String -> PRIMSTRING
-                     : String -> PRIMCHAR
-                     : String -> RATIONAL
-                     : String -> FLOAT
-                     : String -> INTEGER
-    QModId           : String * QModid -> QModid
-    QModId           : String * String -> QModid
-    QConSym          : Modid * String -> QCONSYM
-    QVarSym          : Modid * String -> QVARSYM
-    QConId           : Modid * String -> QCONID
-    QVarId           : Modid * String -> QVARID
-                     : QModid -> Modid
-                     : String -> Modid
-                     : QCONID -> Qconid
-                     : Conid -> Qconid
-                     : CONID -> Conid
-                     : Qtycon -> Qtycls
-                     : Tycon -> Tycls
-                     : QCONID -> Qtycon
-                     : Tycon -> Qtycon
-                     : CONID -> Tycon
-                     : QVARSYM -> Qvarsym1
-                     : VARSYM -> Varsym
-                     : Qconid -> Qcon
-    BinCon           : Qconsym -> Qcon
-                     : CONSYM -> Consym
-                     : QCONSYM -> Qconsym
-                     : Consym -> Qconsym
-    ConsOp           : CONSOP -> ConsOp
-                     : ConsOp -> Gconsym
-                     : Qconsym -> Gconsym
-                     : Qconop -> Qop
-                     : Qvarop -> Qop
-    PrefCon          : Qconid -> Qconop
-                     : Gconsym -> Qconop
-    PrefCon          : Conid -> Conop
-                     : Consym -> Conop
-    PrefOp           : Qvarid -> Qvarop
-                     : Qvarsym -> Qvarop
-    PrefOp           : Varid -> Varop
-                     : Varsym -> Varop
-                     : Qvarsym1 -> Qvarsym
-                     : Varsym -> Qvarsym
-    ConOp            : Conop -> Op
-    Op               : Varop -> Op
-    BinOp            : Qvarsym -> Qvar
-                     : Qvarid -> Qvar
-    BinOp            : Varsym -> Var
-    Var              : Varid -> Var
-                     : QVARID -> Qvarid
-                     : Varid -> Qvarid
-                     : Qcon -> Gcon
-    EmptyList        : Gcon
-    Unit             : Gcon
-    Ins              : Qvar -> Vars
+    String           : List(StringChar) -> String
+    Escape           : Escape -> CharChar
+    Escape           : Escape -> StringChar
+    Gap              : StringChar
+    CharEsc          : CharEsc -> Escape
+    ASCIIEsc         : ASCII -> Escape
+    DecimalEsc       : Decimal -> Escape
+    OctalEsc         : Octal -> Escape
+    HexadecimalEsc   : Hexadecimal -> Escape
     Snoc             : Vars * Var -> Vars
-                     : String -> Tyvar
-                     : String -> Varid
-                     : String -> CONSOP
-                     : String -> CONSYM
-                     : String -> VARSYM
-                     : String -> CONID
+    Ins              : Qvar -> Vars
+    Unit             : Gcon
+    EmptyList        : Gcon
+    Product          : Gcon
+    Var              : Varid -> Var
+    Op               : Varop -> Op
+    ConOp            : Conop -> Op
+    PrefOp           : Varid -> Varop
+    PrefOp           : Qvarid -> Qvarop
+    PrefCon          : Conid -> Conop
+    PrefCon          : Qconid -> Qconop
+    ConsOp           : CONSOP -> ConsOp
+    BinOp            : Varsym -> Var
+    BinOp            : Qvarsym -> Qvar
+    BinCon           : Consym -> Con
+    BinCon           : Qconsym -> Qcon
+    ConId            : Conid -> Con
+    QVarId           : Modid * VARID -> QVARID
+    QConId           : Modid * CONID -> QCONID
+    QVarSym          : Modid * VARSYM -> QVARSYM
+    QConSym          : Modid * CONSYM -> QCONSYM
+    QModId           : CONID * Modid -> QModid
+    QModId           : CONID * QModid -> QModid
+    QModId           : HaskellVARID * HaskellModid -> HaskellQModid
+    QModId           : HaskellVARID * HaskellQModid -> HaskellQModid
 
 
-signature
-  constructors
-    Some : a -> Option(a)
-    None : Option(a)
+rules
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("VARID"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("CONID"))
 
 
-signature
-  constructors
-    Cons : a * List(a) -> List(a)
-    Nil  : List(a)
-    Conc : List(a) * List(a) -> List(a)
+rules
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("INTEGER-HASH"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("FLOAT-HASH"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("RATIONAL-HASH"))
+
+
+rules
+
+
+rules
+
+
+rules
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("CharChar"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("StringChar"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("CharEsc"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("ASCII"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("ASCII-SO"))
+
+
+rules
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("Digit"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("Octit"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("Hexit"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("Zero"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("Decimal"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("Octal"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("Hexadecimal"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("INTEGER"))
+
+
+rules
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("FLOAT"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("RATIONAL"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("Exponent"))
+
+
+rules
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("PRIMCHAR"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("PRIMSTRING"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("PRIMINTEGER"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("PRIMFLOAT"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("PRIMDOUBLE"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("CLITLIT"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("UNKNOWN"))
+
+
+rules
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("Varid"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("Tyvar"))
+
+
+rules
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("Modid"))
+
+
+rules
+
+
+rules
+
+
+rules
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("ReservedId"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("ReservedId0"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("ReservedOp"))
+
+
+rules
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("VARID"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("CONID"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("Symbol"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("VARSYM"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("CONSYM"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("CONSOP"))
+
+
+rules
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("WhiteChar"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("AnyNoSymbol"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("Dashes"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("Comment"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("EOF"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("NComment"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("NCommentContent"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("NCommentText"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("L-Char"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("Hyphen"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("CurlyOpen"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("Newline"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("NoNewlineLayout"))
+
+  is-lexical-sort(|) =
+    equal(|SortNoArgs("NewLineLayout"))
+
+
+rules
+
+
+rules
+
+  smart-NewTypeDecl(|arg1, arg2, arg3, arg4) =
+    ![]
+    ; (try(
+         (where(<(has-sort <+ log-mismatching-sort-error(|"NewTypeDecl") ; fail)> ( arg1
+                                                                                  , Sort(
+                                                                                      "Option"
+                                                                                    , [SortNoArgs("Context")]
+                                                                                    )
+                                                                                  ))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"NewTypeDecl") ; fail)> (arg2, SortNoArgs("Type")))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"NewTypeDecl") ; fail)> (arg3, SortNoArgs("Newconstr")))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"NewTypeDecl") ; fail)> (arg4, SortNoArgs("GeneralizedDeriving"))))
+         ; ![SortNoArgs("Topdecl")|<id>]
+       )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"NewTypeDecl") ; fail)> ( arg1
+                                                                                    , Sort(
+                                                                                        "Option"
+                                                                                      , [SortNoArgs("Context")]
+                                                                                      )
+                                                                                    ))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"NewTypeDecl") ; fail)> (arg2, SortNoArgs("Type")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"NewTypeDecl") ; fail)> (arg3, SortNoArgs("Newconstr")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"NewTypeDecl") ; fail)> (arg4, SortNoArgs("Deriving"))))
+           ; ![SortNoArgs("Topdecl")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "NewTypeDecl")> [arg1, arg2, arg3, arg4]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-CharHash(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"CharHash") ; fail)> (arg1, SortNoArgs("CharChar")))
+        ; ![SortNoArgs("Char-HASH")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "CharHash")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-StringHash(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"StringHash") ; fail)> ( arg1
+                                                                               , Sort(
+                                                                                   "List"
+                                                                                 , [SortNoArgs("StringChar")]
+                                                                                 )
+                                                                               ))
+        ; ![SortNoArgs("String-HASH")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "StringHash")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-IntegerHash(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"IntegerHash") ; fail)> (arg1, SortNoArgs("INTEGER-HASH")))
+        ; ![SortNoArgs("Integer-HASH")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "IntegerHash")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-FloatHash(|arg1) =
+    ![]
+    ; (try(
+         where(<(has-sort <+ log-mismatching-sort-error(|"FloatHash") ; fail)> (arg1, SortNoArgs("FLOAT-HASH")))
+         ; ![SortNoArgs("Float-HASH")|<id>]
+       )
+       ; try(
+           where(<(has-sort <+ log-mismatching-sort-error(|"FloatHash") ; fail)> (arg1, SortNoArgs("RATIONAL-HASH")))
+           ; ![SortNoArgs("Float-HASH")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "FloatHash")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Class(|arg1, arg2) =
+    ![]
+    ; (try(
+         (where(<(has-sort <+ log-mismatching-sort-error(|"Class") ; fail)> (arg1, SortNoArgs("Qtycls")))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"Class") ; fail)> (arg2, SortNoArgs("Type"))))
+         ; ![SortNoArgs("FlexibleClass")|<id>]
+       )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"Class") ; fail)> (arg1, SortNoArgs("Qtycls")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"Class") ; fail)> (arg2, SortNoArgs("Gtycon"))))
+           ; ![SortNoArgs("FlexibleClass")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Class")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-SimpleClass(|arg1, arg2) =
+    ![]
+    ; (try(
+         (where(<(has-sort <+ log-mismatching-sort-error(|"SimpleClass") ; fail)> (arg1, SortNoArgs("Qtycls")))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"SimpleClass") ; fail)> (arg2, SortNoArgs("Tyvar"))))
+         ; ![SortNoArgs("FlexibleClass")|<id>]
+       )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"SimpleClass") ; fail)> (arg1, SortNoArgs("Qtycls")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"SimpleClass") ; fail)> (arg2, SortNoArgs("Tyvar"))))
+           ; ![SortNoArgs("SimpleClass")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "SimpleClass")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-FlexibleContext(|arg1) =
+    ![]
+    ; (try(
+         where(<(has-sort <+ log-mismatching-sort-error(|"FlexibleContext") ; fail)> (arg1, SortNoArgs("FlexibleClass")))
+         ; ![SortNoArgs("FlexibleContext")|<id>]
+       )
+       ; try(
+           where(<(has-sort <+ log-mismatching-sort-error(|"FlexibleContext") ; fail)> ( arg1
+                                                                                       , Sort(
+                                                                                           "List"
+                                                                                         , [SortNoArgs("FlexibleClass")]
+                                                                                         )
+                                                                                       ))
+           ; ![SortNoArgs("FlexibleContext")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "FlexibleContext")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-FlexibleInstance(|arg1, arg2, arg3, arg4) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"FlexibleInstance") ; fail)> ( arg1
+                                                                                      , Sort(
+                                                                                          "Option"
+                                                                                        , [SortNoArgs("SContext")]
+                                                                                        )
+                                                                                      ))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"FlexibleInstance") ; fail)> (arg2, SortNoArgs("Qtycls")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"FlexibleInstance") ; fail)> ( arg3
+                                                                                        , Sort(
+                                                                                            "List"
+                                                                                          , [SortNoArgs("AType")]
+                                                                                          )
+                                                                                        ))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"FlexibleInstance") ; fail)> (arg4, SortNoArgs("MaybeWhere"))))
+        ; ![SortNoArgs("Topdecl")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "FlexibleInstance")> [arg1, arg2, arg3, arg4]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-BindStmt(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"BindStmt") ; fail)> (arg1, SortNoArgs("Pat")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"BindStmt") ; fail)> (arg2, SortNoArgs("Exp"))))
+        ; ![SortNoArgs("Stmt")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "BindStmt")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-ExpStmt(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"ExpStmt") ; fail)> (arg1, SortNoArgs("Exp")))
+        ; ![SortNoArgs("Stmt")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "ExpStmt")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-LetStmt(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"LetStmt") ; fail)> (arg1, SortNoArgs("Declbinds")))
+        ; ![SortNoArgs("Stmt")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "LetStmt")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-FBind(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"FBind") ; fail)> (arg1, SortNoArgs("Qvar")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"FBind") ; fail)> (arg2, SortNoArgs("Exp"))))
+        ; ![SortNoArgs("Fbind")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "FBind")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-StmtList(|arg1) =
+    ![]
+    ; (try(
+         where(<(has-sort <+ log-mismatching-sort-error(|"StmtList") ; fail)> (arg1, SortNoArgs("NoOffsideStmtBlock")))
+         ; ![SortNoArgs("StmtList")|<id>]
+       )
+       ; try(
+           where(<(has-sort <+ log-mismatching-sort-error(|"StmtList") ; fail)> (arg1, SortNoArgs("OffsideStmtList")))
+           ; ![SortNoArgs("StmtList")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "StmtList")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-StmtSeq(|arg1, arg2) =
+    ![]
+    ; (try(
+         (where(<(has-sort <+ log-mismatching-sort-error(|"StmtSeq") ; fail)> (arg1, SortNoArgs("NoOffsideStmt")))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"StmtSeq") ; fail)> (arg2, SortNoArgs("NoOffsideStmtList"))))
+         ; ![SortNoArgs("NoOffsideStmtList")|<id>]
+       )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"StmtSeq") ; fail)> (arg1, SortNoArgs("OffsideStmt")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"StmtSeq") ; fail)> (arg2, SortNoArgs("OffsideStmt"))))
+           ; ![SortNoArgs("OffsideStmt")|<id>]
+         )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"StmtSeq") ; fail)> (arg1, SortNoArgs("OffsideStmtNEWLINE")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"StmtSeq") ; fail)> (arg2, SortNoArgs("OffsideStmtList"))))
+           ; ![SortNoArgs("OffsideStmtList")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "StmtSeq")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-List(|arg1) =
+    ![]
+    ; (try(
+         where(<(has-sort <+ log-mismatching-sort-error(|"List") ; fail)> ( arg1
+                                                                          , Sort(
+                                                                              "List"
+                                                                            , [SortNoArgs("Exp")]
+                                                                            )
+                                                                          ))
+         ; ![SortNoArgs("List")|<id>]
+       )
+       ; try(
+           where(<(has-sort <+ log-mismatching-sort-error(|"List") ; fail)> ( arg1
+                                                                            , Sort(
+                                                                                "List"
+                                                                              , [SortNoArgs("Pat")]
+                                                                              )
+                                                                            ))
+           ; ![SortNoArgs("APat")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "List")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-ListFrom(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"ListFrom") ; fail)> (arg1, SortNoArgs("Exp")))
+        ; ![SortNoArgs("List")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "ListFrom")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-ListFirstFrom(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"ListFirstFrom") ; fail)> (arg1, SortNoArgs("Exp")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"ListFirstFrom") ; fail)> (arg2, SortNoArgs("Exp"))))
+        ; ![SortNoArgs("List")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "ListFirstFrom")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-ListFromTo(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"ListFromTo") ; fail)> (arg1, SortNoArgs("Exp")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"ListFromTo") ; fail)> (arg2, SortNoArgs("Exp"))))
+        ; ![SortNoArgs("List")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "ListFromTo")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-ListFirstFromTo(|arg1, arg2, arg3) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"ListFirstFromTo") ; fail)> (arg1, SortNoArgs("Exp")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"ListFirstFromTo") ; fail)> (arg2, SortNoArgs("Exp")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"ListFirstFromTo") ; fail)> (arg3, SortNoArgs("Exp"))))
+        ; ![SortNoArgs("List")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "ListFirstFromTo")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-ListCompr(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"ListCompr") ; fail)> (arg1, SortNoArgs("Exp")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"ListCompr") ; fail)> ( arg2
+                                                                                 , Sort(
+                                                                                     "List"
+                                                                                   , [SortNoArgs("Qual")]
+                                                                                   )
+                                                                                 )))
+        ; ![SortNoArgs("List")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "ListCompr")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-QualBind(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"QualBind") ; fail)> (arg1, SortNoArgs("Pat")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"QualBind") ; fail)> (arg2, SortNoArgs("Exp"))))
+        ; ![SortNoArgs("Qual")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "QualBind")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-QualLet(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"QualLet") ; fail)> (arg1, SortNoArgs("Declbinds")))
+        ; ![SortNoArgs("Qual")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "QualLet")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-BinOpApp(|arg1, arg2, arg3) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"BinOpApp") ; fail)> (arg1, SortNoArgs("Pat")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"BinOpApp") ; fail)> (arg2, SortNoArgs("Qconop")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"BinOpApp") ; fail)> (arg3, SortNoArgs("LPat"))))
+        ; ![SortNoArgs("Pat")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "BinOpApp")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Negation(|arg1) =
+    ![]
+    ; (try(
+         where(<(has-sort <+ log-mismatching-sort-error(|"Negation") ; fail)> (arg1, SortNoArgs("Literal")))
+         ; ![SortNoArgs("LPat")|<id>]
+       )
+       ; try(
+           where(<(has-sort <+ log-mismatching-sort-error(|"Negation") ; fail)> (arg1, SortNoArgs("Exp")))
+           ; ![SortNoArgs("Exp")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Negation")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-ConstrApp(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"ConstrApp") ; fail)> (arg1, SortNoArgs("Gcon")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"ConstrApp") ; fail)> ( arg2
+                                                                                 , Sort(
+                                                                                     "List"
+                                                                                   , [SortNoArgs("APat")]
+                                                                                   )
+                                                                                 )))
+        ; ![SortNoArgs("LPat")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "ConstrApp")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Named(|arg1, arg2) =
+    ![]
+    ; (try(
+         (where(<(has-sort <+ log-mismatching-sort-error(|"Named") ; fail)> (arg1, SortNoArgs("Var")))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"Named") ; fail)> (arg2, SortNoArgs("APat"))))
+         ; ![SortNoArgs("APat")|<id>]
+       )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"Named") ; fail)> (arg1, SortNoArgs("Qvar")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"Named") ; fail)> (arg2, SortNoArgs("Exp"))))
+           ; ![SortNoArgs("Exp")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Named")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Constr(|arg1) =
+    ![]
+    ; (try(
+         where(<(has-sort <+ log-mismatching-sort-error(|"Constr") ; fail)> (arg1, SortNoArgs("Gcon")))
+         ; ![SortNoArgs("APat")|<id>]
+       )
+       ; try(
+           where(<(has-sort <+ log-mismatching-sort-error(|"Constr") ; fail)> (arg1, SortNoArgs("Gcon")))
+           ; ![SortNoArgs("Exp")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Constr")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Labeled(|arg1, arg2) =
+    ![]
+    ; (try(
+         (where(<(has-sort <+ log-mismatching-sort-error(|"Labeled") ; fail)> (arg1, SortNoArgs("Qcon")))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"Labeled") ; fail)> (arg2, SortNoArgs("LabeledPat"))))
+         ; ![SortNoArgs("APat")|<id>]
+       )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"Labeled") ; fail)> (arg1, SortNoArgs("Exp")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"Labeled") ; fail)> (arg2, SortNoArgs("LabelBinds"))))
+           ; ![SortNoArgs("Exp")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Labeled")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-LabeledPats(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"LabeledPats") ; fail)> ( arg1
+                                                                                , Sort(
+                                                                                    "List"
+                                                                                  , [SortNoArgs("FPat")]
+                                                                                  )
+                                                                                ))
+        ; ![SortNoArgs("LabeledPat")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "LabeledPats")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Wildcard(|) =
+    ![]
+    ; try(
+        id ; ![SortNoArgs("APat")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Wildcard")> []
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Tuple(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"Tuple") ; fail)> (arg1, SortNoArgs("Pat")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Tuple") ; fail)> ( arg2
+                                                                             , Sort(
+                                                                                 "List"
+                                                                               , [SortNoArgs("Pat")]
+                                                                               )
+                                                                             )))
+        ; ![SortNoArgs("APat")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Tuple")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Irrefutable(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"Irrefutable") ; fail)> (arg1, SortNoArgs("APat")))
+        ; ![SortNoArgs("APat")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Irrefutable")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-PatBind(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"PatBind") ; fail)> (arg1, SortNoArgs("Qvar")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"PatBind") ; fail)> (arg2, SortNoArgs("Pat"))))
+        ; ![SortNoArgs("FPat")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "PatBind")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Valdef(|arg1, arg2, arg3) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"Valdef") ; fail)> (arg1, SortNoArgs("FunLHS")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Valdef") ; fail)> (arg2, SortNoArgs("Exp")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Valdef") ; fail)> (arg3, SortNoArgs("MaybeWhere"))))
+        ; ![SortNoArgs("Valdef")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Valdef")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-GdValdef(|arg1, arg2, arg3) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"GdValdef") ; fail)> (arg1, SortNoArgs("FunLHS")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"GdValdef") ; fail)> ( arg2
+                                                                                , Sort(
+                                                                                    "List"
+                                                                                  , [SortNoArgs("Gdrh")]
+                                                                                  )
+                                                                                ))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"GdValdef") ; fail)> (arg3, SortNoArgs("MaybeWhere"))))
+        ; ![SortNoArgs("Valdef")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "GdValdef")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Guarded(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"Guarded") ; fail)> (arg1, SortNoArgs("Exp")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Guarded") ; fail)> (arg2, SortNoArgs("Exp"))))
+        ; ![SortNoArgs("Gdrh")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Guarded")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-VarFunLHS(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"VarFunLHS") ; fail)> (arg1, SortNoArgs("Var")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"VarFunLHS") ; fail)> ( arg2
+                                                                                 , Sort(
+                                                                                     "List"
+                                                                                   , [SortNoArgs("APat")]
+                                                                                   )
+                                                                                 )))
+        ; ![SortNoArgs("FunLHS")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "VarFunLHS")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-OpFunLHS(|arg1, arg2, arg3) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"OpFunLHS") ; fail)> (arg1, SortNoArgs("Pat")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"OpFunLHS") ; fail)> (arg2, SortNoArgs("Varop")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"OpFunLHS") ; fail)> (arg3, SortNoArgs("Pat"))))
+        ; ![SortNoArgs("FunLHS")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "OpFunLHS")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-NestedFunLHS(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"NestedFunLHS") ; fail)> (arg1, SortNoArgs("FunLHS")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"NestedFunLHS") ; fail)> ( arg2
+                                                                                    , Sort(
+                                                                                        "List"
+                                                                                      , [SortNoArgs("APat")]
+                                                                                      )
+                                                                                    )))
+        ; ![SortNoArgs("FunLHS")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "NestedFunLHS")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Where(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"Where") ; fail)> (arg1, SortNoArgs("DeclList")))
+        ; ![SortNoArgs("Where")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Where")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-DeclList(|arg1) =
+    ![]
+    ; (try(
+         where(<(has-sort <+ log-mismatching-sort-error(|"DeclList") ; fail)> (arg1, SortNoArgs("NoOffsideDeclBlock")))
+         ; ![SortNoArgs("DeclList")|<id>]
+       )
+       ; try(
+           where(<(has-sort <+ log-mismatching-sort-error(|"DeclList") ; fail)> ( arg1
+                                                                                , Sort(
+                                                                                    "Alt"
+                                                                                  , [SortNoArgs("OffsideDeclList")|[SortNoArgs("Empty")]]
+                                                                                  )
+                                                                                ))
+           ; ![SortNoArgs("DeclList")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "DeclList")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-DeclSeq(|arg1, arg2) =
+    ![]
+    ; (try(
+         (where(<(has-sort <+ log-mismatching-sort-error(|"DeclSeq") ; fail)> (arg1, SortNoArgs("NoOffsideDecl")))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"DeclSeq") ; fail)> (arg2, SortNoArgs("NoOffsideDeclList"))))
+         ; ![SortNoArgs("NoOffsideDeclList")|<id>]
+       )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"DeclSeq") ; fail)> (arg1, SortNoArgs("OffsideDecl")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"DeclSeq") ; fail)> (arg2, SortNoArgs("Decl"))))
+           ; ![SortNoArgs("OffsideDecl")|<id>]
+         )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"DeclSeq") ; fail)> (arg1, SortNoArgs("OffsideDeclNEWLINE")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"DeclSeq") ; fail)> (arg2, SortNoArgs("OffsideDeclList"))))
+           ; ![SortNoArgs("OffsideDeclList")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "DeclSeq")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Alt(|arg1, arg2, arg3) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"Alt") ; fail)> (arg1, SortNoArgs("Pat")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Alt") ; fail)> (arg2, SortNoArgs("Exp")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Alt") ; fail)> (arg3, SortNoArgs("MaybeWhere"))))
+        ; ![SortNoArgs("Alt")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Alt")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-GdAlt(|arg1, arg2, arg3) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"GdAlt") ; fail)> (arg1, SortNoArgs("Pat")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"GdAlt") ; fail)> ( arg2
+                                                                             , Sort(
+                                                                                 "List"
+                                                                               , [SortNoArgs("Gdpat")]
+                                                                               )
+                                                                             ))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"GdAlt") ; fail)> (arg3, SortNoArgs("MaybeWhere"))))
+        ; ![SortNoArgs("Alt")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "GdAlt")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-GdPat(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"GdPat") ; fail)> (arg1, SortNoArgs("Exp")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"GdPat") ; fail)> (arg2, SortNoArgs("Exp"))))
+        ; ![SortNoArgs("Gdpat")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "GdPat")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-AltList(|arg1) =
+    ![]
+    ; (try(
+         where(<(has-sort <+ log-mismatching-sort-error(|"AltList") ; fail)> (arg1, SortNoArgs("NoOffsideAltBlock")))
+         ; ![SortNoArgs("AltList")|<id>]
+       )
+       ; try(
+           where(<(has-sort <+ log-mismatching-sort-error(|"AltList") ; fail)> (arg1, SortNoArgs("OffsideAltList")))
+           ; ![SortNoArgs("AltList")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "AltList")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-AltSeq(|arg1, arg2) =
+    ![]
+    ; (try(
+         (where(<(has-sort <+ log-mismatching-sort-error(|"AltSeq") ; fail)> (arg1, SortNoArgs("NoOffsideAlt")))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"AltSeq") ; fail)> (arg2, SortNoArgs("NoOffsideAltList"))))
+         ; ![SortNoArgs("NoOffsideAltList")|<id>]
+       )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"AltSeq") ; fail)> (arg1, SortNoArgs("OffsideAlt")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"AltSeq") ; fail)> (arg2, SortNoArgs("Alt"))))
+           ; ![SortNoArgs("OffsideAlt")|<id>]
+         )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"AltSeq") ; fail)> (arg1, SortNoArgs("OffsideAltNEWLINE")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"AltSeq") ; fail)> (arg2, SortNoArgs("OffsideAltList"))))
+           ; ![SortNoArgs("OffsideAltList")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "AltSeq")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Var(|arg1) =
+    ![]
+    ; (try(
+         where(<(has-sort <+ log-mismatching-sort-error(|"Var") ; fail)> (arg1, SortNoArgs("Qvar")))
+         ; ![SortNoArgs("Exp")|<id>]
+       )
+       ; try(
+           where(<(has-sort <+ log-mismatching-sort-error(|"Var") ; fail)> (arg1, SortNoArgs("Varid")))
+           ; ![SortNoArgs("Var")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Var")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Lit(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"Lit") ; fail)> (arg1, SortNoArgs("Literal")))
+        ; ![SortNoArgs("Exp")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Lit")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Product(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"Product") ; fail)> (arg1, SortNoArgs("Exps2")))
+        ; ![SortNoArgs("Exp")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Product")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-ECons(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"ECons") ; fail)> (arg1, SortNoArgs("Exp")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"ECons") ; fail)> ( arg2
+                                                                             , Sort(
+                                                                                 "List"
+                                                                               , [SortNoArgs("Exp")]
+                                                                               )
+                                                                             )))
+        ; ![SortNoArgs("Exps2")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "ECons")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Infix(|) =
+    ![]
+    ; try(
+        id ; ![SortNoArgs("Infix")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Infix")> []
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-InfixL(|) =
+    ![]
+    ; try(
+        id ; ![SortNoArgs("Infix")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "InfixL")> []
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-InfixR(|) =
+    ![]
+    ; try(
+        id ; ![SortNoArgs("Infix")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "InfixR")> []
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-FixDecl(|arg1, arg2, arg3) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"FixDecl") ; fail)> (arg1, SortNoArgs("Infix")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"FixDecl") ; fail)> (arg2, SortNoArgs("Prec")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"FixDecl") ; fail)> (arg3, SortNoArgs("Ops"))))
+        ; ![SortNoArgs("Fixdecl")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "FixDecl")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-LSection(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"LSection") ; fail)> (arg1, SortNoArgs("Exp")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"LSection") ; fail)> (arg2, SortNoArgs("Qop"))))
+        ; ![SortNoArgs("Exp")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "LSection")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-RSection(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"RSection") ; fail)> (arg1, SortNoArgs("QopNoNeg")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"RSection") ; fail)> (arg2, SortNoArgs("Exp"))))
+        ; ![SortNoArgs("Exp")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "RSection")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-LabelBinds(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"LabelBinds") ; fail)> ( arg1
+                                                                               , Sort(
+                                                                                   "List"
+                                                                                 , [SortNoArgs("Fbind")]
+                                                                                 )
+                                                                               ))
+        ; ![SortNoArgs("LabelBinds")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "LabelBinds")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-AppBin(|arg1, arg2) =
+    ![]
+    ; (try(
+         (where(<(has-sort <+ log-mismatching-sort-error(|"AppBin") ; fail)> (arg1, SortNoArgs("Exp")))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"AppBin") ; fail)> (arg2, SortNoArgs("Exp"))))
+         ; ![SortNoArgs("Exp")|<id>]
+       )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"AppBin") ; fail)> (arg1, SortNoArgs("Exp")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"AppBin") ; fail)> (arg2, SortNoArgs("Exp"))))
+           ; ![SortNoArgs("Exp")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "AppBin")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-OpApp(|arg1, arg2, arg3) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"OpApp") ; fail)> (arg1, SortNoArgs("Exp")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"OpApp") ; fail)> (arg2, SortNoArgs("Qop")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"OpApp") ; fail)> (arg3, SortNoArgs("Exp"))))
+        ; ![SortNoArgs("Exp")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "OpApp")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Typed(|arg1, arg2, arg3) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"Typed") ; fail)> (arg1, SortNoArgs("Exp")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Typed") ; fail)> ( arg2
+                                                                             , Sort(
+                                                                                 "Option"
+                                                                               , [SortNoArgs("Context")]
+                                                                               )
+                                                                             ))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Typed") ; fail)> (arg3, SortNoArgs("Type"))))
+        ; ![SortNoArgs("Exp")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Typed")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Abs(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"Abs") ; fail)> (arg1, SortNoArgs("Fargs")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Abs") ; fail)> (arg2, SortNoArgs("Exp"))))
+        ; ![SortNoArgs("Exp")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Abs")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Let(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"Let") ; fail)> (arg1, SortNoArgs("Declbinds")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Let") ; fail)> (arg2, SortNoArgs("Exp"))))
+        ; ![SortNoArgs("Exp")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Let")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-If(|arg1, arg2, arg3) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"If") ; fail)> (arg1, SortNoArgs("AnyExp")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"If") ; fail)> (arg2, SortNoArgs("AnyExp")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"If") ; fail)> (arg3, SortNoArgs("Exp"))))
+        ; ![SortNoArgs("Exp")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "If")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Do(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"Do") ; fail)> (arg1, SortNoArgs("StmtList")))
+        ; ![SortNoArgs("Exp")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Do")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Case(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"Case") ; fail)> (arg1, SortNoArgs("AnyExp")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Case") ; fail)> (arg2, SortNoArgs("AltList"))))
+        ; ![SortNoArgs("Exp")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Case")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-SignDecl(|arg1, arg2, arg3) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"SignDecl") ; fail)> (arg1, SortNoArgs("Vars")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"SignDecl") ; fail)> ( arg2
+                                                                                , Sort(
+                                                                                    "Option"
+                                                                                  , [SortNoArgs("Context")]
+                                                                                  )
+                                                                                ))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"SignDecl") ; fail)> (arg3, SortNoArgs("Type"))))
+        ; ![SortNoArgs("Signdecl")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "SignDecl")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Class(|arg1, arg2, arg3, arg4) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"Class") ; fail)> ( arg1
+                                                                           , Sort(
+                                                                               "Option"
+                                                                             , [SortNoArgs("SContext")]
+                                                                             )
+                                                                           ))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Class") ; fail)> (arg2, SortNoArgs("Tycls")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Class") ; fail)> (arg3, SortNoArgs("Tyvar")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Class") ; fail)> (arg4, SortNoArgs("MaybeWhere"))))
+        ; ![SortNoArgs("Topdecl")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Class")> [arg1, arg2, arg3, arg4]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Instance(|arg1, arg2, arg3, arg4) =
+    ![]
+    ; (try(
+         (where(<(has-sort <+ log-mismatching-sort-error(|"Instance") ; fail)> ( arg1
+                                                                               , Sort(
+                                                                                   "Option"
+                                                                                 , [SortNoArgs("SContext")]
+                                                                                 )
+                                                                               ))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"Instance") ; fail)> (arg2, SortNoArgs("Qtycls")))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"Instance") ; fail)> ( arg3
+                                                                                 , Sort(
+                                                                                     "List"
+                                                                                   , [SortNoArgs("Inst")]
+                                                                                   )
+                                                                                 ))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"Instance") ; fail)> (arg4, SortNoArgs("MaybeWhere"))))
+         ; ![SortNoArgs("Topdecl")|<id>]
+       )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"Instance") ; fail)> ( arg1
+                                                                                 , Sort(
+                                                                                     "Option"
+                                                                                   , [SortNoArgs("SContext")]
+                                                                                   )
+                                                                                 ))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"Instance") ; fail)> (arg2, SortNoArgs("Qtycls")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"Instance") ; fail)> ( arg3
+                                                                                   , Sort(
+                                                                                       "List"
+                                                                                     , [SortNoArgs("Inst")]
+                                                                                     )
+                                                                                   ))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"Instance") ; fail)> (arg4, SortNoArgs("MaybeWhere"))))
+           ; ![SortNoArgs("Topdecl")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Instance")> [arg1, arg2, arg3, arg4]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Default(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"Default") ; fail)> ( arg1
+                                                                            , Sort(
+                                                                                "List"
+                                                                              , [SortNoArgs("Type")]
+                                                                              )
+                                                                            ))
+        ; ![SortNoArgs("Topdecl")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Default")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-InstCons(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"InstCons") ; fail)> (arg1, SortNoArgs("Gtycon")))
+        ; ![SortNoArgs("Inst")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "InstCons")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-InstApp(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"InstApp") ; fail)> (arg1, SortNoArgs("Gtycon")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"InstApp") ; fail)> ( arg2
+                                                                               , Sort(
+                                                                                   "List"
+                                                                                 , [SortNoArgs("Tyvar")]
+                                                                                 )
+                                                                               )))
+        ; ![SortNoArgs("Inst")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "InstApp")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-InstTuple(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"InstTuple") ; fail)> (arg1, SortNoArgs("Tyvar")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"InstTuple") ; fail)> ( arg2
+                                                                                 , Sort(
+                                                                                     "List"
+                                                                                   , [SortNoArgs("Tyvar")]
+                                                                                   )
+                                                                                 )))
+        ; ![SortNoArgs("Inst")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "InstTuple")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-InstList(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"InstList") ; fail)> (arg1, SortNoArgs("Tyvar")))
+        ; ![SortNoArgs("Inst")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "InstList")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-InstArrow(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"InstArrow") ; fail)> (arg1, SortNoArgs("Tyvar")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"InstArrow") ; fail)> (arg2, SortNoArgs("Tyvar"))))
+        ; ![SortNoArgs("Inst")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "InstArrow")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Context(|arg1) =
+    ![]
+    ; (try(
+         where(<(has-sort <+ log-mismatching-sort-error(|"Context") ; fail)> (arg1, SortNoArgs("Class")))
+         ; ![SortNoArgs("Context")|<id>]
+       )
+       ; try(
+           where(<(has-sort <+ log-mismatching-sort-error(|"Context") ; fail)> ( arg1
+                                                                               , Sort(
+                                                                                   "List"
+                                                                                 , [SortNoArgs("Class")]
+                                                                                 )
+                                                                               ))
+           ; ![SortNoArgs("Context")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Context")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-SContext(|arg1) =
+    ![]
+    ; (try(
+         where(<(has-sort <+ log-mismatching-sort-error(|"SContext") ; fail)> (arg1, SortNoArgs("SimpleClass")))
+         ; ![SortNoArgs("SContext")|<id>]
+       )
+       ; try(
+           where(<(has-sort <+ log-mismatching-sort-error(|"SContext") ; fail)> ( arg1
+                                                                                , Sort(
+                                                                                    "List"
+                                                                                  , [SortNoArgs("SimpleClass")]
+                                                                                  )
+                                                                                ))
+           ; ![SortNoArgs("SContext")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "SContext")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Class(|arg1, arg2, arg3) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"Class") ; fail)> (arg1, SortNoArgs("Qtycls")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Class") ; fail)> (arg2, SortNoArgs("Tyvar")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Class") ; fail)> ( arg3
+                                                                             , Sort(
+                                                                                 "List"
+                                                                               , [SortNoArgs("AType")]
+                                                                               )
+                                                                             )))
+        ; ![SortNoArgs("Class")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Class")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-TypeDecl(|arg1, arg2, arg3) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"TypeDecl") ; fail)> (arg1, SortNoArgs("Tycon")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"TypeDecl") ; fail)> ( arg2
+                                                                                , Sort(
+                                                                                    "List"
+                                                                                  , [SortNoArgs("Tyvar")]
+                                                                                  )
+                                                                                ))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"TypeDecl") ; fail)> (arg3, SortNoArgs("Type"))))
+        ; ![SortNoArgs("Topdecl")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "TypeDecl")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Data(|arg1, arg2, arg3, arg4) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"Data") ; fail)> ( arg1
+                                                                          , Sort(
+                                                                              "Option"
+                                                                            , [SortNoArgs("Context")]
+                                                                            )
+                                                                          ))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Data") ; fail)> (arg2, SortNoArgs("Type")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Data") ; fail)> (arg3, SortNoArgs("Constrs")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Data") ; fail)> (arg4, SortNoArgs("Deriving"))))
+        ; ![SortNoArgs("Topdecl")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Data")> [arg1, arg2, arg3, arg4]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Derive(|arg1) =
+    ![]
+    ; (try(
+         where(<(has-sort <+ log-mismatching-sort-error(|"Derive") ; fail)> (arg1, SortNoArgs("Qtycls")))
+         ; ![SortNoArgs("Deriving")|<id>]
+       )
+       ; try(
+           where(<(has-sort <+ log-mismatching-sort-error(|"Derive") ; fail)> ( arg1
+                                                                              , Sort(
+                                                                                  "List"
+                                                                                , [SortNoArgs("Qtycls")]
+                                                                                )
+                                                                              ))
+           ; ![SortNoArgs("Deriving")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Derive")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-NoDeriving(|) =
+    ![]
+    ; (try(
+         id ; ![SortNoArgs("Deriving")|<id>]
+       )
+       ; try(
+           id ; ![SortNoArgs("Deriving")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "NoDeriving")> []
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-NoConstrDecls(|) =
+    ![]
+    ; try(
+        id ; ![SortNoArgs("Constrs")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "NoConstrDecls")> []
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-ConstrDecls(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"ConstrDecls") ; fail)> ( arg1
+                                                                                , Sort(
+                                                                                    "List"
+                                                                                  , [SortNoArgs("Constr")]
+                                                                                  )
+                                                                                ))
+        ; ![SortNoArgs("Constrs")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "ConstrDecls")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-ConstrDecl(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"ConstrDecl") ; fail)> (arg1, SortNoArgs("Conid")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"ConstrDecl") ; fail)> ( arg2
+                                                                                  , Sort(
+                                                                                      "List"
+                                                                                    , [SortNoArgs("Satype")]
+                                                                                    )
+                                                                                  )))
+        ; ![SortNoArgs("Constr")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "ConstrDecl")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-InfixConstr(|arg1, arg2, arg3) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"InfixConstr") ; fail)> (arg1, SortNoArgs("Sbtype")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"InfixConstr") ; fail)> (arg2, SortNoArgs("Conop")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"InfixConstr") ; fail)> (arg3, SortNoArgs("Sbtype"))))
+        ; ![SortNoArgs("Constr")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "InfixConstr")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-LabeledConstr(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"LabeledConstr") ; fail)> (arg1, SortNoArgs("Var")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"LabeledConstr") ; fail)> (arg2, SortNoArgs("Type"))))
+        ; ![SortNoArgs("LabeledConstr")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "LabeledConstr")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-RecordConstr(|arg1, arg2, arg3) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"RecordConstr") ; fail)> ( arg1
+                                                                                  , Sort(
+                                                                                      "Option"
+                                                                                    , [SortNoArgs("Context")]
+                                                                                    )
+                                                                                  ))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"RecordConstr") ; fail)> (arg2, SortNoArgs("Con")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"RecordConstr") ; fail)> (arg3, SortNoArgs("RecordFields"))))
+        ; ![SortNoArgs("Constr")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "RecordConstr")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-TArrow(|) =
+    ![]
+    ; try(
+        id ; ![SortNoArgs("Gtycon")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "TArrow")> []
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-TCons(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"TCons") ; fail)> (arg1, SortNoArgs("Type")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"TCons") ; fail)> ( arg2
+                                                                             , Sort(
+                                                                                 "List"
+                                                                               , [SortNoArgs("Type")]
+                                                                               )
+                                                                             )))
+        ; ![SortNoArgs("Types2")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "TCons")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-TCon(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"TCon") ; fail)> (arg1, SortNoArgs("Gtycon")))
+        ; ![SortNoArgs("AType")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "TCon")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-TVar(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"TVar") ; fail)> (arg1, SortNoArgs("Tyvar")))
+        ; ![SortNoArgs("AType")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "TVar")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-TList(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"TList") ; fail)> (arg1, SortNoArgs("Type")))
+        ; ![SortNoArgs("AType")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "TList")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-TProd(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"TProd") ; fail)> (arg1, SortNoArgs("Types2")))
+        ; ![SortNoArgs("AType")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "TProd")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-TAppBin(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"TAppBin") ; fail)> (arg1, SortNoArgs("Type")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"TAppBin") ; fail)> (arg2, SortNoArgs("Type"))))
+        ; ![SortNoArgs("Type")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "TAppBin")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-TFunBin(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"TFunBin") ; fail)> (arg1, SortNoArgs("Type")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"TFunBin") ; fail)> (arg2, SortNoArgs("Type"))))
+        ; ![SortNoArgs("Type")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "TFunBin")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-TUnit(|) =
+    ![]
+    ; try(
+        id ; ![SortNoArgs("Gtycon")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "TUnit")> []
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-TList(|) =
+    ![]
+    ; try(
+        id ; ![SortNoArgs("Gtycon")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "TList")> []
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-TProduct(|) =
+    ![]
+    ; try(
+        id ; ![SortNoArgs("Gtycon")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "TProduct")> []
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Exportlist(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"Exportlist") ; fail)> ( arg1
+                                                                               , Sort(
+                                                                                   "List"
+                                                                                 , [SortNoArgs("Export")]
+                                                                                 )
+                                                                               ))
+        ; ![SortNoArgs("Exportlist")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Exportlist")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Exports(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"Exports") ; fail)> (arg1, SortNoArgs("Exportlist")))
+        ; ![SortNoArgs("Exports")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Exports")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Import(|arg1, arg2, arg3, arg4, arg5) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"Import") ; fail)> ( arg1
+                                                                            , Sort(
+                                                                                "Option"
+                                                                              , [SortNoArgs("Src")]
+                                                                              )
+                                                                            ))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Import") ; fail)> ( arg2
+                                                                              , Sort(
+                                                                                  "Option"
+                                                                                , [SortNoArgs("Qualified")]
+                                                                                )
+                                                                              ))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Import") ; fail)> (arg3, SortNoArgs("Modid")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Import") ; fail)> ( arg4
+                                                                              , Sort(
+                                                                                  "Option"
+                                                                                , [SortNoArgs("As")]
+                                                                                )
+                                                                              ))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Import") ; fail)> ( arg5
+                                                                              , Sort(
+                                                                                  "Option"
+                                                                                , [SortNoArgs("Impspec")]
+                                                                                )
+                                                                              )))
+        ; ![SortNoArgs("Importdecl")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Import")> [arg1, arg2, arg3, arg4, arg5]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-SOURCE(|) =
+    ![]
+    ; try(
+        id ; ![SortNoArgs("Src")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "SOURCE")> []
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Qualified(|) =
+    ![]
+    ; try(
+        id ; ![SortNoArgs("Qualified")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Qualified")> []
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-As(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"As") ; fail)> (arg1, SortNoArgs("Modid")))
+        ; ![SortNoArgs("As")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "As")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Impspec(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"Impspec") ; fail)> (arg1, SortNoArgs("Exportlist")))
+        ; ![SortNoArgs("Impspec")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Impspec")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Hiding(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"Hiding") ; fail)> (arg1, SortNoArgs("Exportlist")))
+        ; ![SortNoArgs("Impspec")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Hiding")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Module(|arg1, arg2, arg3) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"Module") ; fail)> (arg1, SortNoArgs("Modid")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Module") ; fail)> ( arg2
+                                                                              , Sort(
+                                                                                  "Option"
+                                                                                , [SortNoArgs("Exports")]
+                                                                                )
+                                                                              ))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Module") ; fail)> (arg3, SortNoArgs("Body"))))
+        ; ![SortNoArgs("Module")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Module")> [arg1, arg2, arg3]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Program(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"Program") ; fail)> (arg1, SortNoArgs("Body")))
+        ; ![SortNoArgs("Module")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Program")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Empty(|) =
+    ![]
+    ; try(
+        id ; ![SortNoArgs("Empty")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Empty")> []
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Body(|arg1, arg2) =
+    ![]
+    ; (try(
+         (where(<(has-sort <+ log-mismatching-sort-error(|"Body") ; fail)> (arg1, SortNoArgs("Empty")))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"Body") ; fail)> (arg2, SortNoArgs("Empty"))))
+         ; ![SortNoArgs("NoOffsideBody")|<id>]
+       )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"Body") ; fail)> (arg1, SortNoArgs("Empty")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"Body") ; fail)> (arg2, SortNoArgs("NoOffsideTopdeclListSem"))))
+           ; ![SortNoArgs("NoOffsideBody")|<id>]
+         )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"Body") ; fail)> (arg1, SortNoArgs("NoOffsideImportdeclListSem")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"Body") ; fail)> (arg2, SortNoArgs("Empty"))))
+           ; ![SortNoArgs("NoOffsideBody")|<id>]
+         )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"Body") ; fail)> (arg1, SortNoArgs("NoOffsideImportdeclListSem")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"Body") ; fail)> (arg2, SortNoArgs("NoOffsideTopdeclList"))))
+           ; ![SortNoArgs("NoOffsideBody")|<id>]
+         )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"Body") ; fail)> (arg1, SortNoArgs("Empty")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"Body") ; fail)> (arg2, SortNoArgs("Empty"))))
+           ; ![SortNoArgs("OffsideBody")|<id>]
+         )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"Body") ; fail)> (arg1, SortNoArgs("Empty")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"Body") ; fail)> (arg2, SortNoArgs("OffsideTopdeclList"))))
+           ; ![SortNoArgs("OffsideBody")|<id>]
+         )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"Body") ; fail)> (arg1, SortNoArgs("OffsideImportdeclList")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"Body") ; fail)> (arg2, SortNoArgs("Empty"))))
+           ; ![SortNoArgs("OffsideBody")|<id>]
+         )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"Body") ; fail)> (arg1, SortNoArgs("OffsideImportdeclListNEWLINE")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"Body") ; fail)> (arg2, SortNoArgs("OffsideTopdeclList"))))
+           ; ![SortNoArgs("OffsideBody")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Body")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-ImportdeclSeq(|arg1, arg2) =
+    ![]
+    ; (try(
+         (where(<(has-sort <+ log-mismatching-sort-error(|"ImportdeclSeq") ; fail)> (arg1, SortNoArgs("NoOffsideImportdecl")))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"ImportdeclSeq") ; fail)> (arg2, SortNoArgs("NoOffsideImportdeclList"))))
+         ; ![SortNoArgs("NoOffsideImportdeclList")|<id>]
+       )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"ImportdeclSeq") ; fail)> (arg1, SortNoArgs("Importdecl")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"ImportdeclSeq") ; fail)> (arg2, SortNoArgs("OffsideImportdecl"))))
+           ; ![SortNoArgs("OffsideImportdecl")|<id>]
+         )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"ImportdeclSeq") ; fail)> (arg1, SortNoArgs("OffsideImportdeclNEWLINE")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"ImportdeclSeq") ; fail)> (arg2, SortNoArgs("OffsideImportdeclList"))))
+           ; ![SortNoArgs("OffsideImportdeclList")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "ImportdeclSeq")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-TopdeclSeq(|arg1, arg2) =
+    ![]
+    ; (try(
+         (where(<(has-sort <+ log-mismatching-sort-error(|"TopdeclSeq") ; fail)> (arg1, SortNoArgs("NoOffsideTopdecl")))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"TopdeclSeq") ; fail)> (arg2, SortNoArgs("NoOffsideTopdeclList"))))
+         ; ![SortNoArgs("NoOffsideTopdeclList")|<id>]
+       )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"TopdeclSeq") ; fail)> (arg1, SortNoArgs("Topdecl")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"TopdeclSeq") ; fail)> (arg2, SortNoArgs("OffsideTopdecl"))))
+           ; ![SortNoArgs("OffsideTopdecl")|<id>]
+         )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"TopdeclSeq") ; fail)> (arg1, SortNoArgs("OffsideTopdeclNEWLINE")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"TopdeclSeq") ; fail)> (arg2, SortNoArgs("OffsideTopdeclList"))))
+           ; ![SortNoArgs("OffsideTopdeclList")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "TopdeclSeq")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Int(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"Int") ; fail)> (arg1, SortNoArgs("INTEGER")))
+        ; ![SortNoArgs("Literal")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Int")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Float(|arg1) =
+    ![]
+    ; (try(
+         where(<(has-sort <+ log-mismatching-sort-error(|"Float") ; fail)> (arg1, SortNoArgs("FLOAT")))
+         ; ![SortNoArgs("Literal")|<id>]
+       )
+       ; try(
+           where(<(has-sort <+ log-mismatching-sort-error(|"Float") ; fail)> (arg1, SortNoArgs("RATIONAL")))
+           ; ![SortNoArgs("Literal")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Float")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-PrimInt(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"PrimInt") ; fail)> (arg1, SortNoArgs("PRIMINTEGER")))
+        ; ![SortNoArgs("Literal")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "PrimInt")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-PrimChar(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"PrimChar") ; fail)> (arg1, SortNoArgs("PRIMCHAR")))
+        ; ![SortNoArgs("Literal")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "PrimChar")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-PrimString(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"PrimString") ; fail)> (arg1, SortNoArgs("PRIMSTRING")))
+        ; ![SortNoArgs("Literal")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "PrimString")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-PrimFloat(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"PrimFloat") ; fail)> (arg1, SortNoArgs("PRIMFLOAT")))
+        ; ![SortNoArgs("Literal")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "PrimFloat")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-PrimDouble(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"PrimDouble") ; fail)> (arg1, SortNoArgs("PRIMDOUBLE")))
+        ; ![SortNoArgs("Literal")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "PrimDouble")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-CLitLit(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"CLitLit") ; fail)> (arg1, SortNoArgs("CLITLIT")))
+        ; ![SortNoArgs("Literal")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "CLitLit")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Char(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"Char") ; fail)> (arg1, SortNoArgs("CharChar")))
+        ; ![SortNoArgs("Char")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Char")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-String(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"String") ; fail)> ( arg1
+                                                                           , Sort(
+                                                                               "List"
+                                                                             , [SortNoArgs("StringChar")]
+                                                                             )
+                                                                           ))
+        ; ![SortNoArgs("String")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "String")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Escape(|arg1) =
+    ![]
+    ; (try(
+         where(<(has-sort <+ log-mismatching-sort-error(|"Escape") ; fail)> (arg1, SortNoArgs("Escape")))
+         ; ![SortNoArgs("CharChar")|<id>]
+       )
+       ; try(
+           where(<(has-sort <+ log-mismatching-sort-error(|"Escape") ; fail)> (arg1, SortNoArgs("Escape")))
+           ; ![SortNoArgs("StringChar")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Escape")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Gap(|) =
+    ![]
+    ; try(
+        id ; ![SortNoArgs("StringChar")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Gap")> []
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-CharEsc(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"CharEsc") ; fail)> (arg1, SortNoArgs("CharEsc")))
+        ; ![SortNoArgs("Escape")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "CharEsc")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-ASCIIEsc(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"ASCIIEsc") ; fail)> (arg1, SortNoArgs("ASCII")))
+        ; ![SortNoArgs("Escape")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "ASCIIEsc")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-DecimalEsc(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"DecimalEsc") ; fail)> (arg1, SortNoArgs("Decimal")))
+        ; ![SortNoArgs("Escape")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "DecimalEsc")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-OctalEsc(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"OctalEsc") ; fail)> (arg1, SortNoArgs("Octal")))
+        ; ![SortNoArgs("Escape")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "OctalEsc")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-HexadecimalEsc(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"HexadecimalEsc") ; fail)> (arg1, SortNoArgs("Hexadecimal")))
+        ; ![SortNoArgs("Escape")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "HexadecimalEsc")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Snoc(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"Snoc") ; fail)> (arg1, SortNoArgs("Vars")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"Snoc") ; fail)> (arg2, SortNoArgs("Var"))))
+        ; ![SortNoArgs("Vars")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Snoc")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Ins(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"Ins") ; fail)> (arg1, SortNoArgs("Qvar")))
+        ; ![SortNoArgs("Vars")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Ins")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Unit(|) =
+    ![]
+    ; try(
+        id ; ![SortNoArgs("Gcon")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Unit")> []
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-EmptyList(|) =
+    ![]
+    ; try(
+        id ; ![SortNoArgs("Gcon")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "EmptyList")> []
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Product(|) =
+    ![]
+    ; try(
+        id ; ![SortNoArgs("Gcon")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Product")> []
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-Op(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"Op") ; fail)> (arg1, SortNoArgs("Varop")))
+        ; ![SortNoArgs("Op")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "Op")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-ConOp(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"ConOp") ; fail)> (arg1, SortNoArgs("Conop")))
+        ; ![SortNoArgs("Op")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "ConOp")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-PrefOp(|arg1) =
+    ![]
+    ; (try(
+         where(<(has-sort <+ log-mismatching-sort-error(|"PrefOp") ; fail)> (arg1, SortNoArgs("Varid")))
+         ; ![SortNoArgs("Varop")|<id>]
+       )
+       ; try(
+           where(<(has-sort <+ log-mismatching-sort-error(|"PrefOp") ; fail)> (arg1, SortNoArgs("Qvarid")))
+           ; ![SortNoArgs("Qvarop")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "PrefOp")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-PrefCon(|arg1) =
+    ![]
+    ; (try(
+         where(<(has-sort <+ log-mismatching-sort-error(|"PrefCon") ; fail)> (arg1, SortNoArgs("Conid")))
+         ; ![SortNoArgs("Conop")|<id>]
+       )
+       ; try(
+           where(<(has-sort <+ log-mismatching-sort-error(|"PrefCon") ; fail)> (arg1, SortNoArgs("Qconid")))
+           ; ![SortNoArgs("Qconop")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "PrefCon")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-ConsOp(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"ConsOp") ; fail)> (arg1, SortNoArgs("CONSOP")))
+        ; ![SortNoArgs("ConsOp")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "ConsOp")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-BinOp(|arg1) =
+    ![]
+    ; (try(
+         where(<(has-sort <+ log-mismatching-sort-error(|"BinOp") ; fail)> (arg1, SortNoArgs("Varsym")))
+         ; ![SortNoArgs("Var")|<id>]
+       )
+       ; try(
+           where(<(has-sort <+ log-mismatching-sort-error(|"BinOp") ; fail)> (arg1, SortNoArgs("Qvarsym")))
+           ; ![SortNoArgs("Qvar")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "BinOp")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-BinCon(|arg1) =
+    ![]
+    ; (try(
+         where(<(has-sort <+ log-mismatching-sort-error(|"BinCon") ; fail)> (arg1, SortNoArgs("Consym")))
+         ; ![SortNoArgs("Con")|<id>]
+       )
+       ; try(
+           where(<(has-sort <+ log-mismatching-sort-error(|"BinCon") ; fail)> (arg1, SortNoArgs("Qconsym")))
+           ; ![SortNoArgs("Qcon")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "BinCon")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-ConId(|arg1) =
+    ![]
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"ConId") ; fail)> (arg1, SortNoArgs("Conid")))
+        ; ![SortNoArgs("Con")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "ConId")> [arg1]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-QVarId(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"QVarId") ; fail)> (arg1, SortNoArgs("Modid")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"QVarId") ; fail)> (arg2, SortNoArgs("VARID"))))
+        ; ![SortNoArgs("QVARID")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "QVarId")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-QConId(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"QConId") ; fail)> (arg1, SortNoArgs("Modid")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"QConId") ; fail)> (arg2, SortNoArgs("CONID"))))
+        ; ![SortNoArgs("QCONID")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "QConId")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-QVarSym(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"QVarSym") ; fail)> (arg1, SortNoArgs("Modid")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"QVarSym") ; fail)> (arg2, SortNoArgs("VARSYM"))))
+        ; ![SortNoArgs("QVARSYM")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "QVarSym")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-QConSym(|arg1, arg2) =
+    ![]
+    ; try(
+        (where(<(has-sort <+ log-mismatching-sort-error(|"QConSym") ; fail)> (arg1, SortNoArgs("Modid")))
+         ; where(<(has-sort <+ log-mismatching-sort-error(|"QConSym") ; fail)> (arg2, SortNoArgs("CONSYM"))))
+        ; ![SortNoArgs("QCONSYM")|<id>]
+      )
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "QConSym")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  smart-QModId(|arg1, arg2) =
+    ![]
+    ; (try(
+         (where(<(has-sort <+ log-mismatching-sort-error(|"QModId") ; fail)> (arg1, SortNoArgs("CONID")))
+          ; where(<(has-sort <+ log-mismatching-sort-error(|"QModId") ; fail)> (arg2, SortNoArgs("Modid"))))
+         ; ![SortNoArgs("QModid")|<id>]
+       )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"QModId") ; fail)> (arg1, SortNoArgs("CONID")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"QModId") ; fail)> (arg2, SortNoArgs("QModid"))))
+           ; ![SortNoArgs("QModid")|<id>]
+         )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"QModId") ; fail)> (arg1, SortNoArgs("HaskellVARID")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"QModId") ; fail)> (arg2, SortNoArgs("HaskellModid"))))
+           ; ![SortNoArgs("HaskellQModid")|<id>]
+         )
+       ; try(
+           (where(<(has-sort <+ log-mismatching-sort-error(|"QModId") ; fail)> (arg1, SortNoArgs("HaskellVARID")))
+            ; where(<(has-sort <+ log-mismatching-sort-error(|"QModId") ; fail)> (arg2, SortNoArgs("HaskellQModid"))))
+           ; ![SortNoArgs("HaskellQModid")|<id>]
+         ))
+    ; ?res-sorts
+    ; <prim("SUGARJ_unsafe_build", "QModId")> [arg1, arg2]
+    ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | Sort(
+        "List"
+      , [SortNoArgs("GDerive")]
+      )
+    , SortNoArgs("GeneralizedDeriving")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Qtycls")
+    , SortNoArgs("GDerive")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Deriving")
+    , SortNoArgs("GeneralizedDeriving")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Char-HASH")
+    , SortNoArgs("Literal")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("String-HASH")
+    , SortNoArgs("Literal")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Integer-HASH")
+    , SortNoArgs("Literal")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Float-HASH")
+    , SortNoArgs("Literal")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("FlexibleContext")
+    , SortNoArgs("SContext")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("FlexibleContext")
+    , SortNoArgs("Context")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("NoOffsideStmtListSem")
+    , SortNoArgs("NoOffsideStmtBlock")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Stmt")
+    , SortNoArgs("NoOffsideStmt")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("NoOffsideStmt")
+    , SortNoArgs("NoOffsideStmtList")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("NoOffsideStmtList")
+    , SortNoArgs("NoOffsideStmtListSem")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Stmt")
+    , SortNoArgs("OffsideStmt")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("OffsideStmt")
+    , SortNoArgs("OffsideStmtList")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("OffsideStmt")
+    , SortNoArgs("OffsideStmtNEWLINE")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("List")
+    , SortNoArgs("Exp")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | Sort(
+        "List"
+      , [SortNoArgs("Qual")]
+      )
+    , SortNoArgs("Quals")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Exp")
+    , SortNoArgs("Qual")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("LPat")
+    , SortNoArgs("Pat")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("APat")
+    , SortNoArgs("LPat")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Var")
+    , SortNoArgs("APat")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Literal")
+    , SortNoArgs("APat")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Pat")
+    , SortNoArgs("APat")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Valdef")
+    , SortNoArgs("Decl")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Pat")
+    , SortNoArgs("FunLHS")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Where")
+    , SortNoArgs("MaybeWhere")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("DeclList")
+    , SortNoArgs("Declbinds")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | Sort(
+        "Alt"
+      , [SortNoArgs("NoOffsideDeclListSem")|[SortNoArgs("Empty")]]
+      )
+    , SortNoArgs("NoOffsideDeclBlock")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Decl")
+    , SortNoArgs("NoOffsideDecl")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("NoOffsideDecl")
+    , SortNoArgs("NoOffsideDeclList")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("NoOffsideDeclList")
+    , SortNoArgs("NoOffsideDeclListSem")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Decl")
+    , SortNoArgs("OffsideDecl")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("OffsideDecl")
+    , SortNoArgs("OffsideDeclList")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("OffsideDecl")
+    , SortNoArgs("OffsideDeclNEWLINE")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("NoOffsideAltList")
+    , SortNoArgs("NoOffsideAltBlock")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Alt")
+    , SortNoArgs("NoOffsideAlt")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("NoOffsideAlt")
+    , SortNoArgs("NoOffsideAltList")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("NoOffsideAltList")
+    , SortNoArgs("NoOffsideAltListSem")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Alt")
+    , SortNoArgs("OffsideAlt")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("OffsideAlt")
+    , SortNoArgs("OffsideAltList")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("OffsideAlt")
+    , SortNoArgs("OffsideAltNEWLINE")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Exp")
+    , SortNoArgs("AnyExp")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | Sort(
+        "List"
+      , [SortNoArgs("Exp")]
+      )
+    , SortNoArgs("Exps")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | Sort(
+        "List"
+      , [SortNoArgs("APat")]
+      )
+    , SortNoArgs("Fargs")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | Sort(
+        "Option"
+      , [SortNoArgs("INTEGER")]
+      )
+    , SortNoArgs("Prec")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | Sort(
+        "List"
+      , [SortNoArgs("Op")]
+      )
+    , SortNoArgs("Ops")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Fixdecl")
+    , SortNoArgs("Decl")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Qop")
+    , SortNoArgs("QopNoNeg")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Exp")
+    , SortNoArgs("Aexp")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("StmtList")
+    , SortNoArgs("Exp")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Signdecl")
+    , SortNoArgs("Decl")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("SimpleClass")
+    , SortNoArgs("Class")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("AType")
+    , SortNoArgs("Satype")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("AType")
+    , SortNoArgs("Satype")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Type")
+    , SortNoArgs("Sbtype")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Type")
+    , SortNoArgs("Sbtype")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Fielddecls")
+    , SortNoArgs("RecordFields")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | Sort(
+        "List"
+      , [SortNoArgs("Fielddecl")]
+      )
+    , SortNoArgs("Fielddecls")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Type")
+    , SortNoArgs("Stype")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Type")
+    , SortNoArgs("Stype")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Qtycon")
+    , SortNoArgs("Gtycon")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | Sort(
+        "List"
+      , [SortNoArgs("Type")]
+      )
+    , SortNoArgs("Types")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Type")
+    , SortNoArgs("AType")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("AType")
+    , SortNoArgs("Type")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Qvar")
+    , SortNoArgs("Export")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Gtycon")
+    , SortNoArgs("Export")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Gtycon")
+    , SortNoArgs("Export")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Gtycon")
+    , SortNoArgs("Export")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Modid")
+    , SortNoArgs("Export")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Qvar")
+    , SortNoArgs("Qcname")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Gcon")
+    , SortNoArgs("Qcname")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Decl")
+    , SortNoArgs("Topdecl")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("NoOffsideBody")
+    , SortNoArgs("Body")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("OffsideBody")
+    , SortNoArgs("Body")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Importdecl")
+    , SortNoArgs("NoOffsideImportdecl")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("NoOffsideImportdecl")
+    , SortNoArgs("NoOffsideImportdeclList")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("NoOffsideImportdeclList")
+    , SortNoArgs("NoOffsideImportdeclListSem")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Topdecl")
+    , SortNoArgs("NoOffsideTopdecl")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("NoOffsideTopdecl")
+    , SortNoArgs("NoOffsideTopdeclList")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("NoOffsideTopdeclList")
+    , SortNoArgs("NoOffsideTopdeclListSem")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Importdecl")
+    , SortNoArgs("OffsideImportdecl")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("OffsideImportdecl")
+    , SortNoArgs("OffsideImportdeclList")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("OffsideImportdecl")
+    , SortNoArgs("OffsideImportdeclNEWLINE")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("OffsideImportdeclList")
+    , SortNoArgs("OffsideImportdeclListNEWLINE")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Topdecl")
+    , SortNoArgs("OffsideTopdecl")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("OffsideTopdecl")
+    , SortNoArgs("OffsideTopdeclList")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("OffsideTopdecl")
+    , SortNoArgs("OffsideTopdeclNEWLINE")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Char")
+    , SortNoArgs("Literal")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("String")
+    , SortNoArgs("Literal")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Qcon")
+    , SortNoArgs("Gcon")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Varid")
+    , SortNoArgs("Qvarid")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("QVARID")
+    , SortNoArgs("Qvarid")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Qvarid")
+    , SortNoArgs("Qvar")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Varsym")
+    , SortNoArgs("Qvarsym")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Qvarsym1")
+    , SortNoArgs("Qvarsym")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Varsym")
+    , SortNoArgs("Varop")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Qvarsym")
+    , SortNoArgs("Qvarop")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Consym")
+    , SortNoArgs("Conop")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Gconsym")
+    , SortNoArgs("Qconop")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Qvarop")
+    , SortNoArgs("Qop")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Qconop")
+    , SortNoArgs("Qop")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Qconsym")
+    , SortNoArgs("Gconsym")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("ConsOp")
+    , SortNoArgs("Gconsym")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Consym")
+    , SortNoArgs("Qconsym")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("QCONSYM")
+    , SortNoArgs("Qconsym")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("CONSYM")
+    , SortNoArgs("Consym")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("VARSYM")
+    , SortNoArgs("Varsym")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("QVARSYM")
+    , SortNoArgs("Qvarsym1")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("CONID")
+    , SortNoArgs("Tycon")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Tycon")
+    , SortNoArgs("Qtycon")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("QCONID")
+    , SortNoArgs("Qtycon")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Tycon")
+    , SortNoArgs("Tycls")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Qtycon")
+    , SortNoArgs("Qtycls")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("CONID")
+    , SortNoArgs("Conid")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Conid")
+    , SortNoArgs("Qconid")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("QCONID")
+    , SortNoArgs("Qconid")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("Qconid")
+    , SortNoArgs("Qcon")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("QModid")
+    , SortNoArgs("Modid")
+    )
+
+  has-subsort-of-trans(|) =
+    has-subsort-of-inject(
+    | SortNoArgs("QModid")
+    , SortNoArgs("Modid")
+    )
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellGDerive")) ; ?renamed)
+  ; !SortNoArgs("GDerive")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellGeneralizedDeriving")) ; ?renamed)
+  ; !SortNoArgs("GeneralizedDeriving")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellFloat-HASH")) ; ?renamed)
+  ; !SortNoArgs("Float-HASH")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellInteger-HASH")) ; ?renamed)
+  ; !SortNoArgs("Integer-HASH")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellString-HASH")) ; ?renamed)
+  ; !SortNoArgs("String-HASH")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellChar-HASH")) ; ?renamed)
+  ; !SortNoArgs("Char-HASH")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellRATIONAL-HASH")) ; ?renamed)
+  ; !SortNoArgs("RATIONAL-HASH")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellFLOAT-HASH")) ; ?renamed)
+  ; !SortNoArgs("FLOAT-HASH")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellINTEGER-HASH")) ; ?renamed)
+  ; !SortNoArgs("INTEGER-HASH")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellFlexibleContext")) ; ?renamed)
+  ; !SortNoArgs("FlexibleContext")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellFlexibleClass")) ; ?renamed)
+  ; !SortNoArgs("FlexibleClass")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOffsideStmtNEWLINE")) ; ?renamed)
+  ; !SortNoArgs("OffsideStmtNEWLINE")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOffsideStmtList")) ; ?renamed)
+  ; !SortNoArgs("OffsideStmtList")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellNoOffsideStmtList")) ; ?renamed)
+  ; !SortNoArgs("NoOffsideStmtList")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellNoOffsideStmtBlock")) ; ?renamed)
+  ; !SortNoArgs("NoOffsideStmtBlock")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellStmtList")) ; ?renamed)
+  ; !SortNoArgs("StmtList")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellFbind")) ; ?renamed)
+  ; !SortNoArgs("Fbind")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellStmt")) ; ?renamed)
+  ; !SortNoArgs("Stmt")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellList")) ; ?renamed)
+  ; !SortNoArgs("List")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellQual")) ; ?renamed)
+  ; !SortNoArgs("Qual")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellFPat")) ; ?renamed)
+  ; !SortNoArgs("FPat")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellLabeledPat")) ; ?renamed)
+  ; !SortNoArgs("LabeledPat")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellAPat")) ; ?renamed)
+  ; !SortNoArgs("APat")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellLPat")) ; ?renamed)
+  ; !SortNoArgs("LPat")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellXPat")) ; ?renamed)
+  ; !SortNoArgs("XPat")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOffsideDeclNEWLINE")) ; ?renamed)
+  ; !SortNoArgs("OffsideDeclNEWLINE")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOffsideDeclList")) ; ?renamed)
+  ; !SortNoArgs("OffsideDeclList")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellNoOffsideDeclList")) ; ?renamed)
+  ; !SortNoArgs("NoOffsideDeclList")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellNoOffsideDeclBlock")) ; ?renamed)
+  ; !SortNoArgs("NoOffsideDeclBlock")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellDeclList")) ; ?renamed)
+  ; !SortNoArgs("DeclList")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellDeclbinds")) ; ?renamed)
+  ; !SortNoArgs("Declbinds")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellMaybeWhere")) ; ?renamed)
+  ; !SortNoArgs("MaybeWhere")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellWhere")) ; ?renamed)
+  ; !SortNoArgs("Where")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellFunLHS")) ; ?renamed)
+  ; !SortNoArgs("FunLHS")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellGdrh")) ; ?renamed)
+  ; !SortNoArgs("Gdrh")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellValdef")) ; ?renamed)
+  ; !SortNoArgs("Valdef")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOffsideAltNEWLINE")) ; ?renamed)
+  ; !SortNoArgs("OffsideAltNEWLINE")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOffsideAltList")) ; ?renamed)
+  ; !SortNoArgs("OffsideAltList")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellNoOffsideAltList")) ; ?renamed)
+  ; !SortNoArgs("NoOffsideAltList")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellNoOffsideAltBlock")) ; ?renamed)
+  ; !SortNoArgs("NoOffsideAltBlock")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellAltList")) ; ?renamed)
+  ; !SortNoArgs("AltList")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellGdpat")) ; ?renamed)
+  ; !SortNoArgs("Gdpat")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellAlt")) ; ?renamed)
+  ; !SortNoArgs("Alt")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellLabelBinds")) ; ?renamed)
+  ; !SortNoArgs("LabelBinds")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellQopNoNeg")) ; ?renamed)
+  ; !SortNoArgs("QopNoNeg")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellFixdecl")) ; ?renamed)
+  ; !SortNoArgs("Fixdecl")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOps")) ; ?renamed)
+  ; !SortNoArgs("Ops")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellPrec")) ; ?renamed)
+  ; !SortNoArgs("Prec")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellInfix")) ; ?renamed)
+  ; !SortNoArgs("Infix")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellFargs")) ; ?renamed)
+  ; !SortNoArgs("Fargs")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellExps")) ; ?renamed)
+  ; !SortNoArgs("Exps")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellAnyExp")) ; ?renamed)
+  ; !SortNoArgs("AnyExp")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellSigndecl")) ; ?renamed)
+  ; !SortNoArgs("Signdecl")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellDecl")) ; ?renamed)
+  ; !SortNoArgs("Decl")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellClass")) ; ?renamed)
+  ; !SortNoArgs("Class")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellSimpleClass")) ; ?renamed)
+  ; !SortNoArgs("SimpleClass")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellSContext")) ; ?renamed)
+  ; !SortNoArgs("SContext")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellContext")) ; ?renamed)
+  ; !SortNoArgs("Context")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellInst")) ; ?renamed)
+  ; !SortNoArgs("Inst")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellSbtype")) ; ?renamed)
+  ; !SortNoArgs("Sbtype")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellSatype")) ; ?renamed)
+  ; !SortNoArgs("Satype")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellLabeledConstr")) ; ?renamed)
+  ; !SortNoArgs("LabeledConstr")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellNewconstr")) ; ?renamed)
+  ; !SortNoArgs("Newconstr")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellConstrs")) ; ?renamed)
+  ; !SortNoArgs("Constrs")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellDeriving")) ; ?renamed)
+  ; !SortNoArgs("Deriving")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellStype")) ; ?renamed)
+  ; !SortNoArgs("Stype")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellFielddecl")) ; ?renamed)
+  ; !SortNoArgs("Fielddecl")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellFielddecls")) ; ?renamed)
+  ; !SortNoArgs("Fielddecls")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellRecordFields")) ; ?renamed)
+  ; !SortNoArgs("RecordFields")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellConstr")) ; ?renamed)
+  ; !SortNoArgs("Constr")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellAType")) ; ?renamed)
+  ; !SortNoArgs("AType")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellTypes")) ; ?renamed)
+  ; !SortNoArgs("Types")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellGtycon")) ; ?renamed)
+  ; !SortNoArgs("Gtycon")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOptSig")) ; ?renamed)
+  ; !SortNoArgs("OptSig")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellImpspec")) ; ?renamed)
+  ; !SortNoArgs("Impspec")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellAs")) ; ?renamed)
+  ; !SortNoArgs("As")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellQualified")) ; ?renamed)
+  ; !SortNoArgs("Qualified")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellSrc")) ; ?renamed)
+  ; !SortNoArgs("Src")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellImportdecl")) ; ?renamed)
+  ; !SortNoArgs("Importdecl")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellQcname")) ; ?renamed)
+  ; !SortNoArgs("Qcname")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellExport")) ; ?renamed)
+  ; !SortNoArgs("Export")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellExports")) ; ?renamed)
+  ; !SortNoArgs("Exports")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellExportlist")) ; ?renamed)
+  ; !SortNoArgs("Exportlist")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOffsideTopdeclNEWLINE")) ; ?renamed)
+  ; !SortNoArgs("OffsideTopdeclNEWLINE")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOffsideTopdeclList")) ; ?renamed)
+  ; !SortNoArgs("OffsideTopdeclList")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOffsideImportdeclListNEWLINE")) ; ?renamed)
+  ; !SortNoArgs("OffsideImportdeclListNEWLINE")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOffsideImportdeclNEWLINE")) ; ?renamed)
+  ; !SortNoArgs("OffsideImportdeclNEWLINE")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOffsideImportdeclList")) ; ?renamed)
+  ; !SortNoArgs("OffsideImportdeclList")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellNoOffsideTopdeclList")) ; ?renamed)
+  ; !SortNoArgs("NoOffsideTopdeclList")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellNoOffsideImportdeclList")) ; ?renamed)
+  ; !SortNoArgs("NoOffsideImportdeclList")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOffsideBody")) ; ?renamed)
+  ; !SortNoArgs("OffsideBody")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellNoOffsideBody")) ; ?renamed)
+  ; !SortNoArgs("NoOffsideBody")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellEmpty")) ; ?renamed)
+  ; !SortNoArgs("Empty")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellBody")) ; ?renamed)
+  ; !SortNoArgs("Body")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellTopdecl")) ; ?renamed)
+  ; !SortNoArgs("Topdecl")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellModule")) ; ?renamed)
+  ; !SortNoArgs("Module")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellLiteral")) ; ?renamed)
+  ; !SortNoArgs("Literal")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellASCII-SO")) ; ?renamed)
+  ; !SortNoArgs("ASCII-SO")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellASCII")) ; ?renamed)
+  ; !SortNoArgs("ASCII")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellCharEsc")) ; ?renamed)
+  ; !SortNoArgs("CharEsc")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellEscape")) ; ?renamed)
+  ; !SortNoArgs("Escape")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellStringChar")) ; ?renamed)
+  ; !SortNoArgs("StringChar")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellCharChar")) ; ?renamed)
+  ; !SortNoArgs("CharChar")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellString")) ; ?renamed)
+  ; !SortNoArgs("String")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellChar")) ; ?renamed)
+  ; !SortNoArgs("Char")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellUNKNOWN")) ; ?renamed)
+  ; !SortNoArgs("UNKNOWN")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellCLITLIT")) ; ?renamed)
+  ; !SortNoArgs("CLITLIT")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellPRIMDOUBLE")) ; ?renamed)
+  ; !SortNoArgs("PRIMDOUBLE")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellPRIMFLOAT")) ; ?renamed)
+  ; !SortNoArgs("PRIMFLOAT")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellPRIMINTEGER")) ; ?renamed)
+  ; !SortNoArgs("PRIMINTEGER")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellPRIMSTRING")) ; ?renamed)
+  ; !SortNoArgs("PRIMSTRING")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellPRIMCHAR")) ; ?renamed)
+  ; !SortNoArgs("PRIMCHAR")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellExponent")) ; ?renamed)
+  ; !SortNoArgs("Exponent")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellRATIONAL")) ; ?renamed)
+  ; !SortNoArgs("RATIONAL")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellFLOAT")) ; ?renamed)
+  ; !SortNoArgs("FLOAT")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellINTEGER")) ; ?renamed)
+  ; !SortNoArgs("INTEGER")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellHexadecimal")) ; ?renamed)
+  ; !SortNoArgs("Hexadecimal")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOctal")) ; ?renamed)
+  ; !SortNoArgs("Octal")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellDecimal")) ; ?renamed)
+  ; !SortNoArgs("Decimal")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellZero")) ; ?renamed)
+  ; !SortNoArgs("Zero")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellHexit")) ; ?renamed)
+  ; !SortNoArgs("Hexit")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOctit")) ; ?renamed)
+  ; !SortNoArgs("Octit")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellDigit")) ; ?renamed)
+  ; !SortNoArgs("Digit")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellQModid")) ; ?renamed)
+  ; !SortNoArgs("QModid")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellQCONSYM")) ; ?renamed)
+  ; !SortNoArgs("QCONSYM")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellQVARSYM")) ; ?renamed)
+  ; !SortNoArgs("QVARSYM")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellQCONID")) ; ?renamed)
+  ; !SortNoArgs("QCONID")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellQVARID")) ; ?renamed)
+  ; !SortNoArgs("QVARID")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellModid")) ; ?renamed)
+  ; !SortNoArgs("Modid")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellQconid")) ; ?renamed)
+  ; !SortNoArgs("Qconid")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellConid")) ; ?renamed)
+  ; !SortNoArgs("Conid")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellQtycls")) ; ?renamed)
+  ; !SortNoArgs("Qtycls")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellTycls")) ; ?renamed)
+  ; !SortNoArgs("Tycls")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellQtycon")) ; ?renamed)
+  ; !SortNoArgs("Qtycon")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellTycon")) ; ?renamed)
+  ; !SortNoArgs("Tycon")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellQvarsym1")) ; ?renamed)
+  ; !SortNoArgs("Qvarsym1")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellVarsym")) ; ?renamed)
+  ; !SortNoArgs("Varsym")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellQcon")) ; ?renamed)
+  ; !SortNoArgs("Qcon")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellCon")) ; ?renamed)
+  ; !SortNoArgs("Con")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellQop")) ; ?renamed)
+  ; !SortNoArgs("Qop")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellConsOp")) ; ?renamed)
+  ; !SortNoArgs("ConsOp")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellQconop")) ; ?renamed)
+  ; !SortNoArgs("Qconop")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellGconsym")) ; ?renamed)
+  ; !SortNoArgs("Gconsym")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellConop")) ; ?renamed)
+  ; !SortNoArgs("Conop")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellConsym")) ; ?renamed)
+  ; !SortNoArgs("Consym")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellQconsym")) ; ?renamed)
+  ; !SortNoArgs("Qconsym")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellQvarsym")) ; ?renamed)
+  ; !SortNoArgs("Qvarsym")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellQvarop")) ; ?renamed)
+  ; !SortNoArgs("Qvarop")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellVarop")) ; ?renamed)
+  ; !SortNoArgs("Varop")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOp")) ; ?renamed)
+  ; !SortNoArgs("Op")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellQvar")) ; ?renamed)
+  ; !SortNoArgs("Qvar")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellVar")) ; ?renamed)
+  ; !SortNoArgs("Var")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellQvarid")) ; ?renamed)
+  ; !SortNoArgs("Qvarid")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellGcon")) ; ?renamed)
+  ; !SortNoArgs("Gcon")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellVars")) ; ?renamed)
+  ; !SortNoArgs("Vars")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellTyvar")) ; ?renamed)
+  ; !SortNoArgs("Tyvar")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellVarid")) ; ?renamed)
+  ; !SortNoArgs("Varid")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellReservedOp")) ; ?renamed)
+  ; !SortNoArgs("ReservedOp")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellReservedId0")) ; ?renamed)
+  ; !SortNoArgs("ReservedId0")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellReservedId")) ; ?renamed)
+  ; !SortNoArgs("ReservedId")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellCONSOP")) ; ?renamed)
+  ; !SortNoArgs("CONSOP")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellCONSYM")) ; ?renamed)
+  ; !SortNoArgs("CONSYM")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellVARSYM")) ; ?renamed)
+  ; !SortNoArgs("VARSYM")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellSymbol")) ; ?renamed)
+  ; !SortNoArgs("Symbol")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellCONID")) ; ?renamed)
+  ; !SortNoArgs("CONID")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellVARID")) ; ?renamed)
+  ; !SortNoArgs("VARID")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellNewLineLayout")) ; ?renamed)
+  ; !SortNoArgs("NewLineLayout")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellNoNewlineLayout")) ; ?renamed)
+  ; !SortNoArgs("NoNewlineLayout")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellNewline")) ; ?renamed)
+  ; !SortNoArgs("Newline")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellCurlyOpen")) ; ?renamed)
+  ; !SortNoArgs("CurlyOpen")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellHyphen")) ; ?renamed)
+  ; !SortNoArgs("Hyphen")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellL-Char")) ; ?renamed)
+  ; !SortNoArgs("L-Char")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellNCommentText")) ; ?renamed)
+  ; !SortNoArgs("NCommentText")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellNCommentContent")) ; ?renamed)
+  ; !SortNoArgs("NCommentContent")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellNComment")) ; ?renamed)
+  ; !SortNoArgs("NComment")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellEOF")) ; ?renamed)
+  ; !SortNoArgs("EOF")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellComment")) ; ?renamed)
+  ; !SortNoArgs("Comment")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellWhiteChar")) ; ?renamed)
+  ; !SortNoArgs("WhiteChar")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellNoOffsideImportdecl")) ; ?renamed)
+  ; !SortNoArgs("NoOffsideImportdecl")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellNoOffsideTopdecl")) ; ?renamed)
+  ; !SortNoArgs("NoOffsideTopdecl")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOffsideImportdecl")) ; ?renamed)
+  ; !SortNoArgs("OffsideImportdecl")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOffsideTopdecl")) ; ?renamed)
+  ; !SortNoArgs("OffsideTopdecl")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellAexp")) ; ?renamed)
+  ; !SortNoArgs("Aexp")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellNoOffsideAlt")) ; ?renamed)
+  ; !SortNoArgs("NoOffsideAlt")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOffsideAlt")) ; ?renamed)
+  ; !SortNoArgs("OffsideAlt")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellNoOffsideDecl")) ; ?renamed)
+  ; !SortNoArgs("NoOffsideDecl")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOffsideDecl")) ; ?renamed)
+  ; !SortNoArgs("OffsideDecl")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellPat")) ; ?renamed)
+  ; !SortNoArgs("Pat")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellNoOffsideStmt")) ; ?renamed)
+  ; !SortNoArgs("NoOffsideStmt")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellOffsideStmt")) ; ?renamed)
+  ; !SortNoArgs("OffsideStmt")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellType")) ; ?renamed)
+  ; !SortNoArgs("Type")
+
+
+unrename-sort(|) =
+  (where(renamed := SortNoArgs("HaskellExp")) ; ?renamed)
+  ; !SortNoArgs("Exp")
