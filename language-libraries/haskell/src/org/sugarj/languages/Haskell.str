@@ -3,6 +3,7 @@ module org/sugarj/languages/Haskell
 imports
   org/sugarj/transformations/typesmart/Runtime
   org/sugarj/languages/Stratego
+  Haskell
 
 
 signature
@@ -192,7 +193,7 @@ signature
     BinOp            : Varsym -> Var
     BinOp            : Qvarsym -> Qvar
     BinCon           : Consym -> Con
-    BinCon           : Qconsym -> Qcon
+    BinCon           : Gconsym -> Qcon
     ConId            : Conid -> Con
     QVarId           : Modid * VARID -> QVARID
     QConId           : Modid * CONID -> QCONID
@@ -657,7 +658,7 @@ rules
                                                                           ))
          ; ![SortNoArgs("List")|<id>]
        )
-       ; (try(
+       ; try(
            where(<(has-sort <+ log-mismatching-sort-error(|"List") ; fail)> ( arg1
                                                                             , Sort(
                                                                                 "List"
@@ -665,17 +666,8 @@ rules
                                                                               )
                                                                             ))
            ; ![SortNoArgs("APat")|<id>]
-         )
-      ; try(
-        where(<debug(!"list: "); (has-sort <+ log-mismatching-sort-error(|"List") ; fail)> ( arg1
-                                                                         , Sort(
-                                                                             "List"
-                                                                           , [SortNoArgs("Term")]
-                                                                           )
-                                                                         ))
-        ; ![SortNoArgs("PreTerm")|<id>]
-      )))
-  ; ?res-sorts
+         ))
+    ; ?res-sorts
     ; <prim("SUGARJ_unsafe_build", "List")> [arg1]
     ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
 
@@ -2049,10 +2041,6 @@ rules
         where(<(has-sort <+ log-mismatching-sort-error(|"Int") ; fail)> (arg1, SortNoArgs("INTEGER")))
         ; ![SortNoArgs("Literal")|<id>]
       )
-    ; try(
-        where(<(has-sort <+ log-mismatching-sort-error(|"Int") ; fail)> (arg1, SortNoArgs("Int")))
-        ; ![SortNoArgs("PreTerm")|<id>]
-      )
     ; ?res-sorts
     ; <prim("SUGARJ_unsafe_build", "Int")> [arg1]
     ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)
@@ -2356,7 +2344,7 @@ rules
          ; ![SortNoArgs("Con")|<id>]
        )
        ; try(
-           where(<(has-sort <+ log-mismatching-sort-error(|"BinCon") ; fail)> (arg1, SortNoArgs("Qconsym")))
+           where(<(has-sort <+ log-mismatching-sort-error(|"BinCon") ; fail)> (arg1, SortNoArgs("Gconsym")))
            ; ![SortNoArgs("Qcon")|<id>]
          ))
     ; ?res-sorts

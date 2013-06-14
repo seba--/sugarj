@@ -30,5 +30,7 @@ instance Foldable Tree where
 
 
 
+
+
 mytraverse f [] = (|[]|)
 mytraverse f (x : xs) = (|f x : mytraverse f xs|) 
