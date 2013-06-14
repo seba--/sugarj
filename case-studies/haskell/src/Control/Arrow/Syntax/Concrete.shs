@@ -1,13 +1,4 @@
 module Control.Arrow.Syntax.Concrete where
 
 import Control.Arrow.Syntax.Command
-
-context-free syntax
-  "cmd" "|[" ArrCommand "]|" -> StrategoTerm {cons("ToMetaExpr")}
-
-syntax
-  "$"  <StrategoTerm-CF> -> <ArrCommand-CF> {cons("FromMetaExpr")}
-
-  "$*" <StrategoTerm-CF> -> <ArrImplStmtList-CF> {cons("FromMetaExpr")}
-  "$*" <StrategoTerm-CF> -> <ArrExplStmtList-CF> {cons("FromMetaExpr")}
-
+import Meta.Concrete.Haskell

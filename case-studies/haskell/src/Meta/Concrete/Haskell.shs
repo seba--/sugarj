@@ -19,6 +19,15 @@ syntax
 
   "$*" <StrategoTerm-CF> -> <HaskellDeclList-CF> {cons("FromMetaExpr")}
 
+context-free syntax
+  "cmd" "|[" ArrCommand "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+syntax
+  "$"  <StrategoTerm-CF> -> <ArrCommand-CF> {cons("FromMetaExpr")}
+
+  "$*" <StrategoTerm-CF> -> <ArrImplStmtList-CF> {cons("FromMetaExpr")}
+  "$*" <StrategoTerm-CF> -> <ArrExplStmtList-CF> {cons("FromMetaExpr")}
+
 
 
 lexical syntax
