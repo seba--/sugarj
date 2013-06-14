@@ -6,6 +6,9 @@ signature constructors
   LiftToTop : a -> Empty
   LiftToTop : a * b -> b
 
+rules
+  get-syntax-sort : LiftToTop(_,b) -> <get-syntax-sort> b
+
 desugarings
   lift-to-top
 
