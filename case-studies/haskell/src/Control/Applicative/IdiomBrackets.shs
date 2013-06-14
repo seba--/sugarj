@@ -8,7 +8,7 @@ import Meta.LiftToTop
 context-free syntax
   "(|" PurePart EffectfulPart* "|)" -> HaskellExp {cons("IdiomBrackets")}
   "(|" HaskellExp HaskellQvarsym HaskellExp "|)" -> HaskellExp {cons("VarInfixIdiomBrackets")}
-  "(|" HaskellExp HaskellQconsym HaskellExp "|)" -> HaskellExp {cons("ConInfixIdiomBrackets")}
+  "(|" HaskellExp HaskellGconsym HaskellExp "|)" -> HaskellExp {cons("ConInfixIdiomBrackets")}
 
   HaskellExp -> PurePart
   HaskellExp -> EffectfulPart
