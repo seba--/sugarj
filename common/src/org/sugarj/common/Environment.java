@@ -66,14 +66,17 @@ public class Environment implements Serializable {
   private List<Renaming> renamings = new LinkedList<Renaming>();
   
   public Environment(boolean generateFiles, Path stdlibDirPath) {
-    this.includePath.add(stdlibDirPath);
+    includePath.add(bin);
+    includePath.add(stdlibDirPath);
+    
     try {
       this.parseBin = FileCommands.newTempDir();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    this.generateFiles = !generateFiles;
-    setGenerateFiles(generateFiles);
+    
+    if (!generateFiles)
+      includePath.add(parseBin);
   }
   
   public Path getRoot() {
@@ -97,7 +100,7 @@ public class Environment implements Serializable {
   }
 
   public void setBin(Path bin) {
-    if (this.bin != null && doGenerateFiles()) {
+    if (this.bin != null) {
       includePath.remove(this.bin);
       includePath.add(bin);
     }
@@ -172,14 +175,11 @@ public class Environment implements Serializable {
     if (this.generateFiles == b)
       return;
     
-    if (this.generateFiles) {
-      includePath.remove(bin);
+    if (this.generateFiles)
       includePath.add(parseBin);
-    }
-    else {
-      includePath.remove(parseBin);
+    else
       includePath.add(bin);
-    }
+
     this.generateFiles = b;
   }
 }

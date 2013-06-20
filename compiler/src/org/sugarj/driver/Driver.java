@@ -149,9 +149,6 @@ public class Driver{
       if (environment.getCacheDir() != null)
         FileCommands.createDir(environment.getCacheDir());
       
-      if(environment.getParseBin() != null)
-        FileCommands.createDir(environment.getParseBin());
-      
       FileCommands.createDir(environment.getBin());
       
       initializeCaches(environment, false);
@@ -253,12 +250,8 @@ public class Driver{
       Result result = getParserResult(sourceFile);
 
       boolean needPersistentVersion = result == null || result.hasPersistentVersionChanged();
-      if (needPersistentVersion) {
+      if (needPersistentVersion)
         result = ModuleSystemCommands.locateResult(FileCommands.dropExtension(sourceFile.getRelativePath()), driver.environment);
-        // if disk-stored result provides syntax tree
-        if (result != null && result.getSugaredSyntaxTree() != null)
-          putParserResult(sourceFile, result);
-      }
       
       boolean isUpToDate = result != null && result.isUpToDate(declProvider.getSourceHashCode(), driver.environment);
       if (isUpToDate) {

@@ -479,7 +479,8 @@ public class Result {
     res.dependencies = new HashMap<Path, Integer>();
     for (Path dep : dependencies.keySet()) {
       Result other = readDependencyFile(dep);
-      other.moveTo(targetDir, isParseResult);
+      if (other.isParseResult())
+        other.moveTo(targetDir, isParseResult);
       res.addDependency(other);
     }
     
