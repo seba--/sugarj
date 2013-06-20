@@ -66,15 +66,14 @@ public class Environment implements Serializable {
   private List<Renaming> renamings = new LinkedList<Renaming>();
   
   public Environment(boolean generateFiles, Path stdlibDirPath) {
-    this.includePath.add(bin);
     this.includePath.add(stdlibDirPath);
-    this.generateFiles = generateFiles;
     try {
       this.parseBin = FileCommands.newTempDir();
-      this.includePath.add(parseBin);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+    this.generateFiles = !generateFiles;
+    setGenerateFiles(generateFiles);
   }
   
   public Path getRoot() {
@@ -94,14 +93,15 @@ public class Environment implements Serializable {
   }
 
   public Path getBin() {
-    return bin;
+    return generateFiles ? bin : parseBin;
   }
 
   public void setBin(Path bin) {
-    if (this.bin!=null)
+    if (this.bin != null && doGenerateFiles()) {
       includePath.remove(this.bin);
+      includePath.add(bin);
+    }
     this.bin = bin;
-    includePath.add(bin);
   }
 
   public Path getCacheDir() {
@@ -148,23 +148,12 @@ public class Environment implements Serializable {
     this.includePath = includePath;
   }
 
-  private RelativePath createCompileBinPath(String relativePath) {
-    return new RelativePath(bin, relativePath);
-  }
-  
   public RelativePath createCachePath(String relativePath) {
     return new RelativePath(cacheDir, relativePath);
   }
   
-  private RelativePath createParseBinPath(String relativePath) {
-    return new RelativePath(parseBin, relativePath);
-  }
-
   public RelativePath createOutPath(String relativePath) {
-    if (doGenerateFiles())
-      return createCompileBinPath(relativePath);
-    else
-      return createParseBinPath(relativePath);
+    return new RelativePath(getBin(), relativePath);
   }
 
   public List<Renaming> getRenamings() {
@@ -180,6 +169,17 @@ public class Environment implements Serializable {
   }
 
   public void setGenerateFiles(boolean b) {
+    if (this.generateFiles == b)
+      return;
+    
+    if (this.generateFiles) {
+      includePath.remove(bin);
+      includePath.add(parseBin);
+    }
+    else {
+      includePath.remove(parseBin);
+      includePath.add(bin);
+    }
     this.generateFiles = b;
   }
 }

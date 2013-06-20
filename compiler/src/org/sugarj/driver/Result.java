@@ -476,7 +476,13 @@ public class Result {
   public Result moveTo(Path targetDir, boolean isParseResult) throws IOException {
     Result res = new Result(isParseResult ? targetDir : null);
 
-    res.dependencies = dependencies;
+    res.dependencies = new HashMap<Path, Integer>();
+    for (Path dep : dependencies.keySet()) {
+      Result other = readDependencyFile(dep);
+      other.moveTo(targetDir, isParseResult);
+      res.addDependency(other);
+    }
+    
     res.circularDependencies = circularDependencies;
     res.dependingFileHashes = dependingFileHashes;
     res.collectedErrors = collectedErrors;
