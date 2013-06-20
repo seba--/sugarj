@@ -418,16 +418,12 @@ public class FileCommands {
     return null;
   }
   
-  public static Path tryMoveFile(Path from, Path to, Path file) throws IOException {
+  public static Path tryCopyFile(Path from, Path to, Path file) throws IOException {
     RelativePath p = getRelativePath(from, file);
     Path target = file;
     if (p != null) {
       target = new RelativePath(to, p.getRelativePath());
-      boolean ok = p.getFile().renameTo(target.getFile());
-      if (!ok) {
-        copyFile(p, target);
-        delete(p);
-      }
+      copyFile(p, target);
     }
     return target;
   }

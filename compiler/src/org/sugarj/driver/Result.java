@@ -496,13 +496,13 @@ public class Result {
     res.deferredSourceFiles = deferredSourceFiles;
     res.editorServices = editorServices;
     
-    res.desugaringsFile = FileCommands.tryMoveFile(parseResultPath, targetDir, desugaringsFile);
-    res.parseTableFile = FileCommands.tryMoveFile(parseResultPath, targetDir, parseTableFile);
-    res.generationLog = FileCommands.tryMoveFile(parseResultPath, targetDir, generationLog);
+    res.desugaringsFile = FileCommands.tryCopyFile(parseResultPath, targetDir, desugaringsFile);
+    res.parseTableFile = FileCommands.tryCopyFile(parseResultPath, targetDir, parseTableFile);
+    res.generationLog = FileCommands.tryCopyFile(parseResultPath, targetDir, generationLog);
 
     res.generatedFileHashes = new HashMap<Path, Integer>(generatedFileHashes.size());
     for (Entry<Path, Integer> e : generatedFileHashes.entrySet()) {
-      Path p = FileCommands.tryMoveFile(parseResultPath, targetDir, e.getKey());
+      Path p = FileCommands.tryCopyFile(parseResultPath, targetDir, e.getKey());
       res.generatedFileHashes.put(p, e.getValue());
     }
     
@@ -512,8 +512,6 @@ public class Result {
       dep = new RelativePath(targetDir, wasDep.getRelativePath());
     
     res.writeDependencyFile(dep);
-    if (persistentPath != null)
-      FileCommands.delete(persistentPath);
     
     return res;
   }

@@ -252,7 +252,7 @@ public class Driver{
         result = ModuleSystemCommands.locateResult(FileCommands.dropExtension(sourceFile.getRelativePath()), driver.environment);
       
       boolean isUpToDate = result != null && result.isUpToDate(declProvider.getSourceHashCode(), driver.environment);
-      if (isUpToDate) {
+      if (result != null && result.isUpToDate(declProvider.getSourceHashCode(), driver.environment)) {
         if (driver.environment.doGenerateFiles() && result.isParseResult()) {
           result = result.moveTo(driver.environment.getBin(), false);
           removeParserResult(sourceFile);
