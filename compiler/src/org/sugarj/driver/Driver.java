@@ -31,6 +31,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr_layout.client.ITreeBuilder;
@@ -953,7 +954,7 @@ public class Driver{
   }
 
   private List<String> processLanguageDec(IStrategoTerm toplevelDecl) throws IOException {
-    log.beginTask("processing", "PROCESS " + baseProcessor.getLanguage().getLanguageName() + " declaration: " + toplevelDecl.toString(0), Log.CORE);
+    log.beginTask("processing", "PROCESS " + baseProcessor.getLanguage().getLanguageName() + " declaration: " + ((toplevelDecl instanceof IStrategoAppl) ? ((IStrategoAppl) toplevelDecl).getName() : toplevelDecl.toString(0)), Log.CORE);
     try {
       
       if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
