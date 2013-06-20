@@ -1,0 +1,63 @@
+module contextanalysis.Annotations
+
+rules // TODO: these two definitions belong to Analyze.str
+
+  reinit-for-analysis = bottomup(reinit-analysis-data-annotation)
+
+  reinit-analysis-data-annotation =
+    try(?node
+      ; <get-annotations; filter(?("analysis-data", _)) <+ ![]> node => ana-annos
+      ; <?[]> ana-annos
+      ; <get-annotations; filter(not(?("analysis-data", _))) <+ ![]> node => annos
+      ; ![("analysis-data", <new-hashtable>)] => new-ana-annos
+      ; <set-annotations> (node, <conc> (annos, new-ana-annos))    
+    )
+
+rules
+
+  add-context-errors(|msgs) =
+      if <?[]> msgs
+      then id
+      else 
+         where(!(msgs, <id>); debug-analysis(!"ADD-CTX-ERRS "))
+       ; where(get-context-errors; !(msgs, <id>); conc; nub => all-msgs)
+       ; put-anno(|"context-errors", all-msgs)
+      end
+  
+  add-fresh-context-errors(|msgs) =
+      if oncetd(get-context-errors; not(?[]))
+        then id
+        else add-context-errors(|msgs)
+      end
+
+  get-context-errors = get-anno(|"context-errors") <+ ![]
+
+  collect-all-context-errors = collect-all(get-context-errors); concat
+
+  context-errors-as-alist =
+    let as-alist =
+      { node, errs:
+          ?node
+        ; <get-context-errors> node => errs
+        ; if !errs; ?[] then fail else ![(node, errs)] end
+      }
+    in collect-all(as-alist) end
+
+  get-kind = get-anno(|"kind")
+
+  put-kind = ?(K, node); <put-anno(|"kind", K)> node
+
+  get-signature = get-anno(|"signature")
+
+  put-signature = ?(sig, node); <put-anno(|"signature", sig)> node
+
+  get-type = get-anno(|"type")
+
+  put-type = ?(T, node); <put-anno(|"type", T)> node
+
+  get-context = get-anno(|"context")
+
+  put-context = ?(C, node); <put-anno(|"context", C)> node
+  
+  mark-context-normalized = reinit-analysis-data-annotation; put-anno(|"context-normalized", ())
+  is-context-normalized = where(get-anno(|"context-normalized"))

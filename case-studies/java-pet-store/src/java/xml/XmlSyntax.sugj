@@ -9,126 +9,209 @@ public sugar XmlSyntax {
   context-free syntax
     AttrName "=" AttValue -> Attribute {cons("Attribute")}
     QName -> AttrName {cons("AttrName")}
+
   syntax
+
     "\"" DoubleQuotedPart* "\"" -> <AttValue-CF> {cons("DoubleQuoted")}
     "'"  SingleQuotedPart* "'" -> <AttValue-CF> {cons("SingleQuoted")}
+
     FooDoubleQuotedText -> DoubleQuotedPart {cons("CharDataPart")}
     FooSingleQuotedText -> SingleQuotedPart {cons("CharDataPart")}
+
     <DoubleQuotedText-LEX> -> FooDoubleQuotedText
     <SingleQuotedText-LEX> -> FooSingleQuotedText
+
     <Ref-CF> -> DoubleQuotedPart
     <Ref-CF> -> SingleQuotedPart
+
   lexical syntax
+
     ~[\&\<\"]+ -> DoubleQuotedText
     ~[\&\<\']+ -> SingleQuotedText
+
   lexical restrictions
+
     DoubleQuotedText -/- ~[\&\<\"]
     SingleQuotedText -/- ~[\&\<\']
+
+%% module xml-text
   lexical syntax
     [\ \t\n\13] -> WhiteSpaceChar
+
   syntax
+
     CharDataPart+ -> CharData {cons("Text")}
+
     FooCharDataText -> CharDataPart {cons("CharDataPart")}
     <Ref-CF> -> CharDataPart
     "<![CDATA[" <CData-LEX> "]]>" -> CharDataPart {cons("CDATASection")}
+
     <CharDataText-LEX> -> FooCharDataText
+
   lexical syntax
+
     ~[\<\&]+ -> CharDataText
+
   lexical restrictions
+
     CharDataText -/- ~[\<\&]
+
   syntax
+
     "&#"  <NatConst-LEX> ";" -> <DecCharRef-CF> {cons("DecCharRef")}
     "&#x" <HexConst-LEX> ";" -> <HexCharRef-CF> {cons("HexCharRef")}
     "&"   <NCName-LEX>   ";" -> <EntityRef-CF>  {cons("EntityRef")}
+
   context-free syntax
+
     DecCharRef -> CharRef
     HexCharRef -> CharRef
     CharRef    -> Ref
     EntityRef  -> Ref
+
   lexical syntax
+
     [0-9]+       -> NatConst
     [0-9a-fA-F]+ -> HexConst
+
   lexical syntax
+
     (~[\]] | CloseBracket | TwoCloseBrackets )* -> CData
+
     "]"  -> CloseBracket
     "]]" -> TwoCloseBrackets
+
   lexical restrictions
+
     CloseBracket     -/- [\]]
     TwoCloseBrackets -/- [\>]
     CharDataToken    -/- ~[\<\&\]\ \t\n\13]
+
+%% module xml-external
+
   context-free syntax
     "SYSTEM" SystemLit           -> ExternalID {cons("SystemExternalID")}
     "PUBLIC" PublicLit SystemLit -> ExternalID {cons("PublicExternalID")}
     "PUBLIC" PublicLit           -> PublicID   {cons("PublicID")  }
+
   lexical syntax
+
     "\"" ~[\"]* "\""     -> SystemLit
     "'"  ~[\']* "'"     -> SystemLit
     "\"" PubIDChar* "\"" -> PublicLit
     "'"  PubIDChar* "'" -> PublicLit
+
     [a-zA-Z0-9] -> PubIDChar
     [\ \n\13\-\'\(\)\+\,\.\/\:\=\?\;\!\*\#\@\$\_\%] -> PubIDChar
+
+
+%% module xml-pi
+
   context-free syntax
     "<?" PITarget PIChars "?>" -> PI {cons("PI")}
+
   lexical syntax
     NCName -> PITarget
     [Xx][Mm][Ll] -> PITarget {reject}
+
     ( ~[\?\>] | ( [\?] ~[\>] ) )* -> PIChars
+
+
+
+%% module xml-prolog
+
   context-free syntax
+
     XMLDecl? Misc* DocTypePrologue? -> Prologue {cons("Prologue")}
     Misc* -> Epilogue {cons("Epilogue")}
     Comment -> Misc {cons("Comment")}
     PI      -> Misc
+
   context-free syntax
+
     "<?xml" VersionInfo EncodingDecl? StandaloneDecl? "?>" -> XMLDecl {cons("XMLDecl")}
+
     "standalone" "=" StandaloneValue -> StandaloneDecl {cons("StandaloneDecl")}
     "version"    "=" VersionValue    -> VersionInfo    {cons("VersionDecl")}
     "encoding"   "=" EncodingValue   -> EncodingDecl   {cons("EncodingDecl")}
+
     "\"" YesNo "\"" -> StandaloneValue {cons("Standalone")}
     "'"  YesNo "'" -> StandaloneValue {cons("StandaloneSingle")}
+
     "\"" EncodingName "\"" -> EncodingValue {cons("Encoding")}
     "'"  EncodingName "'" -> EncodingValue {cons("EncodingSingle")}
+
     "\"" VersionNum "\"" -> VersionValue {cons("Version")}
     "'"  VersionNum "'"  -> VersionValue {cons("VersionSingle")}
+
   context-free syntax
+
     DocTypeDecl Misc* -> DocTypePrologue {cons("DocTypePrologue")}
+
     "<!DOCTYPE" QName ExternalID ">" -> DocTypeDecl {cons("DocTypeDecl")}
+
   lexical syntax
+
     [a-zA-Z0-9\_\.\:\-]+ -> VersionNum
     [A-Za-z] [A-Za-z0-9\.\_\-]* -> EncodingName
+
     "yes" -> YesNo
     "no"  -> YesNo
+
+
+%% module xml-document
+
   sorts Document Element Content
   context-free syntax
     Prologue Element Epilogue -> Document {cons("Document")}
+
     Element -> Content
     Comment -> Content {cons("Comment")}
     PI      -> Content
+
   syntax
     CharData      -> <Content-CF>
     CDataSection  -> <Content-CF>
+
+
   context-free syntax
     "<" ElemName Attribute* "/>" -> Element {cons("EmptyElement")}
+
     "<" ElemName Attribute* ">"
       Content* 
     "</" ElemName ">"
     -> Element {cons("Element")}
+    
     QName -> ElemName {cons("ElemName")}
+  
+
+%% module xml-names
+
   context-free syntax
     Qualifier? NCName -> QName     {cons("QName")}
     NCName ":"        -> Qualifier {cons("Prefix")}
+    
     "{" NamespaceURI "}" -> Qualifier {cons("URIPrefix")}
+
   lexical syntax
     [A-Za-z\_] [A-Za-z0-9\.\-\_]* -> NCName
     [a-zA-Z0-9\_\-\:\/\.]+ -> NamespaceURI
+
   lexical restrictions
     NCName -/- [A-Za-z0-9\.\-\_]
+
+%% module xml-comments
+
   lexical syntax
-    CommentLeft (~[\-] | Dash)* CommentRight -> Comment
+    "<!--" -> CommentLeft
+    "-->" -> CommentRight
+    CommentLeft CommentContent* CommentRight -> Comment
+    Dash -> CommentContent
+    ~[\-] -> CommentContent
     "-" -> Dash
+
   lexical restrictions
+
     Dash -/- [\-]
-  lexical syntax
-    [\ \t\n\13] -> LAYOUT
-  context-free restrictions
-    LAYOUT? -/- [\ \t\n\13]
+
 }

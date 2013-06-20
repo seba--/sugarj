@@ -1,0 +1,68 @@
+package quest.analysis;
+
+import quest.lang.Syntax;
+import quest.analysis.Naming;
+import quest.analysis.Satisfiability;
+
+public sugar Determinism {
+  analyses
+    {| ActiveQuestCond, ConditionalContext:
+       rules ( ConditionalContext := Lit(Bool(True)) );
+       analyze-determinism
+    |}
+  
+  rules
+    analyze-determinism = Questionnaire(id, id, analyze-determinism)
+    analyze-determinism = QNil
+    analyze-determinism = QCons(analyze-determinism, analyze-determinism)
+    
+    analyze-determinism = Question(id, QuestId(new-active-name-cond), id) 
+    analyze-determinism = DerivedValue(id, QuestId(new-active-name-cond), id)
+    analyze-determinism = QuestGroup(id, analyze-determinism)
+    analyze-determinism =
+      ConditionalQuest(?QuestExpr(cond),
+                       analyze-determinism-limited-context(|cond), 
+                       ?None + Some(analyze-determinism-limited-context(|Not(cond))))
+    analyze-determinism = ?LocalQuest(_)
+    analyze-determinism = QuestRef(QuestId(new-active-name-cond))
+
+    analyze-determinism-limited-context(|cond) =
+      {| ConditionalContext:
+         rules( ConditionalContext := LazyAnd(<ConditionalContext>, cond)); 
+         analyze-determinism
+      |}
+    
+    inline-derived-values =
+      repeat(changed-tree(
+        topdown(try(
+          ?ExprName(_); 
+          retrieve-reference; 
+          ?DerivedValue(_, _, QuestExpr(<id>))))))
+
+  rules
+    new-active-name-cond =
+      ?name; 
+      where(
+        (ActiveQuestCond <+ !Lit(Bool(False))) => other-cond;
+        ConditionalContext => this-cond;
+        where(<inline-derived-values> this-cond => this-inlined-cond);
+        !LazyAnd(other-cond, this-inlined-cond) => check-cond);
+      if <strip-annos; is-satisfiable> check-cond
+        then where(<conc-strings> 
+                     ("Potentially overlapping definition of '", name,
+                      "' in ", <strip-annos; repeat(reduce); aterm-to-string; escape> other-cond,
+                      " and ", <strip-annos; repeat(reduce); aterm-to-string; escape> this-cond, ".") => msg);
+             put-determinism-error(|msg)
+        else rules ( ActiveQuestCond :+ name{t*} -> LazyOr(other-cond, this-cond))
+      end
+    
+  rules
+    has-determinism-error = where(get-anno(|"determinism-error"))
+    retrieve-determinism-error = get-anno(|"determinism-error")
+    put-determinism-error(|t) = put-anno(|"determinism-error", t)
+    
+  rules
+    constraint-error =
+      where(retrieve-determinism-error; debug => err);
+      !(<id>,<conc-strings>("Determinsm error: ", err))
+}

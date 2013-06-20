@@ -38,7 +38,7 @@ public sugar Accessors {
 
 	strategies
 		defaultPrefix = defaultPrefixBool <+ defaultPrefixOther
-		upcaseFirstChar = explode-string; one(to-upper); implode-string
+		upcaseFirstChar = explode-string; [to-upper|id]; implode-string
 
 	strategies
 		// Takes the AccClassBody content (a list of AccFieldDecs, ConstrDecs, FieldDecs and MethodDecs) and returns only AccFieldDecs
@@ -48,7 +48,14 @@ public sugar Accessors {
 		fieldTriples = ?AccFieldDec(mods, type, vars, _); !vars; map(\VarDec(Id(name)) -> (mods, type, name)\)
 		genFieldDecs = filterAccDecs; mapconcat(fieldTriples); map(field)
 
-        getterTriples = ?AccFieldDec(_, type, vars, accs); if <elem> (AccGet(), accs) then !vars; map(\VarDec(Id(name)) -> (type, name, <defaultPrefix> type)\) else if !accs; filter(\AccGetPre(pre) -> pre\); ?[pre2] then !vars; map(\VarDec(Id(name)) -> (type, name, pre2)\) else ![] end end
+        getterTriples = ?AccFieldDec(_, type, vars, accs); 
+                        if <elem> (AccGet(), accs) 
+                          then !vars; map(\VarDec(Id(name)) -> (type, name, <defaultPrefix> type)\) 
+                          else if !accs; filter(\AccGetPre(pre) -> pre\); ?[pre2] 
+                                 then !vars; map(\VarDec(Id(name)) -> (type, name, pre2)\) 
+                                 else ![] 
+                               end
+                        end
         genGetters = filterAccDecs ; mapconcat(getterTriples); map(getter) <+ ![]
 
 		setterTriples = ?AccFieldDec(_, type, vars, accs); if <elem> (AccSet(), accs) then !vars; map(\VarDec(Id(name)) -> (type, name, "set")\) else if !accs; filter(\AccSetPre(pre) -> pre\); ?[pre2] then !vars; map(\VarDec(Id(name)) -> (type, name, pre2)\) else ![] end end

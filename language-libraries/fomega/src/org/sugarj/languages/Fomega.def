@@ -16,20 +16,20 @@ exports
     "mu" -> Keyword
     "if" -> Keyword
     "then" -> Keyword
-	"else" -> Keyword
-	"case" -> Keyword
-	"of" -> Keyword
-	"fold" -> Keyword
-	"unfold" -> Keyword
+    "else" -> Keyword
+    "case" -> Keyword
+    "of" -> Keyword
+    "fold" -> Keyword
+    "unfold" -> Keyword
     "as" -> Keyword
-	"module" -> Keyword
-	"import" -> Keyword
-	"qualified" -> Keyword
-	"public" -> Keyword
+    "module" -> Keyword
+    "import" -> Keyword
+    "qualified" -> Keyword
+    "public" -> Keyword
     "val" -> Keyword
-	"type" -> Keyword
-	"true" -> Keyword
-	"false" -> Keyword
+    "type" -> Keyword
+    "true" -> Keyword
+    "false" -> Keyword
 
     "Nat" -> PrimitiveType
     "Bool" -> PrimitiveType
@@ -57,38 +57,51 @@ module Fomega-Type
 imports Fomega-Lexical
 
 exports
-  sorts Type TypeDecl TypeDecls Kind
+  sorts Type TyDecl TyDecls TyDecls1 Kind
 
   context-free syntax
-    ID -> Type {cons("TyVar")}
-    "Nat" -> Type {cons("TyNat")}
-    "Bool" -> Type {cons("TyBool")}
-    "String" -> Type {cons("TyString")}
-    "{" TypeDecls "}" -> Type {cons("TyRecord")}
-    "<" TypeDecls ">" -> Type {cons("TyVariant")}
+    ID                    -> Type {cons("TyVar")}
+    "Nat"                 -> Type {cons("TyNat")}
+    "Bool"                -> Type {cons("TyBool")}
+    "String"              -> Type {cons("TyString")}
+    "{" TyDecls "}"       -> Type {cons("TyRecord")}
+    "<" TyDecls ">"       -> Type {cons("TyVariant")}
+    "[]"                  -> Type {cons("TyEmpty")}
+    "{" Type "," Type "}" -> Type {cons("TyPair")}
+    Type "." "1"          -> Type {cons("TyFst")}
+    Type "." "2"          -> Type {cons("TySnd")}
+
     "(" Type ")" -> Type {bracket}
 
-    ID ":" Type -> TypeDecl {cons("TyDecl")}
-    {TypeDecl ","}* -> TypeDecls
+    ID ":" Type -> TyDecl {cons("TyDecl")}
 
-    "*" -> Kind {cons("KiStar")}
-    Kind "=>" Kind -> Kind {cons("KiArrow")}        
+                        -> TyDecls  {cons("TyDeclsNil")}
+    TyDecl TyDecls1     -> TyDecls  {cons("TyDeclsCons")}
+                        -> TyDecls1 {cons("TyDeclsNil")}
+    "," TyDecl TyDecls1 -> TyDecls1 {cons("TyDeclsCons")}
+
+    "*"                   -> Kind {cons("KiStar")}
+    Kind "=>" Kind        -> Kind {cons("KiArrow"), right}
+    "[]"                  -> Kind {cons("KiEmpty")}
+    "{" Kind "," Kind "}" -> Kind {cons("KiPair")}
+
+    "(" Kind ")" -> Kind {bracket}
 
     QID -> Type {cons("TyQVar")}
 
-    Type Type -> Type {cons("TyApp"), left}
-	Type "->" Type -> Type {cons("TyArrow"), right}
-	"forall" ID "::" Kind "." Type -> Type {cons("TyForall")}
-	"\\" ID "::" Kind "." Type -> Type {cons("TyAbs")}
-	"mu" ID "." Type -> Type {cons("TyMu")}
+    Type Type                           -> Type {cons("TyApp"), left}
+    Type "->" Type                      -> Type {cons("TyArrow"), right}
+    "forall" ID "::" Kind "." Type      -> Type {cons("TyForall")}
+    "\\" ID "::" Kind "." Type          -> Type {cons("TyAbs")}
+    "mu" "(" Type "," Type ")"          -> Type {cons("TyMu")}
 
   context-free priorities
-      Type Type -> Type {cons("TyApp"), left}
-	> Type "->" Type -> Type {cons("TyArrow"), right}
-	> {
-      "forall" ID "::" Kind "." Type -> Type {cons("TyForall")}
-	  "\\" ID "::" Kind "." Type -> Type {cons("TyAbs")}
-	  "mu" ID "." Type -> Type {cons("TyMu")}
+      Type Type      -> Type
+    > Type "->" Type -> Type
+    > {
+      "forall" ID "::" Kind "." Type      -> Type
+      "\\" ID "::" Kind "." Type          -> Type
+      "mu" Kind "." "(" Type "," Type ")" -> Type
     }
 
 module Fomega-Module
@@ -97,18 +110,24 @@ imports Fomega-Type
 imports Fomega-Expr
 
 exports
-  sorts Module Def Import Imports ModuleDec Public Qualified Definitions
+  sorts Module Def Defs Import Imports ModuleDec Public Qualified Definitions
 
   context-free syntax
-    "module" MID -> ModuleDec {cons("ModuleDec")}
-    ModuleDec Imports Definitions -> Module {cons("Module")}
-    Import* -> Imports {cons("FomegaImports")}
-    "import" Qualified? MID -> Import {cons("Import")}
-    Def+ -> Definitions {cons("FomegaBody")}
-    Public? "val" ID "=" Expr -> Def {cons("ValDef")}
+    "module" MID                  -> ModuleDec {cons("ModuleDec")}
+    ModuleDec Imports Definitions -> Module    {cons("Module")}
+
+    Import*                 -> Imports {cons("FomegaImports")}
+    "import" Qualified? MID -> Import  {cons("Import")}
+
+    Defs -> Definitions {cons("FomegaBody")}
+
+    Def      -> Defs {cons("DefsEnd")}
+    Def Defs -> Defs {cons("DefsCons")}
+
+    Public? "val" ID "=" Expr  -> Def {cons("ValDef")}
     Public? "type" ID "=" Type -> Def {cons("TypeDef")} 
 
-    "public" -> Public {cons("Public")}
+    "public"    -> Public    {cons("Public")}
     "qualified" -> Qualified {cons("Qualified")}
 
   context-free start-symbols Module 
@@ -119,11 +138,11 @@ imports Fomega-Lexical
 imports Fomega-Type
 
 exports
-  sorts Expr Field Fields Branch Branches
+  sorts Expr Field Fields Fields1 Branch Branches
 
   context-free syntax
     ID -> Expr {cons("Var")}
-	QID -> Expr {cons("QVar")}
+    QID -> Expr {cons("QVar")}
     "(" Expr ")" -> Expr {bracket}
     "{" Fields "}" -> Expr {cons("Record")}
     "<" Field ">" "as" Type -> Expr {cons("Variant")}
@@ -133,10 +152,15 @@ exports
     STRING -> Expr {cons("String")}
 
     ID "=" Expr -> Field {cons("Field")}
-    {Field ","}* -> Fields
 
-    "<" ID "=" ID ">" "=>" Expr -> Branch {cons("Branch")}
-    {Branch ";"}+ -> Branches
+                      -> Fields  {cons("FieldsNil")}
+    Field Fields1     -> Fields  {cons("FieldsCons")}
+                      -> Fields1 {cons("FieldsNil")}
+    "," Field Fields1 -> Fields1 {cons("FieldsCons")}
+
+    "<" ID "=" ID ">" "=>" Expr -> Branch   {cons("Branch")}
+    Branch                      -> Branches {cons("BranchesEnd")}
+    Branch ";" Branches         -> Branches {cons("BranchesCons")}
 
     Expr "!" ID -> Expr {cons("SelectRcd")}
     Expr Expr -> Expr {cons("App"), left}
@@ -178,17 +202,21 @@ imports Fomega-Module [
     NAT => FomegaNAT
     STRING => FomegaSTRING
     Keyword => FomegaKeyword
-    PrimitiveType => FomegaPrimitiveType    
+    PrimitiveType => FomegaPrimitiveType
     Type => FomegaType
-    TypeDecl => FomegaTypeDecl
-    TypeDecls => FomegaTypeDecls
+    TyDecl => FomegaTyDecl
+    TyDecls => FomegaTyDecls
+    TyDecls1 => FomegaTyDecls1
     Kind => FomegaKind
     Module => FomegaModule
     Def => FomegaDef
+    Defs => FomegaDefs
     Import => FomegaImport
+    Imports => FomegaImports
     Expr => FomegaExpr
     Field => FomegaField
     Fields => FomegaFields
+    Fields1 => FomegaFields1
     ModuleDec => FomegaModuleDec
     Branch => FomegaBranch
     Branches => FomegaBranches

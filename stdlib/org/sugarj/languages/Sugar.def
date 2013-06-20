@@ -41,13 +41,18 @@ exports
 
   lexical syntax
     "desugarings" -> StrategoKeyword
+    "analyses" -> StrategoKeyword
 
   context-free syntax
     "desugarings" Desugaring* -> Transformation {cons("Desugarings")}
+    "analyses" Analysis* -> Transformation {cons("Analyses")}
 
   context-free syntax
     StrategoStrategy -> Desugaring {cons("PureDesugaring")}
     StrategoStrategy ":" Sdf2Symbol "->" Sdf2Symbol Sdf2Attributes -> Desugaring {cons("InjectDesugaring")}
+    StrategoStrategy -> Analysis {longest-match}
 
   lexical restrictions
     "desugarings" -/- [a-zA-Z0-9\'\-\_]
+    "analyses" -/- [a-zA-Z0-9\'\-\_]
+    

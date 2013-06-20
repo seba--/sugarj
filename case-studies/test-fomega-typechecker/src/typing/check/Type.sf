@@ -10,8 +10,8 @@ signature
     KiUnknown: FomegaKind
 
 rules
-  lab: [] -> []
-  lab: [TyDecl(x,T) | decls] -> [x|<lab> decls]
+  lab : TyDeclsNil -> []
+  lab : TyDeclsCons(TyDecl(x, T), decls) -> [x | <lab> decls]
 
   kindMismatch:
     (K,J) -> [<concat-strings> ["kind mismatch, expected ",<write-to-string> K," but found ",<write-to-string> J]]
@@ -19,8 +19,8 @@ rules
   kindEq: (KiUnknown(),K) -> []
   kindEq: (K,KiUnknown()) -> []
   kindEq: (K,J) -> <kindEqProper> (K,J)
-          where <not(equal)> (K,KiUnknown())
-              ; <not(equal)> (J,KiUnknown())
+          where <not(structurally-equal)> (K, KiUnknown())
+              ; <not(structurally-equal)> (J, KiUnknown())
 
   kindEqProper: (KiStar(),K) -> msgs
                 where if !K; ?KiStar() then ![] else !(<kindMismatch> (KiStar(),K)) end => msgs
@@ -85,15 +85,16 @@ rules
   kindOf:
     (CtxBindVar(ctx,y,T),TyQVar(qX)) -> <kindOf> (ctx,TyQVar(qX))
   kindOf:
-    (CtxBindTVarDef(ctx,qX,K,T),TyQVar(qX)) -> (K,[])
+    (CtxBindTVarDef(ctx,qY,K,T),TyQVar(qX)) -> (K,[])
+    where <structurally-equal> (qY, qX)
   kindOf:
     (CtxBindTVarDef(ctx,qY,K,T),TyQVar(qX)) -> <kindOf> (ctx,TyQVar(qX))
-    where <not(equal)> (qY,qX)
+    where <not(structurally-equal)> (qY, qX)
 
   kindOf:
-    (ctx,TyVariant([])) -> (KiStar(),[])
+    (ctx,TyVariant(TyDeclsNil())) -> (KiStar(),[])
   kindOf:
-    (ctx,TyVariant([TyDecl(x,T) | decls])) ->
+    (ctx,TyVariant(TyDeclsCons(TyDecl(x,T), decls))) ->
     (KiStar(),<conc> (errs1,errs2,errs3,errs4,errs5))
     where errorUnless(<not(elem)> (x,<lab> decls)
                      | [(decls, <concat-strings> ["duplicate label ",x])]) => errs1
@@ -105,9 +106,9 @@ rules
         ; <msgsToErrs> (msgs5,decls) => errs5
 
   kindOf:
-    (ctx,TyRecord([])) -> (KiStar(),[])
+    (ctx,TyRecord(TyDeclsNil())) -> (KiStar(),[])
   kindOf:
-    (ctx,TyRecord([TyDecl(x,T) | decls])) ->
+    (ctx,TyRecord(TyDeclsCons(TyDecl(x,T), decls))) ->
     (KiStar(),<conc> (errs1,errs2,errs3,errs4,errs5))
     where errorUnless(<not(elem)> (x,<lab> decls)
                      | [(x,<concat-strings> ["duplicate label ",x])]) => errs1
@@ -132,15 +133,17 @@ rules
   kindOf:
     (CtxBindVar(ctx,y,T),TyVar(X)) -> <kindOf> (ctx,TyVar(X))
   kindOf:
-    (CtxBindTVar(ctx,X,K),TyVar(X)) -> (K,[])
+    (CtxBindTVar(ctx,Y,K),TyVar(X)) -> (K,[])
+    where <structurally-equal> (Y, X)
   kindOf:
-    (CtxBindTVarDef(ctx,X,K,T),TyVar(X)) -> (K,[])
+    (CtxBindTVarDef(ctx,Y,K,T),TyVar(X)) -> (K,[])
+    where <structurally-equal> (Y, X)
   kindOf:
     (CtxBindTVar(ctx,Y,K),TyVar(X)) -> <kindOf> (ctx,TyVar(X))
-    where <not(equal)> (Y,X)
+    where <not(structurally-equal)> (Y, X)
   kindOf:
     (CtxBindTVarDef(ctx,Y,K,T),TyVar(X)) -> <kindOf> (ctx,TyVar(X))
-    where <not(equal)> (Y,X)
+    where <not(structurally-equal)> (Y, X)
 
 // *** Notes ***
 //

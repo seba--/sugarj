@@ -1,0 +1,20 @@
+module contextanalysis.Editor
+
+import contextanalysis.Annotations
+import contextanalysis.KindOperations
+import contextanalysis.TypeOperations
+
+rules
+  // TODO: use pretty-print primitive, but primitive currently not loaded during analysis within Spoofax runtime 
+  //   prim("SUGARJ_pretty_print_base")
+
+  find-annotation(s) = s <+ ?c#([<find-annotation(s)>])
+  hover-info(extractor, pp | what) = ?(<find-annotation(extractor)>,_,_,_,_); <conc-strings> (what , ": ", <pp>) 
+
+  type-info = hover-info(get-type, pp-type | "Type")
+  kind-info = hover-info(get-kind, pp-kind | "Kind")
+
+  hover-info = type-info + kind-info
+
+references
+  hover _ : hover-info

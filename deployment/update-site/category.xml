@@ -12,5 +12,8 @@
    <feature url="features/org.sugarj.prolog_1.0.0.qualifier.jar" id="org.sugarj.prolog" version="1.0.0.qualifier">
       <category name="org.sugarj"/>
    </feature>
+   <feature url="features/org.sugarj.fomega_1.0.0.qualifier.jar" id="org.sugarj.fomega" version="1.0.0.qualifier">
+      <category name="org.sugarj"/>
+   </feature>
    <category-def name="org.sugarj" label="SugarJ"/>
 </site>

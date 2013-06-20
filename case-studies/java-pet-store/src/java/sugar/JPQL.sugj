@@ -4,23 +4,23 @@ import sugar.Bnf;
 import org.sugarj.languages.Java;
 
 public sugar JPQL {
-	lexical syntax
-		[A-Z] [A-Z\_]* -> UppercaseString
-		JavaID "." (JavaID ".")* JavaID -> PathExpressionLex
-		":" JavaID -> InputParameterLex
-		":" PathExpressionLex -> InputParameterLex
+  lexical syntax
+    [A-Z] [A-Z\_]* -> UppercaseString
+    JavaID "." (JavaID ".")* JavaID -> PathExpressionLex
+    ":" JavaID -> InputParameterLex
+    ":" PathExpressionLex -> InputParameterLex
 
-	context-free syntax
-		JavaExpr "." QlStatement -> QueryCreation {cons("QueryCreation")}
-		JavaExpr "." QlStatement -> JavaFieldAccess {cons("Field"), reject}
-		QlStatement -> JavaElemVal {cons("JPQLNamedQueryAnnotation")}
+  context-free syntax
+    JavaExpr "." QlStatement -> QueryCreation {cons("QueryCreation")}
+    JavaExpr "." QlStatement -> JavaFieldAccess {cons("Field"), reject}
+    QlStatement -> JavaElemVal {cons("JPQLNamedQueryAnnotation")}
 
-	context-free syntax
-		InputParameterLex -> InputParameter {cons("NamedInputParameter")}
-		PathExpressionLex -> PathExpression {cons("PathExpression")}
-		
-		JPQLKeyword -> IdentificationVariable {reject}
-		JPQLKeyword "." (JPQLKeyword ".")* JPQLKeyword -> PathExpressionLex {reject}
+  context-free syntax
+    InputParameterLex -> InputParameter {cons("NamedInputParameter")}
+    PathExpressionLex -> PathExpression {cons("PathExpression")}
+    
+    JPQLKeyword -> IdentificationVariable {reject}
+    JPQLKeyword "." (JPQLKeyword ".")* JPQLKeyword -> PathExpressionLex {reject}
 
         "ALL" -> JPQLKeyword
         "AND" -> JPQLKeyword
@@ -72,37 +72,37 @@ public sugar JPQL {
         "UPPER" -> JPQLKeyword
         "WHERE" -> JPQLKeyword
 
-	bnf syntax
-		ql_statement ::= select_statement
+  bnf syntax
+    ql_statement ::= select_statement
                        | update_statement
                        | delete_statement
-		select_statement ::= select_clause from_clause [where_clause] [groupby_clause] [having_clause] [orderby_clause]
-		select_clause ::= "SELECT" ["DISTINCT"] select_expression {"," select_expression}*
-		select_expression ::= path_expression | identification_variable
+    select_statement ::= select_clause from_clause [where_clause] [groupby_clause] [having_clause] [orderby_clause]
+    select_clause ::= "SELECT" ["DISTINCT"] select_expression {"," select_expression}*
+    select_expression ::= path_expression | identification_variable
                             | aggregate_expression
                             | "OBJECT" "(" identification_variable ")"
                             | constructor_expression
-		identification_variable ::= JavaID
-		aggregate_expression ::= {"AVG" | "MAX" | "MIN" | "SUM"} "(" ["DISTINCT"] path_expression ")"
+    identification_variable ::= JavaID
+    aggregate_expression ::= {"AVG" | "MAX" | "MIN" | "SUM"} "(" ["DISTINCT"] path_expression ")"
                                | "COUNT" "(" ["DISTINCT"] path_expression | identification_variable ")"
-		constructor_expression ::= "NEW" JavaTypeName "(" constructor_item {"," constructor_item}* ")"
-		constructor_item ::= path_expression | aggregate_expression
-		from_clause ::= "FROM" identification_variable_declaration {"," {identification_variable_declaration | collection_member_declaration}}*
-		identification_variable_declaration ::= range_variable_declaration { join | fetch_join }*
-		range_variable_declaration ::= abstract_schema_name ["AS"] identification_variable
-		abstract_schema_name ::= JavaID
-		join ::= join_spec path_expression ["AS"] identification_variable
-		join_spec::= ["LEFT" ["OUTER"] |"INNER"] "JOIN"
-		fetch_join ::= join_spec "FETCH" path_expression
-		collection_member_declaration ::= "IN" "(" path_expression ")" ["AS"] identification_variable
-		where_clause ::= "WHERE" conditional_expression
-		conditional_expression ::= conditional_term
+    constructor_expression ::= "NEW" JavaTypeName "(" constructor_item {"," constructor_item}* ")"
+    constructor_item ::= path_expression | aggregate_expression
+    from_clause ::= "FROM" identification_variable_declaration {"," {identification_variable_declaration | collection_member_declaration}}*
+    identification_variable_declaration ::= range_variable_declaration { join | fetch_join }*
+    range_variable_declaration ::= abstract_schema_name ["AS"] identification_variable
+    abstract_schema_name ::= JavaID
+    join ::= join_spec path_expression ["AS"] identification_variable
+    join_spec::= ["LEFT" ["OUTER"] |"INNER"] "JOIN"
+    fetch_join ::= join_spec "FETCH" path_expression
+    collection_member_declaration ::= "IN" "(" path_expression ")" ["AS"] identification_variable
+    where_clause ::= "WHERE" conditional_expression
+    conditional_expression ::= conditional_term
                                  | conditional_expression "OR" conditional_term
-		conditional_term ::= conditional_factor
+    conditional_term ::= conditional_factor
                            | conditional_term "AND" conditional_factor
-		conditional_factor ::= ["NOT"] conditional_primary
-		conditional_primary ::= simple_cond_expression | "(" conditional_expression ")"
-		simple_cond_expression ::= comparison_expression
+    conditional_factor ::= ["NOT"] conditional_primary
+    conditional_primary ::= simple_cond_expression | "(" conditional_expression ")"
+    simple_cond_expression ::= comparison_expression
                                  | between_expression
                                  | like_expression
                                  | in_expression
@@ -110,40 +110,40 @@ public sugar JPQL {
                                  | empty_collection_comparison_expression
                                  | collection_member_expression
                                  | exists_expression
-		comparison_expression ::= value_expression comparison_operator {value_expression | all_or_any_expression}
-		value_expression ::= non_arithmetic_value_expression | arithmetic_expression
+    comparison_expression ::= value_expression comparison_operator {value_expression | all_or_any_expression}
+    value_expression ::= non_arithmetic_value_expression | arithmetic_expression
         non_arithmetic_value_expression ::= any_literal | path_expression | identification_variable | "(" subquery ")" | function | input_parameter
         any_literal ::= string_literal | boolean_literal | numeric_literal | enum_literal
-		string_literal ::= JavaStringLiteral
-		boolean_literal ::= "TRUE" | "FALSE" | JavaBoolLiteral
-		numeric_literal ::= JavaDeciFloatLiteral | JavaDeciNumeral
-		enum_literal ::= JavaTypeName "." uppercase_string
-		comparison_operator ::= "=" | ">" | ">=" | "<" | "<=" | "<>"
-		all_or_any_expression ::= {"ALL" | "ANY" | "SOME"} "(" subquery ")"
-		subquery ::= simple_select_clause subquery_from_clause [where_clause] [groupby_clause] [having_clause]
-		simple_select_clause ::= "SELECT" ["DISTINCT"] simple_select_expression
+    string_literal ::= JavaStringLiteral
+    boolean_literal ::= "TRUE" | "FALSE" | JavaBoolLiteral
+    numeric_literal ::= JavaDeciFloatLiteral | JavaDeciNumeral
+    enum_literal ::= JavaTypeName "." uppercase_string
+    comparison_operator ::= "=" | ">" | ">=" | "<" | "<=" | "<>"
+    all_or_any_expression ::= {"ALL" | "ANY" | "SOME"} "(" subquery ")"
+    subquery ::= simple_select_clause subquery_from_clause [where_clause] [groupby_clause] [having_clause]
+    simple_select_clause ::= "SELECT" ["DISTINCT"] simple_select_expression
         simple_select_expression::= path_expression | identification_variable | aggregate_expression
         subquery_from_clause ::= "FROM" subselect_identification_variable_declaration {"," subselect_identification_variable_declaration}*
-		subselect_identification_variable_declaration ::= identification_variable_declaration
+    subselect_identification_variable_declaration ::= identification_variable_declaration
                                                         | path_expression ["AS"] identification_variable
                                                         | collection_member_declaration
-		arithmetic_expression ::= arithmetic_expression { "+" | "-" } arithmetic_term // | arithmetic_term
-		arithmetic_term ::= arithmetic_factor | arithmetic_term { "*" | "/" } arithmetic_factor
-		arithmetic_factor ::= [{ "+" | "-" }] arithmetic_primary
-		arithmetic_primary ::= non_arithmetic_value_expression | "(" arithmetic_expression ")"
+    arithmetic_expression ::= arithmetic_expression { "+" | "-" } arithmetic_term // | arithmetic_term
+    arithmetic_term ::= arithmetic_factor | arithmetic_term { "*" | "/" } arithmetic_factor
+    arithmetic_factor ::= [{ "+" | "-" }] arithmetic_primary
+    arithmetic_primary ::= non_arithmetic_value_expression | "(" arithmetic_expression ")"
         function ::= "LENGTH" "(" value_expression ")"
                    | "LOCATE" "(" value_expression "," value_expression [ "," arithmetic_expression] ")"
                    | "ABS" "(" arithmetic_expression ")"
                    | "SQRT" "(" arithmetic_expression ")"
                    | "MOD" "(" arithmetic_expression "," arithmetic_expression ")"
                    | "SIZE" "(" collection_valued_path_expression ")"
-		           | "CURRENT_DATE" | "CURRENT_TIME" | "CURRENT_TIMESTAMP"
-		           | "CONCAT" "(" value_expression "," value_expression ")"
+               | "CURRENT_DATE" | "CURRENT_TIME" | "CURRENT_TIMESTAMP"
+               | "CONCAT" "(" value_expression "," value_expression ")"
                    | "SUBSTRING" "(" value_expression "," arithmetic_expression "," arithmetic_expression ")"
                    | "TRIM" "(" [[trim_specification] [trim_character] "FROM"] value_expression ")"
                    | "LOWER" "(" value_expression ")"
                    | "UPPER" "(" value_expression ")"
-		trim_specification ::= "LEADING" | "TRAILING" | "BOTH"
+    trim_specification ::= "LEADING" | "TRAILING" | "BOTH"
         trim_character ::= JavaCharLiteral
         between_expression ::= value_expression ["NOT"] "BETWEEN" value_expression "AND" value_expression
         like_expression ::= value_expression ["NOT"] "LIKE" pattern_value ["ESCAPE" escape_character]
@@ -153,88 +153,91 @@ public sugar JPQL {
         in_item ::= any_literal | input_parameter
         null_comparison_expression ::= path_expression | identification_variable "IS" ["NOT"] "NULL"
         empty_collection_comparison_expression ::= path_expression "IS" ["NOT"] "EMPTY"
-		collection_member_expression ::= entity_expression ["NOT"] "MEMBER" ["OF"] path_expression
+    collection_member_expression ::= entity_expression ["NOT"] "MEMBER" ["OF"] path_expression
         entity_expression ::= path_expression | identification_variable | input_parameter
         exists_expression::= ["NOT"] "EXISTS" "(" subquery ")"
         groupby_clause ::= "GROUP" "BY" path_expression {"," path_expression}*
         having_clause ::= "HAVING" conditional_expression
         orderby_clause ::= "ORDER" "BY" orderby_item {"," orderby_item}*
-		orderby_item ::= path_expression ["ASC" | "DESC"]
+    orderby_item ::= path_expression ["ASC" | "DESC"]
         update_statement ::= update_clause [where_clause]
         update_clause ::= "UPDATE" abstract_schema_name [["AS"] identification_variable] "SET" update_item {"," update_item}*
-		update_item ::= path_expression "=" new_value
+    update_item ::= path_expression "=" new_value
         new_value ::= value_expression | "NULL"
         delete_statement ::= delete_clause [where_clause]
-		delete_clause ::= "DELETE" "FROM" abstract_schema_name [["AS"] identification_variable]
+    delete_clause ::= "DELETE" "FROM" abstract_schema_name [["AS"] identification_variable]
 
-	desugarings
-		compileQuery : QueryCreation -> JavaExpr
-		compileAnnotationQuery : JPQLNamedQueryAnnotation -> JavaElemVal
+  desugarings
+    compileQuery : QueryCreation -> JavaExpr
+    compileAnnotationQuery : JPQLNamedQueryAnnotation -> JavaElemVal
 
-	rules
-		compileAnnotationQuery : JPQLNamedQueryAnnotation(querystring) ->
-			Lit(String([Chars(<qls2str> querystring)]))
+  rules
+    compileAnnotationQuery : JPQLNamedQueryAnnotation(querystring) ->
+      Lit(String([Chars(<qls2str> querystring)]))
 
-	rules
-    	constraint-error = check-sql(|[])
+  rules
+      constraint-error = check-sql(|[])
 
-	strategies
-		arglist = ?p1#(p2); !p2
-		/** Takes a concrete syntax tree and returns a corresponding string */
-		qls2str = bottomup(is-string <+ arglist); flatten-list; separate-by(|" "); concat-strings
+  strategies
+    arglist = ?p1#(p2); !p2
+    /** Takes a concrete syntax tree and returns a corresponding string */
+    qls2str = bottomup(is-string <+ arglist); flatten-list; separate-by(|" "); concat-strings
 
-	strategies
-		named-params = collect(\NamedInputParameter(name) -> name\)
+  strategies
+    named-params = collect-all(\NamedInputParameter(name) -> name\)
 
-	strategies
-		strip-colon = trim-chars(':')
+  strategies
+    strip-colon = trim-chars(':')
 
-	strategies
-		set-parameter = ?(param, subtree); !Invoke(Method(subtree, None(), Id("setParameter")), [Lit(String([Chars(<strip-colon> param)])), ExprName(Id(<strip-colon> param))])
+  strategies
+    set-parameter = ?(param, subtree); !Invoke(Method(subtree, None(), Id("setParameter")), [Lit(String([Chars(<strip-colon> param)])), ExprName(Id(<strip-colon> param))])
 
-	rules
-		compileQuery : QueryCreation(ExprName(em-id), qls) ->
-			<foldr(!Invoke(Method(MethodName(AmbName(em-id), Id("createQuery"))),
-						[Lit(String([Chars(<qls2str> qls)]))]),
-				set-parameter)> <named-params> qls
+  rules
+    compileQuery : QueryCreation(ExprName(em-id), qls) ->
+                   result
+     where <qls2str> qls => str
+         ; <named-params> qls => params
+    ; <foldr(!Invoke(Method(MethodName(AmbName(em-id), Id("createQuery"))), [Lit(String([Chars(str)]))]),
+             set-parameter)> params => result
 
-	rules
-		first : [x|_] -> x
+  rules
+    first : [x|_] -> x
 
-	strategies
-		idv-part = string-tokenize(|['.']); first
+  strategies
+    idv-part = string-tokenize(|['.']); first
 
-	signature constructors
-    	IdentificationVariable  : s -> iv
-		PathExpression  : s -> pe
-		
-	rules
-		idvdecs = idvdec1 <+ idvdec2
+  signature constructors
+      IdentificationVariable  : s -> iv
+    PathExpression  : s -> pe
+    
+  rules
+    idvdecs = idvdec1 <+ idvdec2
 
-		idvdec1 : FromClause(_, idvd, idvdlist) -> <conc>(<idvdecs> idvd, <concat> <map(idvdecs)> idvdlist)
-		idvdec1 : IdentificationVariableDeclaration(rvd, joinlist) -> <conc>(<idvdecs> rvd, <concat> <map(idvdecs)> joinlist)
-		idvdec1 : RangeVariableDeclaration(_, _, IdentificationVariable(name)) -> [name]
-  		idvdec2 = arglist; map(idvdecs); concat
+    idvdec1 : FromClause(_, idvd, idvdlist) -> <conc>(<idvdecs> idvd, <concat> <map(idvdecs)> idvdlist)
+    idvdec1 : IdentificationVariableDeclaration(rvd, joinlist) -> <conc>(<idvdecs> rvd, <concat> <map(idvdecs)> joinlist)
+    idvdec1 : RangeVariableDeclaration(_, _, IdentificationVariable(name)) -> [<strip-annos> name]
+    idvdec2 = arglist; map(idvdecs); concat
 
-	strategies
-		check-sql(|names) = ss(|names) //collect-one(ss(|names)); debug
-		idv(|names) = ?iv@IdentificationVariable(name);
-		              if <elem> (name, names)
-						then ![]
-						else ![(iv, <concat-strings>["Identification variable ", name, " is not in scope."])]
-					  end
+  strategies
+    check-sql(|names) = ss(|names) //collect-one(ss(|names)); debug
+    idv(|names) = ?iv@IdentificationVariable(name);
+                  if <elem> (<strip-annos> name, names)
+            then ![]
+            else ![(iv, <concat-strings>["Identification variable ", name, " is not in scope."])]
+            end
 
-		pe(|names) = ?pe@PathExpression(path);
-		             if <elem>(<idv-part> path, names)
-		               then ![]
-		               else ![(pe, <concat-strings>["Identification varible ", <idv-part> path, " is not in scope."])]
-		             end
+    pe(|names) = ?pe@PathExpression(path);
+                 if <elem>(<idv-part> path, names)
+                   then ![]
+                   else ![(pe, <concat-strings>["Identification varible ", <idv-part> path, " is not in scope."])]
+                 end
 
-		ss(|names) = ?SelectStatement(sc, fc, wc, gc, hc, oc);
-		             !fc; idvdecs; ?addnames; <conc>(names, addnames); ?newnames;
-		             ![sc, wc, gc, hc, oc]; map(collect-all(idv(|newnames) <+ pe(|newnames))); flatten-list
+    ss(|names) = ?SelectStatement(sc, fc, wc, gc, hc, oc);
+                 !fc; idvdecs; ?addnames; <conc>(names, addnames); ?newnames;
+                 ![sc, wc, gc, hc, oc]; map(collect-all(idv(|newnames) <+ pe(|newnames))); flatten-list
 
-		sq(|names) = ?Subquery(ssc, sfc, wc, gc, hc);
-		             !sfc; idvdecs; ?addnames; <conc>(names, addnames); ?newnames;
-		             ![ssc, wc, gc, hc]; map(collect-all(idv(|newnames) <+ pe(|newnames))); flatten-list
+    sq(|names) = ?Subquery(ssc, sfc, wc, gc, hc);
+                 !sfc; idvdecs; ?addnames; <conc>(names, addnames); ?newnames;
+                 ![ssc, wc, gc, hc]; map(collect-all(idv(|newnames) <+ pe(|newnames))); flatten-list
+
 }

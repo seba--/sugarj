@@ -1,0 +1,30 @@
+package quest.lang.var;
+
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
+import quest.lang.var.Variable;
+
+/**
+ * @author seba
+ *
+ */
+public class VariableIntegerTextField  extends VariableTextField<Integer> {
+  private static final long serialVersionUID = 1L;
+
+  public VariableIntegerTextField(Variable<Integer> var) {
+    super(var);
+  }
+
+  public Integer getValue(String s) {
+    try {
+      return Integer.valueOf(s);
+    } catch (NumberFormatException e) {
+      return 0;
+    }
+  }
+  public String getText(Integer i) {
+    return String.valueOf(i);
+  }
+}

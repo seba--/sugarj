@@ -1,0 +1,38 @@
+module extensions.Let
+
+import org.sugarj.languages.Fomega
+import concretesyntax.Fomega
+import concretesyntax.Metavars
+
+import extension.Declaration
+import extension.TypeOf
+
+
+syntax {
+  context-free syntax
+    "let" FomegaID "=" FomegaExpr "in" FomegaExpr -> FomegaExpr {cons("Let")}
+
+  context-free priorities
+    FomegaExpr FomegaExpr -> FomegaExpr >
+    "let" FomegaID "=" FomegaExpr "in" FomegaExpr -> FomegaExpr
+
+  lexical syntax
+    "let" -> Keyword
+    "in"  -> Keyword
+
+  lexical restrictions
+    "let" "in" -/- [A-Za-z0-9]
+}
+
+desugaring desugar-let {
+  desugar-let :
+    |[ let ~%x = ~e1 in ~e2 ]| -> |[ (\~%x:$(typeof ~e1). ~e2) ~e1 ]|
+}
+
+typing {
+  ~C |- ~e1 : ~T1
+  ~C |- ~T1 :: *
+  (~C;~%x:~T1) |- ~e2 : ~T2
+  ======================================= T-Let
+  ~C |- (let ~%x = ~e1 in ~e2) : ~T2
+}

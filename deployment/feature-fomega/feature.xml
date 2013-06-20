@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.sugarj.fomega"
+      label="SugarFomega"
+      version="1.0.0.qualifier"
+      provider-name="sugarj.prg">
+
+   <description url="http://sugarj.org">
+      SugarFomega and Sugarclipse
+   </description>
+
+   <copyright>
+      Copyrights of SugarJ and Sugarclipse belong to its authors.
+   </copyright>
+
+   <license url="">
+      The SugarJ compiler and editor are released under the GNU GENERAL PUBLIC LICENSE, Version 3, 29 June 2007
+The SugarJ standard library is released under the GNU GENERAL PUBLIC LICENSE, Version 3, 29 June 2007 and  GNU LESSER GENERAL PUBLIC LICENSE, Version 3, 29 June 2007
+   </license>
+
+   <url>
+      <update label="SugarJ" url="http://update.sugarj.org"/>
+   </url>
+
+   <requires>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.sugarj.common"/>
+      <import plugin="org.sugarj.languagelib"/>
+      <import plugin="org.spoofax.terms"/>
+      <import plugin="org.strategoxt.strj"/>
+   </requires>
+
+   <plugin
+         id="org.sugarj.fomega"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+</feature>

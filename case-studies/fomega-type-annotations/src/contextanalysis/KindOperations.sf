@@ -1,0 +1,177 @@
+module contextanalysis.KindOperations
+
+import org.sugarj.languages.Fomega
+import concretesyntax.Metavars
+import contextanalysis.Unknowns
+
+
+rules
+
+  kind-mismatch :
+    (J, K) -> [<concat-strings> [ "kind mismatch, expected "
+                                , <pp-kind> J
+                                , " but found "
+                                , <pp-kind> K]]
+
+
+rules
+
+  pp-kind = bottomup(strip-annos); write-to-string
+
+
+rules
+
+  kind-eq =
+      where(debug-analysis(!"IN kind eq: "))
+    ; (kind-eq-proper 
+       // <+ kind-eq-unknown
+       <+ (kind-norm-step,id); kind-eq
+       <+ (id,kind-norm-step); kind-eq
+       <+ kind-eq-unexpected)
+    ; where(debug-analysis(!"OUT kind eq: "))
+      <+ where(debug-analysis(!"FAILED kind eq: "))
+
+  kind-eq-proper :
+    (KiEmpty(), KiEmpty()) -> []
+
+  kind-eq-proper :
+    (KiStar(), KiStar()) -> []
+
+  kind-eq-proper :
+    (KiArrow(J1, J2), KiArrow(K1, K2)) -> <conc> (msgs1, msgs2)
+    where <kind-eq> (J1, K1) => msgs1
+        ; <kind-eq> (J2, K2) => msgs2
+
+  kind-eq-proper :
+    (KiPair(J1, J2), KiPair(K1, K2)) -> <conc> (msgs1, msgs2)
+    where <kind-eq> (J1, K1) => msgs1
+        ; <kind-eq> (J2, K2) => msgs2
+
+  kind-eq-proper :
+    (meta1, meta2) -> []
+    where <structurally-equal> (meta1, meta2)
+  
+  kind-eq-unknown :
+    (KiUnknown(), K) -> []
+
+  kind-eq-unknown :
+    (K, KiUnknown()) -> []
+
+  kind-eq-unexpected = kind-mismatch
+
+
+rules
+
+  kind-eq-arrow = kind-eq-arrow-proper <+ kind-norm-step; kind-eq-arrow <+ kind-eq-arrow-unexpected
+
+  kind-eq-arrow-proper :
+    KiUnknown() -> (KiUnknown(), KiUnknown(), [])
+
+  kind-eq-arrow-proper :
+    KiArrow(K1, K2) -> (K1, K2, [])
+
+  kind-eq-arrow-unexpected :
+    K -> ( KiUnknown(), KiUnknown()
+         , [<concat-strings> [ "kind mismatch, expected arrow kind but found "
+                             , <pp-kind> K
+                             ]]
+         )
+
+
+rules
+
+  kind-eq-pair = kind-eq-pair-proper <+ kind-norm-step; kind-eq-pair <+ kind-eq-pair-unexpected
+
+  kind-eq-pair-proper :
+    KiUnknown() -> (KiUnknown(), KiUnknown(), [])
+
+  kind-eq-pair-proper :
+    KiPair(K1, K2) -> (K1, K2, [])
+
+  kind-eq-pair-unexpected :
+    K -> ( KiUnknown(), KiUnknown()
+         , [<concat-strings> [ "kind mismatch, expected pair kind but found "
+                             , <pp-kind> K
+                             ]]
+         )
+
+
+rules
+
+  kind-eq-star = kind-eq-star-proper <+ kind-norm-step; kind-eq-star <+ kind-eq-star-unexpected
+
+  // kind-eq-star-proper :
+  //   KiUnknown() -> []
+
+  kind-eq-star-proper :
+    KiStar() -> []
+
+  kind-eq-star-unexpected :
+    K -> [<concat-strings> ["kind mismatch, expected * but found " , <pp-kind> K]]
+
+
+rules
+
+  kind-eq-empty = kind-eq-empty-proper <+ kind-norm-step; kind-eq-empty <+ kind-eq-empty-unexpected
+
+  // kind-eq-empty-proper :
+  //   KiUnknown() -> []
+
+  kind-eq-empty-proper :
+    KiEmpty() -> []
+
+  kind-eq-empty-unexpected :
+    K -> [<concat-strings> ["kind mismatch, expected [] but found " , <pp-kind> K]]
+
+
+rules // kind normalization
+
+  kind-norm =
+    ?was
+    // ; debug-analysis(!"IN kind norm:  ")
+    ; innermost(kind-norm-step) 
+    // ; debug-analysis(!"OUT kind norm: ")
+    ; where(try(not(?was); <debug-analysis(!"kind normalized: ")> (was, <id>)))
+  kind-norm-step = kind-norm-internal
+  kind-norm-internal = fail
+  
+  
+  
+rules // kind-match
+  kind-match :
+    (KiEmpty(), KiEmpty(), vars) -> ([], vars)
+
+  kind-match :
+    (KiStar(), KiStar(), vars) -> ([], vars)
+
+  kind-match :
+    (KiArrow(J1, J2), KiArrow(K1, K2), vars1) -> (<conc> (res1, res2), vars3)
+    where <kind-match> (J1, K1, vars1) => (res1, vars2)
+        ; <kind-match> (J2, K2, vars2) => (res2, vars3)
+
+  kind-match :
+    (KiPair(J1, J2), KiPair(K1, K2), vars1) -> (<conc> (res1, res2), vars3)
+    where <kind-match> (J1, K1, vars1) => (res1, vars2)
+        ; <kind-match> (J2, K2, vars2) => (res2, vars3)
+
+  kind-match :
+    (Metavar(Var(v)), k, [Var(w)|vars]) -> ([k], vars)
+    where <strip-annos; equal> (v,w)
+  kind-match :
+    (Metavar(Var(v)), k, vars) -> ([], vars)
+    where <  ?[] 
+          <+ ?[Var(w)|_]; !(v,w); strip-annos; not(equal)> vars
+
+  kind-match :
+    (c#([]), c#([]), vars) -> ([], vars)
+  kind-match :
+    (c#(xs), c#(ys), vars) -> res
+    where <zip> (xs,ys) => pairs
+        ; <foldl(kind-match-foldl-op)> (pairs, ([], vars)) => res
+  
+  kind-match-foldl-op :
+    ((x,y), (res, vars)) -> (<conc> (res, res2), vars2)
+    where <kind-match> (x,y,vars) => (res2, vars2)
+
+  kind-match =
+    debug(!"kind mismatch: "); fail

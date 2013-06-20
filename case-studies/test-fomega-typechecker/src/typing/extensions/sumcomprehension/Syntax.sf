@@ -1,0 +1,25 @@
+module typing.extensions.sumcomprehension.Syntax
+
+import org.sugarj.languages.Fomega
+
+
+context-free syntax
+  "dosum" "{" FomegaExpr "}"                   -> FomegaExpr {cons("DoSumAtomic")}
+  "dosum" "{" DoSumBindings ";" FomegaExpr "}" -> FomegaExpr {cons("DoSumSeq")}
+
+  FomegaID "<-" FomegaExpr      -> DoSumBinding {cons("DoSumGen")}
+  "let" FomegaID "=" FomegaExpr -> DoSumBinding {cons("DoSumLet")}
+
+  DoSumBinding                   -> DoSumBindings {cons("BindingsEnd")}
+  DoSumBinding ";" DoSumBindings -> DoSumBindings {cons("BindingsCons")}
+
+
+context-free syntax
+  "~" StrategoVar -> DoSumBindings {cons("Metavar")}
+
+lexical syntax
+  "dosum" -> FomegaKeyword 
+  "let"   -> FomegaKeyword
+
+lexical restrictions
+  "dosum" "let" -/- [A-Za-z0-9]

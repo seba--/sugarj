@@ -1,0 +1,113 @@
+module contextanalysis.Contexts
+
+import org.sugarj.languages.Fomega
+
+import contextanalysis.Unknowns
+
+
+signature
+  sorts Context
+
+  constructors
+    CtxEmpty:       Context
+    CtxBindTVar:    Context * FomegaID * FomegaKind -> Context
+    CtxBindTVarDef: Context * FomegaID * FomegaKind * FomegaType -> Context
+    CtxBindVar:     Context * FomegaID * FomegaType -> Context
+
+rules      
+  strengthened-context(s) =
+    ?(CtxBindTVar(C, _, _), v);
+    <s> (C, v) 
+  strengthened-context(s) =
+    ?(CtxBindTVarDef(C, _, _, _), v);
+    <s> (C, v) 
+  strengthened-context(s) =
+    ?(CtxBindVar(C, _, _), v);
+    <s> (C, v) 
+
+
+rules
+
+  dom : CtxEmpty() -> []
+  dom : CtxBindTVar(C, X, K) -> [X | <dom> C]
+  dom : CtxBindTVarDef(C, X, K, T) -> [X | <dom> C]
+  dom : CtxBindVar(C, x, T) -> [x | <dom> C]
+
+
+rules
+
+  free-in : (x, C) -> <not(elem(structurally-equal))> (x, xs) where <dom> C => xs
+
+
+rules
+
+  lookup-expr-var :
+    (x, CtxEmpty()) -> (TyUnknown(), [<concat-strings> ["undefined identifier ", x]])
+
+  lookup-expr-var :
+    (x, CtxBindTVar(C, Y, K)) -> <lookup-expr-var> (x, C)
+
+  lookup-expr-var :
+    (x, CtxBindTVarDef(C, Y, K, T)) -> <lookup-expr-var> (x, C)
+
+  lookup-expr-var :
+    (x, CtxBindVar(C, y, T)) -> (T, [])
+    where <structurally-equal> (x, y)
+
+  lookup-expr-var : (x, CtxBindVar(C, y, T)) -> <lookup-expr-var> (x, C)
+    where <not(structurally-equal)> (y, x)
+
+
+rules
+
+  lookup-type-var :
+    (X, CtxEmpty()) -> (KiUnknown(), [<concat-strings> ["undefined identifier ", X]])
+
+  lookup-type-var :
+    (X, CtxBindTVar(C, Y, K)) -> <lookup-type-var> (X, C)
+    where <not(structurally-equal)> (Y, X)
+
+  lookup-type-var :
+    (X, CtxBindTVar(C, Y, K)) -> (K, [])
+    where <structurally-equal> (Y, X)
+
+  lookup-type-var :
+    (X, CtxBindTVarDef(C, Y, K, T)) -> <lookup-type-var> (X, C)
+    where <not(structurally-equal)> (Y, X)
+
+  lookup-type-var :
+    (X, CtxBindTVarDef(C, Y, K, T)) -> (K, [])
+    where <structurally-equal> (Y, X)
+
+  lookup-type-var :
+    (X, CtxBindVar(C, y, T)) -> <lookup-type-var> (X, C)
+
+
+rules
+
+  lookup-type-var-def :
+    (X, CtxEmpty()) -> (TyUnknown(), [<concat-strings> ["undefined identifier ", X]])
+
+  lookup-type-var-def :
+    (X, CtxBindTVar(C, Y, K)) -> <lookup-type-var-def> (X, C)
+    where <not(structurally-equal)> (Y, X)
+
+  lookup-type-var-def :
+    (X, CtxBindTVar(C, Y, K)) -> (TyUnknown(), [<concat-strings> ["no definition for ", X]])
+    where <structurally-equal> (Y, X)
+
+  lookup-type-var-def :
+    (X, CtxBindTVarDef(C, Y, K, T)) -> <lookup-type-var-def> (X, C)
+    where <not(structurally-equal)> (Y, X)
+
+  lookup-type-var-def :
+    (X, CtxBindTVarDef(C, Y, K, T)) -> (T, [])
+    where <structurally-equal> (Y, X)
+
+  lookup-type-var-def :
+    (X, CtxBindVar(C, y, T)) -> <lookup-type-var-def> (X, C)
+
+rules
+  not-in-dom =
+    where(\(x,C) -> <not(elem(structurally-equal))> (x, <dom> C)\)
+

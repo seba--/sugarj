@@ -1,0 +1,7 @@
+module test.MatchPair
+
+import extensions.MatchPair
+
+import contextanalysis.ContextAnalysis
+
+val x = match (a,b) = {fst=1, snd="x"} in {a=true, b=b}

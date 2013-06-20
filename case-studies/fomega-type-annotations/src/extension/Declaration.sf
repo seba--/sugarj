@@ -1,0 +1,53 @@
+module extension.Declaration
+
+import contextanalysis.rules.Syntax
+import contextanalysis.rules.Desugaring
+import contextanalysis.rules.Verification
+import contextanalysis.ContextAnalysis
+
+context-free syntax
+  "syntax" "{" Grammar* "}" -> ToplevelDeclaration {cons("SyntaxExtension")}
+  "desugaring" StrategoId "{" StrategoDef* StrategoDecl* "}" -> ToplevelDeclaration {cons("DesugaringExtension")}
+  "typing" "{" InferenceRule* "}" -> ToplevelDeclaration {cons("TypingExtension")}
+
+rules
+  constraint-error = check-typing-rule-subject
+  // TODO check-signature-rule subject etc are missing.
+  check-typing-rule-subject :
+    TypingRule(_, _, TypingJudgment(C, e, T)) ->
+    [(e, <concat-strings> ["Subject does not match desugaring rule. ", <strip-annos; write-to-string> e-imploded])]
+  where <metaexpr-implode> e => e-imploded
+      ; <not(debug-analysis(!"IN DEI ");oncetd(desugar-extension-internal);debug-analysis(!"OUT DEI "))> e-imploded
+  
+  // is generated from DesugaringExtension
+  desugar-extension-internal = fail
+         
+rules
+  desugar-extension :
+    SyntaxExtension(grammars) ->
+    SugarBody(body)
+  where
+      <map(!grammar-elem(<id>))> grammars => body 
+    ; rules( Extension-Syntax := body )
+  
+  desugar-extension :
+    DesugaringExtension(desugar-strat, trafos, decls) ->
+    SugarBody(<conc> (grammars, body))
+  where
+      (Extension-Syntax <+ ![]) => grammars 
+    ; !transformation-elem(Desugarings([PureDesugaring(CallNoArgs(SVar(desugar-strat)))])) => desugaring
+    ; !transformation-elem(Rules([SDefNoArgs("desugar-extension-internal", CallNoArgs(SVar(desugar-strat)))])) => rinternal
+    ; ![rinternal, transformation-elem(Rules(trafos)) | <map(!transformation-elem(<id>))> decls] => body
+    ; rules( Extension-Trafos := [desugaring | body] )
+  
+  desugar-extension :
+    TypingExtension(checks) ->
+    SugarBody(<conc> (grammars, trafos, checks))
+  where
+      (Extension-Syntax <+ ![]) => grammars 
+    ; (Extension-Trafos <+ ![]) => trafos
+//    ; rules( Extension-Checks := checks )
+  
+desugarings
+  desugar-extension
+

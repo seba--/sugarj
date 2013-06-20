@@ -1,0 +1,19 @@
+MethodDec(
+  MethodDecHead(
+    [Public()]
+  , None()
+  , Void()
+  , Id("update")
+  , []
+  , None()
+  )
+, Block(
+    [ ExprStm(
+        Invoke(
+          Method(MethodName(AmbName(Id("lab")), Id("setText")))
+        , [ExprName(Id("res"))]
+        )
+      )
+    ]
+  )
+)

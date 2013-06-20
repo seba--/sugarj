@@ -1,0 +1,84 @@
+module contextanalysis.ContextAnalysis
+
+import org.sugarj.languages.Fomega
+
+import contextanalysis.SignatureRelation
+import contextanalysis.Editor
+
+
+analyses
+  context-analysis
+
+rules
+  // TODO: Establish context from imports instead of empty context
+  context-analysis =
+      ?FomegaBody(defs)
+    ; <debug-analysis(!"Before checking: "); where(annotate-signature)> (CtxEmpty(), defs)
+    ; debug-analysis(!"After checking: ")
+
+rules
+  annotate-type =
+    // debug-analysis(!"ANNO TYPE IN:  ");
+       ?(_,<get-type>) 
+    <+ annotate-type-normalized
+    <+ annotate-type-defined
+    // <+ strengthened-context(annotate-type)
+    <+ annotate-type-missing
+    // ; debug-analysis(!"ANNO TYPE OUT: ") 
+
+  annotate-type-normalized =
+      ?(C, e)
+    // ; <debug-analysis(!"IN CTX NORM:  ")> C
+    ; <context-norm> C => C'
+    ; <not(structurally-equal)> (C, C')
+    // ; <debug-analysis(!"OUT CTX NORM: ")> C'
+    ; <annotate-type> (C', e)
+     
+  annotate-type-defined = fail
+
+rules
+  annotate-kind =
+    // debug-analysis(!"ANNO KIND IN:  "); 
+       ?(_,<get-kind>) 
+    <+ annotate-kind-normalized 
+    <+ annotate-kind-defined
+    // <+ strengthened-context(annotate-kind)
+    <+ annotate-kind-missing
+    // ; debug-analysis(!"ANNO KIND OUT: ") 
+
+  annotate-kind-normalized =
+      ?(C, T)
+    ; <context-norm> C => C'
+    ; <not(structurally-equal)> (C, C') 
+    ; <annotate-kind> (C', T)
+
+  annotate-kind-defined = fail
+
+rules
+  annotate-signature =
+    // debug-analysis(!"ANNO SIGNATURE IN:  "); 
+       ?(_,<get-signature>) 
+    <+ annotate-signature-normalized
+    <+ annotate-signature-defined
+    // <+ strengthened-context(annotate-signature)
+    <+ annotate-signature-missing
+    // ;debug-analysis(!"ANNO SIGNATURE OUT: ") 
+
+  annotate-signature-normalized =
+      ?(C, defs)
+    ; <debug-analysis(!"CTX NORM: ");context-norm;debug-analysis(!"CTX OUT:  ")> C => C'
+    ; <not(structurally-equal)> (C, C')
+    ; <annotate-signature> (C', defs)
+
+  annotate-signature-defined = fail
+
+
+
+rules
+
+  constraint-error =
+    ?node; get-context-errors; not(?[]); !(node, <id>)
+
+
+colorer
+// dummy declaration to ensure export of editor service

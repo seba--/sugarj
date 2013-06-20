@@ -1,0 +1,35 @@
+module test.ADT
+
+import extensions.ADT
+
+import contextanalysis.ContextAnalysis
+
+// type Id = \X::*=>*=>*. X
+
+//data Tree (K::*) (V::*) = Nil isNil {}
+//                        | Leaf isLeaf {value: V} 
+//                        | Node isNode {left: Tree K V, key: K, right: Tree K V}
+
+data List (a::*) = Nil isNil {}
+                 | Cons isCons {hd:a, tl:List a}
+
+type L = List
+val C = Cons
+val foo = Nil [Nat]
+val x1 = foo
+val bar = (Cons [Nat] 1 (Nil [Nat])) as (List Nat)
+val x2 = bar
+
+
+//type TreeBody = \K::*. \V::*.
+//  <Nil: {}, Leaf: {value: V}, Node: {left: Tree K V, key: K, right: Tree K V}>
+
+//val Nil = \K::*. \V::*.
+//  fold [Tree K V] (<Nil={}> as TreeBody K V)
+//val Leaf = \K::*. \V::*.
+//  \v:V. fold [Tree K V] (<Leaf={value=v}> as TreeBody K V)
+//val Node = \K::*. \V::*.
+//  \l:Tree K V. \k:K. \r:Tree K V.
+//     fold [Tree K V] (<Node={left=l, key=k, right=r}> as TreeBody K V)
+
+//val t = Node[Nat][Bool] (Nil[Nat][Bool]) 17 (Leaf[Nat][Bool] true)

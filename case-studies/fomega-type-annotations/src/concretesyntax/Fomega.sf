@@ -1,0 +1,40 @@
+module concretesyntax.Fomega
+
+import org.sugarj.languages.Fomega
+import org.sugarj.languages.Stratego
+
+import concretesyntax.MetaExplode
+
+
+context-free syntax
+  "fomega-expr" "|[" FomegaExpr "]|" -> StrategoTerm {cons("ToMetaExpr")}
+  "fomega"      "|[" FomegaExpr "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                "|[" FomegaExpr "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+  "fomega-type" "|[" FomegaType "]|" -> StrategoTerm {cons("ToMetaExpr")}
+  "fomega"      "|[" FomegaType "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                "|[" FomegaType "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+  "fomega-kind" "|[" FomegaKind "]|" -> StrategoTerm {cons("ToMetaExpr")}
+  "fomega"      "|[" FomegaKind "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                "|[" FomegaKind "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+  "fomega-tydecls" "|[" FomegaTyDecls "]|" -> StrategoTerm {cons("ToMetaExpr")}
+  "fomega"         "|[" FomegaTyDecls "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                   "|[" FomegaTyDecls "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+  "fomega-fields" "|[" FomegaFields "]|" -> StrategoTerm {cons("ToMetaExpr")}
+  "fomega"        "|[" FomegaFields "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                  "|[" FomegaFields "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+  "fomega-branches" "|[" FomegaBranches "]|" -> StrategoTerm {cons("ToMetaExpr")}
+  "fomega"          "|[" FomegaBranches "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                    "|[" FomegaBranches "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+  "fomega-defs" "|[" FomegaDefs "]|" -> StrategoTerm {cons("ToMetaExpr")}
+  "fomega"      "|[" FomegaDefs "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                "|[" FomegaDefs "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+context-free syntax
+  "~" StrategoTerm  -> StrategoId {cons("FromMetaExpr")}
+  "~%" StrategoTerm -> StrategoId {cons("FromMetaExpr")}

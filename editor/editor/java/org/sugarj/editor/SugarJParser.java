@@ -76,7 +76,8 @@ public class SugarJParser extends JSGLRI {
     return schedulingRules.get(nextSchedulingRule++);
   }
   
-  private Result result;
+  private String filename;
+//  private Result result;
 //  private JSGLRI parser;
 //  private Path parserTable;
   
@@ -87,6 +88,7 @@ public class SugarJParser extends JSGLRI {
   
   @Override
   protected IStrategoTerm doParse(String input, String filename) throws IOException {
+    this.filename = filename;
     
     if (environment == null && getController().getProject() != null)
       environment = SugarJParseController.makeProjectEnvironment(getController().getProject().getRawProject());
@@ -97,21 +99,16 @@ public class SugarJParser extends JSGLRI {
       return parseFailureResult(filename).getSugaredSyntaxTree();
     }
 
-    this.result = null;
     Result result = getResult(filename);
 
     if (result == null)
       result = parseFailureResult(filename);
 
-    if (input.contains(ContentProposerSemantic.COMPLETION_TOKEN) && result != null && result.getParseTable() != null) {
-      this.result = result;
+    if (input.contains(ContentProposerSemantic.COMPLETION_TOKEN) && result != null && result.getParseTable() != null)
       return ATermCommands.fixTokenizer(parseCompletionTree(input, filename, result));
-    }
 
-    if (result.getSugaredSyntaxTree() != null && result.isUpToDateShallow(input.hashCode(), environment)) {
-      this.result = result;
+    if (result.getSugaredSyntaxTree() != null && result.isUpToDateShallow(input.hashCode(), environment))
       return result.getSugaredSyntaxTree();
-    }
 
     if (result.getSugaredSyntaxTree() == null)
       return parseFailureResult(filename).getSugaredSyntaxTree();
@@ -150,7 +147,6 @@ public class SugarJParser extends JSGLRI {
           org.strategoxt.imp.runtime.Environment.logException(e);
         } finally {
           monitor.done();
-          SugarJParser.this.result = result;
           SugarJParser.putResult(filename, result);
           SugarJParser.setPending(filename, false);
           if (ok)
@@ -190,6 +186,7 @@ public class SugarJParser extends JSGLRI {
   
   @Override
   public Set<org.spoofax.jsglr.shared.BadTokenException> getCollectedErrors() {
+    Result result = getResult(filename);
     if (result == null)
       return Collections.emptySet();
     
@@ -202,7 +199,12 @@ public class SugarJParser extends JSGLRI {
 
   public List<IStrategoTerm> getEditorServices() {
     final List<IStrategoTerm> empty = Collections.emptyList();
+    Result result = getResult(filename);
     return result == null ? empty : new ArrayList<IStrategoTerm>(result.getEditorServices());
+  }
+  
+  public boolean isInitialized() {
+    return filename != null;
   }
 
   private static Result getResult(String file) {
@@ -212,8 +214,6 @@ public class SugarJParser extends JSGLRI {
   }
   
   public static void putResult(String file, Result result) {
-    if (result != null)
-      result.setSugaredSyntaxTree(result.getSugaredSyntaxTree());
     synchronized (results) {
       results.put(file, result);
     }

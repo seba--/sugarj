@@ -1,0 +1,352 @@
+package concretesyntax;
+
+import org.sugarj.languages.Java;
+import org.sugarj.languages.Stratego;
+
+import concretesyntax.MetaExplode;
+
+/*
+ * copied and adpated from
+ *   https://svn.strategoxt.org/repos/StrategoXT/java-front/trunk/syntax-embedding/languages/java/EmbeddedJava.sdf
+ */
+public sugar Java {
+
+  context-free syntax
+    "~" JavaExpr -> JavaExpr {reject}	
+
+  variables
+    "java_" [ij]  [0-9\']*            -> JavaDeciLiteral {prefer}
+    "java_" [ij]  [\_] [a-zA-Z0-9\']* -> JavaDeciLiteral {prefer}
+    "java_" [xyz] [0-9\']*            -> JavaID          {prefer}
+    "java_" [xyz] [\_] [a-zA-Z0-9\']* -> JavaID          {prefer}
+
+  context-free restrictions
+    JavaID -/- [\_a-zA-Z0-9\']
+  
+  context-free syntax
+    "~id:"  StrategoTerm  -> JavaID  {cons("FromMetaExpr")}
+    "~Id:"  StrategoTerm  -> JavaId  {cons("FromMetaExpr")}
+
+//    "~"  StrategoTerm  -> JavaID  {cons("FromMetaExpr"), avoid}
+
+ 
+
+%%%
+ %% Expressions
+ %%%
+
+  %%%
+   %% Variables for Expressions
+   %%%
+  variables
+    "java_" "e"    [0-9\']*         -> JavaExpr           {prefer}
+    "java_" "e_" [a-zA-Z0-9\']*     -> JavaExpr           {prefer}
+    "java_" "e"    [0-9\']* "*"     -> {JavaVarInit ","}* {prefer}
+    "java_" "e_" [a-zA-Z0-9\']* "*" -> {JavaVarInit ","}* {prefer}
+    "java_" "e"    [0-9\']* "*"     -> {JavaExpr ","}*    {prefer}
+    "java_" "e_" [a-zA-Z0-9\']* "*" -> {JavaExpr ","}*    {prefer}
+
+  lexical syntax
+    "java_" "e" [0-9\']*            -> JavaID {reject}
+    "java_" "e_" [a-zA-Z0-9\']*     -> JavaID {reject}
+
+  %%%
+   %% Quotations for Expressions
+   %%%
+  context-free syntax
+    "java_expr" "|[" JavaExpr "]|"   -> StrategoTerm {cons("ToMetaExpr")}
+    "java"      "|[" JavaExpr "]|"   -> StrategoTerm {cons("ToMetaExpr")}
+                "|[" JavaExpr "]|"   -> StrategoTerm {cons("ToMetaExpr")}
+
+    "java_" "var-init" "|[" JavaVarInit "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+  context-free syntax
+    "~"       StrategoTerm  -> JavaExpr  {cons("FromMetaExpr")}
+    "~expr:"  StrategoTerm  -> JavaExpr  {cons("FromMetaExpr")}
+    "~"       StrategoTerm       -> JavaArrayInit  {cons("FromMetaExpr")}
+    "~arrayinit:"  StrategoTerm  -> JavaArrayInit  {cons("FromMetaExpr")}
+
+
+%%%
+ %% Statements
+ %%%
+
+  %%%
+   %% Variables for Statements
+   %%%
+  variables
+    "java_" "stm"  [0-9\']*             -> JavaStm         {prefer}
+    "java_" "stm_" [a-zA-Z0-9\']*       -> JavaStm         {prefer}
+    "java_" "bstm" [0-9\']*             -> JavaBlockStm    {prefer}
+    "java_" "bstm_" [a-zA-Z0-9\']*      -> JavaBlockStm    {prefer}
+    "java_" "bstm" [0-9\']* "*"         -> JavaBlockStm*   {prefer}    
+    "java_" "bstm_" [a-zA-Z0-9\']* "*"  -> JavaBlockStm*   {prefer}
+
+  %%%
+   %% Quotations for Statements
+   %%%
+  context-free syntax
+    "java_bstm"  "|[" JavaBlockStm "]|" -> StrategoTerm {cons("ToMetaExpr")}
+    "java"       "|[" JavaBlockStm "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                 "|[" JavaBlockStm "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+    "java_bstm*" "|[" JavaBlockStm* "]|" -> StrategoTerm {cons("ToMetaListExpr")}
+
+    "java_block-stm"  "|[" JavaBlockStm "]|" -> StrategoTerm {cons("ToMetaExpr")}
+    "java"            "|[" JavaBlockStm "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                      "|[" JavaBlockStm "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+    "java_block-stm*" "|[" JavaBlockStm* "]|" -> StrategoTerm {cons("ToMetaListExpr")}
+
+
+    "java_stm"  "|[" JavaStm "]|" -> StrategoTerm {cons("ToMetaExpr")}
+         
+    "java_switch-group" "|[" JavaSwitchGroup "]|" -> StrategoTerm {cons("ToMetaListExpr")}
+    
+  %%%
+   %% Anti Quotations for Statements
+   %%%
+  context-free syntax
+    "~"       StrategoTerm  -> JavaBlockStm  {cons("FromMetaExpr")}
+    "~bstm:"  StrategoTerm  -> JavaBlockStm  {cons("FromMetaExpr")}
+    "~*"      StrategoTerm  -> JavaBlockStm* {cons("FromMetaExpr")}
+    "~bstm*:" StrategoTerm  -> JavaBlockStm* {cons("FromMetaExpr")}
+
+    "~stm:"   StrategoTerm  -> JavaStm {cons("FromMetaExpr"), prefer}
+    "~"       StrategoTerm  -> JavaStm {cons("FromMetaExpr")}
+
+    "~*"              StrategoTerm -> JavaSwitchGroup* {cons("FromMetaExpr")}    
+    "~switch-group*:" StrategoTerm -> JavaSwitchGroup* {cons("FromMetaExpr")}    
+
+    "~"               StrategoTerm -> JavaSwitchGroup {cons("FromMetaExpr")}
+    "~switch-group:"  StrategoTerm -> JavaSwitchGroup {cons("FromMetaExpr")}
+
+%%%
+ %% Anti-Quotation for Blocks
+ %%%
+  
+context-free syntax
+  "~block:" StrategoTerm -> JavaBlock {cons("FromMetaExpr"), prefer}
+    
+%%%
+ %% Variable Declarations
+ %%%
+
+  %%%
+   %% Variables for Variable Declarations
+   %%%
+  variables
+    "java_" "lvdec" [0-9]*            -> JavaLocalVarDec    {prefer}
+    "java_" "lvdec_" [a-zA-Z0-9]*     -> JavaLocalVarDec    {prefer}
+     "java_" "vdec" [0-9]*            -> JavaVarDec         {prefer}
+     "java_" "vdec_" [a-zA-Z0-9]*     -> JavaVarDec         {prefer}
+     "java_" "vdec"  [0-9]* "*"       -> {JavaVarDec ","}+  {prefer}
+     "java_" "vdec_" [a-zA-Z0-9]* "*" -> {JavaVarDec ","}+  {prefer}
+
+  lexical syntax
+    "java_" "lvdec"               -> JavaID {reject}
+    "java_" "lvdec_" [a-zA-Z0-9]* -> JavaID {reject}
+     "java_" "vdec"               -> JavaID {reject}
+     "java_" "vdec_" [a-zA-Z0-9]* -> JavaID {reject}
+
+  %%%
+   %% Quotations for Local Variable Declarations
+   %%%
+  context-free syntax
+    "java_lvdec"  "|[" JavaLocalVarDec "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+    "java_vdec" "|[" JavaVarDec "]|" -> StrategoTerm {cons("ToMetaExpr")}
+    "java_tdec" "|[" JavaTypeDec "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+  %%%
+   %% Anti Quotations for Local Variable Declarations
+   %%%
+  context-free syntax
+
+%%%
+ %% LeftHandSide of Assignment
+ %%%
+
+
+  %%%
+   %% Variables for LeftHandSide of Assignment
+   %%%
+  variables
+    "java_" "lhs" [0-9\']* -> JavaLHS {prefer}
+    "java_" "e"   [0-9\']* -> JavaLHS {prefer}
+
+  lexical syntax
+    "java_" "lhs" [0-9\']* -> JavaID {reject}
+
+%%%
+ %% Types
+ %%%
+
+
+  %%%
+   %% Variables for Types
+   %%%
+  variables
+    MetaTypeVar     -> JavaType     {prefer}
+    MetaPrimTypeVar -> JavaPrimType {prefer}
+    MetaRefTypeVar  -> JavaRefType  {prefer}
+    MetaClassType  -> JavaClassOrInterfaceType  {prefer}
+
+  lexical syntax
+    "java_" "t"  [0-9\']*        -> MetaTypeVar
+    "java_" "t_" [a-zA-Z0-9\']*  -> MetaTypeVar
+
+    "java_" "primt"  [0-9]*        -> MetaPrimTypeVar
+    
+    "java_" "reft"   [0-9]*        -> MetaRefTypeVar
+    "java_" "reft_"  [a-zA-Z0-9\']* -> MetaRefTypeVar
+    
+    "java_" "tclass"   [0-9]*        -> MetaClassType
+    "java_" "tclass_"  [a-zA-Z0-9\']* -> MetaClassType
+    
+    "java_" "t"  [0-9\']*          -> JavaID {reject}
+    "java_" "t_" [a-zA-Z0-9\']*  -> JavaID {reject}
+    
+    "java_" "primt"  [0-9]*        -> JavaID {reject}
+    
+    "java_" "reft"   [0-9]*        -> JavaID {reject}
+    "java_" "reft_"  [a-zA-Z0-9\']* -> JavaID {reject}
+    
+    "java_" "tclass"   [0-9]*        -> JavaID {reject}
+    "java_" "tclass_"  [a-zA-Z0-9\']* -> JavaID {reject}
+    
+  lexical restrictions
+    MetaTypeVar -/- [a-zA-Z0-9\_\$\']
+
+  %%%
+   %% Quotation for Types
+   %%%
+  context-free syntax
+    "java_type" "|[" JavaType "]|"   -> StrategoTerm {cons("ToMetaExpr")}
+    "java"      "|[" JavaType "]|"   -> StrategoTerm {cons("ToMetaExpr")}
+                "|[" JavaType "]|"   -> StrategoTerm {cons("ToMetaExpr")}
+
+  %%%
+   %% Anti-Quotation for Types
+   %%%
+  context-free syntax
+    "~"          StrategoTerm -> JavaType {cons("FromMetaExpr")}
+    "~type:"     StrategoTerm -> JavaType {cons("FromMetaExpr")}
+    "~"          StrategoTerm -> JavaArrayBaseType {cons("FromMetaExpr")}
+    "~arraybasetype:"     StrategoTerm -> JavaArrayBaseType {cons("FromMetaExpr")}
+    "~"  StrategoTerm -> JavaRefType {cons("FromMetaExpr"), avoid}
+    "~reftype:"  StrategoTerm -> JavaRefType {cons("FromMetaExpr")}
+
+%%%
+ %% Names
+ %%%
+
+
+
+%%%
+ %% Formal Parameters
+ %%%
+
+
+  %%%
+   %% Variables for Formal Parameters
+   %%%
+  variables
+     "java_" "param" [0-9]*            -> JavaFormalParam  {prefer}
+     "java_" "param" [0-9]* "*"        -> {JavaFormalParam ","}*  {prefer}
+
+  %%%
+   %% Quotations for Formal Parameters
+   %%%
+  context-free syntax
+
+    "java_param"  "|[" JavaFormalParam "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+    "java_param*" "|[" {JavaFormalParam ","}* "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+    "java_formal-param" "|[" JavaFormalParam "]|" -> StrategoTerm {cons("ToMetaExpr")}
+    "java"              "|[" JavaFormalParam "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                        "|[" JavaFormalParam "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+    "java_formal-param*" "|[" {JavaFormalParam ","}* "]|" -> StrategoTerm {cons("ToMetaExpr")}
+    "java"               "|[" {JavaFormalParam ","}* "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                         "|[" {JavaFormalParam ","}* "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+  %%%
+   %% Anti Quotations for Formal Parameters
+   %%%
+  context-free syntax
+    "~"  StrategoTerm  ->  JavaFormalParam       {cons("FromMetaExpr")}
+    "~*" StrategoTerm  -> {JavaFormalParam ","}* {cons("FromMetaExpr")}
+
+%%%
+ %% Package Declarations
+ %%%
+
+
+  %%%
+   %% Quotations
+   %%%
+  context-free syntax
+    "java_package-dec" "|[" JavaPackageDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                       "|[" JavaPackageDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+    "java_package-dec?" "|[" JavaPackageDec? "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+  %%%
+   %% Anti Quotations
+   %%%
+  context-free syntax
+    "~package-dec:"  StrategoTerm -> JavaPackageDec {cons("FromMetaExpr")}
+    "~package-dec?:" StrategoTerm -> JavaPackageDec? {cons("FromMetaExpr")}
+
+%%%
+ %% Import Declarations
+ %%%
+
+
+  %%%
+   %% Quotations for Import Declarations
+   %%%
+  context-free syntax
+
+    "java_import-dec"  "|[" JavaImportDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                       "|[" JavaImportDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
+
+    "java_import-dec*" "|[" JavaImportDec* "]|" -> StrategoTerm {cons("ToMetaListExpr")}
+
+  %%%
+   %% Anti Quotations for Import Declarations
+   %%%
+  context-free syntax
+
+    "~import-dec:"  StrategoTerm  -> JavaImportDec  {cons("FromMetaExpr")}
+    "~import-dec*:" StrategoTerm  -> JavaImportDec* {cons("FromMetaExpr")}
+
+  syntax
+    "~" <StrategoTerm-CF> -> JavaStringChars {cons("FromMetaExpr"), prefer}
+    "~" <StrategoTerm-CF> <LAYOUT?-CF> -> JavaSingleChar  {cons("FromMetaExpr"), prefer}
+
+    "~string:" <StrategoTerm-CF> -> JavaStringChars {cons("FromMetaExpr"), prefer}
+    "~char:"   <StrategoTerm-CF> <LAYOUT?-CF> -> JavaSingleChar  {cons("FromMetaExpr"), prefer}
+  
+  context-free syntax
+    "java_method-dec"  "|[" JavaMethodDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
+    "java"             "|[" JavaMethodDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
+                       "|[" JavaMethodDec  "]|" -> StrategoTerm {cons("ToMetaExpr")}
+   
+  context-free syntax
+    "~field:"  StrategoTerm  -> JavaFieldDec  {cons("FromMetaExpr")}
+  
+  strategies
+    java-char-expr = java-char-expr-meta <+ java-char-expr-plain
+    java-string-expr = java-string-expr-meta <+ java-string-expr-plain
+  
+  rules
+    java-char-expr-meta : FromMetaExpr(e) -> e
+    java-char-expr-plain : c -> Lit(Char(Single(c)))
+    
+    java-string-expr-meta : FromMetaExpr(e) -> e
+    java-string-expr-plain : s -> Lit(String([Chars(s)]))
+  
+}

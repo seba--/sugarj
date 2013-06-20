@@ -313,7 +313,7 @@ public class FileUploadBean {
             response.setHeader("Cache-Control", "no-cache,no-store,max-age=0");
             response.setDateHeader("Expires", 1);
             String xml =
-			  @Validate{jpsfur}
+              @Validate{jpsfur}
               <response>
                 <message>${responseMessage}</message>
                 <status>${status.getStatus()}</status>
@@ -326,6 +326,7 @@ public class FileUploadBean {
                 <itemId>${itemId}</itemId>
                 <productId>${prodId}</productId>
               </response>;
+
             if(bDebug) System.out.println("Response:\n" + xml);
             writer.write(xml);
             writer.flush();

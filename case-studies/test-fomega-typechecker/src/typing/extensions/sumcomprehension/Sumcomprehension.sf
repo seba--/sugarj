@@ -1,0 +1,96 @@
+module typing.extensions.sumcomprehension.Sumcomprehension
+
+import typing.extensions.Declaration
+
+import concretesyntax.Fomega
+
+import typing.rules.Syntax
+import typing.rules.Desugaring
+import typing.rules.ExprTypeRules
+import typing.rules.Verification
+
+syntax {
+	context-free syntax
+	  "dosum" "{" FomegaExpr "}"                   -> FomegaExpr {cons("DoSumAtomic")}
+	  "dosum" "{" DoSumBindings ";" FomegaExpr "}" -> FomegaExpr {cons("DoSumSeq")}
+	
+	  FomegaID "<-" FomegaExpr      -> DoSumBinding {cons("DoSumGen")}
+	  "let" FomegaID "=" FomegaExpr -> DoSumBinding {cons("DoSumLet")}
+	
+	  DoSumBinding                   -> DoSumBindings {cons("BindingsEnd")}
+	  DoSumBinding ";" DoSumBindings -> DoSumBindings {cons("BindingsCons")}
+	
+	
+	context-free syntax
+	  "~" StrategoVar -> DoSumBindings {cons("Metavar")}
+	
+	lexical syntax
+	  "dosum" -> FomegaKeyword 
+	  "dosum" -> StrategoId {reject} 
+	  "let"   -> FomegaKeyword
+	
+	lexical restrictions
+	  "dosum" "let" -/- [A-Za-z0-9]
+}
+
+desugaring dosum-desugar {
+	dosum-desugar :
+	  fomega |[ dosum { ~e } ]|
+	  ->
+	  fomega |[ ~e ]|
+
+  dosum-desugar :
+    |[ dosum { ~%x <- ~e1; ~e2 } ]|
+    ->
+    |[ typing.extensions.sumcomprehension.Support.sum1 ~e1 (\~%x:Nat. ~e2) ]|
+
+  dosum-desugar :
+    |[ dosum { let ~%x = ~e1; ~e2 } ]|
+    ->
+    |[ (\~%x:Nat. ~e2) ~e1 ]|
+
+  dosum-desugar :
+    |[ dosum { ~%x <- ~e1; ~bs; ~e2 } ]|
+    ->
+    |[ typing.extensions.sumcomprehension.Support.sum1 ~e1 (\~%x:Nat. dosum { ~bs; ~e2 }) ]|
+
+  dosum-desugar :
+    |[ dosum { let ~%x = ~e1; ~bs; ~e2 } ]|
+    ->
+    |[ (\~%x:Nat. dosum { ~bs; ~e2 }) ~e1 ]|
+}
+
+typing {
+	~C |- ~e : ~T
+	~C |- ~T ~> Nat
+	================================================================================ T-DoSumAtomic
+	~C |- dosum { ~e } : Nat
+	
+	~C |- ~e1 : ~T1
+	~C |- ~T1 ~> Nat
+	(~C;~%x:Nat) |- ~e2 : ~T2
+	~C |- ~T2 ~> Nat
+	typing.extensions.sumcomprehension.Support.sum1:Nat -> (Nat -> Nat) -> Nat in ~C
+	================================================================================ T-DoSumGen1
+	~C |- dosum { ~%x <- ~e1; ~e2 } : Nat
+	
+	~C |- ~e1 : ~T1
+	~C |- ~T1 ~> Nat
+	(~C;~%x:Nat) |- dosum { ~bs; ~e2 } : Nat
+	typing.extensions.sumcomprehension.Support.sum1:Nat -> (Nat -> Nat) -> Nat in ~C
+	================================================================================ T-DoSumGen2
+	~C |- dosum { ~%x <- ~e1; ~bs; ~e2} : Nat
+	
+	~C |- ~e1 : ~T1
+	~C |- ~T1 ~> Nat
+	(~C;~%x:Nat) |- ~e2 : ~T2
+	~C |- ~T2 ~> Nat
+	======================================== T-DoSumLet1
+	~C |- dosum { let ~%x = ~e1; ~e2 } : Nat
+
+	~C |- ~e1 : ~T1
+	~C |- ~T1 ~> Nat
+	(~C;~%x:Nat) |- dosum { ~bs; ~e2 } : Nat
+	============================================= T-DoSumLet2
+	~C |- dosum { let ~%x = ~e1; ~bs; ~e2 } : Nat
+}

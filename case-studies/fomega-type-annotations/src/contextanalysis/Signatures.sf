@@ -1,0 +1,25 @@
+module contextanalysis.Signatures
+
+import org.sugarj.languages.Fomega
+
+
+signature
+  sorts Signature
+
+  constructors
+    SigEmpty:       Signature
+    SigBindTVarDef: FomegaID * FomegaKind * FomegaType * Signature -> Signature
+    SigBindVar:     FomegaID * FomegaType * Signature -> Signature
+
+rules
+  // free-vars : SigEmpty -> []
+  // free-vars : SigBindTVarDef(X, K, T, Sig) -> , [X | <concat> [<free-vars> K]]
+  // 
+  // signature-eq :
+  //   (SigEmpty, SigEmpty) -> []
+  // signature-eq :
+  //   (SigBindTVarDef(X1, K1, T1, Sig1), SigBindTVarDef(X2, K2, T2, Sig2)) -> <conc> (msgs1, msgs2, msgs3)
+  //       where <kind-eq> (K1, K2) => msgs1
+  //       ; <type-eq> (T1, T2) => msgs2
+  //       ; <fresh> (X, [S, T]) => Z
+  //       ; <signature-eq> (<signature-subst> (X, TyVar(Z), Sig1), <signature-subst> (Y, TyVar(Z), Sig2)) => msgs3

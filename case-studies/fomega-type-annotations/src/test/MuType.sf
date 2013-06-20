@@ -1,0 +1,54 @@
+module test.MuType
+
+import contextanalysis.ContextAnalysis
+
+
+type Naturals =
+  mu (\Naturals:: [] => *. \args:: []. <Zero: {}, Succ: {pred: Naturals []}>, [])
+
+val Zero = fold [Naturals] (<Zero={}> as <Zero: {}, Succ: {pred: Naturals}>)
+
+val Succ = \n:Naturals. fold [Naturals] (<Succ={pred=n}> as <Zero: {}, Succ: {pred: Naturals}>)
+
+val isZero = \n:Naturals.
+  case unfold [Naturals] n of
+    <Zero=z> => true;
+    <Succ=s> => false
+
+val isSucc = \n:Naturals.
+  case unfold [Naturals] n of
+    <Zero=z> => false;
+    <Succ=s> => true
+
+val pred = \n:Naturals.
+  case unfold [Naturals] n of
+    <Succ=s> => s!pred
+
+val zero = Zero
+
+val one = Succ zero
+
+val two = Succ one
+
+val three = Succ two
+
+
+type List = \A::*.
+  mu (\List:: {*, []} => *. \args:: {*, []}.
+        <Nil: {}, Cons: {hd: args.1, tl: List args}>,
+      {A, []})
+
+val Nil = \A::*. fold [List A] (<Nil={}> as <Nil:{}, Cons:{hd:A, tl:List A}>)
+
+val Cons = \A::*. \x:A. \xs:List A.
+  fold [List A] (<Cons={hd=x,tl=xs}> as <Nil:{}, Cons:{hd:A, tl:List A}>)
+
+val isNil = \A::*. \xs:List A.
+ case unfold [List A] xs of
+    <Nil=nil> => true;
+    <Cons=cons> => false
+
+val isCons = \A::*. \xs:List A.
+ case unfold [List A] xs of
+    <Nil=nil> => false;
+    <Cons=cons> => true

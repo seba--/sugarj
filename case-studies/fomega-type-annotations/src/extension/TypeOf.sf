@@ -1,0 +1,52 @@
+module extension.TypeOf
+
+import org.sugarj.languages.Fomega
+import concretesyntax.Stratego
+
+import contextanalysis.TypeOperations
+
+// TODO: this syntax is not working correctly (see extension.matchpair.Semantics)
+context-free syntax
+  "$" "(" "typeof" "~" TypeOfExpr ")"                                   -> FomegaType {cons("TypeOf")}
+  "$" "(" FomegaType "from" "typeof" "~" TypeOfExpr "as" FomegaType ")" -> FomegaType {cons("TypeOfAs")}
+  StrategoVar                                                           -> TypeOfExpr {cons("Metavar")}
+
+rules
+  desugar-typeof :
+    TypeOf(e) -> T
+    where <get-type> e => T    
+
+  desugar-typeofas :
+    TypeOfAs(T, e, S) -> U
+    where <get-type> e => R
+        ; <get-context> e => C
+        ; <norm> (C, R) => R'
+        ; <norm> (C, S) => S'
+        ; <unify-types> (S', R') => sub
+        ; <apply-subst> (sub, T) => U
+
+desugarings
+  desugar-typeof
+  desugar-typeofas
+
+
+rules
+  // implement type-of via type normalization
+  par-reduce-type = resolve-type
+
+  resolve-type :
+    (C, TypeOf(e)) -> T
+    where <get-type> e => T
+  resolve-type :
+    (C, TypeOf(e)) -> T
+    where  <get-context <+ !C> e => C'
+         ; <reinit-for-analysis> e => e'
+         ; <annotate-type> (C',e')
+         ; <get-type> e' => T
+         ; <try(put-type)> (T, e)
+
+rules
+  annotate-kind =
+      ?(C, T)
+    ; <resolve-type> (C, T) => T'
+    ; <annotate-kind> (C, T')

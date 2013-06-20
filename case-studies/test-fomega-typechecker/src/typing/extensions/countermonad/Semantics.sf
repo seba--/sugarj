@@ -1,0 +1,74 @@
+module typing.extensions.countermonad.Semantics
+
+import org.sugarj.languages.Fomega
+import concretesyntax.Fomega
+
+import typing.rules.Syntax
+// import typing.rules.Desugaring
+import typing.rules.ExprTypeRules
+// import typing.rules.Verification
+// Verification not yet possible, see remarks in desugarings section.
+
+import typing.extensions.countermonad.Syntax
+
+
+// TODO: we must enforce a type CounterMonad in the context:
+//
+// CounterMonad :: * => * in ~C
+// or
+// CounterMonad :: * => * = \A::*. Nat -> {fst:Nat, snd:A}
+// ?
+
+
+~C |- ~e : ~T
+~C |- ~T ~> CounterMonad ~U
+typing.extensions.countermonad.CounterMonad.bind:
+  forall A::*. forall B::*. CounterMonad A -> (A -> CounterMonad B) -> CounterMonad B in ~C
+=========================================================================================== T-DoCMAtomic
+~C |- do { ~e } : ~T
+
+~C |- ~T1 :: *
+~C |- ~e1 : ~S1
+~C |- ~S1 ~> CounterMonad ~U
+~C |- ~T1 ~> ~U
+(~C;~%x:~T1) |- ~e2 : ~T2
+~C |- ~T2 ~> CounterMonad ~R
+typing.extensions.countermonad.CounterMonad.bind:
+  forall A::*. forall B::*. CounterMonad A -> (A -> CounterMonad B) -> CounterMonad B in ~C
+=========================================================================================== T-DoCMGen1
+~C |- do { ~%x : ~T1 <- ~e1; ~e2 } : ~T2
+
+~C |- ~T1 :: *
+~C |- ~e1 : ~S1
+~C |- ~S1 ~> CounterMonad ~U
+~C |- ~T1 ~> ~U
+(~C;~%x:~T1) |- do { ~bs; ~e2 } : ~T2
+~C |- ~T2 ~> CounterMonad ~R
+typing.extensions.countermonad.CounterMonad.bind:
+  forall A::*. forall B::*. CounterMonad A -> (A -> CounterMonad B) -> CounterMonad B in ~C
+=========================================================================================== T-DoSumGen2
+~C |- do { ~%x : ~T1 <- ~e1; ~bs; ~e2} : ~T2
+
+
+// TODO: cannot be desugared yet because we do not know
+// the 2nd type argument to bind!
+//
+// desugarings
+//   docm-desugar
+// 
+// rules
+// 
+//   docm-desugar :
+//     fomega |[ do { ~e } ]|
+//     ->
+//     fomega |[ ~e ]|
+// 
+//   docm-desugar :
+//     |[ do { ~%x : ~T1 <- ~e1; ~e2 } ]|
+//     ->
+//     |[ typing.extensions.countermonad.CounterMonad.bind [~T1] [???] ~e1 (\~%x:~T1. ~e2) ]|
+// 
+//   docm-desugar :
+//     |[ do { ~%x : ~T1 <- ~e1; ~bs; ~e2 } ]|
+//     ->
+//     |[ typing.extensions.countermonad.CounterMonad.bind ~e1 [~T1] [???] (\~%x:~T1. do { ~bs; ~e2 }) ]|

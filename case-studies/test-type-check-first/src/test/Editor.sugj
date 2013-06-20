@@ -1,0 +1,13 @@
+package test;
+
+import test.Check;
+
+public sugar Editor {
+  rules
+    type-info-hover = ?(<retrieve-type>,_,_,_,_)
+}
+
+public editor services Editor {
+  references
+    hover _ : type-info-hover
+}

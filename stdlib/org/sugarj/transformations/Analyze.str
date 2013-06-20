@@ -1,0 +1,90 @@
+module org/sugarj/transformations/Analyze
+imports
+  org/sugarj/languages/Stratego
+  org/sugarj/languages/Sugar
+  org/sugarj/stdlib/StdTrans
+rules
+  desugar = changed-tree(desugar-analyze)
+  desugar-analyze : Analyses(strats) -> Rules(<map(strat-to-analysis)> strats)
+  strat-to-analysis = !SDefNoArgs("start-analysis" , Call(SVar("change-annotations-only"), [<id>]))
+  
+  analyze-main = init-for-analysis; repeat(start-analysis); rm-empty-analysis-data-annotations
+  analyze-debug = analyze-main; nice-analysis-data-term
+  start-analysis = fail
+  
+  init-for-analysis = bottomup(init-analysis-data-annotation)
+  
+  get-analysis-data-annotation = get-annotations; <lookup> ("analysis-data",<id>)
+  init-analysis-data-annotation = put-analysis-data-annotation(|<new-hashtable>)
+  put-analysis-data-annotation(|tbl) =
+  	where(![("analysis-data", tbl) | <(get-annotations;filter(not(?("analysis-data",_))) <+ ![])>] => annos);
+  	!(<id>, annos); set-annotations
+	rm-analysis-data-annotation =
+    where(get-annotations; filter(not(?("analysis-data",_))) => annos);
+    !(<id>, annos); set-annotations
+  rm-empty-analysis-data-annotations = id // TODO
+    
+  get-anno(|key) = get-analysis-data-annotation; hashtable-get(|key)
+  put-anno(|key,val) = where(get-analysis-data-annotation; hashtable-put(|key, val))
+  rm-anno(|key) = where(get-analysis-data-annotation; hashtable-remove(|key))
+  
+  sugarj-analyze:
+    (ast, path, project-path) -> (ast, errors, warnings, notes)
+    with
+      editor-init;
+      // try(analyze);
+      errors   := <collect-all(constraint-error; ensure-list, conc)> ast;
+      warnings := <collect-all(constraint-warning; ensure-list, conc)> ast;
+      notes    := <collect-all(constraint-note; ensure-list, conc)> ast
+
+    editor-init =
+      // Ensure all dynamic rules are properly scoped
+      try(dr-scope-all-end);
+      dr-scope-all-start
+
+    constraint-error = fail
+    constraint-warning = fail
+    constraint-note = fail
+    
+    ensure-list = is-list <+ ![<id>]
+
+  change-annotations-only(s) = 
+  	where(analysis-data-as-list => t1);
+  	s => t2;
+  	where(!(t1,t2); structurally-equal);
+  	where(!(t1, <analysis-data-as-list> t2); not(equal))
+  
+  analysis-data-as-list = 
+  	where(get-analysis-data-annotation; hashtable-getlist => list);
+  	\ c#(xs) -> <put-analysis-data-annotation(|list)> c#(<map(analysis-data-as-list)> xs) \
+  
+  restore-analysis-data = 
+    ?(t1,t2); 
+    where(!t2; get-analysis-data-annotation => list);
+    where(!t1; get-analysis-data-annotation; hashtable-clear; hashtable-putlist(|list));
+    ?(_#(xs),_#(ys));
+    !(xs,ys);
+    zip(restore-analysis-data)
+    
+  structurally-equal = ?(c#(xs),d#(ys)); <equal> (c,d); <zip(structurally-equal)> (xs, ys)
+  
+  nice-analysis-data-term =
+    bottomup({list:
+      try(
+        where(get-analysis-data-annotation; hashtable-getlist => list);
+	      if <?[]> list
+	        then rm-analysis-data-annotation
+	        else put-analysis-data-annotation(|<bottomup(strip-annos)> list)
+	      end)
+    })
+  
+  debug-analysis = debug-analysis(id)
+  debug-analysis(s) = where(nice-analysis-data-term; debug(s))
+  write-to-string-analysis = nice-analysis-data-term; write-to-string
+
+rules
+  // desugar =
+  //   changed-tree(desugar-analyses)
+  //   
+  // desugar-analyses : 
+  // 	Analyses(strats) -> Strategies()

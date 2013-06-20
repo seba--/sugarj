@@ -1,0 +1,229 @@
+package quest.lang;
+
+import concretesyntax.Java;
+
+import quest.lang.Syntax;
+import quest.analysis.Typing;
+
+public sugar Transform {
+  desugarings
+    desugar-questionnaire
+    desugar-question
+    desugar-derived-value
+    desugar-question-group
+    desugar-conditional-group
+    desugar-local-quest
+    desugar-quest-ref
+
+  rules
+    desugar-questionnaire :
+      Questionnaire(mods, Id(java_x), body) ->
+      <put-mods(|mods); put-fields(|fields)> java_tdec |[
+        class java_x extends javax.swing.JFrame {
+          
+          public java_x(String s) { super(s); }
+
+          public static void main(String[] args) {
+            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+              public void run() {
+                java_x frame = new java_x("Questionnaire: " + ~Lit(String([Chars(java_x)])));
+                frame.init();
+                frame.setPreferredSize(new java.awt.Dimension(800,600));
+                frame.pack();
+                frame.setVisible(true);
+              }
+            });
+          }
+          
+          public void init() {
+            // Add components to the container.
+            // Constructs (e.g., conditional quest blocks) may change the current container.
+            javax.swing.JComponent container = new javax.swing.JPanel();
+            container.setLayout(new javax.swing.BoxLayout(container, javax.swing.BoxLayout.Y_AXIS));
+            getContentPane().add(container);
+            
+            ~block:Block(flat-body)
+          }
+        }
+      ]|
+    where
+      <flatten-questlist> body => flat-body;
+      (QuestVars; map(strip-annos); nub) => vars;
+      <map(\ (name, java_x_type)
+           -> FieldDec([Public], 
+                       java_type |[ quest.lang.var.Variable<java_x_type> ]|,
+                       [VarDec(Id(name), |[ new quest.lang.var.Variable<java_x_type>(~<default-value> java_x_type) ]|)])\)> vars => fields
+    
+    flatten-questlist : QNil -> []
+    flatten-questlist : QCons(xs, xss) -> <conc> (xs, <flatten-questlist> xss)
+      
+  rules    
+    desugar-question :
+      Question(QuestType(type), QuestId(java_x), QuestText(text)) ->
+      java_bstm* |[
+        javax.swing.JPanel java_x_panel = new javax.swing.JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+        java_x_panel.add(new javax.swing.JLabel(~Lit(String([Chars(text)]))));
+        java_tclass_component java_x_component = new java_tclass_component(java_x);
+        java_x_component.setPreferredSize(new java.awt.Dimension(200, 30));
+        java_x_panel.add(java_x_component);
+        container.add(java_x_panel);
+      ]|
+    where
+      <component-type> type => java_tclass_component;
+      <newname> java_x => java_x_component;
+      <newname> "panel" => java_x_panel;
+      rules ( QuestVars := [(java_x,type) | <QuestVars <+ ![]>] )
+
+  rules
+    desugar-derived-value :
+      DerivedValue(QuestType(type), QuestId(java_x), QuestExpr(expr)) ->
+      java_bstm* |[
+        javax.swing.JPanel java_x_panel = new javax.swing.JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+        java_x_panel.add(new javax.swing.JLabel(~Lit(String([Chars(java_x)]))));
+        java_tclass_component java_x_component = new java_tclass_component(java_x);
+        java_x_component.setPreferredSize(new java.awt.Dimension(200, 30));
+        java_x_component.setEditable(false);
+        java_x_panel.add(java_x_component);
+        container.add(java_x_panel);
+        
+        java_stm_computationClass
+        final java_x_className java_x_obj = new java_x_className();
+        ~block:(Block(listeners)); 
+        java_x_obj.update();
+      ]|
+    where
+      <newname> "panel" => java_x_panel;
+      <newname> java_x => java_x_component;
+      <newname> java_x => java_x_className;
+      <newname> java_x => java_x_obj;
+      <derived-component-type> type => java_tclass_component;
+      <make-computation-class; !ClassDecStm(<id>)> (java_x_className, java_x, expr) => java_stm_computationClass;
+      <collect-all(?ExprName(Id(_)))> expr => free-vars;
+      <map(make-variable-listener(|java_x_obj))> free-vars => listeners;
+      rules ( QuestVars := [(java_x,type) | <QuestVars <+ ![]>] )
+
+    make-computation-class =
+      ?(java_x_class, java_x, java_e);
+      <bottomup(try(variable-get))> java_e => java_e_get;
+      !|[
+        class java_x_class {
+          public void update() {
+            java_x.set(java_e_get);
+          }
+        } 
+      ]|
+      
+    variable-get = 
+      ?ExprName(Id(_)) => java_e;
+      !|[ java_e.get() ]|
+
+  rules
+    desugar-question-group :
+      QuestGroup(QuestId(java_x), qs) ->
+      <conc> 
+      (java_bstm* |[
+        javax.swing.JComponent java_x_old = container;
+        container = new javax.swing.JPanel();
+        container.setLayout(new javax.swing.BoxLayout(container, javax.swing.BoxLayout.Y_AXIS));
+        container.setBorder(javax.swing.BorderFactory.createTitledBorder(~Lit(String([Chars(java_x)]))));
+       ]|
+      , flat-qs
+      ,java_bstm* |[
+        java_x_old.add(container);
+        container = java_x_old;
+       ]|)
+    where
+      <newname> "container" => java_x_old; 
+      <newname> "cond" => java_x_cond;
+      <flatten-questlist> qs => flat-qs
+  
+  rules
+    desugar-conditional-group :
+      ConditionalQuest(QuestExpr(cond), qs1, qs2) ->
+      <conc> 
+      (java_bstm* |[
+        final quest.lang.var.Variable java_x = new quest.lang.var.Variable<Boolean>(true);
+        final quest.lang.var.Variable java_x_not = new quest.lang.var.Variable<Boolean>(false);
+        java_x.addChangeListener(new quest.lang.var.Variable.ChangeListener<Boolean>() {
+          public void changed(Boolean old, Boolean now) {
+            java_x_not.set(!now);
+          }
+        });
+        
+        javax.swing.JComponent java_x_old = container;
+        final quest.lang.var.VariablePanel java_x_then = new quest.lang.var.VariablePanel(java_x);
+        final quest.lang.var.VariablePanel java_x_else = new quest.lang.var.VariablePanel(java_x_not);
+
+        container = java_x_then;
+        container.setLayout(new javax.swing.BoxLayout(container, javax.swing.BoxLayout.Y_AXIS));
+        container.setVisible(false);
+       ]|
+      , flat-qs1
+      ,java_bstm* |[
+        container = java_x_else;
+        container.setLayout(new javax.swing.BoxLayout(container, javax.swing.BoxLayout.Y_AXIS));
+        container.setVisible(false);
+       ]|
+      , flat-qs2
+      ,java_bstm* |[
+        java_stm_computationClass
+        final java_x_className java_x_obj = new java_x_className();
+        ~block:(Block(listeners)); 
+        java_x_obj.update();
+
+        java_x_old.add(java_x_then);
+        java_x_old.add(java_x_else);
+        container = java_x_old;
+      ]|)
+    where
+      <newname> "container" => java_x_old; 
+      <newname> "thenContainer" => java_x_then;
+      <newname> "elseContainer" => java_x_else; 
+      
+      <flatten-questlist> qs1 => flat-qs1;
+      <?None;![] + ?Some(<flatten-questlist>)> qs2 => flat-qs2;
+
+      <newname> "cond" => java_x;
+      <newname> "cond" => java_x_not;
+      <newname> "cond" => java_x_className;
+      <newname> "cond" => java_x_obj;
+      <collect-all(?ExprName(Id(_)))> cond => free-vars;
+      <make-computation-class; !ClassDecStm(<id>)> (java_x_className, java_x, cond) => java_stm_computationClass;
+      <map(make-variable-listener(|java_x_obj))> free-vars => listeners
+    
+    
+  rules
+    desugar-local-quest :
+      QCons(LocalQuest(_), rest) -> rest
+    desugar-quest-ref :
+      q@QuestRef(_) -> <retrieve-reference; ?LocalQuest(<id>)> q
+
+  rules
+    component-type : "Boolean" -> java_type |[ quest.lang.var.VariableCheckBox ]|
+    component-type : "String" -> java_type |[ quest.lang.var.VariableStringTextField ]|
+    component-type : "Integer" -> java_type |[ quest.lang.var.VariableIntegerTextField ]|
+    
+    derived-component-type : "Boolean" -> java_type |[ quest.lang.var.VariableBooleanTextField ]|
+    derived-component-type : "String" -> java_type |[ quest.lang.var.VariableStringTextField ]|
+    derived-component-type : "Integer" -> java_type |[ quest.lang.var.VariableIntegerTextField ]|
+    
+    make-variable-listener(|java_x_obj) = 
+      where(retrieve-type => java_x_type);
+      ?ExprName(Id(java_x_var));
+      !|[ 
+        java_x_var.addChangeListener(new quest.lang.var.Variable.ChangeListener<java_x_type>() {
+          public void changed(java_x_type old, java_x_type now) {
+            java_x_obj.update();
+          }
+        });
+      ]|
+      
+    default-value : "Boolean" -> |[ false ]|
+    default-value : "Integer" -> |[ 0 ]|
+    default-value : "String" -> |[ "" ]|
+    
+  rules
+    put-mods(|mods) = ClassDec(ClassDecHead(!mods,id,id,id,id),id)
+    put-fields(|fields) = ClassDec(id,ClassBody(!(fields,<id>);conc))
+}
+

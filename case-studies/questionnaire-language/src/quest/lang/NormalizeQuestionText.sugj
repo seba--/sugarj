@@ -1,0 +1,28 @@
+package quest.lang;
+
+import quest.lang.Syntax;
+
+public sugar NormalizeQuestionText {
+  desugarings
+    normalize-question-text
+    
+  rules
+    normalize-question-text :
+      QuestText(text) -> QuestText(ntext)
+    where <normalize-layout> text => ntext
+    
+    normalize-layout = string-as-chars(normalize-layout-chars)
+    
+    normalize-layout-chars : [] -> []
+    normalize-layout-chars : [c] -> [c]
+    normalize-layout-chars : [c|cs] -> [c| <normalize-layout-chars> cs]
+      where <not(is-layout)> c
+    normalize-layout-chars : [c1,c2|cs] -> [' ',c2| <normalize-layout-chars> cs]
+      where <is-layout> c1;
+            <not(is-layout)> c2
+    normalize-layout-chars : [c1,c2|cs] -> <normalize-layout-chars> [c2|cs]
+      where <is-layout> c1;
+            <is-layout> c2
+    
+    is-layout = ?' ' + ?'\t' + ?'\n' + ?'\r'
+}

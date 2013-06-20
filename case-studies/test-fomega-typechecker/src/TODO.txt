@@ -1,10 +1,18 @@
+* Recursive types, i. e. substitution in types mentioned in
+  premises.
+
+* Variants, records (require additional judgments).
+
+* Use type checker to annotate terms with types.
+
 * Can we replace the ugly quotes ~%, ~&, ~$, ~# by V~, Q~, N~, S~?
   I got an ambiguity with V~ and application, I think.
 
 * Proper tracking of error locations by attaching a source annotation
   to types (see TODO in typing.rules.Desugaring).
 
-* Recursive types, i. e. substitution in types mentioned in
-  premises.
 
-* Variants, records (require additional judgments)
+* Use Locked to disable desugaring of conclusion when generating the
+  type checker from a typing rule.
+
+* Call pp from stratego?

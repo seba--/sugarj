@@ -20,7 +20,6 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.jsglr_layout.client.InvalidParseTableException;
 import org.spoofax.jsglr_layout.client.imploder.IToken;
 import org.spoofax.jsglr_layout.client.imploder.ImploderAttachment;
-import org.spoofax.jsglr_layout.client.imploder.ImploderOriginTermFactory;
 import org.spoofax.jsglr_layout.client.imploder.Token;
 import org.spoofax.jsglr_layout.client.imploder.Tokenizer;
 import org.spoofax.jsglr_layout.io.ParseTableManager;
@@ -95,7 +94,8 @@ public class ATermCommands {
     }
   }
   
-  public static ITermFactory factory = new ImploderOriginTermFactory(new ParentTermFactory(new TermFactory().getFactoryWithStorageType(IStrategoTerm.MUTABLE)));
+  // TODO use origin factory
+  public static ITermFactory factory = new ParentTermFactory(new TermFactory().getFactoryWithStorageType(IStrategoTerm.MUTABLE));
   public static ParseTableManager parseTableManager = new ParseTableManager(factory, false);
 
   public static IStrategoTerm atermFromFile(String filename) throws IOException {
@@ -288,29 +288,16 @@ public class ATermCommands {
   }
   
   public static List<IStrategoTerm> registerSemanticProvider(Collection<IStrategoTerm> editorServices, Path jarfile) throws IOException {
+    List<IStrategoTerm> newServices = new ArrayList<IStrategoTerm>(editorServices);
+
+    if (jarfile == null)
+      return newServices;
+    
     String jarfilePath = jarfile.getAbsolutePath().replace("\\", "\\\\").replace("\"", "\\\"");
-    IStrategoTerm semanticProvider = atermFromString("SemanticProvider(\"" + jarfilePath + "\")");
-    
-    List<IStrategoTerm> newServices = new ArrayList<IStrategoTerm>();
-    
-    for (IStrategoTerm service : editorServices)
-    {
-      if (ATermCommands.isApplication(service, "Builders")) {
-        IStrategoTerm name = ATermCommands.getApplicationSubterm(service, "Builders", 0);
-        IStrategoTerm builders = ATermCommands.getApplicationSubterm(service, "Builders", 1);
-        if (ATermCommands.isList(builders)) {
-          List<IStrategoTerm> builderList = new ArrayList<IStrategoTerm>();
-          builderList.add(semanticProvider);
-          builderList.addAll(getList(builders));
-          builders = ATermCommands.makeList("SemanticRule*", builderList);
-        }
-        
-        service = ATermCommands.makeAppl("Builders", "Section", 2, name, builders);
-      }
-      
-      newServices.add(service);
-    }
-    
+    IStrategoTerm builder = ATermCommands.atermFromString(
+        "Builders(\"sugarj checking\", [SemanticObserver(Strategy(\"sugarj-analyze\")), SemanticProvider(\"" + jarfilePath + "\")])");
+    newServices.add(builder);
+
     return newServices;
   }
 
@@ -325,8 +312,10 @@ public class ATermCommands {
 //      e.printStackTrace();
 //    }
     
-    if (left == null || right == null)
-      throw new IllegalStateException(msg);
+    if (left == null || right == null) {
+      new IllegalStateException(msg).printStackTrace();
+      return;
+    }
     
     for (int i = left.getIndex(), max = right.getIndex(); i <= max; i++) {
       Token tok = ((Token) left.getTokenizer().getTokenAt(i));
@@ -427,15 +416,18 @@ public class ATermCommands {
       IStrategoTerm current = terms.pop();
       
       ImploderAttachment attach = ImploderAttachment.get(current);
-      boolean isSequence = attach.isSequenceAttachment();
-      String sort = isSequence ? attach.getElementSort() : attach.getSort();
-      IToken left = attach.getLeftToken();
-      IToken right = attach.getRightToken();
-      
-      org.spoofax.jsglr.client.imploder.Token oLeft = map.get(left);
-      org.spoofax.jsglr.client.imploder.Token oRight = map.get(right);
-      
-      org.spoofax.jsglr.client.imploder.ImploderAttachment.putImploderAttachment(current, isSequence, sort, oLeft, oRight);
+      if (attach != null) {
+        boolean isSequence = attach.isSequenceAttachment();
+        String sort = isSequence ? attach.getElementSort() : attach.getSort();
+        IToken left = attach.getLeftToken();
+        IToken right = attach.getRightToken();
+        
+        org.spoofax.jsglr.client.imploder.Token oLeft = map.get(left);
+        org.spoofax.jsglr.client.imploder.Token oRight = map.get(right);
+        
+        current.removeAttachment(ImploderAttachment.TYPE);
+        org.spoofax.jsglr.client.imploder.ImploderAttachment.putImploderAttachment(current, isSequence, sort, oLeft, oRight);
+      }
       
       for (int i = current.getSubtermCount() - 1; i >= 0; i--)
         terms.push(current.getAllSubterms()[i]);
@@ -458,5 +450,45 @@ public class ATermCommands {
     IStrategoTerm textTerm = box2text_string_0_1.instance.invoke(ctx, aboxTerm, factory.makeInt(80));
     return ATermCommands.getString(textTerm);
 
+  }
+
+  /**
+   * Copies the imploder attachments from one term to the other. The two input terms must be structurally equivalent.
+   * 
+   * @return the term 'to' with the imploder attachments of 'from'.
+   */
+  public static IStrategoTerm copyTokens(IStrategoTerm from, IStrategoTerm to) {
+    if (from == to)
+      return to;
+    
+    IStrategoTerm result = to;
+    LinkedList<IStrategoTerm> fromStack = new LinkedList<IStrategoTerm>();
+    LinkedList<IStrategoTerm> toStack = new LinkedList<IStrategoTerm>();
+    fromStack.push(from);
+    toStack.push(to);
+    
+    while (!fromStack.isEmpty()) {
+      from = fromStack.pop();
+      to = toStack.pop();
+      
+      ImploderAttachment attach = ImploderAttachment.get(from);
+      if (attach != null)
+        ImploderAttachment.putImploderAttachment(
+            to,
+            attach.isSequenceAttachment(), 
+            attach.isSequenceAttachment() ? attach.getElementSort() : attach.getSort(), 
+            attach.getLeftToken(), 
+            attach.getRightToken());
+      
+      for (int i = 0; i < from.getSubtermCount(); i++) {
+        fromStack.push(from.getSubterm(i));
+        
+        IStrategoTerm subterm = to.getSubterm(i);
+        ParentAttachment.putParent(subterm, to, null);
+        toStack.push(subterm);
+      }
+    }
+    
+    return result;
   }
 }

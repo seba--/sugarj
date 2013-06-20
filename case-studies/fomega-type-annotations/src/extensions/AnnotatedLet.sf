@@ -1,0 +1,39 @@
+module extensions.AnnotatedLet
+
+import org.sugarj.languages.Fomega
+import concretesyntax.Fomega
+import concretesyntax.Metavars
+
+import extension.Declaration
+
+
+syntax {
+  context-free syntax
+    "let" FomegaID ":" FomegaType "=" FomegaExpr "in" FomegaExpr -> FomegaExpr {cons("Let")}
+
+  context-free priorities
+    FomegaExpr FomegaExpr -> FomegaExpr >
+    "let" FomegaID ":" FomegaType "=" FomegaExpr "in" FomegaExpr -> FomegaExpr
+
+  lexical syntax
+    "let" -> Keyword
+    "in"  -> Keyword
+
+  lexical restrictions
+    "let" "in" -/- [A-Za-z0-9]
+}
+
+desugaring desugar-annotatedlet {
+  desugar-annotatedlet :
+    |[ let ~%x : ~T = ~e1 in ~e2 ]| -> |[ (\~%x:~T. ~e2) ~e1 ]|
+}
+
+typing {
+  ~C |- ~e1 : ~T1
+  ~C |- ~S :: *
+  ~C |- ~S ~> ~U
+  ~C |- ~T1 ~> ~U
+  (~C;~%x:~S) |- ~e2 : ~T2
+  ======================================= T-AnnotatedLet
+  ~C |- (let ~%x : ~S = ~e1 in ~e2) : ~T2
+}

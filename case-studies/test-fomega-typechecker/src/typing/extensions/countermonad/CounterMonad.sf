@@ -1,0 +1,16 @@
+module typing.extensions.countermonad.CounterMonad
+
+import typing.rules.TypeChecker
+
+import typing.extensions.let.Syntax
+import typing.extensions.let.Semantics
+
+
+public type CounterMonad = \A::*. Nat -> {fst:Nat, snd:A}
+
+
+public val return = \A::*. \x:A. \n:Nat. {fst=1, snd=3}
+
+public val bind = \A::*. \B::*. \m: CounterMonad A. \f: A -> CounterMonad B. \n:Nat.
+  let p: {fst:Nat, snd:A} = m n in
+  f p!snd

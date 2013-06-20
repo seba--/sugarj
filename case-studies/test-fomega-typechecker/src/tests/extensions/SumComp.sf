@@ -1,0 +1,13 @@
+module tests.extensions.SumComp
+
+import typing.rules.TypeChecker
+
+import typing.extensions.sumcomprehension.Syntax
+import typing.extensions.sumcomprehension.Semantics
+import qualified typing.extensions.sumcomprehension.Support
+
+
+val test01 =
+  dosum
+  { n1 <- 5
+  ; (\x:Nat. \y:Nat. y) n1 1 }

@@ -1,0 +1,7 @@
+module org/sugarj/stdlib/StdEditor
+
+builders
+  builder  : "Show abstract syntax" = generate-aterm (openeditor) (realtime) (source)
+  builder  : "Show abstract syntax with analysis data" = generate-aterm-analysis (openeditor) (realtime) (source)
+  builder  : "Show desugared abstract syntax" = generate-desugared (openeditor) (realtime) (source)
+  builder  : "Show desugared abstract syntax with analysis data" = generate-desugared-analysis (openeditor) (realtime) (source)

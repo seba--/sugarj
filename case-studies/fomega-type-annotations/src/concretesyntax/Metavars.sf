@@ -1,0 +1,68 @@
+module concretesyntax.Metavars
+
+import org.sugarj.languages.Fomega
+import concretesyntax.MetaExplode
+
+context-free syntax
+
+  "~"  StrategoVar  -> Context        {cons("Metavar")}
+  "~:" StrategoVar  -> FomegaTyDecls1 {cons("Metavar")}
+  "~"  StrategoVar  -> FomegaTyDecls  {cons("Metavar")}
+  "~"  StrategoVar  -> FomegaBranches {cons("Metavar")}
+  "~=" StrategoVar  -> FomegaFields1  {cons("Metavar")}
+  "~"  StrategoVar  -> FomegaFields   {cons("Metavar")}
+  "~"  StrategoVar  -> FomegaExpr     {cons("Metavar")}
+  "~"  StrategoVar  -> FomegaType     {cons("Metavar")}
+  "~"  StrategoVar  -> FomegaKind     {cons("Metavar")}
+
+  "~=" StrategoVar -> FomegaDefs {cons("Metavar")}
+  "~" StrategoVar  -> Signature  {cons("Metavar")}
+
+  "~%" StrategoVar -> FomegaID       {cons("Metavar")}
+  "~&" StrategoVar -> FomegaQID      {cons("Metavar")}
+
+  "~#" StrategoVar -> FomegaNAT      {cons("Metavar")}
+  "~$" StrategoVar -> FomegaSTRING   {cons("Metavar")}
+
+context-free syntax
+  "M~" StrategoTerm -> FomegaExpr     {cons("MetaExpr")}
+  "M~" StrategoTerm -> FomegaType     {cons("MetaExpr")}
+  "M~" StrategoTerm -> FomegaTyDecls  {cons("MetaExpr")}
+  "M~" StrategoTerm -> FomegaTyDecls1 {cons("MetaExpr")}
+  "M~" StrategoTerm -> FomegaKind     {cons("MetaExpr")}
+  "M~" StrategoTerm -> FomegaFields   {cons("MetaExpr")}
+  "M~" StrategoTerm -> FomegaDefs     {cons("MetaExpr")}
+
+  "Mexpr~" StrategoTerm     -> FomegaExpr     {cons("MetaExpr")}
+  "Mtype~" StrategoTerm     -> FomegaType     {cons("MetaExpr")}
+  "Mtydecls~" StrategoTerm  -> FomegaTyDecls  {cons("MetaExpr")}
+  "Mtydecls1~" StrategoTerm -> FomegaTyDecls1 {cons("MetaExpr")}
+  "Mkind~" StrategoTerm     -> FomegaKind     {cons("MetaExpr")}
+  "Mfields~" StrategoTerm   -> FomegaFields   {cons("MetaExpr")}
+  "Mfields1~" StrategoTerm  -> FomegaFields1  {cons("MetaExpr")}
+
+  "Mdefs~" StrategoTerm     -> FomegaDefs     {cons("MetaExpr")}
+
+rules
+  TrmFromTerm = ?Metavar(<MetaExplode>)
+  TrmFromTerm = ?MetaExpr(<MetaExplode>)
+
+
+rules // implode MetaExpr
+
+  metaexpr-implode =
+    bottomup(try(?MetaExpr(<trm-metaexpr-implode>)))
+
+  trm-metaexpr-implode =
+    ?NoAnnoList(<pre-metaexpr-implode>)
+  + strip-annos;\ Var(v) -> Metavar(Var(v)) \
+  + ?ToMetaExpr(<id>)
+  
+  pre-metaexpr-implode =
+    ?Char(<id>) + ?Int(<id>) + ?Real(<id>) + ?Str(<id>)
+  + strip-annos;\ Tuple(ts) -> ""#(<map(trm-metaexpr-implode)> ts) \;try(?""#([<id>]))
+  + ?List(<map(trm-metaexpr-implode)>)
+  + strip-annos;\ ListTail(hs, tl) -> <conc> (<map(trm-metaexpr-implode)> hs, <trm-metaexpr-implode> tl) \
+  + strip-annos;\ Op(n, args) -> n#(<map(trm-metaexpr-implode)> args) \
+  + strip-annos;\ Var(v) -> Metavar(Var(v)) \
+

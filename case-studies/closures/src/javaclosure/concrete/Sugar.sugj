@@ -7,42 +7,15 @@ import javaclosure.ToRefType;
 
 import org.sugarj.languages.Java;
 
-/*
- * see http://javac.info/closures-v06a.html
- */
-public sugar Syntax {
-  context-free syntax
-    "#" JavaType "(" JavaType ")" -> JavaType {cons("ClosureType")}
-    "#" JavaType "(" JavaFormalParam ")" JavaBlock -> JavaExpr {cons("Closure")}
-  
-  %% The remaining priorities follow by transitivity.
-  context-free priorities
-      {right:
-      JavaLHS "="    JavaExpr -> JavaExpr
-      JavaLHS "*="   JavaExpr -> JavaExpr
-      JavaLHS "/="   JavaExpr -> JavaExpr
-      JavaLHS "%="   JavaExpr -> JavaExpr
-      JavaLHS "+="   JavaExpr -> JavaExpr
-      JavaLHS "-="   JavaExpr -> JavaExpr
-      JavaLHS "<<="  JavaExpr -> JavaExpr
-      JavaLHS ">>="  JavaExpr -> JavaExpr
-      JavaLHS ">>>=" JavaExpr -> JavaExpr
-      JavaLHS "&="   JavaExpr -> JavaExpr
-      JavaLHS "^="   JavaExpr -> JavaExpr
-      JavaLHS "|="   JavaExpr -> JavaExpr
-    }
-    > "#" JavaType "(" JavaFormalParam ")" JavaExpr -> JavaExpr
-}
-
+import javaclosure.Syntax;
   
 /*
  * see http://javac.info/closures-v06a.html
  */
-public sugar Transformation {
+public sugar Sugar {
   desugarings
     desugar-closure-type
     desugar-closure
-  
   
   rules
     desugar-closure-type :

@@ -1,0 +1,31 @@
+package test;
+
+public sugar Check {
+  rules
+    analyze = not(oncetd(has-type + has-type-error)); bottomup(try(type-check))
+  
+  rules
+    type-check = ?Lit(Deci(_)); put-type(|"Int")
+    
+    type-check = ?Plus(x,y); put-type(|"Int");
+      where (<has-type(|"Int")> x;
+             <has-type(|"Int")> y)
+    type-check = ?Plus(x,y); Plus(put-type-error(|"Expected type Int"),id);
+      where (<not(has-type(|"Int"))> x)
+    type-check = ?Plus(x,y); Plus(id,put-type-error(|"Expected type Int"));
+      where (<not(has-type(|"Int"))> y)
+
+    has-type = get-anno(|"type")
+    has-type(|type) = where(retrieve-type; equal(|type)) 
+    retrieve-type = get-anno(|"type")
+    put-type(|type) = put-anno(|"type", type)
+    
+    has-type-error = get-anno(|"type-error")
+    retrieve-type-error = get-anno(|"type-error")
+    put-type-error(|type) = put-anno(|"type-error", type)
+
+  rules
+    constraint-error =
+      where(retrieve-type-error => err);
+      !(<id>,<conc-strings>("type error: ", err))
+}

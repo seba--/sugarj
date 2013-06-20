@@ -1,0 +1,32 @@
+package test;
+
+import quest.Language;
+
+public questionnaire HouseOwning
+
+  Boolean question hasSoldHouse =
+    Did you sell a house in 2010?
+  Boolean question hasBoughtHouse =
+    Did you buy a house in 2010?
+  Boolean value active = hasSoldHouse || hasBoughtHouse
+  Boolean value inactive = !active
+ 
+  question group Payment
+    Integer question howMuchPaid =
+      How much did you pay?
+    String question howPaid =
+      Which method of payment did you use?
+      Please do not write down any details;
+      keep it short.
+
+  define Boolean question hasMoney =
+    So you have some money?
+  
+  if hasBoughtHouse && howMuchPaid < 50000
+    ask hasMoney
+    if hasMoney
+      Boolean question spareADime = Can you spare some?
+  if hasSoldHouse
+    ask hasMoney
+    if hasMoney
+      Boolean question spareADime = For a good cause?

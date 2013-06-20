@@ -1,0 +1,42 @@
+package quest.lang.var;
+
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
+import quest.lang.var.Variable;
+
+/**
+ * @author seba
+ *
+ */
+public abstract class VariableTextField<T> extends JTextField implements Variable.ChangeListener<T> {
+  private static final long serialVersionUID = 1L;
+  
+  private boolean inChange = false;
+
+  public VariableTextField(final Variable<T> var) {
+    var.addChangeListener(this);
+    getDocument().addDocumentListener(new DocumentListener() {
+      private void anyUpdate() {
+        inChange = true;
+        var.set(getValue(getText()));
+        inChange = false;
+      }
+      public void removeUpdate(DocumentEvent arg0) { anyUpdate(); }
+      public void insertUpdate(DocumentEvent arg0) { anyUpdate(); }
+      public void changedUpdate(DocumentEvent arg0) { anyUpdate(); }
+    });
+  }
+
+  public void changed(T old, T now) {
+    if (inChange)
+      return;
+    final String text = getText(now);
+    if (!getText().equals(text))
+      setText(text);
+  }
+  
+  public abstract T getValue(String s);
+  public abstract String getText(T t);
+}

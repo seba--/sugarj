@@ -1,0 +1,51 @@
+module typing.extensions.Declaration
+
+import typing.rules.Syntax
+
+context-free syntax
+  "syntax" "{" Grammar* "}" -> ToplevelDeclaration {cons("SyntaxExtension")}
+  "desugaring" StrategoId "{" StrategoDef* StrategoDecl* "}" -> ToplevelDeclaration {cons("DesugaringExtension")}
+  "typing" "{" TypeRule* "}" -> ToplevelDeclaration {cons("TypingExtension")}
+
+rules
+  constraint-error = check-typing-rule-subject
+  
+  check-typing-rule-subject :
+    TypeRule(_, _, TypingJudgment(C, e, T)) ->
+    [(e, "Subject does not match desugaring rule.")]
+  where <not(desugar-extension-internal)> e
+  
+  // is generated from DesugaringExtension
+  desugar-extension-internal = fail
+         
+rules
+  desugar-extension :
+    SyntaxExtension(grammars) ->
+    SugarBody(<conc> (body, trafos, checks))
+  where
+      (Extension-Trafos <+ ![]) => trafos 
+    ; (Extension-Checks <+ ![]) => checks
+    ; <map(!grammar-elem(<id>))> grammars => body 
+    ; rules( Extension-Syntax := body )
+  
+  desugar-extension :
+    DesugaringExtension(desugar-strat, (trafos, decls)) ->
+    SugarBody(<conc> (grammars, body, checks))
+  where
+      (Extension-Syntax <+ ![]) => grammars 
+    ; (Extension-Checks <+ ![]) => checks
+    ; !transformation-elem(Desugarings([PureDesugaring(CallNoArgs(SVar(desugar-strat)))])) => desugaring
+    ; !transformation-elem(Rules([SDefNoArgs("desugar-extension-internal", CallNoArgs(SVar(desugar-strat)))])) => rinternal
+    ; ![desugaring, rinternal, transformation-elem(Rules(trafos)) | <map(!transformation-elem(<id>))> decls] => body
+    ; rules( Extension-Trafos := body )
+  
+  desugar-extension :
+    TypingExtension(checks) ->
+    SugarBody(<conc> (grammars, trafos, checks))
+  where
+      (Extension-Syntax <+ ![]) => grammars 
+    ; (Extension-Trafos <+ ![]) => trafos
+    ; rules( Extension-Checks := checks )
+  
+desugarings
+  desugar-extension

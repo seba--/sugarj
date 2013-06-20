@@ -24,6 +24,8 @@ signature constructors
   ToModelTerm : ATerm -> ModelTerm
  
 rules
+  aterm-to-string = prim("SUGARJ_aterm_to_string")
+  
   desugar : ToModelTerm(t) -> <implode-aterm> t
 
   explode-aterm =

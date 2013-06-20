@@ -1,0 +1,47 @@
+module test.AnnoTest
+
+import contextanalysis.ContextAnalysis
+
+
+public type Foo = Nat
+
+public type Foo1 = Foo
+
+type Bar = (\X::*. X) Foo
+
+type V = {x:Nat, y:Nat, a:Bool, b:Nat}
+
+type Foo2 = forall X::*. V
+
+val x1 = if true then 1 else 3
+
+//val x2 = if x1 then 1 else 2
+
+//val x3 = if x2 then 1 else 2
+
+val x4 = \x:Nat. x
+
+val x5 = x4 x1
+
+val x6 = \A::*.\x:A. x
+
+val x7 = x6 [Bool] true
+
+val x8 = 1 as (\X::*.X) Nat
+
+val x9 = {x=true, y=13, z="abc"}
+
+val x10 = {}
+
+val x11 = x9 ! z
+
+val x12 = <x=true> as <x:Bool, y:Nat, z: {a:Nat,b:String}>
+
+val x13 = case x12 of
+  <x=x> => 17;
+  <y=y> => y;
+  <z=z> => z!a
+ 
+type x14 = {b:Nat,a:Bool}
+
+val x15 = 1 as Nat

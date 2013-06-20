@@ -1,0 +1,108 @@
+module extensions.DoBlock
+
+import org.sugarj.languages.Fomega
+import concretesyntax.Fomega
+import concretesyntax.Metavars
+
+import extension.Declaration
+
+
+syntax {
+  context-free syntax
+    "do" FomegaType "{" FomegaExpr "}"                -> FomegaExpr {cons("DoAtomic")}
+    "do" FomegaType "{" DoBindings ";" FomegaExpr "}" -> FomegaExpr {cons("DoSeq")}
+
+    FomegaID ":" FomegaType "<-" FomegaExpr -> DoBinding {cons("DoArrow")}
+    //FomegaExpr               -> DoBinding {cons("DoNoReturn")}
+
+    DoBinding                -> DoBindings {cons("DoBindingsEnd")}
+    DoBinding ";" DoBindings -> DoBindings {cons("DoBindingsCons")}
+
+  context-free syntax
+    "~" StrategoVar -> DoBindings {cons("Metavar")}
+
+  lexical syntax
+    "do" -> FomegaKeyword
+
+  lexical restrictions
+    "do" -/- [a-zA-Z0-09]
+}
+
+desugaring desugar-do {
+  desugar-do :
+    fomega-expr |[ do ~T { ~e } ]|
+    ->
+    fomega-expr |[ \M::*=>*.
+                     \bind:forall A::*. forall B::*. M A -> (A -> M B) -> M B.
+                       \return: forall A::*. A -> M A. ~e as M ~T ]|
+
+  desugar-do :
+    fomega-expr |[ do ~T { ~%x : ~S <- ~e1; ~e2 } ]|
+    ->
+    fomega-expr |[ \M::*=>*.
+                     \bind:forall A::*. forall B::*. M A -> (A -> M B) -> M B.
+                       \return: forall A::*. A -> M A. 
+                         (bind [~S] [~T] ~e1 (\~%x:~S. ~e2 as M ~T))
+                ]|
+
+  desugar-do :
+    DoSeq(T, DoBindingsCons(DoArrow(x, S, e1), bs), e2)
+    ->
+    fomega-expr |[ \M::*=>*.
+                     \bind:forall A::*. forall B::*. M A -> (A -> M B) -> M B.
+                       \return: forall A::*. A -> M A. 
+                         bind [~S] [~T] ~e1 (\~%x:~S. (do ~T { ~bs; ~e2 }) [M] bind return)
+                ]|
+
+}
+
+typing {
+  (~C; M::*=>*) |- ~T :: *
+  (((~C; M::*=>*); bind:forall A::*. forall B::*. M A -> (A -> M B) -> M B);
+    return: forall A::*. A -> M A) |- ~e : ~R
+  (~C; M::*=>*) |- ~R ~> M ~U
+  (~C; M::*=>*) |- ~U :: *
+  (~C; M::*=>*) |- ~T ~> ~U
+  ======================================================================== T-DoAtomic
+  ~C |- do ~T { ~e } :
+    forall M::*=>*. 
+      (forall A::*. forall B::*. M A -> (A -> M B) -> M B) ->
+        (forall A::*. A -> M A) -> M ~T
+
+
+  (~C; M::*=>*) |- ~S :: *
+  (~C; M::*=>*) |- ~T :: *
+  (((~C; M::*=>*); bind:forall A::*. forall B::*. M A -> (A -> M B) -> M B);
+    return: forall A::*. A -> M A) |- ~e1 : ~R1
+  (~C; M::*=>*) |- ~R1 ~> M ~U1
+  (~C; M::*=>*) |- ~U1 :: *
+  (~C; M::*=>*) |- ~S ~> ~U1
+  ((((~C; M::*=>*); bind:forall A::*. forall B::*. M A -> (A -> M B) -> M B);
+    return: forall A::*. A -> M A); ~%x:~S) |- ~e2 : ~R2
+  (~C; M::*=>*) |- ~R2 ~> M ~U2
+  (~C; M::*=>*) |- ~U2 :: *
+  (~C; M::*=>*) |- ~T ~> ~U2
+  =========================================================================== T-DoSeqEnd
+  ~C |- do ~T { ~%x : ~S <- ~e1; ~e2 } :
+    forall M::*=>*. 
+      (forall A::*. forall B::*. M A -> (A -> M B) -> M B) ->
+        (forall A::*. A -> M A) -> M ~T
+
+  (~C; M::*=>*) |- ~S :: *
+  (~C; M::*=>*) |- ~T :: *
+  (~C; M::*=>*; bind:forall A::*. forall B::*. M A -> (A -> M B) -> M B;
+    return: forall A::*. A -> M A) |- ~e1 : ~R1
+  (~C; M::*=>*) |- ~R1 ~> M ~U1
+  (~C; M::*=>*) |- ~U1 :: *
+  (~C; M::*=>*) |- ~S ~> ~U1
+  (~C; M::*=>*; bind:forall A::*. forall B::*. M A -> (A -> M B) -> M B;
+    return: forall A::*. A -> M A; ~%x:~S) |- do ~T { ~bs; ~e2 } :
+      forall M::*=>*. 
+        (forall A::*. forall B::*. M A -> (A -> M B) -> M B) ->
+          (forall A::*. A -> M A) -> M ~T
+  =========================================================================== T-DoSeqCons
+  ~C |- do ~T { ~%x : ~S <- ~e1; ~bs; ~e2 } :
+    forall M::*=>*. 
+      (forall A::*. forall B::*. M A -> (A -> M B) -> M B) ->
+        (forall A::*. A -> M A) -> M ~T
+}

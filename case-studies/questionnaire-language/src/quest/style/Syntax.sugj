@@ -1,0 +1,31 @@
+package quest.style;
+
+import quest.lang.Syntax;
+
+public sugar Syntax {
+  context-free syntax
+    Style -> ToplevelDeclaration
+    AnnoOrSugarMod* "style" JavaId StyleList
+      -> Style {cons("Style"), layout(1.first.col < 4.first.col)}
+
+    -> StyleList {cons("SNil")}
+    StyleElem StyleList -> StyleList {cons("SCons"), layout(1.first.col == 2.first.col)}
+  
+  desugarings
+    style-model
+
+  rules
+    style-model :
+      Style(mods, name, body) -> 
+      ModelDec(ModelDecHead(mods, name, "quest.style.Syntax"), ModelBody(body))
+
+
+  // type style
+  context-free syntax
+    TypeStyle -> StyleElem {layout(1.first.col < 1.left.col)}
+    "display" QuestType "question" "with" ComponentType -> TypeStyle {cons("QuestionTypeStyle")}
+    "display" QuestType "value"    "with" ComponentType -> TypeStyle {cons("DerivedValueTypeStyle")}
+    JavaType -> ComponentType {cons("ComponentType")}
+  
+    
+}

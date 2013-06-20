@@ -1,0 +1,29 @@
+package test;
+
+import quest.Language;
+
+public questionnaire MobileSecurity
+  define Boolean question securityRelevant =
+    Is security an issue for you?
+  
+  Integer question age =
+    How old are you?
+  Boolean value oldEnough = age >= 18
+
+  Boolean question useMobileDevice =
+    Do you use any mobile devices?
+  
+  if oldEnough && useMobileDevice
+    question group deviceDetails
+      Integer question howManyDevices =
+        How many mobile devices do you use?
+      String question whatOS =
+        Which operation system are you mainly using?
+    ask securityRelevant
+  else 
+    if oldEnough
+      Boolean question usePC =
+        If you do not use a mobile device,
+        are you maybe using a PC?
+      if usePC
+        ask securityRelevant

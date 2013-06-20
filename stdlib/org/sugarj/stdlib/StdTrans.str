@@ -1,6 +1,7 @@
 module org/sugarj/stdlib/StdTrans
 imports libstrategolib
 
+imports org/sugarj/transformations/Analyze
 imports org/sugarj/transformations/ATerm
 imports org/sugarj/transformations/GenerateSignatures
 imports org/sugarj/transformations/LayoutSugar
@@ -23,26 +24,38 @@ strategies
   desugar-main = internal-main
   internal-main = traverse(desugar); unlock
   main = io-wrap(internal-main)
+  
+strategies
+  debug-strat(what, s) =
+    debug-analysis(!<conc-strings>("IN ", <what>, ": "));
+    (s < debug-analysis(!<conc-strings>("OUT ", <what>, ": "))
+       + debug-analysis(!<conc-strings>("FAILED ", <what>, ": ")); fail)
 
-  sugarj-analyze:
-    (ast, path, project-path) -> (ast, errors, warnings, notes)
+strategies
+  generate-desugared :
+    (selected, position, ast, path, project-path) -> (filename, result)
+    where
+      filename := <guarantee-extension(|"desug")> path;
+      result   := <desugar-main; bottomup(strip-annos)> selected // we just return the input term
+
+  generate-desugared-analysis :
+    (selected, position, ast, path, project-path) -> (filename, result)
+    where
+      filename := <guarantee-extension(|"desug")> path;
+      result   := <desugar-main; nice-analysis-data-term> selected // we just return the input term
+  
+  generate-aterm:
+    (selected, position, ast, path, project-path) -> (filename, result)
     with
-      editor-init;
-      try(analyze);
-      errors   := <collect-all(constraint-error, conc)> ast;
-      warnings := <collect-all(constraint-warning, conc)> ast;
-      notes    := <collect-all(constraint-note, conc)> ast
+      filename := <guarantee-extension(|"aterm")> path;
+      result   := <bottomup(strip-annos)> selected
 
-    editor-init =
-      // Ensure all dynamic rules are properly scoped
-      try(dr-scope-all-end);
-      dr-scope-all-start
-
-    analyze = fail
-    constraint-error = fail
-    constraint-warning = fail
-    constraint-note = fail
-
+  generate-aterm-analysis:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"aterm")> path;
+      result   := <nice-analysis-data-term> selected
+  
 signature
   constructors
     Locked : a -> a

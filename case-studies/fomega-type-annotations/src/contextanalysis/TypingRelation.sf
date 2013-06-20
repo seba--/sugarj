@@ -1,0 +1,152 @@
+module contextanalysis.TypingRelation
+
+import contextanalysis.rules.Syntax
+import contextanalysis.rules.Desugaring
+
+import contextanalysis.KindingRelation
+
+import concretesyntax.Fomega
+
+
+================= T-True
+~C |- true : Bool
+
+
+================== T-False
+~C |- false : Bool
+
+
+=============== T-Nat
+~C |- ~#n : Nat
+
+
+================== T-String
+~C |- ~$s : String
+
+
+~%x:~T in ~C
+============== T-Var
+~C |- ~%x : ~T
+
+
+~&qx:~T in ~C
+=============== T-QVar
+~C |- ~&qx : ~T
+
+
+~C |- ~e1 : ~T1
+~C |- ~e2 : ~T2
+~C |- ~e3 : ~T3
+~C |- ~T1 ~> Bool
+~C |- ~T2 ~> ~U
+~C |- ~T3 ~> ~U
+=================================== T-If
+~C |- if ~e1 then ~e2 else ~e3 : ~U
+
+
+(~C;~%X::~K1) |- ~e2 : ~T2
+=========================================== T-TAbs
+~C |- \~%X::~K1. ~e2 : forall ~%X::~K1. ~T2
+
+
+~C |- ~T1 :: *
+(~C;~%x:~T1) |- ~e2 : ~T2
+================================ T-Abs
+~C |- \~%x:~T1. ~e2 : ~T1 -> ~T2
+
+
+~C |- ~e : ~S
+~C |- ~T :: *
+~C |- ~S ~> ~U
+~C |- ~T ~> ~U
+=================== T-As
+~C |- ~e as ~T : ~T
+
+
+~C |- ~e1 : ~T1
+~C |- ~T1 ~> forall ~%X::~K11. ~T12
+~C |- ~T2 :: ~K11
+=================================== T-TApp
+~C |- ~e1 [~T2] : [~%X |-> ~T2]~T12
+
+
+~C |- ~e1 : ~T1
+~C |- ~e2 : ~T2
+~C |- ~T1 ~> ~T11 -> ~T12
+~C |- ~T2 ~> ~T11
+========================= T-App
+~C |- ~e1 ~e2 : ~T12
+
+
+============= T-RecordNil
+~C |- {} : {}
+
+
+~C |- ~e : ~T
+~C |- {~flds} : ~S
+~C |- ~S ~> {~decls}
+~%x notin lab(~decls)
+======================================== T-RecordCons
+~C |- {~%x=~e ~=flds} : {~%x:~T ~:decls}
+
+
+~C |- ~e : ~T
+~C |- ~T ~> {~decls}
+~%x:~S in decls ~decls
+====================== T-Select
+~C |- ~e!~%x : ~S
+
+
+~C |- ~T :: *
+~C |- ~T ~> mu (~T1, ~T2)
+~C |- ~e : ~S
+~C |- ~S ~> ~U
+~C |- ~T2 :: ~K
+~C |- ~T1 (\arg::~K. mu (~T1, arg)) ~T2 ~> ~U
+============================================= T-Fold
+~C |- fold [~T] ~e : mu (~T1, ~T2) 
+
+
+~C |- ~T :: *
+~C |- ~T ~> mu (~T1, ~T2)
+~C |- ~e : ~S
+~C |- ~S ~> mu (~T1, ~T2) 
+~C |- ~T2 :: ~K
+======================================================== T-Unfold
+~C |- unfold [~T] ~e : ~T1 (\arg::~K. mu (~T1, arg)) ~T2
+
+
+~C |- ~T :: *
+~C |- ~e : ~S
+~C |- ~S ~> ~U
+~C |- ~T ~> <~decls>
+~%x:~U in decls ~decls
+========================= T-Variant
+~C |- <~%x=~e> as ~T : ~T
+
+
+signature
+  constructors
+    BRANCH-TYPING : FomegaTyDecls * FomegaBranches -> FomegaExpr
+
+
+~C |- ~e : ~S
+~C |- ~S ~> <~decls>
+~C |- M~BRANCH-TYPING(decls, brs) : ~T
+========================================= T-Case
+~C |- case ~e of ~brs : ~T
+
+
+~%x:~S in decls ~decls
+(~C;~%y:~S) |- ~e : ~T
+=========================================================== TB-End
+~C |- M~BRANCH-TYPING(decls, |[ <~%x=~%y> => ~e ]|) : ~T
+
+
+~%x:~S in decls ~decls
+(~C;~%y:~S) |- ~e : ~T1
+~C |- ~T1 ~> ~U
+~C |- M~BRANCH-TYPING(decls, brs) : ~T2
+~C |- ~T2 ~> ~U
+================================================================= TB-Cons
+~C |- M~BRANCH-TYPING(decls, |[ <~%x=~%y> => ~e; ~brs ]|) : ~U

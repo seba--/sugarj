@@ -1,0 +1,10 @@
+module test.Let
+
+import extensions.Let
+
+import contextanalysis.ContextAnalysis
+
+
+val x = let a = 1 in a
+
+val y = let a = \x:Nat. x in a x

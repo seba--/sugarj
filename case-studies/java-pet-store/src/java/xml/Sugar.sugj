@@ -6,30 +6,33 @@ import org.sugarj.languages.Java;
 import concretesyntax.Java;
 
 public sugar Sugar {
-	context-free syntax
-		Document -> JavaExpr {cons("XMLExpr")}
-		"$" "{" JavaExpr "}" -> Element {cons("JavaEscape"), prefer}
-		"$" "{" JavaExpr "}" -> AttValue {cons("JavaEscape"), prefer}
+  context-free syntax
+    Document -> JavaExpr {cons("XMLExpr")}
+    "$" "{" JavaExpr "}" -> Element {cons("JavaEscape"), prefer}
+    "$" "{" JavaExpr "}" -> AttValue {cons("JavaEscape"), prefer}
 
-	desugarings
-		desugar-xml : Document -> JavaExpr
-	strategies
-		arglist = ?p1#(<id>)
+  desugarings
+    desugar-xml : Document -> JavaExpr
+  strategies
+    arglist = ?p1#(<id>)
 
-		desugar-xml: XMLExpr(doc) -> 
-			|[ String.format(~xml-string, ~java-escapes) ]|
-			where <xml-to-string> doc => xml-string;
-			      <xml-java-escapes> doc => java-escapes
-				
-		xml-java-escapes = collect-all(\JavaEscape(code) -> code\); !NewArray(TypeName(Id("Object")), [Dim()], ArrayInit(<id>))
-		
-        xml-to-string = !Lit(String([Chars(<xml-to-string-lit>)]))
-        xml-to-string-lit = pprint <+ arglist; map(xml-to-string-lit); concat-strings <+ !""
-		
-        pprint : Element(ElemName(QName(None(), open_name)), attributes, body, ElemName(QName(None(), close_name)))
-			->  <concat-strings> ["<", open_name, <xml-to-string-lit> attributes, ">", <xml-to-string-lit> body, "</", close_name, ">"]
-		pprint : Attribute(AttrName(QName(None(), aname)), content) -> <concat-strings> [" ", aname, "=", <xml-to-string-lit> content]
-		pprint : DoubleQuoted(anything) -> <concat-strings>["\\\"", <xml-to-string-lit> anything, "\\\""]
-		pprint : CharDataPart(s) -> s
-		pprint : JavaEscape(_) -> "%s"
+    desugar-xml: XMLExpr(doc) -> 
+      |[ String.format(~xml-string, ~java-escapes) ]|
+      where <xml-to-string> doc => xml-string;
+            <xml-java-escapes> doc => java-escapes
+        
+    xml-java-escapes = collect-all(\JavaEscape(code) -> code\); !NewArray(TypeName(Id("Object")), [Dim()], ArrayInit(<id>))
+    
+    xml-to-string = !Lit(String([Chars(<xml-to-string-lit>)]))
+    xml-to-string-lit = pprint <+ arglist; map(xml-to-string-lit); concat-strings <+ !""
+    
+    pprint : Element(ElemName(QName(None(), open_name)), attributes, body, ElemName(QName(None(), close_name)))
+      ->  <concat-strings> ["<", open_name, <xml-to-string-lit> attributes, ">", <xml-to-string-lit> body, "</", close_name, ">"]
+    pprint : Attribute(AttrName(QName(None(), aname)), content) -> <concat-strings> [" ", aname, "=", <xml-to-string-lit> content]
+    pprint : DoubleQuoted(anything) -> <concat-strings>["\\\"", <xml-to-string-lit> anything, "\\\""]
+    pprint : CharDataPart(s) -> s
+    pprint : JavaEscape(_) -> "%s"
+}
+
+public editor services Sugar {
 }

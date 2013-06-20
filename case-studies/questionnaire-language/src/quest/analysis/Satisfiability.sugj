@@ -1,0 +1,55 @@
+package quest.analysis;
+
+/*
+ * TODO: use proper SAT solver or the like
+ * Hints from Christian Kaestner:
+ *   pseudo-boolsche SAT solver -> SAT4J, Packet: pseudo
+ *   CSP solver -> Choco
+ *   SMT -> Microsoft Z3
+ */
+public sugar Satisfiability {
+  rules
+    is-satisfiable =
+      innermost(reduce);
+      repeat(remove-equation);
+      innermost(reduce);
+      repeat(remove-variable);
+      innermost(reduce);
+      ?Lit(Bool(True))
+
+    remove-equation =
+      ?t; oncetd({c: where(?c#([_,_]); <elem> (c, ["Lt", "Gt", "LtEq", "GtEq", "Eq", "NotEq"])); ?op});
+      // <bottomup({t*: try(?op{t*}; !Lit(Bool(True)))})> t => with-true;
+      // <bottomup({t*: try(?op{t*}; !Lit(Bool(False)))})> t => with-false;
+      // !LazyOr(with-true, with-false)
+      <newname> "arithEq" => x;
+      <bottomup({t*: try(?op{t*}; !ExprName(Id(x)))})> t
+    
+    remove-variable =
+      ?t; oncetd(ExprName(Id(?name)));
+      <subst-all-vars(|name, Lit(Bool(True)))> t => with-true;
+      <subst-all-vars(|name, Lit(Bool(False)))> t => with-false;
+      !LazyOr(with-true, with-false)
+    
+    reduce : LazyAnd(Lit(Bool(False)), _) -> Lit(Bool(False))
+    reduce : LazyAnd(Lit(Bool(True)), t2) -> t2
+    reduce : LazyAnd(_ ,Lit(Bool(False))) -> Lit(Bool(False))
+    reduce : LazyAnd(t1, Lit(Bool(True))) -> t1
+    reduce : LazyAnd(t, Not(t)) -> Lit(Bool(False))
+    reduce : LazyAnd(Not(t), t) -> Lit(Bool(False))
+    reduce : LazyAnd(t, t) -> t
+    
+    reduce : LazyOr(Lit(Bool(True)), _) -> Lit(Bool(True))
+    reduce : LazyOr(Lit(Bool(False)), t2) -> t2
+    reduce : LazyOr(_, Lit(Bool(True))) -> Lit(Bool(True))
+    reduce : LazyOr(t1, Lit(Bool(False))) -> t1
+    reduce : LazyOr(t, Not(t)) -> Lit(Bool(True))
+    reduce : LazyOr(Not(t), t) -> Lit(Bool(True))
+    reduce : LazyOr(t, t) -> t
+    
+    reduce : Not(Lit(Bool(True))) -> Lit(Bool(False))
+    reduce : Not(Lit(Bool(False))) -> Lit(Bool(True))
+    
+    subst-all-vars(|name, val) = bottomup(try(subst-var(|name, val)))
+    subst-var(|name, val) = ?ExprName(Id(name)); !val
+}

@@ -1,0 +1,13 @@
+package quest;
+
+import quest.lang.Syntax;
+import quest.lang.NormalizeQuestionText;
+import quest.lang.Editor;
+import quest.lang.Transform;
+
+import quest.analysis.Naming;
+import quest.analysis.Typing;
+import quest.analysis.Determinism;
+
+public sugar Language { }
+public editor services Language { }
