@@ -78,7 +78,7 @@ public class JavaCommands {
     
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     
-    // this is ECJ
+    // this is EJC
     boolean ok = BatchCompiler.compile(
         cmd,
         new PrintWriter(baos),

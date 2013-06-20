@@ -149,8 +149,6 @@ public class Driver{
       if (environment.getCacheDir() != null)
         FileCommands.createDir(environment.getCacheDir());
       
-      FileCommands.createDir(environment.getBin());
-      
       initializeCaches(environment, false);
       sdfCache = selectCache(sdfCaches, baseLang, environment);
       strCache = selectCache(strCaches, baseLang, environment);
@@ -611,7 +609,6 @@ public class Driver{
   public Pair<IStrategoTerm, Integer> currentParse(String remainingInput, ITreeBuilder treeBuilder, boolean recovery) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
     
     currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfCache, environment, baseLanguage);
-    driverResult.addFileDependency(currentGrammarTBL);
 
     ParseTable table = ATermCommands.parseTableManager.loadFromFile(currentGrammarTBL.getAbsolutePath());
     
@@ -650,7 +647,6 @@ public class Driver{
     log.beginTask("analyze", "ANALYZE toplevel declaration.", Log.CORE);
     try {
       currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(), strParser, strCache, environment, baseProcessor);
-      driverResult.addFileDependency(currentTransProg);
     
       return STRCommands.assimilate("analyze-main", currentTransProg, term, baseProcessor.getInterpreter());
     } catch (StrategoException e) {

@@ -105,6 +105,11 @@ public class Environment implements Serializable {
       includePath.add(bin);
     }
     this.bin = bin;
+    try {
+      FileCommands.createDir(bin);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public Path getCacheDir() {
