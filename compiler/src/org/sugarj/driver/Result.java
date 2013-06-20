@@ -375,6 +375,10 @@ public class Result {
     return parseResultPath != null;
   }
   
+  public Path getParseResultPath() {
+    return parseResultPath;
+  }
+  
   public void rewriteDependencyFile() throws IOException {
     if (persistentPath == null)
       throw new IllegalStateException("Result not previously written to file.");

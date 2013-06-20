@@ -907,12 +907,16 @@ public class Driver{
    */
   public Result subcompile(IStrategoTerm toplevelDecl, RelativePath importSourceFile) throws InterruptedException {
     try {
+      Result result;
       if ("model".equals(FileCommands.getExtension(importSourceFile))) {
         IStrategoTerm term = ATermCommands.atermFromFile(importSourceFile.getAbsolutePath());
-        return run(term, importSourceFile, environment, monitor, baseProcessor.getLanguage(), currentlyProcessing);
+        result = run(term, importSourceFile, environment, monitor, baseProcessor.getLanguage(), currentlyProcessing);
       }
       else
-        return run(importSourceFile, environment, monitor, baseProcessor.getLanguage(), currentlyProcessing);
+        result = run(importSourceFile, environment, monitor, baseProcessor.getLanguage(), currentlyProcessing);
+      if (result.isParseResult())
+        environment.getIncludePath().add(result.getParseResultPath());
+      return result;
     } catch (IOException e) {
       setErrorMessage("Problems while compiling " + importSourceFile);
     } catch (TokenExpectedException e) {

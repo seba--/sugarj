@@ -3,6 +3,8 @@ package pair;
 import org.sugarj.languages.Java;
 import concretesyntax.Java;
 
+import pair.Pair;
+
 public sugar Sugar {
   context-free syntax
     "(" JavaType "," JavaType ")" -> JavaType {cons("PType")}
