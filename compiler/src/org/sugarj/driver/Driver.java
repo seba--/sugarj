@@ -76,7 +76,7 @@ public class Driver{
   
   private final static int PENDING_TIMEOUT = 30000;
 
-  private static Map<Path, SoftReference<Result>> resultCache = new HashMap<Path, SoftReference<Result>>(); // new LRUMap(50);
+  private static Map<Path, SoftReference<Result>> parserResultCache = new HashMap<Path, SoftReference<Result>>(); // new LRUMap(50);
 
   private static Map<Path, Entry<ToplevelDeclarationProvider, Driver>> pendingRuns = new HashMap<Path, Map.Entry<ToplevelDeclarationProvider,Driver>>();
   private static List<Path> pendingInputFiles = new ArrayList<Path>();
@@ -162,11 +162,11 @@ public class Driver{
     }
   }  
   
-  private static synchronized Result getResult(Path file) {
-    SoftReference<Result> res = resultCache.get(file);
+  private static synchronized Result getParserResult(Path file) {
+    SoftReference<Result> res = parserResultCache.get(file);
     if (res != null) {
       if (res.get() == null)
-        resultCache.remove(file);
+        parserResultCache.remove(file);
       return res.get();
     }
     return null;
@@ -210,8 +210,12 @@ public class Driver{
     }
   }
 
-  private static synchronized void putResult(Path file, Result result) {
-    resultCache.put(file, new SoftReference<Result>(result));
+  private static synchronized void putParserResult(Path file, Result result) {
+    parserResultCache.put(file, new SoftReference<Result>(result));
+  }
+
+  private static synchronized void removeParserResult(Path file) {
+    parserResultCache.remove(file);
   }
 
   public static Result run(RelativePath sourceFile, Environment env, IProgressMonitor monitor, AbstractBaseLanguage baseLang) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
@@ -246,22 +250,28 @@ public class Driver{
     }
 
     if (pending == null) {
-      Result result = getResult(sourceFile);
-      if (result == null || result != null && result.hasPersistentVersionChanged()) {
+      Result result = getParserResult(sourceFile);
+
+      boolean needPersistentVersion = result == null || result.hasPersistentVersionChanged();
+      if (needPersistentVersion) {
         result = ModuleSystemCommands.locateResult(FileCommands.dropExtension(sourceFile.getRelativePath()), driver.environment);
+        // if disk-stored result provides syntax tree
         if (result != null && result.getSugaredSyntaxTree() != null)
-          putResult(sourceFile, result);
+          putParserResult(sourceFile, result);
       }
       
-      if (result != null
-          && result.getSugaredSyntaxTree() != null
-          && result.isUpToDate(declProvider.getSourceHashCode(), driver.environment)) {
+      boolean isUpToDate = result != null && result.isUpToDate(declProvider.getSourceHashCode(), driver.environment);
+      if (isUpToDate) {
         if (driver.environment.doGenerateFiles() && result.isParseResult()) {
           result = result.moveTo(driver.environment.getBin(), false);
-          putResult(sourceFile, result);
+          removeParserResult(sourceFile);
         }
-        return result;
+        
+        if (driver.environment.doGenerateFiles() || result.getSugaredSyntaxTree() != null)
+          return result;
       }
+      else
+        removeParserResult(sourceFile);
     }
     
     if (pending == null)
@@ -289,8 +299,10 @@ public class Driver{
       org.strategoxt.imp.runtime.Environment.logException(e);
     } finally {
       pendingRuns.remove(sourceFile);
-
-      putResult(sourceFile, driver.driverResult != null && driver.driverResult.getSugaredSyntaxTree() != null ? driver.driverResult : null);
+      if (driver.environment.doGenerateFiles())
+        removeParserResult(sourceFile);
+      else if (driver.driverResult != null && driver.driverResult.getSugaredSyntaxTree() != null)
+        putParserResult(sourceFile, driver.driverResult);
     }
 
     return driver.driverResult;
