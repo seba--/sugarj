@@ -512,6 +512,8 @@ public class Result {
       dep = new RelativePath(targetDir, wasDep.getRelativePath());
     
     res.writeDependencyFile(dep);
+    if (persistentPath != null)
+      FileCommands.delete(persistentPath);
     
     return res;
   }
