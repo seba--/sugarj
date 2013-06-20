@@ -51,7 +51,7 @@ public class Result {
   private Map<Path, Integer> dependencies = new HashMap<Path, Integer>();
   private Set<Path> circularDependencies = new HashSet<Path>();
   private Map<Path, Integer> generatedFileHashes = new HashMap<Path, Integer>();
-  private Map<Path, Integer> dependingFileHashes = new HashMap<Path, Integer>();
+  private Map<RelativePath, Integer> dependingFileHashes = new HashMap<RelativePath, Integer>();
   private Set<IStrategoTerm> editorServices = new HashSet<IStrategoTerm>();
   private List<String> collectedErrors = new LinkedList<String>();
   private Set<BadTokenException> parseErrors = new HashSet<BadTokenException>();
@@ -77,7 +77,7 @@ public class Result {
     this.parseResultPath = parseResultPath;
   }
   
-  public void addFileDependency(Path file) {
+  public void addFileDependency(RelativePath file) {
     allDependentFiles.add(file);
     try {
       dependingFileHashes.put(file, FileCommands.fileHash(file));
@@ -94,13 +94,13 @@ public class Result {
   public void addDependency(Result result) throws IOException {
     if (result.persistentPath != null && !result.hasPersistentVersionChanged())
       dependencies.put(result.persistentPath, result.persistentHash);
-    allDependentFiles.addAll(result.getFileDependencies());
+    allDependentFiles.addAll(result.getTransitiveFileDependencies());
   }
   
   public void addDependency(Path depFile) throws IOException {
     dependencies.put(depFile, FileCommands.fileHash(depFile));
     Result result = readDependencyFile(depFile);
-    allDependentFiles.addAll(result.getFileDependencies());
+    allDependentFiles.addAll(result.getTransitiveFileDependencies());
   }
   
   public boolean hasDependency(Path otherDep, Environment env) throws IOException {
@@ -111,13 +111,17 @@ public class Result {
         return true;
     return false;
   }
+  
+  public Map<RelativePath, Integer> getFileDependencies() {
+    return dependingFileHashes;
+  }
 
-  public Collection<Path> getFileDependencies() throws IOException {
+  public Collection<Path> getTransitiveFileDependencies() throws IOException {
     if (allDependentFiles == null) {
       HashSet<Path> deps = new HashSet<Path>(generatedFileHashes.keySet());
       deps.addAll(dependingFileHashes.keySet());
       for (Path depFile : dependencies.keySet())
-        deps.addAll(readDependencyFile(depFile).getFileDependencies());
+        deps.addAll(readDependencyFile(depFile).getTransitiveFileDependencies());
       synchronized(this) { allDependentFiles = deps; }
     }
 
@@ -241,7 +245,7 @@ public class Result {
       if (FileCommands.fileHash(entry.getKey()) != entry.getValue())
         return false;
 
-    for (Entry<Path, Integer> entry : dependingFileHashes.entrySet())
+    for (Entry<RelativePath, Integer> entry : dependingFileHashes.entrySet())
       if (FileCommands.fileHash(entry.getKey()) != entry.getValue())
         return false;
 
@@ -448,7 +452,7 @@ public class Result {
       result.dependencies = (Map<Path, Integer>) ois.readObject();
       result.circularDependencies = (Set<Path>) ois.readObject();
       result.generatedFileHashes = (Map<Path, Integer>) ois.readObject();
-      result.dependingFileHashes = (Map<Path, Integer>) ois.readObject();
+      result.dependingFileHashes = (Map<RelativePath, Integer>) ois.readObject();
 
       result.deferredSourceFiles = (Map<Path, Pair<Path, String>>) ois.readObject();
       

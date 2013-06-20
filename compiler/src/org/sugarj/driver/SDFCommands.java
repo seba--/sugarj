@@ -7,9 +7,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -45,6 +45,7 @@ import org.sugarj.common.FilteringIOAgent;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
+import org.sugarj.common.path.RelativePath;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.transformations.extraction.extract_sdf_0_0;
@@ -99,7 +100,9 @@ public class SDFCommands {
     }));
     
     for (Path grammarFile : baseLang.getPackagedGrammars()) {
-      ModuleKey key = new ModuleKey(Collections.<Path, Integer>emptyMap(), grammarFile.getAbsolutePath()); 
+      Map<String, Integer> map = new HashMap<String, Integer>();
+      map.put(grammarFile.getAbsolutePath(), FileCommands.fileHash(grammarFile));
+      ModuleKey key = new ModuleKey(map, ""); 
       Path permissiveGrammar = lookupGrammarInCache(sdfCache, key);
       if (permissiveGrammar == null) {
         permissiveGrammar = FileCommands.newTempFile("def");
@@ -198,7 +201,7 @@ public class SDFCommands {
    */
   public static Path compile(Path sdf,
                               String module, 
-                              Collection<Path> dependentFiles, 
+                              Map<RelativePath, Integer> dependentFiles, 
                               SGLR sdfParser, 
                               ModuleKeyCache<Path> sdfCache, 
                               Environment environment,
@@ -262,7 +265,7 @@ public class SDFCommands {
     }
   }
   
-  private static ModuleKey getModuleKeyForGrammar(Path sdf, String module, Collection<Path> dependentFiles, SGLR parser) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
+  private static ModuleKey getModuleKeyForGrammar(Path sdf, String module, Map<RelativePath, Integer> dependentFiles, SGLR parser) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
     log.beginTask("Generating", "Generate module key for current grammar", Log.CACHING);
     try {
       IStrategoTerm aterm = (IStrategoTerm) parser.parse(FileCommands.readFileAsString(sdf), sdf.getAbsolutePath(), "Sdf2Module");
@@ -271,12 +274,7 @@ public class SDFCommands {
       IStrategoTerm body = ATermCommands.getApplicationSubterm(aterm, "module", 2);
       IStrategoTerm term = ATermCommands.makeTuple(imports, body);
 
-      LinkedList<Path> depList = new LinkedList<Path>();
-      for (Path file : dependentFiles)
-        if (SDF_FILE_PATTERN.matcher(file.getAbsolutePath()).matches() && FileCommands.exists(file))
-          depList.add(file);
-      
-      return new ModuleKey(depList, term);
+      return new ModuleKey(dependentFiles, SDF_FILE_PATTERN, term);
     } catch (Exception e) {
       throw new SGLRException(parser, "could not parse SDF file " + sdf, e);
     } finally {

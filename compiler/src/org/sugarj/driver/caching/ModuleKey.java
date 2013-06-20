@@ -4,14 +4,14 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.sugarj.common.FileCommands;
-import org.sugarj.common.path.Path;
+import org.sugarj.common.ATermCommands;
+import org.sugarj.common.path.RelativePath;
 
 /**
  * The key of some SDF module as needed for caching.
@@ -26,7 +26,7 @@ import org.sugarj.common.path.Path;
 public class ModuleKey implements Externalizable {
 
   private boolean checkGet;
-  public Map<Path, Integer> imports;
+  public Map<String, Integer> moduleDeps;
   public String body;
   
   /**
@@ -34,20 +34,19 @@ public class ModuleKey implements Externalizable {
    */
   public ModuleKey() {}
   
-  public ModuleKey(Map<Path, Integer> imports, String body) {
-    this.imports = imports;
+  public ModuleKey(Map<String, Integer> moduleDeps, String body) {
+    this.moduleDeps = moduleDeps;
     this.body = body;
   }
   
-  public ModuleKey(Collection<Path> dependentFiles, IStrategoTerm module) throws IOException {
-    this.imports = new HashMap<Path, Integer>();
+  public ModuleKey(Map<RelativePath, Integer> dependentFiles, Pattern pat, IStrategoTerm module) throws IOException {
+    this.moduleDeps = new HashMap<String, Integer>();
     
-    StringBuffer buf = new StringBuffer();
-    module.writeAsString(buf, Integer.MAX_VALUE);
-    this.body = buf.toString();
+    this.body = ATermCommands.atermToString(module);
     
-    for (Path file : dependentFiles)
-      imports.put(file, FileCommands.fileHash(file));
+    for (Map.Entry<RelativePath, Integer> entry : dependentFiles.entrySet())
+      if (pat == null || pat.matcher(entry.getKey().getRelativePath()).matches())
+        moduleDeps.put(entry.getKey().getRelativePath(), entry.getValue());
   }
   
   public boolean equals(Object o) {
@@ -59,19 +58,19 @@ public class ModuleKey implements Externalizable {
     if (!body.equals(k.body))
       return false;
     
-    return (checkGet ? imports.equals(k.imports) : imports.keySet().equals(k.imports.keySet()));
+    return (checkGet ? moduleDeps.equals(k.moduleDeps) : moduleDeps.keySet().equals(k.moduleDeps.keySet()));
   }
   
   public int hashCode() {
-    return imports.keySet().hashCode() + body.hashCode();
+    return moduleDeps.keySet().hashCode() + body.hashCode();
   }
 
   @Override
   public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-    imports = new HashMap<Path, Integer>();
+    moduleDeps = new HashMap<String, Integer>();
     int entries = in.readInt();
     for (int i = 0; i < entries; i++) {
-      imports.put((Path) in.readObject(), in.readInt());
+      moduleDeps.put((String) in.readObject(), in.readInt());
     }
     
     body = (String) in.readObject();
@@ -79,8 +78,8 @@ public class ModuleKey implements Externalizable {
 
   @Override
   public void writeExternal(ObjectOutput out) throws IOException {
-    out.writeInt(imports.size());
-    for (Entry<Path, Integer> entry : imports.entrySet()) {
+    out.writeInt(moduleDeps.size());
+    for (Entry<String, Integer> entry : moduleDeps.entrySet()) {
       out.writeObject(entry.getKey());
       out.writeInt(entry.getValue());
     }

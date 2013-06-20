@@ -152,7 +152,7 @@ public class ImportCommands {
     String strat = "main-" + FileCommands.dropExtension(transformationPath.getRelativePath()).replace('/', '_');
     Result transformationResult = ModuleSystemCommands.locateResult(FileCommands.dropExtension(transformationPath.getRelativePath()), environment);
     
-    Path trans = str.compile(transformationPath, strat, transformationResult.getFileDependencies());
+    Path trans = str.compile(transformationPath, strat, transformationResult.getTransitiveFileDependencies());
     
     IStrategoTerm transformationInput = 
         ATermCommands.makeTuple(
