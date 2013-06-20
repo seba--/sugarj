@@ -2979,6 +2979,10 @@ rules
         where(<(has-sort <+ log-mismatching-sort-error(|"Char") ; fail)> (arg1, SortNoArgs("CharContent")))
         ; ![SortNoArgs("CharLiteral")|<id>]
       )
+    ; try(
+        where(<(has-sort <+ log-mismatching-sort-error(|"Char") ; fail)> (arg1, SortNoArgs("Char")))
+        ; ![SortNoArgs("PreTerm")|<id>]
+      )
     ; ?res-sorts
     ; <prim("SUGARJ_unsafe_build", "Char")> [arg1]
     ; put-syntax-sort(|<build-alt-sort-or-fail> res-sorts)

@@ -66,4 +66,5 @@ public class Test<T>{
     
     System.out.println(t.map(compose(inc, toDouble)));
   }
+  
 }

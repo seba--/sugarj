@@ -1,8 +1,0 @@
-package editor;
-
-import editor.util.Strategies;
-
-public editor services ASTBuilder {
-  builders
-    builder  : "generate AST"   = generate-ast (openeditor) (realtime)
-}
