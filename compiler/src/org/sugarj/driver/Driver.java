@@ -539,12 +539,8 @@ public class Driver{
     if (!ATermCommands.isList(services))
       throw new IllegalStateException("editor services are not a list: " + services);
     
-    List<IStrategoTerm> editorServices = ATermCommands.getList(services);
-    
-    // XXX if (currentTransProg != null)
-    editorServices = ATermCommands.registerSemanticProvider(editorServices, currentTransProg);
-
     Path editorServicesFile = environment.createOutPath(baseProcessor.getRelativeNamespaceSep() + extName + ".serv");
+    List<IStrategoTerm> editorServices = ATermCommands.getList(services);
     
     log.log("writing editor services to " + editorServicesFile, Log.DETAIL);
     
@@ -559,7 +555,6 @@ public class Driver{
     }
     
     driverResult.generateFile(editorServicesFile, buf.toString());
-
   }
   
   private void processPlainDec(IStrategoTerm toplevelDecl) throws IOException {
