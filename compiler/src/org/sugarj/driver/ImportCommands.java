@@ -152,7 +152,7 @@ public class ImportCommands {
     String strat = "main-" + FileCommands.dropExtension(transformationPath.getRelativePath()).replace('/', '_');
     Result transformationResult = ModuleSystemCommands.locateResult(FileCommands.dropExtension(transformationPath.getRelativePath()), environment);
     
-    Path trans = str.compile(transformationPath, strat, transformationResult.getTransitiveFileDependencies());
+    Path trans = str.compile(transformationPath, strat, transformationResult.getFileDependencies());
     
     IStrategoTerm transformationInput = 
         ATermCommands.makeTuple(
@@ -201,22 +201,4 @@ public class ImportCommands {
       return getTransformationApplicationModelPath(appl.getSubterm(1), baseProcessor);
     return baseProcessor.getModulePath(appl);
   }
-
-  /**
-   * Finds the compilation result of the given module and checks if its up-to-date.
-   * 
-   * @param modulePath
-   * @param environment
-   * @return true iff found result is up-to-date.
-   * @throws IOException
-   */
-  private static boolean isModuleCompilationUpToDate(String modulePath, Environment environment) throws IOException {
-    Path dep = ModuleSystemCommands.searchFile(modulePath, "dep", environment, null);
-    if (dep != null) {
-      Result res = Result.readDependencyFile(dep);
-      return res != null && res.isUpToDate(res.getSourceFile(), environment);
-    }
-    return false;
-  }
-
 }
