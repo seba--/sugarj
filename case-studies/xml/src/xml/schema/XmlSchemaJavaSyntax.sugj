@@ -1,6 +1,6 @@
 package xml.schema;
 
-import org.sugarj.languages.Java;
+import org.sugarj.languages.SugarJ;
 
 import xml.XmlJavaSyntax;
  
@@ -19,9 +19,9 @@ public sugar XmlSchemaJavaSyntax {
     XsdSugarDecHead XsdSugarBody
       -> XsdSugarDec {cons("XsdSugarDec")}
     
-    XsdSugarDec -> SugarDec
+    XsdSugarDec -> ExtensionDec
 
-    AnnoOrSugarMod* "xmlschema" JavaId 
+    JavaPublic* "xmlschema" JavaId 
       -> XsdSugarDecHead {cons("XsdSugarDecHead")}
 
     "{" XsdDefinition  "}" -> XsdSugarBody {cons("XsdSugarBody")}
@@ -41,6 +41,6 @@ public sugar XmlSchemaJavaSyntax {
     XMLSchemaDoc : Document -> XsdDefinition
   
     XsdSugarDec : XsdSugarDecHead * XsdSugarBody -> XsdSugarDec
-    XsdSugarDecHead : list(AnnoOrSugarMod) * JavaId -> XsdSugarDecHead
+    XsdSugarDecHead : list(AnnoOrExtensionMod) * JavaId -> XsdSugarDecHead
     XsdSugarBody : XsdDefinition -> XsdSugarBody
 }

@@ -151,11 +151,11 @@ public editor services Editor {
   
   
   folding Editor services
-    _.EditorServicesDec
+    _.ExtensionDec
     EditorServiceSection
   
   outliner Editor services
-    _.EditorServicesDec
+    _.ExtensionDec
     EditorServiceSection
     EditorServiceRefactoringRule
     EditorServiceBuilderRule

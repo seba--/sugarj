@@ -4,7 +4,7 @@ import xml.schema.AsDesugaring;
 import xml.schema.XmlSchemaJavaSyntax;
 
 import xml.schema.AsEditorService;
-import xml.schema.SharedStrategies;   
+import xml.schema.SharedStrategies;
 
 import xml.schema.Editor;
 

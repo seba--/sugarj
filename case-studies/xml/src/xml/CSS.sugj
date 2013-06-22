@@ -5,7 +5,7 @@ import concretesyntax.EditorServices;
 
 public sugar CSS {
   context-free syntax
-    AnnoOrSugarMod* "css" JavaId CSSBody -> ToplevelDeclaration{cons("CSSDec")}
+    AnnoOrExtensionMod* "css" JavaId CSSBody -> ToplevelDeclaration{cons("CSSDec")}
     "{" CSSStm* "}" -> CSSBody {cons("CSSBody")}
     
   context-free syntax
@@ -42,7 +42,7 @@ public sugar CSS {
     css-to-editor-services :
       CSSDec(mods, n, CSSBody(stms))
       ->
-      EditorServicesDec(EditorServicesDecHead(mods, n), EditorServicesBody(<mapconcat(compile-css)> stms))
+      ExtensionDec(ExtensionDecHead(mods, n), ExtensionBody(<mapconcat(compile-css)> stms))
     
     compile-css :
       CSSStm(Selector(node), rs, _) -> <map(compile-css-rule(|node))> rs
