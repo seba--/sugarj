@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.FileCommands;
+import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 
 /**
@@ -40,15 +41,21 @@ public class ModuleKey implements Externalizable {
     this.body = body;
   }
   
-  public ModuleKey(Map<RelativePath, Integer> dependentFiles, Pattern pat, IStrategoTerm module) throws IOException {
+  public ModuleKey(Map<Path, Integer> dependentFiles, Pattern pat, IStrategoTerm module) throws IOException {
     this.moduleDeps = new HashMap<String, Integer>();
     
     this.body = ATermCommands.atermToString(module);
     
-    for (Map.Entry<RelativePath, Integer> entry : dependentFiles.entrySet())
-      if (pat == null || pat.matcher(entry.getKey().getRelativePath()).matches())
-        if (FileCommands.exists(entry.getKey()))
-          moduleDeps.put(entry.getKey().getRelativePath(), entry.getValue());
+    for (Map.Entry<Path, Integer> entry : dependentFiles.entrySet())
+      if (pat == null || pat.matcher(entry.getKey().getAbsolutePath()).matches())
+        if (FileCommands.exists(entry.getKey())) {
+          String cachePath;
+          if (entry.getKey() instanceof RelativePath)
+            cachePath = ((RelativePath) entry.getKey()).getRelativePath();
+          else
+            cachePath = entry.getKey().getAbsolutePath();
+          moduleDeps.put(cachePath, entry.getValue());
+        }
   }
   
   public boolean equals(Object o) {

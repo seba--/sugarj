@@ -286,6 +286,8 @@ public class Driver{
         for (ProcessingListener listener : processingListener)
           listener.processingDone(driver.driverResult);
       }
+    } catch (InterruptedException e) {
+      // nothing
     } catch (Exception e) {
       org.strategoxt.imp.runtime.Environment.logException(e);
     } finally {
@@ -539,7 +541,7 @@ public class Driver{
     if (!ATermCommands.isList(services))
       throw new IllegalStateException("editor services are not a list: " + services);
     
-    Path editorServicesFile = environment.createOutPath(baseProcessor.getRelativeNamespaceSep() + extName + ".serv");
+    RelativePath editorServicesFile = environment.createOutPath(baseProcessor.getRelativeNamespaceSep() + extName + ".serv");
     List<IStrategoTerm> editorServices = ATermCommands.getList(services);
     
     log.log("writing editor services to " + editorServicesFile, Log.DETAIL);
@@ -590,7 +592,7 @@ public class Driver{
       String plainContent = Term.asJavaString(ATermCommands.getApplicationSubterm(body, "PlainBody", 0));
       
       String ext = extension == null ? "" : ("." + extension);
-      Path plainFile = environment.createOutPath(baseProcessor.getRelativeNamespaceSep() + extName + ext);
+      RelativePath plainFile = environment.createOutPath(baseProcessor.getRelativeNamespaceSep() + extName + ext);
       FileCommands.createFile(plainFile);
 
       log.log("writing plain content to " + plainFile, Log.DETAIL);
@@ -603,7 +605,7 @@ public class Driver{
   
   public Pair<IStrategoTerm, Integer> currentParse(String remainingInput, ITreeBuilder treeBuilder, boolean recovery) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
     
-    currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfCache, environment, baseLanguage);
+    currentGrammarTBL = SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getTransitiveFileDependencies(), sdfParser, sdfCache, environment, baseLanguage);
 
     ParseTable table = ATermCommands.parseTableManager.loadFromFile(currentGrammarTBL.getAbsolutePath());
     
@@ -641,7 +643,7 @@ public class Driver{
   
     log.beginTask("analyze", "ANALYZE toplevel declaration.", Log.CORE);
     try {
-      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(), strParser, strCache, environment, baseProcessor);
+      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getTransitiveFileDependencies(), strParser, strCache, environment, baseProcessor);
     
       return STRCommands.assimilate("analyze-main", currentTransProg, term, baseProcessor.getInterpreter());
     } catch (StrategoException e) {
@@ -661,7 +663,7 @@ public class Driver{
 
     log.beginTask("desugaring", "DESUGAR toplevel declaration.", Log.CORE);
     try {
-      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(), strParser, strCache, environment, baseProcessor);
+      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getTransitiveFileDependencies(), strParser, strCache, environment, baseProcessor);
 
       return STRCommands.assimilate(currentTransProg, term, baseProcessor.getInterpreter());
     } catch (StrategoException e) {
@@ -989,8 +991,8 @@ public class Driver{
       if (dependsOnModel)
         return;
       
-      Path sdfExtension = environment.createOutPath(baseProcessor.getRelativeNamespaceSep() + extName + ".sdf");
-      Path strExtension = environment.createOutPath(baseProcessor.getRelativeNamespaceSep() + extName + ".str");
+      RelativePath sdfExtension = environment.createOutPath(baseProcessor.getRelativeNamespaceSep() + extName + ".sdf");
+      RelativePath strExtension = environment.createOutPath(baseProcessor.getRelativeNamespaceSep() + extName + ".str");
       
       String sdfImports = " imports " + StringCommands.printListSeparated(availableSDFImports, " ") + "\n";
       String strImports = " imports " + StringCommands.printListSeparated(availableSTRImports, " ") + "\n";
@@ -1079,7 +1081,7 @@ public class Driver{
       String fullExtName = getFullRenamedDeclarationName(extName);
       checkModuleName(extName, toplevelDecl);
       
-      Path strExtension = environment.createOutPath(baseProcessor.getRelativeNamespaceSep() + extName + ".str");
+      RelativePath strExtension = environment.createOutPath(baseProcessor.getRelativeNamespaceSep() + extName + ".str");
       IStrategoTerm transBody = baseLanguage.getTransformationBody(toplevelDecl);
       if (isApplication(transBody, "TransformationDef")) 
         transBody = ATermCommands.factory.makeListCons(ATermCommands.makeAppl("Rules", "Rules", 1, transBody.getSubterm(0)), (IStrategoList) transBody.getSubterm(1));
@@ -1200,7 +1202,7 @@ public class Driver{
     log.beginTask("checking grammar", "CHECK current grammar", Log.CORE);
     
     try {
-      SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getFileDependencies(), sdfParser, sdfCache, environment, baseLanguage);
+      SDFCommands.compile(currentGrammarSDF, currentGrammarModule, driverResult.getTransitiveFileDependencies(), sdfParser, sdfCache, environment, baseLanguage);
     } finally {
       log.endTask();
     }
@@ -1210,7 +1212,7 @@ public class Driver{
     log.beginTask("checking transformation", "CHECK current transformation", Log.CORE);
     
     try {
-      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getFileDependencies(), strParser, strCache, environment, baseProcessor);
+      currentTransProg = STRCommands.compile(currentTransSTR, "main", driverResult.getTransitiveFileDependencies(), strParser, strCache, environment, baseProcessor);
     } catch (StrategoException e) {
       String msg = e.getClass().getName() + " " + e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.toString();
       log.logErr(msg, Log.DETAIL);

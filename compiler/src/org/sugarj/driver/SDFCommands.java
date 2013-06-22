@@ -45,7 +45,6 @@ import org.sugarj.common.FilteringIOAgent;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
-import org.sugarj.common.path.RelativePath;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.transformations.extraction.extract_sdf_0_0;
@@ -201,7 +200,7 @@ public class SDFCommands {
    */
   public static Path compile(Path sdf,
                               String module, 
-                              Map<RelativePath, Integer> dependentFiles, 
+                              Map<Path, Integer> dependentFiles, 
                               SGLR sdfParser, 
                               ModuleKeyCache<Path> sdfCache, 
                               Environment environment,
@@ -265,7 +264,7 @@ public class SDFCommands {
     }
   }
   
-  private static ModuleKey getModuleKeyForGrammar(Path sdf, String module, Map<RelativePath, Integer> dependentFiles, SGLR parser) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
+  private static ModuleKey getModuleKeyForGrammar(Path sdf, String module, Map<Path, Integer> dependentFiles, SGLR parser) throws IOException, InvalidParseTableException, TokenExpectedException, SGLRException {
     log.beginTask("Generating", "Generate module key for current grammar", Log.CACHING);
     try {
       IStrategoTerm aterm = (IStrategoTerm) parser.parse(FileCommands.readFileAsString(sdf), sdf.getAbsolutePath(), "Sdf2Module");

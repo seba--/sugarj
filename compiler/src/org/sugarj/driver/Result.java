@@ -60,7 +60,7 @@ public class Result {
   private Path desugaringsFile;
   private RelativePath sourceFile;
   private Integer sourceFileHash;
-  private Set<Path> allDependentFiles = new HashSet<Path>();
+  private Map<Path, Integer> allDependentFiles = new HashMap<Path, Integer>();
   private boolean failed = false;
   private Path generationLog;
   
@@ -78,13 +78,15 @@ public class Result {
   }
   
   public void addFileDependency(RelativePath file) {
-    allDependentFiles.add(file);
+    int hash;
     try {
-      dependingFileHashes.put(file, FileCommands.fileHash(file));
+      hash = FileCommands.fileHash(file);
     } catch (IOException e) {
       e.printStackTrace();
-      dependingFileHashes.put(file, -1);
+      hash = -1;
     }
+    dependingFileHashes.put(file, hash);
+    allDependentFiles.put(file, hash);
   }
   
   void addCircularDependency(Path depFile) throws IOException {
@@ -94,13 +96,13 @@ public class Result {
   public void addDependency(Result result) throws IOException {
     if (result.persistentPath != null && !result.hasPersistentVersionChanged())
       dependencies.put(result.persistentPath, result.persistentHash);
-    allDependentFiles.addAll(result.getTransitiveFileDependencies());
+    allDependentFiles.putAll(result.getTransitiveFileDependencies());
   }
   
   public void addDependency(Path depFile) throws IOException {
     dependencies.put(depFile, FileCommands.fileHash(depFile));
     Result result = readDependencyFile(depFile);
-    allDependentFiles.addAll(result.getTransitiveFileDependencies());
+    allDependentFiles.putAll(result.getTransitiveFileDependencies());
   }
   
   public boolean hasDependency(Path otherDep, Environment env) throws IOException {
@@ -116,12 +118,13 @@ public class Result {
     return dependingFileHashes;
   }
 
-  public Collection<Path> getTransitiveFileDependencies() throws IOException {
+  public Map<Path, Integer> getTransitiveFileDependencies() throws IOException {
     if (allDependentFiles == null) {
-      HashSet<Path> deps = new HashSet<Path>(generatedFileHashes.keySet());
-      deps.addAll(dependingFileHashes.keySet());
+      Map<Path, Integer> deps = new HashMap<Path, Integer>();
+      deps.putAll(generatedFileHashes);
+      deps.putAll(dependingFileHashes);
       for (Path depFile : dependencies.keySet())
-        deps.addAll(readDependencyFile(depFile).getTransitiveFileDependencies());
+        deps.putAll(readDependencyFile(depFile).getTransitiveFileDependencies());
       synchronized(this) { allDependentFiles = deps; }
     }
 
@@ -190,10 +193,12 @@ public class Result {
     }
   }
 
-  public void generateFile(Path file, String content) throws IOException {
+  public void generateFile(RelativePath file, String content) throws IOException {
     FileCommands.writeToFile(file, content);
-    generatedFileHashes.put(file, FileCommands.fileHash(file));
-    allDependentFiles.add(file);
+    addFileDependency(file);
+    int hash = FileCommands.fileHash(file);
+    generatedFileHashes.put(file, hash);
+    allDependentFiles.put(file, hash);
     logGeneration(file);
   }
 

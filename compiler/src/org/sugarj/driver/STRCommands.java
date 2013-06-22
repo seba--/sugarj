@@ -32,7 +32,6 @@ import org.sugarj.common.FileCommands;
 import org.sugarj.common.FilteringIOAgent;
 import org.sugarj.common.Log;
 import org.sugarj.common.path.Path;
-import org.sugarj.common.path.RelativePath;
 import org.sugarj.driver.caching.ModuleKey;
 import org.sugarj.driver.caching.ModuleKeyCache;
 import org.sugarj.driver.transformations.extraction.extract_editor_0_0;
@@ -130,13 +129,13 @@ public class STRCommands {
   }
   
   
-  public Path compile(Path str, String main, Map<RelativePath, Integer> dependentFiles) throws TokenExpectedException, BadTokenException, IOException, InvalidParseTableException, SGLRException {
+  public Path compile(Path str, String main, Map<Path, Integer> dependentFiles) throws TokenExpectedException, BadTokenException, IOException, InvalidParseTableException, SGLRException {
     return STRCommands.compile(str, main, dependentFiles, strParser, strCache, environment, baseProcessor);
   }
   
   public static Path compile(Path str,
                               String main,
-                              Map<RelativePath, Integer> dependentFiles,
+                              Map<Path, Integer> dependentFiles,
                               SGLR strParser,
                               ModuleKeyCache<Path> strCache,
                               Environment environment,
@@ -230,7 +229,7 @@ public class STRCommands {
   }
 
 
-  private static ModuleKey getModuleKeyForAssimilation(Path str, String main, Map<RelativePath, Integer> dependentFiles, SGLR strParser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
+  private static ModuleKey getModuleKeyForAssimilation(Path str, String main, Map<Path, Integer> dependentFiles, SGLR strParser) throws IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, SGLRException {
     log.beginTask("Generating", "Generate module key for current assimilation", Log.CACHING);
     try {
       IStrategoTerm aterm = (IStrategoTerm) strParser.parse(FileCommands.readFileAsString(str), str.getAbsolutePath(), "StrategoModule");
