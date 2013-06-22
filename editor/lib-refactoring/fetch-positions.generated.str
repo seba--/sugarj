@@ -1,0 +1,154 @@
+module lib-refactoring/fetch-positions.generated
+
+imports
+  lib/editor-common.generated
+  lib-refactoring/list-operations.generated
+    
+rules //strategies for fetching terms and positions in the ast
+  
+  /**
+   * fetches the AST position by visiting the ancestors 
+   * of a term, bottum up, starting at a certain position.
+   * @param match: matches ancestor term to be fetched
+   * @param ast: AST
+   * @type List(Int) ->  List(Int)
+   */ 
+  fetch-up-position(match|ast):
+    position -> position'
+    where
+      term := <term-at-position(|position)> ast;
+      (term', position') := <fetch-up-with-position(match|ast)> (term, position)
+  
+  /**
+   * fetches the first ancestor of a term, bottum up, 
+   * starting at a certain position.
+   * @param matches ancestor term to be fetched
+   * @param AST
+   * @type List(Int) ->  T
+   */ 
+  fetch-up-term(match|ast):
+    position -> term'
+    where
+      term := <term-at-position(|position)> ast;
+      (term', position') := <fetch-up-with-position(match|ast)> (term, position)
+          
+  /**
+   * fetches an ancestor and its AST position by visiting the ancestors of a term, bottum up
+   * @param matches ancestor term to be fetched
+   * @param AST
+   * @type (Term, List(Int)) -> (Term, List(Int))
+   */ 
+  fetch-up-with-position(match|ast):
+    (term, position) -> (term', position')
+    where
+      (term', position') := <fetch-up-with-position(match, fail|ast)> (term, position)
+  
+  /**
+   * fetches an ancestor and its AST position by visiting the ancestors of a term, bottum up
+   * @param matches ancestor term to be fetched
+   * @param stop criteria
+   * @param AST
+   * @type (Term, List(Int)) -> (Term, List(Int))
+   */  
+  fetch-up-with-position(match, stop|ast):
+    (term, position) -> (term', position')
+    where
+      <not(match)> term;
+      <not(stop)> term;
+      parent-tuple := (<parent-at-position(|position)> ast, <init> position);
+      (term', position') := <fetch-up-with-position(match, stop|ast)> parent-tuple
+  
+  fetch-up-with-position(match, stop|ast):
+    (term, position) -> (term, position)
+    where
+      <match> term
+  
+  /**
+   * fetches a subterm in a chain of single-argument nodes
+   * @param matches subterm to be fetched
+   * @type Term -> Term
+   */  
+  fetch-down-term(match):
+    term -> term'
+    where
+      term' := <fetch-down-with-position(match); Fst> (term, [])
+  
+  /**
+   * fetches a subterm and its position in a chain of single-argument nodes
+   * @param matches subterm to be fetched
+   * @type (Term, List(Int)) -> (Term, List(Int))
+   */  
+  fetch-down-with-position(match):
+    (term, position) -> (term', position')
+    where 
+      <not(match)> term; 
+      <get-arguments; ?[e]> term; 
+      (term', position') := <fetch-down-with-position(match)> (e, <conc>(position,[0]))
+    
+  fetch-down-with-position(match):
+    (term, position) -> (term, position)
+    where
+      <match> term
+  
+  
+rules //strategies for getting the tree positions of subterms
+  
+  /**
+   * Returns the term positions of the first and last elements of a (sub)list,
+   * relative to a given ancestor term.
+   *
+   * @param ast, ancestor term
+   * @type ATerm -> (List(Int), List(Int))
+  */  
+  position-of-sublist-from-to(|ast):
+    sublist -> <position-of-sublist-from-to(|ast, [])> sublist
+  
+  /**
+   * Returns the AST positions of the first and last elements of a (sub)list,
+   * calculated from an ancestor term at a given position.
+   *
+   * @param ast, ancestor term
+   * @param position, List(Int) position of ancestor term  
+   * @type ATerm -> (List(Int), List(Int))
+  */  
+  position-of-sublist-from-to(|ast, position):
+    sublist -> (from, to)
+    where
+      from := <Hd; position-of-subterm(|ast, position)> sublist; 
+      to := <last; position-of-subterm(|ast, position)> sublist
+    where
+      lst := <select-sublist(|from, to)> ast;
+      <equal> (<length> lst, <length> sublist) //TODO: origin equal
+      
+  
+  /**
+   * Returns the position of a subterm relative to an ancestor term.
+   *
+   * @param ast, ancestor term
+   * @type ATerm -> List(Int)
+  */
+  position-of-subterm(|ast) =
+    position-of-subterm(|ast, [])
+  
+  /**
+   * Returns the AST position of a subterm,
+   * calculated from an ancestor term at a given position.
+   *
+   * @param term T, ancestor term
+   * @param term-position List(Int), position of ancestor term  
+   * @type ATerm -> List(Int)
+  */
+  position-of-subterm(|term, term-position):
+    subterm -> <conc>(term-position, position)
+    where
+      position := <position-of-term(origin-equal(|subterm))> term
+  
+  
+rules
+  
+  /**
+   * Returns the position of the next sibling
+   *
+   * @type List(Int) -> List(Int)
+  */
+  position-next-sibling = at-last(([i] -> [<inc> i]))

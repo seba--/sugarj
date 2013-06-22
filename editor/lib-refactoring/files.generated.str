@@ -1,0 +1,96 @@
+/** 
+* Functions to find and parse files
+*/
+module lib-refactoring/files.generated
+
+imports
+  lib/editor-common.generated
+  lib/analysis-library.generated
+  lib/index-library.generated
+
+rules //parse files
+
+  /**
+   * Parses the file (project relative path) or reports an error ('file not found' or 'syntax errors')
+   *
+   * @type List(String) -> (List(ast), List(String)
+   */
+  files-to-asts:
+    files -> <partition(parse-file, file-to-error-message)> files
+
+  //@internal
+  //constructs an error message for a file that can not be parsed
+  file-to-error-message:
+    file -> error-message
+    where
+      if <file-exists> file then
+        error-message := $['[file]' can not be parsed because of syntax errors.]
+      else
+        error-message := $['[file]' can not be found.]
+      end
+
+
+rules //collect dependent files
+
+  /**
+   * Returns all files that contain Defs, Uses or Reads of the construct with the given URI
+   *
+   * @type String{[uri]} -> List(String)
+   */
+  files-with-references-to-uri:
+    annotated-name -> <conc; make-set> (files-with-accesses, files-with-definition)
+    where
+      files-with-accesses := <files-with-accesses-to-uri> annotated-name; 
+      files-with-definition := <files-with-definition-of-uri> annotated-name
+
+  /**
+   * Returns all files that contain Uses or Reads of the construct with the given URI
+   *
+   * @type String{[uri]} -> List(String)
+   */
+  files-with-accesses-to-uri:
+    annotated-name -> project-relative-paths
+    where
+        project-relative-paths := <
+          index-get-dependent-files;
+          index-filepairs-to-files
+        > [annotated-name]
+
+  /**
+   * Returns all files that contain Defs of the construct with the given URI
+   *
+   * @type String{[uri]} -> List(String)
+   */
+  files-with-definition-of-uri:
+    annotated-name -> project-relative-paths
+    where
+        defsite := <index-lookup> annotated-name;
+        project-relative-paths := <
+          index-get-referenced-files(![defsite]);
+          index-filepairs-to-files
+        > [annotated-name]
+
+  /**
+   * Returns all files that contain an identifier with the given name (given as String, NOT as uri)
+   *
+   * @type String -> List(String)
+   */
+  files-with-terms-of-name:
+    name -> <
+      index-get-all-files; 
+      filter(file-has-term-of-name(|name)); 
+      index-filepairs-to-files
+    >
+
+  /**
+   * Says whether a file contains an identifier with the given name (given as String, NOT as uri)
+   *
+   * @internal
+   * @param String
+   * @type String -> String
+   */
+  file-has-term-of-name(|name):
+    filename -> filename
+    where
+      index-get-all-in-file; 
+      fetch(?Use([_, name | _]) <+ ?BadUse([_, name | _]) <+ ?Def([_, name | _]) <+ ?Read([_, name | _]))

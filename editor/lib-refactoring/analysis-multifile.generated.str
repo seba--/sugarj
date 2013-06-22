@@ -1,0 +1,61 @@
+/** 
+* This module contains analysis functions for refactorings that affect multiple files.
+*/
+module lib-refactoring/analysis-multifile.generated
+
+imports
+  lib/index-library.generated
+  lib/analysis-library-internal.generated
+  lib/editor-common.generated
+
+
+rules //multifile name analysis
+
+  /**
+   * (Re)analyzes a set of ASTs. 
+   * @see multifile-analyze-asts-internal(|language, project-path)
+   *
+   * @type List(ast) -> List(ast)
+   */
+  multifile-analyze-asts:
+    asts -> asts-analyzed
+    where
+      asts-analyzed := <
+        topdown(strip-annos);
+        map(!(<id>, <origin-file>));
+        multifile-analyze-asts-internal(|<language>, <project-path>)
+      > asts
+
+  /**
+   * Analyzes a set of ASTs that are possible changed together in one operation.
+   * The multifile analysis makes sure that all definitions are looked up from the ASTs in the set
+   * instead of from the file system (represented by the current semantic index) which may contain the 
+   * old version before the multifile change operation (refactoring) applied.
+   * The analysis annotates definition and use sites found in the ASTs with URIs.
+   *
+   * Remark: The new analysis results are commited to the index.
+   * TODO: The Spoofax refactoring class takes care of index rollback in case the refactoring is aborted
+   * TODO: The Spoofax refactoring class implements reschedule analysis of changed files 
+   * in case the refactoring is commited.
+   *
+   * @param language      The name of the language that is being analysed.
+   * @param project-path  The path of the directory that contains all the source files.
+   * @type List(ast, file) -> List(ast) REMARK: full-path file names are used.
+   */
+  multifile-analyze-asts-internal(|language, project-path):
+    astFilePaths -> asts
+    with
+      <map(index-setup(|language, [project-path], <Snd>))> astFilePaths;
+      <map(Snd; index-clear-file)> astFilePaths
+    with
+      {| Index-UnresolvedSet:
+        unresolvedSet := <new-iset>;
+        rules(Index-UnresolvedSet: _ -> unresolvedSet);
+        astFilePairs := <map(!(<Fst>, (<Snd>, [])))> astFilePaths;
+        (astFilePairs2, _) := <unzip> <map(analyze-top-defs)> astFilePairs;
+        (astFilePairs3, _) := <unzip> <map(analyze-top-data(|language, <{path: ((_, (path, _)) -> path)}>))> astFilePairs2;
+        (astFilePairs4, _) := <unzip> <map(analyze-top-uses(|language, <{path: ((_, (path, _)) -> path)}>))> astFilePairs3;
+        (asts, _) := <unzip> astFilePairs4
+      |}
+    with
+      <list-loop(analyze-top-store-ast(|language, <{path: ((_, (path, _)) -> path)}>))> astFilePairs4

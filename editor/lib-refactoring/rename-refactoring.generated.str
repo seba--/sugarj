@@ -1,0 +1,58 @@
+/** 
+* Language generic Rename refactoring
+*/
+module lib-refactoring/rename-refactoring.generated
+
+imports
+  lib-refactoring/analysis-multifile.generated
+  lib-refactoring/behavior-preservation.generated
+  lib-refactoring/files.generated
+  lib/nbl-library.generated
+  lib/index-library.generated
+  lib/editor-common.generated
+
+rules //generic rename refactoring
+
+  /**
+   * Implements a multifile rename refactoring based on the semantic index.
+   * Renames the definition and use sites of the selected identifier, and
+   * reports errors end warnings for name binding violations or semantic correctness violations.
+   *
+   * @type (String, String (annotated with uri), List(Int), AST, String, String) -> 
+   * (List(Tuple(AST, AST)), List(Tuple(T,String)), List(Tuple(T,String) or String), List(Tuple(T,String)))
+   * @param AST -> AST 
+   * @param T -> Tuple(T, String) 
+   * @param T -> Tuple(T, String)
+   */
+  generic-rename-refactoring(desugar, s-constraint-error, s-constraint-warning):
+    (newname, oldname, position, ast, path, project-path) -> (ast-change-tuples, [], all-errors, warnings)
+    where
+      //Assumption: all files in project are indexed (or are in the analysis queue)!?
+      //TODO: Spoofax refactoring component must show waiting dialog in case the analysis queue is not empty
+      index-setup(|<language>, [project-path], ".");
+
+      //Get analyzed asts of all files that contain oldname + uri identifiers 
+      files-related-oldname := <files-with-references-to-uri; filter(not(?path))> oldname; //files that have changes
+      (asts-related-oldname, file-errors-1) := <files-to-asts> files-related-oldname;
+      asts-before := [ast | <map(desugar); multifile-analyze-asts> asts-related-oldname];
+
+      //Apply renaming transformation on ASTs with oldname + uri identifiers
+      //Construct change list that forms the result of the refactoring
+      asts-after := <alltd(preserve-annos((oldname -> newname)))> asts-before;
+      ast-change-tuples := <zip> (asts-before, asts-after);
+
+      //Get analyzed asts of all files that may be involved in name collisions.
+      files-containing-newname := <files-with-terms-of-name> newname; 
+      files-to-check-newname := <diff> (files-containing-newname, [path|files-related-oldname]); 
+      (asts-to-check-newname, file-errors-2) := <files-to-asts> files-to-check-newname;
+      asts-to-check-newname-analyzed :=  <map(desugar); multifile-analyze-asts> asts-to-check-newname; 
+      (errors, warnings) := <semantic-violation-errors(s-constraint-error <+ constraint-error, s-constraint-warning|[newname, oldname])> (
+         <conc> (asts-before, asts-to-check-newname-analyzed), 
+         <conc> (asts-after,  asts-to-check-newname-analyzed)
+      );
+       
+      //all errors
+      all-errors := <concat> [file-errors-1, file-errors-2, errors]
+      
+      // REMARK: all (possible) changed files are automatically queued for analysis in the Spoofax 
+      // refactoring component after the refactoring is executed or canceled by the user
