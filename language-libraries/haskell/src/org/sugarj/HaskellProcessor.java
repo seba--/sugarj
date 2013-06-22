@@ -35,6 +35,7 @@ public class HaskellProcessor extends AbstractBaseProcessor {
   private String moduleHeader;
   private List<String> imports = new LinkedList<String>();
   private List<String> body = new LinkedList<String>();
+  private boolean hasExtension = false;
 
   private Environment environment;
   private RelativePath sourceFile;
@@ -49,6 +50,9 @@ public class HaskellProcessor extends AbstractBaseProcessor {
   @Override
   public String getGeneratedSource() {
     if (moduleHeader == null)
+      return "";
+    
+    if (hasExtension && body.isEmpty())
       return "";
     
     return moduleHeader + "\n"
@@ -138,6 +142,7 @@ public class HaskellProcessor extends AbstractBaseProcessor {
   
   @Override
   public String getExtensionName(IStrategoTerm decl) throws IOException {
+    hasExtension = true;
     return moduleName;
   }
 
