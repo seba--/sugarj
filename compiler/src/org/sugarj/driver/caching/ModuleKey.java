@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.sugarj.common.ATermCommands;
+import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.RelativePath;
 
 /**
@@ -46,7 +47,8 @@ public class ModuleKey implements Externalizable {
     
     for (Map.Entry<RelativePath, Integer> entry : dependentFiles.entrySet())
       if (pat == null || pat.matcher(entry.getKey().getRelativePath()).matches())
-        moduleDeps.put(entry.getKey().getRelativePath(), entry.getValue());
+        if (FileCommands.exists(entry.getKey()))
+          moduleDeps.put(entry.getKey().getRelativePath(), entry.getValue());
   }
   
   public boolean equals(Object o) {
