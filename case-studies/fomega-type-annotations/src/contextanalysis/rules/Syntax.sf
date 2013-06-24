@@ -18,7 +18,7 @@ context-free syntax
 
 context-free syntax // *** Syntax for typing rules ***
 
-  TypingRule -> SugarDefElem
+  TypingRule -> ExtensionElem
   TypingRule -> InferenceRule
 
   TypingRulePremises RuleSepName TypingRuleConsequence
@@ -42,7 +42,7 @@ context-free syntax // *** Syntax for typing rules ***
 
 context-free syntax // *** Syntax for kinding rules ***
 
-  KindingRule -> SugarDefElem
+  KindingRule -> ExtensionElem
   KindingRule -> InferenceRule
 
   KindingRulePremises RuleSepName KindingRuleConsequence
@@ -66,7 +66,7 @@ context-free syntax // *** Syntax for kinding rules ***
 
 context-free syntax // *** Syntax for signature rules ***
 
-  SignatureRule -> SugarDefElem
+  SignatureRule -> ExtensionElem
   SignatureRule -> InferenceRule
 
   SignatureRulePremises RuleSepName SignatureRuleConsequence
@@ -90,7 +90,7 @@ context-free syntax // *** Syntax for signature rules ***
 
 context-free syntax // *** Syntax for type normalization rules ***
 
-  NormalizationRule -> SugarDefElem
+  NormalizationRule -> ExtensionElem
   NormalizationRule -> InferenceRule
 
   NormalizationRulePremises RuleSepName NormalizationRuleConsequence
@@ -114,7 +114,7 @@ context-free syntax // *** Syntax for type normalization rules ***
 
 context-free syntax // *** Syntax for kind nomalization rules ***
 
-  KindNormalizationRule -> SugarDefElem
+  KindNormalizationRule -> ExtensionElem
   KindNormalizationRule -> InferenceRule
 
   KindNormalizationRulePremises RuleSepName KindNormalizationRuleConsequence
@@ -138,7 +138,7 @@ context-free syntax // *** Syntax for kind nomalization rules ***
 
 context-free syntax // *** Syntax for not-in-lab rules ***
 
-  NotinLabRule -> SugarDefElem
+  NotinLabRule -> ExtensionElem
   NotinLabRule -> InferenceRule
 
   NotinLabRulePremises RuleSepName NotinLabRuleConsequence

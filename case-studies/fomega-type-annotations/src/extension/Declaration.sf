@@ -25,14 +25,14 @@ rules
 rules
   desugar-extension :
     SyntaxExtension(grammars) ->
-    SugarBody(body)
+    ExtensionBody(body)
   where
       <map(!grammar-elem(<id>))> grammars => body 
     ; rules( Extension-Syntax := body )
   
   desugar-extension :
     DesugaringExtension(desugar-strat, trafos, decls) ->
-    SugarBody(<conc> (grammars, body))
+    ExtensionBody(<conc> (grammars, body))
   where
       (Extension-Syntax <+ ![]) => grammars 
     ; !transformation-elem(Desugarings([PureDesugaring(CallNoArgs(SVar(desugar-strat)))])) => desugaring
@@ -42,7 +42,7 @@ rules
   
   desugar-extension :
     TypingExtension(checks) ->
-    SugarBody(<conc> (grammars, trafos, checks))
+    ExtensionBody(<conc> (grammars, trafos, checks))
   where
       (Extension-Syntax <+ ![]) => grammars 
     ; (Extension-Trafos <+ ![]) => trafos
@@ -50,4 +50,5 @@ rules
   
 desugarings
   desugar-extension
+
 
