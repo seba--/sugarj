@@ -1379,12 +1379,7 @@ public class Driver{
   private IStrategoTerm makeDesugaredSyntaxTree() {
     IStrategoTerm decls = ATermCommands.makeList("Decl*", declProvider.getStartToken(), desugaredBodyDecls);
     IStrategoTerm term = ATermCommands.makeAppl("CompilationUnit", "CompilationUnit", 1, decls);
-    
-    if (ImploderAttachment.getTokenizer(term) != null) {
-      ImploderAttachment.getTokenizer(term).setAst(term);
-      ImploderAttachment.getTokenizer(term).initAstNodeBinding();
-    }
-    
+        
     return term;
   }
 
