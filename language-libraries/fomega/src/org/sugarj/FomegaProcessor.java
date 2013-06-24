@@ -27,6 +27,7 @@ public class FomegaProcessor extends AbstractBaseProcessor {
   private String moduleHeader;
   private List<String> imports = new LinkedList<String>();
   private List<String> body = new LinkedList<String>();
+  private boolean hasExtension = false;
 
   private Set<RelativePath> generatedModules = new HashSet<RelativePath>();
   
@@ -40,6 +41,12 @@ public class FomegaProcessor extends AbstractBaseProcessor {
   
   @Override
   public String getGeneratedSource() {
+    if (moduleHeader == null)
+      return "";
+    
+    if (hasExtension && body.isEmpty())
+      return "";
+    
     return moduleHeader + "\n"
          + StringCommands.printListSeparated(imports, "\n") + "\n"
          + StringCommands.printListSeparated(body, "\n");
@@ -68,7 +75,7 @@ public class FomegaProcessor extends AbstractBaseProcessor {
   
   @Override
   public void init(RelativePath sourceFile, Environment environment) {
-    this.init(sourceFile, environment);
+    this.environment = environment;
     this.sourceFile = sourceFile;
     outFile = environment.createOutPath(FileCommands.dropExtension(sourceFile.getRelativePath()) + ".pts-source");
   }
@@ -152,6 +159,7 @@ public class FomegaProcessor extends AbstractBaseProcessor {
 
   @Override
   public String getExtensionName(IStrategoTerm decl) throws IOException {
+    hasExtension = true;
     return moduleName;
   }
 
