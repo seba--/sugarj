@@ -108,10 +108,7 @@ public sugar Typing {
       !(<id>,<conc-strings>("Type error: ", err))
       
     hover-type-info = ?(<conc-strings> ("Type: ", <find-annotation(retrieve-type)>),_,_,_,_)
-}
 
-
-public editor services Typing {
   references
     hover _ : hover-type-info
 }

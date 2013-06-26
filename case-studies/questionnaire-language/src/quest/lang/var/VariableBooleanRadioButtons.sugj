@@ -9,10 +9,10 @@ import quest.lang.var.Variable;
  * @author seba
  *
  */
-public class VariableBooleanRadioButtons extends JPanel implements Variable.ChangeListener<Boolean> {
+public class VariableBooleanRadioButtons extends JCheckBox implements Variable.ChangeListener<Boolean> {
   private static final long serialVersionUID = 1L;
 
-  public VariableCheckBox(final Variable<Boolean> var) {
+  public VariableBooleanRadioButtons(final Variable<Boolean> var) {
     var.addChangeListener(this);
     addChangeListener(new javax.swing.event.ChangeListener() {
       public void stateChanged(ChangeEvent e) {
