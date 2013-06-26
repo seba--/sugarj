@@ -5,6 +5,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import quest.lang.var.Variable;
+import quest.lang.var.VariableTextField;
 
 /**
  * @author seba
