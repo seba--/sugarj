@@ -4,7 +4,7 @@ public sugar Syntax {
   // top-level questionnaire declaration
   context-free syntax
     Quest -> ToplevelDeclaration
-    AnnoOrSugarMod* "questionnaire" JavaId QuestList
+    AnnoOrExtensionMod* "questionnaire" JavaId QuestList
       -> Quest {cons("Questionnaire"), layout(1.first.col < 4.first.col)}
 
     -> QuestList {cons("QNil")}

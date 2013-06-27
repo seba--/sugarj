@@ -1,8 +1,0 @@
-package test;
-
-import quest.style.Syntax;
-
-public style AlternativeStyle
-  display Boolean question with quest.lang.var.VariableBooleanTextField
-  
-  
