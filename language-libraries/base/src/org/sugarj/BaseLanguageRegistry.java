@@ -61,6 +61,17 @@ public class BaseLanguageRegistry {
     return baseLanguages.get(extension);
   }
   
+  public synchronized AbstractBaseLanguage getBaseLanguageByName(String languageName) {
+    if (!extensionsLoaded)
+      loadExtensions();
+    
+    for(AbstractBaseLanguage language : baseLanguages.values()) {
+      if(language.getLanguageName().equals(languageName)) 
+        return language;
+    }
+    return null;
+  }
+  
   public synchronized boolean isRegistered(String extension) {
     if (!extensionsLoaded)
       loadExtensions();
