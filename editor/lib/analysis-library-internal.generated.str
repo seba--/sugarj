@@ -19,7 +19,7 @@ signature constructors
   AST             : Namespace
   
   // Data
-  AST             : List(UriPart) * AST -> AST
+  AST             : Identifier * AST -> AST
   
   // Annotations 
   Scope: Term -> Anno
@@ -76,8 +76,8 @@ rules // Analysis traversals
         (added, removed) := ([], []);
         filesToAnalyze := []
       end
-    //with
-    //  <list-loop(analyze-top-store-ast(|full-path))> astFilePairs4
+    with
+      <list-loop(analyze-top-store-ast(|language, full-path))> astFilePairs4
       
   /**
    * Add URI annotations to each definition and unresolved URI annotations to each use site.
@@ -149,21 +149,14 @@ rules // Analysis traversals
    *
    * @internal
    */   
-  analyze-top-store-ast(|full-path):
-    (ast, (_, subfile)) -> <id>
+  analyze-top-store-ast(|language, full-path):
+    (ast, (file, subfile)) -> <id>
     where
-      <index-add(|full-path)> AST(subfile, ast)
-
-  /**
-   * Stores AST from file to the index.
-   *
-   * @internal
-   */   
-  analyze-top-store-ast(|full-path):
-    (ast, file) -> <id>
-    where
-      <is-string> file;
-      <index-add(|full-path)> AST([AST()], ast)
+      if [] := subfile then
+        <index-add(|full-path)> AST((language, full-path), ast)
+      else
+        <index-add(|full-path)> AST((language, subfile), ast)
+      end
       
   /**
    * Identifies all definitions in the tree and annotates them with their URI.

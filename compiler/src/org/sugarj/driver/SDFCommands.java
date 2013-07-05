@@ -21,12 +21,12 @@ import java.util.regex.Pattern;
 
 import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.jsglr_layout.client.ITreeBuilder;
-import org.spoofax.jsglr_layout.client.InvalidParseTableException;
-import org.spoofax.jsglr_layout.client.ParseTable;
-import org.spoofax.jsglr_layout.client.SGLR;
-import org.spoofax.jsglr_layout.shared.SGLRException;
-import org.spoofax.jsglr_layout.shared.TokenExpectedException;
+import org.spoofax.jsglr.client.ITreeBuilder;
+import org.spoofax.jsglr.client.InvalidParseTableException;
+import org.spoofax.jsglr.client.ParseTable;
+import org.spoofax.jsglr.client.SGLR;
+import org.spoofax.jsglr.shared.SGLRException;
+import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.spoofax.terms.Term;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.nativebundle.SDFBundleCommand;
@@ -365,7 +365,7 @@ public class SDFCommands {
     Callable<Pair<IStrategoTerm, Integer>> parseCallable = new Callable<Pair<IStrategoTerm, Integer>>() {
       @Override
       public Pair<IStrategoTerm, Integer> call() throws Exception {
-        Object o = parser.parse(source, sourceFile.getAbsolutePath(), start, parseMax);
+        Object o = parser.parseMax(source, sourceFile.getAbsolutePath(), start);
         if (o instanceof IStrategoTerm)
           return Pair.create((IStrategoTerm) o, source.length());
         else {

@@ -5,10 +5,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
-import org.spoofax.jsglr_layout.client.InvalidParseTableException;
-import org.spoofax.jsglr_layout.client.Label;
-import org.spoofax.jsglr_layout.client.ParseTable;
-import org.spoofax.jsglr_layout.client.Priority;
+import org.spoofax.jsglr.client.InvalidParseTableException;
+import org.spoofax.jsglr.client.Label;
+import org.spoofax.jsglr.client.ParseTable;
+import org.spoofax.jsglr.client.Priority;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.FileCommands;
 

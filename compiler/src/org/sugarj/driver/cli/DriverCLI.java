@@ -1,8 +1,9 @@
 package org.sugarj.driver.cli;
 
-import static org.spoofax.jsglr_layout.client.imploder.ImploderAttachment.getLeftToken;
-import static org.spoofax.jsglr_layout.client.imploder.ImploderAttachment.getRightToken;
-import static org.spoofax.jsglr_layout.client.imploder.ImploderAttachment.getTokenizer;
+import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getLeftToken;
+import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getRightToken;
+import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getTokenizer;
+
 import static org.spoofax.terms.Term.tryGetConstructor;
 import static org.sugarj.common.Log.log;
 
@@ -21,14 +22,14 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.jsglr_layout.client.MultiBadTokenException;
-import org.spoofax.jsglr_layout.client.ParseTimeoutException;
-import org.spoofax.jsglr_layout.client.imploder.IToken;
-import org.spoofax.jsglr_layout.client.imploder.ITokenizer;
-import org.spoofax.jsglr_layout.client.imploder.ImploderAttachment;
-import org.spoofax.jsglr_layout.client.imploder.Token;
-import org.spoofax.jsglr_layout.shared.BadTokenException;
-import org.spoofax.jsglr_layout.shared.TokenExpectedException;
+import org.spoofax.jsglr.client.MultiBadTokenException;
+import org.spoofax.jsglr.client.ParseTimeoutException;
+import org.spoofax.jsglr.client.imploder.IToken;
+import org.spoofax.jsglr.client.imploder.ITokenizer;
+import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+import org.spoofax.jsglr.client.imploder.Token;
+import org.spoofax.jsglr.shared.BadTokenException;
+import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.spoofax.terms.TermVisitor;
 import org.strategoxt.HybridInterpreter;
 import org.strategoxt.imp.runtime.Environment;

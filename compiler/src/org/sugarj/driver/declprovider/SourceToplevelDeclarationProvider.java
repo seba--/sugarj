@@ -7,12 +7,12 @@ import java.text.ParseException;
 import java.util.concurrent.TimeoutException;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.jsglr_layout.client.FilterException;
-import org.spoofax.jsglr_layout.client.InvalidParseTableException;
-import org.spoofax.jsglr_layout.client.imploder.IToken;
-import org.spoofax.jsglr_layout.client.imploder.ImploderAttachment;
-import org.spoofax.jsglr_layout.shared.SGLRException;
-import org.spoofax.jsglr_layout.shared.TokenExpectedException;
+import org.spoofax.jsglr.client.FilterException;
+import org.spoofax.jsglr.client.InvalidParseTableException;
+import org.spoofax.jsglr.client.imploder.IToken;
+import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+import org.spoofax.jsglr.shared.SGLRException;
+import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.strategoxt.lang.StrategoException;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.FileCommands;

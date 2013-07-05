@@ -9,7 +9,6 @@ Require-Bundle: org.eclipse.ui,
  org.strategoxt.strj,
  org.spoofax.jsglr,
  org.eclipse.jdt.core,
- org.spoofax.jsglr_layout,
  org.spoofax.terms
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

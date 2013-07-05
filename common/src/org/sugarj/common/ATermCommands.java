@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
@@ -17,12 +16,11 @@ import org.spoofax.interpreter.terms.IStrategoReal;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
-import org.spoofax.jsglr_layout.client.InvalidParseTableException;
-import org.spoofax.jsglr_layout.client.imploder.IToken;
-import org.spoofax.jsglr_layout.client.imploder.ImploderAttachment;
-import org.spoofax.jsglr_layout.client.imploder.Token;
-import org.spoofax.jsglr_layout.client.imploder.Tokenizer;
-import org.spoofax.jsglr_layout.io.ParseTableManager;
+import org.spoofax.jsglr.client.InvalidParseTableException;
+import org.spoofax.jsglr.client.imploder.IToken;
+import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+import org.spoofax.jsglr.client.imploder.Token;
+import org.spoofax.jsglr.io.ParseTableManager;
 import org.spoofax.terms.StrategoListIterator;
 import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.attachments.ParentAttachment;
@@ -386,51 +384,6 @@ public class ATermCommands {
       }
       
       return term;
-    }
-    
-    return term;
-  }
-  
-  public static IStrategoTerm fixTokenizer(IStrategoTerm term) {
-    if (term == null)
-      return null;
-    
-    Tokenizer tokenizer = (Tokenizer) ImploderAttachment.getTokenizer(term);
-    if (tokenizer == null)
-      return term;
-    
-    org.spoofax.jsglr.client.imploder.Tokenizer oTokenizer = tokenizer.makeStdTokenizer(ATermCommands.factory);
-    Map<Token, org.spoofax.jsglr.client.imploder.Token> map = tokenizer.reassignTokens(oTokenizer);
-    
-    IStrategoTerm oTerm = fixTokens(term, map);
-    oTokenizer.setAst(oTerm);
-    oTokenizer.initAstNodeBinding();
-    return oTerm;
-  }
-  
-  private static IStrategoTerm fixTokens(IStrategoTerm term, Map<Token, org.spoofax.jsglr.client.imploder.Token> map) {
-    LinkedList<IStrategoTerm> terms = new LinkedList<IStrategoTerm>();
-    terms.push(term);
-    
-    while (!terms.isEmpty()) {
-      IStrategoTerm current = terms.pop();
-      
-      ImploderAttachment attach = ImploderAttachment.get(current);
-      if (attach != null) {
-        boolean isSequence = attach.isSequenceAttachment();
-        String sort = isSequence ? attach.getElementSort() : attach.getSort();
-        IToken left = attach.getLeftToken();
-        IToken right = attach.getRightToken();
-        
-        org.spoofax.jsglr.client.imploder.Token oLeft = map.get(left);
-        org.spoofax.jsglr.client.imploder.Token oRight = map.get(right);
-        
-        current.removeAttachment(ImploderAttachment.TYPE);
-        org.spoofax.jsglr.client.imploder.ImploderAttachment.putImploderAttachment(current, isSequence, sort, oLeft, oRight);
-      }
-      
-      for (int i = current.getSubtermCount() - 1; i >= 0; i--)
-        terms.push(current.getAllSubterms()[i]);
     }
     
     return term;

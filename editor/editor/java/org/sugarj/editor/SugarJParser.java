@@ -20,15 +20,15 @@ import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
-import org.spoofax.jsglr_layout.client.InvalidParseTableException;
-import org.spoofax.jsglr_layout.client.KeywordRecognizer;
-import org.spoofax.jsglr_layout.client.ParseTable;
-import org.spoofax.jsglr_layout.client.SGLR;
-import org.spoofax.jsglr_layout.client.imploder.IToken;
-import org.spoofax.jsglr_layout.client.imploder.Token;
-import org.spoofax.jsglr_layout.client.imploder.Tokenizer;
-import org.spoofax.jsglr_layout.shared.BadTokenException;
-import org.spoofax.jsglr_layout.shared.SGLRException;
+import org.spoofax.jsglr.client.InvalidParseTableException;
+import org.spoofax.jsglr.client.KeywordRecognizer;
+import org.spoofax.jsglr.client.ParseTable;
+import org.spoofax.jsglr.client.SGLR;
+import org.spoofax.jsglr.client.imploder.IToken;
+import org.spoofax.jsglr.client.imploder.Token;
+import org.spoofax.jsglr.client.imploder.Tokenizer;
+import org.spoofax.jsglr.shared.BadTokenException;
+import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.terms.attachments.ParentAttachment;
 import org.strategoxt.imp.runtime.parser.JSGLRI;
 import org.strategoxt.imp.runtime.services.ContentProposerSemantic;
@@ -105,7 +105,7 @@ public class SugarJParser extends JSGLRI {
       result = parseFailureResult(filename);
 
     if (input.contains(ContentProposerSemantic.COMPLETION_TOKEN) && result != null && result.getParseTable() != null)
-      return ATermCommands.fixTokenizer(parseCompletionTree(input, filename, result));
+      return parseCompletionTree(input, filename, result);
 
     if (result.getSugaredSyntaxTree() != null && result.isUpToDateShallow(input.hashCode(), environment))
       return result.getSugaredSyntaxTree();
