@@ -9,6 +9,7 @@ import java.util.concurrent.TimeoutException;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.FilterException;
 import org.spoofax.jsglr.client.InvalidParseTableException;
+import org.spoofax.jsglr.client.SGLR;
 import org.spoofax.jsglr.client.imploder.IToken;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.spoofax.jsglr.shared.SGLRException;
@@ -101,6 +102,11 @@ public class SourceToplevelDeclarationProvider implements ToplevelDeclarationPro
         log.logErr(msg, Log.DETAIL);
       
       if (!treeBuilder.isInitialized()) {
+    	SGLR parser = driver.getParser();
+    	if (parser == null && (e instanceof SGLRException))
+    	  parser = ((SGLRException) e).getParser();
+    	if (parser == null)
+    		return new IncrementalParseResult(ATermCommands.factory.makeString(input), "");
         treeBuilder.initializeTable(driver.getParser().getParseTable(), 0, 0, 0);
         treeBuilder.initializeInput(input, null);
       }

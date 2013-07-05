@@ -22,6 +22,11 @@ public class RetractableTreeBuilder extends TreeBuilder {
   }
   
   @Override
+  public void reset(int startOffset) {
+	// TODO enable resets for disambiguation etc., restoring the startOffset after the last successful piece of parsing.
+  }
+  
+  @Override
   public void initializeInput(String input, String filename) {
     if (getOffset() != 0)
       return;
