@@ -11,12 +11,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: org.sugarj.java.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.sugarj.stdlib,
  org.spoofax.terms,
- org.strategoxt.imp.nativebundle,
- org.strategoxt.imp.runtime,
  org.strategoxt.strj,
  org.sugarj.languagelib,
- org.sugarj.common,
- org.eclipse.jdt.core
+ org.sugarj.common
 Eclipse-RegisterBuddy: org.sugarj.languagelib
