@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.sugarj.base_1.0.0.qualifier.jar" id="org.sugarj.base" version="1.0.0.qualifier">
-      <category name="org.sugarj"/>
-   </feature>
    <feature url="features/org.sugarj.haskell_1.0.0.qualifier.jar" id="org.sugarj.haskell" version="1.0.0.qualifier">
       <category name="org.sugarj"/>
    </feature>
@@ -13,6 +10,9 @@
       <category name="org.sugarj"/>
    </feature>
    <feature url="features/org.sugarj.fomega_1.0.0.qualifier.jar" id="org.sugarj.fomega" version="1.0.0.qualifier">
+      <category name="org.sugarj"/>
+   </feature>
+   <feature url="features/org.sugarj.javascript_1.0.0.qualifier.jar" id="org.sugarj.javascript" version="1.0.0.qualifier">
       <category name="org.sugarj"/>
    </feature>
    <category-def name="org.sugarj" label="SugarJ"/>

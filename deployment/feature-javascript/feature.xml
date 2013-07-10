@@ -29,6 +29,7 @@ The SugarJ standard library is released under the GNU GENERAL PUBLIC LICENSE, Ve
       <import plugin="org.strategoxt.strj"/>
       <import plugin="org.sugarj.languagelib"/>
       <import plugin="org.sugarj.common"/>
+      <import feature="org.sugarj.base" version="1.0.0.qualifier"/>
    </requires>
 
    <plugin
