@@ -34,7 +34,7 @@
       </category>
       <wizard
             name="SugarJ Project"
-            icon="icons/sample.gif"
+            icon="icons/wizard.gif"
             category="Wizzard"
             class="org.sugarj.editor.wizard.SugarJNewWizard"
             id="org.sugarj.editor.wizard.SugarJNewWizard">
