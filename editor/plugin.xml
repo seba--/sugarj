@@ -28,6 +28,9 @@
        </extension>
           <extension
          point="org.eclipse.ui.newWizards">
+      <primaryWizard
+            id="org.sugarj.editor.wizard.SugarJNewWizard">
+      </primaryWizard>
       <category
             name="SugarJ Wizzards"
             id="Wizzard">
