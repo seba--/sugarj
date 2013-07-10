@@ -57,7 +57,7 @@ public class SugarJParser extends JSGLRI {
   private static Map<String, Result> results = new HashMap<String, Result>();
   private static Set<String> pending = new HashSet<String>();
   
-  private final static int PARELLEL_PARSES = 3;
+  private final static int PARELLEL_PARSES = 1;
   private final static List<ISchedulingRule> schedulingRules = new LinkedList<ISchedulingRule>();
   private static int nextSchedulingRule = 0;
   static {
