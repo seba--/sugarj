@@ -25,5 +25,19 @@
 	            <parameter name="comment" value="SugarJ Builder"/>
 	         </run>
           </builder>
-       </extension>    
+       </extension>
+          <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="SugarJ Wizzards"
+            id="Wizzard">
+      </category>
+      <wizard
+            name="SugarJ Project"
+            icon="icons/sample.gif"
+            category="Wizzard"
+            class="org.sugarj.editor.wizard.SugarJNewWizard"
+            id="org.sugarj.editor.wizard.SugarJNewWizard">
+      </wizard>
+   </extension>    
     </plugin>
