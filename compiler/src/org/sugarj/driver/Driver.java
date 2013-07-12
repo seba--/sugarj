@@ -961,6 +961,8 @@ public class Driver{
       
       if (!sugaredBodyDecls.contains(lastSugaredToplevelDecl))
         sugaredBodyDecls.add(lastSugaredToplevelDecl);
+      if (!desugaredBodyDecls.contains(toplevelDecl))
+        desugaredBodyDecls.add(toplevelDecl);
       
       if (dependsOnModel)
         return Collections.emptyList();
