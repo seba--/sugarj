@@ -236,7 +236,7 @@ public class Result {
     return isUpToDate(FileCommands.fileHash(inputFile), env);
   }
 
-  public boolean isUpToDateShallow(int inputHash, Environment env) throws IOException {
+  private boolean isUpToDateShallow(int inputHash, Environment env) throws IOException {
      if (hasPersistentVersionChanged())
       return false;
     

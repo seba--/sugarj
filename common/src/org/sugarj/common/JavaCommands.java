@@ -9,8 +9,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
+import org.sugarj.common.errors.SourceCodeException;
+import org.sugarj.common.errors.SourceLocation;
+import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
+import org.sugarj.util.Pair;
 
 /**
  * 
@@ -21,25 +25,25 @@ import org.sugarj.common.path.RelativePath;
  *
  */
 public class JavaCommands {
-
-  public static List<Path> javac(Path sourceFile, Path dir, Collection<Path> cp) throws IOException {
+  
+  public static List<Path> javac(Path sourceFile, Path dir, Collection<Path> cp) throws IOException, SourceCodeException {
     ArrayList<Path> sourceFiles = new ArrayList<Path>();
     sourceFiles.add(sourceFile);
     return javac(sourceFiles, dir, cp);
   }
   
-  public static List<Path> javac(List<Path> sourceFiles, Path dir, Collection<Path> cp) throws IOException {
+  public static List<Path> javac(List<Path> sourceFiles, Path dir, Collection<Path> cp) throws IOException, SourceCodeException {
     return javac(sourceFiles, null, dir, cp.toArray(new Path[cp.size()]));
   }
 
-  public static List<Path> javac(List<Path> sourceFiles, Path sourcePath, Path dir, Collection<Path> cp) throws IOException {
+  public static List<Path> javac(List<Path> sourceFiles, Path sourcePath, Path dir, Collection<Path> cp) throws IOException, SourceCodeException {
     return javac(sourceFiles, sourcePath, dir, cp.toArray(new Path[cp.size()]));
   }
 
   /**
    * @return list of generated class files.
    */
-  public static List<Path> javac(List<Path> sourceFiles, Path sourcePath, Path dir, Path... cp) throws IOException {
+  public static List<Path> javac(List<Path> sourceFiles, Path sourcePath, Path dir, Path... cp) throws IOException, SourceCodeException {
     StringBuilder cpBuilder = new StringBuilder();
     
     for (int i = 0; i < cp.length; i++) {
@@ -76,31 +80,64 @@ public class JavaCommands {
     for (int i = 0; i < sourceFiles.size(); i++)
       cmd[i + next] = FileCommands.toWindowsPath(sourceFiles.get(i).getAbsolutePath());
     
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    ByteArrayOutputStream stdOutBA = new ByteArrayOutputStream();
+    ByteArrayOutputStream errOutBA = new ByteArrayOutputStream();
     
     // this is EJC
     boolean ok = BatchCompiler.compile(
         cmd,
-        new PrintWriter(baos),
-        new PrintWriter(Log.err),
+        new PrintWriter(stdOutBA),
+        new PrintWriter(errOutBA),
         null);
+
+    String stdOut = stdOutBA.toString();
+    String errOut = errOutBA.toString();
     
-    if (!ok)
-      throw new RuntimeException("Java compilation failed");
+    if (!ok) {
+      List<Pair<SourceLocation, String>> errors = parseJavacErrors(errOut);
+      throw new SourceCodeException(errors);
+    }
     
-    String output = baos.toString();
     List<Path> generatedFiles = new LinkedList<Path>();
     int index = 0;
-    while ((index = output.indexOf("[writing", index)) >= 0) {
+    while ((index = stdOut.indexOf("[writing", index)) >= 0) {
       index += "[writing".length();
-      while (output.charAt(index) == ' ')
+      while (stdOut.charAt(index) == ' ')
         index++;
-      int to = output.indexOf(' ', index);
-      String generatedPath = output.substring(index, to);
+      int to = stdOut.indexOf(' ', index);
+      String generatedPath = stdOut.substring(index, to);
       generatedFiles.add(new RelativePath(dir, generatedPath));
     }
     
     return generatedFiles;
+  }
+
+  private final static String ERR_PAT = " ERROR in ";
+  private final static String LINE_PAT = "(at line ";
+  /**
+   * @param stdOut
+   */
+  private static List<Pair<SourceLocation, String>> parseJavacErrors(String s) {
+    List<Pair<SourceLocation, String>> errors = new LinkedList<Pair<SourceLocation,String>>();
+    int index = 0;
+    while ((index = s.indexOf(" ERROR in ", index)) >= 0) {
+      int fileStart = index + ERR_PAT.length();
+      int fileEnd = s.indexOf(LINE_PAT, fileStart) - 1;
+      String file = s.substring(fileStart, fileEnd);
+      int lineStart = fileEnd + LINE_PAT.length() + 1;
+      int lineEnd = s.indexOf(")", lineStart);
+      int line = Integer.parseInt(s.substring(lineStart, lineEnd));
+      int colMarkerStart = s.indexOf("\n", s.indexOf("\n", lineEnd) + 1);
+      int colMarkerEnd = s.indexOf("\n", colMarkerStart + 1);
+      int colStart = s.indexOf("^", colMarkerStart);
+      int colEnd = s.lastIndexOf("^", colMarkerEnd);
+      int msgStart = colMarkerEnd + 1;
+      int msgEnd = s.indexOf("\n", msgStart);
+      String msg = s.substring(msgStart, msgEnd);
+      errors.add(Pair.create(new SourceLocation(new AbsolutePath(file), line, line, colStart, colEnd), msg));
+      index = msgEnd + 1;
+    }
+    return errors;
   }
 
   /**

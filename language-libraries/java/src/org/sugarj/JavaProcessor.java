@@ -19,6 +19,7 @@ import org.sugarj.common.FileCommands;
 import org.sugarj.common.JavaCommands;
 import org.sugarj.common.Log;
 import org.sugarj.common.StringCommands;
+import org.sugarj.common.errors.SourceCodeException;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 
@@ -147,7 +148,7 @@ public class JavaProcessor extends AbstractBaseProcessor implements Serializable
   }
 
   @Override
-  public List<Path> compile(List<Path> javaOutFiles, Path bin, List<Path> path) throws IOException {
+  public List<Path> compile(List<Path> javaOutFiles, Path bin, List<Path> path) throws IOException, SourceCodeException {
     return JavaCommands.javac(javaOutFiles, sourcePath, bin, path);
   }
 

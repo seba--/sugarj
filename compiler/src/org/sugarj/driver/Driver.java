@@ -55,6 +55,8 @@ import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.Log;
 import org.sugarj.common.StringCommands;
+import org.sugarj.common.errors.SourceCodeException;
+import org.sugarj.common.errors.SourceLocation;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
@@ -463,7 +465,11 @@ public class Driver{
             driverResult.getGeneratedFileHashes());
       } catch (ClassNotFoundException e) {
         setErrorMessage("Could not resolve imported class " + e.getMessage());
-        // throw new RuntimeException(e);
+      } catch (SourceCodeException e) {
+        for (Pair<SourceLocation, String> err : e.getErrors())
+          setErrorMessage(err.b + " in " + err.a.file 
+                                + " lines " + err.a.lineStart + "-" + err.a.lineEnd
+                                + " columns " + err.a.columnStart + "-" + err.a.columnEnd);
       }
       good = true;
     } finally {

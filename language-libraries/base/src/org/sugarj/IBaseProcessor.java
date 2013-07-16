@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.sugarj.common.Environment;
+import org.sugarj.common.errors.SourceCodeException;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 
@@ -29,5 +30,5 @@ public interface IBaseProcessor {
 
   public abstract String getGeneratedSource();
   public abstract Path getGeneratedSourceFile();
-  public abstract List<Path> compile(List<Path> generatedSourceFiles, Path targetDir, List<Path> classpath) throws IOException;
+  public abstract List<Path> compile(List<Path> generatedSourceFiles, Path targetDir, List<Path> classpath) throws IOException, SourceCodeException;
 }

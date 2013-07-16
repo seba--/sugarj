@@ -107,7 +107,7 @@ public class SugarJParser extends JSGLRI {
     if (input.contains(ContentProposerSemantic.COMPLETION_TOKEN) && result != null && result.getParseTable() != null)
       return parseCompletionTree(input, filename, result);
 
-    if (result.getSugaredSyntaxTree() != null && result.isUpToDateShallow(input.hashCode(), environment))
+    if (result.getSugaredSyntaxTree() != null && result.isUpToDate(input.hashCode(), environment))
       return result.getSugaredSyntaxTree();
 
     if (result.getSugaredSyntaxTree() == null)
@@ -258,7 +258,6 @@ public class SugarJParser extends JSGLRI {
     IStrategoTerm term = ATermCommands.makeList("CompilationUnit", tok);
     
     Result r = new Result() {
-      public boolean isUpToDateShallow(int h, Environment env) { return false; }
       public boolean isUpToDate(int h, Environment env) { return false; }
     };
     r.setSugaredSyntaxTree(term);

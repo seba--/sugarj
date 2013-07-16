@@ -11,6 +11,7 @@ import org.strategoxt.HybridInterpreter;
 import org.sugarj.common.ATermCommands;
 import org.sugarj.common.Environment;
 import org.sugarj.common.FileCommands;
+import org.sugarj.common.errors.SourceCodeException;
 import org.sugarj.common.path.Path;
 import org.sugarj.util.Pair;
 
@@ -44,7 +45,7 @@ public abstract class AbstractBaseProcessor implements IBaseProcessor, Serializa
 	    List<Path> path,
 			Map<Path, Pair<Path, String>> deferredSourceFilesForSourceFile,
 			Map<Path, Integer> generatedFileHashes
-			) throws IOException, ClassNotFoundException {
+			) throws IOException, ClassNotFoundException, SourceCodeException {
 	  
 	  
     List<Path> outFiles = new ArrayList<Path>();
