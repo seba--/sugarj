@@ -198,7 +198,7 @@ public class STRCommands {
         cacheProg = prog;
       
       Path oldProg = strCache.putGet(key, cacheProg);
-      FileCommands.delete(oldProg);
+//      FileCommands.delete(oldProg);
 
       log.log("Cache Location: " + cacheProg, Log.CACHING);
       return cacheProg;
