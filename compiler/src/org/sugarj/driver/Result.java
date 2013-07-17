@@ -7,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.ref.SoftReference;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -276,6 +275,9 @@ public class Result {
         continue;
       
       Result r = Result.readDependencyFile(path);
+      if (!isParseResult() && r.isParseResult())
+        // rebuild if compiled-result dependency to parsed-result dependency
+        return false;
       if (r == null || !r.isUpToDateShallow(r.getSourceFile(), env))
         return false;
       
