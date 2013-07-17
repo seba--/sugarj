@@ -467,8 +467,7 @@ public class Driver{
         setErrorMessage("Could not resolve imported class " + e.getMessage());
       } catch (SourceCodeException e) {
         for (Pair<SourceLocation, String> err : e.getErrors())
-          setErrorMessage(err.b + " in " + err.a.file 
-                                + " lines " + err.a.lineStart + "-" + err.a.lineEnd
+          setErrorMessage(err.b + " lines " + err.a.lineStart + "-" + err.a.lineEnd
                                 + " columns " + err.a.columnStart + "-" + err.a.columnEnd);
       }
       good = true;

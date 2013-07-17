@@ -3,6 +3,7 @@ package org.sugarj.common;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -315,10 +316,25 @@ public class ATermCommands {
       return;
     }
     
+    HashMap<String, String> cache = new HashMap<String, String>();
+    
     for (int i = left.getIndex(), max = right.getIndex(); i <= max; i++) {
       Token tok = ((Token) left.getTokenizer().getTokenAt(i));
       if (tok.getError() == null || tok.getError().isEmpty())
         tok.setError(msg);
+      else {
+        StringBuilder b = new StringBuilder();
+        b.append(tok.getError());
+        b.append("<br>");
+        b.append(msg);
+        String key = b.toString();
+        String val = cache.get(key);
+        if (val == null) {
+          val = key;
+          cache.put(key, val);
+        }
+        tok.setError(val);
+      }
       
       if (tok.getTokenizer().getInput().length() <= tok.getStartOffset() || tok.getTokenizer().getInput().charAt(tok.getStartOffset()) == '\n')
         break;
