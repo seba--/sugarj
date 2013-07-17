@@ -256,7 +256,12 @@ public class Driver{
       boolean isUpToDate = result != null && result.isUpToDate(declProvider.getSourceHashCode(), driver.environment);
       if (isUpToDate) {
         if (driver.environment.doGenerateFiles() && result.isParseResult()) {
+          Log.log.beginTask("Moving result", Log.DETAIL);
+          try {
           result = result.moveTo(driver.environment.getBin(), false);
+          } finally {
+            Log.log.endTask();
+          }
           removeParserResult(sourceFile);
         }
         
@@ -344,6 +349,8 @@ public class Driver{
   private void process(ToplevelDeclarationProvider declProvider, RelativePath sourceFile, IProgressMonitor monitor) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     if (sourceFile == null)
       throw new IllegalArgumentException("Required source file argument was null.");
+    
+    Log.log.setLoggingLevel(Log.ALWAYS);
     
     List<Renaming> originalRenamings = new LinkedList<Renaming>(environment.getRenamings());
     currentlyProcessing.add(this);
