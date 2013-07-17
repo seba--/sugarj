@@ -38,7 +38,7 @@ public class Environment implements Serializable {
 
   private Path root = new AbsolutePath(".");
   
-  private Path bin = new AbsolutePath(".");
+  private Path compileBin = new AbsolutePath(".");
 
   /**
    * The directory in which to place files at parse time.
@@ -66,7 +66,7 @@ public class Environment implements Serializable {
   private List<Renaming> renamings = new LinkedList<Renaming>();
   
   public Environment(boolean generateFiles, Path stdlibDirPath) {
-    includePath.add(bin);
+    includePath.add(compileBin);
     includePath.add(stdlibDirPath);
     
     try {
@@ -96,15 +96,15 @@ public class Environment implements Serializable {
   }
 
   public Path getBin() {
-    return generateFiles ? bin : parseBin;
+    return generateFiles ? compileBin : parseBin;
   }
 
   public void setBin(Path bin) {
-    if (this.bin != null) {
-      includePath.remove(this.bin);
+    if (this.compileBin != null) {
+      includePath.remove(this.compileBin);
       includePath.add(bin);
     }
-    this.bin = bin;
+    this.compileBin = bin;
     try {
       FileCommands.createDir(bin);
     } catch (IOException e) {
@@ -120,6 +120,10 @@ public class Environment implements Serializable {
     this.cacheDir = cacheDir;
   }
 
+  public Path getCompileBin() {
+    return compileBin;
+  }
+  
   public Path getParseBin() {
     return parseBin;
   }
@@ -183,7 +187,7 @@ public class Environment implements Serializable {
     if (this.generateFiles)
       includePath.add(parseBin);
     else
-      includePath.add(bin);
+      includePath.add(compileBin);
 
     this.generateFiles = b;
   }

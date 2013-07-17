@@ -4,11 +4,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -54,8 +52,7 @@ public class SugarJParser extends JSGLRI {
 
   private Environment environment;
   
-  private static Map<String, Result> results = new HashMap<String, Result>();
-  private static Set<String> pending = new HashSet<String>();
+  private static Set<RelativePath> pending = new HashSet<RelativePath>();
   
   private final static int PARELLEL_PARSES = 1;
   private final static List<ISchedulingRule> schedulingRules = new LinkedList<ISchedulingRule>();
@@ -76,7 +73,7 @@ public class SugarJParser extends JSGLRI {
     return schedulingRules.get(nextSchedulingRule++);
   }
   
-  private String filename;
+  private RelativePath sourceFile;
 //  private Result result;
 //  private JSGLRI parser;
 //  private Path parserTable;
@@ -88,8 +85,6 @@ public class SugarJParser extends JSGLRI {
   
   @Override
   protected IStrategoTerm doParse(String input, String filename) throws IOException {
-    this.filename = filename;
-    
     if (environment == null && getController().getProject() != null)
       environment = SugarJParseController.makeProjectEnvironment(getController().getProject().getRawProject());
     assert environment != null;
@@ -99,56 +94,53 @@ public class SugarJParser extends JSGLRI {
       return parseFailureResult(filename).getSugaredSyntaxTree();
     }
 
-    Result result = getResult(filename);
+    RelativePath sourceFile = ModuleSystemCommands.locateSourceFile(filename, environment.getSourcePath());
+    if (sourceFile == null)
+      throw new IllegalArgumentException("Cannot find source file for path " + filename);
+    this.sourceFile = sourceFile;
+    String modulePath = FileCommands.dropExtension(sourceFile.getRelativePath());
+    Result result = ModuleSystemCommands.locateResult(modulePath, environment);
 
     if (result == null)
       result = parseFailureResult(filename);
 
     if (input.contains(ContentProposerSemantic.COMPLETION_TOKEN) && result != null && result.getParseTable() != null)
       return parseCompletionTree(input, filename, result);
-
     if (result.getSugaredSyntaxTree() != null && result.isUpToDate(input.hashCode(), environment))
-      return result.getSugaredSyntaxTree();
-
-    if (result.getSugaredSyntaxTree() == null)
+        return result.getSugaredSyntaxTree();
+    if (result.hasFailed())
       return parseFailureResult(filename).getSugaredSyntaxTree();
     
-    if (!isPending(filename)) 
-      scheduleParse(input, filename);
+    if (!isPending(sourceFile)) 
+      scheduleParse(input, sourceFile);
     
-    return result.getSugaredSyntaxTree();
+    return result.getSugaredSyntaxTree() == null ? parseFailureResult(filename).getSugaredSyntaxTree() : result.getSugaredSyntaxTree();
   }
   
-  private synchronized void scheduleParse(final String input, final String filename) {
+  private synchronized void scheduleParse(final String input, final RelativePath sourceFile) {
     if (environment == null) {
       getController().scheduleParserUpdate(200, false);
       return;
     }
     
-    final RelativePath sourceFile = ModuleSystemCommands.locateSourceFile(filename, environment.getSourcePath());
-    assert sourceFile != null;
-    
-    final AbstractBaseLanguage factory = BaseLanguageRegistry.getInstance().getBaseLanguage(FileCommands.getExtension(filename));
+    final AbstractBaseLanguage factory = BaseLanguageRegistry.getInstance().getBaseLanguage(FileCommands.getExtension(sourceFile));
 
-    SugarJParser.setPending(filename, true);
+    SugarJParser.setPending(sourceFile, true);
     
     Job parseJob = new Job("SugarJ parser: " + sourceFile.getRelativePath()) {
       @Override
       protected IStatus run(IProgressMonitor monitor) {
         monitor.beginTask("parse " + sourceFile.getRelativePath(), IProgressMonitor.UNKNOWN);
-        Result result = null;
         boolean ok = false;
         try {
-          result = runParser(input, sourceFile, factory, monitor);
+          runParser(input, sourceFile, factory, monitor);
           ok = true;
         } catch (InterruptedException e) {
-          result = null;
         } catch (Exception e) {
           org.strategoxt.imp.runtime.Environment.logException(e);
         } finally {
           monitor.done();
-          SugarJParser.putResult(filename, result);
-          SugarJParser.setPending(filename, false);
+          SugarJParser.setPending(sourceFile, false);
           if (ok)
             getController().scheduleParserUpdate(0, false);
         }
@@ -186,7 +178,7 @@ public class SugarJParser extends JSGLRI {
   
   @Override
   public Set<org.spoofax.jsglr.shared.BadTokenException> getCollectedErrors() {
-    Result result = getResult(filename);
+    Result result = ModuleSystemCommands.locateResult(FileCommands.dropExtension(sourceFile.getRelativePath()), environment);
     if (result == null)
       return Collections.emptySet();
     
@@ -199,38 +191,26 @@ public class SugarJParser extends JSGLRI {
 
   public List<IStrategoTerm> getEditorServices() {
     final List<IStrategoTerm> empty = Collections.emptyList();
-    Result result = getResult(filename);
+    Result result = ModuleSystemCommands.locateResult(FileCommands.dropExtension(sourceFile.getRelativePath()), environment);
     return result == null ? empty : new ArrayList<IStrategoTerm>(result.getEditorServices());
   }
   
   public boolean isInitialized() {
-    return filename != null;
+    return sourceFile != null;
   }
 
-  private static Result getResult(String file) {
-    synchronized (results) {
-      return results.get(file);
-    }
-  }
-  
-  public static void putResult(String file, Result result) {
-    synchronized (results) {
-      results.put(file, result);
-    }
-  }
-  
-  private static boolean isPending(String file) {
+  private static boolean isPending(RelativePath sourceFile) {
     synchronized (pending) {
-      return pending.contains(file);      
+      return pending.contains(sourceFile);      
     }
   }
   
-  private static void setPending(String file, boolean isPending) {
+  private static void setPending(RelativePath sourceFile, boolean isPending) {
     synchronized (pending) {
       if (isPending)
-        pending.add(file);
+        pending.add(sourceFile);
       else
-        pending.remove(file);
+        pending.remove(sourceFile);
     }
   }
   

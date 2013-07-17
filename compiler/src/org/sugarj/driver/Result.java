@@ -34,7 +34,7 @@ public class Result {
   /**
    * Caching for results
    */
-  private static HashMap<Path, SoftReference<Result>> results = new HashMap<Path, SoftReference<Result>>();
+  private static HashMap<Path, Result> results = new HashMap<Path, Result>();
     
   /**
    * Path and hash of the disk-stored version of this result.
@@ -393,12 +393,6 @@ public class Result {
     writeDependencyFile(persistentPath);
   }
   
-  private void cacheInMemory(Path dep) {
-    synchronized (results) {
-      results.put(dep, new SoftReference<Result>(this));
-    }
-  }
-  
   public void writeDependencyFile(Path dep) throws IOException {
     logGeneration(dep);
 
@@ -420,7 +414,7 @@ public class Result {
       
       oos.writeObject(deferredSourceFiles);
       
-      cacheInMemory(dep);
+      cacheInMemory(dep, this);
     } finally {
       if (oos != null)
         oos.close();
@@ -431,14 +425,8 @@ public class Result {
   
   @SuppressWarnings("unchecked")
   public static Result readDependencyFile(Path dep) throws IOException {
-    Result result = null;
-    
-    synchronized (results) {
-      SoftReference<Result> ref = results.get(dep);
-      if (ref != null)
-        result = ref.get();
-    }
-    if (result != null && !result.hasPersistentVersionChanged())
+    Result result = getCachedResult(dep);
+    if (result != null)
       return result;
     
     result = new Result();
@@ -460,7 +448,7 @@ public class Result {
 
       result.deferredSourceFiles = (Map<Path, Pair<Path, String>>) ois.readObject();
       
-      result.cacheInMemory(dep);
+      cacheInMemory(dep, result);
     } catch (FileNotFoundException e) {
       return null;
     } catch (ClassNotFoundException e) {
@@ -523,4 +511,25 @@ public class Result {
     
     return res;
   }
+  
+  public static void cacheInMemory(Path dep, Result result) {
+    synchronized (results) {
+      results.put(dep, result);
+//      results.put(dep, new SoftReference<Result>(result));
+    }
+  }
+  
+  public static Result getCachedResult(Path dep) throws IOException {
+    Result result = null;
+    synchronized (results) {
+      result = results.get(dep);
+//      SoftReference<Result> ref = results.get(dep);
+//      if (ref != null)
+//        result = ref.get();
+    }
+    if (result != null && !result.hasPersistentVersionChanged())
+      return result;
+    return null;
+  }
+
 }

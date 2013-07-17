@@ -16,7 +16,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.ref.SoftReference;
 import java.text.ParseException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -77,8 +76,6 @@ import org.sugarj.util.Renaming;
 public class Driver{
   
   private final static int PENDING_TIMEOUT = 30000;
-
-  private static Map<Path, SoftReference<Result>> parserResultCache = new HashMap<Path, SoftReference<Result>>(); // new LRUMap(50);
 
   private static Map<Path, Entry<ToplevelDeclarationProvider, Driver>> pendingRuns = new HashMap<Path, Map.Entry<ToplevelDeclarationProvider,Driver>>();
   private static List<Path> pendingInputFiles = new ArrayList<Path>();
@@ -159,16 +156,6 @@ public class Driver{
     }
   }  
   
-  private static synchronized Result getParserResult(Path file) {
-    SoftReference<Result> res = parserResultCache.get(file);
-    if (res != null) {
-      if (res.get() == null)
-        parserResultCache.remove(file);
-      return res.get();
-    }
-    return null;
-  }
-  
   private static synchronized Entry<ToplevelDeclarationProvider, Driver> getPendingRun(Path file) {
     return pendingRuns.get(file);
   }
@@ -207,14 +194,6 @@ public class Driver{
     }
   }
 
-  private static synchronized void putParserResult(Path file, Result result) {
-    parserResultCache.put(file, new SoftReference<Result>(result));
-  }
-
-  private static synchronized void removeParserResult(Path file) {
-    parserResultCache.remove(file);
-  }
-
   public static Result run(RelativePath sourceFile, Environment env, IProgressMonitor monitor, AbstractBaseLanguage baseLang) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     return run(sourceFile, env, monitor, baseLang, new LinkedList<Driver>());
   }
@@ -239,6 +218,7 @@ public class Driver{
   
   private static Result run(Driver driver, ToplevelDeclarationProvider declProvider, RelativePath sourceFile, IProgressMonitor monitor) throws IOException, TokenExpectedException, ParseException, InvalidParseTableException, SGLRException, InterruptedException {
     Entry<ToplevelDeclarationProvider, Driver> pending = null;
+    String modulePath = FileCommands.dropExtension(sourceFile.getRelativePath());
     
     pending = getPendingRun(sourceFile);
     if (pending != null && !pending.getKey().equals(declProvider) && pending.getValue().environment.doGenerateFiles() == driver.environment.doGenerateFiles()) {
@@ -247,11 +227,7 @@ public class Driver{
     }
 
     if (pending == null) {
-      Result result = getParserResult(sourceFile);
-
-      boolean needPersistentVersion = result == null || result.hasPersistentVersionChanged();
-      if (needPersistentVersion)
-        result = ModuleSystemCommands.locateResult(FileCommands.dropExtension(sourceFile.getRelativePath()), driver.environment);
+      Result result = ModuleSystemCommands.locateResult(modulePath, driver.environment);
       
       boolean isUpToDate = result != null && result.isUpToDate(declProvider.getSourceHashCode(), driver.environment);
       if (isUpToDate) {
@@ -262,14 +238,11 @@ public class Driver{
           } finally {
             Log.log.endTask();
           }
-          removeParserResult(sourceFile);
         }
         
         if (driver.environment.doGenerateFiles() || result.getSugaredSyntaxTree() != null)
           return result;
       }
-      else
-        removeParserResult(sourceFile);
     }
     
     if (pending == null)
@@ -299,10 +272,10 @@ public class Driver{
       org.strategoxt.imp.runtime.Environment.logException(e);
     } finally {
       pendingRuns.remove(sourceFile);
-      if (driver.environment.doGenerateFiles())
-        removeParserResult(sourceFile);
-      else if (driver.driverResult != null && driver.driverResult.getSugaredSyntaxTree() != null)
-        putParserResult(sourceFile, driver.driverResult);
+      if (!driver.environment.doGenerateFiles()) {
+        Path binDep = new RelativePath(driver.environment.getCompileBin(), modulePath + ".dep");
+        Result.cacheInMemory(binDep, driver.driverResult);
+      }
     }
 
     return driver.driverResult;
@@ -835,7 +808,7 @@ public class Driver{
         importSourceFile = ModuleSystemCommands.locateSourceFileOrModel(modulePath, environment.getSourcePath(), baseProcessor, environment);
 
       boolean sourceFileAvailable = importSourceFile != null;
-      boolean requiresUpdate = res == null || res.getSourceFile() == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment);
+      boolean requiresUpdate = res == null || res.getSourceFile() == null || pendingInputFiles.contains(res.getSourceFile()) || !res.isUpToDate(res.getSourceFile(), environment) || environment.doGenerateFiles() && res.isParseResult();
       
       if (sourceFileAvailable && requiresUpdate && getCircularImportResult(importSourceFile) != null) {
         // Circular import. Assume source file does not provide syntactic sugar.
