@@ -323,8 +323,6 @@ public class Driver{
     if (sourceFile == null)
       throw new IllegalArgumentException("Required source file argument was null.");
     
-    Log.log.setLoggingLevel(Log.ALWAYS);
-    
     List<Renaming> originalRenamings = new LinkedList<Renaming>(environment.getRenamings());
     currentlyProcessing.add(this);
     

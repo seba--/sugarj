@@ -4,11 +4,9 @@ package org.sugarj.common;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -57,8 +55,8 @@ public class Environment implements Serializable {
 
   private Path tmpDir = new AbsolutePath(System.getProperty("java.io.tmpdir"));
   
-  private Set<Path> sourcePath = new HashSet<Path>();
-  private Set<Path> includePath = new HashSet<Path>();
+  private List<Path> sourcePath = new LinkedList<Path>();
+  private List<Path> includePath = new LinkedList<Path>();
   
   /**
    * List of renamings that need to be applied during compilation.
@@ -87,11 +85,11 @@ public class Environment implements Serializable {
     this.root = root;
   }
 
-  public Set<Path> getSourcePath() {
+  public List<Path> getSourcePath() {
     return sourcePath;
   }
 
-  public void setSourcePath(Set<Path> sourcePath) {
+  public void setSourcePath(List<Path> sourcePath) {
     this.sourcePath = sourcePath;
   }
 
@@ -152,11 +150,11 @@ public class Environment implements Serializable {
     this.tmpDir = tmpDir;
   }
 
-  public Set<Path> getIncludePath() {
+  public List<Path> getIncludePath() {
     return includePath;
   }
 
-  public void setIncludePath(Set<Path> includePath) {
+  public void setIncludePath(List<Path> includePath) {
     this.includePath = includePath;
   }
 

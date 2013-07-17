@@ -169,7 +169,7 @@ public class STRCommands {
   private static Path generateAssimilator(ModuleKey key,
                                           Path str,
                                           String main,
-                                          Collection<Path> paths,
+                                          List<Path> paths,
                                           AbstractBaseProcessor baseProcessor) throws IOException {
     boolean success = false;
     log.beginTask("Generating", "Generate the assimilator", Log.TRANSFORM);

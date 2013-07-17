@@ -194,10 +194,15 @@ public class Result {
 
   public void generateFile(RelativePath file, String content) throws IOException {
     FileCommands.writeToFile(file, content);
-    addFileDependency(file);
     int hash = FileCommands.fileHash(file);
+    logFileGeneration(file, hash);
+  }
+
+  private void logFileGeneration(Path file, int hash) throws IOException {
     generatedFileHashes.put(file, hash);
     allDependentFiles.put(file, hash);
+    if (file instanceof RelativePath)
+      dependingFileHashes.put((RelativePath) file, hash);
     logGeneration(file);
   }
 
@@ -501,7 +506,7 @@ public class Result {
     res.generatedFileHashes = new HashMap<Path, Integer>(generatedFileHashes.size());
     for (Entry<Path, Integer> e : generatedFileHashes.entrySet()) {
       Path p = FileCommands.tryCopyFile(parseResultPath, targetDir, e.getKey());
-      res.generatedFileHashes.put(p, e.getValue());
+      res.logFileGeneration(p, FileCommands.fileHash(p));
     }
     
     RelativePath wasDep = FileCommands.getRelativePath(parseResultPath, persistentPath);

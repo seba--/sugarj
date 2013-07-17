@@ -3,14 +3,13 @@ package org.sugarj.driver.cli;
 import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getLeftToken;
 import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getRightToken;
 import static org.spoofax.jsglr.client.imploder.ImploderAttachment.getTokenizer;
-
 import static org.spoofax.terms.Term.tryGetConstructor;
 import static org.sugarj.common.Log.log;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
@@ -416,7 +415,7 @@ public class DriverCLI {
         environment.getIncludePath().add(pathArgument(path));
   
     if (line.hasOption("sourcepath")) {
-      HashSet<Path> sourcePath = new HashSet<Path>();
+      List<Path> sourcePath = new LinkedList<Path>();
       for (String path : line.getOptionValue("sourcepath").split(org.sugarj.common.Environment.classpathsep))
         sourcePath.add(pathArgument(path));
       environment.setSourcePath(sourcePath);

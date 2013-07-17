@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Set;
+import java.util.List;
 
 import org.sugarj.AbstractBaseProcessor;
 import org.sugarj.common.ATermCommands;
@@ -127,11 +127,11 @@ public class ModuleSystemCommands {
     return model;
   }
   
-  public static RelativePath locateSourceFile(String path, Set<Path> sourcePath) {
+  public static RelativePath locateSourceFile(String path, List<Path> sourcePath) {
     return locateSourceFile (FileCommands.dropExtension(path), FileCommands.getExtension(path), sourcePath);
   }
 
-  public static RelativePath locateSourceFileOrModel(String modulePath, Set<Path> sourcePath, AbstractBaseProcessor baseProcessor, Environment environment) {
+  public static RelativePath locateSourceFileOrModel(String modulePath, List<Path> sourcePath, AbstractBaseProcessor baseProcessor, Environment environment) {
     RelativePath result = locateSourceFile(modulePath, baseProcessor.getLanguage().getSugarFileExtension(), sourcePath);
     if (result == null)
       result = searchFile(modulePath, "model", environment, null);
@@ -140,7 +140,7 @@ public class ModuleSystemCommands {
     return result;
   }
 
-  public static RelativePath locateSourceFile(String modulePath, String extension, Set<Path> sourcePath) {
+  public static RelativePath locateSourceFile(String modulePath, String extension, List<Path> sourcePath) {
     if (modulePath.startsWith("org/sugarj"))
       return null;
     
@@ -177,7 +177,7 @@ public class ModuleSystemCommands {
     return null;
   }
 	  
-  private static RelativePath searchFileInSearchPath(String relativePath, String extension, Set<Path> searchPath, Result driverResult) {
+  private static RelativePath searchFileInSearchPath(String relativePath, String extension, List<Path> searchPath, Result driverResult) {
     for (Path base : searchPath) {
       RelativePath p = searchFile(base, relativePath, extension, driverResult);
       if (p != null)
@@ -187,7 +187,7 @@ public class ModuleSystemCommands {
     return null;
   }
 
-  private static RelativePath searchFileInSourceLocationPath(String relativePath, String extension, Set<Path> searchPath, Result driverResult) {
+  private static RelativePath searchFileInSourceLocationPath(String relativePath, String extension, List<Path> searchPath, Result driverResult) {
     for (Path loc : searchPath) {
       RelativePath p = searchFile(loc, relativePath, extension, driverResult);
       if (p != null)
