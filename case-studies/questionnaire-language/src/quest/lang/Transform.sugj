@@ -5,7 +5,7 @@ import concretesyntax.Java;
 import quest.lang.Syntax;
 import quest.analysis.Typing;
 
-public sugar Transform {
+public extension Transform {
   desugarings
     desugar-questionnaire
     desugar-question
