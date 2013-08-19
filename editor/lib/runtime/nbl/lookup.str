@@ -1,0 +1,72 @@
+module runtime/nbl/lookup
+
+imports
+  
+  runtime/nbl/collect
+  runtime/nbl/query
+  runtime/nbl/tasks
+  runtime/nbl/uri
+  runtime/nbl/entries
+  runtime/task/core
+
+rules // Lookup
+	
+	nabl-lookup(|ns, name):
+		uri -> def*
+		with
+  		uri' := <nabl-extend-uri(|ns, name, ())> uri;
+  		def* := <nabl-get-all-definitions> uri'
+
+	nabl-lookup-all(|ns):
+		uri -> def*
+		with
+  		def*  := <nabl-get-child-definitions(|ns)> uri
+
+	nabl-lookup-named-import(|ns, name):
+		uri -> import*
+		with
+			language := <nabl-uri-language> uri;
+      import*  := <nabl-get-import-uris-named(|language, ns, name)> uri
+			  		
+	nabl-lookup-unnamed-import(|ns):
+		uri -> import*
+		with
+			language := <nabl-uri-language> uri;
+      import*  := <nabl-get-import-uris-unnamed(|language, ns)> uri
+
+rules // Imports
+
+  nabl-get-import-uris-unnamed(|language, namespace):
+  	uri -> <nabl-get-import-uris-unnamed(|[uri], 0, language, namespace)> uri
+
+  nabl-get-import-uris-unnamed(|seen, count, language, namespace):
+    uri -> result
+    with
+      importResult*        := <nabl-get-all-properties(|Import(language, namespace))> uri;
+      importURI*           := <map(task-get-solved; filter(nabl-uri) <+ task-create-dependencies; ![<id>]); concat> importResult*;
+      if d1 := <task-collect-dependencies> importURI* then
+      	result := [d1]
+      else
+	      importedResult*      := <nabl-get-all-properties(|Import(language, Imported(namespace)))> uri;
+	      importedURI*         := <map(task-get-solved; filter(nabl-uri) <+ task-create-dependencies; ![<id>]); concat> importedResult*;
+	      if d2 := <task-collect-dependencies> importedURI* then
+	      	result := [d2]
+	      else
+		      transitiveImportURI* := <filter(nabl-get-import-uris-unnamed-transitive(|seen, count, language, namespace)); concat> importedURI*;
+		      result               := [importURI*, transitiveImportURI*]
+      	end
+    	end
+
+  nabl-get-import-uris-unnamed-transitive(|seen, count, language, namespace):
+    uri -> transitiveImportURI*
+    where
+    	not(<lt> (count, 1));
+      not(<fetch(?uri)> seen);
+      transitiveImportURI* := <nabl-get-import-uris-unnamed(|[uri|seen], <dec> count, language, namespace)> uri
+
+  nabl-get-import-uris-named(|language, namespace, name):
+    uri -> importURI*
+    with
+      importResult* := <nabl-get-all-properties(|Import(language, namespace, name))> uri;
+      importURI*    := <map(task-get-solved <+ task-create-dependencies; ![<id>]); concat> importResult*
+

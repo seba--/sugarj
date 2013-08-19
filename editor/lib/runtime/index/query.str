@@ -1,0 +1,60 @@
+module runtime/index/query
+
+rules
+
+  /**
+   * Get all index entries that match the given template.
+   *
+   * Example:
+   *   <index-get-all> Def([Entity(), "Bar"]) => [Def([Entity(), "Bar"]), ...]
+   *
+   * @type template -> List(elem)
+   */
+  index-get-all:
+    template -> <prim("LANG_index_get", template)>
+
+  /**
+   * Get all children entries of the given template.
+   *
+   * Example:
+   *   <index-get-children> Def([Entity(), "Bar", "Foo"]) => [Def([Method(), "Bar"]), Def([Field(), "Baz"]), ...]
+   *
+   * @type template -> List(elem)
+   */    
+  index-get-children:
+    template -> <prim("LANG_index_get_children", template)>
+  
+  /**
+   * Gets a list of all partitions for current project.
+   *
+   * Example:
+   *   <index-get-all-partitions> => [("fullpath/file.ext", "subfile"), ...]
+   *
+   * @type x -> List(partition)
+   */   
+  index-get-all-partitions =
+    prim("LANG_index_all_partitions")
+  
+  /**
+   * Gets all index entries for the given partition.
+   *
+   * Examples:
+   *   <index-get-all-in-partition> "fullpath/file.ext" => [Def([Entity(), "Bar"]), ...]
+   *   <index-get-all-in-partition> ("fullpath/file.ext", "subfile") => [Def([Entity(), "Bar"]), ...]
+   *
+   * @type partition -> List(elem)
+   */  
+  index-get-all-in-partition =
+    prim("LANG_index_get_all_in_partition", <id>)
+
+  /**
+   * Gets the containing partitions of index entry with given template.
+   *
+   * Example:
+   *   <index-get-partitions-of> Def([Entity(), "Bar"]) => [("fullpath/file.ext", "subfile"), ...]
+   *
+   * @type template -> List(partition)
+   */  
+  index-get-partitions-of:
+    template -> <prim("LANG_index_get_partitions_of", template)>
+

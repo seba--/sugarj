@@ -1,0 +1,22 @@
+module runtime/index/partition
+
+rules // Construction
+  
+  index-create-partition(|file) =
+    !file
+    
+  index-create-partition(|file, uri) =
+    !(file, uri)
+
+rules // Projections
+	
+	index-partition-file:
+		(file, _) -> file
+		
+	index-partition-file:
+		file -> file
+		where
+			<is-string> file
+		
+  index-partition-uri:
+  	(_, uri) -> uri

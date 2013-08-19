@@ -1,0 +1,35 @@
+module runtime/analysis/single
+
+imports
+	
+  runtime/analysis/core
+    
+rules // Single file analysis
+  
+  analyze-one(|language, path, project-path) = 
+  	analyze-one(id|language, path, project-path)
+  
+  analyze-one(try-recover|language, path, project-path):
+    ast -> 
+    (
+    	analyzed-ast
+		, (error*, warning*, note*)
+		, removed-entry*
+		, added-entry*
+		, removed-task*
+		, added-task*
+		, invalidated-task*
+		, evaluated-task*
+		, skipped-task*
+		, unevaluated-task*
+		)
+    with
+      partition := <analysis-partition(|path, project-path)>;
+      r@(
+      	Result(_, _, analyzed-ast, _, _, _, _)
+      , DebugResult(removed-entry*, added-entry*, removed-task*, added-task*, invalidated-task*)
+      ) := <analyze-collect(try-recover|language, project-path)> File(partition, ast);
+      
+    	(result*, evaluated-task*, skipped-task*, unevaluated-task*) := <analyze-perform-all> [r];
+    	
+    	Result(_, _, _, _, error*, warning*, note*) := <Hd; Fst> result*

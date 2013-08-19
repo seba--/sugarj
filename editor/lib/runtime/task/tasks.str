@@ -1,0 +1,66 @@
+module runtime/task/tasks
+
+imports
+	
+	runtime/task/core
+	runtime/task/interface
+  runtime/nbl/utils
+  
+signature
+
+	constructors
+		
+    Choice  : List(Result)                         -> Instruction
+    Message : List(Result) * MessageTrigger * Term -> Instruction
+    Match   : ID * List(Term) * Term               -> Instruction
+    Rewrite : ID * Term                            -> Instruction
+    Concat  : List(Result)                         -> Instruction
+    
+    Failure  : MessageTrigger // No results
+    Success  : MessageTrigger // At least one result
+    Multiple : MessageTrigger // More than one result
+	
+rules
+	
+	avoid-task(|dep*):
+	  Choice([choice]) -> choice
+	  where
+	    <dependent-tasks> choice => dep*
+	
+	avoid-task(|dep*):
+    Choice(choice*) -> <concat> choice*
+    where
+      [] := <dependent-tasks> choice*
+      
+	perform-task(|nr):
+ 		Choice(choice*) -> <fetch-elem(not(?[]))> choice*
+ 		
+	task-is-combinator = ?Choice(_)
+
+  perform-task(|n):
+    Message(task, trigger, message) -> []
+    where
+    	switch !trigger
+    		case Failure()  : not(<Hd> task); task-add-message(|n, message)
+    		case Success()  : <Hd> task; task-add-message(|n, message)
+    		case Multiple() : <Tl; Hd> task; task-add-message(|n, message)
+    	end
+
+	task-is-combinator = ?Message(_, _, _)
+
+  avoid-task(|dep*):
+    Match(_, _, _) -> <perform-task(|0) <+ ![]>
+    where
+      [] := dep*
+    	
+  perform-task(|nr): 
+  	Match(key, bound, term) -> <task-match> (key, term, bound)
+  
+  perform-task(|nr): 
+    Rewrite(key, term) -> <task-match> (key, term)
+
+  perform-task(|nr):
+  	Concat(term*) -> <concat> term*
+
+	task-is-combinator = ?Concat(_)
+

@@ -1,0 +1,104 @@
+module runtime/types/collect
+
+imports 
+	
+  runtime/task/core
+  runtime/task/messages
+  runtime/task/tasks
+  runtime/types/interface
+  runtime/types/tasks
+  runtime/nbl/collect
+  runtime/nbl/utils
+  runtime/editor/origins
+  
+strategies
+  
+ 	get-property-kinds:
+ 		_ -> [Type()|<iset-elements> iset]
+ 		with
+ 			iset := <new-iset>;
+ 			try(custom-properties(\p* -> <iset-addlist(|p*); fail> iset\))
+ 			
+  annotate-property-tasks(|lang, partition, uri*):
+  	term -> <foldl(annotate-property-task(|lang, partition, uri*) <+ Snd)> (kind*, term')
+  	where
+  		kind* := <get-property-kinds>;
+  		term' := <remove-property-annotations(|kind*)> term
+  
+  annotate-property-task(|lang, partition, uri*):
+    (kind, term{a*}) -> term{(kind, prop), a*}
+    where
+      not(<property-task(|kind)> term)
+    where
+      prop := <new-property-task(|lang, partition, uri*) <+ new-property-task(|partition)> 
+  
+  remove-property-annotations(|kind*) =
+  	!(kind*, <id>); foldl(remove-property-annotation) 
+  	
+	remove-property-annotation:
+		(kind, term) -> <remove-annotations(?(kind, _))> term
+
+     
+  new-property-task(|lang, partition, uri*):
+    (Type(), term) -> <type-of(|lang, partition, uri*) <+ type-of(|partition)> term
+    
+  new-property-task(|partition):
+    (Type(), term) -> <type-of(|partition)> term
+
+  property-task(|kind, task*) = 
+     property-task(|kind)
+  <+ <new-property-task(|task*)> (kind, <id>)
+ 
+  property-task(|kind) = 
+    get-annos
+  ; fetch-elem(?(kind, task))
+  ; !task
+ 
+  property-of(|kind) = property-task(|kind); insert-results; try-remove-list
+    
+strategies
+  
+  prop-calc(|task*, dep*) = 
+    where(all-dep* := <union> (<dependent-tasks>, <dependent-tasks> dep*));
+    <new-task(|task*, all-dep*)> PropCalc(<id>)
+    
+  prop-check(|kind, task*, dep*):
+    (term, expected) -> task
+    where
+      actual    := <property-task(|kind)> term
+    ; expected* := <try-make-list> expected
+    ; check*    := <map(<new-task(|task*)> PropCheck(actual, <id>))> expected*
+    ; task      := <new-task(|task*, <dependent-tasks> [dep*, check*])> Choice(check*)
+  
+  prop-check(|kind, task*, dep*):
+    (term, expected, msg) -> task
+    where
+      task := <prop-check(|kind, task*, dep*)> (term, expected)
+    ; <origin-track-forced(task-create-error-on-failure(|task*, task, msg))> term
+  
+  prop-lookup(|kind, task*, dep*) = 
+    where(all-dep* := <union> (<dependent-tasks> dep*, <dependent-tasks>))
+  ; <new-task(|task*, all-dep*)> PropLookup(kind, <id>) 
+  
+  prop-match(|task*, relation) = 
+    <new-task(|task*)> Rewrite(relation, <id>)
+    
+  prop-match(|task*, relation, dep*) = 
+    where(all-dep* := <union> (<dependent-tasks> dep*, <dependent-tasks>))
+  ; <new-task(|task*)> Rewrite(relation, <id>)
+  
+strategies
+  
+  type-is(|task*)           = prop-calc(|task*, [])
+  type-is(|task*, dep*)     = prop-calc(|task*, dep*)
+  
+  type-check(|task*)        = prop-check(|Type(), task*, [])
+  type-check(|task*, dep*)  = prop-check(|Type(), task*, dep*)
+  
+  type-lookup(|task*)       = prop-lookup(|Type(), task*, [])
+  type-lookup(|task*, dep*) = prop-lookup(|Type(), task*, dep*)
+  
+  type-match(|task*, relation) = prop-match(|task*, relation)
+
+  type-of = property-of(|Type())
+  

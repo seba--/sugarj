@@ -1,0 +1,177 @@
+module runtime/index/core
+
+imports
+	
+	runtime/index/utils
+
+signature
+
+  sorts
+  
+    URI Entry
+  
+rules
+
+  /**
+   * Sets up the index library for given language, project paths and current file.
+   * Must be called once before doing anything with the library.
+   *
+   * Example:
+   *   <index-setup(|"MiniJava", <project-path>)
+   *
+   * @param language          The language to set the index up for.
+   * @param project-path      The project path that contains all source files to analyse.
+   * @type x -> x
+   */
+  index-setup(|language, project-path) =
+    prim("LANG_index_setup_new", language, <index-setup-paths> project-path)
+    
+  index-setup:
+  	(language, project-path) -> <prim("LANG_index_setup_new", language, <index-setup-paths> project-path)>
+    
+  /**
+   * Unloads the currently loaded index.
+   *
+   * Example:
+   *   index-unload(|<project-path>)
+   *
+   * @param project-path The project path that contain all source files to analyse and compile.
+   *
+   * @type x -> x
+   */
+  index-unload(|project-path) =
+    prim("LANG_index_unload", project-path)
+
+  /**
+   * Tries to recover the index from an invalid state, for example after a crash.
+   */
+	index-recover =
+		prim("LANG_index_recover")
+		
+	/**
+	 * Starts collection for given partition. Used in conjunction with index-stop-collection to 
+	 * retrieve a list of added and removed index entries in relation to the previous entries in
+	 * given partition.
+	 *
+	 * Example:
+	 *   index-start-collection(|"fullpath/file.ext")
+	 *   index-start-collection(|("fullpath/file.ext", "subfile"))
+	 *
+	 * @type x -> x
+	 */
+	index-start-collection(|partition) =
+		prim("LANG_index_start_collection", partition)
+		
+	/**
+	 * Stops collection for the partition on which index-start-collection was called. Returns 
+	 * a tuple with removed and added entries in relation to the previous entries in that partition.
+	 *
+	 * Example:
+	 *   index-stop-collection => (removed, added)
+	 *
+	 * @type x -> (List(elem), List(elem))
+	 */
+	index-stop-collection =
+		prim("LANG_index_stop_collection")
+	
+	/**
+	 * Pushes a new index on the stack and sets that as the current index. Entries from the parent
+	 * index are still visible, but additions only apply to the current index. Clearing a partition
+	 * also hides all entries in that partition from the parent index.
+	 *
+	 * Example:
+	 *   index-push
+	 *
+	 * @type x -> x 
+	 */	
+	index-push = 
+		prim("LANG_index_push")
+
+	/**
+	 * Pops the current index from the stack and sets the parent index as the current index. All
+	 * modifications from the current index are discarded. The root index cannot be popped.
+	 *
+	 * Example:
+	 *   index-pop
+	 *
+	 * @type x -> x 
+	 */	
+	index-pop = 
+		prim("LANG_index_pop")
+
+	/**
+	 * Pops the current index from the stack and sets the parent index as the current index. All
+	 * modifications from the current index are merged into the parent index; partitions that were
+	 * cleared in the current index are cleared in the parent, and entries added to the current
+	 * index are also added to the parrent. The root index cannot be merged.
+	 *
+	 * Example:
+	 *   index-merge
+	 *
+	 * @type x -> x 
+	 */	
+	index-merge = 
+		prim("LANG_index_merge")
+		
+  /**
+   * Adds given element to the index.
+   *
+   * Example:
+   *   <index-add(|"fullpath/file.ext")> Def([Entity(), "Bar"])
+   *   <index-add(|("fullpath/file.ext", "subfile"))> Def([Entity(), "Bar"])
+   *
+   * @param partition The partition to add the element to.
+   * @type x -> ?x
+   */
+  index-add(|partition) =
+    prim("LANG_index_add", <id>, partition)
+
+  /**
+   * Adds all given elements to the index.
+   *
+   * Example:
+   *   <index-add-all(|"fullpath/file.ext")> [Def([Entity(), "Bar"]), ...]
+   *   <index-add-all(|("fullpath/file.ext", "subfile"))> [Def([Entity(), "Bar"]), ...]
+   *
+   * @param partition The partition to add the elements to.
+   * @type List(x) -> ?List(x)
+   */
+  index-add-all(|partition) =
+    list-loop(with(index-add(|partition)))
+    
+  /**
+   * Removes all elements from the index that are contained in given partition.
+   *
+   * Example:
+   *   <index-clear-partition> "fullpath/file.ext"
+   *   <index-clear-partition> ("fullpath/file.ext", "subfile")
+   *
+   * @type x -> ?x
+   */
+  index-clear-partition = 
+    prim("LANG_index_clear_partition", <id>)
+    
+  /**
+   * Removes all elements from the index.
+   *
+   * @type x -> x
+   */
+  index-reset = 
+    prim("LANG_index_clear_all")
+    
+  /**
+   * Removes all elements from the index and re-analyzes all partitions in the project.
+   *
+   * @type x -> x
+   */
+  index-reload = 
+    prim("LANG_index_reload")
+   
+  /**
+   * Persists index to a cache on disk.
+   *
+   * @type x -> x
+   */
+  index-persist = 
+    prim("LANG_index_persist")
+

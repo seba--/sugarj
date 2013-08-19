@@ -1,0 +1,55 @@
+module runtime/editor/origins
+
+imports
+	
+	runtime/editor/editor
+
+strategies
+  
+  origin-term      = prim("SSL_EXT_origin_term", <id>)
+  origin-text      = prim("SSL_EXT_origin_text", <id>)
+  origin-offset    = prim("SSL_EXT_origin_offset", <id>)
+  origin-location  = prim("SSL_EXT_origin_location", <id>)
+  origin-line      = origin-location => (<id>, _, _, _)
+  origin-column    = origin-location => (_, <id>, _, _)
+  origin-file      = prim("SSL_EXT_origin_file", <id>)
+  origin-strip     = prim("SSL_EXT_origin_strip", <id>)
+  origin-equal(|t) = prim("SSL_EXT_origin_equal", <id>, t)
+
+	origin-location-offset = prim("SSL_EXT_origin_location_offset", <id>)
+	origin-location-offset-set(|origin-location-offset) = prim("SSL_EXT_set_origin_location_offset", origin-location-offset)
+
+  origin-language-description =
+    prim("SSL_EXT_languagedescription", <id>)
+
+  origin-language =
+    origin-file; 
+    origin-language-description;
+    Fst
+  
+  origin-surrounding-comments =
+    prim("SSL_EXT_origin_surrounding_comments", <origin-language>, <id>)
+    
+  origin-documentation-comment =
+    origin-surrounding-comments;
+    filter(string-as-chars(documentation-comment-chars));
+    concat-strings
+  
+  documentation-comment-chars:
+    ['*' | c*] -> <ltrim(' ' + '\t' + '\n' + '\r')> c*
+
+  origin-track-forced(s) =
+    ![<id>]; all(s); ?[<id>]
+
+  origin-relative-path:
+    trm -> rel-path
+    where
+      full-path := <origin-file> trm;
+      len-project-prefix := <project-path; string-length; inc>;
+      rel-path := <string-as-chars(drop(|len-project-prefix))> full-path
+
+	origin-debug:
+		term -> term
+		with
+			<(origin-term     <+ !"Failed"); debug(!"origin-trm: ")> term;
+			<(origin-location <+ !"Failed"); debug(!"origin-loc: ")> term 

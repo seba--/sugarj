@@ -1,0 +1,65 @@
+module runtime/analysis/debug
+
+imports
+	
+	runtime/index/core
+	runtime/index/query
+	runtime/task/core
+	runtime/task/debug
+
+rules
+	
+  analysis-debug-show-current-partition(|language):
+    (_, _, _, path, project-path) -> (filename, result)
+    with
+    	partition := $[[project-path]/[path]];
+      index-setup(|language, project-path);
+      filename := <guarantee-extension(|"index.current.aterm")> path;
+      result   := <index-get-all-in-partition> partition
+      
+  analysis-debug-show-all-partitions(|language):
+    (_, _, _, path, project-path) -> (filename, result)
+    with
+    	partition := $[[project-path]/[path]];
+      index-setup(|language, project-path);
+      filename := <guarantee-extension(|"index.all.aterm")> path;
+      result   := <index-get-all-partitions; map(\filename -> (filename, <index-get-all-in-partition> filename)\)>
+      
+  analysis-debug-show-tasks(|language):
+    (_, _, _, path, project-path) -> (filename, result)
+    with
+    	partition := $[[project-path]/[path]];
+      task-setup(|project-path);
+      filename := <guarantee-extension(|"task.current.aterm")> path;
+      result   := <task-debug-info(|partition)>
+      
+  analysis-debug-show-tasks-selection(|language):
+    (selected, _, _, path, project-path) -> (filename, result)
+    with
+    	partition := $[[project-path]/[path]];
+      task-setup(|project-path);
+      filename := <guarantee-extension(|"task.selected.aterm")> path;
+      result   := <task-debug-ast> selected
+      
+  analysis-debug-reset-index(|language):
+    (_, _, _, path, project-path) -> None()
+    with
+    	partition := $[[project-path]/[path]];
+      index-setup(|language, project-path);
+      index-reset
+      
+  analysis-debug-reset-task(|language):
+    (_, _, _, path, project-path) -> None()
+    with
+      task-setup(|project-path);
+      task-reset
+
+  analysis-debug-reanalyze(|language):
+    (_, _, _, path, project-path) -> None()
+    with
+    	partition := $[[project-path]/[path]];
+    	task-setup(|project-path);
+    	task-reset;
+      index-setup(|language, project-path);
+      index-reload
+

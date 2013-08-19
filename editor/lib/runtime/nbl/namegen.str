@@ -1,0 +1,77 @@
+module runtime/nbl/namegen
+
+imports
+	
+	runtime/nbl/collect
+	runtime/nbl/query
+	runtime/nbl/uri
+	runtime/nbl/utils
+	runtime/nbl/interface
+	runtime/editor/origins
+	runtime/index/core
+	runtime/index/query
+	
+signature
+
+	constructors
+		
+		GenerateName : Namespace -> GenerateName
+		GenerateNum  : URI * Int -> Entry
+	
+rules
+	
+	nabl-namegen-stem(|ns) = add-annotation(|GenerateName(ns))
+
+rules // Name generation
+	
+	nabl-namegen(|lang, partition, unique*, uri*, anno*):
+		name -> <origin-track-forced(!newname{anno'*})> name
+		where
+			<has-annotation(?GenerateName(ns))> name;
+			uri      := <lookup-uri(|lang, ns)> uri*;
+			newname  := <nabl-namegen-get(|lang, partition, ns, uri, unique*)> name;
+			anno'*   := <remove-all(?GenerateName(_))> anno*
+	
+	nabl-namegen-get(|lang, partition, ns, uri, unique*):
+		name -> result
+		with
+			name-key := (name, "namegen");
+      if full-newname := <hashtable-get(|name-key)> unique* then
+        result := full-newname
+      else
+        nextnum := <nabl-namegen-get-num(|uri) <+ !0>;
+        numstr  := <int-to-string> nextnum;
+        newname := <nabl-namegen-name-create(|lang, partition, uri, ns)> numstr;
+        result  := $[[newname][numstr]];
+        <hashtable-put(|name-key, result)> unique*;
+        <inc; nabl-namegen-store-num(|partition, uri)> nextnum
+      end
+
+rules // Name generation strategies
+      
+  nabl-namegen-name-create(|lang, partition, uri, ns) = 
+  	nabl-namegen-name(|lang, partition, uri, ns) <+ nabl-namegen-name-generic(|lang, partition, uri, ns)
+      
+  nabl-namegen-name-generic(|lang, partition, uri, ns):
+  	name -> <nabl-namegen-name-generic-fix> 
+			$[[<nabl-namegen-name-generic-str> lang-name][<nabl-namegen-name-generic-str> partition][ns-name][uri-name][name]]
+  	with
+  		Language(lang-name) := lang;
+  		ns-name             := <get-constructor; nabl-namegen-name-generic-str> ns;
+  		uri-name            := <nabl-uri-path; filter(nabl-segment-name; nabl-namegen-name-generic-str); concat-strings> uri
+  
+  nabl-namegen-name-generic-str = 
+  	explode-string; reverse; (take(|3) <+ take(|2) <+ take(|1) <+ ![]); reverse; implode-string
+  		
+	nabl-namegen-name-generic-fix = 
+		lower-case; string-replace(|"/", "_"); string-replace(|"-", "_"); string-replace(|".", "_")
+
+rules // Storage & retrieval
+	
+	nabl-namegen-get-num(|uri)              = <nabl-get-all-values; !(<id>, 0); foldl(max)> GenerateNum(uri, ())
+	nabl-namegen-store-num(|partition, uri) = <index-add(|<nabl-namegen-partition(|partition)>)> GenerateNum(uri, <id>)
+	nabl-namegen-clear(|partition)          = nabl-namegen-partition(|partition); index-clear-partition
+	nabl-namegen-partition(|partition)      = !$[[partition]_namegen]
+	nabl-uri                                : GenerateNum(uri, _) -> uri
+	nabl-value                              : GenerateNum(_, num) -> num
+	

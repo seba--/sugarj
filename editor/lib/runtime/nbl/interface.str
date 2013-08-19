@@ -1,0 +1,53 @@
+module runtime/nbl/interface
+
+strategies // Collect
+  
+	nabl-scoping-site = fail
+	
+	nabl-def-site(
+	  child-uris, sibiling-uris, implicits
+	| lang, partition, unique*, uri*, state*
+	) = fail
+	
+	nabl-external-def-site(|partition) = fail
+
+	nabl-state-site = fail
+	
+	nabl-use-site(|lang, partition, unique*, uri*, state*) = fail
+	
+	nabl-import-site(|lang, partition, uri*, state*) = fail
+	
+	nabl-prop-site(|lang, partition, state*, implicit*) = fail
+	
+strategies // Projections
+  
+	nabl-name = fail
+	
+	nabl-name-apply(s) = fail
+	
+	nabl-scopes = fail
+
+strategies // Tasks
+  
+	calc-property = fail
+
+	message-task(|partition) = fail
+	
+strategies // Lookup hooks
+	
+	nabl-property-eq(|kind) = fail
+	
+	nabl-disambiguate(|prop*, namespace, name) = fail
+
+strategies // Name generation
+	
+	nabl-namegen-name(|lang, partition, uri, ns) = fail
+	
+strategies // Default error checks
+	
+	nabl-check-disable-unresolved = fail
+	
+	nabl-check-disable-duplicate(|uri, ns) = fail
+	
+	nabl-check-disable-hiding(|uri, ns) = fail
+	

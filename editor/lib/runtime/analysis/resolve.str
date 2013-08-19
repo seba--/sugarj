@@ -1,0 +1,21 @@
+module runtime/analysis/resolve
+
+imports
+	
+	runtime/nbl/resolve
+	runtime/task/core
+	runtime/index/core
+	runtime/index/query
+	
+rules
+	
+	analysis-resolve(|language, project-path):
+		node -> definition
+		where
+			task-setup(|project-path);
+    	index-setup(|language, project-path);
+    	<nabl-has-reference> node;
+    	definition := <nabl-collect-one-resolved-def; index-get-all; Hd> node
+    	
+	// Legacy
+	analysis-resolve(|language, project-path, path) = analysis-resolve(|language, project-path)

@@ -1,0 +1,36 @@
+module runtime/nbl/resolve
+
+imports
+  
+  runtime/nbl/tasks
+	runtime/nbl/entries
+	runtime/nbl/utils
+	runtime/task/core
+  runtime/task/utils
+  
+rules // Reference resolution
+  
+  nabl-is-reference =
+    ?Use(_)
+    
+  nabl-has-reference =
+    collect-one(nabl-is-reference)
+    
+  nabl-has-reference =
+    has-annos;
+    get-annos;
+    nabl-has-reference
+  
+	nabl-collect-all-resolved-defs:
+		ast -> def*
+		with
+			if ast' := <insert-results> ast then
+				def* := <collect-all-annos(?Def(_), conc)> ast'
+			else
+				def* := []
+			end
+
+	nabl-collect-one-resolved-def =
+		insert-results-or-create-dependency;
+		collect-one-annos(?Def(_) <+ ?Dependency(_))
+	

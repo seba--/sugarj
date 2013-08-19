@@ -1,0 +1,48 @@
+module runtime/analysis/reanalysis
+
+imports
+	
+	runtime/analysis/core
+	runtime/analysis/single
+	runtime/analysis/defaults
+	runtime/task/core
+	runtime/index/core
+	runtime/nbl/collect
+	runtime/nbl/namegen
+
+rules
+	
+	start-reanalysis(|language, path, project-path) =
+		nabl-namegen-clear(|<analysis-partition(|path, project-path)>);
+		index-push;
+		task-push
+		
+	stop-reanalysis(|language, path, project-path) =
+		task-pop;
+		index-pop
+	
+	reanalysis(s|language, path, project-path) =
+		where(start-reanalysis(|language, path, project-path); s; stop-reanalysis(|language, path, project-path))
+	
+  reanalyze-ast(|language, path, project-path):
+    ast -> analyzed-ast
+    with
+	    (
+	    	analyzed-ast
+			, (error*, warning*, note*)
+			, removed-entry*
+			, added-entry*
+			, removed-task*
+			, added-task*
+			, invalidated-task*
+			, evaluated-task*
+			, skipped-task*
+			, unevaluated-task*
+			) := <analyze-one(fail|language, path, project-path)> ast;
+			
+      <analysis-debug-results> (removed-entry*, added-entry*, removed-task*, added-task*, invalidated-task*, evaluated-task*, skipped-task*, unevaluated-task*);
+      
+      <map(analysis-default-debug(!"Error: "))> error*;
+      <map(analysis-default-debug(!"Warning: "))> warning*;
+      <map(analysis-default-debug(!"Note: "))> note*
+

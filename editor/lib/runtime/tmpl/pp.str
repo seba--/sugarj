@@ -1,0 +1,34 @@
+module runtime/tmpl/pp
+
+imports
+  libstratego-lib
+  libstratego-gpp
+
+signature constructors
+
+  Parenthetical : Unknown -> Unknown
+
+strategies
+
+  // Unwrap Parenthetical/1 if pp fails, in case the user is using
+  // parenthesize, but grammar does not contain {bracket} production.
+  pp-one(pp) = (pp <+ ?Parenthetical(<pp>)); filter(gpp-is-real-vbox)
+
+  pp-one-V(pp) = pp-one(pp); (?[] <+ !V([], <id>))
+  pp-one-Z(pp) = pp-one(pp); (?[] <+ !Z([], <id>))
+
+  pp-option(pp) = \None() -> []\ + ?Some(<pp>)
+
+  pp-V-list(pp)    = ?[] <+ !V([], <map(pp-one-V(pp))>)
+  pp-V-list(pp|vs) = ?[] <+ !V([SOpt(VS(), vs)], <map(pp-one-V(pp))>)
+
+  pp-indent(|is) = filter(gpp-is-real-vbox); (?[] <+ !I([SOpt(IS(), is)], H([SOpt(HS(), "0")], <id>)))
+
+  pp-H-list(pp)     = ?[] <+ !H([], <map(pp-one-Z(pp))>)
+  pp-H-list(pp|sep) = ?[] <+ !H([SOpt(HS(), "0")], <map(pp-one-Z(pp)); separate-by(|S(sep))>)
+
+  pp-HV-list(pp)     = ?[] <+ !HV([SOpt(HS(), "0")], <map(pp-one-Z(pp))>)
+  pp-HV-list(pp|sep) = ?[] <+ !HV([SOpt(HS(), "0")], <map(pp-one-Z(pp)); separate-by(|S(sep))>)
+
+  pp-HZ-list(pp)     = ?[] <+ !HZ([SOpt(HS(), "0")], <map(pp-one-Z(pp))>)
+  pp-HZ-list(pp|sep) = ?[] <+ !HZ([SOpt(HS(), "0")], <map(pp-one-Z(pp)); separate-by(|S(sep))>)

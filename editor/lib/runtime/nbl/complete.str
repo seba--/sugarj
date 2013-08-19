@@ -1,0 +1,24 @@
+module runtime/nbl/complete
+
+imports
+	
+	runtime/nbl/collect
+  runtime/nbl/uri
+  runtime/task/core
+  
+signature
+
+  constructors
+    
+    COMPLETION : String -> COMPLETION
+    
+rules // Code completion
+
+  nabl-propose-completions:
+    ast -> proposal*
+    with
+	    	completion* := <collect-one(?COMPLETION(_)); nabl-collect-all-completion> ast;
+				def*        := <mapconcat(\Completion(result) -> result\; task-get-solved)> completion*;
+				proposal*   := <map(nabl-uri; nabl-uri-name)> def*
+			<+
+				proposal*   := []

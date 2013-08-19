@@ -1,0 +1,18 @@
+module runtime/analysis/complete
+
+imports
+	
+	runtime/nbl/complete
+	runtime/task/core
+	runtime/index/core
+	
+rules
+	
+	analysis-propose-completions(|language, project-path):
+		ast -> <nabl-propose-completions> ast
+		with
+    	task-setup(|project-path);
+    	index-setup(|language, project-path)
+
+	// Legacy
+	analysis-propose-completions(|language, project-path, path) = analysis-propose-completions(|language, project-path)

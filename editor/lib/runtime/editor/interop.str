@@ -1,0 +1,6 @@
+module runtime/editor/interop
+
+rules
+	
+  foreign-call(|lang,strategy) = prim("SSL_EXT_foreigncall", lang, strategy)
+

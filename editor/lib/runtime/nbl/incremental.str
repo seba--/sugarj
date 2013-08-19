@@ -1,0 +1,49 @@
+module runtime/nbl/incremental
+
+imports
+	
+	runtime/nbl/uri
+	runtime/nbl/entries
+	runtime/task/core
+	
+rules // Read generation
+	
+	nabl-add-uri-read(|taskID):
+		uri -> uri
+		with
+			<try(nabl-replace-uri-qualifier(|())); task-add-read(|taskID)> uri
+			
+	nabl-add-ns-read(|taskID, ns):
+		uri -> uri
+		with
+			<task-add-read(|taskID)> (uri, ns)
+			
+	nabl-add-name-read(|taskID, ns, name):
+		uri -> uri
+		with
+			<nabl-extend-uri(|ns, name, ()); task-add-read(|taskID)> uri
+			
+rules // Read processing
+	
+	nabl-get-changed-reads:
+		changed-entry* -> [uri-read*, ns-read*]
+		with
+			uri*      := <filter(nabl-diff-entry; nabl-uri)> changed-entry*;
+			uri-read* := <map(try(nabl-replace-uri-qualifier(|())))> uri*;
+			ns-read*  := <filter(nabl-create-ns-read)> uri*
+	
+	nabl-create-ns-read:
+		uri -> (uri', ns)
+		where
+			ns   := <nabl-uri-namespace> uri;
+			uri' := <nabl-uri-parent> uri
+
+  nabl-diff-entry =
+    ?Def(_)
+ 
+  nabl-diff-entry =
+    ?Alias(_, _)
+    
+  nabl-diff-entry =
+    ?Prop(_, _, _)
+

@@ -1,0 +1,31 @@
+module runtime/task/debug
+
+imports
+	
+	runtime/task/core
+
+rules
+	
+	task-transitive-dependencies = task-transitive-dependencies(|[])
+	
+	task-transitive-dependencies(|seen):
+		taskID -> [dep*, trans-dep*]
+		where
+			not(<elem> (taskID, seen));
+			dep*       := <task-get-dependencies> taskID;
+			trans-dep* := <mapconcat(task-transitive-dependencies(|[taskID|seen]))> dep*
+			
+	task-transitive-dependencies(|seen):
+		taskID -> []
+		where
+			<elem> (taskID, seen)
+			
+rules
+	
+	task-debug-ast:
+		ast -> debug*
+		with
+			resultID* := <task-collect-result-ids> ast;
+			dep*      := <mapconcat(task-transitive-dependencies)> resultID*;
+			debug*    := <make-set; map(task-debug-info(|<id>))> [resultID*, dep*]
+

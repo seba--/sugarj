@@ -1,0 +1,55 @@
+module runtime/types/tasks
+
+imports 
+	
+	runtime/nbl/resolve
+	runtime/nbl/collect
+	runtime/nbl/entries
+	runtime/nbl/query
+	runtime/nbl/incremental
+	runtime/nbl/utils
+	runtime/nbl/uri
+	runtime/nbl/tasks
+  runtime/types/interface
+  runtime/task/core
+  
+signature
+  
+  constructors
+
+    PropLookup : Property * Term -> Instruction
+    PropCalc   : Term            -> Instruction
+    PropCheck  : Term * Term     -> Instruction
+
+rules
+  
+  perform-task(|n): 
+  	PropLookup(kind, t) -> result
+  	where
+  		resolved := <nabl-collect-one-resolved-def> t;
+  		uri      := <nabl-uri> resolved;
+  		<nabl-add-uri-read(|n)> uri;
+  		prop     := <nabl-get-property(|kind); insert-results-or-create-dependency> uri;
+      switch id
+      	case task-collect-dependencies => d : !d
+      	otherwise                           : id
+      end => result
+  
+  avoid-task(|dep*):
+    PropCalc(_) -> <perform-task(|0)> 
+    where
+      [] := dep*
+  	
+  perform-task(|n): 
+  	PropCalc(result) -> result
+  
+  avoid-task(|dep*):
+    PropCheck(actual, expected) -> <perform-task(|0) <+ ![]> 
+    where
+      [] := dep*
+  	
+  perform-task(|n): 
+  	PropCheck(actual, expected) -> actual
+  	where
+  		<type-prop-eq> (actual, expected)
+

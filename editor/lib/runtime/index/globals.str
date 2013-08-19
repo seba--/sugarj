@@ -1,0 +1,196 @@
+module runtime/index/globals
+
+imports
+
+	runtime/index/core
+	runtime/index/query
+  
+signature 
+
+  constructors
+    
+    Global : URI               -> Entry
+    Global : URI * List(Entry) -> Entry
+    
+rules
+    
+  /**
+   * Gets the 'fake' path where globals are stored in the index.
+   *
+   * @internal
+   */
+  index-globals-path:
+  	names -> <separate-by(|"/"); concat-strings> path
+    with
+      if is-list then
+        path := <concat> [names, ["globals", ".internal"]]
+      else
+        path := [names, "global", ".internal"]
+      end
+    
+  /**
+   * Gets the URI where globals are stored in the index for given name or names.
+   *
+   * @internal
+   * @type name or List(name) -> uri
+   */
+  index-globals-uri:
+    names -> uri
+    with
+      if is-list then
+        uri := <concat> [names, ["globals", ".internal"]]
+      else
+        uri := [names, "global", ".internal"]
+      end
+    
+  /**
+   * Gets the first value in global storage with given name, or fail.
+   *
+   * Example:
+   *   index-get-global(|"last-compile") => Timestamp(1334322856)
+   *   index-get-global(|["last-compile", "file.str"]) => Timestamp(1334322856)
+   * 
+   * @param name  The name or list of names to identify the global value.
+   * @type _ -> ?value
+   */
+  index-get-global(|name):
+    _ -> value
+    where
+      Global(_, value) := <index-get-all; Hd> Global(<index-globals-uri> name, ())
+    
+  /**
+   * Gets all values in global storage with given name.
+   *
+   * Example:
+   *   index-get-global(|"last-compile") => [Timestamp(1334322856), ...]
+   *   index-get-global(|["last-compile", "file.str"]) => [Timestamp(1334322856), ...]
+   *
+   * @param name  The name or list of names to identify the global value.
+   * @type _ -> List(value)
+   */ 
+  index-get-all-globals(|name):
+    _ -> values'
+    with
+      values  := <index-get-all> Global(<index-globals-uri> name, ());
+      values' := <filter(?Global(_, <id>))> values
+    
+  /**
+   * Add value to global storage with given name.
+   *
+   * Example:
+   *   <index-add-global(|"last-compile")> Timestamp(1334322856)
+   *   <index-add-global(|["last-compile", "file.str"])> Timestamp(1334322856)
+   *
+   * @param name  The name or list of names to identify the global value.
+   * @type x -> x
+   */   
+  index-add-global(|name):
+    value -> <id>
+    with
+      <index-add(|<index-globals-path>)> Global(<index-globals-uri> name, value)
+      
+  /**
+   * Overwrites value in global storage with given value.
+   *
+   * Example:
+   *   <index-set-global(|"last-compile")> Timestamp(1334322856)
+   *   <index-set-global(|["last-compile", "file.str"])> Timestamp(1334322856)
+   *
+   * @param name  The name or list of names to identify the global value.
+   * @type x -> x
+   */   
+  index-set-global(|name):
+    value -> <id>
+    with
+      index-clear-global(|name);
+      <index-add-global(|name)> value
+    
+  /**
+   * Removes all values from global storage with given name.
+   *
+   * Example:
+   *   index-clear-global(|"last-compile")
+   *   index-clear-global(|["last-compile", "file.str"])
+   *
+   * @param name  The name or list of names to identify the global value.
+   * @type x -> x
+   */   
+  index-clear-global(|name):
+    _ -> <id>
+    with
+      <index-globals-path; index-clear-partition> name
+rules
+	
+  /**
+   * Gets the 'fake' path where boolean globals are stored in the index.
+   *
+   * @internal
+   */
+  index-boolean-globals-path:
+  	names -> <separate-by(|"/"); concat-strings> path
+    with
+      if is-list then
+        path := <concat> [names, ["boolean", "globals", ".internal"]]
+      else
+        path := [names, "boolean", "global", ".internal"]
+      end
+	      
+  /**
+   * Gets the URI where boolean globals are stored in the index for given name or names.
+   *
+   * @internal
+   */
+  index-boolean-globals-uri:
+    names -> uri
+    with
+      if is-list then
+        uri := <concat> [names, ["boolean", "globals", ".internal"]]
+      else
+        uri := [names, "boolean", "global", ".internal"]
+      end
+      
+  /**
+   * Sets boolean value true to global boolean storage with given name.
+   *
+   * Example:
+   *   index-enable-global(|"can-compile")
+   *   index-enable-global(|["can-compile", "file.str"])
+   *
+   * @param name  The name or list of names to identify the global boolean value.
+   * @type x -> x
+   */   
+  index-enable-global(|name):
+    _ -> <id>
+    with
+      <index-add(|<index-globals-path>)> Global(<index-boolean-globals-uri> name)
+      
+  /**
+   * Sets boolean value false to global boolean storage with given name.
+   *
+   * Example:
+   *   index-disable-global(|"can-compile")
+   *   index-disable-global(|["can-compile", "file.str"])
+   *
+   * @param name  The name or list of names to identify the global boolean value.
+   * @type x -> x
+   */   
+  index-disable-global(|name):
+    _ -> <id>
+    with
+      <index-boolean-globals-path; index-clear-partition> name
+      
+  /**
+   * Query for boolean value true in global boolean storage with given name.
+   *
+   * Example:
+   *   index-is-global-enabled(|"can-compile")
+   *   index-is-global-enabled(|["can-compile", "file.str"])
+   *
+   * @param name  The name or list of names to identify the global boolean value.
+   * @type x -> ?x
+   */   
+  index-is-global-enabled(|name):
+    _ -> <id>
+    where
+      <index-get-all; Hd> Global(<index-boolean-globals-uri> name)
+

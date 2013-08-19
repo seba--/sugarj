@@ -1,0 +1,11 @@
+module editor/SugarJ-Outliner.generated
+
+imports
+  include/SugarJ
+  lib/runtime/editor/outline-library
+
+rules
+
+  outline = simple-label-outline(to-outline-label)
+  
+  to-outline-label = fail

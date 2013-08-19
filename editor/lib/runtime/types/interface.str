@@ -1,0 +1,14 @@
+module runtime/types/interface
+
+strategies
+  
+  custom-properties(add-properties) = fail
+  
+  new-property-task(|task*): (kind, term) -> <fail>
+
+  type-of(|partition) = fail
+  
+  type-of(|lang, partition, uri*) = fail
+
+  type-prop-eq = eq
+

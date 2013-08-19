@@ -1,0 +1,246 @@
+module runtime/nbl/uri
+
+imports
+  
+  runtime/nbl/interface
+  runtime/index/core
+  
+signature
+
+  sorts
+  
+    Language
+    Segment
+    Qualifier
+    
+  constructors
+    
+    Language    : String                       -> Language
+    ID          : Namespace * Name * Qualifier -> Segment
+    Subsequent  : String                       -> Segment
+    Anonymous   : String                       -> Segment
+    ExternalDef : String                       -> Segment
+    Unique      : String                       -> Qualifier
+    NonUnique   :                                 Qualifier
+    Unique      :                                 Qualifier
+    URI         : Language * List(Segment)     -> URI
+    
+rules // Construction
+  
+  nabl-base-uri = 
+    !URI(<id>, [])
+     
+  nabl-extend-uri(|segment) = 
+    URI(id, ![segment|<id>])
+    
+  nabl-extend-uri(|namespace, name, qualifier) = 
+    URI(id, ![ID(namespace, name, qualifier)|<id>])
+    
+  nabl-replace-uri(|segment) = 
+    URI(id, [!segment|id])
+    
+  nabl-replace-uri(|namespace, name, qualifier) = 
+    URI(id, [!ID(namespace, name, qualifier)|id])
+    
+  nabl-replace-uri-qualifier(|qualifier) =
+    URI(id, [ID(id, id, !qualifier)|id])
+      
+  nabl-external-segment: Anonymous(name) -> ExternalDef(name)
+  
+	nabl-nonunique-uri =
+		URI(id, [ID(id, id, !NonUnique())|id])
+
+rules // stable URI extensions
+  
+  nabl-extend-uri(|table, partition, ns, n, u):
+    uri -> <nabl-extend-uri(|ns, n, qualifier)> uri
+    where 
+	    if where(<?NonUnique()> u) then
+	      qualifier := NonUnique()
+	    else
+	      qualifier := Unique(<stable-uri-part(|table, partition)> (partition, uri, ns, n))
+	    end
+    
+  nabl-extend-uri-anonymous(|table, partition):
+    uri -> <nabl-extend-uri(|Anonymous(unique))> uri
+    where
+      unique := <stable-uri-part(|table, partition)> (partition, uri, "anonymous")
+      
+  nabl-extend-uri-subsequent(|table, partition):
+    uri -> <nabl-extend-uri(|Subsequent(unique))> uri
+    where
+      unique := <stable-uri-part(|table, partition)> (partition, uri, "subsequent")
+
+  stable-uri-part(|table, partition):
+    key -> $[[partition]/[unique]]
+    where
+      if value := <hashtable-get(|key)> table then
+        unique    := <int-to-string> value;
+        new-value := <inc> value
+      else
+        unique    := "0";
+        new-value := 1
+      end;
+      <hashtable-put(|key, new-value)> table
+      
+rules // Projections
+  
+  nabl-uri = fail
+  nabl-uris = fail
+  nabl-value = fail
+  nabl-values = fail
+  
+  nabl-uri-language:
+    URI(language, _) -> language
+    
+  nabl-uri-language-name:
+    URI(Language(name), _) -> name
+    
+  nabl-uri-path:
+    URI(_, path) -> path
+    
+  nabl-uri-parent:
+    URI(language, path) -> URI(language, parent)
+    where
+      [_|parent] := path
+  
+  nabl-uri-parent(|targetNamespace):
+    URI(language, path) -> URI(language, parent')
+    where
+      [_|parent] := path;
+      if [segment|_] := parent; namespace := <nabl-segment-namespace> segment then
+        if <nabl-scopes> (namespace, targetNamespace) then
+          parent' := parent
+        else
+          parent' := <nabl-uri-parent(|targetNamespace)> parent
+        end
+      else
+        parent' := parent
+      end
+      
+  nabl-uri-name:
+    uri -> <nabl-uri-path; Hd; nabl-segment-name> uri
+    
+  nabl-uri-namespace:
+    uri -> <nabl-uri-path; Hd; nabl-segment-namespace> uri    
+
+  nabl-uri-qualifier:
+    uri -> <nabl-uri-path; Hd; nabl-segment-qualifier> uri
+      
+  nabl-segment-namespace:
+    ID(namespace, _, _) -> namespace
+    
+  nabl-segment-name:
+    ID(_, name, _) -> name
+    
+  nabl-segment-name:
+  	Subsequent(name) -> name
+  
+	nabl-segment-name:
+  	Anonymous(name) -> name
+  	
+	nabl-segment-name:
+  	ExternalDef(name) -> name
+    
+  nabl-segment-qualifier:
+    ID(_, _, qualifier) -> qualifier
+    
+  nabl-uri-scope      = URI(id, Tl)
+  nabl-uri-scopes    = nabl-closure(nabl-uri-scope)
+  
+  nabl-uri-in-scope  = URI(id, [id|Tl])
+  nabl-uri-in-scopes = nabl-closure(nabl-uri-in-scope)
+  
+  nabl-closure(s) = 
+      s 
+    < ![<id>|<nabl-closure(s)>] 
+    + ![]
+
+rules // Conditions
+  
+  nabl-is-uri =
+  	?URI(_, _)
+  
+  nabl-is-unique =
+    nabl-uri-qualifier;
+    ?Unique(_)
+    
+  nabl-is-nonunique =
+    nabl-uri-qualifier;
+    ?NonUnique()
+    
+  nabl-segment-is-id =
+  	?ID(_, _, _)
+
+rules // Equality
+  
+  nabl-uri-eq = 
+    ?(URI(lang1, segs1), URI(lang2, segs2));
+    <eq> (lang1, lang2);
+    <zip(nabl-uri-segment-eq)> (segs1, segs2)
+    
+  nabl-uri-segment-eq =
+    ?(ID(ns1, name1, _), ID(ns2, name2, _));
+    <eq> (ns1, ns2);
+    <eq> (name1, name2)
+     
+  nabl-uri-segment-eq =
+    ?(Subsequent(_), Subsequent(_))
+    
+  nabl-uri-segment-eq =
+    ?(Anonymous(_), Anonymous(_))
+    
+  nabl-uri-segment-eq =
+    ?(ExternalDef(_), ExternalDef(_))
+
+rules // Printing
+  
+  nabl-print-uri:
+    uri -> $[[ns] [names]]
+    where
+      ns#(_) := <nabl-uri-namespace> uri;
+      names  := <nabl-uri-path; filter(nabl-segment-name); separate-by(|"."); concat-strings> uri
+        
+rules /** @internal Projections */
+
+  /** @internal */
+  nabl-uri:
+    URI(_, _) -> <id>
+    
+  /** @internal */
+  nabl-value:
+    URI(_, _) -> <id>
+ 
+  /** @internal */
+  nabl-uris:
+    URI(_, _) -> [<id>]
+    
+  /** @internal */
+  nabl-values:
+    URI(_, _) -> [<id>]
+
+    
+  /** @internal */  
+  nabl-uri =
+  	has-annos;
+  	get-annos;
+  	fetch-elem(nabl-uri)
+
+  /** @internal */  
+  nabl-value =
+  	has-annos;
+  	get-annos;
+  	fetch-elem(nabl-value)
+
+  /** @internal */  
+  nabl-uris =
+  	has-annos;
+  	get-annos;
+  	filter(nabl-uri)
+
+  /** @internal */  
+  nabl-values =
+  	has-annos;
+  	get-annos;
+  	filter(nabl-value)
+

@@ -1,0 +1,123 @@
+module runtime/task/messages
+
+imports
+	
+	runtime/task/core
+	runtime/task/tasks
+	runtime/editor/origins
+	
+signature
+
+	sorts
+	
+		Message
+		
+	constructors
+		
+    Error   : Origin * Term * Msg -> Message
+    Warning : Origin * Term * Msg -> Message
+    Note    : Origin * Term * Msg -> Message
+
+overlays
+	
+	MISSING_ORIGIN = "MISSING ORIGIN INFORMATION"
+    
+rules
+	
+	task-error-message(|message):
+		term -> Error(<task-message-origin-location-offset> term, term, message)
+		
+	task-warning-message(|message):
+    term -> Warning(<task-message-origin-location-offset> term, term, message)
+    
+	task-note-message(|message):
+    term -> Note(<task-message-origin-location-offset> term, term, message)
+
+
+	task-message:
+		Error(_, _, message) -> message
+
+	task-message:
+		Warning(_, _, message) -> message
+		
+	task-message:
+		Note(_, _, message) -> message
+
+
+	task-message-term:
+		Error(_, term, _) -> term
+
+	task-message-term:
+		Warning(_, term, _) -> term
+		
+	task-message-term:
+		Note(_, term, _) -> term
+		
+
+	task-message-origin:
+		Error(origin, _, _) -> origin
+
+	task-message-origin:
+		Warning(origin, _, _) -> origin
+		
+	task-message-origin:
+		Note(origin, _, _) -> origin
+	
+rules
+	
+	task-create-message-on-failure(|partition, task):
+    message -> <new-task(|partition)> Message(task, Failure(), message)
+  
+  task-create-error-on-failure(|partition, task, message) = 
+  	task-error-message(|message); task-create-message-on-failure(|partition, task)
+		
+	task-create-warning-on-failure(|partition, task, message) =
+		task-warning-message(|message); task-create-message-on-failure(|partition, task)
+		
+	task-create-note-on-failure(|partition, task, message) =
+		task-note-message(|message); task-create-message-on-failure(|partition, task)
+			
+			
+	task-create-message-on-success(|partition, task):
+    message -> <new-task(|partition)> Message(task, Success(), message)
+  
+  task-create-error-on-success(|partition, task, message) = 
+  	task-error-message(|message); task-create-message-on-success(|partition, task)
+		
+	task-create-warning-on-success(|partition, task, message) =
+		task-warning-message(|message); task-create-message-on-success(|partition, task)
+		
+	task-create-note-on-success(|partition, task, message) =
+		task-note-message(|message); task-create-message-on-success(|partition, task)
+		
+		
+	task-create-message-on-multiple(|partition, task):
+    message -> <new-task(|partition)> Message(task, Multiple(), message)
+  
+  task-create-error-on-multiple(|partition, task, message) = 
+  	task-error-message(|message); task-create-message-on-multiple(|partition, task)
+		
+	task-create-warning-on-multiple(|partition, task, message) =
+		task-warning-message(|message); task-create-message-on-multiple(|partition, task)
+		
+	task-create-note-on-multiple(|partition, task, message) =
+		task-note-message(|message); task-create-message-on-multiple(|partition, task)
+
+rules
+	
+	task-message-origin-location-offset:
+		term -> <origin-location-offset <+ MISSING_ORIGIN()> term
+		where
+		  not(<is-list> term)
+		
+  task-message-origin-location-offset:
+    list -> location-offset
+    where
+      <is-list> list;
+      (
+      	(partition, line, column, start-offset, _) := <Hd; origin-location-offset> list;
+      	(_, _, _, _, end-offset)                   := <last; origin-location-offset> list;
+      	location-offset := (partition, line, column, start-offset, end-offset)
+      ) <+
+      	location-offset := MISSING_ORIGIN()
+

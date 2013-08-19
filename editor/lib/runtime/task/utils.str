@@ -1,0 +1,18 @@
+module runtime/task/utils
+
+rules
+
+	oncetd-annos(s) = s <+ has-annos; get-annos; one(oncetd-annos(s)) <+ one(oncetd-annos(s))
+	
+	collect-one-annos(s) = oncetd-annos(s; ?t); !t
+	
+  crush-annos(nul, sum, s) :
+    _#(xs){a*} -> r2
+    where
+     r1 := <foldr(nul, sum, s)> xs;
+     r2 := <foldr(!r1, sum, s)> a*
+
+	collect-all-annos(s, un) =
+		![<s> | <crush-annos(![], un, collect-all-annos(s, un))>]
+	<+ crush-annos(![], un, collect-all-annos(s, un))
+

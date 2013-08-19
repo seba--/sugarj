@@ -1,0 +1,88 @@
+module runtime/nbl/utils
+
+imports
+	
+	libstratego-lib
+	runtime/task/core
+
+rules 
+	
+	match(m|val) = where (!val; m)
+	
+	vdebug(s) = where(verbose < debug(s) + id)
+	verbose   = fail
+
+  force-origins(s) =
+    ![<id>]; all(s); ?[<id>]
+
+	is-completion-name = ?"completion123"
+  fix-completion-name = is-completion-name; !""
+
+	has-annotation(s) =
+		has-annos;
+		get-annos;
+		collect-one(s)
+
+  add-annotation(|a):
+    t{a*} -> t{a, a*}
+    
+  add-annotations(|a'*):
+    t{a*} -> t{a'*, a*}
+
+  remove-annotations(s):
+    t{a*} -> t{a'*}
+    where
+      a'* := <remove-all(s)> a*
+      
+  replace-annotations(s|a):
+    t{a*} -> t{a, a'*}
+    where
+      a'* := <remove-all(s)> a*
+      
+  replace-annotations(s|a1, a2):
+    t{a*} -> t{a1, a2, a'*}
+    where
+      a'* := <remove-all(s)> a*
+  
+  measure-time(s, log) =
+    where(before := <times>);
+    s;
+    where(after := <times>; !(after, before); diff-times; times-to-seconds; Fst; log)
+  
+  measure-time(s, log | name) = 
+    measure-time(s, record-time(|name); log)
+  
+  record-time(|name) = id
+    
+  //external record-time-native(|name)
+  	
+ 	try-make-list = is-list <+ ?Dependency(_) <+ ![<id>]
+		
+	try-remove-list = is-list < Hd + id
+	
+rules // multimap simulation
+	
+	hash-multimap-put(|key, value):
+		hashtable -> hashtable
+		where
+			values := <hash-multimap-getorcreate(|key)> hashtable;
+			<hashtable-put(|key, [value|values])> hashtable 
+			
+	hash-multimap-putlist(|key, put-value*):
+		hashtable -> hashtable
+		where
+			value* := <hash-multimap-getorcreate(|key)> hashtable;
+			<hashtable-put(|key, [value*, put-value*])> hashtable 
+			
+	hash-multimap-getorcreate(|key) =
+		hashtable-get(|key) <+ hashtable-put(|key, []); ![]
+	
+	hash-multimap-copy(|from):
+		to -> to
+		where
+			// wtf is this I don't even.. hashtable-fold needs term arguments instead of current term arguments.
+			<hashtable-fold(hash-multimap-copy-fold|to)> from
+			
+	hash-multimap-copy-fold(|key, value*):
+		to -> <hash-multimap-putlist(|key, value*)> to
+

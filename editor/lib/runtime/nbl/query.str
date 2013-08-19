@@ -1,0 +1,165 @@
+module runtime/nbl/query
+
+imports
+  
+  runtime/nbl/uri
+  runtime/nbl/entries
+  runtime/index/query
+  
+rules // Specific queries
+
+  /**
+   * Gets all unique and non-unique definition entries that match the given URI.
+   *
+   * Example:
+   *   <nabl-get-all-definitions> [Entity(), "M", "Bar"] => [Def([Entity(), "M", "Bar"]), ...]
+   *
+   * @type Def(uri) or "name"{uri} or URI(language, path) -> List(Def(uri))
+   */
+  nabl-get-all-definitions:
+    contains-uri* -> <mapconcat(nabl-get-unique-nonunique(!Def(<id>)))> uri*
+    where
+    	uri* := <nabl-uris> contains-uri*
+    	
+  /**
+   * Gets all child definition entries in given URI that match given namespace.
+   *
+   * Example:
+   *   <nabl-get-child-definitions> [Entity(), "M", "Bar"] => [Def([Field(), "a", "M", "Bar"]), ...]
+   *
+   * @type Def(uri) or "name"{uri} or URI(language, path) -> List(Def(uri))
+   */
+  nabl-get-child-definitions(|ns):
+    contains-uri* -> [def*, alias-def*]
+    where
+    	uri*       := <nabl-uris> contains-uri*;
+    	def*       := <mapconcat(!Def(<id>); nabl-get-children(|ns)); mapconcat(nabl-uri; nabl-get-unique-nonunique(!Def(<id>)))> uri*;
+    	alias-def* := <mapconcat(!Alias(<id>, ()); nabl-get-children(|ns)); mapconcat(nabl-value; !Def(<id>); nabl-get-all-definitions)> uri*
+
+  /**
+   * Gets a property that matches the kind of value and given URI, or fails if no property is found.
+   *
+   * Example:
+   *   <nabl-get-property(|Size())> Def([Entity(), "Bar"]) => Size(8)
+   *
+   * @param type Only properties of this kind is returned.
+   * @type Def(uri) or "name"{uri} or URI(language, path) -> Prop(uri, kind, value)
+   */
+  nabl-get-property(|kind) = 
+  	nabl-get-all-properties(|kind); Hd
+      
+  /**
+   * Gets all properties that match the kind of value and given URI.
+   *
+   * Example:
+   *   <nabl-get-all-properties(|Size())> Def([Entity(), "Bar"]) => [Size(8), ...]
+   *
+   * @param kind Only data of this kind is returned.
+   * @type Def(uri) or "name"{uri} or URI(language, path) -> List(Prop(uri, kind, value))
+   */
+  nabl-get-all-properties(|kind):
+		contains-uri* -> <mapconcat(!Prop(<id>, kind, ()); nabl-get-all-values)> uri*
+    where
+    	uri* := <nabl-uris> contains-uri*
+
+  /**
+   * Gets all Alias entries that match the given URI.
+   *
+   * Example:
+   *   <nabl-get-all-aliases> Def([Entity(), "M", "Bar"]) => [[Entity(), "M", "Baz"], ...]
+   *
+   * @type Def(uri) or "name"{uri} or URI(language, path) -> List(aliasURI)
+   */
+  nabl-get-all-aliases:
+    contains-uri* -> alias-uri*
+    where
+    	uri*           := <nabl-uris> contains-uri*;
+    	nonunique-uri* := <filter(nabl-replace-uri-qualifier(|NonUnique()))> uri*;
+      alias-uri*     := <mapconcat(!Alias(<id>, ()); nabl-get-all-values)> nonunique-uri*
+      
+  /**
+   * Gets all InverseAlias entries that match the given URI.
+   *
+   * Example:
+   *   <nabl-get-all-aliases> Def([Entity(), "M", "Bar"]) => [[Entity(), "M", "Baz"], ...]
+   *
+   * @type Def(uri) or "name"{uri} or URI(language, path) -> List(inverseAliasURI)
+   */
+  nabl-get-all-inverse-aliasses:
+    contains-uri* -> inverse-alias*
+    where
+    	uri*           := <nabl-uris> contains-uri*;
+      inverse-alias* := <mapconcat(!InverseAlias(<id>, ()); nabl-get-all-values)> uri*
+
+rules // Generic queries
+  
+  nabl-get-all:
+    template -> <index-get-all> template
+       
+  nabl-get-all-values:
+    template -> <nabl-get-all; map(nabl-value)> template
+
+  nabl-get:
+    template -> <nabl-get-all; Hd> template
+     
+  nabl-get-value:
+    template -> <nabl-get-all; Hd; nabl-value> template
+  
+  nabl-get-children:
+    template -> entries
+      with
+        entries  := <index-get-children> template
+
+  nabl-get-children(|namespace):
+    template -> entries
+      with
+        children := <index-get-children> template;
+        entries  := <nabl-filter-entries(|namespace)> children
+        
+  nabl-get-children(|namespace, prefix):
+    template -> entries
+      with
+        children := <index-get-children> template;
+        entries  := <nabl-filter-entries(|namespace, prefix)> children
+
+  nabl-get-unique-nonunique(create-template):
+  	uri -> [unique*, nonUnique*]
+  	where
+      if alias* := <nabl-get-all-aliases> uri then
+        unique* := <mapconcat(create-template; nabl-get-all)> alias*
+      else
+        unique* := []
+      end;
+      if nonUniqueURI := <nabl-replace-uri-qualifier(|NonUnique())> uri then
+        nonUnique*    := <create-template; nabl-get-all> nonUniqueURI
+      else
+        nonUnique*    := []
+      end
+
+rules /** @internal Entry filtering */
+  
+  /** @internal */
+  nabl-filter-entries(|namespace, prefix):
+    entry* -> <filter(nabl-compare-prefix(|namespace, prefix))> entry*
+  
+  /** @internal */
+  nabl-filter-entries(|namespace):
+    entry* -> <filter(nabl-compare-namespace(|namespace))> entry*
+
+rules /** @internal Helpers */
+  
+  /** @internal */
+  nabl-compare-prefix(|namespace, prefix):
+    entry -> <id>
+    where
+      uri := <nabl-uri> entry;
+      <eq> (namespace, <nabl-uri-namespace> uri);
+      <is-substring(!prefix)> <nabl-uri-name> uri
+      
+  /** @internal */
+  nabl-compare-namespace(|namespace):
+    entry -> <id>
+    where
+      uri := <nabl-uri> entry;
+      <eq> (namespace, <nabl-uri-namespace> uri)
+
