@@ -1,8 +1,0 @@
-package xml;
-
-import xml.XmlJavaSyntax;
-import xml.Checks;
-import xml.AsSax;
-
-public sugar Sugar {
-}
