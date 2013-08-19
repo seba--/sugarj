@@ -1210,7 +1210,7 @@ public class Driver{
   private void checkModuleName(String decName, IStrategoTerm toplevelDecl) {
     String expectedDecName = FileCommands.fileName(baseProcessor.getGeneratedSourceFile());
     if (expectedDecName != null && !expectedDecName.equals(decName))
-      setErrorMessage(toplevelDecl, "Declaration name " + decName + " does not match file name " + expectedDecName);
+      setErrorMessage(lastSugaredToplevelDecl, "Declaration name " + decName + " does not match file name " + expectedDecName);
   }
 
   private void initEditorServices() throws IOException, TokenExpectedException, SGLRException, InterruptedException {
