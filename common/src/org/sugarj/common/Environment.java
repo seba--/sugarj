@@ -4,6 +4,7 @@ package org.sugarj.common;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -91,7 +92,7 @@ public class Environment implements Serializable {
   }
   
   public List<Path> getSourcePath() {
-    return Collections.unmodifiableList(sourcePath);
+    return Collections.unmodifiableList(new ArrayList<>(sourcePath));
   }
 
   public void setSourcePath(List<Path> sourcePath) {
@@ -160,7 +161,7 @@ public class Environment implements Serializable {
   }
   
   public List<Path> getIncludePath() {
-    return Collections.unmodifiableList(includePath);
+    return Collections.unmodifiableList(new ArrayList<>(includePath));
   }
 
   public void setIncludePath(List<Path> includePath) {
