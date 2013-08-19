@@ -283,7 +283,7 @@ public class Driver{
   
   private void init(ToplevelDeclarationProvider declProvider, RelativePath sourceFile, IProgressMonitor monitor) throws FileNotFoundException, IOException, InvalidParseTableException {
     this.monitor = monitor;
-    environment.getIncludePath().add(new AbsolutePath(baseLanguage.getPluginDirectory().getAbsolutePath()));
+    environment.addToIncludePath(new AbsolutePath(baseLanguage.getPluginDirectory().getAbsolutePath()));
   
     depOutFile = null;
   
@@ -884,7 +884,7 @@ public class Driver{
       else
         result = run(importSourceFile, environment, monitor, baseProcessor.getLanguage(), currentlyProcessing);
       if (result.isParseResult())
-        environment.getIncludePath().add(result.getParseResultPath());
+        environment.addToIncludePath(result.getParseResultPath());
       return result;
     } catch (IOException e) {
       setErrorMessage("Problems while compiling " + importSourceFile);

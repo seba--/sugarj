@@ -412,7 +412,7 @@ public class DriverCLI {
   
     if (line.hasOption("buildpath"))
       for (String path : line.getOptionValue("buildpath").split(org.sugarj.common.Environment.classpathsep))
-        environment.getIncludePath().add(pathArgument(path));
+        environment.addToIncludePath(pathArgument(path));
   
     if (line.hasOption("sourcepath")) {
       List<Path> sourcePath = new LinkedList<Path>();

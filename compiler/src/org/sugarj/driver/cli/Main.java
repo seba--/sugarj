@@ -72,13 +72,13 @@ public class Main {
   private static Environment getConsoleEnvironment() {
     Environment environment = new Environment(true, StdLib.stdLibDir);
     environment.setCacheDir(new RelativePath(new AbsolutePath(FileCommands.TMP_DIR), ".sugarjcache"));
-    environment.getSourcePath().add(new AbsolutePath("."));
+    environment.addToSourcePath(new AbsolutePath("."));
     environment.setAtomicImportParsing(true);
     environment.setNoChecking(true);
     
     for (String cp : System.getProperty("java.class.path").split(System.getProperty("path.separator"))) {
       if (cp.length() > 0)
-        environment.getIncludePath().add(new AbsolutePath(cp));
+        environment.addToIncludePath(new AbsolutePath(cp));
     }
     return environment;
   }

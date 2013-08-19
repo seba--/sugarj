@@ -179,9 +179,9 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
         includePath = new RelativePath(root, p);
       
       if (fragment.getKind() == IPackageFragmentRoot.K_SOURCE && fragment.getParent().equals(project))
-        env.getSourcePath().add(includePath);
+        env.addToSourcePath(includePath);
       else if (fragment.getKind() == IPackageFragmentRoot.K_BINARY)
-        env.getIncludePath().add(includePath);
+        env.addToIncludePath(includePath);
     }
     
     for (String reqProject : project.getRequiredProjectNames()) {
@@ -189,7 +189,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
       if (reqJavaProject != null) {
         Environment projEnv = makeProjectEnvironment(reqJavaProject);
 //        env.getSourcePath().addAll(projEnv.getSourcePath());
-        env.getIncludePath().add(projEnv.getParseBin());
+        env.addToIncludePath(projEnv.getParseBin());
       }
     }
   
@@ -204,7 +204,7 @@ public class SugarJParseController extends SugarJParseControllerGenerated {
 
     environment.setAtomicImportParsing(true);
     environment.setNoChecking(true);
-    environment.getIncludePath().add(new AbsolutePath(new StrategoJarAntPropertyProvider().getAntPropertyValue("")));
+    environment.addToIncludePath(new AbsolutePath(new StrategoJarAntPropertyProvider().getAntPropertyValue("")));
   }
   
   private static InputStream imposeRegisteredExtensions(InputStream descriptorStream) {
