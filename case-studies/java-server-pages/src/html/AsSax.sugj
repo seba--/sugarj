@@ -38,13 +38,13 @@ public sugar AsSax {
 	   * @todo  Support namespaces
 	   */
 	  content-to-stm(|java_x) :
-	    Element(ElemName(QName(pref, n)), atts, children, ElemName(QName(pref', n'))) ->
+	    Element(ElemName(n), atts, children, ElemName(n')) ->
 	      java_bstm* |[
 	         java_bstm1*;
-	         out.write( ~<java-string-qname> (pref,n));
+	         out.write( ~<java-string-expr> n);
 	         // out.write(~(<concat-strings; java-string-expr>["<", n, ">"]));
 	         java_bstm2*; 
-	         out.write( ~<java-string-qname> (pref,n) );
+	         out.write( ~<java-string-expr> n );
 	      ]|
 	      where <map(content-to-stms(|java_x))> children => java_bstm2*
 	          ; new => java_y
@@ -52,10 +52,10 @@ public sugar AsSax {
               // ; <?None() < "" + <concat-strings> ["{", <?Some(URIPrefix(<id>))> pref, "}"]> pref => pref-string
 	
 	   content-to-stm(|java_x) :
-      EmptyElement(ElemName(QName(pref, n)), atts) ->
+      EmptyElement(ElemName(n), atts) ->
         java_bstm* |[
            java_bstm1*;
-           out.write(~<java-string-qname> (pref,n));
+           out.write(~<java-string-expr> n);
         ]|
         where new => java_y
             ; <map(attribute-to-stm(|java_y))> atts => java_bstm1*
@@ -76,7 +76,7 @@ public sugar AsSax {
 	   * @todo  Support namespaces
 	   */
 	  attribute-to-stm(|java_y) :
-	    Attribute(AttrName(QName(pref, n)), v) -> java_bstm |[ java_y.addAttribute(~<java-string-prefix> pref, ~<java-string-expr> n, ~<java-string-qname> (pref, n), "CDATA", java_e); ]|
+	    Attribute(AttrName(n), v) -> java_bstm |[ java_y.addAttribute("", ~<java-string-expr> n, ~<java-string-expr> n, "CDATA", java_e); ]|
 	      where <attribute-value-to-expr> v => java_e
 	
 	  attribute-value-to-expr :
@@ -117,20 +117,4 @@ public sugar AsSax {
         java_bstm* |[
           // ;
         ]|
-
-
-  rules
-    java-string-prefix :
-      None -> <java-string-expr> ""
-    
-    java-string-prefix :
-      Some(Prefix(pref)) -> <java-string-expr> ""
-  
-  rules
-    java-string-qname :
-      (None, name) -> <java-string-expr> name
-    
-    java-string-qname :
-      (Some(Prefix(pref)), name) -> <concat-strings; java-string-expr> [pref, ":", name]
-     
 }

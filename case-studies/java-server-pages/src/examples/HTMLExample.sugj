@@ -1,8 +1,12 @@
 package examples; 
+
 import html.Sugar;
 import html.Editor;
 
-public class HtmlExample {
+import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
+
+public class HTMLExample {
    
 public void htmlPage(ContentHandler ch) throws SAXException {
 	
@@ -20,4 +24,3 @@ public void htmlPage(ContentHandler ch) throws SAXException {
 		</html>;           
   }              
 }         
-                                                 
