@@ -1214,7 +1214,16 @@ public class Driver{
   }
 
   private void initEditorServices() throws IOException, TokenExpectedException, SGLRException, InterruptedException {
-    Path editorFile = baseLanguage.getInitEditor();
+    List<IStrategoTerm> stdServices = parseEditorServiceFile(StdLib.stdEditor);
+    for (IStrategoTerm service : stdServices)
+      driverResult.addEditorService(service);
+    
+    List<IStrategoTerm> baseServices = parseEditorServiceFile(baseLanguage.getInitEditor());
+    for (IStrategoTerm service : baseServices)
+      driverResult.addEditorService(service);
+  }
+  
+  private List<IStrategoTerm> parseEditorServiceFile(Path editorFile) throws TokenExpectedException, BadTokenException, org.spoofax.jsglr.client.ParseException, SGLRException, InterruptedException, IOException {
     IStrategoTerm initEditor = (IStrategoTerm) editorServicesParser.parse(FileCommands.readFileAsString(editorFile), editorFile.getAbsolutePath(), "Module");
 
     IStrategoTerm services = ATermCommands.getApplicationSubterm(initEditor, "Module", 2);
@@ -1222,8 +1231,7 @@ public class Driver{
     if (!ATermCommands.isList(services))
       throw new IllegalStateException("initial editor ill-formed");
     
-    for (IStrategoTerm service : ATermCommands.getList(services))
-      driverResult.addEditorService(service);
+    return ATermCommands.getList(services);
   }
   
   @SuppressWarnings("unchecked")

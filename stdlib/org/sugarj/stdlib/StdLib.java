@@ -82,6 +82,7 @@ public class StdLib {
   public static Path commonDef = ensureFile("org/sugarj/stdlib/Common.def");
   public static Path sugarDef = ensureFile("org/sugarj/languages/Sugar.def");
   public static Path modelDef = ensureFile("org/sugarj/languages/Model.def");
+  public static Path stdEditor = ensureFile("org/sugarj/stdlib/StdEditor.serv");
   public static Path failureTrans = ensureFile("failure-trans.jar");
 
   public static List<Path> stdGrammars() {
@@ -99,6 +100,7 @@ public class StdLib {
     exists(plainDef);
     exists(commonDef);
     exists(sugarDef);
+    exists(stdEditor);
     exists(failureTrans);
   }
   
