@@ -10,7 +10,7 @@ sorts Document Element Content
   context-free syntax
     Prologue Element Epilogue -> Document {cons("Document")}
     Element -> Content
-    Doctype -> Content {cons("DocTypeDec")}
+    DocTypeDecl -> Content {cons("DocTypeDec")}
     HTMLComment -> Content {cons("Comment")}    
     
 %% module html-prolog
@@ -20,12 +20,11 @@ sorts Document Element Content
     HTMLComment -> Misc {cons("Comment")}
 
   context-free syntax
-    "<!DOCTYPE"		-> DocTypeLeft
-    ">"				-> DocTypeRight
+  "<!DOCTYPE" -> DocTypeLeft
 	"html"			-> RootElement
 	"PUBLIC"		-> OtherInfo
 	"SYSTEM"		-> OtherInfo
-	DocTypeLeft RootElement OtherInfo  URI* DocTypeRight	-> DocTypeDecl {cons("DocTypeDecl")}
+	DocTypeLeft RootElement OtherInfo  URI* ">"	-> DocTypeDecl {cons("DocTypeDecl")}
     DocTypeDecl Misc* -> DocTypePrologue {cons("DocTypePrologue")}
 
   syntax
@@ -114,7 +113,7 @@ sorts Document Element Content
   lexical syntax
     "<!--" -> CommentLeft
     "-->" -> CommentRight
-    CommentLeft CommentContent* CommentRight -> Comment
+    CommentLeft CommentContent* CommentRight -> HTMLComment
     Dash -> CommentContent
     ~[\-] -> CommentContent
     "-" -> Dash

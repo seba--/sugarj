@@ -8,7 +8,7 @@ import javascript.JsSyntax;
 
 public sugar JspSyntax { 
   context-free syntax
-    AnnoOrSugarMod* "jsp" JavaId JSPBody -> ToplevelDeclaration {cons("JSPDec")}
+    AnnoOrExtensionMod* "jsp" JavaId JSPBody -> ToplevelDeclaration {cons("JSPDec")}
     "{" JSPDoc "}" 			-> JSPBody {cons("JSPBody")}
     Content* 	-> JSPDoc {cons("JSPDoc")}    
 
@@ -17,7 +17,7 @@ public sugar JspSyntax {
  
   rules
     jsp-to-plain :
-      JSPDec(mods, n, JSPBody(content))
+      JSPDec(mods, Id(n), JSPBody(content))
       ->
       PlainDec(PlainDecHead(mods, n, Some("jsp")), PlainBody(<origin-text> content)) 
       

@@ -434,11 +434,6 @@ public sugar JavaScriptSyntax {
   context-free syntax
     "/" RegularExpressionBody "/" RegularExpressionFlags -> RegularExpressionLiteral
 
-  %% @todo check: ad-hoc
-  lexical syntax
-    WhiteSpace     -> LAYOUT
-    LineTerminator -> LAYOUT
-    
     
   %%%
    %% 7.5.1: Reserved Words
