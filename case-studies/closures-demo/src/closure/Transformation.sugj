@@ -1,0 +1,35 @@
+package closure;
+
+import closure.Closure;
+
+import concretesyntax.Java;
+
+import closure.Syntax;
+
+public sugar Transformation {
+  desugarings
+    desugar-cl
+  
+  rules
+    desugar-cl :
+      |[ ~t1 => ~t2 ]| -> |[ closure.Closure<~t1, ~t2> ]|
+    desugar-cl :
+      |[ ~res(~arg ~id:name) => ~exp ]| ->
+      |[ new closure.Closure<~arg,~res>(){
+          public ~res apply(~arg ~id:name) {
+            return ~exp;
+          }
+        }
+      ]|
+  
+}
+
+
+
+
+
+
+
+
+
+

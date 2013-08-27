@@ -1,0 +1,10 @@
+package closure;
+
+public sugar Syntax {
+  context-free syntax
+    JavaType "=>" JavaType -> JavaType {cons("FunType")}
+  
+    JavaType "(" JavaType JavaId ")" "=>" JavaExpr -> JavaExpr
+      {cons("Closure"), longest-match}
+    
+}

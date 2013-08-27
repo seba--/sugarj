@@ -1,0 +1,6 @@
+package closure;
+
+public interface Closure<A, R> {
+  
+  public R apply(A a);
+}

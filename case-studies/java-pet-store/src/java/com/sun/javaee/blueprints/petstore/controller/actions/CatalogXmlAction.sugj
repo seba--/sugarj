@@ -259,9 +259,9 @@ public class CatalogXmlAction implements ControllerAction {
           <id>${i.getItemID()}</id>
           <cat-id>${i.getProductID()}</cat-id>
           <name>${i.getName()}</name>
-              <description>${"<![CDATA[" + i.getDescription() + "]]>"}</description>
-              <image-url>${i.getImageURL()}</image-url>
-              <price>${NumberFormat.getCurrencyInstance(Locale.US).format(i.getPrice())}</price>
+          <description>${"<![CDATA[" + i.getDescription() + "]]>"}</description>
+          <image-url>${i.getImageURL()}</image-url>
+          <price>${NumberFormat.getCurrencyInstance(Locale.US).format(i.getPrice())}</price>
         </item>;
     }
     
