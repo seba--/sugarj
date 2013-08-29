@@ -16,7 +16,7 @@ Require-Bundle: org.eclipse.ui,
  org.sugarj.languagelib,
  org.strategoxt.imp.generator
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: 
  org.sugarj.driver,
  org.sugarj.driver.caching,

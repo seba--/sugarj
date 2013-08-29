@@ -11,6 +11,6 @@ Require-Bundle: org.eclipse.ui,
  org.spoofax.terms,
  org.strategoxt.strj
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.sugarj
 Eclipse-RegisterBuddy: org.sugarj.languagelib

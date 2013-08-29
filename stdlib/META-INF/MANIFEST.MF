@@ -13,6 +13,6 @@ Require-Bundle: org.eclipse.ui,
  org.spoofax.terms,
  org.sugarj.common
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.sugarj.languages,
  org.sugarj.stdlib;uses:="org.eclipse.ui.plugin,org.osgi.framework"

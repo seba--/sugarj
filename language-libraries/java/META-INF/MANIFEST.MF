@@ -7,7 +7,7 @@ Export-Package: org.sugarj,
  org.sugarj.java.init,
  org.sugarj.languages
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: org.sugarj.java.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

@@ -12,7 +12,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.strategoxt.imp.nativebundle,
  org.spoofax.jsglr
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.sugarj,
  org.sugarj.baselang
 Eclipse-BuddyPolicy: registered
