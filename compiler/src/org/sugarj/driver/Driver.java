@@ -406,6 +406,7 @@ public class Driver{
       }
         
       driverResult.setSugaredSyntaxTree(makeSugaredSyntaxTree());
+      driverResult.setDesugaredSyntaxTree(makeDesugaredSyntaxTree());
       
       if (currentGrammarTBL != null)
         driverResult.registerParseTable(currentGrammarTBL);

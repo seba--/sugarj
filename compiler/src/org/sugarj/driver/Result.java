@@ -55,6 +55,7 @@ public class Result {
   private List<String> collectedErrors = new LinkedList<String>();
   private Set<BadTokenException> parseErrors = new HashSet<BadTokenException>();
   private IStrategoTerm sugaredSyntaxTree = null;
+  private IStrategoTerm desugaredSyntaxTree;
   private Path parseTableFile;
   private Path desugaringsFile;
   private RelativePath sourceFile;
@@ -315,6 +316,14 @@ public class Result {
   
   public IStrategoTerm getSugaredSyntaxTree() {
     return sugaredSyntaxTree;
+  }
+  
+  public void setDesugaredSyntaxTree(IStrategoTerm desugaredSyntaxTree) {
+    this.desugaredSyntaxTree = desugaredSyntaxTree;
+  }
+  
+  public IStrategoTerm getDesugaredSyntaxTree() {
+    return desugaredSyntaxTree;
   }
   
   void delegateCompilation(Result delegate, Path compileFile, String source, boolean hasNonBaseDec) {
