@@ -3,7 +3,6 @@
 # script to print classpath
 
 # find base directory of sugarj
-# CELEBRATION: No longer dependent on eclipse's location
 sugarj="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../../.." && pwd )"
 script="$sugarj/deployment/cli-scripts"
 common="$sugarj/common/bin"
@@ -12,7 +11,7 @@ stdlib="$sugarj/stdlib/bin"
 layout="$sugarj/layout-parsing/jsglr-layout/bin"
 cliroot="$sugarj/compiler"
 strategojar=`echo $STRATEGO_JAR`
-clijars="$strategojar:$cliroot/make_permissive.jar"
+clijars="$strategojar:$cliroot/make_permissive.jar:$cliroot/commons-cli-1.2.jar"
 langroot="$sugarj/language-libraries"
 langlibs="$langroot/base/bin:$langroot/haskell/bin:$langroot/java/bin:$langroot/prolog/bin"
 

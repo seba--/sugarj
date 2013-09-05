@@ -3,7 +3,6 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="commons-cli-1.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="commons-collections-3.2.1.jar"/>
 	<classpathentry kind="lib" path="make_permissive.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
