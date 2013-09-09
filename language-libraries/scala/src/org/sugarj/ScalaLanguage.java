@@ -106,7 +106,7 @@ public class ScalaLanguage extends AbstractBaseLanguage {
 
   @Override
   public boolean isBaseDecl(IStrategoTerm decl) {
-    String[] baseDecls = {"Class", "Object", "CaseClass", "CaseObject", "Trait"};
+    String[] baseDecls = {"PackageDeclaration", "Class", "Object", "CaseClass", "CaseObject", "Trait"};
     for (String baseDecl: baseDecls) {
       if (isApplication(decl, baseDecl)) {
         return true;

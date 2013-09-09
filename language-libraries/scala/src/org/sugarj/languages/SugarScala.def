@@ -5,5 +5,6 @@ imports org/sugarj/languages/Scala
 
 exports
   context-free syntax
-	ScalaTopStatSemi -> ToplevelDeclaration
+    ScalaPackageDeclarationSemi -> ToplevelDeclaration
+    ScalaTopStatSemi -> ToplevelDeclaration
 
