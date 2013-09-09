@@ -241,6 +241,7 @@ public class SugarJParser extends JSGLRI {
       public boolean isUpToDate(int h, Environment env) { return false; }
     };
     r.setSugaredSyntaxTree(term);
+    r.setDesugaredSyntaxTree(term);
     r.registerEditorDesugarings(new AbsolutePath(StdLib.failureTrans.getAbsolutePath()));
     return r;
   }
