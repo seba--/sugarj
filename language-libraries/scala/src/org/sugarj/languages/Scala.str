@@ -1,0 +1,399 @@
+module Scala
+
+signature
+  constructors
+                                     : ScalaVarPlainId -> ScalaVarPlainId0
+                                     : ScalaPatterns -> ScalaPatterns0
+                                     : ScalaType -> ScalaType0
+                                     : ScalaCompoundType -> ScalaCompoundType0
+                                     : ScalaNoLExprs -> ScalaNoLExprs0
+                                     : ScalaExpr -> ScalaExpr0
+                                     : ScalaParamType -> ScalaParamType0
+                                     : ScalaType -> ScalaType1
+                                     : ScalaType -> ScalaType2
+    ScalaDisjunctPattern             : ScalaPattern * ScalaPattern -> ScalaPattern
+                                     : ScalaPattern1 -> ScalaPattern
+                                     : ScalaPattern2 -> ScalaPattern1
+    ScalaWildcardTypedPattern        : ScalaType -> ScalaPattern1
+    ScalaTypedPattern                : ScalaVarPlainId * ScalaType -> ScalaPattern1
+                                     : ScalaPattern3 -> ScalaPattern2
+    ScalaPatternBinder               : ScalaVarPlainId * ScalaPattern3 -> ScalaPattern2
+                                     : ScalaSimplePattern -> ScalaPattern3
+    ScalaInfixPattern                : ScalaPattern3 * ScalaInfixPatternOp * ScalaPattern3 -> ScalaPattern3
+    ScalaPatternSequence             : ScalaStableId * Option(ScalaPatterns0) * Option(ScalaVarPlainId0) -> ScalaSimplePattern
+    ScalaTuplePattern                : ScalaPatterns -> ScalaSimplePattern
+    ScalaConstructorPattern          : ScalaStableId * ScalaPatterns -> ScalaSimplePattern
+                                     : ScalaStableId -> ScalaSimplePattern
+    ScalaLiteralPattern              : ScalaLiteral -> ScalaSimplePattern
+    ScalaWildcardPattern             : ScalaSimplePattern
+    ScalaPackageObject               : ScalaObjectDef -> ScalaPackageObject
+    ScalaPackaging                   : ScalaQualId * List(ScalaTopStatSemi) -> ScalaPackaging
+    ScalaQualId                      : List(ScalaId) -> ScalaQualId
+    ScalaPackageDeclaration          : ScalaQualId * ScalaSEMI -> ScalaPackageDeclarationSemi
+    ScalaPackageDeclaration          : ScalaQualId * ScalaEOL -> ScalaPackageDeclarationSemi
+                                     : ScalaPackageObject -> ScalaTopStat
+                                     : ScalaPackaging -> ScalaTopStat
+                                     : ScalaImport -> ScalaTopStat
+    ScalaTopTmplDef                  : Option(ScalaAnnotationSeq) * List(ScalaModifier) * ScalaTmplDef -> ScalaTopStat
+    ScalaTopStatSemi                 : ScalaTopStat * ScalaEOB -> ScalaTopStatSemi
+    ScalaTopStatSemi                 : ScalaTopStat * ScalaEOF -> ScalaTopStatSemi
+    ScalaTopStatSemi                 : ScalaTopStat * ScalaEOL -> ScalaTopStatSemi
+    ScalaTopStatSemi                 : ScalaTopStat * ScalaSEMI -> ScalaTopStatSemi
+    ScalaCompilationUnit             : List(ScalaPackageDeclarationSemi) * List(ScalaTopStatSemi) -> ScalaCompilationUnit
+    ScalaEmptyCompilationUnit        : ScalaCompilationUnit
+    ScalaAnnotationSeq               : ScalaAnnotation * ScalaAnnotationSeq -> ScalaAnnotationSeq
+                                     : ScalaAnnotation -> ScalaAnnotationSeq
+    ScalaConstrAnnotation            : ScalaSimpleType * Option(ScalaArgumentExprs) -> ScalaConstrAnnotation
+    ScalaAnnotation                  : ScalaSimpleType * Option(ScalaArgumentExprsSeq) -> ScalaAnnotation
+    ScalaAssignmentNoLExpr           : ScalaId * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaAscriptionNoLExpr           : ScalaNoLExpr * ScalaAscription -> ScalaNoLExpr
+    ScalaReturnNoLExpr               : Option(ScalaNoLExpr) -> ScalaNoLExpr
+    ScalaThrowNoLExpr                : ScalaNoLExpr -> ScalaNoLExpr
+    ScalaForYieldNoLExpr             : List(ScalaEnumeratorSemi) * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaForNoLExpr                  : List(ScalaEnumeratorSemi) * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaDoWhileNoLExpr              : ScalaNoLExpr * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaTryCatchFinallyNoLExpr      : ScalaNoLExpr * ScalaNoLExpr * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaTryFinallyNoLExpr           : ScalaNoLExpr * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaTryCatchNoLExpr             : ScalaNoLExpr * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaTryNoLExpr                  : ScalaNoLExpr -> ScalaNoLExpr
+    ScalaWhileNoLExpr                : ScalaNoLExpr * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaIfElseNoLExpr               : ScalaNoLExpr * ScalaNoLExpr * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaIfNoLExpr                   : ScalaNoLExpr * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaWildcardFunNoLExpr          : ScalaNoLExpr -> ScalaNoLExpr
+    ScalaImplicitFunNoLExpr          : ScalaId * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaIdFunNoLExpr                : ScalaId * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaFunNoLExpr                  : ScalaBindings * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaDesignatorAssignmentNoLExpr : ScalaNoLExpr * ScalaId * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaAccessAssignmentNoLExpr     : ScalaNoLExpr * ScalaArgumentExprs * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaMatchNoLExpr                : ScalaNoLExpr * List(ScalaCaseClause) -> ScalaNoLExpr
+    ScalaPostfixNoLExpr              : ScalaNoLExpr * ScalaId -> ScalaNoLExpr
+    ScalaInfixNoLExpr                : ScalaNoLExpr * ScalaLetterOp * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaInfixNoLExpr                : ScalaNoLExpr * ScalaBarOp * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaInfixNoLExpr                : ScalaNoLExpr * ScalaCircumflexOp * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaInfixNoLExpr                : ScalaNoLExpr * ScalaAmpersandOp * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaInfixNoLExpr                : ScalaNoLExpr * ScalaBracketOp * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaInfixNoLExpr                : ScalaNoLExpr * ScalaAssignOp * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaInfixNoLExpr                : ScalaNoLExpr * ScalaColonOp * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaInfixNoLExpr                : ScalaNoLExpr * ScalaSumOp * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaInfixNoLExpr                : ScalaNoLExpr * ScalaMultOp * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaInfixNoLExpr                : ScalaNoLExpr * ScalaSpecialOp * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaTypeApplication             : ScalaNoLExpr * ScalaTypeArgs -> ScalaNoLExpr
+    ScalaTupleNoLExpr                : List(ScalaNoLExpr) -> ScalaNoLExpr
+    ScalaBlockAppNoLExpr             : ScalaNoLExpr * ScalaBlockExpr -> ScalaNoLExpr
+    ScalaAppNoLExpr                  : ScalaNoLExpr * ScalaArgumentExprs -> ScalaNoLExpr
+                                     : ScalaPath -> ScalaNoLExpr
+                                     : ScalaLiteral -> ScalaNoLExpr
+    ScalaEtaExpansionNoLExpr         : ScalaNoLExpr -> ScalaNoLExpr
+                                     : ScalaBlockExpr -> ScalaNoLExpr
+    ScalaNewTemplateNoLExpr          : ScalaTemplateBody -> ScalaNoLExpr
+    ScalaNewClassNoLExpr             : ScalaClassTemplate -> ScalaNoLExpr
+    ScalaWildcardNoLExpr             : ScalaNoLExpr
+    ScalaPrefixNoLExpr               : ScalaPrefix * ScalaNoLExpr -> ScalaNoLExpr
+    ScalaDesignatorNoLExpr           : ScalaNoLExpr * ScalaId -> ScalaNoLExpr
+    ScalaAscriptionExpr              : ScalaExpr * ScalaAscription -> ScalaExpr
+    ScalaAssignmentExpr              : ScalaId * ScalaExpr -> ScalaExpr
+    ScalaReturnExpr                  : Option(ScalaExpr) -> ScalaExpr
+    ScalaThrowExpr                   : ScalaExpr -> ScalaExpr
+    ScalaForYieldExpr                : List(ScalaEnumeratorSemi) * ScalaExpr -> ScalaExpr
+    ScalaForExpr                     : List(ScalaEnumeratorSemi) * ScalaExpr -> ScalaExpr
+    ScalaDoWhileExpr                 : ScalaExpr * ScalaExpr -> ScalaExpr
+    ScalaTryCatchFinallyExpr         : ScalaExpr * ScalaExpr * ScalaExpr -> ScalaExpr
+    ScalaTryFinallyExpr              : ScalaExpr * ScalaExpr -> ScalaExpr
+    ScalaTryCatchExpr                : ScalaExpr * ScalaExpr -> ScalaExpr
+    ScalaTryExpr                     : ScalaExpr -> ScalaExpr
+    ScalaWhileExpr                   : ScalaNoLExpr * ScalaExpr -> ScalaExpr
+    ScalaIfElseExpr                  : ScalaNoLExpr * ScalaExpr * ScalaExpr -> ScalaExpr
+    ScalaIfExpr                      : ScalaNoLExpr * ScalaExpr -> ScalaExpr
+    ScalaWildcardFunExpr             : ScalaExpr -> ScalaExpr
+    ScalaImplicitFunExpr             : ScalaId * ScalaExpr -> ScalaExpr
+    ScalaIdFunExpr                   : ScalaId * ScalaExpr -> ScalaExpr
+    ScalaFunExpr                     : ScalaBindings * ScalaExpr -> ScalaExpr
+    ScalaDesignatorAssignmentExpr    : ScalaExpr * ScalaId * ScalaExpr -> ScalaExpr
+    ScalaAccessAssignmentExpr        : ScalaExpr * ScalaArgumentExprs * ScalaExpr -> ScalaExpr
+    ScalaMatchExpr                   : ScalaExpr * List(ScalaCaseClause) -> ScalaExpr
+    ScalaPostfixExpr                 : ScalaExpr * ScalaId -> ScalaExpr
+    ScalaInfixExpr                   : ScalaExpr * ScalaLetterOp * ScalaExpr -> ScalaExpr
+    ScalaInfixExpr                   : ScalaExpr * ScalaBarOp * ScalaExpr -> ScalaExpr
+    ScalaInfixExpr                   : ScalaExpr * ScalaCircumflexOp * ScalaExpr -> ScalaExpr
+    ScalaInfixExpr                   : ScalaExpr * ScalaAmpersandOp * ScalaExpr -> ScalaExpr
+    ScalaInfixExpr                   : ScalaExpr * ScalaBracketOp * ScalaExpr -> ScalaExpr
+    ScalaInfixExpr                   : ScalaExpr * ScalaAssignOp * ScalaExpr -> ScalaExpr
+    ScalaInfixExpr                   : ScalaExpr * ScalaColonOp * ScalaExpr -> ScalaExpr
+    ScalaInfixExpr                   : ScalaExpr * ScalaSumOp * ScalaExpr -> ScalaExpr
+    ScalaInfixExpr                   : ScalaExpr * ScalaMultOp * ScalaExpr -> ScalaExpr
+    ScalaInfixExpr                   : ScalaExpr * ScalaSpecialOp * ScalaExpr -> ScalaExpr
+    ScalaTypeApplication             : ScalaExpr * ScalaTypeArgs -> ScalaExpr
+    ScalaTupleExpr                   : List(ScalaNoLExpr) -> ScalaExpr
+    ScalaBlockAppExpr                : ScalaExpr * ScalaBlockExpr -> ScalaExpr
+    ScalaAppExpr                     : ScalaExpr * ScalaArgumentExprs -> ScalaExpr
+                                     : ScalaPath -> ScalaExpr
+                                     : ScalaLiteral -> ScalaExpr
+    ScalaEtaExpansionExpr            : ScalaExpr -> ScalaExpr
+                                     : ScalaBlockExpr -> ScalaExpr
+    ScalaNewTemplateExpr             : ScalaTemplateBody -> ScalaExpr
+    ScalaNewClassExpr                : ScalaClassTemplate -> ScalaExpr
+    ScalaWildcardExpr                : ScalaExpr
+    ScalaPrefixExpr                  : ScalaPrefix * ScalaExpr -> ScalaExpr
+    ScalaDesignatorExpr              : ScalaExpr * ScalaId -> ScalaExpr
+    ScalaAssignment                  : ScalaExpr -> ScalaAssignment
+    ScalaBindings                    : List(ScalaBinding) -> ScalaBindings
+    ScalaWildCardBinding             : Option(ScalaType0) -> ScalaBinding
+    ScalaBinding                     : ScalaId * Option(ScalaType0) -> ScalaBinding
+    ScalaExprTemplateStat            : ScalaExpr -> ScalaTemplateStat
+    ScalaImportTemplateStat          : ScalaImport -> ScalaTemplateStat
+    ScalaDclTemplateStat             : Option(ScalaAnnotationSeq) * List(ScalaModifier) * ScalaDcl -> ScalaTemplateStat
+    ScalaDefTemplateStat             : Option(ScalaAnnotationSeq) * List(ScalaModifier) * ScalaDef -> ScalaTemplateStat
+    ScalaTemplateStatSemi            : ScalaTemplateStat * ScalaEOB -> ScalaTemplateStatSemi
+    ScalaTemplateStatSemi            : ScalaTemplateStat * ScalaEOL -> ScalaTemplateStatSemi
+    ScalaTemplateStatSemi            : ScalaTemplateStat * ScalaSEMI -> ScalaTemplateStatSemi
+                                     : ScalaSEMI -> ScalaTemplateStatSemi
+    ScalaLazyDefBlockStat            : List(ScalaAnnotation) * ScalaDef -> ScalaBlockStat
+    ScalaImplicitDefBlockStat        : List(ScalaAnnotation) * ScalaDef -> ScalaBlockStat
+    ScalaDefBlockStat                : List(ScalaAnnotation) * ScalaDef -> ScalaBlockStat
+    ScalaTmplDefBlockStat            : List(ScalaAnnotation) * List(ScalaLocalModifier) * ScalaTmplDef -> ScalaBlockStat
+                                     : ScalaExpr -> ScalaBlockStat
+                                     : ScalaImport -> ScalaBlockStat
+                                     : ScalaSEMI -> ScalaBlockStatSemi
+    ScalaBlockStatSemi               : ScalaBlockStat * ScalaSEMI -> ScalaBlockStatSemi
+    ScalaBlockStatSemi               : ScalaBlockStat * ScalaEOB -> ScalaBlockStatSemi
+    ScalaBlockStatSemi               : ScalaBlockStat * ScalaEOL -> ScalaBlockStatSemi
+    ScalaWildcardResultExpr          : Option(ScalaCompoundType0) * ScalaBlock -> ScalaResultExpr
+    ScalaSimpleResultExpr            : ScalaId * Option(ScalaCompoundType0) * ScalaBlock -> ScalaResultExpr
+    ScalaImplicitResultExpr          : ScalaId * ScalaCompoundType * ScalaBlock -> ScalaResultExpr
+    ScalaBindingsResultExpr          : ScalaBindings * ScalaBlock -> ScalaResultExpr
+    ScalaBlock                       : List(ScalaBlockStatSemi) -> ScalaBlock
+    ScalaBlock                       : List(ScalaBlockStatSemi) * ScalaResultExpr -> ScalaBlock
+    ScalaEOCBlockStatSemi            : ScalaBlockStat * ScalaEOC -> ScalaCaseBlockStatSemi
+                                     : ScalaBlockStatSemi -> ScalaCaseBlockStatSemi
+    ScalaCaseBlock                   : List(ScalaCaseBlockStatSemi) -> ScalaCaseBlock
+                                     : ScalaBlock -> ScalaCaseBlock
+    ScalaBlockExpr                   : ScalaBlock -> ScalaBlockExpr
+    ScalaCaseBlockExpr               : List(ScalaCaseClause) -> ScalaBlockExpr
+    ScalaCaseClause                  : ScalaPattern * Option(ScalaGuard) * ScalaCaseBlock -> ScalaCaseClause
+    ScalaValDef                      : ScalaPattern1 * ScalaExpr -> ScalaEnumerator
+                                     : ScalaGuard -> ScalaEnumerator
+                                     : ScalaGenerator -> ScalaEnumerator
+    ScalaEnumeratorSemi              : ScalaEnumerator * ScalaEOB -> ScalaEnumeratorSemi
+    ScalaEnumeratorSemi              : ScalaEnumerator * ScalaEOP -> ScalaEnumeratorSemi
+    ScalaEnumeratorSemi              : ScalaEnumerator * ScalaEOL -> ScalaEnumeratorSemi
+    ScalaEnumeratorSemi              : ScalaEnumerator * ScalaSEMI -> ScalaEnumeratorSemi
+    ScalaGuard                       : ScalaNoLExpr -> ScalaGuard
+    ScalaGenerator                   : ScalaPattern1 * ScalaExpr * Option(ScalaGuard) -> ScalaGenerator
+    ScalaSequenceAscription          : ScalaAscription
+    ScalaAnnotationAscription        : List(ScalaAnnotation) -> ScalaAscription
+    ScalaTypeAscription              : ScalaInfixType -> ScalaAscription
+    ScalaExprs                       : List(ScalaNoLExpr) -> ScalaNoLExprs
+    ScalaArgumentExprsSeq            : ScalaArgumentExprs * ScalaArgumentExprsSeq -> ScalaArgumentExprsSeq
+                                     : ScalaArgumentExprs -> ScalaArgumentExprsSeq
+    ScalaSequenceArgumentExprs       : Option(ScalaNoLExprs0) * ScalaNoLExpr -> ScalaArgumentExprs
+    ScalaArgumentExprs               : Option(ScalaNoLExprs) -> ScalaArgumentExprs
+                                     : ScalaString -> ScalaEOC
+    ScalaPatterns                    : List(ScalaPattern) -> ScalaPatterns
+    ScalaFalse                       : ScalaBooleanLiteral
+    ScalaTrue                        : ScalaBooleanLiteral
+    ScalaProcessedString             : ScalaProcessedString -> ScalaLiteral
+    ScalaNull                        : ScalaLiteral
+    ScalaSymbol                      : ScalaSymbolLiteral -> ScalaLiteral
+    ScalaString                      : ScalaStringLiteral -> ScalaLiteral
+    ScalaChar                        : ScalaCharacterLiteral -> ScalaLiteral
+                                     : ScalaBooleanLiteral -> ScalaLiteral
+    ScalaFloat                       : ScalaFloatingPointLiteral -> ScalaLiteral
+    ScalaInt                         : ScalaIntegerLiteral -> ScalaLiteral
+                                     : ScalaString -> ScalaInfixPatternOp
+    ScalaWildcardImportSelector      : ScalaId -> ScalaImportSelector
+    ScalaMappedImportSelector        : ScalaId * ScalaId -> ScalaImportSelector
+    ScalaImportSelector              : ScalaId -> ScalaImportSelector
+    ScalaOnlyWildcardImportSelectors : ScalaImportSelectors
+    ScalaImportSelectorsWithWildcard : List(ScalaImportSelector) -> ScalaImportSelectors
+    ScalaImportSelectors             : List(ScalaImportSelector) -> ScalaImportSelectors
+    ScalaSelectorsImportExpr         : ScalaStableId * ScalaImportSelectors -> ScalaImportExpr
+    ScalaWildcardImportExpr          : ScalaStableId -> ScalaImportExpr
+    ScalaImportExpr                  : ScalaStableId -> ScalaImportExpr
+    ScalaImport                      : List(ScalaImportExpr) -> ScalaImport
+    ScalaRepeatedParam               : ScalaType -> ScalaParamType
+    ScalaByNameParam                 : ScalaType -> ScalaParamType
+                                     : ScalaType -> ScalaParamType
+    ScalaParam                       : List(ScalaAnnotation) * ScalaId * Option(ScalaParamType0) * Option(ScalaExpr0) -> ScalaParam
+    ScalaParamClause                 : List(ScalaParam) -> ScalaParamClause
+    ScalaParamClauses                : ScalaParamClause * ScalaParamClauses -> ScalaParamClauses
+    ScalaImplicitParamClause         : List(ScalaParam) -> ScalaParamClauses
+                                     : ScalaParamClause -> ScalaParamClauses
+    ScalaFunSig                      : ScalaId * Option(ScalaTypeParamClause) * Option(ScalaParamClauses) -> ScalaFunSig
+    ScalaProcDcl                     : ScalaFunSig -> ScalaFunDcl
+    ScalaFunDcl                      : ScalaFunSig * ScalaType -> ScalaFunDcl
+    ScalaTypeContextBound            : ScalaType -> ScalaTypeContextBound
+    ScalaTypeViewBound               : ScalaType -> ScalaTypeViewBound
+    ScalaWildcardTypeParam           : Option(ScalaTypeParamClause) * Option(ScalaType2) * Option(ScalaType1) * List(ScalaTypeViewBound) * List(ScalaTypeContextBound) -> ScalaTypeParam
+    ScalaTypeParam                   : ScalaId * Option(ScalaTypeParamClause) * Option(ScalaType2) * Option(ScalaType1) * List(ScalaTypeViewBound) * List(ScalaTypeContextBound) -> ScalaTypeParam
+    ScalaNegVariantTypeParam         : List(ScalaAnnotation) * ScalaTypeParam -> ScalaVariantTypeParam
+    ScalaPlusVariantTypeParam        : List(ScalaAnnotation) * ScalaTypeParam -> ScalaVariantTypeParam
+    ScalaVariantTypeParam            : List(ScalaAnnotation) * ScalaTypeParam -> ScalaVariantTypeParam
+    ScalaTypeParamClause             : List(ScalaVariantTypeParam) -> ScalaTypeParamClause
+    ScalaTypeDef                     : ScalaId * Option(ScalaTypeParamClause) * ScalaType -> ScalaTypeDef
+    ScalaTypeDcl                     : ScalaId * Option(ScalaTypeParamClause) * Option(ScalaType2) * Option(ScalaType1) -> ScalaTypeDcl
+    ScalaWildcardVarDef              : List(ScalaId) * ScalaType -> ScalaVarDef
+                                     : ScalaPatDef -> ScalaVarDef
+    ScalaVarDcl                      : List(ScalaId) * ScalaType -> ScalaVarDcl
+    ScalaPatDef                      : List(ScalaPattern2) * Option(ScalaType0) * ScalaExpr -> ScalaPatDef
+    ScalaVarPatDef                   : ScalaVarDef -> ScalaPatVarDef
+    ScalaValPatDef                   : ScalaPatDef -> ScalaPatVarDef
+    ScalaValDcl                      : List(ScalaId) * ScalaType -> ScalaValDcl
+    ScalaFunDclDcl                   : ScalaFunDcl -> ScalaDcl
+    ScalaTypeDclDcl                  : ScalaTypeDcl -> ScalaDcl
+    ScalaVarDclDcl                   : ScalaVarDcl -> ScalaDcl
+    ScalaValDclDcl                   : ScalaValDcl -> ScalaDcl
+    ScalaFunDefDef                   : ScalaFunDef -> ScalaDef
+    ScalaTypeDefDef                  : ScalaTypeDef -> ScalaDef
+                                     : ScalaTmplDef -> ScalaDef
+                                     : ScalaPatVarDef -> ScalaDef
+    ScalaObjectDef                   : ScalaId * ScalaClassTemplateOpt -> ScalaObjectDef
+    ScalaEmptyTraitTemplateOpt       : ScalaTraitTemplateOpt
+                                     : ScalaTemplateBody -> ScalaTraitTemplateOpt
+    ScalaTemplateTraitTemplateOpt    : ScalaTemplateBody -> ScalaTraitTemplateOpt
+    ScalaTraitTraitTemplateOpt       : ScalaTraitTemplate -> ScalaTraitTemplateOpt
+    ScalaTraitDef                    : ScalaId * Option(ScalaTypeParamClause) * ScalaTraitTemplateOpt -> ScalaTraitDef
+    ScalaConstrBlock                 : ScalaSelfInvocation * List(ScalaBlockStatSemi) -> ScalaConstrBlock
+    ScalaConstrBlock                 : ScalaSelfInvocation -> ScalaConstrBlock
+    ScalaConstrBlock                 : ScalaSelfInvocation * List(ScalaBlockStatSemi) -> ScalaConstrBlock
+                                     : ScalaConstrBlock -> ScalaConstrExpr
+                                     : ScalaSelfInvocation -> ScalaConstrExpr
+    ScalaBlockSelfInvocation         : ScalaBlockExpr -> ScalaSelfInvocation
+    ScalaSelfInvocation              : ScalaArgumentExprsSeq -> ScalaSelfInvocation
+    ScalaMacroDef                    : ScalaFunSig * Option(ScalaType0) * ScalaStableId * Option(ScalaTypeArgs) -> ScalaFunDef
+    ScalaProcDef                     : ScalaFunSig * ScalaBlock -> ScalaFunDef
+    ScalaFunDef                      : ScalaFunSig * Option(ScalaType0) * ScalaExpr -> ScalaFunDef
+    ScalaThisBlockFunDef             : ScalaParamClauses * ScalaConstrBlock -> ScalaFunDef
+    ScalaThisExprFunDef              : ScalaParamClauses * ScalaConstrExpr -> ScalaFunDef
+    ScalaEmptyClassTemplateOpt       : ScalaClassTemplateOpt
+                                     : ScalaTemplateBody -> ScalaClassTemplateOpt
+    ScalaTemplateClassTemplateOpt    : ScalaTemplateBody -> ScalaClassTemplateOpt
+    ScalaClassClassTemplateOpt       : ScalaClassTemplate -> ScalaClassTemplateOpt
+    ScalaVarClassParam               : List(ScalaAnnotation) * List(ScalaModifier) * ScalaId * ScalaParamType * Option(ScalaAssignment) -> ScalaClassParam
+    ScalaValClassParam               : List(ScalaAnnotation) * List(ScalaModifier) * ScalaId * ScalaParamType * Option(ScalaAssignment) -> ScalaClassParam
+    ScalaClassParam                  : List(ScalaAnnotation) * ScalaId * ScalaParamType * Option(ScalaAssignment) -> ScalaClassParam
+    ScalaClassParamClause            : List(ScalaClassParam) -> ScalaClassParamClause
+    ScalaClassParamClauses           : ScalaClassParamClause * ScalaClassParamClauses -> ScalaClassParamClauses
+    ScalaImplicitClassParamClause    : List(ScalaClassParam) -> ScalaClassParamClauses
+                                     : ScalaClassParamClause -> ScalaClassParamClauses
+    ScalaPolymorph                   : ScalaId * ScalaTypeParamClause -> ScalaMorphism
+                                     : ScalaId -> ScalaMorphism
+    ScalaClassDef                    : ScalaMorphism * List(ScalaConstrAnnotation) * Option(ScalaAccessModifier) * Option(ScalaClassParamClauses) * ScalaClassTemplateOpt -> ScalaClassDef
+    ScalaObject                      : ScalaObjectDef -> ScalaTmplDef
+    ScalaCaseObject                  : ScalaObjectDef -> ScalaTmplDef
+    ScalaTrait                       : ScalaTraitDef -> ScalaTmplDef
+    ScalaCaseClass                   : ScalaClassDef -> ScalaTmplDef
+    ScalaClass                       : ScalaClassDef -> ScalaTmplDef
+    ScalaThisQualifier               : ScalaAccessQualifier
+    ScalaAccessQualifier             : ScalaId -> ScalaAccessQualifier
+    ScalaProtectedModifier           : Option(ScalaAccessQualifier) -> ScalaAccessModifier
+    ScalaPrivateModifier             : Option(ScalaAccessQualifier) -> ScalaAccessModifier
+    ScalaLazyModifier                : ScalaLocalModifier
+    ScalaImplicitModifier            : ScalaLocalModifier
+    ScalaSealedModifier              : ScalaLocalModifier
+    ScalaFinalModifier               : ScalaLocalModifier
+    ScalaAbstractModifier            : ScalaLocalModifier
+    ScalaOverrideModifier            : ScalaModifier
+                                     : ScalaAccessModifier -> ScalaModifier
+                                     : ScalaLocalModifier -> ScalaModifier
+    ScalaEarlyDef                    : Option(ScalaAnnotationSeq) * List(ScalaModifier) * ScalaPatVarDef -> ScalaEarlyDef
+    ScalaEarlyDefSemi                : ScalaEarlyDef * ScalaEOB -> ScalaEarlyDefSemi
+    ScalaEarlyDefSemi                : ScalaEarlyDef * ScalaEOL -> ScalaEarlyDefSemi
+    ScalaEarlyDefSemi                : ScalaEarlyDef * ScalaSEMI -> ScalaEarlyDefSemi
+    ScalaEarlyDefs                   : List(ScalaEarlyDefSemi) -> ScalaEarlyDefs
+    ScalaConstr                      : ScalaAnnotType * Option(ScalaArgumentExprsSeq) -> ScalaConstr
+    ScalaTemplateBody                : Option(ScalaNl) * List(ScalaTemplateStatSemi) -> ScalaTemplateBody
+    ScalaSelfTypeTemplateBody        : Option(ScalaNl) * ScalaSelfType * List(ScalaTemplateStatSemi) -> ScalaTemplateBody
+    ScalaWildcardSelfType            : ScalaType -> ScalaSelfType
+    ScalaThisSelfType                : ScalaType -> ScalaSelfType
+    ScalaSelfType                    : ScalaId * Option(ScalaType0) -> ScalaSelfType
+    ScalaWithAnnotType               : ScalaAnnotType -> ScalaWithAnnotType
+    ScalaTraitParents                : ScalaAnnotType * List(ScalaWithAnnotType) -> ScalaTraitParents
+    ScalaClassParents                : ScalaConstr * List(ScalaWithAnnotType) -> ScalaClassParents
+    ScalaTraitTemplate               : Option(ScalaEarlyDefs) * ScalaTraitParents * Option(ScalaTemplateBody) -> ScalaTraitTemplate
+    ScalaClassTemplate               : Option(ScalaEarlyDefs) * ScalaClassParents * Option(ScalaTemplateBody) -> ScalaClassTemplate
+    ScalaLowerAndUpperTypeBound      : ScalaType * ScalaType -> ScalaTypeBounds
+    ScalaUpperTypeBound              : ScalaType -> ScalaTypeBounds
+    ScalaLowerTypeBound              : ScalaType -> ScalaTypeBounds
+    ScalaExistentialVal              : ScalaValDcl -> ScalaExistentialDcl
+    ScalaExistentialType             : ScalaTypeDcl -> ScalaExistentialDcl
+    ScalaExistentialDclSemi          : ScalaExistentialDcl * ScalaEOB -> ScalaExistentialDclSemi
+    ScalaExistentialDclSemi          : ScalaExistentialDcl * ScalaEOL -> ScalaExistentialDclSemi
+    ScalaExistentialDclSemi          : ScalaExistentialDcl * ScalaSEMI -> ScalaExistentialDclSemi
+    ScalaExistentialClause           : List(ScalaExistentialDclSemi) -> ScalaExistentialClause
+    ScalaFunctionArgType             : List(ScalaParamType) -> ScalaFunctionArgTypes
+                                     : ScalaInfixType -> ScalaFunctionArgTypes
+    ScalaInfixType                   : ScalaInfixType * ScalaPlainId * ScalaInfixType -> ScalaInfixType
+                                     : ScalaCompoundType -> ScalaInfixType
+    ScalaExistentialType             : ScalaInfixType * ScalaExistentialClause -> ScalaType
+    ScalaFunctionType                : ScalaFunctionArgTypes * ScalaType -> ScalaType
+                                     : ScalaInfixType -> ScalaType
+    ScalaTypeRefineStat              : ScalaTypeDef -> ScalaRefineStat
+                                     : ScalaDcl -> ScalaRefineStat
+    ScalaRefineStatSemi              : ScalaRefineStat * ScalaEOB -> ScalaRefineStatSemi
+    ScalaRefineStatSemi              : ScalaRefineStat * ScalaEOL -> ScalaRefineStatSemi
+    ScalaRefineStatSemi              : ScalaRefineStat * ScalaSEMI -> ScalaRefineStatSemi
+    ScalaRefinement                  : List(ScalaRefineStatSemi) -> ScalaRefinement
+    ScalaWith                        : ScalaAnnotType -> ScalaWith
+    ScalaCompoundType                : ScalaAnnotType * List(ScalaWith) * Option(ScalaRefinement) -> ScalaCompoundType
+    ScalaRefinedType                 : ScalaAnnotType * ScalaRefinement -> ScalaCompoundType
+                                     : ScalaRefinement -> ScalaCompoundType
+                                     : ScalaAnnotType -> ScalaCompoundType
+    ScalaAnnotType                   : ScalaSimpleType * List(ScalaAnnotation) -> ScalaAnnotType
+                                     : ScalaSimpleType -> ScalaAnnotType
+    ScalaTypeArgs                    : List(ScalaType) -> ScalaTypeArgs
+    ScalaWildcardType                : Option(ScalaTypeBounds) -> ScalaSimpleType
+    ScalaTupleType                   : List(ScalaType) -> ScalaSimpleType
+    ScalaParameterizedType           : ScalaSimpleType * ScalaTypeArgs -> ScalaSimpleType
+    ScalaType                        : ScalaStableId -> ScalaSimpleType
+    ScalaTypeProjection              : ScalaSimpleType * ScalaId -> ScalaSimpleType
+    ScalaSingletonType               : ScalaPath -> ScalaSimpleType
+                                     : ScalaString -> ScalaSymbolLiteral
+                                     : ScalaString -> ScalaProcessedString
+                                     : ScalaString -> ScalaStringLiteral
+                                     : ScalaString -> ScalaCharacterLiteral
+                                     : ScalaString -> ScalaFloatingPointLiteral
+                                     : ScalaString -> ScalaIntegerLiteral
+    ScalaClassQualifier              : ScalaPlainId -> ScalaClassQualifier
+    ScalaStableId                    : List(ScalaStableIdElem) * ScalaPlainId -> ScalaStableId
+                                     : ScalaId -> ScalaStableId
+    ScalaStableSuper                 : Option(ScalaClassQualifier) -> ScalaStableIdElem
+    ScalaStableThis                  : ScalaStableIdElem
+                                     : ScalaPlainId -> ScalaStableIdElem
+    ScalaSuper                       : Option(ScalaClassQualifier) * ScalaPlainId -> ScalaPathElem
+    ScalaThis                        : ScalaPathElem
+                                     : ScalaPlainId -> ScalaPathElem
+    ScalaPath                        : List(ScalaPathElem) -> ScalaPath
+                                     : ScalaId -> ScalaPath
+    ScalaId                          : ScalaPlainId -> ScalaId
+                                     : ScalaString -> ScalaNl
+                                     : ScalaString -> ScalaSEMI
+                                     : ScalaString -> ScalaEOP
+                                     : ScalaString -> ScalaEOB
+                                     : ScalaString -> ScalaEOF
+                                     : ScalaString -> ScalaEOL
+                                     : ScalaString -> ScalaPrefix
+                                     : ScalaString -> ScalaPlainId
+                                     : ScalaString -> ScalaVarPlainId
+                                     : ScalaString -> ScalaSpecialOp
+                                     : ScalaString -> ScalaMultOp
+                                     : ScalaString -> ScalaSumOp
+                                     : ScalaString -> ScalaColonOp
+                                     : ScalaString -> ScalaAssignOp
+                                     : ScalaString -> ScalaBracketOp
+                                     : ScalaString -> ScalaAmpersandOp
+                                     : ScalaString -> ScalaCircumflexOp
+                                     : ScalaString -> ScalaBarOp
+                                     : ScalaString -> ScalaLetterOp
+
+
+signature
+  constructors
+    Some : a -> Option(a)
+    None : Option(a)
+
+
+signature
+  constructors
+    Cons : a * List(a) -> List(a)
+    Nil  : List(a)
+    Conc : List(a) * List(a) -> List(a)

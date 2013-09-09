@@ -1,0 +1,4 @@
+module org/sugarj/scala/initTrans
+imports org/sugarj/stdlib/StdTrans
+        org/sugarj/languages/SugarScala
+

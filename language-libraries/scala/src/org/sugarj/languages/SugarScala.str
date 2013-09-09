@@ -1,0 +1,9 @@
+module org/sugarj/languages/SugarScala
+imports org/sugarj/languages/Sugar
+
+signature constructors
+  CompilationUnit : List(ScalaPackageDeclarationSemi) * List(ScalaTopStatSemi) -> SugarCompilationUnit
+  ModuleDec : ScalaModId -> ScalaModuleDec
+  ScalaBody : List(ScalaDef) -> SugarScalaBody
+  ExtensionBody : List(SugarDefElem) -> SugarScalaBody
+

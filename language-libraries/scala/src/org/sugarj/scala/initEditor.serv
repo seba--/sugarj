@@ -1,0 +1,339 @@
+module org/sugarj/scala/initEditor
+
+colorer Default, token-based highlighting
+
+  keyword    : 127 0 85 bold
+  identifier : default
+  string     : blue
+  number     : darkgreen
+  var        : 255 0 100 italic
+  operator   : 0 0 128
+  layout     : 63 127 95 italic
+
+colorer System colors
+
+  darkred   = 128 0 0
+  red       = 255 0 0
+  darkgreen = 0 128 0
+  green     = 0 255 0
+  darkblue  = 0 0 128
+  blue      = 0 0 255
+  cyan      = 0 255 255
+  magenta   = 255 0 255
+  yellow    = 255 255 0
+  white     = 255 255 255
+  black     = 0 0 0
+  gray      = 128 128 128
+  grey      = gray
+  orange    = 255 165 0
+  pink      = 255 105 180
+  brown     = 139 69 19
+  default   = _
+
+language
+  fences : ( )
+  fences : { }
+  fences : [ ]
+
+  line comment                           : "//"
+  block comment                          : "/*" * "*/"
+
+folding
+  _.CompilationUnit
+  ToplevelDeclaration
+  EditorServiceSection
+  SugarDefElem
+  _.Valdef
+  _.GdValdef
+  ScalaExp.Do
+  ScalaExp.Case
+//  ScalaAlt
+  ScalaWhere
+
+
+outliner
+  ToplevelDeclaration
+  _.ModuleDec
+  _.Valdef
+
+  completions SDF
+    completion template : SugarDefElem =
+      "context-free syntax" "\n\t" (blank)
+
+    completion template : SugarDefElem =
+      "lexical syntax" "\n\t" (blank)
+
+    completion template : SugarDefElem =
+      "syntax" "\n\t" (blank)
+
+    completion template : SugarDefElem =
+      "context-free restrictions" "\n\t" (blank)
+
+    completion template : SugarDefElem =
+      "lexical restrictions" "\n\t" (blank)
+
+    completion template : SugarDefElem =
+      "restrictions" "\n\t" (blank)
+
+    completion template : SugarDefElem =
+      "sorts" "\n\t" (blank)
+
+    completion template : SugarDefElem =
+      "variables" "\n\t" (blank)
+
+    completion template : SugarDefElem =
+      "aliases" "\n\t" (blank)
+
+    completion template : SugarDefElem =
+      "priorities" "\n\t" (blank)
+
+    completion template : SugarDefElem =
+      "lexical variables" "\n\t" (blank)
+
+    completion template : Sdf2Attribute =
+      "cons" "(\"" <Name> "\")"
+
+    completion template : Sdf2Attribute =
+      "deprecated" "(\"" <explanation> "\")"
+
+    completion template : Sdf2Attribute =
+      "reject"
+
+    completion template : Sdf2Attribute =
+      "left"
+
+    completion template : Sdf2Attribute =
+      "right"
+
+    completion template : Sdf2Attribute =
+      "non-assoc"
+
+    completion template : Sdf2Attribute =
+      "avoid"
+
+    completion template : Sdf2Attribute =
+      "prefer"
+
+    completion template : Sdf2Attribute =
+      "bracket"
+
+    completion template : Sdf2Attribute =
+      "recover"
+
+
+
+  folding Stratego
+    _.SDefNoArgs
+    _.SDefT
+    _.SDef
+    _.RDefNoArgs
+    _.RDefT
+    _.RDef
+
+  colorer Stratego
+    // StrategyDef: 0 128 128 bold
+    // RuleDef:     0 128 128 bold
+
+    // White background for variables and escapes
+    environment _.StringEscape1 : _ 255 255 255
+    environment _.StringEscape2 : _ 255 255 255
+    environment _.StringEscape3 : _ 255 255 255
+    environment _.StringEscape4 : _ 255 255 255
+    _.Wld     : _ 255 255 255
+
+    _.StringEscape1 : gray
+    _.StringEscape2 : gray
+    _.StringEscape3 : gray
+    _.StringEscape4 : gray
+
+    _.Str     : blue
+    _.StrCong : blue
+    _.QStr    : blue
+    _.QDollar : blue
+    _.QBr     : gray
+
+    StrategoRuleDef     : 0 64 128 bold
+    StrategoRuleDec     : 0 64 128 bold
+    StrategoStrategyDef : 0 64 128 bold
+    StrategoOverlay     : 0 64 128 bold
+
+    //strategies    = 0    0    0
+    strategycalls = 0   64  128
+    terms         = 0    0    0
+    vars          = 0    0    0   255 255 255
+    sdefault      = 0    0    0
+
+    _.RootApp : strategycalls
+    _.App     : strategycalls
+
+    //Strategy  : strategies
+    StrategoSVar      : strategycalls
+    StrategoTerm      : terms
+    StrategoPreTerm   : terms
+    StrategoVar       : vars
+    _.Var     : vars
+    _.ListVar : vars
+    _.Assign  : sdefault
+    _.AM      : sdefault
+
+    StrategoQuotedBracket1 : blue
+    StrategoQuotedBracket2 : blue
+    StrategoQuotedBracket3 : blue
+    StrategoQuotedBracket4 : blue
+
+  completions Stratego
+    completion template : StrategoStrategy =
+    "if" " " <e> " then\n\t" <s> "\nend"
+
+    completion template : StrategoStrategy =
+      "switch" " " <s> "\n\tcase " <c> ":" " " <s> "\n\totherwise: " <id> "\nend"
+
+    completion template : StrategoStrategy =
+      "let" "\n\t" <x> " = " <s> "\nin\n\t" <s> "\nend"
+
+    completion template : StrategoDef =
+      "where" "\n\t" (blank)
+
+    completion template : StrategoDef =
+      "with" "\n\t" (blank)
+
+    completion template : SugarDefElem =
+      "strategies" "\n\t" (blank)
+
+    completion template : SugarDefElem =
+      "rules" "\n\t" (blank)
+
+
+
+  folding Editor services
+    _.EditorServicesDec
+    EditorServiceSection
+
+  outliner Editor services
+    _.EditorServicesDec
+    EditorServiceSection
+    EditorServiceRefactoringRule
+    EditorServiceBuilderRule
+    EditorServiceCompletionRule
+    EditorServiceReferenceRule
+
+
+  completions Editor services
+    completion template : EditorServiceSection =
+      "builders" "\n\t" (blank)
+
+    completion template : EditorServiceSection =
+      "colorer" "\n\t" (blank)
+
+    completion template : EditorServiceSection =
+      "folding" "\n\t" (blank)
+
+    completion template : EditorServiceSection =
+      "outliner" "\n\t" (blank)
+
+    completion template : EditorServiceSection =
+      "completions" "\n\t" (blank)
+
+    completion template : EditorServiceSection =
+      "language" "\n\t" (blank)
+
+    completion template : EditorServiceSection =
+      "references" "\n\t" (blank)
+
+    completion template : EditorServiceCompletionRule =
+      "completion template" " : " <Sort> " =\n\t"
+        "\"" <prefix>  "\" <" <placeholder> ">" (blank)
+
+    completion template : EditorServiceCompletionRule =
+      "identifier lexical" ":\n\t" <regex> (blank)
+
+    completion template : EditorServiceCompletionRule =
+      "completion proposer" ":\n\t" <s> (blank)
+
+    completion template : EditorServiceCompletionRule =
+      "completion keyword" ":\n\t" <k> (blank)
+
+    completion template : EditorServiceCompletionRule =
+      "completion trigger" ":\n\t" <regex> (blank)
+
+    completion template : EditorServiceBuilderRule =
+      "observer" ": " <s> (blank)
+
+    completion template : EditorServiceBuilderRule =
+      "builder" ": " <"caption"> " = " <s> (blank)
+
+    completion template : EditorServiceBuilderRule =
+      "builder caption" ": " <"caption"> (blank)
+
+    completion template : EditorServiceLanguageProperty =
+      "unmanaged table" ": " <prefix> "*" (blank)
+
+    completion template : EditorServiceLanguageProperty =
+      "line comment" ": " <prefix> (blank)
+
+    completion template : EditorServiceLanguageProperty =
+      "block comment" ":\n\t" <prefix> " " <middle> " " <end> (blank)
+
+    completion template : LanguageProperty =
+      "fences" ":\n\t" <f> " " <g> (blank)
+
+    completion template : EditorServiceLanguageProperty =
+      "indent after" ":\n\t" <keyword> (blank)
+
+    completion template : EditorServiceLanguageProperty =
+      "name" ":\n\t" <Name> (blank)
+
+    completion template : EditorServiceLanguageProperty =
+      "url" ":\n\thttp://" <url> (blank)
+
+    completion template : EditorServiceLanguageProperty =
+      "id" ":\n\t" <id> (blank)
+
+    completion template : EditorServiceLanguageProperty =
+      "extends" ":\n\t" <Language> (blank)
+
+    completion template : EditorServiceLanguageProperty =
+      "extensions" ":\n\t" <ext> (blank)
+
+    completion template : EditorServiceLanguageProperty =
+      "start symbols" ":\n\t" <Start> (blank)
+
+    completion template : EditorServiceLanguageProperty =
+      "disambiguator" ":\n\t" <s> (blank)
+
+    completion template : EditorServiceLanguageProperty =
+      "description" ":\n\t" <description> (blank)
+
+    completion template : EditorServiceLanguageProperty =
+      "table" ":\n\t" <table> (blank)
+
+    completion template : EditorServiceLanguageProperty =
+      "table provider" ":\n\t" <provider> (blank)
+
+    completion template : EditorServiceReferenceRule =
+      "reference" " _ : " <s> (blank)
+
+    completion template : EditorServiceReferenceRule =
+      "occurrence" " _ : " <s> (blank)
+
+    completion template : EditorServiceReferenceRule =
+      "hover" " _ : " <s> (blank)
+
+
+    completion template : EditorServiceRefactoringRule =
+      "provider" ": " <provider.jar> (blank)
+    completion template : EditorServiceBuilderRule =
+      "provider" ": " <provider.jar> (blank)
+    completion template : EditorServiceCompletionRule =
+      "provider" ": " <provider.jar> (blank)
+    completion template : EditorServiceReferenceRule =
+      "provider" ": " <provider.jar> (blank)
+
+    completion template : EditorServiceRefactoringRule =
+      "on save" ": " <s> (blank)
+    completion template : EditorServiceBuilderRule =
+      "on save" ": " <s> (blank)
+    completion template : EditorServiceCompletionRule =
+      "on save" ": " <s> (blank)
+    completion template : EditorServiceReferenceRule =
+      "on save" ": " <s> (blank)

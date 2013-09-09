@@ -1,0 +1,9 @@
+definition
+module org/sugarj/languages/SugarScala
+imports org/sugarj/languages/Scala
+        org/sugarj/languages/Sugar
+
+exports
+  context-free syntax
+	ScalaTopStatSemi -> ToplevelDeclaration
+

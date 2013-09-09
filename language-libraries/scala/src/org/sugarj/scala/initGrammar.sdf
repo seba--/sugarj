@@ -1,0 +1,4 @@
+module org/sugarj/scala/initGrammar
+imports org/sugarj/languages/SugarScala
+        org/sugarj/stdlib/Common
+

@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.sugarj.scala
+Bundle-SymbolicName: org.sugarj.scala;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.sugarj.scala.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.sugarj.common,
+ org.sugarj.languagelib,
+ org.spoofax.terms,
+ org.strategoxt.strj
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: org.sugarj
+Eclipse-RegisterBuddy: org.sugarj.languagelib
