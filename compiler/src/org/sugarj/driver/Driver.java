@@ -417,7 +417,7 @@ public class Driver{
         driverResult.registerEditorDesugarings(currentTransProg);
       }
 
-     driverResult.writeDependencyFile(depOutFile);
+      driverResult.writeDependencyFile(depOutFile);
 
       success = true;
     } 
