@@ -102,12 +102,12 @@ public class SourceToplevelDeclarationProvider implements ToplevelDeclarationPro
         log.logErr(msg, Log.DETAIL);
       
       if (!treeBuilder.isInitialized()) {
-    	SGLR parser = driver.getParser();
-    	if (parser == null && (e instanceof SGLRException))
-    	  parser = ((SGLRException) e).getParser();
-    	if (parser == null)
-    		return new IncrementalParseResult(ATermCommands.factory.makeString(input), "");
-        treeBuilder.initializeTable(driver.getParser().getParseTable(), 0, 0, 0);
+    	  SGLR parser = driver.getParser();
+    	  if (parser == null && (e instanceof SGLRException))
+    	    parser = ((SGLRException) e).getParser();
+    	  if (parser == null)
+    		  return new IncrementalParseResult(ATermCommands.factory.makeString(input), "");
+        treeBuilder.initializeTable(parser.getParseTable(), 0, 0, 0);
         treeBuilder.initializeInput(input, null);
       }
       else if (treeBuilder.getTokenizer().getStartOffset() > start) {
