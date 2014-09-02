@@ -54,6 +54,7 @@ signature
                             : JavaPrimType -> JavaArrayBaseType
     NewArray                : JavaArrayBaseType * List(JavaDim) * JavaArrayInit -> JavaArrayCreationExpr
     NewArray                : JavaArrayBaseType * List(JavaDimExpr) * List(JavaDim) -> JavaArrayCreationExpr
+    ArrayAccess		    : JavaExpr * JavaArraySubscript -> JavaArrayAccess
     Semicolon               : JavaClassMemberDec
                             : JavaInterfaceDec -> JavaClassMemberDec
                             : JavaClassDec -> JavaClassMemberDec
